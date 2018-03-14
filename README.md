@@ -46,6 +46,8 @@ All Features:
 
 #### Web-Worker Support
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/nextapps-de/flexsearch.svg)](https://greenkeeper.io/)
+
 Workers get its own dedicated memory. Especially for larger indexes, web worker improves speed and available memory a lot. FlexSearch index was tested with a 250 Mb text file including __10 Million words__. The indexing was done silently in background by multiple parallel running workers in about 7 minutes and __reserve ~ 8.2 Mb__ memory. The search result __took ~ 0.25 ms__!
 
 __Note:__ It is slightly faster to use no web worker when the index isn't too big (< 100,000 words).
