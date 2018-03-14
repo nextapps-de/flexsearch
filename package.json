@@ -1,0 +1,46 @@
+{
+  "name": "flexsearch",
+  "version": "0.1.27",
+  "description": "Superfast, lightweight and memory efficient full text search library.",
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/nextapps-de/flexsearch/issues",
+    "email": "info@nextapps.de"
+  },
+  "main": "flexsearch.js",
+  "preferGlobal": true,
+  "bin": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nextapps-de/flexsearch.git"
+  },
+  "scripts": {
+    "build": "java -jar -Xms256m -Xmx4096m node_modules/google-closure-compiler/compiler.jar --compilation_level=ADVANCED_OPTIMIZATIONS --use_types_for_optimization=true --new_type_inf=true --jscomp_warning=newCheckTypes --generate_exports=true --export_local_property_definitions=true --language_in=ECMASCRIPT5_STRICT --language_out=ECMASCRIPT5_STRICT --process_closure_primitives=true --summary_detail_level=3 --warning_level=VERBOSE --emit_use_strict=true --output_manifest=log/manifest.log --output_module_dependencies=log/module_dependencies.log --property_renaming_report=log/renaming_report.log --js='flexsearch.js' --js_output_file='flexsearch.min.js' && echo Build Complete. && exit 0",
+    "test-production": "nyc --reporter=html --reporter=text mocha --timeout=3000 test --exit",
+    "test-develop": "nyc --reporter=html --reporter=text mocha --timeout=3000 --exit",
+    "test-browser": "mocha-phantomjs test/index.html",
+    "test": "npm run test-develop && npm run test-production && npm run test-browser",
+    "update": "node_modules/.bin/updtr --to non-breaking",
+    "coverage": "nyc report --reporter=lcov --reporter=text-lcov | coveralls"
+  },
+  "files": [
+    "flexsearch.js",
+    "flexsearch.min.js",
+    "test/"
+  ],
+  "homepage": "https://nextapps-de.github.io/xone/",
+  "author": "Thomas Wilkerling",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.0",
+    "google-closure-compiler": "^20180204.0.0",
+    "mocha": "^5.0.4",
+    "mocha-lcov-reporter": "^1.3.0",
+    "mocha-phantomjs": "^4.1.0",
+    "nyc": "^11.5.0",
+    "phantomjs-prebuilt": "^2.1.16",
+    "updtr": "^2.0.0"
+  }
+}
