@@ -1,7 +1,7 @@
 {
   "name": "flexsearch",
-  "version": "0.2.0",
-  "description": "Superfast, lightweight and memory efficient full text search library.",
+  "version": "0.2.1",
+  "description": "World's fastest and most memory efficient full text search library.",
   "keywords": [],
   "bugs": {
     "url": "https://github.com/nextapps-de/flexsearch/issues",

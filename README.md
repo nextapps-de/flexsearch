@@ -48,16 +48,14 @@ All Features:
 <a name="contextual"></a>
 #### Contextual Search
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search __incredibly boost up queries to a new level__.
-The basic idea of this concept is to limit relevance by context instead of calculating relevance through the whole (unlimited) distance.
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search __incredibly boost up queries to a complete new level__.
+The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.
 Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?
 In this way contextual search also improves the results of relevance-based queries on large amount of text data.
 
-<br>
 <p align="center">
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/contextual_index.svg">
 </p>
-<br>
 
 __Note:__ This feature is actually not enabled by default.
 
@@ -573,7 +571,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
         <td><b>"ngram"</b> (default)</td>
         <td>index words partially through phonetic n-grams</td>
         <td><b>foo</b>bar<br>foo<b>bar</b></td>
-        <td>* n/3.5</td>
+        <td>* n / 3.5</td>
     </tr>
     <tr></tr>
     <tr>
@@ -587,14 +585,14 @@ Tokenizer effects the required memory also as query time and flexibility of part
         <td><b>"reverse"</b></td>
         <td>incrementally index words in both directions</td>
         <td>foob<b>ar</b><br>fo<b>obar</b></td>
-        <td>* 2n</td>
+        <td>* 2n - 1</td>
     </tr>
     <tr></tr>
     <tr>
         <td><b>"full"</b></td>
         <td>index every possible combination</td>
         <td>fo<b>oba</b>r<br>f<b>oob</b>ar</td>
-        <td>* n*(n-1)</td>
+        <td>* n * (n - 1)</td>
     </tr>
 
 </table>
@@ -810,23 +808,23 @@ The required memory for the index depends on several options:
     </tr>
     <tr></tr>
     <tr>
+        <td>"ngram" (default)</td>
+        <td>* n / 3.5</td>
+    </tr>
+    <tr></tr>
+    <tr>
         <td>"forward"</td>
         <td>* n</td>
     </tr>
     <tr></tr>
     <tr>
         <td>"reverse"</td>
-        <td>* 2n</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>"ngram" (default)</td>
-        <td>* n/4</td>
+        <td>* 2n - 1</td>
     </tr>
     <tr></tr>
     <tr>
         <td>"full"</td>
-        <td>* n*(n-1)</td>
+        <td>* n * (n - 1)</td>
     </tr>
 </table>
 

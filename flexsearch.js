@@ -3,7 +3,7 @@
  * ----------------------------------------------------------
  * @author: Thomas Wilkerling
  * @preserve https://github.com/nextapps-de/flexsearch
- * @version: 0.2.0
+ * @version: 0.2.1
  * @license: Apache 2.0 Licence
  */
 
@@ -45,7 +45,7 @@
 
             // use on of built-in functions
             // or pass custom encoding algorithm
-            encode: false
+            encode: 'icase'
         };
 
         /**
@@ -183,7 +183,7 @@
 
         FlexSearch.encode = function(name, value){
 
-            return global_encoder[name](value);
+            return global_encoder[name].call(global_encoder, value);
         };
 
         /**
@@ -311,9 +311,8 @@
                 this.encoder = (
 
                     (options['encode'] && global_encoder[options['encode']]) ||
-                    this.encoder ||
+                    (typeof options['encode'] === 'function' ? options['encode'] : this.encoder || false)
                     //(defaults.encode && global_encoder[defaults.encode]) ||
-                    options['encode']
                 );
 
                 //if(DEBUG){
@@ -486,9 +485,9 @@
 
                     var words = (
 
-                        content.constructor === Array ?
+                        this.mode === 'ngram' ?
 
-                            /** @type {!Array<string>} */ (content)
+                            /** @type {!Array<string>} */ (ngram(content))
                         :
                             /** @type {string} */ (content).split(regex_split)
                     );
@@ -582,13 +581,8 @@
 
                                     break;
 
-                                case 'ngram':
-
-                                    // TODO
-
-                                    break;
-
                                 case 'strict':
+                                case 'ngram':
                                 default:
 
                                     var score = addIndex(
@@ -617,58 +611,27 @@
                                             {/* 7 */},
                                             {/* 8 */},
                                             {/* 9 */}
+                                            // TODO test concept of deep trees instead of flat ones
+                                            //{/* ctx */}
                                         ]);
 
-                                        if(i) {
+                                        var x = i - this.depth;
+                                        var y = i + this.depth;
 
-                                            if(i > 1) {
+                                        if(x < 0) x = 0;
+                                        if(y > word_length - 1) y = word_length - 1;
 
-                                                addIndex(
-
-                                                    ctx_tmp,
-                                                    ctx_dupes,
-                                                    words[i - 2],
-                                                    id,
-                                                    /** @type {string} */ (content),
-                                                    threshold
-                                                );
-                                            }
+                                        for(; x <= y; x++){
 
                                             addIndex(
 
                                                 ctx_tmp,
                                                 ctx_dupes,
-                                                words[i - 1],
+                                                words[x],
                                                 id,
                                                 /** @type {string} */ (content),
                                                 threshold
                                             );
-                                        }
-
-                                        if(i < (word_length - 1)) {
-
-                                            addIndex(
-
-                                                ctx_tmp,
-                                                ctx_dupes,
-                                                words[i + 1],
-                                                id,
-                                                /** @type {string} */ (content),
-                                                threshold
-                                            );
-
-                                            if(i < (word_length - 2)) {
-
-                                                addIndex(
-
-                                                    ctx_tmp,
-                                                    ctx_dupes,
-                                                    words[i + 2],
-                                                    id,
-                                                    /** @type {string} */ (content),
-                                                    threshold
-                                                );
-                                            }
                                         }
                                     }
 
@@ -1360,97 +1323,7 @@
 
                     return str;
                 };
-            })(),
-
-            /**
-             * @param {!string} value
-             *  @this {global_encoder}
-             * @returns {Array<?string>}
-             */
-
-            'ngram': function(value){
-
-                var parts = [];
-
-                if(!value){
-
-                    return parts;
-                }
-
-                // perform advanced encoding
-                value = this['advanced'](value);
-
-                if(!value){
-
-                    return parts;
-                }
-
-                var count_vowels = 0,
-                    count_literal = 0,
-                    count_parts = -1;
-
-                var tmp = "";
-                var length = value.length;
-
-                for(var i = 0; i < length; i++){
-
-                    var char = value[i];
-                    var char_is_vowel = (
-
-                        (char === 'a') ||
-                        (char === 'e') ||
-                        (char === 'i') ||
-                        (char === 'o') ||
-                        (char === 'u') ||
-                        (char === 'y')
-                    );
-
-                    if(char_is_vowel){
-
-                        count_vowels++;
-                    }
-                    else{
-
-                        count_literal++;
-                    }
-
-                    if(char !== ' ') {
-
-                        tmp += char;
-                    }
-
-                    // dynamic n-gram sequences
-
-                    if((char === ' ') || ((count_vowels >= 2) && (count_literal >= 2)) || (i === length - 1)){
-
-                        if(tmp){
-
-                            var tmp_length = tmp.length;
-
-                            if((tmp_length > 2) || (char === ' ') || (i === length - 1)){
-
-                                var char_code = tmp.charCodeAt(0);
-
-                                if((tmp_length > 1) || (char_code >= 48) || (char_code <= 57)){
-
-                                    parts[++count_parts] = tmp;
-                                }
-                            }
-                            else if(parts[count_parts]){
-
-                                parts[count_parts] += tmp;
-                            }
-
-                            tmp = "";
-                        }
-
-                        count_vowels = 0;
-                        count_literal = 0;
-                    }
-                }
-
-                return parts;
-            }
+            })()
 
             // TODO: provide some common encoder plugins
             // soundex
@@ -1597,6 +1470,83 @@
 
                 ((3 / ref.length * (ref.length - context_index)) + (6 / partial_index) + 0.5) | 0
             );
+        }
+
+        /**
+         * @param {!string} value
+         *  @this {global_encoder}
+         * @returns {Array<?string>}
+         */
+
+        function ngram(value){
+
+            var parts = [];
+
+            if(!value){
+
+                return parts;
+            }
+
+            var count_vowels = 0,
+                count_literal = 0,
+                count_parts = -1;
+
+            var tmp = "";
+            var length = value.length;
+
+            for(var i = 0; i < length; i++){
+
+                var char = value[i];
+                var char_is_vowel = (
+
+                    (char === 'a') ||
+                    (char === 'e') ||
+                    (char === 'i') ||
+                    (char === 'o') ||
+                    (char === 'u') ||
+                    (char === 'y')
+                );
+
+                if(char_is_vowel){
+
+                    count_vowels++;
+                }
+                else{
+
+                    count_literal++;
+                }
+
+                if(char !== ' ') {
+
+                    tmp += char;
+                }
+
+                // dynamic n-gram sequences
+
+                if((char === ' ') || ((count_vowels >= 2) && (count_literal >= 2)) || (i === length - 1)){
+
+                    if(tmp){
+
+                        var tmp_length = tmp.length;
+
+                        if(tmp_length > 2){
+
+                            parts[++count_parts] = tmp;
+                        }
+                        else if(parts[count_parts]){
+
+                            parts[count_parts] += tmp;
+                        }
+
+                        tmp = "";
+                    }
+
+                    count_vowels = 0;
+                    count_literal = 0;
+                }
+            }
+
+            return parts;
         }
 
         /**

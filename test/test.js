@@ -122,8 +122,8 @@ describe('Initialize', function(){
 
         flexsearch_ngram = new FlexSearch({
 
-            encode: 'ngram',
-            mode: 'strict',
+            encode: 'advanced',
+            mode: 'ngram',
             async: false,
             worker: false
         });
@@ -173,7 +173,7 @@ describe('Initialize', function(){
         expect(flexsearch_forward.mode).to.equal("forward");
         expect(flexsearch_reverse.mode).to.equal("reverse");
         expect(flexsearch_full.mode).to.equal("full");
-        expect(flexsearch_ngram.mode).to.equal("strict");
+        expect(flexsearch_ngram.mode).to.equal("ngram");
     });
 });
 
@@ -905,6 +905,7 @@ describe('Options', function(){
 
         expect(flexsearch_ngram.length).to.equal(1);
         expect(flexsearch_ngram.search("mayer")).to.have.lengthOf(1);
+
         expect(flexsearch_ngram.search("philip meier")).to.have.lengthOf(1);
         expect(flexsearch_ngram.search("philip meier")).to.include(0);
         expect(flexsearch_ngram.search("björn meier")).to.have.lengthOf(1);
