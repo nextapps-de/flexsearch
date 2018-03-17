@@ -12,7 +12,7 @@
 </p>
 
 <h1></h1>
-<h3>Worlds fastest and most memory efficient full text search library with zero dependencies.</h3>
+<h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
 
 When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. It also has the __most memory-efficient index__. Keep in mind that updating existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice. FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates on the index as well as queries through dedicated threads. 
 
@@ -206,8 +206,7 @@ var index = new FlexSearch({
     // default values:
 
     encode: "icase",
-    mode: "forward",
-    multi: false,
+    mode: "ngram",
     async: false,
     cache: false
 });
@@ -416,8 +415,48 @@ var index = FlexSearch.create()
 index.remove(0).update(1, 'foo').add(2, 'foobar');
 ```
 
+#### Enable Contextual Index
+
+Create context-enabled index and also set the limit of relevance (depth):
+```js
+var index = new FlexSearch({
+
+    encode: "icase",
+    mode: "strict",
+    depth: 3
+});
+```
+
+#### Use WebWorker (Browser only)
+
+Create worker-enabled index and also set the count of parallel threads:
+```js
+var index = new FlexSearch({
+
+    encode: "icase",
+    mode: "full",
+    async: true,
+    worker: 4
+});
+```
+
+Adding items to worker index as usual (async enabled):
+```js
+index.add(10025, "John Doe");
+```
+
+Perform search and simply pass in callback like:
+```js
+index.search("John Doe", function(results){
+
+    // do something with array of results
+});
+```
+
 <a name="options"></a>
 ## Options
+
+FlexSearch ist highly customizable. Make use of the the right options can really improve your results as well as memory economy or query time.
 
 <table>
     <tr></tr>
@@ -436,7 +475,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             "full"
         </td>
         <td vertical-align="top">
-            The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br><br><br><br><br>
+            The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br>
         </td>
     </tr>
     <tr></tr>
@@ -450,7 +489,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             "extra"<br>
             function()
         </td>
-        <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.<br><br><br><br></td>
+        <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
     </tr>
     <!--
     <tr></tr>
@@ -469,7 +508,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             true<br>
             false
         </td>
-        <td>Enable multi word processing.<br><br></td>
+        <td>Enable multi word processing.</td>
     </tr>
     -->
     <tr></tr>
@@ -479,7 +518,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             true<br>
             false
         </td>
-        <td>Enable/Disable caching.<br><br></td>
+        <td>Enable/Disable caching.</td>
     </tr>
     <tr></tr>
     <tr>
@@ -488,7 +527,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             true<br>
             false
         </td>
-        <td>Enable/Disable asynchronous processing.<br><br></td>
+        <td>Enable/Disable asynchronous processing.</td>
     </tr>
     <tr></tr>
     <tr>
@@ -497,7 +536,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             false<br>
             {number}
         </td>
-        <td>Enable/Disable and set count of running worker threads.<br><br></td>
+        <td>Enable/Disable and set count of running worker threads.</td>
     </tr>
     <tr></tr>
     <tr>
@@ -506,12 +545,14 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             false<br>
             {number}
         </td>
-        <td>Enable/Disable contextual indexing and also sets relevance depth (experimental).<br><br></td>
+        <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets relevance depth (experimental).</td>
     </tr>
 </table>
 
 <a name="tokenizer"></a>
 ## Tokenizer
+
+Tokenizer effects the required memory also as query time and flexibility of partial matches. Try to choose the most upper of these tokenizer which fits your needs:
 
 <table>
     <tr></tr>
@@ -529,6 +570,13 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
     </tr>
     <tr></tr>
     <tr>
+        <td><b>"ngram"</b> (default)</td>
+        <td>index words partially through phonetic n-grams</td>
+        <td><b>foo</b>bar<br>foo<b>bar</b></td>
+        <td>* n/3.5</td>
+    </tr>
+    <tr></tr>
+    <tr>
         <td><b>"foward"</b></td>
         <td>incrementally index words in forward direction</td>
         <td><b>fo</b>obar<br><b>foob</b>ar<br></td>
@@ -543,13 +591,6 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
     </tr>
     <tr></tr>
     <tr>
-        <td><b>"ngram"</b> (default)</td>
-        <td>index words partially through phonetic n-grams</td>
-        <td><b>foo</b>bar<br>foo<b>bar</b></td>
-        <td>* n/4</td>
-    </tr>
-    <tr></tr>
-    <tr>
         <td><b>"full"</b></td>
         <td>index every possible combination</td>
         <td>fo<b>oba</b>r<br>f<b>oob</b>ar</td>
@@ -560,6 +601,8 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 
 <a name="phonetic"></a>
 ## Phonetic Encoding
+
+Encoding effects the required memory also as query time and phonetic matches. Try to choose the most upper of these encoders which fits your needs, or pass in a <a href="#flexsearch.encoder">custom encoder</a>:
 
 <table>
     <tr></tr>
@@ -613,9 +656,9 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 </table>
 
 <a name="compare" id="compare"></a>
-#### Comparison
+#### Comparison (Matches)
 
-Reference String: __"Björn-Phillipp Mayer"__
+> Reference String: __"Björn-Phillipp Mayer"__
 
 <table>
     <tr></tr>
@@ -725,13 +768,13 @@ Reference String: __"Björn-Phillipp Mayer"__
 <a name="memory" id="memory"></a>
 ## Memory Usage
 
-__Note:__ The required memory depends on several options. 
+The required memory for the index depends on several options:
 
 <table>
     <tr></tr>
     <tr>
         <td align="left">Encoding</td>
-        <td align="left">Memory usage of every ~ 100,000 indexed words</td>
+        <td align="left">Memory usage of every ~ 100,000 indexed word</td>
     </tr>
     <tr>
         <td>false</td>
@@ -759,7 +802,7 @@ __Note:__ The required memory depends on several options.
     </tr>
     <tr>
         <td align="left">Mode</td>
-        <td align="left">Multiplied with: (n = <u>average</u> length of all words)</td>
+        <td align="left">Multiplied with: (n = <u>average</u> length of indexed words)</td>
     </tr>
     <tr>
         <td>"strict"</td>
