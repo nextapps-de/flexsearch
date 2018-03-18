@@ -3,7 +3,7 @@
  * ----------------------------------------------------------
  * @author: Thomas Wilkerling
  * @preserve https://github.com/nextapps-de/flexsearch
- * @version: 0.2.1
+ * @version: 0.2.11
  * @license: Apache 2.0 Licence
  */
 
@@ -623,7 +623,7 @@
 
                                         for(; x <= y; x++){
 
-                                            addIndex(
+                                            if(x !== i) addIndex(
 
                                                 ctx_tmp,
                                                 ctx_dupes,

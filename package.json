@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.2.1",
+  "version": "0.2.11",
   "description": "World's fastest and most memory efficient full text search library.",
   "keywords": [],
   "bugs": {
