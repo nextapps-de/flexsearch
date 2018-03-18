@@ -826,7 +826,58 @@ The required memory for the index depends on several options:
         <td>"full"</td>
         <td>* n * (n - 1)</td>
     </tr>
+    <tr>
+        <td align="left">Contextual Index</td>
+        <td align="left">Multiplied with:</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>* 2(depth + 1)</td>
+    </tr>
 </table>
+
+## Example Options
+
+Memory-optimized:
+
+```js
+{
+    encode: "extra",
+    mode: "strict",
+    threshold: 5
+}
+```
+
+Speed-optimized:
+
+```js
+{
+    encode: "icase",
+    mode: "strict",
+    threshold: 5,
+    depth: 2
+}
+```
+
+Matching-tolerant:
+
+```js
+{
+    encode: "extra",
+    mode: "full"
+}
+```
+
+Balanced:
+
+```js
+{
+    encode: "simple",
+    mode: "ngram",
+    threshold: 3,
+    depth: 3
+}
+```
 
 ---
 

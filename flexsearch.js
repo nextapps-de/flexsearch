@@ -498,6 +498,7 @@
                     };
 
                     var threshold = this.threshold;
+                    var depth = this.depth;
                     var map = this._map;
                     var word_length = words.length;
 
@@ -595,7 +596,7 @@
                                         threshold
                                     );
 
-                                    if((word_length > 1) && this.depth && (score > threshold)){
+                                    if(depth && (word_length > 1) && (score > threshold)){
 
                                         var ctx_map = map[10];
                                         var ctx_dupes = dupes['_ctx'][value] || (dupes['_ctx'][value] = {});
@@ -615,8 +616,8 @@
                                             //{/* ctx */}
                                         ]);
 
-                                        var x = i - this.depth;
-                                        var y = i + this.depth;
+                                        var x = i - depth;
+                                        var y = i + depth;
 
                                         if(x < 0) x = 0;
                                         if(y > word_length - 1) y = word_length - 1;

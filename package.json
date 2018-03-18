@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.2.11",
+  "version": "0.2.125",
   "description": "World's fastest and most memory efficient full text search library.",
   "keywords": [],
   "bugs": {
@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "java -jar -Xms256m -Xmx4096m node_modules/google-closure-compiler/compiler.jar --compilation_level=ADVANCED_OPTIMIZATIONS --use_types_for_optimization=true --new_type_inf=true --jscomp_warning=newCheckTypes --generate_exports=true --export_local_property_definitions=true --language_in=ECMASCRIPT5_STRICT --language_out=ECMASCRIPT5_STRICT --process_closure_primitives=true --summary_detail_level=3 --warning_level=VERBOSE --emit_use_strict=true --output_manifest=log/manifest.log --output_module_dependencies=log/module_dependencies.log --property_renaming_report=log/renaming_report.log --js='flexsearch.js' --js_output_file='flexsearch.min.js' && echo Build Complete. && exit 0",
+    "release": "npm version patch && npm run build && npm publish",
     "test-production": "nyc --reporter=html --reporter=text mocha --timeout=3000 test --exit",
     "test-develop": "nyc --reporter=html --reporter=text mocha --timeout=3000 --exit",
     "test-browser": "mocha-phantomjs test/index.html",
