@@ -148,7 +148,7 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
     var data = [];
     var queries = [];
 
-    (function(){
+    setTimeout(function(){
 
         var start = 0;
         var new_data = text_data.split('. ');
@@ -253,14 +253,15 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             payload[i] = {id: i, content: data[i]};
         }
 
-        console.time('fuse');
+        // Note: fuse adds async
+        //console.time('fuse');
 
         var fuse = new Fuse(payload.slice(0), {
             keys: ['id', 'content'],
             id: 'id'
         });
 
-        console.timeEnd('fuse');
+        //console.timeEnd('fuse');
 
         var jssearch = new JsSearch.Search('id');
         jssearch.addIndex('content');
@@ -338,7 +339,7 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             }
         }
 
-    })();
+    }, 50);
 
 </script>
 </body>

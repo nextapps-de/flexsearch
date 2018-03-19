@@ -14,11 +14,14 @@
 <h1></h1>
 <h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
 
-When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. It also has the __most memory-efficient index__. Keep in mind that updating existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice. FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates on the index as well as queries through dedicated threads. 
+When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
+It also has the __most memory-efficient index__. Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice. 
+FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates on the index as well as queries through dedicated threads. 
 
-Benchmark:
-- Library Comparison: <a href="https://jsperf.com/compare-search-libraries" target="_blank">https://jsperf.com/compare-search-libraries</a>
-- BulkSearch vs. FlexSearch: <a href="https://jsperf.com/flexsearch" target="_blank">https://jsperf.com/flexsearch</a>
+Comparison:
+- <a href="https://jsperf.com/compare-search-libraries" target="_blank">Library Benchmarks</a>
+- <a href="https://jsperf.com/flexsearch" target="_blank">BulkSearch vs. FlexSearch Benchmark</a>
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
 
 Supported Platforms:
 - Browser
@@ -48,10 +51,10 @@ All Features:
 <a name="contextual"></a>
 #### Contextual Search
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search __incredibly boost up queries to a complete new level__.
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://jsperf.com/compare-search-libraries" target="_blank">incredibly boost up queries to a complete new level</a>.
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.
 Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?
-In this way contextual search also improves the results of relevance-based queries on large amount of text data.
+In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
 
 <p align="center">
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/contextual_index.svg">
