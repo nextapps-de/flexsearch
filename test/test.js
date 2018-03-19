@@ -209,14 +209,6 @@ describe('Add (Sync)', function(){
         flexsearch_extra.add(3, "  -  ");
 
         expect(flexsearch_extra.length).to.equal(0);
-
-        flexsearch_extra.add(4, "Thomas");
-        flexsearch_extra.add(5, "Arithmetic");
-        flexsearch_extra.add(6, "Mahagoni");
-
-        expect(flexsearch_extra.search("tomass")).to.include(4);
-        expect(flexsearch_extra.search("arytmetik")).to.include(5);
-        expect(flexsearch_extra.search("mahagony")).to.include(6);
     });
 });
 
@@ -230,6 +222,14 @@ describe('Search (Sync)', function(){
 
         expect(flexsearch_sync.search("foo foo")).to.have.members([0, 1]);
         expect(flexsearch_sync.search("foo  foo")).to.have.members([0, 1]);
+
+        flexsearch_extra.add(4, "Thomas");
+        flexsearch_extra.add(5, "Arithmetic");
+        flexsearch_extra.add(6, "Mahagoni");
+
+        expect(flexsearch_extra.search("tomass")).to.include(4);
+        expect(flexsearch_extra.search("arytmetik")).to.include(5);
+        expect(flexsearch_extra.search("mahagony")).to.include(6);
     });
 
     it('Should have been limited', function(){
@@ -911,6 +911,63 @@ describe('Options', function(){
         expect(flexsearch_ngram.search("björn meier")).to.have.lengthOf(1);
         expect(flexsearch_ngram.search("björn meier")).to.include(0);
         expect(flexsearch_ngram.search("björn-peter mayer")).to.have.lengthOf(0);
+    });
+});
+
+// ------------------------------------------------------------------------
+// Relevance Tests
+// ------------------------------------------------------------------------
+
+describe('Relevance', function(){
+
+    it('Should have been sorted by relevance properly', function(){
+
+        var index = new FlexSearch({
+            encode: 'advanced',
+            mode: 'strict'
+        });
+
+        index.add(0, "1 2 3 2 4 1 5 3");
+        index.add(1, "zero one two three four five six seven eight nine ten");
+        index.add(2, "four two zero one three ten five seven eight six nine");
+
+        expect(index.search("1")).to.have.members([0]);
+        expect(index.search("one")).to.have.members([1, 2]);
+        expect(index.search("one two")).to.have.members([1, 2]);
+        expect(index.search("four one")).to.have.members([1, 2]);
+
+        var index = new FlexSearch({
+            encode: 'advanced',
+            mode: 'strict',
+            threshold: 5,
+            depth: 3
+        });
+
+        index.add(0, "1 2 3 2 4 1 5 3");
+        index.add(1, "zero one two three four five six seven eight nine ten");
+        index.add(2, "four two zero one three ten five seven eight six nine");
+
+        expect(index.search("1")).to.have.members([0]);
+        expect(index.search("one")).to.have.members([1, 2]);
+        expect(index.search("one two")).to.have.members([1, 2]);
+        expect(index.search("four one")).to.have.members([1, 2]);
+
+        var index = new FlexSearch({
+            encode: 'extra',
+            mode: 'ngram',
+            threshold: 5,
+            depth: 3
+        });
+
+        index.add(0, "1 2 3 2 4 1 5 3");
+        index.add(1, "zero one two three four five six seven eight nine ten");
+        index.add(2, "four two zero one three ten five seven eight six nine");
+
+        expect(index.search("1 3 4")).to.have.members([0]);
+        expect(index.search("1 5 3 4")).to.have.members([0]);
+        expect(index.search("one")).to.have.members([1, 2]);
+        expect(index.search("one two")).to.have.members([1, 2]);
+        expect(index.search("four one")).to.have.members([1, 2]);
     });
 });
 

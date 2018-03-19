@@ -828,11 +828,11 @@ The required memory for the index depends on several options:
     </tr>
     <tr>
         <td align="left">Contextual Index</td>
-        <td align="left">Multiplied with:</td>
+        <td align="left">Multiply the sum above with:</td>
     </tr>
     <tr>
         <td></td>
-        <td>* 2(depth + 1)</td>
+        <td>* (depth * 2 + 1)</td>
     </tr>
 </table>
 

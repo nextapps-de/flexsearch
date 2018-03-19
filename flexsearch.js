@@ -3,7 +3,7 @@
  * ----------------------------------------------------------
  * @author: Thomas Wilkerling
  * @preserve https://github.com/nextapps-de/flexsearch
- * @version: 0.2.11
+ * @version: 0.2.2
  * @license: Apache 2.0 Licence
  */
 
@@ -928,9 +928,9 @@
                 if(this.depth){
 
                     var use_contextual = true;
-                    var key = words[0];
+                    var ctx_root = words[0];
 
-                    check_words[key] = "1";
+                    check_words[ctx_root] = "1";
                 }
                 else{
 
@@ -942,7 +942,7 @@
 
             var ctx_map;
 
-            if(!use_contextual || (ctx_map = this._map[10])[key]){
+            if(!use_contextual || (ctx_map = this._map[10])[ctx_root]){
 
                 for(var a = use_contextual ? 1 : 0; a < length; a++){
 
@@ -961,10 +961,11 @@
 
                                 use_contextual ?
 
-                                    ctx_map[key][z][value]
+                                    ctx_map[ctx_root]
                                 :
-                                    this._map[z][value]
-                            );
+                                    this._map
+
+                            )[z][value];
 
                             if(map){
 
@@ -995,7 +996,7 @@
                         check_words[value] = "1";
                     }
 
-                    key = value;
+                    ctx_root = value;
                 }
             }
             else{
@@ -1149,7 +1150,8 @@
 
             'simple': (function(){
 
-                var regex_strip = regex('[^a-z0-9 ]'),
+                var regex_whitespace = regex('\\s\\s+'),
+                    regex_strip = regex('[^a-z0-9 ]'),
                     regex_split = regex('[-\/]'),
                     regex_a = regex('[àáâãäå]'),
                     regex_e = regex('[èéêë]'),
@@ -1174,14 +1176,17 @@
                     regex_c, 'c',
                     regex_s, 's',
                     regex_split, ' ',
-                    regex_strip, ''
+                    regex_strip, '',
+                    regex_whitespace, ' '
                 ];
 
                 return function(str){
 
+                    str = replace(str.toLowerCase(), regex_pairs);
+
                     return (
 
-                        replace(str.toLowerCase(), regex_pairs)
+                        str !== ' ' ? str : ''
                     );
                 };
             }()),
@@ -1318,7 +1323,7 @@
                             }
                         }
 
-                        str = str.join("");
+                        str = str.join(" ");
                         str = collapseRepeatingChars(str);
                     }
 
@@ -1490,7 +1495,7 @@
 
             var count_vowels = 0,
                 count_literal = 0,
-                count_parts = -1;
+                count_parts = 0;
 
             var tmp = "";
             var length = value.length;
@@ -1524,19 +1529,27 @@
 
                 // dynamic n-gram sequences
 
-                if((char === ' ') || ((count_vowels >= 2) && (count_literal >= 2)) || (i === length - 1)){
+                if((char === ' ') || ((count_vowels > 1) && (count_literal > 1)) || (count_vowels > 2) || (count_literal > 2) || (i === length - 1)){
 
                     if(tmp){
 
-                        var tmp_length = tmp.length;
+                        if(parts[count_parts] && (tmp.length > 2)){
 
-                        if(tmp_length > 2){
-
-                            parts[++count_parts] = tmp;
+                            count_parts++;
                         }
-                        else if(parts[count_parts]){
+
+                        if(parts[count_parts]){
 
                             parts[count_parts] += tmp;
+                        }
+                        else{
+
+                            parts[count_parts] = tmp;
+                        }
+
+                        if(char === ' '){
+
+                            count_parts++;
                         }
 
                         tmp = "";
@@ -1567,7 +1580,7 @@
 
                 if(char !== char_prev){
 
-                    if((i > 0) && (char === 'h')){
+                    if(i && (char === 'h')){
 
                         var char_prev_is_vowel = (
 
@@ -1589,7 +1602,7 @@
                             (char_next === 'y')
                         );
 
-                        if(char_prev_is_vowel && char_next_is_vowel){
+                        if((char_prev_is_vowel && char_next_is_vowel) || (char_prev === ' ')){
 
                             collapsed_string += char;
                         }
@@ -1666,38 +1679,55 @@
         }
 
         /**
-         * @param {!Array<Array<number|string>>} arr
+         * Fastest intersect method for a set of unsorted arrays so far
+         * @param {!Array<Array<number|string>>} arrays
          * @param {number=} limit
          * @returns {Array}
          */
 
-        function intersect(arr, limit) {
+        function intersect(arrays, limit) {
 
             var result = [];
-            var length_z = arr.length;
+            var length_z = arrays.length;
 
             if(length_z > 1){
 
-                arr.sort(sort_by_length_up);
+                // pre-sort arrays by length up
 
-                var map = {};
-                var a = arr[0];
+                arrays.sort(sort_by_length_up);
 
-                for(var i = 0, length = a.length; i < length; ++i) {
+                // fill initial map
 
-                    map[a[i]] = 1;
+                var check = {};
+                var arr = arrays[0];
+                var length = arr.length;
+                var i = 0;
+
+                while(i < length) {
+
+                    check[arr[i++]] = 1;
                 }
 
+                // loop through arrays
+
                 var tmp, count = 0;
+                var z = 1;
 
-                for(var z = 1; z < length_z; ++z){
+                while(z < length_z){
 
-                    var b = arr[z];
+                    // get each array one by one
+
                     var found = false;
 
-                    for(var i = 0, length = b.length; i < length; ++i){
+                    arr = arrays[z];
+                    length = arr.length;
+                    i = 0;
 
-                        if((map[tmp = b[i]]) === z){
+                    while(i < length){
+
+                        if((check[tmp = arr[i++]]) === z){
+
+                            // fill in during last round
 
                             if(z === (length_z - 1)){
 
@@ -1705,34 +1735,89 @@
 
                                 if(limit && (count === limit)){
 
-                                    return result;
+                                    found = false;
+                                    break;
                                 }
                             }
 
-                            found = true;
-                            map[tmp] = z + 1;
+                            // apply count status
 
-                            break;
+                            found = true;
+                            check[tmp] = z + 1;
                         }
                     }
 
                     if(!found){
 
-                        return [];
+                        break;
                     }
-                }
 
-                return result;
+                    z++;
+                }
             }
             else if(length_z){
 
-                result = arr[0];
+                result = arrays[0];
 
                 if(limit && result && (result.length > limit)){
 
-                    // Note: do not touch original array
+                    // Note: do not touch original array!
 
                     result = result.slice(0, limit);
+                }
+            }
+
+            return result;
+        }
+
+        /**
+         * Fastest intersect method for 2 sorted arrays so far
+         * @param {!Array<number|string>} a
+         * @param {!Array<number|string>} b
+         * @param {number=} limit
+         * @returns {Array}
+         */
+
+        function intersect_sorted(a, b, limit){
+
+            var result = [];
+
+            var length_a = a.length,
+                length_b = b.length;
+
+            if(length_a && length_b){
+
+                var x = 0, y = 0, count = 0;
+
+                var current_a = 0,
+                    current_b = 0;
+
+                while(true){
+
+                    if((current_a || (current_a = a[x])) ===
+                       (current_b || (current_b = b[y]))){
+
+                        result[count++] = current_a;
+
+                        current_a = current_b = 0;
+                        x++;
+                        y++;
+                    }
+                    else if(current_a < current_b){
+
+                        current_a = 0;
+                        x++;
+                    }
+                    else{
+
+                        current_b = 0;
+                        y++;
+                    }
+
+                    if((x === length_a) || (y === length_b)){
+
+                        break;
+                    }
                 }
             }
 
