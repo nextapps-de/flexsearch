@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.3
+ * @preserve FlexSearch v0.2.32
  * Copyright 2017-2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -35,8 +35,9 @@ var SUPPORT_ASYNC = true;
 
         var defaults = {
 
-            // bitsize of assigned IDs (data type)
-            type: 'integer',
+            // use on of built-in functions
+            // or pass custom encoding algorithm
+            encode: 'icase',
 
             // type of information
             mode: 'forward',
@@ -54,11 +55,55 @@ var SUPPORT_ASYNC = true;
             threshold: 0,
 
             // contextual depth
-            depth: 0,
+            depth: 0
+        };
 
-            // use on of built-in functions
-            // or pass custom encoding algorithm
-            encode: 'icase'
+        /**
+         * @struct
+         * @private
+         * @const
+         * @final
+         */
+
+        var profiles = {
+
+            "memory": {
+                encode: "extra",
+                mode: "strict",
+                threshold: 7
+            },
+
+            "speed": {
+                encode: "icase",
+                mode: "strict",
+                threshold: 7,
+                depth: 2
+            },
+
+            "match": {
+                encode: "extra",
+                mode: "full"
+            },
+
+            "score": {
+                encode: "extra",
+                mode: "strict",
+                threshold: 5,
+                depth: 4
+            },
+
+            "balance": {
+                encode: "balance",
+                mode: "ngram",
+                threshold: 6,
+                depth: 3
+            },
+
+            "fastest": {
+                encode: "icase",
+                threshold: 9,
+                depth: 1
+            }
         };
 
         /**
@@ -94,7 +139,7 @@ var SUPPORT_ASYNC = true;
          * @const {Array<string>}
          */
 
-        var filter = SUPPORT_BUILTINS ? [
+        var filter = [
 
             "a",
             "about",
@@ -301,14 +346,13 @@ var SUPPORT_ASYNC = true;
             "yourself",
             "yourselves",
             "you've"
-
-        ] : null;
+        ];
 
         /**
          * @const {Object<string, string>}
          */
 
-        var stemmer = SUPPORT_BUILTINS ? {
+        var stemmer = {
 
             "ational": "ate",
             "tional": "tion",
@@ -356,18 +400,24 @@ var SUPPORT_ASYNC = true;
             "ous": "",
             "ive": "",
             "ize": ""
-
-        } : null;
+        };
 
         /**
-         * @param {Object<string, number|string|boolean|Object|function(string):string>=} options
+         * @param {string|Object<string, number|string|boolean|Object|function(string):string>=} options
          * @constructor
          * @private
          */
 
         function FlexSearch(options){
 
-            options || (options = defaults);
+            if(typeof options === 'string'){
+
+                options = profiles[options] || defaults;
+            }
+            else{
+
+                options || (options = defaults);
+            }
 
             // generate UID
 
@@ -467,9 +517,11 @@ var SUPPORT_ASYNC = true;
 
             if(options){
 
+                var custom;
+
                 // initialize worker
 
-                if(SUPPORT_WORKER && options['worker']){
+                if(SUPPORT_WORKER && (custom = options['worker'])){
 
                     if(typeof Worker === 'undefined'){
 
@@ -485,7 +537,7 @@ var SUPPORT_ASYNC = true;
                     else{
 
                         var self = this;
-                        var threads = parseInt(options['worker'], 10) || 4;
+                        var threads = parseInt(custom, 10) || 4;
 
                         self._current_task = -1;
                         self._task_completed = 0;
@@ -536,7 +588,30 @@ var SUPPORT_ASYNC = true;
                     }
                 }
 
-                // apply options
+                // apply profile options
+
+                if((custom = options['profile'])) {
+
+                    this.profile = custom || 'custom';
+
+                    custom = profiles[custom];
+
+                    if(custom) {
+
+                        for(var option in custom){
+
+                            if(custom.hasOwnProperty(option)){
+
+                                if(typeof options[option] === 'undefined'){
+
+                                    options[option] = custom[option];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // apply custom options
 
                 this.mode = (
 
@@ -580,10 +655,12 @@ var SUPPORT_ASYNC = true;
                     defaults.depth
                 );
 
+                custom = options['encode'];
+
                 this.encoder = (
 
-                    (options['encode'] && global_encoder[options['encode']]) ||
-                    (typeof options['encode'] === 'function' ? options['encode'] : this.encoder || false)
+                    (custom && global_encoder[custom]) ||
+                    (typeof custom === 'function' ? custom : this.encoder || false)
                 );
 
                 if(SUPPORT_DEBUG){
@@ -595,35 +672,35 @@ var SUPPORT_ASYNC = true;
                     );
                 }
 
-                if(options['matcher']) {
+                if(custom = options['matcher']) {
 
-                    this.addMatcher(/** @type {Object<string, string>} */ (options['matcher']));
+                    this.addMatcher(/** @type {Object<string, string>} */ (custom));
                 }
 
-                if(options['filter']) {
+                if(SUPPORT_BUILTINS && (custom = options['filter'])) {
 
                     this.filter = initFilter(
 
-                        (options['filter'] === true ?
+                        (custom === true ?
 
                             filter
                         :
-                            /** @type {Array<string>} */ (options['filter'])
+                            /** @type {Array<string>} */ (custom)
 
-                        ), this.encoder);
+                    ), this.encoder);
                 }
 
-                if(options['stemmer']) {
+                if(SUPPORT_BUILTINS && (custom = options['stemmer'])) {
 
                     this.stemmer = initStemmer(
 
-                        (options['stemmer'] === true ?
+                        (custom === true ?
 
                             stemmer
                         :
-                            /** @type {Object<string, string>} */ (options['stemmer'])
+                            /** @type {Object<string, string>} */ (custom)
 
-                        ), this.encoder);
+                    ), this.encoder);
                 }
             }
 
@@ -932,7 +1009,7 @@ var SUPPORT_ASYNC = true;
                                         threshold
                                     );
 
-                                    if(depth && (word_length > 1) && (score > threshold)){
+                                    if(depth && (word_length > 1) && (score >= threshold)){
 
                                         var ctx_map = map[10];
                                         var ctx_dupes = dupes['_ctx'][value] || (dupes['_ctx'][value] = {});
@@ -1476,7 +1553,7 @@ var SUPPORT_ASYNC = true;
 
         /** @const */
 
-        var global_encoder_balanced = (function(){
+        var global_encoder_balance = (function(){
 
             var regex_whitespace = regex('\\s\\s+'),
                 regex_strip = regex('[^a-z0-9 ]'),
@@ -1702,16 +1779,7 @@ var SUPPORT_ASYNC = true;
                 };
             })(),
 
-            'balanced': global_encoder_balanced
-
-            // TODO: provide some common encoder plugins
-            // soundex
-            // cologne
-            // metaphone
-            // caverphone
-            // levinshtein
-            // hamming
-            // matchrating
+            'balance': global_encoder_balance
 
         } : {
 
@@ -1722,7 +1790,7 @@ var SUPPORT_ASYNC = true;
                 return value.toLowerCase();
             },
 
-            'balanced': global_encoder_balanced
+            'balance': global_encoder_balance
         };
 
         // Xone Async Handler Fallback
@@ -1846,7 +1914,7 @@ var SUPPORT_ASYNC = true;
 
                 dupes[tmp] = score;
 
-                if(score > threshold){
+                if(score >= threshold){
 
                     var arr = map[score];
                         arr = arr[tmp] || (arr[tmp] = []);
@@ -2525,13 +2593,17 @@ var SUPPORT_ASYNC = true;
 
                             URL.createObjectURL(
 
-                                new Blob(
+                                new Blob([
 
-                                    ['(' + _worker.toString() + ')()'], {
-
-                                        'type': 'text/javascript'
-                                    }
-                                )
+                                    'var SUPPORT_WORKER = true;' +
+                                    'var SUPPORT_BUILTINS = ' + (SUPPORT_BUILTINS ? 'true' : 'false') + ';' +
+                                    'var SUPPORT_DEBUG = ' + (SUPPORT_DEBUG ? 'true' : 'false') + ';' +
+                                    'var SUPPORT_CACHE = ' + (SUPPORT_CACHE ? 'true' : 'false') + ';' +
+                                    'var SUPPORT_ASYNC = ' + (SUPPORT_ASYNC ? 'true' : 'false') + ';' +
+                                    '(' + _worker.toString() + ')()'
+                                ],{
+                                    'type': 'text/javascript'
+                                })
                             )
                         :
 

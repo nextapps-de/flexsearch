@@ -16,14 +16,13 @@
 
 When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
 It also has the __most memory-efficient index__. Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice. 
-FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates on the index as well as queries through dedicated threads. 
+FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#examples">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
 
 Comparison:
 - <a href="https://jsperf.com/compare-search-libraries" target="_blank">Library Benchmarks</a>
-- <a href="https://jsperf.com/flexsearch" target="_blank">BulkSearch vs. FlexSearch Benchmark</a>
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Library Relevance Scoring</a>
 
 Supported Platforms:
 - Browser
@@ -42,14 +41,14 @@ All Features:
     <li>Multiple Words</li>
     <li><a href="#phonetic">Phonetic Search</a></li>
     <li>Relevance-based Scoring</li>
-    <li><a href="contextual">Contextual Indexes</a></li>
+    <li><a href="#contextual">Contextual Indexes</a></li>
     <li>Limit Results</li>
     <li>Supports Caching</li>
     <li>Asynchronous Processing</li>
     <li>Customizable: Matcher, Encoder, Tokenizer, Stemmer, Stopword-Filter</li>
 </ul>
 
-This features are not available in the 50% smaller <a href="flexsearch.light.js">light version</a>:
+These features are not available in the 50% smaller <a href="flexsearch.light.js">light version</a>:
 
 - WebWorker
 - Async handler
@@ -216,6 +215,12 @@ alternatively you can also use:
 var index = FlexSearch.create();
 ```
 
+##### Create a new index and choosing one of the built-in profiles
+
+```js
+var index = new FlexSearch("speed");
+```
+
 ##### Create a new index with custom options
 
 ```js
@@ -223,6 +228,7 @@ var index = new FlexSearch({
 
     // default values:
 
+    profile: "balance",
     encode: "icase",
     mode: "ngram",
     async: false,
@@ -230,7 +236,8 @@ var index = new FlexSearch({
 });
 ```
 
-__Read more:__ <a href="#phonetic">Phonetic Search</a>, <a href="#compare">Phonetic Comparison</a>, <a href="#memory">Improve Memory Usage</a>
+<a href="#options">Read more about custom options</a>
+
 <a name="index.add"></a>
 #### Add items to an index
 
@@ -488,7 +495,7 @@ index.search("John Doe", function(results){
 <a name="options"></a>
 ## Options
 
-FlexSearch ist highly customizable. Make use of the the right options can really improve your results as well as memory economy or query time.
+FlexSearch ist highly customizable. Make use of the the <a href="#profiles">right options</a> can really improve your results as well as memory economy or query time.
 
 <table>
     <tr></tr>
@@ -498,7 +505,22 @@ FlexSearch ist highly customizable. Make use of the the right options can really
         <td align="left">Description</td>
     </tr>
     <tr>
-        <td align="top">mode<br><br><br><br><br></td>
+        <td align="top">profile<br><br><br><br><br><br></td>
+        <td vertical="top" vertical-align="top">
+            "memory"<br>
+            "speed"<br>
+            "match"<br>
+            "score"<br>
+            "balance"<br>
+            "fastest"
+        </td>
+        <td vertical-align="top">
+            The <a href="#profiles">configuration profile</a>.<br>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="top">mode<br><br><br><br><br><br></td>
         <td vertical="top" vertical-align="top">
             "strict"<br>
             "foward"<br>
@@ -872,31 +894,32 @@ The required memory for the index depends on several options:
     </tr>
 </table>
 
-<a name="examples"></a>
-## Example Options
+<a name="profiles"></a>
+## Built-in Profiles
 
-Memory-optimized:
+You can pass a built-in profile during creation/initialization. They have these following settings:
 
+Memory-optimized profile: __"memory"__
 ```js
 {
     encode: "extra",
     mode: "strict",
-    threshold: 5
+    threshold: 7
 }
 ```
 
-Speed-optimized:
+Speed-optimized profile: __"speed"__
 
 ```js
 {
     encode: "icase",
     mode: "strict",
-    threshold: 5,
+    threshold: 7,
     depth: 2
 }
 ```
 
-Matching-tolerant:
+Matching-tolerant profile: __"match"__
 
 ```js
 {
@@ -905,16 +928,41 @@ Matching-tolerant:
 }
 ```
 
-Well-balanced:
+Relevance-optimized profile: __"score"__
 
 ```js
 {
     encode: "extra",
+    mode: "strict",
+    threshold: 5,
+    depth: 4
+}
+```
+
+Most-balanced profile: __"balanced"__
+
+```js
+{
+    encode: "balanced",
     mode: "ngram",
-    threshold: 4,
+    threshold: 6,
     depth: 3
 }
 ```
+
+Absolute fastest profile: __"fastest"__
+
+```js
+{
+    encode: "icase",
+    threshold: 9,
+    depth: 1
+}
+```
+
+Compare these options above:
+- <a href="https://jsperf.com/compare-flexsearch-options" target="_blank">Benchmarks</a>
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching-flexsearch.html" target="_blank">Relevance Scoring</a>
 
 <a name="builds"></a>
 ## Custom Builds

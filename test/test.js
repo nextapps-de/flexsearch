@@ -353,11 +353,12 @@ describe('Apply Sort by Scoring', function(){
 
         expect(flexsearch_reverse.search("xxx").length).to.equal(1);
         expect(flexsearch_reverse.search("yyy").length).to.equal(1);
-        expect(flexsearch_reverse.search("zzz").length).to.equal(0);
+        expect(flexsearch_reverse.search("zzz").length).to.equal(1);
         expect(flexsearch_reverse.search({query: "xxx", threshold: 2}).length).to.equal(1);
         expect(flexsearch_reverse.search({query: "xxx", threshold: 5}).length).to.equal(0);
         expect(flexsearch_reverse.search({query: "yyy", threshold: 2}).length).to.equal(0);
-        expect(flexsearch_reverse.search({query: "zzz", threshold: 0}).length).to.equal(0);
+        expect(flexsearch_reverse.search({query: "zzz", threshold: 1}).length).to.equal(0);
+        expect(flexsearch_reverse.search({query: "zzz", threshold: 0}).length).to.equal(1);
     });
 });
 
@@ -576,7 +577,7 @@ describe('Add (Worker)', function(){
 
         flexsearch_worker = new FlexSearch({
 
-            encode: false,
+            encode: 'icase',
             mode: 'strict',
             async: true,
             worker: 4
@@ -594,10 +595,12 @@ describe('Add (Worker)', function(){
         expect(flexsearch_worker.length).to.equal(3);
         expect(flexsearch_worker.index).to.have.keys([0, 1, 2]);
 
-        setTimeout(function(){
+        flexsearch_worker.search("foo", function(result){
 
-            expect(flexsearch_worker.length).to.equal(3);
-            expect(flexsearch_worker.index).to.have.keys([0, 1, 2]);
+            expect(result).to.have.length(0);
+        });
+
+        setTimeout(function(){
 
             done();
 
@@ -643,7 +646,7 @@ describe('Search (Worker)', function(){
 
         flexsearch_worker.search("foobar", function(result){
 
-            expect(result).to.include(1);
+            expect(result).to.have.members([1]);
         });
 
         setTimeout(function(){
@@ -720,14 +723,14 @@ describe('Update (Worker)', function(){
 
         flexsearch_worker.search("foobar", function(results){
 
-            expect(results).to.include(2);
+            expect(results).to.have.members([2]);
         });
 
         setTimeout(function(){
 
             done();
 
-        }, 25);
+        }, 50);
     });
 });
 

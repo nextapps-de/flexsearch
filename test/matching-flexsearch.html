@@ -3,16 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Matching Test</title>
-    <script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script><!--<script src="../flexsearch.min.js"></script>-->
-    <script src="https://rawgit.com/nextapps-de/bulksearch/master/bulksearch.min.js"></script>
-    <script src="https://cdn.rawgit.com/weixsong/elasticlunr.js/master/example/elasticlunr.min.js"></script>
-    <script src="https://unpkg.com/lunr@2.1.6/lunr.js"></script>
-    <script src="https://cdn.rawgit.com/kbrsh/wade/master/dist/wade.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.0.4/fuse.min.js"></script>
-    <script src="https://unpkg.com/js-search@1.3.7/dist/umd/js-search.min.js"></script>
-    <script src="https://rawgit.com/karussell/jsii/master/web/js/src/BitSet.js"></script>
-    <script src="https://rawgit.com/karussell/jsii/master/web/js/src/JSii.js"></script>
-    <script src="https://rawgit.com/vlad-x/a25e0c5c1eeb6bf6aa38/raw/02d1a1703e4a99a7c733c85097f583579f6af4e2/bm25.js"></script>
+    <script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script><!--<script src="../flexsearch.js"></script>-->
     <style>
         body{
             font-family: sans-serif;
@@ -33,20 +24,16 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
     <table>
         <tr>
             <th><b>Query</b></th>
-            <th>flexsearch</th>
-            <th>bulksearch</th>
-            <th>elasticlunr</th>
-            <th>lunr</th>
-            <th>wade</th>
-            <th>fuse</th>
-            <th>jssearch</th>
-            <th>jsii</th>
-            <th>bm25</th>
+            <th>default</th>
+            <th>memory</th>
+            <th>speed</th>
+            <th>matching</th>
+            <th>scoring</th>
+            <th>balanced</th>
+            <th>fastest</th>
         </tr>
         <tr id="test-1">
             <td style="width: 200px">"without breach of modesty"</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -64,13 +51,9 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
         </tr>
         <tr id="test-3">
             <td>"princes of the ambition"</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -88,13 +71,9 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
         </tr>
         <tr id="test-5">
             <td>"i already observed"</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -112,13 +91,9 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
         </tr>
         <tr id="test-7">
             <td>"take that to the rocks"</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -136,13 +111,9 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
         </tr>
         <tr id="test-9">
             <td>"matematikal musikal instruments"</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -160,13 +131,9 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
         </tr>
         <tr id="test-11">
             <td>"lalkon the camberlayhn"</td>
-            <td>wait ...</td>
-            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -179,8 +146,8 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 </div>
 <br>
 <b>Red:</b> No results.<br>
-<b>Yellow:</b> Most relevant result is not on the first place.<br>
-<b>Green:</b> Most relevant result was was successfully found on the first place.<br><br>
+<b>Yellow:</b> Most relevant result is not on top.<br>
+<b>Green:</b> Most relevant result was successfully found on top.<br><br>
 <b>Note:</b> Open console and type e.g. <i>data[493]</i>
 <script>
 
@@ -188,7 +155,6 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
     setTimeout(function(){
 
-        var start = 0;
         var new_data = text_data.split('. ');
         var tmp = '';
 
@@ -206,124 +172,69 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             }
         }
 
-        var bulksearch = new BulkSearch({
-            type: 'short', // this type specifies the maximum bitlength of assigned IDs!
-            encode: 'advanced',
-            multi: true,
-            async: false,
-            cache: false
-        });
+        var flexsearch_default = new FlexSearch();
+        var flexsearch_memory = new FlexSearch("memory");
+        var flexsearch_speed = new FlexSearch("speed");
+        var flexsearch_fastest = new FlexSearch("fastest");
+        var flexsearch_match = new FlexSearch("match");
+        var flexsearch_score = new FlexSearch("score");
+        var flexsearch_balance = new FlexSearch("balance");
 
-        console.time('bulksearch');
-
-        for(var i = 0; i < data.length; i++){
-            bulksearch.add(i, data[i]);
-        }
-
-        console.timeEnd('bulksearch');
-
-        var flexsearch = new FlexSearch({
-            encode: 'extra',
-            mode: 'strict',
-            threshold: 5,
-            depth: 3,
-            filter: true,
-            stemmer: true,
-            async: false,
-            cache: false,
-            worker: false
-        });
-
-        console.time('flexsearch');
+        console.time('flexsearch_default');
 
         for(var i = 0; i < data.length; i++){
-            flexsearch.add(i, data[i]);
+            flexsearch_default.add(i, data[i]);
         }
 
-        console.timeEnd('flexsearch');
+        console.timeEnd('flexsearch_default');
 
-        var elasticsearch = elasticlunr(function () {
-            this.setRef('id');
-            this.addField('content');
-        });
-
-        console.time('elasticsearch');
+        console.time('flexsearch_memory');
 
         for(var i = 0; i < data.length; i++){
-            elasticsearch.addDoc({id: i, content: data[i]});
+            flexsearch_memory.add(i, data[i]);
         }
 
-        console.timeEnd('elasticsearch');
+        console.timeEnd('flexsearch_memory');
 
-        console.time('lunr');
-
-        var lunrsearch = lunr(function(){
-            this.ref('id');
-            this.field('content');
-            for(var i = 0; i < data.length; i++){
-                this.add({id: i, content: data[i]});
-            }
-        });
-
-        console.timeEnd('lunr');
-
-        console.time('wade');
-        var wade = Wade(data.slice(0));
-        console.timeEnd('wade');
-        var wadesearch = function(query){
-            return wade(query).sort(sort_by_score_down);
-        };
-
-        function sort_by_score_down(a, b){
-            var sum = a.score - b.score;
-            return sum < 0 ? 1 : sum > 0 ? -1 : 0;
-        }
-
-        var payload = [];
+        console.time('flexsearch_speed');
 
         for(var i = 0; i < data.length; i++){
-            payload[i] = {id: i, content: data[i]};
+            flexsearch_speed.add(i, data[i]);
         }
 
-        // Note: fuse adds async?
-        console.time('fuse');
+        console.timeEnd('flexsearch_speed');
 
-        var fuse = new Fuse(payload.slice(0), {
-            keys: ['id', 'content'],
-            id: 'id'
-        });
-
-        console.timeEnd('fuse');
-
-        var jssearch = new JsSearch.Search('id');
-        jssearch.addIndex('content');
-        console.time('jssearch');
-        jssearch.addDocuments(payload.slice(0));
-        console.timeEnd('jssearch');
-
-        var payload = [];
+        console.time('flexsearch_match');
 
         for(var i = 0; i < data.length; i++){
-            payload[i] = {id: i, text: data[i]};
+            flexsearch_match.add(i, data[i]);
         }
 
-        var jsii = new JSii();
+        console.timeEnd('flexsearch_match');
 
-        console.time('jsii');
-        jsii.feedDocs(payload.slice(0));
-        console.timeEnd('jsii');
+        console.time('flexsearch_score');
 
-        var bm25 = new BM25();
-
-        console.time('bm25');
         for(var i = 0; i < data.length; i++){
-            bm25.addDocument({id: i, body: data[i]});
+            flexsearch_score.add(i, data[i]);
         }
-        console.timeEnd('bm25');
 
-        bm25.updateIdf();
+        console.timeEnd('flexsearch_score');
 
-        payload = null;
+        console.time('flexsearch_balance');
+
+        for(var i = 0; i < data.length; i++){
+            flexsearch_balance.add(i, data[i]);
+        }
+
+        console.timeEnd('flexsearch_balance');
+
+        console.time('flexsearch_fastest');
+
+        for(var i = 0; i < data.length; i++){
+            flexsearch_fastest.add(i, data[i]);
+        }
+
+        console.timeEnd('flexsearch_fastest');
 
         // ---------------------------------------
 
@@ -345,15 +256,13 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
             var nodes = document.getElementById(id).getElementsByTagName('td');
 
-            nodes[1].innerHTML = flexsearch.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[2].innerHTML = bulksearch.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[3].innerHTML = elasticsearch.search(query).slice(0, 1).map(function(val){return val.ref}).join('<br>') || '-';
-            nodes[4].innerHTML = lunrsearch.search(query).slice(0, 1).map(function(val){return val.ref}).join('<br>') || '-';
-            nodes[5].innerHTML = wadesearch(query).slice(0, 1).map(function(val){return val.index}).join('<br>') || '-';
-            nodes[6].innerHTML = fuse.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[7].innerHTML = jssearch.search(query).slice(0, 1).map(function(val){return val.id}).join('<br>') || '-';
-            nodes[8].innerHTML = jsii.search(query).docs.slice(0, 1).map(function(val){return val.id}).join('<br>') || '-';
-            nodes[9].innerHTML = bm25.search(query).slice(0, 1).map(function(val){return val.id}).join('<br>') || '-';
+            nodes[1].innerHTML = flexsearch_default.search(query).slice(0, 1).join('<br>') || '-';
+            nodes[2].innerHTML = flexsearch_memory.search(query).slice(0, 1).join('<br>') || '-';
+            nodes[3].innerHTML = flexsearch_speed.search(query).slice(0, 1).join('<br>') || '-';
+            nodes[4].innerHTML = flexsearch_match.search(query).slice(0, 1).join('<br>') || '-';
+            nodes[5].innerHTML = flexsearch_score.search(query).slice(0, 1).join('<br>') || '-';
+            nodes[6].innerHTML = flexsearch_balance.search(query).slice(0, 1).join('<br>') || '-';
+            nodes[7].innerHTML = flexsearch_fastest.search(query).slice(0, 1).join('<br>') || '-';
 
             for(var i = 1; i < nodes.length; i++){
 
