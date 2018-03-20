@@ -6,9 +6,9 @@ if(typeof module !== 'undefined'){
     URL.createObjectURL = function(val){};
     Blob = function(string){};
 
-    var env = process.argv[3] === 'test' ? '.min' : '';
+    var env = process.argv[3] === 'test' ? 'min' : process.argv[3] === 'test/' ? 'light' : '';
     var expect = require('chai').expect;
-    var FlexSearch = require("../flexsearch" + env + ".js");
+    var FlexSearch = require("../flexsearch" + (env ? '.' + env : '') + ".js");
 }
 
 var flexsearch_default;
@@ -148,7 +148,11 @@ describe('Initialize', function(){
         expect(flexsearch_default).to.respondTo("remove");
         expect(flexsearch_default).to.respondTo("reset");
         expect(flexsearch_default).to.respondTo("init");
-        expect(flexsearch_default).to.respondTo("info");
+
+        if(env !== 'light'){
+
+            expect(flexsearch_default).to.respondTo("info");
+        }
     });
 
     it('Should have correct uuids', function(){
@@ -168,12 +172,17 @@ describe('Initialize', function(){
         expect(flexsearch_default.mode).to.equal("forward");
         expect(flexsearch_sync.async).to.equal(false);
         expect(flexsearch_async.async).to.equal(true);
-        expect(flexsearch_custom.encoder).to.equal(test_encoder);
         expect(flexsearch_strict.mode).to.equal("strict");
         expect(flexsearch_forward.mode).to.equal("forward");
         expect(flexsearch_reverse.mode).to.equal("reverse");
         expect(flexsearch_full.mode).to.equal("full");
         expect(flexsearch_ngram.mode).to.equal("ngram");
+
+        // not available in compiled version:
+        if(typeof flexsearch_custom.encoder !== 'undefined'){
+
+            expect(flexsearch_custom.encoder).to.equal(test_encoder);
+        }
     });
 });
 
@@ -223,13 +232,16 @@ describe('Search (Sync)', function(){
         expect(flexsearch_sync.search("foo foo")).to.have.members([0, 1]);
         expect(flexsearch_sync.search("foo  foo")).to.have.members([0, 1]);
 
-        flexsearch_extra.add(4, "Thomas");
-        flexsearch_extra.add(5, "Arithmetic");
-        flexsearch_extra.add(6, "Mahagoni");
+        if(env !== 'light'){
 
-        expect(flexsearch_extra.search("tomass")).to.include(4);
-        expect(flexsearch_extra.search("arytmetik")).to.include(5);
-        expect(flexsearch_extra.search("mahagony")).to.include(6);
+            flexsearch_extra.add(4, "Thomas");
+            flexsearch_extra.add(5, "Arithmetic");
+            flexsearch_extra.add(6, "Mahagoni");
+
+            expect(flexsearch_extra.search("tomass")).to.include(4);
+            expect(flexsearch_extra.search("arytmetik")).to.include(5);
+            expect(flexsearch_extra.search("mahagony")).to.include(6);
+        }
     });
 
     it('Should have been limited', function(){
@@ -843,6 +855,7 @@ describe('Context', function(){
         expect(flexsearch_depth.search("zero three").length).to.equal(0);
         expect(flexsearch_depth.search("three seven").length).to.equal(0);
         expect(flexsearch_depth.search("three five seven")).to.include(0);
+        expect(flexsearch_depth.search("eight six four")).to.include(0);
         // TODO
         // expect(flexsearch_depth.search("three seven five")).to.include(0);
         expect(flexsearch_depth.search("three foobar seven").length).to.equal(0);
@@ -961,13 +974,14 @@ describe('Relevance', function(){
 
         index.add(0, "1 2 3 2 4 1 5 3");
         index.add(1, "zero one two three four five six seven eight nine ten");
-        index.add(2, "four two zero one three ten five seven eight six nine");
+        index.add(2, "five two zero one three four ten seven eight six nine");
 
         expect(index.search("1 3 4")).to.have.members([0]);
         expect(index.search("1 5 3 4")).to.have.members([0]);
         expect(index.search("one")).to.have.members([1, 2]);
-        expect(index.search("one two")).to.have.members([1, 2]);
-        expect(index.search("four one")).to.have.members([1, 2]);
+        expect(index.search("one three")).to.have.members([1, 2]);
+        expect(index.search("three one")).to.have.members([1, 2]);
+        expect(index.search("zero five one ten")).to.have.members([2]);
     });
 });
 
@@ -1016,67 +1030,73 @@ describe('Add Matchers', function(){
 // Caching
 // ------------------------------------------------------------------------
 
-describe('Caching', function(){
+if(env !== 'light'){
 
-    it('Should have been cached properly', function(){
+    describe('Caching', function(){
 
-        flexsearch_cache.add(0, 'foo')
-                        .add(1, 'bar')
-                        .add(2, 'foobar');
-        // fetch:
+        it('Should have been cached properly', function(){
 
-        expect(flexsearch_cache.search("foo")).to.have.members([0, 2]);
-        expect(flexsearch_cache.search("bar")).to.have.members([1, 2]);
-        expect(flexsearch_cache.search("foobar")).to.include(2);
+            flexsearch_cache.add(0, 'foo')
+                            .add(1, 'bar')
+                            .add(2, 'foobar');
+            // fetch:
 
-        // cache:
+            expect(flexsearch_cache.search("foo")).to.have.members([0, 2]);
+            expect(flexsearch_cache.search("bar")).to.have.members([1, 2]);
+            expect(flexsearch_cache.search("foobar")).to.include(2);
 
-        expect(flexsearch_cache.search("foo")).to.have.members([0, 2]);
-        expect(flexsearch_cache.search("bar")).to.have.members([1, 2]);
-        expect(flexsearch_cache.search("foobar")).to.include(2);
+            // cache:
 
-        // update:
+            expect(flexsearch_cache.search("foo")).to.have.members([0, 2]);
+            expect(flexsearch_cache.search("bar")).to.have.members([1, 2]);
+            expect(flexsearch_cache.search("foobar")).to.include(2);
 
-        flexsearch_cache.remove(2).update(1, 'foo').add(3, 'foobar');
+            // update:
 
-        // fetch:
+            flexsearch_cache.remove(2).update(1, 'foo').add(3, 'foobar');
 
-        expect(flexsearch_cache.search("foo")).to.have.members([0, 1, 3]);
-        expect(flexsearch_cache.search("bar")).to.include(3);
-        expect(flexsearch_cache.search("foobar")).to.include(3);
+            // fetch:
 
-        // cache:
+            expect(flexsearch_cache.search("foo")).to.have.members([0, 1, 3]);
+            expect(flexsearch_cache.search("bar")).to.include(3);
+            expect(flexsearch_cache.search("foobar")).to.include(3);
 
-        expect(flexsearch_cache.search("foo")).to.have.members([0, 1, 3]);
-        expect(flexsearch_cache.search("bar")).to.include(3);
-        expect(flexsearch_cache.search("foobar")).to.include(3);
+            // cache:
+
+            expect(flexsearch_cache.search("foo")).to.have.members([0, 1, 3]);
+            expect(flexsearch_cache.search("bar")).to.include(3);
+            expect(flexsearch_cache.search("foobar")).to.include(3);
+        });
     });
-});
+}
 
 // ------------------------------------------------------------------------
 // Debug Information
 // ------------------------------------------------------------------------
 
-describe('Debug', function(){
+if(env !== 'light'){
 
-    it('Should have been debug mode activated', function(){
+    describe('Debug', function(){
 
-        var info = flexsearch_cache.info();
+        it('Should have been debug mode activated', function(){
 
-        expect(info).to.have.keys([
+            var info = flexsearch_cache.info();
 
-            'id',
-            'chars',
-            'status',
-            'cache',
-            'items',
-            'matcher',
-            'memory',
-            'sequences',
-            'worker'
-        ]);
+            expect(info).to.have.keys([
+
+                'id',
+                'chars',
+                'status',
+                'cache',
+                'items',
+                'matcher',
+                'memory',
+                'sequences',
+                'worker'
+            ]);
+        });
     });
-});
+}
 
 // ------------------------------------------------------------------------
 // Chaining

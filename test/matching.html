@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Matching Test</title>
-    <script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script>
+    <script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script><!--<script src="../flexsearch.min.js"></script>-->
     <script src="https://rawgit.com/nextapps-de/bulksearch/master/bulksearch.min.js"></script>
     <script src="https://cdn.rawgit.com/weixsong/elasticlunr.js/master/example/elasticlunr.min.js"></script>
     <script src="https://unpkg.com/lunr@2.1.6/lunr.js"></script>
@@ -68,7 +68,7 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
         </tr>
         <tr id="test-3">
-            <td>"i already observed"</td>
+            <td>"princes of the ambition"</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -80,7 +80,7 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
         </tr>
         <tr id="test-4">
-            <td>"let a of his"</td>
+            <td>"five-thousand leagues"</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -92,7 +92,7 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
         </tr>
         <tr id="test-5">
-            <td>"take that to the rocks"</td>
+            <td>"i already observed"</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -104,7 +104,7 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
         </tr>
         <tr id="test-6">
-            <td>"bignes of splaknuk"</td>
+            <td>"let a of his"</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -116,7 +116,7 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
         </tr>
         <tr id="test-7">
-            <td>"matematikal musikal instruments"</td>
+            <td>"take that to the rocks"</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -128,6 +128,30 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             <td>wait ...</td>
         </tr>
         <tr id="test-8">
+            <td>"bignes of splaknuk"</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+        </tr>
+        <tr id="test-9">
+            <td>"matematikal musikal instruments"</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+            <td>wait ...</td>
+        </tr>
+        <tr id="test-10">
             <td>"lalkon the camberlayhn"</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -197,6 +221,8 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             mode: 'strict',
             threshold: 4,
             depth: 3,
+            filter: true,
+            stemmer: true,
             async: false,
             cache: false,
             worker: false
@@ -297,12 +323,14 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
         do_test('test-1', 'without breach of modesty', '493');
         do_test('test-2', 'went softly stream', '446');
-        do_test('test-3', 'i already observed', '458');
-        do_test('test-4', 'let a of his', '50');
-        do_test('test-5', 'take that to the rocks', '175');
-        do_test('test-6', 'bignes of splaknuk', '146');
-        do_test('test-7', 'matematikal musikal instruments', '267');
-        do_test('test-8', 'lalkon the camberlayhn', '99');
+        do_test('test-3', 'princes of the ambition', '72');
+        do_test('test-4', 'five-thousand leagues', '2');
+        do_test('test-5', 'i already observed', '458');
+        do_test('test-6', 'let a of his', '50');
+        do_test('test-7', 'take that to the rocks', '175');
+        do_test('test-8', 'bignes of splaknuk', '146');
+        do_test('test-9', 'matematikal musikal instruments', '267');
+        do_test('test-10', 'lalkon the camberlayhn', '99');
 
         // ---------------------------------------
 

@@ -1,11 +1,24 @@
 ;/**!
- * FlexSearch - Superfast lightweight full text search engine
- * ----------------------------------------------------------
- * @author: Thomas Wilkerling
- * @preserve https://github.com/nextapps-de/flexsearch
- * @version: 0.2.2
- * @license: Apache 2.0 Licence
+ * @preserve FlexSearch v0.2.3
+ * Copyright 2017-2018 Thomas Wilkerling
+ * Released under the Apache 2.0 Licence
+ * https://github.com/nextapps-de/flexsearch
  */
+
+/** @define {boolean} */
+var SUPPORT_WORKER = true;
+
+/** @define {boolean} */
+var SUPPORT_BUILTINS = true;
+
+/** @define {boolean} */
+var SUPPORT_DEBUG = true;
+
+/** @define {boolean} */
+var SUPPORT_CACHE = true;
+
+/** @define {boolean} */
+var SUPPORT_ASYNC = true;
 
 (function(){
 
@@ -77,6 +90,276 @@
         var regex_split = regex("[ -\/]");
 
         /**
+         * http://www.ranks.nl/stopwords
+         * @const {Array<string>}
+         */
+
+        var filter = SUPPORT_BUILTINS ? [
+
+            "a",
+            "about",
+            "above",
+            "after",
+            "again",
+            "against",
+            "all",
+            "also",
+            "am",
+            "an",
+            "and",
+            "any",
+            "are",
+            "aren't",
+            "as",
+            "at",
+            //"back",
+            "be",
+            "because",
+            "been",
+            "before",
+            "being",
+            "below",
+            //"between",
+            "both",
+            "but",
+            "by",
+            "can",
+            "cannot",
+            "can't",
+            "come",
+            "could",
+            "couldn't",
+            //"day",
+            "did",
+            "didn't",
+            "do",
+            "does",
+            "doesn't",
+            "doing",
+            "dont",
+            "down",
+            "during",
+            "each",
+            "even",
+            "few",
+            "first",
+            "for",
+            "from",
+            "further",
+            "get",
+            //"give",
+            "go",
+            //"good",
+            "had",
+            "hadn't",
+            "has",
+            "hasn't",
+            "have",
+            "haven't",
+            "having",
+            "he",
+            "hed",
+            //"hell",
+            "her",
+            "here",
+            "here's",
+            "hers",
+            "herself",
+            "hes",
+            "him",
+            "himself",
+            "his",
+            "how",
+            "how's",
+            "i",
+            "id",
+            "if",
+            "ill",
+            "im",
+            "in",
+            "into",
+            "is",
+            "isn't",
+            "it",
+            "it's",
+            "itself",
+            "i've",
+            "just",
+            "know",
+            "let's",
+            "like",
+            //"look",
+            "make",
+            "me",
+            "more",
+            "most",
+            "mustn't",
+            "my",
+            "myself",
+            "new",
+            "no",
+            "nor",
+            "not",
+            "now",
+            "of",
+            "off",
+            "on",
+            "once",
+            //"one",
+            "only",
+            "or",
+            "other",
+            "ought",
+            "our",
+            "our's",
+            "ourselves",
+            "out",
+            "over",
+            "own",
+            //"people",
+            "same",
+            "say",
+            "see",
+            "shan't",
+            "she",
+            "she'd",
+            "shell",
+            "shes",
+            "should",
+            "shouldn't",
+            "so",
+            "some",
+            "such",
+            //"take",
+            "than",
+            "that",
+            "that's",
+            "the",
+            "their",
+            "theirs",
+            "them",
+            "themselves",
+            "then",
+            "there",
+            "there's",
+            "these",
+            "they",
+            "they'd",
+            "they'll",
+            "they're",
+            "they've",
+            //"think",
+            "this",
+            "those",
+            "through",
+            "time",
+            "to",
+            "too",
+            //"two",
+            //"under",
+            "until",
+            "up",
+            "us",
+            //"use",
+            "very",
+            "want",
+            "was",
+            "wasn't",
+            "way",
+            "we",
+            "wed",
+            "well",
+            "were",
+            "weren't",
+            "we've",
+            "what",
+            "what's",
+            "when",
+            "when's",
+            "where",
+            "where's",
+            "which",
+            "while",
+            "who",
+            "whom",
+            "who's",
+            "why",
+            "why's",
+            "will",
+            "with",
+            "won't",
+            //"work",
+            "would",
+            "wouldn't",
+            //"year",
+            "you",
+            "you'd",
+            "you'll",
+            "your",
+            "you're",
+            "your's",
+            "yourself",
+            "yourselves",
+            "you've"
+
+        ] : null;
+
+        /**
+         * @const {Object<string, string>}
+         */
+
+        var stemmer = SUPPORT_BUILTINS ? {
+
+            "ational": "ate",
+            "tional": "tion",
+            "enci": "ence",
+            "anci": "ance",
+            "izer": "ize",
+            "bli": "ble",
+            "alli": "al",
+            "entli": "ent",
+            "eli": "e",
+            "ousli": "ous",
+            "ization": "ize",
+            "ation": "ate",
+            "ator": "ate",
+            "alism": "al",
+            "iveness": "ive",
+            "fulness": "ful",
+            "ousness": "ous",
+            "aliti": "al",
+            "iviti": "ive",
+            "biliti": "ble",
+            "logi": "log",
+            "icate": "ic",
+            "ative": "",
+            "alize": "al",
+            "iciti": "ic",
+            "ical": "ic",
+            "ful": "",
+            "ness": "",
+            "al": "",
+            "ance": "",
+            "ence": "",
+            "er": "",
+            "ic": "",
+            "able": "",
+            "ible": "",
+            "ant": "",
+            "ement": "",
+            "ment": "",
+            "ent": "",
+            "ou": "",
+            "ism": "",
+            "ate": "",
+            "iti": "",
+            "ous": "",
+            "ive": "",
+            "ize": ""
+
+        } : null;
+
+        /**
          * @param {Object<string, number|string|boolean|Object|function(string):string>=} options
          * @constructor
          * @private
@@ -97,28 +380,14 @@
 
             // define functional properties
 
-            Object.defineProperty(this, 'index', {
+            registerProperty(this, 'index', /** @this {FlexSearch} */ function(){
 
-                /**
-                 * @this {FlexSearch}
-                 */
-
-                get: function(){
-
-                    return this._ids;
-                }
+                return this._ids;
             });
 
-            Object.defineProperty(this, 'length', {
+            registerProperty(this, 'length', /** @this {FlexSearch} */ function(){
 
-                /**
-                 * @this {FlexSearch}
-                 */
-
-                get: function(){
-
-                    return Object.keys(this._ids).length;
-                }
+                return Object.keys(this._ids).length;
             });
         }
 
@@ -200,12 +469,16 @@
 
                 // initialize worker
 
-                if(options['worker']){
+                if(SUPPORT_WORKER && options['worker']){
 
                     if(typeof Worker === 'undefined'){
 
                         options['worker'] = false;
-                        options['async'] = true;
+
+                        if(SUPPORT_ASYNC){
+
+                            options['async'] = true;
+                        }
 
                         this._worker = null;
                     }
@@ -272,21 +545,21 @@
                     defaults.mode
                 );
 
-                this.cache = (
+                if(SUPPORT_CACHE) this.cache = (
 
                     options['cache'] ||
                     this.cache ||
                     defaults.cache
                 );
 
-                this.async = (
+                if(SUPPORT_ASYNC) this.async = (
 
                     options['async'] ||
                     this.async ||
                     defaults.async
                 );
 
-                this.worker = (
+                if(SUPPORT_WORKER) this.worker = (
 
                     options['worker'] ||
                     this.worker ||
@@ -307,26 +580,50 @@
                     defaults.depth
                 );
 
-                /** @export */
                 this.encoder = (
 
                     (options['encode'] && global_encoder[options['encode']]) ||
                     (typeof options['encode'] === 'function' ? options['encode'] : this.encoder || false)
-                    //(defaults.encode && global_encoder[defaults.encode]) ||
                 );
 
-                //if(DEBUG){
+                if(SUPPORT_DEBUG){
 
                     this.debug = (
 
                         options['debug'] ||
                         this.debug
                     );
-                //}
+                }
 
                 if(options['matcher']) {
 
                     this.addMatcher(/** @type {Object<string, string>} */ (options['matcher']));
+                }
+
+                if(options['filter']) {
+
+                    this.filter = initFilter(
+
+                        (options['filter'] === true ?
+
+                            filter
+                        :
+                            /** @type {Array<string>} */ (options['filter'])
+
+                        ), this.encoder);
+                }
+
+                if(options['stemmer']) {
+
+                    this.stemmer = initStemmer(
+
+                        (options['stemmer'] === true ?
+
+                            stemmer
+                        :
+                            /** @type {Object<string, string>} */ (options['stemmer'])
+
+                        ), this.encoder);
                 }
             }
 
@@ -368,7 +665,8 @@
             this._timer = null;
             this._last_empty_query = "";
             this._status = true;
-            this._cache = this.cache ?
+
+            if(SUPPORT_CACHE) this._cache = this.cache ?
 
                 (new cache(30 * 1000, 50, true))
             :
@@ -398,6 +696,37 @@
             if(value && this.encoder){
 
                 value = this.encoder.call(global_encoder, value);
+            }
+
+            if(value && this.filter){
+
+                var words = value.split(' ');
+                var final = "";
+
+                for(var i = 0; i < words.length; i++){
+
+                    var word = words[i];
+
+                    if(this.filter[word]){
+
+                        //var length = word.length - 1;
+
+                        // TODO completely filter out words actually breaks the context chain
+                        words[i] = this.filter[word];
+                        //words[i] = word[0] + (length ? word[1] : '');
+                        //words[i] = '~' + word[0];
+                        //words.splice(i, 1);
+                        //i--;
+                        //final += (final ? ' ' : '') + word;
+                    }
+                }
+
+                value = words.join(' '); // final;
+            }
+
+            if(value && this.stemmer){
+
+                value = replace(value, this.stemmer);
             }
 
             return value;
@@ -441,7 +770,7 @@
                 }
                 else{
 
-                    if(this.worker){
+                    if(SUPPORT_WORKER && this.worker){
 
                         if(++this._current_task >= this._worker.length) this._current_task = 0;
 
@@ -457,7 +786,7 @@
                         return this;
                     }
 
-                    if(this.async){
+                    if(SUPPORT_ASYNC && this.async){
 
                         this._stack[id] || (
 
@@ -483,13 +812,20 @@
                         return this;
                     }
 
+                    var tokenizer = this.mode;
+
                     var words = (
 
-                        this.mode === 'ngram' ?
+                        typeof tokenizer === 'function' ?
 
-                            /** @type {!Array<string>} */ (ngram(content))
-                        :
-                            /** @type {string} */ (content).split(regex_split)
+                            tokenizer(content)
+                        :(
+                            tokenizer === 'ngram' ?
+
+                                /** @type {!Array<string>} */ (ngram(content))
+                            :
+                                /** @type {string} */ (content).split(regex_split)
+                        )
                     );
 
                     var dupes = {
@@ -513,7 +849,7 @@
 
                             var length = value.length;
 
-                            switch(this.mode){
+                            switch(tokenizer){
 
                                 case 'reverse':
                                 case 'both':
@@ -663,7 +999,7 @@
 
                 if(this._ids[id]){
 
-                    if(this.worker){
+                    if(SUPPORT_WORKER && this.worker){
 
                         var int = parseInt(this._ids[id], 10);
 
@@ -677,7 +1013,7 @@
                         return this;
                     }
 
-                    if(this.async){
+                    if(SUPPORT_ASYNC && this.async){
 
                         this._stack[id] || (
 
@@ -717,7 +1053,7 @@
 
             if(this._ids[id]){
 
-                if(this.worker){
+                if(SUPPORT_WORKER && this.worker){
 
                     var int = parseInt(this._ids[id], 10);
 
@@ -732,7 +1068,7 @@
                     return this;
                 }
 
-                if(this.async){
+                if(SUPPORT_ASYNC && this.async){
 
                     this._stack[id] || (
 
@@ -823,7 +1159,7 @@
                 limit || (limit = 1000);
             }
 
-            if(this.worker){
+            if(SUPPORT_WORKER && this.worker){
 
                 this._current_callback = callback;
                 this._task_completed = 0;
@@ -870,7 +1206,7 @@
 
             if(!this._status){
 
-                if(this.cache){
+                if(SUPPORT_CACHE && this.cache){
 
                     this._last_empty_query = "";
                     this._cache.reset();
@@ -881,7 +1217,7 @@
 
             // validate cache
 
-            else if(this.cache){
+            else if(SUPPORT_CACHE && this.cache){
 
                 var cache = this._cache.get(query);
 
@@ -909,13 +1245,20 @@
 
             // convert words into single components
 
+            var tokenizer = this.mode;
+
             var words = (
 
-                _query.constructor === Array ?
+                typeof tokenizer === 'function' ?
 
-                    /** @type {!Array<string>} */ (_query)
-                :
-                    /** @type {string} */ (_query).split(regex_split)
+                    tokenizer(_query)
+                :(
+                    tokenizer === 'ngram' ?
+
+                        /** @type {!Array<string>} */ (ngram(_query))
+                    :
+                        /** @type {string} */ (_query).split(regex_split)
+                )
             );
 
             var length = words.length;
@@ -936,7 +1279,7 @@
 
                     // Note: sort words by length only in non-contextual mode
 
-                    words.sort(sort_by_length_down);
+                    words.sort(sortByLengthDown);
                 }
             }
 
@@ -1020,7 +1363,7 @@
 
             // store result to cache
 
-            if(this.cache){
+            if(SUPPORT_CACHE && this.cache){
 
                 this._cache.set(query, result);
             }
@@ -1028,67 +1371,70 @@
             return result;
         };
 
-        /**
-         * @export
-         */
+        if(SUPPORT_DEBUG){
 
-        FlexSearch.prototype.info = function(){
+            /**
+             * @export
+             */
 
-            if(this.worker){
+            FlexSearch.prototype.info = function(){
 
-                for(var i = 0; i < this.worker; i++) this._worker[i].postMessage(i, {
+                if(SUPPORT_WORKER && this.worker){
 
-                    'info': true,
-                    'id': this.id
-                });
+                    for(var i = 0; i < this.worker; i++) this._worker[i].postMessage(i, {
 
-                return;
-            }
+                        'info': true,
+                        'id': this.id
+                    });
 
-            var keys;
-            var length;
-
-            var bytes = 0,
-                words = 0,
-                chars = 0;
-
-            for(var z = 0; z < 10; z++){
-
-                keys = Object.keys(this._map[z]);
-
-                for(var i = 0; i < keys.length; i++){
-
-                    length = this._map[z][keys[i]].length;
-
-                    // Note: 1 char values allocates 1 byte "Map (OneByteInternalizedString)"
-                    bytes += length * 1 + keys[i].length * 2 + 4;
-                    words += length;
-                    chars += keys[i].length * 2;
+                    return;
                 }
-            }
 
-            keys = Object.keys(this._ids);
+                var keys;
+                var length;
 
-            var items = keys.length;
+                var bytes = 0,
+                    words = 0,
+                    chars = 0;
 
-            for(var i = 0; i < items; i++){
+                for(var z = 0; z < 10; z++){
 
-                bytes += keys[i].length * 2 + 2;
-            }
+                    keys = Object.keys(this._map[z]);
 
-            return {
+                    for(var i = 0; i < keys.length; i++){
 
-                'id': this.id,
-                'memory': bytes,
-                'items': items,
-                'sequences': words,
-                'chars': chars,
-                'status': this._status,
-                'cache': this._stack_keys.length,
-                'matcher': global_matcher.length,
-                'worker': this.worker
+                        length = this._map[z][keys[i]].length;
+
+                        // Note: 1 char values allocates 1 byte "Map (OneByteInternalizedString)"
+                        bytes += length * 1 + keys[i].length * 2 + 4;
+                        words += length;
+                        chars += keys[i].length * 2;
+                    }
+                }
+
+                keys = Object.keys(this._ids);
+
+                var items = keys.length;
+
+                for(var i = 0; i < items; i++){
+
+                    bytes += keys[i].length * 2 + 2;
+                }
+
+                return {
+
+                    'id': this.id,
+                    'memory': bytes,
+                    'items': items,
+                    'sequences': words,
+                    'chars': chars,
+                    'status': this._status,
+                    'cache': this._stack_keys.length,
+                    'matcher': global_matcher.length,
+                    'worker': this.worker
+                };
             };
-        };
+        }
 
         /**
          * @export
@@ -1113,7 +1459,7 @@
 
             // cleanup cache
 
-            if(this.cache){
+            if(SUPPORT_CACHE && this.cache){
 
                 this._cache.reset();
             }
@@ -1128,16 +1474,39 @@
             return this;
         };
 
+        /** @const */
+
+        var global_encoder_balanced = (function(){
+
+            var regex_whitespace = regex('\\s\\s+'),
+                regex_strip = regex('[^a-z0-9 ]'),
+                regex_space = regex('[-\/]'),
+                regex_vowel = regex('[aeiouy]');
+
+            /** @const {Array} */
+            var regex_pairs = [
+
+                regex_space, ' ',
+                regex_strip, '',
+                regex_whitespace, ' ',
+                regex_vowel, ''
+            ];
+
+            return function(value){
+
+                return collapseRepeatingChars(replace(value.toLowerCase(), regex_pairs));
+            }
+        })();
+
         /**
          * Phonetic Encoders
-         * @dict
-         * @enum {Function}
+         * @dict {Function}
          * @private
          * @const
          * @final
          */
 
-        var global_encoder = {
+        var global_encoder = SUPPORT_BUILTINS ? {
 
             // case insensitive search
 
@@ -1152,7 +1521,7 @@
 
                 var regex_whitespace = regex('\\s\\s+'),
                     regex_strip = regex('[^a-z0-9 ]'),
-                    regex_split = regex('[-\/]'),
+                    regex_space = regex('[-\/]'),
                     regex_a = regex('[àáâãäå]'),
                     regex_e = regex('[èéêë]'),
                     regex_i = regex('[ìíîï]'),
@@ -1161,7 +1530,8 @@
                     regex_y = regex('[ýŷÿ]'),
                     regex_n = regex('ñ'),
                     regex_c = regex('ç'),
-                    regex_s = regex('ß');
+                    regex_s = regex('ß'),
+                    regex_and = regex(' & ');
 
                 /** @const {Array} */
                 var regex_pairs = [
@@ -1175,7 +1545,8 @@
                     regex_n, 'n',
                     regex_c, 'c',
                     regex_s, 's',
-                    regex_split, ' ',
+                    regex_and, ' and ',
+                    regex_space, ' ',
                     regex_strip, '',
                     regex_whitespace, ' '
                 ];
@@ -1283,7 +1654,7 @@
                     soundex_f = regex('[vw]');
 
                 /** @const {RegExp} */
-                var regex_vowel = regex('[aeiouy]'); // [aeiouy]
+                var regex_vowel = regex('[aeiouy]');
 
                 /** @const {Array} */
                 var regex_pairs = [
@@ -1319,7 +1690,7 @@
                             if(current.length > 1){
 
                                 // remove all vowels after 2nd char
-                                str[i] = current[0] + replace(current.substring(1), regex_pairs)
+                                str[i] = current[0] + replace(current.substring(1), regex_pairs);
                             }
                         }
 
@@ -1329,7 +1700,9 @@
 
                     return str;
                 };
-            })()
+            })(),
+
+            'balanced': global_encoder_balanced
 
             // TODO: provide some common encoder plugins
             // soundex
@@ -1339,11 +1712,22 @@
             // levinshtein
             // hamming
             // matchrating
+
+        } : {
+
+            // case insensitive search
+
+            'icase': function(value){
+
+                return value.toLowerCase();
+            },
+
+            'balanced': global_encoder_balanced
         };
 
         // Xone Async Handler Fallback
 
-        var queue = (function(){
+        var queue = SUPPORT_ASYNC ? (function(){
 
             var stack = {};
 
@@ -1361,11 +1745,12 @@
                     stack[id] = setTimeout(fn, delay)
                 );
             };
-        })();
+
+        })() : null;
 
         // Xone Flexi-Cache Handler Fallback
 
-        var cache = (function(){
+        var cache = SUPPORT_CACHE ? (function(){
 
             /** @this {Cache} */
             function Cache(){
@@ -1392,12 +1777,23 @@
             };
 
             return Cache;
-        })();
+
+        })() : null;
 
         return FlexSearch;
 
         // ---------------------------------------------------------
         // Helpers
+
+        function registerProperty(obj, key, fn){
+
+            // define functional properties
+
+            Object.defineProperty(obj, key, {
+
+                get: fn
+            });
+        }
 
         /**
          * @param {!string} str
@@ -1629,12 +2025,64 @@
         }
 
         /**
+         * @param {Array<string>} words
+         * @param encoder
+         * @returns {Object<string, string>}
+         */
+
+        function initFilter(words, encoder){
+
+            var final = {};
+
+            if(stemmer){
+
+                for(var i = 0; i < words.length; i++){
+
+                    var word = encoder ? encoder.call(global_encoder, words[i]) : words[i];
+
+                    final[word] = String.fromCharCode((65000 - words.length) + i);
+                }
+            }
+
+            return final;
+        }
+
+        /**
+         * @param {Object<string, string>} stemmer
+         * @param encoder
+         * @returns {Array}
+         */
+
+        function initStemmer(stemmer, encoder){
+
+            var final = [];
+
+            if(stemmer){
+
+                var count = 0;
+
+                for(var key in stemmer){
+
+                    if(stemmer.hasOwnProperty(key)){
+
+                        var tmp = encoder ? encoder.call(global_encoder, key) : key;
+
+                        final[count++] = regex('(?=.{' + (tmp.length + 3) + ',})' + tmp + '$');
+                        final[count++] = encoder ? encoder.call(global_encoder, stemmer[key]) : stemmer[key];
+                    }
+                }
+            }
+
+            return final;
+        }
+
+        /**
          * @param {string} a
          * @param {string} b
          * @returns {number}
          */
 
-        function sort_by_length_down(a, b){
+        function sortByLengthDown(a, b){
 
             var diff = a.length - b.length;
 
@@ -1659,7 +2107,7 @@
          * @returns {number}
          */
 
-        function sort_by_length_up(a, b){
+        function sortByLengthUp(a, b){
 
             var diff = a.length - b.length;
 
@@ -1679,7 +2127,6 @@
         }
 
         /**
-         * Fastest intersect method for a set of unsorted arrays so far
          * @param {!Array<Array<number|string>>} arrays
          * @param {number=} limit
          * @returns {Array}
@@ -1694,7 +2141,7 @@
 
                 // pre-sort arrays by length up
 
-                arrays.sort(sort_by_length_up);
+                arrays.sort(sortByLengthUp);
 
                 // fill initial map
 
@@ -2023,13 +2470,13 @@
 
                         callback(data['id'], data['content'], data['result'], data['limit']);
                     }
-                    //else{
+                    else{
 
-                        //if(DEBUG && options['debug']){
+                        if(SUPPORT_DEBUG && options['debug']){
 
-                            //console.log(data);
-                        //}
-                    //}
+                            console.log(data);
+                        }
+                    }
                 },
 
                 // cores:
@@ -2052,7 +2499,7 @@
     })(
         // Xone Worker Handler Fallback
 
-        (function register_worker(){
+        SUPPORT_WORKER ? (function register_worker(){
 
             var worker_stack = {};
             var inline_is_supported = !!((typeof Blob !== 'undefined') && (typeof URL !== 'undefined') && URL.createObjectURL);
@@ -2100,10 +2547,10 @@
                     worker_stack[name][_core] = new Worker(worker_payload);
                     worker_stack[name][_core]['onmessage'] = _callback;
 
-                    //if(DEBUG){
+                    if(SUPPORT_DEBUG){
 
-                        //console.log('Register Worker: ' + name + '@' + _core);
-                    //}
+                        console.log('Register Worker: ' + name + '@' + _core);
+                    }
 
                     return {
 
@@ -2114,7 +2561,7 @@
                     };
                 }
             );
-        })()
+        })() : false
 
     ), this);
 
@@ -2158,5 +2605,3 @@
     }
 
 }).call(this);
-
-// --define='DEBUG=false'

@@ -1,6 +1,6 @@
 <p align="center">
     <br>
-    <img src="http://nextapps.de/img/flexsearch.svg" alt="Search Library" width="50%">
+    <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/flexsearch.svg" alt="Search Library" width="50%">
     <br><br>
     <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
     <img src="https://img.shields.io/badge/status-BETA-orange.svg">
@@ -17,6 +17,8 @@
 When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
 It also has the __most memory-efficient index__. Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice. 
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates on the index as well as queries through dedicated threads. 
+
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#examples">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
 
 Comparison:
 - <a href="https://jsperf.com/compare-search-libraries" target="_blank">Library Benchmarks</a>
@@ -40,13 +42,26 @@ All Features:
     <li>Multiple Words</li>
     <li><a href="#phonetic">Phonetic Search</a></li>
     <li>Relevance-based Scoring</li>
-    <li>Contextual Indexes</li>
+    <li><a href="contextual">Contextual Indexes</a></li>
     <li>Limit Results</li>
-    <li>Caching</li>
-    <li>Asynchronous Mode</li>
-    <li>Custom Matchers</li>
-    <li>Custom Encoders</li>
+    <li>Supports Caching</li>
+    <li>Asynchronous Processing</li>
+    <li>Customizable: Matcher, Encoder, Tokenizer, Stemmer, Stopword-Filter</li>
 </ul>
+
+This features are not available in the 50% smaller <a href="flexsearch.light.js">light version</a>:
+
+- WebWorker
+- Async handler
+- Cache handler
+- Built-in encoders except 'balanced' (you can still pass in customs)
+- Built-in stemmers and stopword filter (you can still pass in customs)
+- Debug logging
+- _index.info()_ method
+
+The light version is just available as compiled version (flexsearch.light.js).
+
+> You can also make <a href="#builds">Custom Builds</a> pretty simple
 
 <a name="contextual"></a>
 #### Contextual Search
@@ -57,7 +72,7 @@ Imagine you add a text block of some sentences to an index ID. Assuming the quer
 In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
 
 <p align="center">
-    <img src="https://rawgithub.com/nextapps-de/flexsearch/master/contextual_index.svg">
+    <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/contextual_index.svg">
 </p>
 
 __Note:__ This feature is actually not enabled by default.
@@ -93,7 +108,7 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
     <tr>
         <td>Usecase</td>
         <td><ul><li>Limited content</li><li>Use when existing items of the index needs to be updated continously (update, remove)</li><li>Supports pagination</li></ul></td>
-        <td><ul><li>Fastest possible search</li><li>Existing items of the index does not need to be updated continously (update, remove)</li><li>Max out memory capabilities</li></ul></td>
+        <td><ul><li>Fastest possible search</li><li>Use when existing items of the index does not need to be updated continously (update, remove)</li><li>Max out memory capabilities</li><li>Enhanced relevance scoring</li></ul></td>
     </tr>
     <tr></tr>
     <tr>
@@ -121,6 +136,7 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
     </tr>
 </table>
 
+<a name="installation"></a>
 ## Installation
 
 ##### HTML / Javascript
@@ -163,6 +179,7 @@ __AMD__
 var FlexSearch = require("./flexsearch.js");
 ```
 
+<a name="api"></a>
 ## API Overview
 
 Global methods:
@@ -381,7 +398,21 @@ FlexSearch.register('extended', function(str){
     return str;
 });
 ```
+<a name="flexsearch.tokenizer"></a>
+#### Add custom tokenizer
 
+Define a private custom tokenizer during creation/initialization:
+```js
+var index = new FlexSearch({
+
+    mode: function(str){
+    
+        // split string into components, e.g.:
+        
+        return str.split(/ -\//g);
+    }
+});
+```
 <a name="index.info"></a>
 #### Get info
 
@@ -473,21 +504,23 @@ FlexSearch ist highly customizable. Make use of the the right options can really
             "foward"<br>
             "reverse"<br>
             "ngram"<br>
-            "full"
+            "full"<br>
+            function()
         </td>
         <td vertical-align="top">
-            The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br>
+            The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br><br>Choose one of the <a href="#tokenizer">built-ins</a> or pass a <a href="#flexsearch.tokenizer">custom tokenizer function</a>.<br>
         </td>
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">encode<br><br><br><br><br><br></td>
+        <td align="top">encode<br><br><br><br><br><br><br></td>
         <td>
             false<br>
             "icase"<br>
             "simple"<br>
             "advanced"<br>
             "extra"<br>
+            "balanced"<br>
             function()
         </td>
         <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
@@ -574,7 +607,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
         <td><b>"ngram"</b> (default)</td>
         <td>index words partially through phonetic n-grams</td>
         <td><b>foo</b>bar<br>foo<b>bar</b></td>
-        <td>* n / 3.5</td>
+        <td>* n / 3</td>
     </tr>
     <tr></tr>
     <tr>
@@ -766,7 +799,7 @@ Encoding effects the required memory also as query time and phonetic matches. Tr
     </tr>
 </table>
 
-<a name="memory" id="memory"></a>
+<a name="memory"></a>
 ## Memory Usage
 
 The required memory for the index depends on several options:
@@ -812,7 +845,7 @@ The required memory for the index depends on several options:
     <tr></tr>
     <tr>
         <td>"ngram" (default)</td>
-        <td>* n / 3.5</td>
+        <td>* n / 3</td>
     </tr>
     <tr></tr>
     <tr>
@@ -839,6 +872,7 @@ The required memory for the index depends on several options:
     </tr>
 </table>
 
+<a name="examples"></a>
 ## Example Options
 
 Memory-optimized:
@@ -871,18 +905,51 @@ Matching-tolerant:
 }
 ```
 
-Balanced:
+Well-balanced:
 
 ```js
 {
-    encode: "simple",
+    encode: "extra",
     mode: "ngram",
-    threshold: 3,
+    threshold: 4,
     depth: 3
 }
 ```
 
+<a name="builds"></a>
+## Custom Builds
+
+Default Build:
+```bash
+npm run build
+```
+
+Light Build:
+```bash
+npm run build-light
+```
+
+Custom Build:
+```bash
+npm run build-custom SUPPORT_WORKER=true SUPPORT_ASYNC=true
+```
+
+Supported flags:
+
+- SUPPORT_DEBUG
+- SUPPORT_WORKER
+- SUPPORT_CACHE
+- SUPPORT_ASYNC
+- SUPPORT_BUILTINS (english stemmer and filter)
+
+Alternatively you can also use:
+```bash
+node compile SUPPORT_WORKER=true
+```
+
+The custom build was saved to flexsearch.custom.js
+
 ---
 
-Author FlexSearch: Thomas Wilkerling<br>
-License: <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">Apache 2.0 License</a><br>
+Copyright 2017-2018 Thomas Wilkerling<br>
+Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">Apache 2.0 License</a><br>

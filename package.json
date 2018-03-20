@@ -1,23 +1,26 @@
 {
   "name": "flexsearch",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "World's fastest and most memory efficient full text search library.",
   "keywords": [],
   "bugs": {
     "url": "https://github.com/nextapps-de/flexsearch/issues",
     "email": "info@nextapps.de"
   },
-  "main": "flexsearch.js",
-  "preferGlobal": true,
+  "main": "flexsearch.min.js",
+  "preferGlobal": false,
   "bin": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/nextapps-de/flexsearch.git"
   },
   "scripts": {
-    "build": "java -jar -Xms256m -Xmx4096m node_modules/google-closure-compiler/compiler.jar --compilation_level=ADVANCED_OPTIMIZATIONS --use_types_for_optimization=true --new_type_inf=true --jscomp_warning=newCheckTypes --generate_exports=true --export_local_property_definitions=true --language_in=ECMASCRIPT5_STRICT --language_out=ECMASCRIPT5_STRICT --process_closure_primitives=true --summary_detail_level=3 --warning_level=VERBOSE --emit_use_strict=true --output_manifest=log/manifest.log --output_module_dependencies=log/module_dependencies.log --property_renaming_report=log/renaming_report.log --js='flexsearch.js' --js_output_file='flexsearch.min.js' && echo Build Complete. && exit 0",
-    "release": "npm version patch && npm run build && npm publish",
+    "build": "node compile RELEASE=min SUPPORT_DEBUG=true SUPPORT_WORKER=true SUPPORT_BUILTINS=true SUPPORT_CACHE=true SUPPORT_ASYNC=true && exit 0",
+    "build-light": "node compile RELEASE=light SUPPORT_DEBUG=false SUPPORT_WORKER=false SUPPORT_BUILTINS=false SUPPORT_CACHE=false SUPPORT_ASYNC=false && exit 0",
+    "build-custom": "node compile",
+    "build-all": "npm run build && npm run build-light",
     "test-production": "nyc --reporter=html --reporter=text mocha --timeout=3000 test --exit",
+    "test-light": "nyc --reporter=html --reporter=text mocha --timeout=3000 test/ --exit",
     "test-develop": "nyc --reporter=html --reporter=text mocha --timeout=3000 --exit",
     "test-browser": "mocha-phantomjs test/index.html",
     "test": "npm run test-develop && npm run test-production && npm run test-browser",
