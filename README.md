@@ -21,8 +21,9 @@ FlexSearch also provides you a non-blocking asynchronous processing model as wel
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
 
 Comparison:
-- <a href="https://jsperf.com/compare-search-libraries" target="_blank">Library Benchmarks</a>
+- <a href="https://jsperf.com/compare-search-libraries" target="_blank">Library Query Benchmarks</a>
 - <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Library Relevance Scoring</a>
+- <a href="#consumption">Library Memory Consumption</a>
 
 Supported Platforms:
 - Browser
@@ -83,6 +84,7 @@ Workers get its own dedicated memory. Especially for larger indexes, web worker 
 
 __Note:__ It is slightly faster to use no web worker when the index or query isn't too big (index < 500,000 words, query < 25 words).
 
+<!--
 #### Compare BulkSearch vs. FlexSearch
 
 <table>
@@ -134,6 +136,7 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
         <td>Yes</td>
     </tr>
 </table>
+-->
 
 <a name="installation"></a>
 ## Installation
@@ -894,17 +897,35 @@ The required memory for the index depends on several options:
     </tr>
 </table>
 
+<a name="consumption"></a>
+#### Compare Memory Consumption
+
+The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
+
+<br>
+<img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/memory-comparison.svg">
+
 <a name="profiles"></a>
 ## Built-in Profiles
 
 You can pass a built-in profile during creation/initialization. They have these following settings:
+
+Standard profile: __"default"__
+```js
+{
+    encode: "icase",
+    mode: "forward"
+}
+```
 
 Memory-optimized profile: __"memory"__
 ```js
 {
     encode: "extra",
     mode: "strict",
-    threshold: 7
+    threshold: 7,
+    stemmer: true,
+    filter: true
 }
 ```
 
