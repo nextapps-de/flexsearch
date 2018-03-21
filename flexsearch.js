@@ -59,7 +59,6 @@ var SUPPORT_ASYNC = true;
         };
 
         /**
-         * @struct
          * @private
          * @const
          * @final
@@ -101,6 +100,7 @@ var SUPPORT_ASYNC = true;
 
             "fastest": {
                 encode: "icase",
+                mode: "strict",
                 threshold: 9,
                 depth: 1
             }
@@ -412,12 +412,10 @@ var SUPPORT_ASYNC = true;
 
             if(typeof options === 'string'){
 
-                options = profiles[options] || defaults;
+                options = profiles[options];
             }
-            else{
 
-                options || (options = defaults);
-            }
+            options || (options = defaults);
 
             // generate UID
 
@@ -517,7 +515,8 @@ var SUPPORT_ASYNC = true;
 
             if(options){
 
-                var custom;
+                var custom = options['profile'];
+                var profile = custom ? profiles[custom] : {};
 
                 // initialize worker
 
@@ -588,34 +587,12 @@ var SUPPORT_ASYNC = true;
                     }
                 }
 
-                // apply profile options
-
-                if((custom = options['profile'])) {
-
-                    this.profile = custom || 'custom';
-
-                    custom = profiles[custom];
-
-                    if(custom) {
-
-                        for(var option in custom){
-
-                            if(custom.hasOwnProperty(option)){
-
-                                if(typeof options[option] === 'undefined'){
-
-                                    options[option] = custom[option];
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // apply custom options
 
                 this.mode = (
 
                     options['mode'] ||
+                    profile.mode ||
                     this.mode ||
                     defaults.mode
                 );
@@ -644,6 +621,7 @@ var SUPPORT_ASYNC = true;
                 this.threshold = (
 
                     options['threshold'] ||
+                    profile.threshold ||
                     this.threshold ||
                     defaults.threshold
                 );
@@ -651,11 +629,12 @@ var SUPPORT_ASYNC = true;
                 this.depth = (
 
                     options['depth'] ||
+                    profile.depth ||
                     this.depth ||
                     defaults.depth
                 );
 
-                custom = options['encode'];
+                custom = options['encode'] || profile.encode;
 
                 this.encoder = (
 
@@ -1224,7 +1203,7 @@ var SUPPORT_ASYNC = true;
                 query = query['query'];
             }
 
-            threshold || (threshold = 0);
+            threshold = (threshold || this.threshold || 0) | 0;
 
             if(typeof limit === 'function'){
 
@@ -1916,7 +1895,7 @@ var SUPPORT_ASYNC = true;
 
                 if(score >= threshold){
 
-                    var arr = map[score];
+                    var arr = map[(score + 0.5) | 0];
                         arr = arr[tmp] || (arr[tmp] = []);
                         arr[arr.length] = id;
                 }
@@ -1938,7 +1917,7 @@ var SUPPORT_ASYNC = true;
 
             return (
 
-                ((3 / ref.length * (ref.length - context_index)) + (6 / partial_index) + 0.5) | 0
+                (3 / ref.length * (ref.length - context_index)) + (6 / partial_index)
             );
         }
 
