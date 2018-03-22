@@ -177,18 +177,19 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
         </tr>
     </table>
 </div>
-<br>
-<b>Red:</b> No results.<br>
-<b>Yellow:</b> Most relevant result is not on the first place.<br>
-<b>Green:</b> Most relevant result was was successfully found on the first place.<br><br>
-<b>Note:</b> Open console and type e.g. <i>data[493]</i>
+<hr>
+<div style="line-height: 2em">
+    <div style="display:inline-block; width:16px; height:16px; background: #f00"></div> Either no results or relevant content was not included in results.<br>
+    <div style="display:inline-block; width:16px; height:16px; background: orange"></div> Most relevant result was not found in the first place.<br>
+    <div style="display:inline-block; width:16px; height:16px; background: #0a0"></div> Most relevant result was successfully found in the first place.<br>
+    <b>Note:</b> Open console and type e.g. <i>data[493]</i>
+</div>
 <script>
 
     var data = [];
 
     setTimeout(function(){
 
-        var start = 0;
         var new_data = text_data.split('. ');
         var tmp = '';
 
@@ -206,7 +207,23 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             }
         }
 
-        var bulksearch = new BulkSearch({
+        tmp = null;
+        new_data = null;
+        text_data = null;
+
+        var bulksearch;
+        var flexsearch;
+        var elasticsearch;
+        var lunrsearch;
+        var wade;
+        var fuse;
+        var jssearch;
+        var jsii;
+        var bm25;
+
+        // -----------------------------------------------------------
+
+        bulksearch = new BulkSearch({
             type: 'short', // this type specifies the maximum bitlength of assigned IDs!
             encode: 'advanced',
             multi: true,
@@ -222,7 +239,9 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
         console.timeEnd('bulksearch');
 
-        var flexsearch = new FlexSearch({
+        // -----------------------------------------------------------
+
+        flexsearch = new FlexSearch({
             encode: 'extra',
             mode: 'strict',
             threshold: 5,
@@ -242,7 +261,9 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
         console.timeEnd('flexsearch');
 
-        var elasticsearch = elasticlunr(function () {
+        // -----------------------------------------------------------
+
+        elasticsearch = elasticlunr(function () {
             this.setRef('id');
             this.addField('content');
         });
@@ -255,9 +276,11 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
         console.timeEnd('elasticsearch');
 
+        // -----------------------------------------------------------
+
         console.time('lunr');
 
-        var lunrsearch = lunr(function(){
+        lunrsearch = lunr(function(){
             this.ref('id');
             this.field('content');
             for(var i = 0; i < data.length; i++){
@@ -267,9 +290,8 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
         console.timeEnd('lunr');
 
-        console.time('wade');
-        var wade = Wade(data.slice(0));
-        console.timeEnd('wade');
+        // -----------------------------------------------------------
+
         var wadesearch = function(query){
             return wade(query).sort(sort_by_score_down);
         };
@@ -278,6 +300,12 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             var sum = a.score - b.score;
             return sum < 0 ? 1 : sum > 0 ? -1 : 0;
         }
+
+        console.time('wade');
+        wade = Wade(data.slice(0));
+        console.timeEnd('wade');
+
+        // -----------------------------------------------------------
 
         var payload = [];
 
@@ -288,18 +316,33 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
         // Note: fuse adds async?
         console.time('fuse');
 
-        var fuse = new Fuse(payload.slice(0), {
-            keys: ['id', 'content'],
-            id: 'id'
+        fuse = new Fuse(payload.slice(0), {
+            keys: ['content'],
+            id: 'id',
+            shouldSort: true,
+            threshold: 0.6,
+            location: 0,
+            distance: 100,
+            findAllMatches: true,
+            maxPatternLength: 32,
+            minMatchCharLength: 1
         });
 
         console.timeEnd('fuse');
 
-        var jssearch = new JsSearch.Search('id');
+        // payload = null;
+        // data = null;
+        // return;
+
+        // -----------------------------------------------------------
+
+        jssearch = new JsSearch.Search('id');
         jssearch.addIndex('content');
         console.time('jssearch');
         jssearch.addDocuments(payload.slice(0));
         console.timeEnd('jssearch');
+
+        // -----------------------------------------------------------
 
         var payload = [];
 
@@ -307,37 +350,38 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
             payload[i] = {id: i, text: data[i]};
         }
 
-        var jsii = new JSii();
+        jsii = new JSii();
 
         console.time('jsii');
         jsii.feedDocs(payload.slice(0));
         console.timeEnd('jsii');
 
-        var bm25 = new BM25();
+        // -----------------------------------------------------------
+
+        bm25 = new BM25();
 
         console.time('bm25');
         for(var i = 0; i < data.length; i++){
             bm25.addDocument({id: i, body: data[i]});
         }
-        console.timeEnd('bm25');
-
         bm25.updateIdf();
+        console.timeEnd('bm25');
 
         payload = null;
 
-        // ---------------------------------------
+        // -----------------------------------------------------------
 
-        do_test('test-1', 'without breach of modesty', '493');
-        do_test('test-2', 'went softly stream', '446');
-        do_test('test-3', 'princes of the ambition', '72');
-        do_test('test-4', 'five-thousand leagues', '2');
-        do_test('test-5', 'i already observed', '458');
-        do_test('test-6', 'let a of his', '50');
-        do_test('test-7', 'take that to the rocks', '175');
-        do_test('test-8', 'bignes of splaknuk', '146');
-        do_test('test-9', 'matematikal musikal instruments', '267');
-        do_test('test-10', 'matical sical strument', '267');
-        do_test('test-11', 'lalkon the camberlayhn', '99');
+        do_test('test-1', 'without breach of modesty', 493);
+        do_test('test-2', 'went softly stream', 446);
+        do_test('test-3', 'princes of the ambition', 72);
+        do_test('test-4', 'five-thousand leagues', 2);
+        do_test('test-5', 'i already observed', 458);
+        do_test('test-6', 'let a of his', 50);
+        do_test('test-7', 'take that to the rocks', 175);
+        do_test('test-8', 'bignes of splaknuk', 146);
+        do_test('test-9', 'matematikal musikal instruments', 267);
+        do_test('test-10', 'matical sical strument', 267);
+        do_test('test-11', 'lalkon the camberlayhn', 99);
 
         // ---------------------------------------
 
@@ -345,36 +389,68 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
             var nodes = document.getElementById(id).getElementsByTagName('td');
 
-            nodes[1].innerHTML = flexsearch.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[2].innerHTML = bulksearch.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[3].innerHTML = elasticsearch.search(query).slice(0, 1).map(function(val){return val.ref}).join('<br>') || '-';
-            nodes[4].innerHTML = lunrsearch.search(query).slice(0, 1).map(function(val){return val.ref}).join('<br>') || '-';
-            nodes[5].innerHTML = wadesearch(query).slice(0, 1).map(function(val){return val.index}).join('<br>') || '-';
-            nodes[6].innerHTML = fuse.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[7].innerHTML = jssearch.search(query).slice(0, 1).map(function(val){return val.id}).join('<br>') || '-';
-            nodes[8].innerHTML = jsii.search(query).docs.slice(0, 1).map(function(val){return val.id}).join('<br>') || '-';
-            nodes[9].innerHTML = bm25.search(query).slice(0, 1).map(function(val){return val.id}).join('<br>') || '-';
-
             for(var i = 1; i < nodes.length; i++){
 
-                if(nodes[i].innerHTML === '-'){
+                var results;
 
-                    nodes[i].style.backgroundColor = '#f00';
+                switch(i){
+
+                    case 1:
+                        results = flexsearch.search(query);
+                        break;
+
+                    case 2:
+                        results = bulksearch.search(query);
+                        break;
+
+                    case 3:
+                        results = elasticsearch.search(query).map(function(val){return val.ref});
+                        break;
+
+                    case 4:
+                        results = lunrsearch.search(query).map(function(val){return val.ref});
+                        break;
+
+                    case 5:
+                        results = wadesearch(query).map(function(val){return val.index});
+                        break;
+
+                    case 6:
+                        results = fuse.search(query);
+                        break;
+
+                    case 7:
+                        results = jssearch.search(query).map(function(val){return val.id});
+                        break;
+
+                    case 8:
+                        results = jsii.search(query).docs.map(function(val){return val.id});
+                        break;
+
+                    case 9:
+                        results = bm25.search(query).map(function(val){return val.id});
+                        break;
                 }
-                else if(nodes[i].innerHTML === ref){
+
+                if((results[0] === ref) || (results[0] === String(ref))){
 
                     nodes[i].style.backgroundColor = '#0a0';
+                }
+                else if(!results.length || ((results.indexOf(ref) === -1) && (results.indexOf(String(ref)) === -1))){
+
+                    nodes[i].style.backgroundColor = '#f00';
                 }
                 else{
 
                     nodes[i].style.backgroundColor = 'orange';
                 }
 
+                nodes[i].innerHTML = results[0] || '-';
                 nodes[i].style.color = '#fff';
             }
         }
 
-    }, 50);
+    }, 100);
 
 </script>
 </body>

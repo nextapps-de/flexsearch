@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.32
+ * @preserve FlexSearch v0.2.4
  * Copyright 2017-2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -35,20 +35,10 @@ var SUPPORT_ASYNC = true;
 
         var defaults = {
 
-            // use on of built-in functions
-            // or pass custom encoding algorithm
             encode: 'icase',
-
-            // type of information
-            mode: 'forward',
-
-            // use flexible cache (scales automatically)
+            mode: 'ngram',
             cache: false,
-
-            // use flexible cache (scales automatically)
             async: false,
-
-            // use flexible cache (scales automatically)
             worker: false,
 
             // minimum scoring (0 - 9)
@@ -60,6 +50,7 @@ var SUPPORT_ASYNC = true;
 
         /**
          * @private
+         * @enum {Object}
          * @const
          * @final
          */
@@ -653,7 +644,11 @@ var SUPPORT_ASYNC = true;
 
                 if(custom = options['matcher']) {
 
-                    this.addMatcher(/** @type {Object<string, string>} */ (custom));
+                    this.addMatcher(
+
+                        /** @type {Object<string, string>} */
+                        (custom)
+                    );
                 }
 
                 if(SUPPORT_BUILTINS && (custom = options['filter'])) {
@@ -664,7 +659,8 @@ var SUPPORT_ASYNC = true;
 
                             filter
                         :
-                            /** @type {Array<string>} */ (custom)
+                            /** @type {Array<string>} */
+                            (custom)
 
                     ), this.encoder);
                 }
@@ -677,28 +673,22 @@ var SUPPORT_ASYNC = true;
 
                             stemmer
                         :
-                            /** @type {Object<string, string>} */ (custom)
+                            /** @type {Object<string, string>} */
+                            (custom)
 
                     ), this.encoder);
                 }
             }
 
-            // initialize index
+            // initialize primary index
 
             this._map = [
 
-                {/* 0 */},
-                {/* 1 */},
-                {/* 2 */},
-                {/* 3 */},
-                {/* 4 */},
-                {/* 5 */},
-                {/* 6 */},
-                {/* 7 */},
-                {/* 8 */},
-                {/* 9 */},
-                {/* ctx */}
+                {/* 0 */}, {/* 1 */}, {/* 2 */}, {/* 3 */}, {/* 4 */},
+                {/* 5 */}, {/* 6 */}, {/* 7 */}, {/* 8 */}, {/* 9 */}
             ];
+
+            this._ctx = {};
 
             this._ids = {};
 
@@ -757,18 +747,19 @@ var SUPPORT_ASYNC = true;
             if(value && this.filter){
 
                 var words = value.split(' ');
-                var final = "";
+                //var final = "";
 
                 for(var i = 0; i < words.length; i++){
 
                     var word = words[i];
+                    var filter = this.filter[word];
 
-                    if(this.filter[word]){
+                    if(filter){
 
                         //var length = word.length - 1;
 
                         // TODO completely filter out words actually breaks the context chain
-                        words[i] = this.filter[word];
+                        words[i] = filter;
                         //words[i] = word[0] + (length ? word[1] : '');
                         //words[i] = '~' + word[0];
                         //words.splice(i, 1);
@@ -789,18 +780,20 @@ var SUPPORT_ASYNC = true;
         };
 
         /**
-         * @param {Object<string, string>} matcher
+         * @param {Object<string, string>} custom
          * @export
          */
 
-        FlexSearch.prototype.addMatcher = function(matcher){
+        FlexSearch.prototype.addMatcher = function(custom){
 
-            for(var key in matcher){
+            var matcher = this._matcher;
 
-                if(matcher.hasOwnProperty(key)){
+            for(var key in custom){
 
-                    this._matcher[this._matcher.length] = regex(key);
-                    this._matcher[this._matcher.length] = matcher[key];
+                if(custom.hasOwnProperty(key)){
+
+                    matcher[matcher.length] = regex(key);
+                    matcher[matcher.length] = custom[key];
                 }
             }
 
@@ -810,17 +803,18 @@ var SUPPORT_ASYNC = true;
         /**
          * @param {?number|string} id
          * @param {?string} content
+         * @param {boolean=} _skip_update
          * @this {FlexSearch}
          * @export
          */
 
-        FlexSearch.prototype.add = function(id, content){
+        FlexSearch.prototype.add = function(id, content, _skip_update){
 
             if((typeof content === 'string') && content && (id || (id === 0))){
 
                 // check if index ID already exist
 
-                if(this._ids[id]){
+                if(this._ids[id] && !_skip_update){
 
                     this.update(id, content);
                 }
@@ -878,9 +872,11 @@ var SUPPORT_ASYNC = true;
                         :(
                             tokenizer === 'ngram' ?
 
-                                /** @type {!Array<string>} */ (ngram(content))
+                                /** @type {!Array<string>} */
+                                (ngram(content))
                             :
-                                /** @type {string} */ (content).split(regex_split)
+                                /** @type {string} */
+                                (content).split(regex_split)
                         )
                     );
 
@@ -922,7 +918,8 @@ var SUPPORT_ASYNC = true;
                                             dupes,
                                             tmp,
                                             id,
-                                            /** @type {string} */ (content),
+                                            /** @type {string} */
+                                            (content),
                                             threshold
                                         );
                                     }
@@ -943,7 +940,8 @@ var SUPPORT_ASYNC = true;
                                             dupes,
                                             tmp,
                                             id,
-                                            /** @type {string} */ (content),
+                                            /** @type {string} */
+                                            (content),
                                             threshold
                                         );
                                     }
@@ -966,7 +964,8 @@ var SUPPORT_ASYNC = true;
                                                 dupes,
                                                 tmp,
                                                 id,
-                                                /** @type {string} */ (content),
+                                                /** @type {string} */
+                                                (content),
                                                 threshold
                                             );
                                         }
@@ -984,37 +983,27 @@ var SUPPORT_ASYNC = true;
                                         dupes,
                                         value,
                                         id,
-                                        /** @type {string} */ (content),
+                                        /** @type {string} */
+                                        (content),
                                         threshold
                                     );
 
                                     if(depth && (word_length > 1) && (score >= threshold)){
 
-                                        var ctx_map = map[10];
                                         var ctx_dupes = dupes['_ctx'][value] || (dupes['_ctx'][value] = {});
-                                        var ctx_tmp = ctx_map[value] || (ctx_map[value] = [
+                                        var ctx_tmp = this._ctx[value] || (this._ctx[value] = [
 
-                                            {/* 0 */},
-                                            {/* 1 */},
-                                            {/* 2 */},
-                                            {/* 3 */},
-                                            {/* 4 */},
-                                            {/* 5 */},
-                                            {/* 6 */},
-                                            {/* 7 */},
-                                            {/* 8 */},
-                                            {/* 9 */}
-                                            // TODO test concept of deep trees instead of flat ones
-                                            //{/* ctx */}
+                                            {/* 0 */}, {/* 1 */}, {/* 2 */}, {/* 3 */}, {/* 4 */},
+                                            {/* 5 */}, {/* 6 */}, {/* 7 */}, {/* 8 */}, {/* 9 */}
                                         ]);
 
                                         var x = i - depth;
-                                        var y = i + depth;
+                                        var y = i + depth + 1;
 
                                         if(x < 0) x = 0;
-                                        if(y > word_length - 1) y = word_length - 1;
+                                        if(y > word_length) y = word_length;
 
-                                        for(; x <= y; x++){
+                                        for(; x < y; x++){
 
                                             if(x !== i) addIndex(
 
@@ -1022,7 +1011,8 @@ var SUPPORT_ASYNC = true;
                                                 ctx_dupes,
                                                 words[x],
                                                 id,
-                                                /** @type {string} */ (content),
+                                                /** @type {string} */
+                                                (content),
                                                 threshold
                                             );
                                         }
@@ -1051,50 +1041,10 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.prototype.update = function(id, content){
 
-            if((typeof content === 'string') && (id || (id === 0))){
+            if(this._ids[id] && content && (typeof content === 'string')){
 
-                if(this._ids[id]){
-
-                    if(SUPPORT_WORKER && this.worker){
-
-                        var int = parseInt(this._ids[id], 10);
-
-                        this._worker[int].postMessage(int, {
-
-                            'update': true,
-                            'id': id,
-                            'content': content
-                        });
-
-                        return this;
-                    }
-
-                    if(SUPPORT_ASYNC && this.async){
-
-                        this._stack[id] || (
-
-                            this._stack_keys[this._stack_keys.length] = id
-                        );
-
-                        this._stack[id] = [
-
-                            enum_task.update,
-                            id,
-                            content
-                        ];
-
-                        register_task(this);
-
-                        return this;
-                    }
-
-                    this.remove(id);
-
-                    if(content){
-
-                        this.add(id, content);
-                    }
-                }
+                this.remove(id);
+                this.add(id, content, /* skip_update: */ true);
             }
 
             return this;
@@ -1144,32 +1094,12 @@ var SUPPORT_ASYNC = true;
 
                 for(var z = 0; z < 10; z++){
 
-                    var keys = Object.keys(this._map[z]);
+                    removeIndex(this._map[z], id);
+                }
 
-                    for(var i = 0; i < keys.length; i++){
+                if(this.depth){
 
-                        var key = keys[i];
-                        var tmp = this._map[z];
-                            tmp = tmp && tmp[key];
-
-                        if(tmp && tmp.length){
-
-                            for(var a = 0; a < tmp.length; a++){
-
-                                if(tmp[a] === id){
-
-                                    tmp.splice(a, 1);
-
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(!tmp.length){
-
-                            delete this._map[z][key];
-                        }
-                    }
+                    removeIndex(this._ctx, id);
                 }
 
                 delete this._ids[id];
@@ -1311,9 +1241,11 @@ var SUPPORT_ASYNC = true;
                 :(
                     tokenizer === 'ngram' ?
 
-                        /** @type {!Array<string>} */ (ngram(_query))
+                        /** @type {!Array<string>} */
+                        (ngram(_query))
                     :
-                        /** @type {string} */ (_query).split(regex_split)
+                        /** @type {string} */
+                        (_query).split(regex_split)
                 )
             );
 
@@ -1341,7 +1273,7 @@ var SUPPORT_ASYNC = true;
 
             var ctx_map;
 
-            if(!use_contextual || (ctx_map = this._map[10])[ctx_root]){
+            if(!use_contextual || (ctx_map = this._ctx)[ctx_root]){
 
                 for(var a = use_contextual ? 1 : 0; a < length; a++){
 
@@ -1522,9 +1454,14 @@ var SUPPORT_ASYNC = true;
 
             // release references
 
+            this.filter =
+            this.stemmer =
             this._scores =
             this._map =
+            this._ctx =
             this._ids =
+            this._stack =
+            this._stack_keys =
             this._cache = null;
 
             return this;
@@ -1554,6 +1491,13 @@ var SUPPORT_ASYNC = true;
             }
         })();
 
+        /** @const */
+
+        var global_encoder_icase = function(value){
+
+            return value.toLowerCase();
+        };
+
         /**
          * Phonetic Encoders
          * @dict {Function}
@@ -1566,12 +1510,9 @@ var SUPPORT_ASYNC = true;
 
             // case insensitive search
 
-            'icase': function(value){
+            'icase': global_encoder_icase,
 
-                return value.toLowerCase();
-            },
-
-            // simple phonetic normalization (latin)
+            // literal normalization
 
             'simple': (function(){
 
@@ -1618,7 +1559,7 @@ var SUPPORT_ASYNC = true;
                 };
             }()),
 
-            // advanced phonetic transformation (latin)
+            // literal transformation
 
             'advanced': (function(){
 
@@ -1698,6 +1639,8 @@ var SUPPORT_ASYNC = true;
 
             })(),
 
+            // phonetic transformation
+
             'extra': (function(){
 
                 var soundex_b = regex('p'),
@@ -1762,13 +1705,7 @@ var SUPPORT_ASYNC = true;
 
         } : {
 
-            // case insensitive search
-
-            'icase': function(value){
-
-                return value.toLowerCase();
-            },
-
+            'icase': global_encoder_icase,
             'balance': global_encoder_balance
         };
 
@@ -1895,13 +1832,57 @@ var SUPPORT_ASYNC = true;
 
                 if(score >= threshold){
 
-                    var arr = map[(score + 0.5) | 0];
+                    var arr = map[((score + 0.5) | 0)];
                         arr = arr[tmp] || (arr[tmp] = []);
-                        arr[arr.length] = id;
+
+                    arr[arr.length] = id;
                 }
             }
 
             return score || dupes[tmp];
+        }
+
+        /**
+         * @param {Object} map
+         * @param {string|number} id
+         */
+
+        function removeIndex(map, id){
+
+            if(map){
+
+                var keys = Object.keys(map);
+
+                for(var i = 0, length_keys = keys.length; i < length_keys; i++){
+
+                    var key = keys[i];
+                    var tmp = map[key];
+
+                    if(tmp){
+
+                        for(var a = 0, length_map = tmp.length; a < length_map; a++){
+
+                            if(tmp[a] === id){
+
+                                if(length_map === 1){
+
+                                    delete map[key];
+                                }
+                                else{
+
+                                    tmp.splice(a, 1);
+                                }
+
+                                break;
+                            }
+                            else if(typeof tmp[a] === 'object'){
+
+                                removeIndex(tmp[a], id);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /**
@@ -1911,6 +1892,8 @@ var SUPPORT_ASYNC = true;
          */
 
         function calcScore(part, ref){
+
+            // TODO: use word distance further than char distance
 
             var context_index = ref.indexOf(part);
             var partial_index = context_index - ref.lastIndexOf(" ", context_index);
@@ -2446,13 +2429,25 @@ var SUPPORT_ASYNC = true;
 
                             if(data['search']){
 
+                                var results = flexsearch['search'](data['content'],
+
+                                    data['threshold'] ?
+
+                                        {
+                                            'limit': data['limit'],
+                                            'threshold': data['threshold']
+                                        }
+                                    :
+                                        data['limit']
+                                );
+
                                 /** @lends {Worker} */
                                 self.postMessage({
 
-                                    'result': flexsearch['search'](data['content'], data['threshold'] ? {'limit': data['limit'], 'threshold': data['threshold']} : data['limit']),
                                     'id': id,
                                     'content': data['content'],
-                                    'limit': data['limit']
+                                    'limit': data['limit'],
+                                    'result':results
                                 });
                             }
                             else if(data['add']){

@@ -41,6 +41,7 @@ describe('Initialize', function(){
 
         flexsearch_sync = new FlexSearch({
 
+            mode: 'forward',
             encode: false,
             async: false,
             worker: false
@@ -48,6 +49,7 @@ describe('Initialize', function(){
 
         flexsearch_async = FlexSearch.create({
 
+            mode: 'forward',
             encode: false,
             async: true,
             worker: false
@@ -169,7 +171,7 @@ describe('Initialize', function(){
     it('Should have the correct options', function(){
 
         expect(flexsearch_default.async).to.equal(false);
-        expect(flexsearch_default.mode).to.equal("forward");
+        expect(flexsearch_default.mode).to.equal("ngram");
         expect(flexsearch_sync.async).to.equal(false);
         expect(flexsearch_async.async).to.equal(true);
         expect(flexsearch_strict.mode).to.equal("strict");
@@ -579,7 +581,7 @@ describe('Add (Worker)', function(){
 
             encode: 'icase',
             mode: 'strict',
-            async: true,
+            async: false,
             worker: 4
         });
 

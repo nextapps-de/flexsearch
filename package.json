@@ -1,8 +1,17 @@
 {
-  "name": "flexsearch",
-  "version": "0.2.32",
+  "name": "FlexSearch",
+  "version": "0.2.4",
   "description": "World's fastest and most memory efficient full text search library.",
-  "keywords": [],
+  "homepage": "https://nextapps-de.github.io/xone/",
+  "author": "Thomas Wilkerling",
+  "copyright": "Nextapps GmbH",
+  "license": "Apache-2.0",
+  "keywords": [
+    "full text search",
+    "elastic search",
+    "fastest search",
+    "contextual search"
+  ],
   "bugs": {
     "url": "https://github.com/nextapps-de/flexsearch/issues",
     "email": "info@nextapps.de"
@@ -32,9 +41,6 @@
     "flexsearch.min.js",
     "test/"
   ],
-  "homepage": "https://nextapps-de.github.io/xone/",
-  "author": "Thomas Wilkerling",
-  "license": "Apache-2.0",
   "dependencies": {},
   "devDependencies": {
     "chai": "^4.1.2",
