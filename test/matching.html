@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Matching Test</title>
-    <script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script><!--<script src="../flexsearch.min.js"></script>-->
+    <script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script><!--<script src="../flexsearch.js"></script>-->
     <script src="https://rawgit.com/nextapps-de/bulksearch/master/bulksearch.min.js"></script>
     <script src="https://cdn.rawgit.com/weixsong/elasticlunr.js/master/example/elasticlunr.min.js"></script>
     <script src="https://unpkg.com/lunr@2.1.6/lunr.js"></script>
@@ -180,8 +180,8 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 <hr>
 <div style="line-height: 2em">
     <div style="display:inline-block; width:16px; height:16px; background: #f00"></div> Either no results or relevant content was not included in results.<br>
-    <div style="display:inline-block; width:16px; height:16px; background: orange"></div> Most relevant result was not found in the first place.<br>
-    <div style="display:inline-block; width:16px; height:16px; background: #0a0"></div> Most relevant result was successfully found in the first place.<br>
+    <div style="display:inline-block; width:16px; height:16px; background: orange"></div> Most relevant results was not found in the first place.<br>
+    <div style="display:inline-block; width:16px; height:16px; background: #0a0"></div> Most relevant results was successfully found in the first place.<br>
     <b>Note:</b> Open console and type e.g. <i>data[493]</i>
 </div>
 <script>
@@ -371,17 +371,17 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
         // -----------------------------------------------------------
 
-        do_test('test-1', 'without breach of modesty', 493);
-        do_test('test-2', 'went softly stream', 446);
-        do_test('test-3', 'princes of the ambition', 72);
-        do_test('test-4', 'five-thousand leagues', 2);
-        do_test('test-5', 'i already observed', 458);
-        do_test('test-6', 'let a of his', 50);
-        do_test('test-7', 'take that to the rocks', 175);
-        do_test('test-8', 'bignes of splaknuk', 146);
-        do_test('test-9', 'matematikal musikal instruments', 267);
-        do_test('test-10', 'matical sical strument', 267);
-        do_test('test-11', 'lalkon the camberlayhn', 99);
+        do_test('test-1', 'without breach of modesty', [493]);
+        do_test('test-2', 'went softly stream', [446]);
+        do_test('test-3', 'princes of the ambition', [72, 408]);
+        do_test('test-4', 'five-thousand leagues', [2]);
+        do_test('test-5', 'i already observed', [458, 346]);
+        do_test('test-6', 'let a of his', [50]);
+        do_test('test-7', 'take that to the rocks', [175]);
+        do_test('test-8', 'bignes of splaknuk', [146]);
+        do_test('test-9', 'matematikal musikal instruments', [267]);
+        do_test('test-10', 'matical sical strument', [267]);
+        do_test('test-11', 'lalkon the camberlayhn', [99]);
 
         // ---------------------------------------
 
@@ -432,21 +432,30 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
                         break;
                 }
 
-                if((results[0] === ref) || (results[0] === String(ref))){
+                for(var a = 0; a < ref.length; a++){
 
-                    nodes[i].style.backgroundColor = '#0a0';
+                    var current = ref[a];
+
+                    nodes[i].innerHTML = results[0] || '-';
+                    nodes[i].style.color = '#fff';
+
+                    if((results[0] === current) || (results[0] === String(current))){
+
+                        nodes[i].style.backgroundColor = '#0a0';
+                        break;
+                    }
+                    else if(!results.length || ((results.indexOf(current) === -1) && (results.indexOf(String(current)) === -1))){
+
+                        if(nodes[i].style.backgroundColor !== 'orange'){
+
+                            nodes[i].style.backgroundColor = '#f00';
+                        }
+                    }
+                    else{
+
+                        nodes[i].style.backgroundColor = 'orange';
+                    }
                 }
-                else if(!results.length || ((results.indexOf(ref) === -1) && (results.indexOf(String(ref)) === -1))){
-
-                    nodes[i].style.backgroundColor = '#f00';
-                }
-                else{
-
-                    nodes[i].style.backgroundColor = 'orange';
-                }
-
-                nodes[i].innerHTML = results[0] || '-';
-                nodes[i].style.color = '#fff';
             }
         }
 

@@ -1,6 +1,6 @@
 ;/**!
- * @preserve FlexSearch v0.2.41
- * Copyright 2017-2018 Thomas Wilkerling
+ * @preserve FlexSearch v0.2.42
+ * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
  */
@@ -920,6 +920,7 @@ var SUPPORT_ASYNC = true;
                                             id,
                                             /** @type {string} */
                                             (content),
+                                            0,
                                             threshold
                                         );
                                     }
@@ -942,6 +943,7 @@ var SUPPORT_ASYNC = true;
                                             id,
                                             /** @type {string} */
                                             (content),
+                                            0,
                                             threshold
                                         );
                                     }
@@ -966,6 +968,7 @@ var SUPPORT_ASYNC = true;
                                                 id,
                                                 /** @type {string} */
                                                 (content),
+                                                0,
                                                 threshold
                                             );
                                         }
@@ -985,6 +988,7 @@ var SUPPORT_ASYNC = true;
                                         id,
                                         /** @type {string} */
                                         (content),
+                                        depth ? 1 : 0,
                                         threshold
                                     );
 
@@ -1013,6 +1017,7 @@ var SUPPORT_ASYNC = true;
                                                 id,
                                                 /** @type {string} */
                                                 (content),
+                                                (x < i ? i - x : x - i),
                                                 threshold
                                             );
                                         }
@@ -1312,7 +1317,7 @@ var SUPPORT_ASYNC = true;
                         }
                         else{
 
-                            // TODO: handle by intersection
+                            // Not handled by intersection:
 
                             check[check.length] = (
 
@@ -1322,6 +1327,10 @@ var SUPPORT_ASYNC = true;
                                 :
                                     map_check[0]
                             );
+
+                            // Handled by intersection:
+
+                            // check[check.length] = map_check;
                         }
 
                         check_words[value] = "1";
@@ -1335,9 +1344,15 @@ var SUPPORT_ASYNC = true;
                 found = false;
             }
 
-            if(found /*&& check.length*/){
+            if(found){
+
+                // Not handled by intersection:
 
                 result = intersect(check, limit);
+
+                // Handled by intersection:
+
+                //result = intersect_3d(check, limit);
             }
 
             if(result.length){
@@ -1879,14 +1894,15 @@ var SUPPORT_ASYNC = true;
          * @param {string} tmp
          * @param {string|number} id
          * @param {string} content
+         * @param {number} context
          * @param {number} threshold
          */
 
-        function addIndex(map, dupes, tmp, id, content, threshold){
+        function addIndex(map, dupes, tmp, id, content, context, threshold){
 
             if(typeof dupes[tmp] === 'undefined'){
 
-                var score = calcScore(tmp, content);
+                var score = context ? (10 - context) : calcScore(tmp, content);
 
                 dupes[tmp] = score;
 
@@ -1952,8 +1968,6 @@ var SUPPORT_ASYNC = true;
          */
 
         function calcScore(part, ref){
-
-            // TODO: use word distance further than char distance
 
             var context_index = ref.indexOf(part);
             var partial_index = context_index - ref.lastIndexOf(" ", context_index);
@@ -2124,7 +2138,7 @@ var SUPPORT_ASYNC = true;
 
             var final = {};
 
-            if(stemmer){
+            if(words){
 
                 for(var i = 0; i < words.length; i++){
 
@@ -2296,6 +2310,111 @@ var SUPPORT_ASYNC = true;
 
                 result = arrays[0];
 
+                if(limit && /*result &&*/ (result.length > limit)){
+
+                    // Note: do not modify the original index array!
+
+                    return result.slice(0, limit);
+                }
+
+                // Note: handle references to the original index array
+                //return result.slice(0);
+            }
+
+            return result;
+        }
+
+        /**
+         * @param {!Array<Array<number|string>>} arrays
+         * @param {number=} limit
+         * @returns {Array}
+         */
+
+        /*
+        function intersect_3d(arrays, limit) {
+
+            var result = [];
+            var length_z = arrays.length;
+
+            if(length_z > 1){
+
+                // pre-sort arrays by length up
+
+                arrays.sort(sortByLengthUp);
+
+                var arr_tmp = arrays[0];
+
+                for(var a = 0; a < arr_tmp.length; a++){
+
+                    // fill initial map
+
+                    var check = {};
+                    var arr = arr_tmp[a];
+                    var length = arr.length;
+                    var i = 0;
+
+                    while(i < length) {
+
+                        check[arr[i++]] = 1;
+                    }
+                }
+
+                // loop through arrays
+
+                var tmp, count = 0;
+                var z = 1;
+
+                while(z < length_z){
+
+                    // get each array one by one
+
+                    var found = false;
+
+                    var arr_tmp = arrays[0];
+
+                    for(var a = 0; a < arr_tmp.length; a++){
+
+                        arr = arr_tmp[a];
+                        length = arr.length;
+                        i = 0;
+
+                        while(i < length){
+
+                            if((check[tmp = arr[i++]]) === z){
+
+                                // fill in during last round
+
+                                if(z === (length_z - 1)){
+
+                                    result[count++] = tmp;
+
+                                    if(limit && (count === limit)){
+
+                                        found = false;
+                                        break;
+                                    }
+                                }
+
+                                // apply count status
+
+                                found = true;
+                                check[tmp] = z + 1;
+                            }
+                        }
+                    }
+
+                    if(!found){
+
+                        break;
+                    }
+
+                    z++;
+                }
+            }
+            else if(length_z){
+
+                result = result.concat.apply(result, arrays[0]);
+
                 if(limit && result && (result.length > limit)){
 
                     // Note: do not touch original array!
@@ -2306,6 +2425,7 @@ var SUPPORT_ASYNC = true;
 
             return result;
         }
+        */
 
         /**
          * Fastest intersect method for 2 sorted arrays so far
