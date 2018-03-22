@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.4
+ * @preserve FlexSearch v0.2.41
  * Copyright 2017-2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -1737,27 +1737,87 @@ var SUPPORT_ASYNC = true;
         var cache = SUPPORT_CACHE ? (function(){
 
             /** @this {Cache} */
-            function Cache(){
+            function Cache(limit){
 
-                this.cache = {};
+                this.reset();
+                this.limit = limit || 1000;
             }
 
             /** @this {Cache} */
             Cache.prototype.reset = function(){
 
                 this.cache = {};
+                this.count = {};
+                this.index = {};
+                this.keys = [];
             };
 
             /** @this {Cache} */
             Cache.prototype.set = function(id, value){
 
+                if(!this.count[id]){
+
+                    var length = this.keys.length;
+
+                    if(length === this.limit){
+
+                        length--;
+
+                        var last_id = this.keys[length];
+
+                        delete this.cache[last_id];
+                        delete this.count[last_id];
+                        delete this.index[last_id];
+                    }
+
+                    this.index[id] = length;
+                    this.keys[length] = id;
+                    this.count[id] = 1;
+                }
+
                 this.cache[id] = value;
+
+                // shift up counter +1
+
+                this.get(id);
             };
 
-            /** @this {Cache} */
+            /**
+             * Note: It is a lot better to have the complexity when fetching the cache:
+             * @this {Cache}
+             */
             Cache.prototype.get = function(id){
 
-                return this.cache[id];
+                var cache = this.cache[id];
+
+                if(cache){
+
+                    var count = ++this.count[id];
+                    var index = this.index;
+                    var current_index = index[id];
+
+                    if(current_index > 0){
+
+                        var keys = this.keys;
+                        var old_index = current_index;
+
+                        while(current_index && this.count[keys[current_index--]] <= count){}
+
+                        if(current_index >= 0 && ((current_index + 1) !== old_index)){
+
+                            var tmp = keys[current_index];
+
+                            // TODO splice is too slow
+                            index[id] = current_index;
+                            keys.splice(current_index, 1, id);
+
+                            index[tmp] = old_index;
+                            keys.splice(old_index, 1, tmp);
+                        }
+                    }
+                }
+
+                return cache;
             };
 
             return Cache;
