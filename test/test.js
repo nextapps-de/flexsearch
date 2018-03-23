@@ -837,7 +837,7 @@ describe('Encoding', function(){
 
     it('Should have been encoded properly: Custom Encoder', function(){
 
-        FlexSearch.register('custom', test_encoder);
+        FlexSearch.registerEncoder('custom', test_encoder);
 
         expect(FlexSearch.encode('custom', "Björn-Phillipp Mayer")).to.equal(flexsearch_custom.encode("Björn-Phillipp Mayer"));
     });
@@ -1006,7 +1006,7 @@ describe('Add Matchers', function(){
 
     it('Should have been added properly', function(){
 
-        FlexSearch.addMatcher({
+        FlexSearch.registerMatcher({
 
             '1': 'a',
             '2': 'b',

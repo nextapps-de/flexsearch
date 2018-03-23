@@ -1,40 +1,12 @@
 var child_process = require('child_process');
 
+var supported_lang = [
+
+    'en',
+    'de'
+];
+
 console.log("Start build .....");
-
-var parameter = (function(opt){
-
-    var parameter = '';
-
-    for(var index in opt){
-
-        if(opt.hasOwnProperty(index)){
-
-            parameter += ' --' + index + '=' + opt[index];
-        }
-    }
-
-    console.log(parameter);
-
-    return parameter;
-})({
-
-    compilation_level: "ADVANCED_OPTIMIZATIONS",
-    use_types_for_optimization: true,
-    new_type_inf: true,
-    jscomp_warning: "newCheckTypes",
-    generate_exports: true,
-    export_local_property_definitions: true,
-    language_in: "ECMASCRIPT5_STRICT",
-    language_out: "ECMASCRIPT5_STRICT",
-    process_closure_primitives: true,
-    summary_detail_level: 3,
-    warning_level: "VERBOSE",
-    emit_use_strict: true,
-    output_manifest: "log/manifest.log",
-    output_module_dependencies: "log/module_dependencies.log",
-    property_renaming_report: "log/renaming_report.log"
-});
 
 var options = (function(argv){
 
@@ -61,10 +33,61 @@ var options = (function(argv){
 
 })(process.argv);
 
-exec("java -jar node_modules/google-closure-compiler/compiler.jar" + parameter + " --define='SUPPORT_DEBUG=" + (options['SUPPORT_DEBUG'] || 'false') + "' --define='SUPPORT_WORKER=" + (options['SUPPORT_WORKER'] || 'false') + "' --define='SUPPORT_BUILTINS=" + (options['SUPPORT_BUILTINS'] || 'false') + "' --define='SUPPORT_CACHE=" + (options['SUPPORT_CACHE'] || 'false') + "' --define='SUPPORT_ASYNC=" + (options['SUPPORT_ASYNC'] || 'false') + "' --js='flexsearch.js' --js_output_file='flexsearch." + (options['RELEASE'] || 'custom') + ".js' && exit 0", function(){
+var parameter = (function(opt){
 
-    console.log("Build Complete: flexsearch." + (options['RELEASE'] || 'custom') + ".js");
+    var parameter = '';
+
+    for(var index in opt){
+
+        if(opt.hasOwnProperty(index)){
+
+            parameter += ' --' + index + '=' + opt[index];
+        }
+    }
+
+    //console.log(parameter);
+
+    return parameter;
+})({
+
+    compilation_level: "ADVANCED_OPTIMIZATIONS",
+    use_types_for_optimization: true,
+    new_type_inf: true,
+    jscomp_warning: "newCheckTypes",
+    generate_exports: true,
+    export_local_property_definitions: true,
+    language_in: "ECMASCRIPT5_STRICT",
+    language_out: "ECMASCRIPT5_STRICT",
+    process_closure_primitives: true,
+    summary_detail_level: 3,
+    warning_level: "VERBOSE",
+    emit_use_strict: options['RELEASE'] !== 'lang',
+    output_manifest: "log/manifest.log",
+    output_module_dependencies: "log/module_dependencies.log",
+    property_renaming_report: "log/renaming_report.log"
 });
+
+if(options['RELEASE'] === 'lang'){
+
+    for(var i = 0; i < supported_lang.length; i++){
+
+        (function(i){
+
+            exec("java -jar node_modules/google-closure-compiler/compiler.jar" + parameter + " --define='SUPPORT_LANG_" + supported_lang[i].toUpperCase() + "=true' --js='lang/" + supported_lang[i] + ".js' --js_output_file='lang/" + supported_lang[i] + ".min.js' && exit 0", function(){
+
+                console.log("Build Complete: " + supported_lang[i] + ".min.js");
+            });
+
+        })(i);
+    }
+}
+else{
+
+    exec("java -jar node_modules/google-closure-compiler/compiler.jar" + parameter + " --define='SUPPORT_DEBUG=" + (options['SUPPORT_DEBUG'] || 'false') + "' --define='SUPPORT_WORKER=" + (options['SUPPORT_WORKER'] || 'false') + "' --define='SUPPORT_BUILTINS=" + (options['SUPPORT_BUILTINS'] || 'false') + "' --define='SUPPORT_CACHE=" + (options['SUPPORT_CACHE'] || 'false') + "' --define='SUPPORT_ASYNC=" + (options['SUPPORT_ASYNC'] || 'false') + "' --define='SUPPORT_LANG_EN=" + (options['SUPPORT_LANG_EN'] || 'false') + "' --define='SUPPORT_LANG_DE=" + (options['SUPPORT_LANG_DE'] || 'false') + "' --js='flexsearch.js' --js='lang/**.js' --js='!lang/**.min.js' --js_output_file='flexsearch." + (options['RELEASE'] || 'custom') + ".js' && exit 0", function(){
+
+        console.log("Build Complete: flexsearch." + (options['RELEASE'] || 'custom') + ".js");
+    });
+}
 
 function exec(prompt, callback){
 

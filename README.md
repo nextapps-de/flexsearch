@@ -1,3 +1,4 @@
+<p align="center"></p>
 <p align="center">
     <br>
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/flexsearch.svg" alt="Search Library" width="50%">
@@ -10,12 +11,13 @@
     <img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/xone.svg"></a>
 </p>
-
 <h1></h1>
 <h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
-
 When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-It also has the __most memory-efficient index__. Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice. 
+It also has the <a href="#memory">most memory-efficient index</a>.
+<!-- 
+Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
+-->
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
@@ -39,32 +41,30 @@ Supported Module Definitions:
 
 All Features:
 <ul>
-    <li><a href="#webworker">Web-Worker Support</a> (not available in Node.js)</li>
+    <li><a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)</li>
     <li><a href="#contextual">Contextual Indexes</a></li>
     <li>Partial Matching</li>
-    <li>Multiple Words</li>
-    <li><a href="#phonetic">Phonetic Search</a></li>
+    <li>Multi-Phrase Search</li>
+    <li><a href="#phonetic">Phonetic Mathching</a></li>
     <li>Relevance-based Scoring</li>
     <li>Auto-Balanced Cache by Popularity</li>
-    <li>Limit Results</li>
-    <li>Supports Caching</li>
-    <li>Asynchronous Processing</li>
+    <li>Suggestions (Results)</li>
+    <li>Asynchronous Processing & Concurrency Control</li>
     <li>Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter</li>
 </ul>
 
 These features are not available in the 50% smaller <a href="flexsearch.light.js">light version</a>:
 
 - WebWorker
-- Asynchronous
+- Asynchronous Processing
 - Cache
-- Built-in encoders except 'balance' and 'icase' (you can still pass in customs)
-- Built-in stemmer and filter (you can still pass in customs)
+- Built-in encoders except 'balance' and 'icase' (you can still pass in customs) <!--- Built-in stemmer and filter (you can still pass in customs)-->
 - Debug logging
-- _index.info()_ method
+- Methods: _index.info()_
 
-The light version is just available as compiled version (flexsearch.light.js).
+The light version is just available as compiled version (<a href="flexsearch.light.js">flexsearch.light.js</a>).
 
-> You can also make <a href="#builds">Custom Builds</a> pretty simple
+> It is also pretty simple to make <a href="#builds">Custom Builds</a> 
 
 <a name="contextual"></a>
 #### Contextual Search
@@ -75,7 +75,7 @@ Imagine you add a text block of some sentences to an index ID. Assuming the quer
 In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
 
 <p align="center">
-    <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/contextual_index.svg">
+    <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/contextual-index.svg">
 </p>
 
 __Note:__ This feature is actually not enabled by default.
@@ -105,7 +105,7 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
     <tr></tr>
     <tr>
         <td>Memory</td>
-        <td>Large: ~ 5 Mb per 100,000 words</td>
+        <td>Large: ~ 1 Mb per 100,000 words</td>
         <td>Tiny: ~ 100 Kb per 100,000 words</td>
     </tr>
     <tr></tr>
@@ -137,6 +137,18 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
         <td>WebWorker</td>
         <td>No</td>
         <td>Yes</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>Super-Partial-Matching</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>Wildcards (Query)</td>
+        <td>Yes</td>
+        <td>No</td>
     </tr>
 </table>
 -->
@@ -189,8 +201,8 @@ var FlexSearch = require("./flexsearch.js");
 
 Global methods:
 - <a href="#flexsearch.create">FlexSearch.__create__(\<options\>)</a>
-- <a href="#flexsearch.addmatcher">FlexSearch.__addMatcher__({_KEY: VALUE_})</a>
-- <a href="#flexsearch.register">FlexSearch.__register__(name, encoder)</a>
+- <a href="#flexsearch.registerMatcher">FlexSearch.__registerMatcher__({_KEY: VALUE_})</a>
+- <a href="#flexsearch.registerEncoder">FlexSearch.__registerEncoder__(name, encoder)</a>
 - <a href="#flexsearch.encode">FlexSearch.__encode__(name, string)</a>
 
 Index methods:
@@ -275,6 +287,29 @@ index.search("John", function(result){
     // array of results
 });
 ```
+
+Pass custom options for each query:
+
+```js
+index.search({
+    
+    query: "John",
+    limit: 1000,
+    threshold: 5, // >= initial threshold
+    depth: 3      // <= initial depth
+});
+```
+
+Get suggestions of a query:
+
+```js
+index.search({
+    
+    query: "John",
+    suggest: true
+});
+```
+
 <a name="index.update"></a>
 #### Update item to the index
 
@@ -325,11 +360,11 @@ index.init({
 <a name="flexsearch.addmatcher"></a>
 #### Add custom matcher
 
-> FlexSearch.__addMatcher({_REGEX: REPLACE_})__
+> FlexSearch.__registerMatcher({_REGEX: REPLACE_})__
 
 Add global matchers for all instances:
 ```js
-FlexSearch.addMatcher({
+FlexSearch.registerMatcher({
 
     'ä': 'a', // replaces all 'ä' to 'a'
     'ó': 'o',
@@ -364,10 +399,10 @@ var index = new FlexSearch({
 <a name="flexsearch.register"></a>
 ##### Register a global encoder to be used by all instances
 
-> FlexSearch.__register(name, encoder)__
+> FlexSearch.__registerEncoder(name, encoder)__
 
 ```js
-FlexSearch.register('whitespace', function(str){
+FlexSearch.registerEncoder('whitespace', function(str){
 
     return str.replace(/ /g, '');
 });
@@ -393,7 +428,7 @@ var encoded = FlexSearch.encode("whitespace", "sample text");
 ##### Mixup/Extend multiple encoders
 
 ```js
-FlexSearch.register('mixed', function(str){
+FlexSearch.registerEncoder('mixed', function(str){
   
     str = this.encode("icase", str);  // built-in
     str = this.encode("whitespace", str); // custom
@@ -402,7 +437,7 @@ FlexSearch.register('mixed', function(str){
 });
 ```
 ```js
-FlexSearch.register('extended', function(str){
+FlexSearch.registerEncoder('extended', function(str){
   
     str = this.encode("custom", str);
     
@@ -426,18 +461,89 @@ var index = new FlexSearch({
     }
 });
 ```
+<a name="flexsearch.stemmer"></a>
+#### Add language-specific stemmer and/or filter
+
+> __Stemmer:__ several linguistic mutations of the same word (e.g. "run" and "running")
+
+> __Filter:__ a blacklist of words to be filtered out from indexing at all (e.g. "and", "to" or "be")
+
+Define a private custom stemmer or filter during creation/initialization:
+```js
+var index = new FlexSearch({
+
+    stemmer: {
+        
+        // object {key: replacement}
+        "ational": "ate",
+        "tional": "tion",
+        "enci": "ence",
+        "ing": ""
+    },
+    filter: [ 
+        
+        // array blacklist
+        "in",
+        "into",
+        "is",
+        "isn't",
+        "it",
+        "it's"
+    ]
+});
+```
+
+Or assign stemmer/filters globally to a language:
+```js
+FlexSearch.registerLanguage('us', {
+
+    stemmer: {/* ... */},
+    filter: [/* ... */]
+});
+```
+
+Or use built-in stemmer or filter of your preferred languages:
+```html
+<html>
+<head>
+    <script src="js/flexsearch.min.js"></script>
+    <script src="js/lang/en.min.js"></script>
+    <script src="js/lang/de.min.js"></script>
+</head>
+...
+```
+
+Now you can assign built-in stemmer during creation/initialization:
+```js
+var index_en = new FlexSearch({stemmer: 'en', filter: 'en'});
+var index_de = new FlexSearch({stemmer: 'de', filter: [/* custom */]});
+```
+
+In Node.js you just need require the language pack files to make them available:
+
+```js
+require('lang/en.js');
+require('lang/de.js');
+```
+
+It is also possible to <a href="#builds">compile language packs into the build</a> as follows:
+
+```bash
+node compile SUPPORT_LANG_EN=true SUPPORT_LANG_DE=true
+```
+
 <a name="index.info"></a>
-#### Get info
+#### Get info about an index
 
 ```js
 index.info();
 ```
 
-Returns information about the index, e.g.:
+Returns information e.g.:
 
 ```json
 {
-    "bytes": 3600356288,
+    "bytes": 64000,
     "id": 0,
     "matchers": 0,
     "size": 10000,
@@ -462,7 +568,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 
 #### Enable Contextual Index
 
-Create context-enabled index and also set the limit of relevance (depth):
+Create index and just set the limit of relevance ("depth"):
 ```js
 var index = new FlexSearch({
 
@@ -472,9 +578,20 @@ var index = new FlexSearch({
 });
 ```
 
-#### Use WebWorker (Browser only)
+#### Enable Auto-Balanced Cache
 
-Create worker-enabled index and also set the count of parallel threads:
+Create index and just set a limit of cache entries:
+```js
+var index = new FlexSearch({
+
+    profile: "score",
+    cache: 10000
+});
+```
+
+#### Use WebWorker Sharding (Browser only)
+
+Create index and just set the count of parallel threads:
 ```js
 var index = new FlexSearch({
 
@@ -581,7 +698,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
             true<br>
             {number}
         </td>
-        <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the cache automatically balance stored entries related to their popularity.<br><br>Note: When just using "true" the cache has no limits and is actually 5 times faster (the balancer should not run).</td>
+        <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the <b>cache automatically balance stored entries related to their popularity</b>.<br><br>Note: When just using "true" the cache has no limits and is actually 2-3 times faster (because the balancer do not have to run).</td>
     </tr>
     <tr></tr>
     <tr>
@@ -606,36 +723,38 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
         <td align="top">depth<br><br></td>
         <td>
             false<br>
-            {number}
+            {number:0-9}
         </td>
-        <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets relevance depth (experimental).</td>
+        <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance.</td>
     </tr>
     <tr></tr>
     <tr>
         <td align="top">threshold<br><br></td>
         <td>
             false<br>
-            {number}
+            {number:0-9}
         </td>
-        <td>Enable/Disable the threshold of minimum relevance results should have.<br><br>Note: You can take a lower threshold for indexing and pass a higher value when calling .search(), but not other turn around.</td>
+        <td>Enable/Disable the threshold of minimum relevance all results should have.<br><br>Note: It is also possible to set a lower threshold for indexing and pass a higher value when calling <i>index.search(options)</i>.</td>
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">stemmer<br><br></td>
+        <td align="top">stemmer<br><br><br></td>
         <td>
             false<br>
+            {string}<br>
             {function}
         </td>
-        <td>Disable or pass in custom object/array.</td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">filter<br><br></td>
+        <td align="top">filter<br><br><br></td>
         <td>
             false<br>
+            {string}<br>
             {function}
         </td>
-        <td>Disable or pass in custom object/array.</td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
     </tr>
 </table>
 
@@ -746,7 +865,7 @@ Encoding effects the required memory also as query time and phonetic matches. Tr
 </table>
 
 <a name="compare" id="compare"></a>
-#### Comparison (Matches)
+#### Comparison (Matching)
 
 > Reference String: __"Björn-Phillipp Mayer"__
 
@@ -954,9 +1073,7 @@ Memory-optimized profile: __"memory"__
 {
     encode: "extra",
     mode: "strict",
-    threshold: 7,
-    stemmer: true,
-    filter: true
+    threshold: 7
 }
 ```
 
@@ -987,7 +1104,7 @@ Relevance-optimized profile: __"score"__
     encode: "extra",
     mode: "strict",
     threshold: 5,
-    depth: 4
+    depth: 5
 }
 ```
 
@@ -1019,7 +1136,7 @@ Compare these options above:
 <a name="builds"></a>
 ## Custom Builds
 
-Default Build:
+Full Build:
 ```bash
 npm run build
 ```
@@ -1027,6 +1144,11 @@ npm run build
 Light Build:
 ```bash
 npm run build-light
+```
+
+Build Language Packs:
+```bash
+npm run build-lang
 ```
 
 Custom Build:
@@ -1040,7 +1162,12 @@ Supported flags:
 - SUPPORT_WORKER
 - SUPPORT_CACHE
 - SUPPORT_ASYNC
-- SUPPORT_BUILTINS (english stemmer and filter)
+- SUPPORT_BUILTINS (built-in encoders)
+
+Supported language flags (includes stemmer and filter):
+
+- SUPPORT_LANG_EN
+- SUPPORT_LANG_DE
 
 Alternatively you can also use:
 ```bash

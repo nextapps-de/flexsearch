@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.2.44",
+  "version": "0.2.461",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://nextapps-de.github.io/xone/",
   "author": "Thomas Wilkerling",
@@ -25,9 +25,10 @@
   },
   "scripts": {
     "build": "node compile RELEASE=min SUPPORT_DEBUG=true SUPPORT_WORKER=true SUPPORT_BUILTINS=true SUPPORT_CACHE=true SUPPORT_ASYNC=true && exit 0",
-    "build-light": "node compile RELEASE=light SUPPORT_DEBUG=false SUPPORT_WORKER=false SUPPORT_BUILTINS=false SUPPORT_CACHE=false SUPPORT_ASYNC=false && exit 0",
+    "build-light": "node compile RELEASE=light && exit 0",
     "build-custom": "node compile",
-    "build-all": "npm run build && npm run build-light",
+    "build-lang": "node compile RELEASE=lang && exit 0",
+    "build-all": "npm run build && npm run build-light && npm run build-lang",
     "test-production": "nyc --reporter=html --reporter=text mocha --timeout=3000 test --exit",
     "test-light": "nyc --reporter=html --reporter=text mocha --timeout=3000 test/ --exit",
     "test-develop": "nyc --reporter=html --reporter=text mocha --timeout=3000 --exit",
@@ -39,6 +40,7 @@
   "files": [
     "flexsearch.js",
     "flexsearch.min.js",
+    "lang/",
     "test/"
   ],
   "dependencies": {},

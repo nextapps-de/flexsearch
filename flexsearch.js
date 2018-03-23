@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.44
+ * @preserve FlexSearch v0.2.46
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -125,273 +125,9 @@ var SUPPORT_ASYNC = true;
         /**  @const  {RegExp} */
         var regex_split = regex("[ -\/]");
 
-        /**
-         * http://www.ranks.nl/stopwords
-         * @const {Array<string>}
-         */
+        var filter = {};
 
-        var filter = [
-
-            "a",
-            "about",
-            "above",
-            "after",
-            "again",
-            "against",
-            "all",
-            "also",
-            "am",
-            "an",
-            "and",
-            "any",
-            "are",
-            "aren't",
-            "as",
-            "at",
-            //"back",
-            "be",
-            "because",
-            "been",
-            "before",
-            "being",
-            "below",
-            //"between",
-            "both",
-            "but",
-            "by",
-            "can",
-            "cannot",
-            "can't",
-            "come",
-            "could",
-            "couldn't",
-            //"day",
-            "did",
-            "didn't",
-            "do",
-            "does",
-            "doesn't",
-            "doing",
-            "dont",
-            "down",
-            "during",
-            "each",
-            "even",
-            "few",
-            "first",
-            "for",
-            "from",
-            "further",
-            "get",
-            //"give",
-            "go",
-            //"good",
-            "had",
-            "hadn't",
-            "has",
-            "hasn't",
-            "have",
-            "haven't",
-            "having",
-            "he",
-            "hed",
-            //"hell",
-            "her",
-            "here",
-            "here's",
-            "hers",
-            "herself",
-            "hes",
-            "him",
-            "himself",
-            "his",
-            "how",
-            "how's",
-            "i",
-            "id",
-            "if",
-            "ill",
-            "im",
-            "in",
-            "into",
-            "is",
-            "isn't",
-            "it",
-            "it's",
-            "itself",
-            "i've",
-            "just",
-            "know",
-            "let's",
-            "like",
-            //"look",
-            "make",
-            "me",
-            "more",
-            "most",
-            "mustn't",
-            "my",
-            "myself",
-            "new",
-            "no",
-            "nor",
-            "not",
-            "now",
-            "of",
-            "off",
-            "on",
-            "once",
-            //"one",
-            "only",
-            "or",
-            "other",
-            "ought",
-            "our",
-            "our's",
-            "ourselves",
-            "out",
-            "over",
-            "own",
-            //"people",
-            "same",
-            "say",
-            "see",
-            "shan't",
-            "she",
-            "she'd",
-            "shell",
-            "shes",
-            "should",
-            "shouldn't",
-            "so",
-            "some",
-            "such",
-            //"take",
-            "than",
-            "that",
-            "that's",
-            "the",
-            "their",
-            "theirs",
-            "them",
-            "themselves",
-            "then",
-            "there",
-            "there's",
-            "these",
-            "they",
-            "they'd",
-            "they'll",
-            "they're",
-            "they've",
-            //"think",
-            "this",
-            "those",
-            "through",
-            "time",
-            "to",
-            "too",
-            //"two",
-            //"under",
-            "until",
-            "up",
-            "us",
-            //"use",
-            "very",
-            "want",
-            "was",
-            "wasn't",
-            "way",
-            "we",
-            "wed",
-            "well",
-            "were",
-            "weren't",
-            "we've",
-            "what",
-            "what's",
-            "when",
-            "when's",
-            "where",
-            "where's",
-            "which",
-            "while",
-            "who",
-            "whom",
-            "who's",
-            "why",
-            "why's",
-            "will",
-            "with",
-            "won't",
-            //"work",
-            "would",
-            "wouldn't",
-            //"year",
-            "you",
-            "you'd",
-            "you'll",
-            "your",
-            "you're",
-            "your's",
-            "yourself",
-            "yourselves",
-            "you've"
-        ];
-
-        /**
-         * @const {Object<string, string>}
-         */
-
-        var stemmer = {
-
-            "ational": "ate",
-            "tional": "tion",
-            "enci": "ence",
-            "anci": "ance",
-            "izer": "ize",
-            "bli": "ble",
-            "alli": "al",
-            "entli": "ent",
-            "eli": "e",
-            "ousli": "ous",
-            "ization": "ize",
-            "ation": "ate",
-            "ator": "ate",
-            "alism": "al",
-            "iveness": "ive",
-            "fulness": "ful",
-            "ousness": "ous",
-            "aliti": "al",
-            "iviti": "ive",
-            "biliti": "ble",
-            "logi": "log",
-            "icate": "ic",
-            "ative": "",
-            "alize": "al",
-            "iciti": "ic",
-            "ical": "ic",
-            "ful": "",
-            "ness": "",
-            "al": "",
-            "ance": "",
-            "ence": "",
-            "er": "",
-            "ic": "",
-            "able": "",
-            "ible": "",
-            "ant": "",
-            "ement": "",
-            "ment": "",
-            "ent": "",
-            "ou": "",
-            "ism": "",
-            "ate": "",
-            "iti": "",
-            "ous": "",
-            "ive": "",
-            "ize": ""
-        };
+        var stemmer = {};
 
         /**
          * @param {string|Object<string, number|string|boolean|Object|function(string):string>=} options
@@ -455,7 +191,7 @@ var SUPPORT_ASYNC = true;
          * @export
          */
 
-        FlexSearch.addMatcher = function(matcher){
+        FlexSearch.registerMatcher = function(matcher){
 
             for(var key in matcher){
 
@@ -475,9 +211,32 @@ var SUPPORT_ASYNC = true;
          * @export
          */
 
-        FlexSearch.register = function(name, encoder){
+        FlexSearch.registerEncoder = function(name, encoder){
 
             global_encoder[name] = encoder;
+
+            return this;
+        };
+
+        /**
+         * @param {string} lang
+         * @param {Object} language_pack
+         * @export
+         */
+
+        FlexSearch.registerLanguage = function(lang, language_pack){
+
+            /**
+             * @type {Array<string>}
+             */
+
+            filter[lang] = language_pack['filter'];
+
+            /**
+             * @type {Object<string, string>}
+             */
+
+            stemmer[lang] = language_pack['stemmer'];
 
             return this;
         };
@@ -646,32 +405,14 @@ var SUPPORT_ASYNC = true;
                     );
                 }
 
-                if(SUPPORT_BUILTINS && (custom = options['filter'])) {
+                if((custom = options['filter'])) {
 
-                    this.filter = initFilter(
-
-                        (custom === true ?
-
-                            filter
-                        :
-                            /** @type {Array<string>} */
-                            (custom)
-
-                    ), this.encoder);
+                    this.filter = initFilter(filter[custom] || custom, this.encoder);
                 }
 
-                if(SUPPORT_BUILTINS && (custom = options['stemmer'])) {
+                if((custom = options['stemmer'])) {
 
-                    this.stemmer = initStemmer(
-
-                        (custom === true ?
-
-                            stemmer
-                        :
-                            /** @type {Object<string, string>} */
-                            (custom)
-
-                    ), this.encoder);
+                    this.stemmer = initStemmer(stemmer[custom] || custom, this.encoder);
                 }
             //}
 
