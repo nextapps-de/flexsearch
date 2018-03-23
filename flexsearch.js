@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.42
+ * @preserve FlexSearch v0.2.44
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -504,7 +504,9 @@ var SUPPORT_ASYNC = true;
             /** @type {Array} */
             this._matcher = [];
 
-            if(options){
+            //if(options){
+
+            options || (options = defaults);
 
                 var custom = options['profile'];
                 var profile = custom ? profiles[custom] : {};
@@ -586,13 +588,6 @@ var SUPPORT_ASYNC = true;
                     profile.mode ||
                     this.mode ||
                     defaults.mode
-                );
-
-                if(SUPPORT_CACHE) this.cache = (
-
-                    options['cache'] ||
-                    this.cache ||
-                    defaults.cache
                 );
 
                 if(SUPPORT_ASYNC) this.async = (
@@ -678,7 +673,7 @@ var SUPPORT_ASYNC = true;
 
                     ), this.encoder);
                 }
-            }
+            //}
 
             // initialize primary index
 
@@ -689,19 +684,8 @@ var SUPPORT_ASYNC = true;
             ];
 
             this._ctx = {};
-
             this._ids = {};
-
-            /**
-             * @type {Object<string|number, Array>}
-             */
-
             this._stack = {};
-
-            /**
-             * @type {Array<string|number>}
-             */
-
             this._stack_keys = [];
 
             /**
@@ -712,11 +696,21 @@ var SUPPORT_ASYNC = true;
             this._last_empty_query = "";
             this._status = true;
 
-            if(SUPPORT_CACHE) this._cache = this.cache ?
+            if(SUPPORT_CACHE) {
 
-                (new cache(30 * 1000, 50, true))
-            :
-                false;
+                this.cache = custom = (
+
+                    options['cache'] ||
+                    this.cache ||
+                    defaults.cache
+                );
+
+                this._cache = custom ?
+
+                    (new cache(custom))
+                :
+                    false;
+            }
 
             return this;
         };
@@ -900,6 +894,7 @@ var SUPPORT_ASYNC = true;
                         if(value){
 
                             var length = value.length;
+                            var context_score = (word_length - i) / word_length;
 
                             switch(tokenizer){
 
@@ -918,9 +913,8 @@ var SUPPORT_ASYNC = true;
                                             dupes,
                                             tmp,
                                             id,
-                                            /** @type {string} */
-                                            (content),
-                                            0,
+                                            (length - a) / length,
+                                            context_score,
                                             threshold
                                         );
                                     }
@@ -941,9 +935,8 @@ var SUPPORT_ASYNC = true;
                                             dupes,
                                             tmp,
                                             id,
-                                            /** @type {string} */
-                                            (content),
-                                            0,
+                                            1,
+                                            context_score,
                                             threshold
                                         );
                                     }
@@ -956,6 +949,8 @@ var SUPPORT_ASYNC = true;
 
                                     for(var x = 0; x < length; x++){
 
+                                        var partial_score = (length - x) / length;
+
                                         for(var y = length; y > x; y--){
 
                                             tmp = value.substring(x, y);
@@ -966,9 +961,8 @@ var SUPPORT_ASYNC = true;
                                                 dupes,
                                                 tmp,
                                                 id,
-                                                /** @type {string} */
-                                                (content),
-                                                0,
+                                                partial_score,
+                                                context_score,
                                                 threshold
                                             );
                                         }
@@ -986,9 +980,10 @@ var SUPPORT_ASYNC = true;
                                         dupes,
                                         value,
                                         id,
-                                        /** @type {string} */
-                                        (content),
-                                        depth ? 1 : 0,
+                                        // Note: ngrams has partial scoring (sequence->word) and contextual scoring (word->context)
+                                        // TODO compute and pass distance of ngram sequences as the initial score for each word
+                                        1,
+                                        context_score,
                                         threshold
                                     );
 
@@ -1015,9 +1010,8 @@ var SUPPORT_ASYNC = true;
                                                 ctx_dupes,
                                                 words[x],
                                                 id,
-                                                /** @type {string} */
-                                                (content),
-                                                (x < i ? i - x : x - i),
+                                                0,
+                                                10 - (x < i ? i - x : x - i),
                                                 threshold
                                             );
                                         }
@@ -1465,6 +1459,7 @@ var SUPPORT_ASYNC = true;
             if(SUPPORT_CACHE && this.cache){
 
                 this._cache.reset();
+                this._cache = null;
             }
 
             // release references
@@ -1476,8 +1471,7 @@ var SUPPORT_ASYNC = true;
             this._ctx =
             this._ids =
             this._stack =
-            this._stack_keys =
-            this._cache = null;
+            this._stack_keys = null;
 
             return this;
         };
@@ -1496,8 +1490,8 @@ var SUPPORT_ASYNC = true;
 
                 regex_space, ' ',
                 regex_strip, '',
-                regex_whitespace, ' ',
-                regex_vowel, ''
+                regex_whitespace, ' '
+                //regex_vowel, ''
             ];
 
             return function(value){
@@ -1747,7 +1741,7 @@ var SUPPORT_ASYNC = true;
 
         })() : null;
 
-        // Xone Flexi-Cache Handler Fallback
+        // Flexi-Cache
 
         var cache = SUPPORT_CACHE ? (function(){
 
@@ -1755,7 +1749,8 @@ var SUPPORT_ASYNC = true;
             function Cache(limit){
 
                 this.reset();
-                this.limit = limit || 1000;
+
+                this.limit = (limit !== true) && limit;
             }
 
             /** @this {Cache} */
@@ -1770,7 +1765,7 @@ var SUPPORT_ASYNC = true;
             /** @this {Cache} */
             Cache.prototype.set = function(id, value){
 
-                if(!this.count[id]){
+                if(this.limit && (typeof this.cache[id] === 'undefined')){
 
                     var length = this.keys.length;
 
@@ -1787,25 +1782,29 @@ var SUPPORT_ASYNC = true;
 
                     this.index[id] = length;
                     this.keys[length] = id;
-                    this.count[id] = 1;
+                    this.count[id] = -1;
+                    this.cache[id] = value;
+
+                    // shift up counter +1
+
+                    this.get(id);
                 }
+                else{
 
-                this.cache[id] = value;
-
-                // shift up counter +1
-
-                this.get(id);
+                    this.cache[id] = value;
+                }
             };
 
             /**
-             * Note: It is a lot better to have the complexity when fetching the cache:
+             * Note: It is better to have the complexity when fetching the cache:
              * @this {Cache}
              */
+
             Cache.prototype.get = function(id){
 
                 var cache = this.cache[id];
 
-                if(cache){
+                if(this.limit && cache){
 
                     var count = ++this.count[id];
                     var index = this.index;
@@ -1816,18 +1815,32 @@ var SUPPORT_ASYNC = true;
                         var keys = this.keys;
                         var old_index = current_index;
 
-                        while(current_index && this.count[keys[current_index--]] <= count){}
+                        // forward pointer
+                        while(this.count[keys[--current_index]] <= count){
 
-                        if(current_index >= 0 && ((current_index + 1) !== old_index)){
+                            if(current_index === -1){
 
-                            var tmp = keys[current_index];
+                                break;
+                            }
+                        }
 
-                            // TODO splice is too slow
+                        // move pointer back
+                        current_index++;
+
+                        if(current_index !== old_index){
+
+                            // copy values from predecessors
+                            for(var i = old_index; i > current_index; i--) {
+
+                                var key = keys[i - 1];
+
+                                keys[i] = key;
+                                index[key] = i;
+                            }
+
+                            // push new value on top
+                            keys[current_index] = id;
                             index[id] = current_index;
-                            keys.splice(current_index, 1, id);
-
-                            index[tmp] = old_index;
-                            keys.splice(old_index, 1, tmp);
                         }
                     }
                 }
@@ -1893,16 +1906,24 @@ var SUPPORT_ASYNC = true;
          * @param {Object} dupes
          * @param {string} tmp
          * @param {string|number} id
-         * @param {string} content
-         * @param {number} context
+         * @param {number} partial_score
+         * @param {number} context_score
          * @param {number} threshold
          */
 
-        function addIndex(map, dupes, tmp, id, content, context, threshold){
+        function addIndex(map, dupes, tmp, id, partial_score, context_score, threshold){
 
             if(typeof dupes[tmp] === 'undefined'){
 
-                var score = context ? (10 - context) : calcScore(tmp, content);
+                var score = (
+
+                    partial_score ?
+
+                        ((9 - (threshold || 6)) * context_score) + ((threshold || 6) * partial_score)
+                        // calcScore(tmp, content)
+                    :
+                        context_score
+                );
 
                 dupes[tmp] = score;
 
@@ -1916,6 +1937,23 @@ var SUPPORT_ASYNC = true;
             }
 
             return score || dupes[tmp];
+        }
+
+        /**
+        * @param {!string} part
+        * @param {!string} ref
+        * @returns {number}
+        */
+
+        function calcScore(part, ref){
+
+            var context_index = ref.indexOf(part);
+            var partial_index = context_index - ref.lastIndexOf(" ", context_index);
+
+            return (
+
+                (3 / ref.length * (ref.length - context_index)) + (6 / partial_index)
+            );
         }
 
         /**
@@ -1959,23 +1997,6 @@ var SUPPORT_ASYNC = true;
                     }
                 }
             }
-        }
-
-        /**
-         * @param {!string} part
-         * @param {!string} ref
-         * @returns {number}
-         */
-
-        function calcScore(part, ref){
-
-            var context_index = ref.indexOf(part);
-            var partial_index = context_index - ref.lastIndexOf(" ", context_index);
-
-            return (
-
-                (3 / ref.length * (ref.length - context_index)) + (6 / partial_index)
-            );
         }
 
         /**
@@ -2027,9 +2048,21 @@ var SUPPORT_ASYNC = true;
                     tmp += char;
                 }
 
+                //console.log(tmp);
+
                 // dynamic n-gram sequences
 
-                if((char === ' ') || ((count_vowels > 1) && (count_literal > 1)) || (count_vowels > 2) || (count_literal > 2) || (i === length - 1)){
+                if((char === ' ') || (
+
+                    (count_vowels >= (length > 8 ? 2 : 1)) &&
+                    (count_literal >= 2)
+
+                ) || (
+
+                    (count_vowels >= 2) &&
+                    (count_literal >= (length > 8 ? 2 : 1))
+
+                ) || (i === length - 1)){
 
                     if(tmp){
 

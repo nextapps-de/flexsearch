@@ -29,33 +29,36 @@ Supported Platforms:
 - Browser
 - Node.js
 
+<!--
 Supported Module Definitions:
 - AMD (RequireJS)
 - CommonJS (Node.js)
 - Closure (Xone)
 - Global (Browser)
+-->
 
 All Features:
 <ul>
     <li><a href="#webworker">Web-Worker Support</a> (not available in Node.js)</li>
+    <li><a href="#contextual">Contextual Indexes</a></li>
     <li>Partial Matching</li>
     <li>Multiple Words</li>
     <li><a href="#phonetic">Phonetic Search</a></li>
     <li>Relevance-based Scoring</li>
-    <li><a href="#contextual">Contextual Indexes</a></li>
+    <li>Auto-Balanced Cache by Popularity</li>
     <li>Limit Results</li>
     <li>Supports Caching</li>
     <li>Asynchronous Processing</li>
-    <li>Customizable: Matcher, Encoder, Tokenizer, Stemmer, Stopword-Filter</li>
+    <li>Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter</li>
 </ul>
 
 These features are not available in the 50% smaller <a href="flexsearch.light.js">light version</a>:
 
 - WebWorker
-- Async handler
-- Cache handler
-- Built-in encoders except 'balanced' (you can still pass in customs)
-- Built-in stemmers and stopword filter (you can still pass in customs)
+- Asynchronous
+- Cache
+- Built-in encoders except 'balance' and 'icase' (you can still pass in customs)
+- Built-in stemmer and filter (you can still pass in customs)
 - Debug logging
 - _index.info()_ method
 
@@ -518,7 +521,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
             "fastest"
         </td>
         <td vertical-align="top">
-            The <a href="#profiles">configuration profile</a>.<br>
+            The <a href="#profiles">configuration profile</a>. Choose your preferation.<br>
         </td>
     </tr>
     <tr></tr>
@@ -545,7 +548,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
             "simple"<br>
             "advanced"<br>
             "extra"<br>
-            "balanced"<br>
+            "balance"<br>
             function()
         </td>
         <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
@@ -572,12 +575,13 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
     -->
     <tr></tr>
     <tr>
-        <td align="top">cache<br><br></td>
+        <td align="top">cache<br><br><br></td>
         <td>
+            false<br>
             true<br>
-            false
+            {number}
         </td>
-        <td>Enable/Disable caching.</td>
+        <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the cache automatically balance stored entries related to their popularity.<br><br>Note: When just using "true" the cache has no limits and is actually 5 times faster (the balancer should not run).</td>
     </tr>
     <tr></tr>
     <tr>
@@ -586,7 +590,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
             true<br>
             false
         </td>
-        <td>Enable/Disable asynchronous processing.</td>
+        <td>Enable/Disable asynchronous processing.<br><br>Each job will be queued for non-blocking processing. Recommended when using WebWorkers.</td>
     </tr>
     <tr></tr>
     <tr>
@@ -605,6 +609,33 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
             {number}
         </td>
         <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets relevance depth (experimental).</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="top">threshold<br><br></td>
+        <td>
+            false<br>
+            {number}
+        </td>
+        <td>Enable/Disable the threshold of minimum relevance results should have.<br><br>Note: You can take a lower threshold for indexing and pass a higher value when calling .search(), but not other turn around.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="top">stemmer<br><br></td>
+        <td>
+            false<br>
+            {function}
+        </td>
+        <td>Disable or pass in custom object/array.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="top">filter<br><br></td>
+        <td>
+            false<br>
+            {function}
+        </td>
+        <td>Disable or pass in custom object/array.</td>
     </tr>
 </table>
 

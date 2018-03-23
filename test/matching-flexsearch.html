@@ -238,17 +238,19 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
         // ---------------------------------------
 
-        do_test('test-1', 'without breach of modesty', '493');
-        do_test('test-2', 'went softly stream', '446');
-        do_test('test-3', 'princes of the ambition', '72');
-        do_test('test-4', 'five-thousand leagues', '2');
-        do_test('test-5', 'i already observed', '458');
-        do_test('test-6', 'let a of his', '50');
-        do_test('test-7', 'take that to the rocks', '175');
-        do_test('test-8', 'bignes of splaknuk', '146');
-        do_test('test-9', 'matematikal musikal instruments', '267');
-        do_test('test-10', 'matical sical strument', '267');
-        do_test('test-11', 'lalkon the camberlayhn', '99');
+        do_test('test-1', 'without breach of modesty', [493]);
+        do_test('test-2', 'went softly stream', [446]);
+        do_test('test-3', 'princes of the ambition', [72, 408]);
+        do_test('test-4', 'five-thousand leagues', [2]);
+        do_test('test-5', 'i already observed', [458, 346]);
+        do_test('test-6', 'let a of his', [50]);
+        do_test('test-7', 'take that to the rocks', [175]);
+        do_test('test-8', 'bignes of splaknuk', [146]);
+        do_test('test-9', 'matematikal musikal instruments', [267]);
+        do_test('test-10', 'matical sical strument', [267]);
+        do_test('test-11', 'lalkon the camberlayhn', [99]);
+
+        // ---------------------------------------
 
         // ---------------------------------------
 
@@ -256,30 +258,65 @@ var text_data = "LIBRARY OF THE FUTURE (R) First Edition Ver. 4.02 Gulliver's Tr
 
             var nodes = document.getElementById(id).getElementsByTagName('td');
 
-            nodes[1].innerHTML = flexsearch_default.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[2].innerHTML = flexsearch_memory.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[3].innerHTML = flexsearch_speed.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[4].innerHTML = flexsearch_match.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[5].innerHTML = flexsearch_score.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[6].innerHTML = flexsearch_balance.search(query).slice(0, 1).join('<br>') || '-';
-            nodes[7].innerHTML = flexsearch_fastest.search(query).slice(0, 1).join('<br>') || '-';
-
             for(var i = 1; i < nodes.length; i++){
 
-                if(nodes[i].innerHTML === '-'){
+                var results;
 
-                    nodes[i].style.backgroundColor = '#f00';
+                switch(i){
+
+                    case 1:
+                        results = flexsearch_default.search(query);
+                        break;
+
+                    case 2:
+                        results = flexsearch_memory.search(query);
+                        break;
+
+                    case 3:
+                        results = flexsearch_speed.search(query);
+                        break;
+
+                    case 4:
+                        results = flexsearch_match.search(query);
+                        break;
+
+                    case 5:
+                        results = flexsearch_score.search(query);
+                        break;
+
+                    case 6:
+                        results = flexsearch_balance.search(query);
+                        break;
+
+                    case 7:
+                        results = flexsearch_fastest.search(query);
+                        break;
                 }
-                else if(nodes[i].innerHTML === ref){
 
-                    nodes[i].style.backgroundColor = '#0a0';
+                for(var a = 0; a < ref.length; a++){
+
+                    var current = ref[a];
+
+                    nodes[i].innerHTML = results[0] || '-';
+                    nodes[i].style.color = '#fff';
+
+                    if((results[0] === current) || (results[0] === String(current))){
+
+                        nodes[i].style.backgroundColor = '#0a0';
+                        break;
+                    }
+                    else if(!results.length || ((results.indexOf(current) === -1) && (results.indexOf(String(current)) === -1))){
+
+                        if(nodes[i].style.backgroundColor !== 'orange'){
+
+                            nodes[i].style.backgroundColor = '#f00';
+                        }
+                    }
+                    else{
+
+                        nodes[i].style.backgroundColor = 'orange';
+                    }
                 }
-                else{
-
-                    nodes[i].style.backgroundColor = 'orange';
-                }
-
-                nodes[i].style.color = '#fff';
             }
         }
 

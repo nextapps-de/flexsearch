@@ -356,11 +356,19 @@ describe('Apply Sort by Scoring', function(){
         expect(flexsearch_reverse.search("xxx").length).to.equal(1);
         expect(flexsearch_reverse.search("yyy").length).to.equal(1);
         expect(flexsearch_reverse.search("zzz").length).to.equal(1);
+
         expect(flexsearch_reverse.search({query: "xxx", threshold: 2}).length).to.equal(1);
-        expect(flexsearch_reverse.search({query: "xxx", threshold: 5}).length).to.equal(0);
-        expect(flexsearch_reverse.search({query: "yyy", threshold: 2}).length).to.equal(0);
-        expect(flexsearch_reverse.search({query: "zzz", threshold: 1}).length).to.equal(0);
+        expect(flexsearch_reverse.search({query: "xxx", threshold: 3}).length).to.equal(1);
+        expect(flexsearch_reverse.search({query: "xxx", threshold: 5}).length).to.equal(1);
+        expect(flexsearch_reverse.search({query: "xxx", threshold: 7}).length).to.equal(0); // <-- stop
+
+        expect(flexsearch_reverse.search({query: "yyy", threshold: 0}).length).to.equal(1);
+        expect(flexsearch_reverse.search({query: "yyy", threshold: 2}).length).to.equal(1);
+        expect(flexsearch_reverse.search({query: "yyy", threshold: 5}).length).to.equal(0); // <-- stop
+
         expect(flexsearch_reverse.search({query: "zzz", threshold: 0}).length).to.equal(1);
+        expect(flexsearch_reverse.search({query: "zzz", threshold: 1}).length).to.equal(1);
+        expect(flexsearch_reverse.search({query: "zzz", threshold: 3}).length).to.equal(0); // <-- stop
     });
 });
 

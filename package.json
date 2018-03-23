@@ -1,7 +1,7 @@
 {
-  "name": "FlexSearch",
-  "version": "0.2.42",
-  "description": "World's fastest and most memory efficient full text search library.",
+  "name": "flexsearch",
+  "version": "0.2.44",
+  "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://nextapps-de.github.io/xone/",
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
