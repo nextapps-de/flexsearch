@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.46
+ * @preserve FlexSearch v0.2.48
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -37,6 +37,7 @@ var SUPPORT_ASYNC = true;
 
             encode: 'icase',
             mode: 'ngram',
+            suggest: false,
             cache: false,
             async: false,
             worker: false,
@@ -315,13 +316,16 @@ var SUPPORT_ASYNC = true;
 
                                 if(self._current_callback && (self._task_completed === self.worker)){
 
-                                    if(self._task_result.length){
+                                    if(typeof self._last_empty_query !== 'undefined'){
 
-                                        self._last_empty_query = "";
-                                    }
-                                    else{
+                                        if(self._task_result.length){
 
-                                        self._last_empty_query || (self._last_empty_query = query);
+                                            self._last_empty_query = "";
+                                        }
+                                        else{
+
+                                            self._last_empty_query || (self._last_empty_query = query);
+                                        }
                                     }
 
                                     // store result to cache
@@ -379,6 +383,13 @@ var SUPPORT_ASYNC = true;
                     defaults.depth
                 );
 
+                this.suggest = (
+
+                    options['suggest'] ||
+                    this.suggest ||
+                    defaults.suggest
+                );
+
                 custom = options['encode'] || profile.encode;
 
                 this.encoder = (
@@ -434,8 +445,12 @@ var SUPPORT_ASYNC = true;
              */
 
             this._timer = null;
-            this._last_empty_query = "";
             this._status = true;
+
+            if(this.mode === 'forward' || this.mode === 'reverse' || this.mode === 'both'){
+
+                this._last_empty_query = "";
+            }
 
             if(SUPPORT_CACHE) {
 
@@ -479,6 +494,8 @@ var SUPPORT_ASYNC = true;
                 value = this.encoder.call(global_encoder, value);
             }
 
+            // TODO completely filter out words actually can break the context chain
+            /*
             if(value && this.filter){
 
                 var words = value.split(' ');
@@ -493,7 +510,6 @@ var SUPPORT_ASYNC = true;
 
                         //var length = word.length - 1;
 
-                        // TODO completely filter out words actually breaks the context chain
                         words[i] = filter;
                         //words[i] = word[0] + (length ? word[1] : '');
                         //words[i] = '~' + word[0];
@@ -505,6 +521,7 @@ var SUPPORT_ASYNC = true;
 
                 value = words.join(' '); // final;
             }
+            */
 
             if(value && this.stemmer){
 
@@ -934,7 +951,11 @@ var SUPPORT_ASYNC = true;
 
                 if(SUPPORT_CACHE && this.cache){
 
-                    this._last_empty_query = "";
+                    if(typeof this._last_empty_query !== 'undefined'){
+
+                        this._last_empty_query = "";
+                    }
+
                     this._cache.reset();
                 }
 
@@ -955,7 +976,7 @@ var SUPPORT_ASYNC = true;
 
             // validate last query
 
-            else if(this._last_empty_query && (query.indexOf(this._last_empty_query) === 0)){
+            else if((typeof this._last_empty_query !== 'undefined') && this._last_empty_query && (query.indexOf(this._last_empty_query) === 0)){
 
                 return result;
             }
@@ -1047,10 +1068,13 @@ var SUPPORT_ASYNC = true;
 
                         if(!map_found){
 
-                            found = false;
-                            break;
+                            if(!this.suggest){
+
+                                found = false;
+                                break;
+                            }
                         }
-                        else{
+                        else {
 
                             // Not handled by intersection:
 
@@ -1083,20 +1107,23 @@ var SUPPORT_ASYNC = true;
 
                 // Not handled by intersection:
 
-                result = intersect(check, limit);
+                result = intersect(check, limit, this.suggest);
 
                 // Handled by intersection:
 
-                //result = intersect_3d(check, limit);
+                //result = intersect_3d(check, limit, this.suggest);
             }
 
-            if(result.length){
+            if(typeof this._last_empty_query !== 'undefined'){
 
-                this._last_empty_query = "";
-            }
-            else{
+                if(result.length){
 
-                this._last_empty_query || (this._last_empty_query = query);
+                    this._last_empty_query = "";
+                }
+                else{
+
+                    this._last_empty_query || (this._last_empty_query = query);
+                }
             }
 
             // store result to cache
@@ -2007,12 +2034,14 @@ var SUPPORT_ASYNC = true;
         /**
          * @param {!Array<Array<number|string>>} arrays
          * @param {number=} limit
+         * @param {boolean=} suggest
          * @returns {Array}
          */
 
-        function intersect(arrays, limit) {
+        function intersect(arrays, limit, suggest) {
 
             var result = [];
+            var suggestions = [];
             var length_z = arrays.length;
 
             if(length_z > 1){
@@ -2043,25 +2072,28 @@ var SUPPORT_ASYNC = true;
                     // get each array one by one
 
                     var found = false;
+                    var is_final_loop = (z === (length_z - 1));
 
+                    suggestions = [];
                     arr = arrays[z];
                     length = arr.length;
-                    i = 0;
+                    i = -1;
 
                     while(i < length){
 
-                        if((check[tmp = arr[i++]]) === z){
+                        var check_val = check[tmp = arr[++i]];
+
+                        if(check_val === z){
 
                             // fill in during last round
 
-                            if(z === (length_z - 1)){
+                            if(is_final_loop){
 
                                 result[count++] = tmp;
 
                                 if(limit && (count === limit)){
 
-                                    found = false;
-                                    break;
+                                    return result;
                                 }
                             }
 
@@ -2070,14 +2102,48 @@ var SUPPORT_ASYNC = true;
                             found = true;
                             check[tmp] = z + 1;
                         }
+                        else if(suggest){
+
+                            var current_suggestion = suggestions[check_val] || (suggestions[check_val] = []);
+
+                            current_suggestion[current_suggestion.length] = tmp;
+                        }
                     }
 
-                    if(!found){
+                    if(!found && !suggest){
 
                         break;
                     }
 
                     z++;
+                }
+
+                if(suggest){
+
+                    limit || (limit = 1000);
+                    count = result.length;
+                    length = suggestions.length;
+
+                    if((count < limit) && length){
+
+                        for(z = length - 1; z >= 0; z--){
+
+                            tmp = suggestions[z];
+
+                            if(tmp){
+
+                                for(i = 0; i < tmp.length; i++){
+
+                                    result[count++] = tmp[i];
+
+                                    if(limit && (count === limit)){
+
+                                        return result;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             else if(length_z){
@@ -2088,7 +2154,7 @@ var SUPPORT_ASYNC = true;
 
                     // Note: do not modify the original index array!
 
-                    return result.slice(0, limit);
+                    result = result.slice(0, limit);
                 }
 
                 // Note: handle references to the original index array
@@ -2285,10 +2351,10 @@ var SUPPORT_ASYNC = true;
                             ref.add(current[1], current[2]);
                             break;
 
-                        case enum_task.update:
-
-                            ref.update(current[1], current[2]);
-                            break;
+                        // case enum_task.update:
+                        //
+                        //     ref.update(current[1], current[2]);
+                        //     break;
 
                         case enum_task.remove:
 

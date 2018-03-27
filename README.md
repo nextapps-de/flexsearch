@@ -7,17 +7,14 @@
     <img src="https://img.shields.io/badge/status-BETA-orange.svg">
     <a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
     <a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master"></a>
-    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/xone.svg"></a>
-    <img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">
+    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/xone.svg"></a><!--<img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">-->
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/xone.svg"></a>
 </p>
 <h1></h1>
 <h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
+
 When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-It also has the <a href="#memory">most memory-efficient index</a>.
-<!-- 
-Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
--->
+It also has the <a href="#memory">most memory-efficient index</a>.<!-- Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.-->
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
@@ -201,13 +198,15 @@ var FlexSearch = require("./flexsearch.js");
 
 Global methods:
 - <a href="#flexsearch.create">FlexSearch.__create__(\<options\>)</a>
-- <a href="#flexsearch.registerMatcher">FlexSearch.__registerMatcher__({_KEY: VALUE_})</a>
-- <a href="#flexsearch.registerEncoder">FlexSearch.__registerEncoder__(name, encoder)</a>
+- <a href="#flexsearch.addmatcher">FlexSearch.__registerMatcher__({_KEY: VALUE_})</a>
+- <a href="#flexsearch.register">FlexSearch.__registerEncoder__(name, encoder)</a>
+- <a href="#flexsearch.language">FlexSearch.__registerLanguage__(lang, {stemmer:{}, filter:[]})</a>
 - <a href="#flexsearch.encode">FlexSearch.__encode__(name, string)</a>
 
 Index methods:
 - <a href="#index.add">Index.__add__(id, string)</a>
 - <a href="#index.search">Index.__search__(string, \<limit\>, \<callback\>)</a>
+- <a href="#index.search">Index.__search__(\<options\>)</a>
 - <a href="#index.update">Index.__update__(id, string)</a>
 - <a href="#index.remove">Index.__remove__(id)</a>
 - <a href="#index.reset">Index.__reset__()</a>
@@ -296,19 +295,37 @@ index.search({
     query: "John",
     limit: 1000,
     threshold: 5, // >= initial threshold
-    depth: 3      // <= initial depth
+    depth: 3,     // <= initial depth
+    callback: function(results){/* ... */}
 });
 ```
 
-Get suggestions of a query:
+The same from above could also be written as:
+
+```js
+index.search("John", {
+
+    limit: 1000,
+    threshold: 5,
+    depth: 3
+    
+}, function(results){
+    
+    // ....
+});
+```
+
+Get also suggestions for a query:
 
 ```js
 index.search({
     
-    query: "John",
+    query: "John Doe",
     suggest: true
 });
 ```
+
+When suggestion is enabled all results will be filled up (until limit, default 1000) with similar matches ordered by relevance.
 
 <a name="index.update"></a>
 #### Update item to the index
@@ -461,7 +478,7 @@ var index = new FlexSearch({
     }
 });
 ```
-<a name="flexsearch.stemmer"></a>
+<a name="flexsearch.language"></a>
 #### Add language-specific stemmer and/or filter
 
 > __Stemmer:__ several linguistic mutations of the same word (e.g. "run" and "running")

@@ -884,7 +884,7 @@ describe('Context', function(){
 });
 
 // ------------------------------------------------------------------------
-// Encoding Tests
+// Tokenizer Tests
 // ------------------------------------------------------------------------
 
 describe('Options', function(){
@@ -991,10 +991,38 @@ describe('Relevance', function(){
 
         expect(index.search("1 3 4")).to.have.members([0]);
         expect(index.search("1 5 3 4")).to.have.members([0]);
+        expect(index.search("1 3 4 7")).to.have.lengthOf(0);
         expect(index.search("one")).to.have.members([1, 2]);
         expect(index.search("one three")).to.have.members([1, 2]);
         expect(index.search("three one")).to.have.members([1, 2]);
         expect(index.search("zero five one ten")).to.have.members([2]);
+    });
+});
+
+// ------------------------------------------------------------------------
+// Suggestion Tests
+// ------------------------------------------------------------------------
+
+describe('Suggestion', function(){
+
+    it('Should have been suggested properly by relevance', function(){
+
+        var index = new FlexSearch({
+            encode: 'advanced',
+            mode: 'strict',
+            suggest: true
+        });
+
+        index.add(0, "1 2 3 2 4 1 5 3");
+        index.add(1, "zero one two three four five six seven eight nine ten");
+        index.add(2, "four two zero one three ten five seven eight six nine");
+
+        expect(index.search("1 3 4 7")).to.have.members([0]);
+        expect(index.search("1 3 9 7")).to.have.members([0]);
+        expect(index.search("one foobar two")).to.have.members([1, 2]);
+        expect(index.search("zero one foobar two foobar")).to.have.members([1, 2]);
+        //TODO
+        //expect(index.search("zero one foobar two foobar")[0]).to.equal(1);
     });
 });
 
@@ -1029,9 +1057,8 @@ describe('Add Matchers', function(){
         }).addMatcher({
 
             '8': 'f'
-        });
 
-        flexsearch_forward.add(0, "12345678");
+        }).add(0, "12345678");
 
         expect(flexsearch_forward.search("12345678")).to.include(0);
         expect(flexsearch_forward.search("abcd")).to.include(0);
@@ -1152,5 +1179,5 @@ describe('Chaining', function(){
 
 function test_encoder(str){
 
-    return str = '-[' + str.toUpperCase() + ']-';
+    return '-[' + str.toUpperCase() + ']-';
 }
