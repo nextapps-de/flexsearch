@@ -14,7 +14,7 @@
 <h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
 
 When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-It also has the <a href="#memory">most memory-efficient index</a>.<!-- Keep in mind that updating / removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.-->
+It also has the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
@@ -84,7 +84,6 @@ Workers get its own dedicated memory. Especially for larger indexes, web worker 
 
 __Note:__ It is slightly faster to use no web worker when the index or query isn't too big (index < 500,000 words, query < 25 words).
 
-<!--
 #### Compare BulkSearch vs. FlexSearch
 
 <table>
@@ -107,9 +106,21 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
     </tr>
     <tr></tr>
     <tr>
-        <td>Usecase</td>
-        <td><ul><li>Limited content</li><li>Use when existing items of the index needs to be updated continously (update, remove)</li><li>Supports pagination</li></ul></td>
-        <td><ul><li>Fastest possible search</li><li>Use when existing items of the index does not need to be updated continously (update, remove)</li><li>Max out memory capabilities</li><li>Enhanced relevance scoring</li></ul></td>
+        <td>Index Type</td>
+        <td>Bulk of encoded string data divided into chunks</td>
+        <td><ol><li>Lexical pre-scored dictionary</li><li>Contextual-based map</li></ol></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>Strength</td>
+        <td><ul><li>fast adds / fast updates / fast removals</li></ul></td>
+        <td><ul><li>fast queries</li><li>memory-efficient index</li></ul></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>Weaks</td>
+        <td><ul><li>less powerful contextual search</li><li>less memory efficient (has to be defragmented from time to time)</li></ul></td>
+        <td><ul><li>updating / deleting extisting items from index is slow</li><li>adding items to the index optimized for super partial matching (mode: "full") is slow</li></ul></td>
     </tr>
     <tr></tr>
     <tr>
@@ -117,38 +128,45 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
         <td>Yes</td>
         <td>No</td>
     </tr>
+    <!--
+    <tr></tr>
+    <tr>
+        <td>Query Wildcards</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
     <tr></tr>
     <tr>
         <td>Ranked Searching</td>
-        <td>No</td>
+        <td>Yes</td>
         <td>Yes</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>Contextual Index</td>
-        <td>No</td>
+        <td>Contextual Search</td>
         <td>Yes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>WebWorker</td>
-        <td>No</td>
         <td>Yes</td>
     </tr>
     <tr></tr>
     <tr>
         <td>Super-Partial-Matching</td>
         <td>Yes</td>
-        <td>No</td>
+        <td>Yes</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>Wildcards (Query)</td>
+        <td>Auto-balanced Cache</td>
         <td>Yes</td>
-        <td>No</td>
+        <td>Yes</td>
     </tr>
+    <tr></tr>
+    <tr>
+        <td>WebWorker</td>
+        <td>Yes</td>
+        <td>Yes</td>
+    </tr>
+    -->
 </table>
--->
 
 <a name="installation"></a>
 ## Installation

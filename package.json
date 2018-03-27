@@ -41,7 +41,10 @@
     "flexsearch.js",
     "flexsearch.min.js",
     "lang/",
-    "test/"
+    "test/",
+    "compile.js",
+    "README.md",
+    "LICENSE"
   ],
   "dependencies": {},
   "devDependencies": {
