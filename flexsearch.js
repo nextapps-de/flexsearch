@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.48
+ * @preserve FlexSearch v0.2.49
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -316,17 +316,17 @@ var SUPPORT_ASYNC = true;
 
                                 if(self._current_callback && (self._task_completed === self.worker)){
 
-                                    if(typeof self._last_empty_query !== 'undefined'){
-
-                                        if(self._task_result.length){
-
-                                            self._last_empty_query = "";
-                                        }
-                                        else{
-
-                                            self._last_empty_query || (self._last_empty_query = query);
-                                        }
-                                    }
+                                    // if(typeof self._last_empty_query !== 'undefined'){
+                                    //
+                                    //     if(self._task_result.length){
+                                    //
+                                    //         self._last_empty_query = "";
+                                    //     }
+                                    //     else{
+                                    //
+                                    //         self._last_empty_query || (self._last_empty_query = query);
+                                    //     }
+                                    // }
 
                                     // store result to cache
 
@@ -447,10 +447,10 @@ var SUPPORT_ASYNC = true;
             this._timer = null;
             this._status = true;
 
-            if(this.mode === 'forward' || this.mode === 'reverse' || this.mode === 'both'){
-
-                this._last_empty_query = "";
-            }
+            // if(this.mode === 'forward' || this.mode === 'reverse' || this.mode === 'both'){
+            //
+            //     this._last_empty_query = "";
+            // }
 
             if(SUPPORT_CACHE) {
 
@@ -951,10 +951,10 @@ var SUPPORT_ASYNC = true;
 
                 if(SUPPORT_CACHE && this.cache){
 
-                    if(typeof this._last_empty_query !== 'undefined'){
-
-                        this._last_empty_query = "";
-                    }
+                    // if(typeof this._last_empty_query !== 'undefined'){
+                    //
+                    //     this._last_empty_query = "";
+                    // }
 
                     this._cache.reset();
                 }
@@ -976,10 +976,10 @@ var SUPPORT_ASYNC = true;
 
             // validate last query
 
-            else if((typeof this._last_empty_query !== 'undefined') && this._last_empty_query && (query.indexOf(this._last_empty_query) === 0)){
-
-                return result;
-            }
+            // else if((typeof this._last_empty_query !== 'undefined') && this._last_empty_query && (query.indexOf(this._last_empty_query) === 0)){
+            //
+            //     return result;
+            // }
 
             // encode string
 
@@ -1114,17 +1114,17 @@ var SUPPORT_ASYNC = true;
                 //result = intersect_3d(check, limit, this.suggest);
             }
 
-            if(typeof this._last_empty_query !== 'undefined'){
-
-                if(result.length){
-
-                    this._last_empty_query = "";
-                }
-                else{
-
-                    this._last_empty_query || (this._last_empty_query = query);
-                }
-            }
+            // if(typeof this._last_empty_query !== 'undefined'){
+            //
+            //     if(result.length){
+            //
+            //         this._last_empty_query = "";
+            //     }
+            //     else{
+            //
+            //         this._last_empty_query || (this._last_empty_query = query);
+            //     }
+            // }
 
             // store result to cache
 
@@ -1383,7 +1383,7 @@ var SUPPORT_ASYNC = true;
                     regex_uo, 'u'
                 ];
 
-                return /** @this {global_encoder} */ function(string, _skip_post_processing){
+                return /** @this {Object} */ function(string, _skip_post_processing){
 
                     if(!string){
 
@@ -1445,7 +1445,7 @@ var SUPPORT_ASYNC = true;
                     regex_vowel, ''
                 ];
 
-                return /** @this {global_encoder} */ function(str){
+                return /** @this {Object} */ function(str){
 
                     if(!str){
 
@@ -1527,7 +1527,7 @@ var SUPPORT_ASYNC = true;
                 this.cache = {};
                 this.count = {};
                 this.index = {};
-                this.keys = [];
+                this.ids = [];
             };
 
             /** @this {Cache} */
@@ -1535,13 +1535,13 @@ var SUPPORT_ASYNC = true;
 
                 if(this.limit && (typeof this.cache[id] === 'undefined')){
 
-                    var length = this.keys.length;
+                    var length = this.ids.length;
 
                     if(length === this.limit){
 
                         length--;
 
-                        var last_id = this.keys[length];
+                        var last_id = this.ids[length];
 
                         delete this.cache[last_id];
                         delete this.count[last_id];
@@ -1549,7 +1549,7 @@ var SUPPORT_ASYNC = true;
                     }
 
                     this.index[id] = length;
-                    this.keys[length] = id;
+                    this.ids[length] = id;
                     this.count[id] = -1;
                     this.cache[id] = value;
 
@@ -1580,11 +1580,11 @@ var SUPPORT_ASYNC = true;
 
                     if(current_index > 0){
 
-                        var keys = this.keys;
+                        var ids = this.ids;
                         var old_index = current_index;
 
                         // forward pointer
-                        while(this.count[keys[--current_index]] <= count){
+                        while(this.count[ids[--current_index]] <= count){
 
                             if(current_index === -1){
 
@@ -1600,14 +1600,14 @@ var SUPPORT_ASYNC = true;
                             // copy values from predecessors
                             for(var i = old_index; i > current_index; i--) {
 
-                                var key = keys[i - 1];
+                                var key = ids[i - 1];
 
-                                keys[i] = key;
+                                ids[i] = key;
                                 index[key] = i;
                             }
 
                             // push new value on top
-                            keys[current_index] = id;
+                            ids[current_index] = id;
                             index[id] = current_index;
                         }
                     }
@@ -1769,7 +1769,6 @@ var SUPPORT_ASYNC = true;
 
         /**
          * @param {!string} value
-         *  @this {global_encoder}
          * @returns {Array<?string>}
          */
 
