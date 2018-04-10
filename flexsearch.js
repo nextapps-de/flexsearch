@@ -36,7 +36,7 @@ var SUPPORT_ASYNC = true;
         var defaults = {
 
             encode: 'icase',
-            mode: 'ngram',
+            mode: 'forward',
             suggest: false,
             cache: false,
             async: false,
