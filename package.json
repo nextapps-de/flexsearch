@@ -1,8 +1,8 @@
 {
   "name": "flexsearch",
-  "version": "0.2.49",
+  "version": "0.2.52",
   "description": "Next-Generation full text search library with zero dependencies.",
-  "homepage": "https://nextapps-de.github.io/xone/",
+  "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
   "license": "Apache-2.0",
