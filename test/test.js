@@ -171,7 +171,7 @@ describe('Initialize', function(){
     it('Should have the correct options', function(){
 
         expect(flexsearch_default.async).to.equal(false);
-        expect(flexsearch_default.mode).to.equal("ngram");
+        expect(flexsearch_default.mode).to.equal("forward");
         expect(flexsearch_sync.async).to.equal(false);
         expect(flexsearch_async.async).to.equal(true);
         expect(flexsearch_strict.mode).to.equal("strict");

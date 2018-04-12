@@ -1,4 +1,5 @@
 var child_process = require('child_process');
+var fs = require('fs');
 
 var supported_lang = [
 
@@ -7,6 +8,8 @@ var supported_lang = [
 ];
 
 console.log("Start build .....");
+
+fs.existsSync("log") || fs.mkdirSync("log");
 
 var options = (function(argv){
 

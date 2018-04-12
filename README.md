@@ -1,4 +1,3 @@
-<p align="center"></p>
 <p align="center">
     <br>
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/flexsearch.svg" alt="Search Library" width="50%">
@@ -7,10 +6,10 @@
     <img src="https://img.shields.io/badge/status-BETA-orange.svg">
     <a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
     <a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master"></a>
-<a href="https://app.fossa.io/projects/git%2Bgithub.com%2Fts-thomas%2Fflexsearch?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.io/api/projects/git%2Bgithub.com%2Fts-thomas%2Fflexsearch.svg?type=shield"/></a>
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/xone.svg"></a><!--<img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">-->
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/xone.svg"></a>
 </p>
+
 <h1></h1>
 <h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
 
@@ -28,14 +27,6 @@ Comparison:
 Supported Platforms:
 - Browser
 - Node.js
-
-<!--
-Supported Module Definitions:
-- AMD (RequireJS)
-- CommonJS (Node.js)
-- Closure (Xone)
-- Global (Browser)
--->
 
 All Features:
 <ul>
@@ -65,8 +56,6 @@ The light version is just available as compiled version (<a href="flexsearch.lig
 > It is also pretty simple to make <a href="#builds">Custom Builds</a> 
 
 <a name="contextual"></a>
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fts-thomas%2Fflexsearch.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fts-thomas%2Fflexsearch?ref=badge_large)
 
 #### Contextual Search
 

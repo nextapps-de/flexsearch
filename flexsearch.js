@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.49
+ * @preserve FlexSearch v0.2.63
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
