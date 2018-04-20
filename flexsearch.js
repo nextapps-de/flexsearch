@@ -316,18 +316,6 @@ var SUPPORT_ASYNC = true;
 
                                 if(self._current_callback && (self._task_completed === self.worker)){
 
-                                    // if(typeof self._last_empty_query !== 'undefined'){
-                                    //
-                                    //     if(self._task_result.length){
-                                    //
-                                    //         self._last_empty_query = "";
-                                    //     }
-                                    //     else{
-                                    //
-                                    //         self._last_empty_query || (self._last_empty_query = query);
-                                    //     }
-                                    // }
-
                                     // store result to cache
 
                                     if(self.cache){
@@ -446,11 +434,6 @@ var SUPPORT_ASYNC = true;
 
             this._timer = null;
             this._status = true;
-
-            // if(this.mode === 'forward' || this.mode === 'reverse' || this.mode === 'both'){
-            //
-            //     this._last_empty_query = "";
-            // }
 
             if(SUPPORT_CACHE) {
 
@@ -951,11 +934,6 @@ var SUPPORT_ASYNC = true;
 
                 if(SUPPORT_CACHE && this.cache){
 
-                    // if(typeof this._last_empty_query !== 'undefined'){
-                    //
-                    //     this._last_empty_query = "";
-                    // }
-
                     this._cache.reset();
                 }
 
@@ -973,13 +951,6 @@ var SUPPORT_ASYNC = true;
                     return cache;
                 }
             }
-
-            // validate last query
-
-            // else if((typeof this._last_empty_query !== 'undefined') && this._last_empty_query && (query.indexOf(this._last_empty_query) === 0)){
-            //
-            //     return result;
-            // }
 
             // encode string
 
@@ -1082,6 +1053,7 @@ var SUPPORT_ASYNC = true;
 
                                 count > 1 ?
 
+                                    // https://jsperf.com/merge-arrays-comparison
                                     check.concat.apply([], map_check)
                                 :
                                     map_check[0]
@@ -1113,18 +1085,6 @@ var SUPPORT_ASYNC = true;
 
                 //result = intersect_3d(check, limit, this.suggest);
             }
-
-            // if(typeof this._last_empty_query !== 'undefined'){
-            //
-            //     if(result.length){
-            //
-            //         this._last_empty_query = "";
-            //     }
-            //     else{
-            //
-            //         this._last_empty_query || (this._last_empty_query = query);
-            //     }
-            // }
 
             // store result to cache
 
@@ -2252,9 +2212,11 @@ var SUPPORT_ASYNC = true;
             }
             else if(length_z){
 
-                result = result.concat.apply(result, arrays[0]);
+                arrays = arrays[0];
 
-                if(limit && result && (result.length > limit)){
+                result = arrays.length > 1 ? result.concat.apply(result, arrays) : arrays[0];
+
+                if(limit && (result.length > limit)){
 
                     // Note: do not touch original array!
 
@@ -2274,6 +2236,7 @@ var SUPPORT_ASYNC = true;
          * @returns {Array}
          */
 
+        /*
         function intersect_sorted(a, b, limit){
 
             var result = [];
@@ -2319,6 +2282,7 @@ var SUPPORT_ASYNC = true;
 
             return result;
         }
+        */
 
         /**
          * @param {FlexSearch} ref

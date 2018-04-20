@@ -70,6 +70,10 @@ In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch
 
 __Note:__ This feature is actually not enabled by default.
 
+###### TF-IDF / BM25?
+
+> "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithm today. They does'nt provide either: a meaningful relevance of a term as well as the importance of it! Like many pseudo-intelligent algorithm this is also an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
+
 <a name="webworker"></a>
 #### Web-Worker Support
 
