@@ -266,7 +266,7 @@ var SUPPORT_ASYNC = true;
 
             //if(options){
 
-            options || (options = defaults);
+                options || (options = defaults);
 
                 var custom = options['profile'];
                 var profile = custom ? profiles[custom] : {};
@@ -279,10 +279,10 @@ var SUPPORT_ASYNC = true;
 
                         options['worker'] = false;
 
-                        if(SUPPORT_ASYNC){
-
-                            options['async'] = true;
-                        }
+                        // if(SUPPORT_ASYNC){
+                        //
+                        //     options['async'] = true;
+                        // }
 
                         this._worker = null;
                     }
@@ -295,11 +295,14 @@ var SUPPORT_ASYNC = true;
                         self._task_completed = 0;
                         self._task_result = [];
                         self._current_callback = null;
+                        //self._ids_count = new Array(threads);
                         self._worker = new Array(threads);
 
                         for(var i = 0; i < threads; i++){
 
-                            self._worker[i] = add_worker(self.id, i, options || defaults, function(id, query, result, limit){
+                            //self._ids_count[i] = 0;
+
+                            self._worker[i] = add_worker(self.id, i, options /*|| defaults*/, function(id, query, result, limit){
 
                                 if(self._task_completed === self.worker){
 
@@ -317,6 +320,7 @@ var SUPPORT_ASYNC = true;
                                 if(self._current_callback && (self._task_completed === self.worker)){
 
                                     // store result to cache
+                                    // TODO: add worker cache, may remove global cache
 
                                     if(self.cache){
 
@@ -326,6 +330,8 @@ var SUPPORT_ASYNC = true;
                                     self._current_callback(self._task_result);
                                     self._task_result = [];
                                 }
+
+                                return self;
                             });
                         }
                     }
@@ -433,9 +439,10 @@ var SUPPORT_ASYNC = true;
              */
 
             this._timer = null;
-            this._status = true;
 
             if(SUPPORT_CACHE) {
+
+                this._cache_status = true;
 
                 this.cache = custom = (
 
@@ -557,7 +564,10 @@ var SUPPORT_ASYNC = true;
 
                     if(SUPPORT_WORKER && this.worker){
 
-                        if(++this._current_task >= this._worker.length) this._current_task = 0;
+                        if(++this._current_task >= this._worker.length){
+
+                            this._current_task = 0;
+                        }
 
                         this._worker[this._current_task].postMessage(this._current_task, {
 
@@ -568,8 +578,14 @@ var SUPPORT_ASYNC = true;
 
                         this._ids[id] = "" + this._current_task;
 
+                        // TODO: improve auto-balancing
+                        //this._ids_count[this._current_task]++;
+
                         return this;
                     }
+
+                    // collect tasks for non-blocking processing
+                    // TODO: actually auto-enabled in worker
 
                     if(SUPPORT_ASYNC && this.async){
 
@@ -766,7 +782,11 @@ var SUPPORT_ASYNC = true;
                     // update status
 
                     this._ids[id] = "1";
-                    this._status = false;
+
+                    if(SUPPORT_CACHE){
+
+                        this._cache_status = false;
+                    }
                 }
             }
 
@@ -801,13 +821,15 @@ var SUPPORT_ASYNC = true;
 
                 if(SUPPORT_WORKER && this.worker){
 
-                    var int = parseInt(this._ids[id], 10);
+                    var current_task = parseInt(this._ids[id], 10);
 
-                    this._worker[int].postMessage(int, {
+                    this._worker[current_task].postMessage(current_task, {
 
                         'remove': true,
                         'id': id
                     });
+
+                    //this._ids_count[current_task]--;
 
                     delete this._ids[id];
 
@@ -844,7 +866,10 @@ var SUPPORT_ASYNC = true;
 
                 delete this._ids[id];
 
-                this._status = false;
+                if(SUPPORT_CACHE){
+
+                    this._cache_status = false;
+                }
             }
 
             return this;
@@ -928,27 +953,26 @@ var SUPPORT_ASYNC = true;
             /** @type {!string|Array<string>} */
             var _query = query;
 
-            // invalidate cache
+            if(SUPPORT_CACHE && this.cache){
 
-            if(!this._status){
+                // invalidate cache
 
-                if(SUPPORT_CACHE && this.cache){
+                if(!this._cache_status){
 
                     this._cache.reset();
+                    this._cache_status = true;
                 }
 
-                this._status = true;
-            }
+                // validate cache
 
-            // validate cache
+                else {
 
-            else if(SUPPORT_CACHE && this.cache){
+                    var cache = this._cache.get(query);
 
-                var cache = this._cache.get(query);
+                    if(cache){
 
-                if(cache){
-
-                    return cache;
+                        return cache;
+                    }
                 }
             }
 
@@ -1153,7 +1177,7 @@ var SUPPORT_ASYNC = true;
                     'items': items,
                     'sequences': words,
                     'chars': chars,
-                    'status': this._status,
+                    //'status': this._cache_status,
                     'cache': this._stack_keys.length,
                     'matcher': global_matcher.length,
                     'worker': this.worker

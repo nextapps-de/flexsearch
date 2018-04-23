@@ -1126,7 +1126,7 @@ if(env !== 'light'){
 
                 'id',
                 'chars',
-                'status',
+                //'status',
                 'cache',
                 'items',
                 'matcher',
