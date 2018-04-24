@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.63
+ * @preserve FlexSearch v0.2.66
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -22,7 +22,7 @@ var SUPPORT_ASYNC = true;
 
 (function(){
 
-    provide('FlexSearch', (function factory(register_worker){
+    provide("FlexSearch", (function factory(registerWorker){
 
         "use strict";
 
@@ -35,8 +35,8 @@ var SUPPORT_ASYNC = true;
 
         var defaults = {
 
-            encode: 'icase',
-            mode: 'forward',
+            encode: "icase",
+            mode: "forward",
             suggest: false,
             cache: false,
             async: false,
@@ -103,20 +103,20 @@ var SUPPORT_ASYNC = true;
          * @private
          */
 
-        var global_matcher = [];
+        var globalMatcher = [];
 
         /**
          * @type {number}
          * @private
          */
 
-        var id_counter = 0;
+        var idCounter = 0;
 
         /**
          * @enum {number}
          */
 
-        var enum_task = {
+        var enumTask = {
 
             add: 0,
             update: 1,
@@ -124,7 +124,7 @@ var SUPPORT_ASYNC = true;
         };
 
         /**  @const  {RegExp} */
-        var regex_split = regex("[ -\/]");
+        var regexSplit = regex("[ -\/]");
 
         var filter = {};
 
@@ -138,7 +138,7 @@ var SUPPORT_ASYNC = true;
 
         function FlexSearch(options){
 
-            if(typeof options === 'string'){
+            if((typeof options === "string") && profiles.hasOwnProperty(options)){
 
                 options = profiles[options];
             }
@@ -148,7 +148,7 @@ var SUPPORT_ASYNC = true;
             // generate UID
 
             /** @export */
-            this.id = options['id'] || id_counter++;
+            this.id = options["id"] || idCounter++;
 
             // initialize index
 
@@ -156,12 +156,12 @@ var SUPPORT_ASYNC = true;
 
             // define functional properties
 
-            registerProperty(this, 'index', /** @this {FlexSearch} */ function(){
+            registerProperty(this, "index", /** @this {FlexSearch} */ function(){
 
                 return this._ids;
             });
 
-            registerProperty(this, 'length', /** @this {FlexSearch} */ function(){
+            registerProperty(this, "length", /** @this {FlexSearch} */ function(){
 
                 return Object.keys(this._ids).length;
             });
@@ -198,8 +198,7 @@ var SUPPORT_ASYNC = true;
 
                 if(matcher.hasOwnProperty(key)){
 
-                    global_matcher[global_matcher.length] = regex(key);
-                    global_matcher[global_matcher.length] = matcher[key];
+                    globalMatcher.push(regex(key), matcher[key]);
                 }
             }
 
@@ -214,30 +213,30 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.registerEncoder = function(name, encoder){
 
-            global_encoder[name] = encoder;
+            globalEncoder[name] = encoder;
 
             return this;
         };
 
         /**
          * @param {string} lang
-         * @param {Object} language_pack
+         * @param {Object} languagePack
          * @export
          */
 
-        FlexSearch.registerLanguage = function(lang, language_pack){
+        FlexSearch.registerLanguage = function(lang, languagePack){
 
             /**
              * @type {Array<string>}
              */
 
-            filter[lang] = language_pack['filter'];
+            filter[lang] = languagePack["filter"];
 
             /**
              * @type {Object<string, string>}
              */
 
-            stemmer[lang] = language_pack['stemmer'];
+            stemmer[lang] = languagePack["stemmer"];
 
             return this;
         };
@@ -251,7 +250,7 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.encode = function(name, value){
 
-            return global_encoder[name].call(global_encoder, value);
+            return globalEncoder[name].call(globalEncoder, value);
         };
 
         /**
@@ -268,20 +267,20 @@ var SUPPORT_ASYNC = true;
 
                 options || (options = defaults);
 
-                var custom = options['profile'];
+                var custom = options["profile"];
                 var profile = custom ? profiles[custom] : {};
 
                 // initialize worker
 
-                if(SUPPORT_WORKER && (custom = options['worker'])){
+                if(SUPPORT_WORKER && (custom = options["worker"])){
 
-                    if(typeof Worker === 'undefined'){
+                    if(typeof Worker === "undefined"){
 
-                        options['worker'] = false;
+                        options["worker"] = false;
 
                         // if(SUPPORT_ASYNC){
                         //
-                        //     options['async'] = true;
+                        //     options["async"] = true;
                         // }
 
                         this._worker = null;
@@ -291,10 +290,10 @@ var SUPPORT_ASYNC = true;
                         var self = this;
                         var threads = parseInt(custom, 10) || 4;
 
-                        self._current_task = -1;
-                        self._task_completed = 0;
-                        self._task_result = [];
-                        self._current_callback = null;
+                        self._currentTask = -1;
+                        self._taskCompleted = 0;
+                        self._taskResult = [];
+                        self._currentCallback = null;
                         //self._ids_count = new Array(threads);
                         self._worker = new Array(threads);
 
@@ -304,31 +303,31 @@ var SUPPORT_ASYNC = true;
 
                             self._worker[i] = add_worker(self.id, i, options /*|| defaults*/, function(id, query, result, limit){
 
-                                if(self._task_completed === self.worker){
+                                if(self._taskCompleted === self.worker){
 
                                     return;
                                 }
 
-                                self._task_result = self._task_result.concat(result);
-                                self._task_completed++;
+                                self._taskResult = self._taskResult.concat(result);
+                                self._taskCompleted++;
 
-                                if(limit && (self._task_result.length >= limit)){
+                                if(limit && (self._taskResult.length >= limit)){
 
-                                    self._task_completed = self.worker;
+                                    self._taskCompleted = self.worker;
                                 }
 
-                                if(self._current_callback && (self._task_completed === self.worker)){
+                                if(self._currentCallback && (self._taskCompleted === self.worker)){
 
                                     // store result to cache
                                     // TODO: add worker cache, may remove global cache
 
                                     if(self.cache){
 
-                                        self._cache.set(query, self._task_result);
+                                        self._cache.set(query, self._taskResult);
                                     }
 
-                                    self._current_callback(self._task_result);
-                                    self._task_result = [];
+                                    self._currentCallback(self._taskResult);
+                                    self._taskResult = [];
                                 }
 
                                 return self;
@@ -341,7 +340,7 @@ var SUPPORT_ASYNC = true;
 
                 this.mode = (
 
-                    options['mode'] ||
+                    options["mode"] ||
                     profile.mode ||
                     this.mode ||
                     defaults.mode
@@ -349,21 +348,21 @@ var SUPPORT_ASYNC = true;
 
                 if(SUPPORT_ASYNC) this.async = (
 
-                    options['async'] ||
+                    options["async"] ||
                     this.async ||
                     defaults.async
                 );
 
                 if(SUPPORT_WORKER) this.worker = (
 
-                    options['worker'] ||
+                    options["worker"] ||
                     this.worker ||
                     defaults.worker
                 );
 
                 this.threshold = (
 
-                    options['threshold'] ||
+                    options["threshold"] ||
                     profile.threshold ||
                     this.threshold ||
                     defaults.threshold
@@ -371,7 +370,7 @@ var SUPPORT_ASYNC = true;
 
                 this.depth = (
 
-                    options['depth'] ||
+                    options["depth"] ||
                     profile.depth ||
                     this.depth ||
                     defaults.depth
@@ -379,29 +378,29 @@ var SUPPORT_ASYNC = true;
 
                 this.suggest = (
 
-                    options['suggest'] ||
+                    options["suggest"] ||
                     this.suggest ||
                     defaults.suggest
                 );
 
-                custom = options['encode'] || profile.encode;
+                custom = options["encode"] || profile.encode;
 
                 this.encoder = (
 
-                    (custom && global_encoder[custom]) ||
-                    (typeof custom === 'function' ? custom : this.encoder || false)
+                    (custom && globalEncoder[custom]) ||
+                    (typeof custom === "function" ? custom : this.encoder || false)
                 );
 
                 if(SUPPORT_DEBUG){
 
                     this.debug = (
 
-                        options['debug'] ||
+                        options["debug"] ||
                         this.debug
                     );
                 }
 
-                if(custom = options['matcher']) {
+                if(custom = options["matcher"]) {
 
                     this.addMatcher(
 
@@ -410,12 +409,12 @@ var SUPPORT_ASYNC = true;
                     );
                 }
 
-                if((custom = options['filter'])) {
+                if((custom = options["filter"])) {
 
                     this.filter = initFilter(filter[custom] || custom, this.encoder);
                 }
 
-                if((custom = options['stemmer'])) {
+                if((custom = options["stemmer"])) {
 
                     this.stemmer = initStemmer(stemmer[custom] || custom, this.encoder);
                 }
@@ -432,7 +431,7 @@ var SUPPORT_ASYNC = true;
             this._ctx = {};
             this._ids = {};
             this._stack = {};
-            this._stack_keys = [];
+            this._stackKeys = [];
 
             /**
              * @type {number|null}
@@ -442,18 +441,18 @@ var SUPPORT_ASYNC = true;
 
             if(SUPPORT_CACHE) {
 
-                this._cache_status = true;
+                this._cacheStatus = true;
 
                 this.cache = custom = (
 
-                    options['cache'] ||
+                    options["cache"] ||
                     this.cache ||
                     defaults.cache
                 );
 
                 this._cache = custom ?
 
-                    (new cache(custom))
+                    (new Cache(custom))
                 :
                     false;
             }
@@ -469,9 +468,9 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.prototype.encode = function(value){
 
-            if(value && global_matcher.length){
+            if(value && globalMatcher.length){
 
-                value = replace(value, global_matcher);
+                value = replace(value, globalMatcher);
             }
 
             if(value && this._matcher.length){
@@ -481,14 +480,14 @@ var SUPPORT_ASYNC = true;
 
             if(value && this.encoder){
 
-                value = this.encoder.call(global_encoder, value);
+                value = this.encoder.call(globalEncoder, value);
             }
 
             // TODO completely filter out words actually can break the context chain
             /*
             if(value && this.filter){
 
-                var words = value.split(' ');
+                var words = value.split(" ");
                 //var final = "";
 
                 for(var i = 0; i < words.length; i++){
@@ -501,15 +500,15 @@ var SUPPORT_ASYNC = true;
                         //var length = word.length - 1;
 
                         words[i] = filter;
-                        //words[i] = word[0] + (length ? word[1] : '');
-                        //words[i] = '~' + word[0];
+                        //words[i] = word[0] + (length ? word[1] : "");
+                        //words[i] = "~" + word[0];
                         //words.splice(i, 1);
                         //i--;
-                        //final += (final ? ' ' : '') + word;
+                        //final += (final ? " " : "") + word;
                     }
                 }
 
-                value = words.join(' '); // final;
+                value = words.join(" "); // final;
             }
             */
 
@@ -545,18 +544,18 @@ var SUPPORT_ASYNC = true;
         /**
          * @param {?number|string} id
          * @param {?string} content
-         * @param {boolean=} _skip_update
+         * @param {boolean=} _skipUpdate
          * @this {FlexSearch}
          * @export
          */
 
-        FlexSearch.prototype.add = function(id, content, _skip_update){
+        FlexSearch.prototype.add = function(id, content, _skipUpdate){
 
-            if((typeof content === 'string') && content && (id || (id === 0))){
+            if((typeof content === "string") && content && (id || (id === 0))){
 
                 // check if index ID already exist
 
-                if(this._ids[id] && !_skip_update){
+                if(this._ids[id] && !_skipUpdate){
 
                     this.update(id, content);
                 }
@@ -564,22 +563,22 @@ var SUPPORT_ASYNC = true;
 
                     if(SUPPORT_WORKER && this.worker){
 
-                        if(++this._current_task >= this._worker.length){
+                        if(++this._currentTask >= this._worker.length){
 
-                            this._current_task = 0;
+                            this._currentTask = 0;
                         }
 
-                        this._worker[this._current_task].postMessage(this._current_task, {
+                        this._worker[this._currentTask].postMessage(this._currentTask, {
 
-                            'add': true,
-                            'id': id,
-                            'content': content
+                            "add": true,
+                            "id": id,
+                            "content": content
                         });
 
-                        this._ids[id] = "" + this._current_task;
+                        this._ids[id] = "" + this._currentTask;
 
                         // TODO: improve auto-balancing
-                        //this._ids_count[this._current_task]++;
+                        //this._ids_count[this._currentTask]++;
 
                         return this;
                     }
@@ -591,17 +590,17 @@ var SUPPORT_ASYNC = true;
 
                         this._stack[id] || (
 
-                            this._stack_keys[this._stack_keys.length] = id
+                            this._stackKeys[this._stackKeys.length] = id
                         );
 
                         this._stack[id] = [
 
-                            enum_task.add,
+                            enumTask.add,
                             id,
                             content
                         ];
 
-                        register_task(this);
+                        registerTask(this);
 
                         return this;
                     }
@@ -617,33 +616,33 @@ var SUPPORT_ASYNC = true;
 
                     var words = (
 
-                        typeof tokenizer === 'function' ?
+                        typeof tokenizer === "function" ?
 
                             tokenizer(content)
                         :(
-                            tokenizer === 'ngram' ?
+                            tokenizer === "ngram" ?
 
                                 /** @type {!Array<string>} */
                                 (ngram(content))
                             :
                                 /** @type {string} */
-                                (content).split(regex_split)
+                                (content).split(regexSplit)
                         )
                     );
 
                     var dupes = {
 
-                        '_ctx': {}
+                        "_ctx": {}
                     };
 
                     var threshold = this.threshold;
                     var depth = this.depth;
                     var map = this._map;
-                    var word_length = words.length;
+                    var wordLength = words.length;
 
                     // tokenize
 
-                    for(var i = 0; i < word_length; i++){
+                    for(var i = 0; i < wordLength; i++){
 
                         /** @type {string} */
                         var value = words[i];
@@ -651,12 +650,12 @@ var SUPPORT_ASYNC = true;
                         if(value){
 
                             var length = value.length;
-                            var context_score = (word_length - i) / word_length;
+                            var contextScore = (wordLength - i) / wordLength;
 
                             switch(tokenizer){
 
-                                case 'reverse':
-                                case 'both':
+                                case "reverse":
+                                case "both":
 
                                     var tmp = "";
 
@@ -671,14 +670,14 @@ var SUPPORT_ASYNC = true;
                                             tmp,
                                             id,
                                             (length - a) / length,
-                                            context_score,
+                                            contextScore,
                                             threshold
                                         );
                                     }
 
                                 // Note: no break here, fallthrough to next case
 
-                                case 'forward':
+                                case "forward":
 
                                     var tmp = "";
 
@@ -693,20 +692,20 @@ var SUPPORT_ASYNC = true;
                                             tmp,
                                             id,
                                             1,
-                                            context_score,
+                                            contextScore,
                                             threshold
                                         );
                                     }
 
                                     break;
 
-                                case 'full':
+                                case "full":
 
                                     var tmp = "";
 
                                     for(var x = 0; x < length; x++){
 
-                                        var partial_score = (length - x) / length;
+                                        var partialScore = (length - x) / length;
 
                                         for(var y = length; y > x; y--){
 
@@ -718,8 +717,8 @@ var SUPPORT_ASYNC = true;
                                                 dupes,
                                                 tmp,
                                                 id,
-                                                partial_score,
-                                                context_score,
+                                                partialScore,
+                                                contextScore,
                                                 threshold
                                             );
                                         }
@@ -727,8 +726,8 @@ var SUPPORT_ASYNC = true;
 
                                     break;
 
-                                case 'strict':
-                                case 'ngram':
+                                case "strict":
+                                case "ngram":
                                 default:
 
                                     var score = addIndex(
@@ -740,14 +739,14 @@ var SUPPORT_ASYNC = true;
                                         // Note: ngrams has partial scoring (sequence->word) and contextual scoring (word->context)
                                         // TODO compute and pass distance of ngram sequences as the initial score for each word
                                         1,
-                                        context_score,
+                                        contextScore,
                                         threshold
                                     );
 
-                                    if(depth && (word_length > 1) && (score >= threshold)){
+                                    if(depth && (wordLength > 1) && (score >= threshold)){
 
-                                        var ctx_dupes = dupes['_ctx'][value] || (dupes['_ctx'][value] = {});
-                                        var ctx_tmp = this._ctx[value] || (this._ctx[value] = [
+                                        var ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = {});
+                                        var ctxTmp = this._ctx[value] || (this._ctx[value] = [
 
                                             {/* 0 */}, {/* 1 */}, {/* 2 */}, {/* 3 */}, {/* 4 */},
                                             {/* 5 */}, {/* 6 */}, {/* 7 */}, {/* 8 */}, {/* 9 */}
@@ -757,14 +756,14 @@ var SUPPORT_ASYNC = true;
                                         var y = i + depth + 1;
 
                                         if(x < 0) x = 0;
-                                        if(y > word_length) y = word_length;
+                                        if(y > wordLength) y = wordLength;
 
                                         for(; x < y; x++){
 
                                             if(x !== i) addIndex(
 
-                                                ctx_tmp,
-                                                ctx_dupes,
+                                                ctxTmp,
+                                                ctxDupes,
                                                 words[x],
                                                 id,
                                                 0,
@@ -785,7 +784,7 @@ var SUPPORT_ASYNC = true;
 
                     if(SUPPORT_CACHE){
 
-                        this._cache_status = false;
+                        this._cacheStatus = false;
                     }
                 }
             }
@@ -801,7 +800,7 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.prototype.update = function(id, content){
 
-            if(this._ids[id] && content && (typeof content === 'string')){
+            if(this._ids[id] && content && (typeof content === "string")){
 
                 this.remove(id);
                 this.add(id, content, /* skip_update: */ true);
@@ -821,15 +820,15 @@ var SUPPORT_ASYNC = true;
 
                 if(SUPPORT_WORKER && this.worker){
 
-                    var current_task = parseInt(this._ids[id], 10);
+                    var currentTask = parseInt(this._ids[id], 10);
 
-                    this._worker[current_task].postMessage(current_task, {
+                    this._worker[currentTask].postMessage(currentTask, {
 
-                        'remove': true,
-                        'id': id
+                        "remove": true,
+                        "id": id
                     });
 
-                    //this._ids_count[current_task]--;
+                    //this._ids_count[currentTask]--;
 
                     delete this._ids[id];
 
@@ -840,16 +839,16 @@ var SUPPORT_ASYNC = true;
 
                     this._stack[id] || (
 
-                        this._stack_keys[this._stack_keys.length] = id
+                        this._stackKeys[this._stackKeys.length] = id
                     );
 
                     this._stack[id] = [
 
-                        enum_task.remove,
+                        enumTask.remove,
                         id
                     ];
 
-                    register_task(this);
+                    registerTask(this);
 
                     return this;
                 }
@@ -868,7 +867,7 @@ var SUPPORT_ASYNC = true;
 
                 if(SUPPORT_CACHE){
 
-                    this._cache_status = false;
+                    this._cacheStatus = false;
                 }
             }
 
@@ -888,19 +887,19 @@ var SUPPORT_ASYNC = true;
             var threshold;
             var result = [];
 
-            if(query && (typeof query === 'object')){
+            if(query && (typeof query === "object")){
 
                 // re-assign properties
 
-                callback = query['callback'] || /** @type {?Function} */ (limit);
-                limit = query['limit'];
-                threshold = query['threshold'];
-                query = query['query'];
+                callback = query["callback"] || /** @type {?Function} */ (limit);
+                limit = query["limit"];
+                threshold = query["threshold"];
+                query = query["query"];
             }
 
             threshold = (threshold || this.threshold || 0) | 0;
 
-            if(typeof limit === 'function'){
+            if(typeof limit === "function"){
 
                 callback = limit;
                 limit = 1000;
@@ -912,18 +911,18 @@ var SUPPORT_ASYNC = true;
 
             if(SUPPORT_WORKER && this.worker){
 
-                this._current_callback = callback;
-                this._task_completed = 0;
-                this._task_result = [];
+                this._currentCallback = callback;
+                this._taskCompleted = 0;
+                this._taskResult = [];
 
                 for(var i = 0; i < this.worker; i++){
 
                     this._worker[i].postMessage(i, {
 
-                        'search': true,
-                        'limit': limit,
-                        'threshold': threshold,
-                        'content': query
+                        "search": true,
+                        "limit": limit,
+                        "threshold": threshold,
+                        "content": query
                     });
                 }
 
@@ -940,12 +939,12 @@ var SUPPORT_ASYNC = true;
                     callback(self.search(query, limit));
                     self = null;
 
-                }, 1, 'search-' + this.id);
+                }, 1, "search-" + this.id);
 
                 return null;
             }
 
-            if(!query || (typeof query !== 'string')){
+            if(!query || (typeof query !== "string")){
 
                 return result;
             }
@@ -957,10 +956,10 @@ var SUPPORT_ASYNC = true;
 
                 // invalidate cache
 
-                if(!this._cache_status){
+                if(!this._cacheStatus){
 
                     this._cache.reset();
-                    this._cache_status = true;
+                    this._cacheStatus = true;
                 }
 
                 // validate cache
@@ -991,33 +990,33 @@ var SUPPORT_ASYNC = true;
 
             var words = (
 
-                typeof tokenizer === 'function' ?
+                typeof tokenizer === "function" ?
 
                     tokenizer(_query)
                 :(
-                    tokenizer === 'ngram' ?
+                    tokenizer === "ngram" ?
 
                         /** @type {!Array<string>} */
                         (ngram(_query))
                     :
                         /** @type {string} */
-                        (_query).split(regex_split)
+                        (_query).split(regexSplit)
                 )
             );
 
             var length = words.length;
             var found = true;
             var check = [];
-            var check_words = {};
+            var checkWords = {};
 
             if(length > 1){
 
                 if(this.depth){
 
-                    var use_contextual = true;
-                    var ctx_root = words[0];
+                    var useContextual = true;
+                    var ctxRoot = words[0];
 
-                    check_words[ctx_root] = "1";
+                    checkWords[ctxRoot] = "1";
                 }
                 else{
 
@@ -1027,28 +1026,28 @@ var SUPPORT_ASYNC = true;
                 }
             }
 
-            var ctx_map;
+            var ctxMap;
 
-            if(!use_contextual || (ctx_map = this._ctx)[ctx_root]){
+            if(!useContextual || (ctxMap = this._ctx)[ctxRoot]){
 
-                for(var a = use_contextual ? 1 : 0; a < length; a++){
+                for(var a = useContextual ? 1 : 0; a < length; a++){
 
                     var value = words[a];
 
-                    if(value && !check_words[value]){
+                    if(value && !checkWords[value]){
 
                         var map;
-                        var map_found = false;
-                        var map_check = [];
+                        var mapFound = false;
+                        var mapCheck = [];
                         var count = 0;
 
                         for(var z = 9; z >= threshold; z--){
 
                             map = (
 
-                                use_contextual ?
+                                useContextual ?
 
-                                    ctx_map[ctx_root]
+                                    ctxMap[ctxRoot]
                                 :
                                     this._map
 
@@ -1056,12 +1055,12 @@ var SUPPORT_ASYNC = true;
 
                             if(map){
 
-                                map_check[count++] = map;
-                                map_found = true;
+                                mapCheck[count++] = map;
+                                mapFound = true;
                             }
                         }
 
-                        if(!map_found){
+                        if(!mapFound){
 
                             if(!this.suggest){
 
@@ -1078,20 +1077,20 @@ var SUPPORT_ASYNC = true;
                                 count > 1 ?
 
                                     // https://jsperf.com/merge-arrays-comparison
-                                    check.concat.apply([], map_check)
+                                    check.concat.apply([], mapCheck)
                                 :
-                                    map_check[0]
+                                    mapCheck[0]
                             );
 
                             // Handled by intersection:
 
-                            // check[check.length] = map_check;
+                            // check[check.length] = mapCheck;
                         }
 
-                        check_words[value] = "1";
+                        checkWords[value] = "1";
                     }
 
-                    ctx_root = value;
+                    ctxRoot = value;
                 }
             }
             else{
@@ -1132,8 +1131,8 @@ var SUPPORT_ASYNC = true;
 
                     for(var i = 0; i < this.worker; i++) this._worker[i].postMessage(i, {
 
-                        'info': true,
-                        'id': this.id
+                        "info": true,
+                        "id": this.id
                     });
 
                     return;
@@ -1172,15 +1171,15 @@ var SUPPORT_ASYNC = true;
 
                 return {
 
-                    'id': this.id,
-                    'memory': bytes,
-                    'items': items,
-                    'sequences': words,
-                    'chars': chars,
-                    //'status': this._cache_status,
-                    'cache': this._stack_keys.length,
-                    'matcher': global_matcher.length,
-                    'worker': this.worker
+                    "id": this.id,
+                    "memory": bytes,
+                    "items": items,
+                    "sequences": words,
+                    "chars": chars,
+                    //"status": this._cacheStatus,
+                    "cache": this._stackKeys.length,
+                    "matcher": globalMatcher.length,
+                    "worker": this.worker
                 };
             };
         }
@@ -1223,38 +1222,38 @@ var SUPPORT_ASYNC = true;
             this._ctx =
             this._ids =
             this._stack =
-            this._stack_keys = null;
+            this._stackKeys = null;
 
             return this;
         };
 
         /** @const */
 
-        var global_encoder_balance = (function(){
+        var globalEncoderBalance = (function(){
 
-            var regex_whitespace = regex('\\s\\s+'),
-                regex_strip = regex('[^a-z0-9 ]'),
-                regex_space = regex('[-\/]'),
-                regex_vowel = regex('[aeiouy]');
+            var regexWhitespace = regex("\\s\\s+"),
+                regexStrip = regex("[^a-z0-9 ]"),
+                regexSpace = regex("[-\/]"),
+                regexVowel = regex("[aeiouy]");
 
             /** @const {Array} */
-            var regex_pairs = [
+            var regexPairs = [
 
-                regex_space, ' ',
-                regex_strip, '',
-                regex_whitespace, ' '
-                //regex_vowel, ''
+                regexSpace, " ",
+                regexStrip, "",
+                regexWhitespace, " "
+                //regexVowel, ""
             ];
 
             return function(value){
 
-                return collapseRepeatingChars(replace(value.toLowerCase(), regex_pairs));
+                return collapseRepeatingChars(replace(value.toLowerCase(), regexPairs));
             }
         })();
 
         /** @const */
 
-        var global_encoder_icase = function(value){
+        var globalEncoderIcase = function(value){
 
             return value.toLowerCase();
         };
@@ -1267,107 +1266,107 @@ var SUPPORT_ASYNC = true;
          * @final
          */
 
-        var global_encoder = SUPPORT_BUILTINS ? {
+        var globalEncoder = SUPPORT_BUILTINS ? {
 
             // case insensitive search
 
-            'icase': global_encoder_icase,
+            "icase": globalEncoderIcase,
 
             // literal normalization
 
-            'simple': (function(){
+            "simple": (function(){
 
-                var regex_whitespace = regex('\\s\\s+'),
-                    regex_strip = regex('[^a-z0-9 ]'),
-                    regex_space = regex('[-\/]'),
-                    regex_a = regex('[àáâãäå]'),
-                    regex_e = regex('[èéêë]'),
-                    regex_i = regex('[ìíîï]'),
-                    regex_o = regex('[òóôõöő]'),
-                    regex_u = regex('[ùúûüű]'),
-                    regex_y = regex('[ýŷÿ]'),
-                    regex_n = regex('ñ'),
-                    regex_c = regex('ç'),
-                    regex_s = regex('ß'),
-                    regex_and = regex(' & ');
+                var regexWhitespace = regex("\\s\\s+"),
+                    regexStrip = regex("[^a-z0-9 ]"),
+                    regexSpace = regex("[-\/]"),
+                    regexA = regex("[àáâãäå]"),
+                    regexE = regex("[èéêë]"),
+                    regexI = regex("[ìíîï]"),
+                    regexO = regex("[òóôõöő]"),
+                    regexU = regex("[ùúûüű]"),
+                    regexY = regex("[ýŷÿ]"),
+                    regexN = regex("ñ"),
+                    regexC = regex("ç"),
+                    regexS = regex("ß"),
+                    regexAnd = regex(" & ");
 
                 /** @const {Array} */
-                var regex_pairs = [
+                var regexPairs = [
 
-                    regex_a, 'a',
-                    regex_e, 'e',
-                    regex_i, 'i',
-                    regex_o, 'o',
-                    regex_u, 'u',
-                    regex_y, 'y',
-                    regex_n, 'n',
-                    regex_c, 'c',
-                    regex_s, 's',
-                    regex_and, ' and ',
-                    regex_space, ' ',
-                    regex_strip, '',
-                    regex_whitespace, ' '
+                    regexA, "a",
+                    regexE, "e",
+                    regexI, "i",
+                    regexO, "o",
+                    regexU, "u",
+                    regexY, "y",
+                    regexN, "n",
+                    regexC, "c",
+                    regexS, "s",
+                    regexAnd, " and ",
+                    regexSpace, " ",
+                    regexStrip, "",
+                    regexWhitespace, " "
                 ];
 
                 return function(str){
 
-                    str = replace(str.toLowerCase(), regex_pairs);
+                    str = replace(str.toLowerCase(), regexPairs);
 
                     return (
 
-                        str !== ' ' ? str : ''
+                        str !== " " ? str : ""
                     );
                 };
             }()),
 
             // literal transformation
 
-            'advanced': (function(){
+            "advanced": (function(){
 
-                var regex_space = regex(' '),
-                    regex_ae = regex('ae'),
-                    regex_ai = regex('ai'),
-                    regex_ay = regex('ay'),
-                    regex_ey = regex('ey'),
-                    regex_oe = regex('oe'),
-                    regex_ue = regex('ue'),
-                    regex_ie = regex('ie'),
-                    regex_sz = regex('sz'),
-                    regex_zs = regex('zs'),
-                    regex_ck = regex('ck'),
-                    regex_cc = regex('cc'),
-                    regex_sh = regex('sh'),
-                    //regex_th = regex('th'),
-                    regex_dt = regex('dt'),
-                    regex_ph = regex('ph'),
-                    regex_pf = regex('pf'),
-                    regex_ou = regex('ou'),
-                    regex_uo = regex('uo');
+                var regexSpace = regex(" "),
+                    regexAe = regex("ae"),
+                    regexAi = regex("ai"),
+                    regexAy = regex("ay"),
+                    regexEy = regex("ey"),
+                    regexOe = regex("oe"),
+                    regexUe = regex("ue"),
+                    regexIe = regex("ie"),
+                    regexSz = regex("sz"),
+                    regexZs = regex("zs"),
+                    regexCk = regex("ck"),
+                    regexCc = regex("cc"),
+                    regexSh = regex("sh"),
+                    //regexTh = regex("th"),
+                    regexDt = regex("dt"),
+                    regexPh = regex("ph"),
+                    regexPf = regex("pf"),
+                    regexOu = regex("ou"),
+                    regexUo = regex("uo");
 
                 /** @const {Array} */
-                var regex_pairs = [
+                var regexPairs = [
 
-                    regex_ae, 'a',
-                    regex_ai, 'ei',
-                    regex_ay, 'ei',
-                    regex_ey, 'ei',
-                    regex_oe, 'o',
-                    regex_ue, 'u',
-                    regex_ie, 'i',
-                    regex_sz, 's',
-                    regex_zs, 's',
-                    regex_sh, 's',
-                    regex_ck, 'k',
-                    regex_cc, 'k',
-                    //regex_th, 't',
-                    regex_dt, 't',
-                    regex_ph, 'f',
-                    regex_pf, 'f',
-                    regex_ou, 'o',
-                    regex_uo, 'u'
+                    regexAe, "a",
+                    regexAi, "ei",
+                    regexAy, "ei",
+                    regexEy, "ei",
+                    regexOe, "o",
+                    regexUe, "u",
+                    regexIe, "i",
+                    regexSz, "s",
+                    regexZs, "s",
+                    regexSh, "s",
+                    regexCk, "k",
+                    regexCc, "k",
+                    //regexTh, "t",
+                    regexDt, "t",
+                    regexPh, "f",
+                    regexPf, "f",
+                    regexOu, "o",
+                    regexUo, "u"
                 ];
 
-                return /** @this {Object} */ function(string, _skip_post_processing){
+                return /** @this {Object} */ function(string, _skipPostProcessing){
 
                     if(!string){
 
@@ -1375,18 +1374,18 @@ var SUPPORT_ASYNC = true;
                     }
 
                     // perform simple encoding
-                    string = this['simple'](string);
+                    string = this["simple"](string);
 
                     // normalize special pairs
                     if(string.length > 2){
 
-                        string = replace(string, regex_pairs)
+                        string = replace(string, regexPairs)
                     }
 
-                    if(!_skip_post_processing){
+                    if(!_skipPostProcessing){
 
                         // remove white spaces
-                        //string = string.replace(regex_space, '');
+                        //string = string.replace(regexSpace, "");
 
                         // delete all repeating chars
                         if(string.length > 1){
@@ -1402,31 +1401,31 @@ var SUPPORT_ASYNC = true;
 
             // phonetic transformation
 
-            'extra': (function(){
+            "extra": (function(){
 
-                var soundex_b = regex('p'),
-                    //soundex_c = regex('[sz]'),
-                    soundex_s = regex('z'),
-                    soundex_k = regex('[cgq]'),
-                    //soundex_i = regex('[jy]'),
-                    soundex_m = regex('n'),
-                    soundex_t = regex('d'),
-                    soundex_f = regex('[vw]');
+                var soundexB = regex("p"),
+                    //soundex_c = regex("[sz]"),
+                    soundexS = regex("z"),
+                    soundexK = regex("[cgq]"),
+                    //soundexI = regex("[jy]"),
+                    soundexM = regex("n"),
+                    soundexT = regex("d"),
+                    soundexF = regex("[vw]");
 
                 /** @const {RegExp} */
-                var regex_vowel = regex('[aeiouy]');
+                var regexVowel = regex("[aeiouy]");
 
                 /** @const {Array} */
-                var regex_pairs = [
+                var regexPairs = [
 
-                    soundex_b, 'b',
-                    soundex_s, 's',
-                    soundex_k, 'k',
-                    //soundex_i, 'i',
-                    soundex_m, 'm',
-                    soundex_t, 't',
-                    soundex_f, 'f',
-                    regex_vowel, ''
+                    soundexB, "b",
+                    soundexS, "s",
+                    soundexK, "k",
+                    //soundexI, "i",
+                    soundexM, "m",
+                    soundexT, "t",
+                    soundexF, "f",
+                    regexVowel, ""
                 ];
 
                 return /** @this {Object} */ function(str){
@@ -1437,7 +1436,7 @@ var SUPPORT_ASYNC = true;
                     }
 
                     // perform advanced encoding
-                    str = this['advanced'](str, /* skip post processing? */ true);
+                    str = this["advanced"](str, /* skip post processing? */ true);
 
                     if(str.length > 1){
 
@@ -1450,7 +1449,7 @@ var SUPPORT_ASYNC = true;
                             if(current.length > 1){
 
                                 // remove all vowels after 2nd char
-                                str[i] = current[0] + replace(current.substring(1), regex_pairs);
+                                str[i] = current[0] + replace(current.substring(1), regexPairs);
                             }
                         }
 
@@ -1462,12 +1461,12 @@ var SUPPORT_ASYNC = true;
                 };
             })(),
 
-            'balance': global_encoder_balance
+            "balance": globalEncoderBalance
 
         } : {
 
-            'icase': global_encoder_icase,
-            'balance': global_encoder_balance
+            "icase": globalEncoderIcase,
+            "balance": globalEncoderBalance
         };
 
         // Xone Async Handler Fallback
@@ -1495,7 +1494,7 @@ var SUPPORT_ASYNC = true;
 
         // Flexi-Cache
 
-        var cache = SUPPORT_CACHE ? (function(){
+        var Cache = SUPPORT_CACHE ? (function(){
 
             /** @this {Cache} */
             function Cache(limit){
@@ -1517,7 +1516,7 @@ var SUPPORT_ASYNC = true;
             /** @this {Cache} */
             Cache.prototype.set = function(id, value){
 
-                if(this.limit && (typeof this.cache[id] === 'undefined')){
+                if(this.limit && (typeof this.cache[id] === "undefined")){
 
                     var length = this.ids.length;
 
@@ -1560,29 +1559,29 @@ var SUPPORT_ASYNC = true;
 
                     var count = ++this.count[id];
                     var index = this.index;
-                    var current_index = index[id];
+                    var currentIndex = index[id];
 
-                    if(current_index > 0){
+                    if(currentIndex > 0){
 
                         var ids = this.ids;
-                        var old_index = current_index;
+                        var oldIndex = currentIndex;
 
                         // forward pointer
-                        while(this.count[ids[--current_index]] <= count){
+                        while(this.count[ids[--currentIndex]] <= count){
 
-                            if(current_index === -1){
+                            if(currentIndex === -1){
 
                                 break;
                             }
                         }
 
                         // move pointer back
-                        current_index++;
+                        currentIndex++;
 
-                        if(current_index !== old_index){
+                        if(currentIndex !== oldIndex){
 
                             // copy values from predecessors
-                            for(var i = old_index; i > current_index; i--) {
+                            for(var i = oldIndex; i > currentIndex; i--) {
 
                                 var key = ids[i - 1];
 
@@ -1591,8 +1590,8 @@ var SUPPORT_ASYNC = true;
                             }
 
                             // push new value on top
-                            ids[current_index] = id;
-                            index[id] = current_index;
+                            ids[currentIndex] = id;
+                            index[id] = currentIndex;
                         }
                     }
                 }
@@ -1626,7 +1625,7 @@ var SUPPORT_ASYNC = true;
 
         function regex(str){
 
-            return new RegExp(str, 'g');
+            return new RegExp(str, "g");
         }
 
         /**
@@ -1638,7 +1637,7 @@ var SUPPORT_ASYNC = true;
 
         function replace(str, regex, replacement){
 
-            if(typeof replacement === 'undefined'){
+            if(typeof replacement === "undefined"){
 
                 for(var i = 0; i < /** @type {Array} */ (regex).length; i += 2){
 
@@ -1658,23 +1657,23 @@ var SUPPORT_ASYNC = true;
          * @param {Object} dupes
          * @param {string} tmp
          * @param {string|number} id
-         * @param {number} partial_score
-         * @param {number} context_score
+         * @param {number} partialScore
+         * @param {number} contextScore
          * @param {number} threshold
          */
 
-        function addIndex(map, dupes, tmp, id, partial_score, context_score, threshold){
+        function addIndex(map, dupes, tmp, id, partialScore, contextScore, threshold){
 
-            if(typeof dupes[tmp] === 'undefined'){
+            if(typeof dupes[tmp] === "undefined"){
 
                 var score = (
 
-                    partial_score ?
+                    partialScore ?
 
-                        ((9 - (threshold || 6)) * context_score) + ((threshold || 6) * partial_score)
+                        ((9 - (threshold || 6)) * contextScore) + ((threshold || 6) * partialScore)
                         // calcScore(tmp, content)
                     :
-                        context_score
+                        contextScore
                 );
 
                 dupes[tmp] = score;
@@ -1699,12 +1698,12 @@ var SUPPORT_ASYNC = true;
 
         function calcScore(part, ref){
 
-            var context_index = ref.indexOf(part);
-            var partial_index = context_index - ref.lastIndexOf(" ", context_index);
+            var contextIndex = ref.indexOf(part);
+            var partial_index = contextIndex - ref.lastIndexOf(" ", contextIndex);
 
             return (
 
-                (3 / ref.length * (ref.length - context_index)) + (6 / partial_index)
+                (3 / ref.length * (ref.length - contextIndex)) + (6 / partial_index)
             );
         }
 
@@ -1719,18 +1718,18 @@ var SUPPORT_ASYNC = true;
 
                 var keys = Object.keys(map);
 
-                for(var i = 0, length_keys = keys.length; i < length_keys; i++){
+                for(var i = 0, lengthKeys = keys.length; i < lengthKeys; i++){
 
                     var key = keys[i];
                     var tmp = map[key];
 
                     if(tmp){
 
-                        for(var a = 0, length_map = tmp.length; a < length_map; a++){
+                        for(var a = 0, lengthMap = tmp.length; a < lengthMap; a++){
 
                             if(tmp[a] === id){
 
-                                if(length_map === 1){
+                                if(lengthMap === 1){
 
                                     delete map[key];
                                 }
@@ -1741,7 +1740,7 @@ var SUPPORT_ASYNC = true;
 
                                 break;
                             }
-                            else if(typeof tmp[a] === 'object'){
+                            else if(typeof tmp[a] === "object"){
 
                                 removeIndex(tmp[a], id);
                             }
@@ -1765,9 +1764,9 @@ var SUPPORT_ASYNC = true;
                 return parts;
             }
 
-            var count_vowels = 0,
-                count_literal = 0,
-                count_parts = 0;
+            var countVowels = 0,
+                countLiteral = 0,
+                countParts = 0;
 
             var tmp = "";
             var length = value.length;
@@ -1775,26 +1774,26 @@ var SUPPORT_ASYNC = true;
             for(var i = 0; i < length; i++){
 
                 var char = value[i];
-                var char_is_vowel = (
+                var charIsVowel = (
 
-                    (char === 'a') ||
-                    (char === 'e') ||
-                    (char === 'i') ||
-                    (char === 'o') ||
-                    (char === 'u') ||
-                    (char === 'y')
+                    (char === "a") ||
+                    (char === "e") ||
+                    (char === "i") ||
+                    (char === "o") ||
+                    (char === "u") ||
+                    (char === "y")
                 );
 
-                if(char_is_vowel){
+                if(charIsVowel){
 
-                    count_vowels++;
+                    countVowels++;
                 }
                 else{
 
-                    count_literal++;
+                    countLiteral++;
                 }
 
-                if(char !== ' ') {
+                if(char !== " ") {
 
                     tmp += char;
                 }
@@ -1803,44 +1802,44 @@ var SUPPORT_ASYNC = true;
 
                 // dynamic n-gram sequences
 
-                if((char === ' ') || (
+                if((char === " ") || (
 
-                    (count_vowels >= (length > 8 ? 2 : 1)) &&
-                    (count_literal >= 2)
+                    (countVowels >= (length > 8 ? 2 : 1)) &&
+                    (countLiteral >= 2)
 
                 ) || (
 
-                    (count_vowels >= 2) &&
-                    (count_literal >= (length > 8 ? 2 : 1))
+                    (countVowels >= 2) &&
+                    (countLiteral >= (length > 8 ? 2 : 1))
 
                 ) || (i === length - 1)){
 
                     if(tmp){
 
-                        if(parts[count_parts] && (tmp.length > 2)){
+                        if(parts[countParts] && (tmp.length > 2)){
 
-                            count_parts++;
+                            countParts++;
                         }
 
-                        if(parts[count_parts]){
+                        if(parts[countParts]){
 
-                            parts[count_parts] += tmp;
+                            parts[countParts] += tmp;
                         }
                         else{
 
-                            parts[count_parts] = tmp;
+                            parts[countParts] = tmp;
                         }
 
-                        if(char === ' '){
+                        if(char === " "){
 
-                            count_parts++;
+                            countParts++;
                         }
 
                         tmp = "";
                     }
 
-                    count_vowels = 0;
-                    count_literal = 0;
+                    countVowels = 0;
+                    countLiteral = 0;
                 }
             }
 
@@ -1854,62 +1853,62 @@ var SUPPORT_ASYNC = true;
 
         function collapseRepeatingChars(string){
 
-            var collapsed_string = '',
-                char_prev = '',
-                char_next = '';
+            var collapsedString = "",
+                charPrev = "",
+                charNext = "";
 
             for(var i = 0; i < string.length; i++){
 
                 var char = string[i];
 
-                if(char !== char_prev){
+                if(char !== charPrev){
 
-                    if(i && (char === 'h')){
+                    if(i && (char === "h")){
 
-                        var char_prev_is_vowel = (
+                        var charPrevIsVowel = (
 
-                            (char_prev === 'a') ||
-                            (char_prev === 'e') ||
-                            (char_prev === 'i') ||
-                            (char_prev === 'o') ||
-                            (char_prev === 'u') ||
-                            (char_prev === 'y')
+                            (charPrev === "a") ||
+                            (charPrev === "e") ||
+                            (charPrev === "i") ||
+                            (charPrev === "o") ||
+                            (charPrev === "u") ||
+                            (charPrev === "y")
                         );
 
-                        var char_next_is_vowel = (
+                        var charNextIsVowel = (
 
-                            (char_next === 'a') ||
-                            (char_next === 'e') ||
-                            (char_next === 'i') ||
-                            (char_next === 'o') ||
-                            (char_next === 'u') ||
-                            (char_next === 'y')
+                            (charNext === "a") ||
+                            (charNext === "e") ||
+                            (charNext === "i") ||
+                            (charNext === "o") ||
+                            (charNext === "u") ||
+                            (charNext === "y")
                         );
 
-                        if((char_prev_is_vowel && char_next_is_vowel) || (char_prev === ' ')){
+                        if((charPrevIsVowel && charNextIsVowel) || (charPrev === " ")){
 
-                            collapsed_string += char;
+                            collapsedString += char;
                         }
                     }
                     else{
 
-                        collapsed_string += char;
+                        collapsedString += char;
                     }
                 }
 
-                char_next = (
+                charNext = (
 
                     (i === (string.length - 1)) ?
 
-                        ''
+                        ""
                     :
                         string[i + 1]
                 );
 
-                char_prev = char;
+                charPrev = char;
             }
 
-            return collapsed_string;
+            return collapsedString;
         }
 
         /**
@@ -1926,7 +1925,7 @@ var SUPPORT_ASYNC = true;
 
                 for(var i = 0; i < words.length; i++){
 
-                    var word = encoder ? encoder.call(global_encoder, words[i]) : words[i];
+                    var word = encoder ? encoder.call(globalEncoder, words[i]) : words[i];
 
                     final[word] = String.fromCharCode((65000 - words.length) + i);
                 }
@@ -1953,10 +1952,10 @@ var SUPPORT_ASYNC = true;
 
                     if(stemmer.hasOwnProperty(key)){
 
-                        var tmp = encoder ? encoder.call(global_encoder, key) : key;
+                        var tmp = encoder ? encoder.call(globalEncoder, key) : key;
 
-                        final[count++] = regex('(?=.{' + (tmp.length + 3) + ',})' + tmp + '$');
-                        final[count++] = encoder ? encoder.call(global_encoder, stemmer[key]) : stemmer[key];
+                        final[count++] = regex("(?=.{" + (tmp.length + 3) + ",})" + tmp + "$");
+                        final[count++] = encoder ? encoder.call(globalEncoder, stemmer[key]) : stemmer[key];
                     }
                 }
             }
@@ -2025,9 +2024,9 @@ var SUPPORT_ASYNC = true;
 
             var result = [];
             var suggestions = [];
-            var length_z = arrays.length;
+            var lengthZ = arrays.length;
 
-            if(length_z > 1){
+            if(lengthZ > 1){
 
                 // pre-sort arrays by length up
 
@@ -2050,12 +2049,12 @@ var SUPPORT_ASYNC = true;
                 var tmp, count = 0;
                 var z = 1;
 
-                while(z < length_z){
+                while(z < lengthZ){
 
                     // get each array one by one
 
                     var found = false;
-                    var is_final_loop = (z === (length_z - 1));
+                    var isFinalLoop = (z === (lengthZ - 1));
 
                     suggestions = [];
                     arr = arrays[z];
@@ -2064,13 +2063,13 @@ var SUPPORT_ASYNC = true;
 
                     while(i < length){
 
-                        var check_val = check[tmp = arr[++i]];
+                        var checkVal = check[tmp = arr[++i]];
 
-                        if(check_val === z){
+                        if(checkVal === z){
 
                             // fill in during last round
 
-                            if(is_final_loop){
+                            if(isFinalLoop){
 
                                 result[count++] = tmp;
 
@@ -2087,9 +2086,9 @@ var SUPPORT_ASYNC = true;
                         }
                         else if(suggest){
 
-                            var current_suggestion = suggestions[check_val] || (suggestions[check_val] = []);
+                            var currentSuggestion = suggestions[checkVal] || (suggestions[checkVal] = []);
 
-                            current_suggestion[current_suggestion.length] = tmp;
+                            currentSuggestion[currentSuggestion.length] = tmp;
                         }
                     }
 
@@ -2129,7 +2128,7 @@ var SUPPORT_ASYNC = true;
                     }
                 }
             }
-            else if(length_z){
+            else if(lengthZ){
 
                 result = arrays[0];
 
@@ -2157,9 +2156,9 @@ var SUPPORT_ASYNC = true;
         function intersect_3d(arrays, limit) {
 
             var result = [];
-            var length_z = arrays.length;
+            var lengthZ = arrays.length;
 
-            if(length_z > 1){
+            if(lengthZ > 1){
 
                 // pre-sort arrays by length up
 
@@ -2187,7 +2186,7 @@ var SUPPORT_ASYNC = true;
                 var tmp, count = 0;
                 var z = 1;
 
-                while(z < length_z){
+                while(z < lengthZ){
 
                     // get each array one by one
 
@@ -2207,7 +2206,7 @@ var SUPPORT_ASYNC = true;
 
                                 // fill in during last round
 
-                                if(z === (length_z - 1)){
+                                if(z === (lengthZ - 1)){
 
                                     result[count++] = tmp;
 
@@ -2234,7 +2233,7 @@ var SUPPORT_ASYNC = true;
                     z++;
                 }
             }
-            else if(length_z){
+            else if(lengthZ){
 
                 arrays = arrays[0];
 
@@ -2322,28 +2321,28 @@ var SUPPORT_ASYNC = true;
                 ref.async = false;
             }
 
-            if(ref._stack_keys.length){
+            if(ref._stackKeys.length){
 
                 var start = time();
                 var key;
 
-                while((key = ref._stack_keys.shift()) || (key === 0)){
+                while((key = ref._stackKeys.shift()) || (key === 0)){
 
                     current = ref._stack[key];
 
                     switch(current[0]){
 
-                        case enum_task.add:
+                        case enumTask.add:
 
                             ref.add(current[1], current[2]);
                             break;
 
-                        // case enum_task.update:
+                        // case enumTask.update:
                         //
                         //     ref.update(current[1], current[2]);
                         //     break;
 
-                        case enum_task.remove:
+                        case enumTask.remove:
 
                             ref.remove(current[1]);
                             break;
@@ -2358,9 +2357,9 @@ var SUPPORT_ASYNC = true;
                     }
                 }
 
-                if(ref._stack_keys.length){
+                if(ref._stackKeys.length){
 
-                    register_task(ref);
+                    registerTask(ref);
                 }
             }
 
@@ -2374,7 +2373,7 @@ var SUPPORT_ASYNC = true;
          * @param {FlexSearch} ref
          */
 
-        function register_task(ref){
+        function registerTask(ref){
 
             ref._timer || (
 
@@ -2384,7 +2383,7 @@ var SUPPORT_ASYNC = true;
 
                     runner(ref);
 
-                }, 1, 'search-async-' + ref.id)
+                }, 1, "search-async-" + ref.id)
             );
         }
 
@@ -2396,7 +2395,7 @@ var SUPPORT_ASYNC = true;
 
             return (
 
-                typeof performance !== 'undefined' ?
+                typeof performance !== "undefined" ?
 
                     performance.now()
                 :
@@ -2406,13 +2405,13 @@ var SUPPORT_ASYNC = true;
 
         function add_worker(id, core, options, callback){
 
-            var thread = register_worker(
+            var thread = registerWorker(
 
                 // name:
-                'flexsearch',
+                "flexsearch",
 
                 // id:
-                'id' + id,
+                "id" + id,
 
                 // worker:
                 function(){
@@ -2425,59 +2424,59 @@ var SUPPORT_ASYNC = true;
                     /** @lends {Worker} */
                     self.onmessage = function(event){
 
-                        var data = event['data'];
+                        var data = event["data"];
 
                         if(data){
 
                             // if(flexsearch.debug){
                             //
-                            //     console.log("Worker Job Started: " + data['id']);
+                            //     console.log("Worker Job Started: " + data["id"]);
                             // }
 
-                            if(data['search']){
+                            if(data["search"]){
 
-                                var results = flexsearch['search'](data['content'],
+                                var results = flexsearch["search"](data["content"],
 
-                                    data['threshold'] ?
+                                    data["threshold"] ?
 
                                         {
-                                            'limit': data['limit'],
-                                            'threshold': data['threshold']
+                                            "limit": data["limit"],
+                                            "threshold": data["threshold"]
                                         }
                                     :
-                                        data['limit']
+                                        data["limit"]
                                 );
 
                                 /** @lends {Worker} */
                                 self.postMessage({
 
-                                    'id': id,
-                                    'content': data['content'],
-                                    'limit': data['limit'],
-                                    'result':results
+                                    "id": id,
+                                    "content": data["content"],
+                                    "limit": data["limit"],
+                                    "result":results
                                 });
                             }
-                            else if(data['add']){
+                            else if(data["add"]){
 
-                                flexsearch['add'](data['id'], data['content']);
+                                flexsearch["add"](data["id"], data["content"]);
                             }
-                            else if(data['update']){
+                            else if(data["update"]){
 
-                                flexsearch['update'](data['id'], data['content']);
+                                flexsearch["update"](data["id"], data["content"]);
                             }
-                            else if(data['remove']){
+                            else if(data["remove"]){
 
-                                flexsearch['remove'](data['id']);
+                                flexsearch["remove"](data["id"]);
                             }
-                            else if(data['reset']){
+                            else if(data["reset"]){
 
-                                flexsearch['reset']();
+                                flexsearch["reset"]();
                             }
-                            else if(data['info']){
+                            else if(data["info"]){
 
-                                var info = flexsearch['info']();
+                                var info = flexsearch["info"]();
 
-                                info['worker'] = id;
+                                info["worker"] = id;
 
                                 if(flexsearch.debug){
 
@@ -2487,24 +2486,24 @@ var SUPPORT_ASYNC = true;
                                 /** @lends {Worker} */
                                 //self.postMessage(info);
                             }
-                            else if(data['register']){
+                            else if(data["register"]){
 
-                                id = data['id'];
+                                id = data["id"];
 
-                                data['options']['cache'] = false;
-                                data['options']['async'] = true;
-                                data['options']['worker'] = false;
+                                data["options"]["cache"] = false;
+                                data["options"]["async"] = true;
+                                data["options"]["worker"] = false;
 
                                 flexsearch = new Function(
 
-                                    data['register'].substring(
+                                    data["register"].substring(
 
-                                        data['register'].indexOf('{') + 1,
-                                        data['register'].lastIndexOf('}')
+                                        data["register"].indexOf("{") + 1,
+                                        data["register"].lastIndexOf("}")
                                     )
                                 )();
 
-                                flexsearch = new flexsearch(data['options']);
+                                flexsearch = new flexsearch(data["options"]);
                             }
                         }
                     };
@@ -2513,15 +2512,15 @@ var SUPPORT_ASYNC = true;
                 // callback:
                 function(event){
 
-                    var data = event['data'];
+                    var data = event["data"];
 
-                    if(data && data['result']){
+                    if(data && data["result"]){
 
-                        callback(data['id'], data['content'], data['result'], data['limit']);
+                        callback(data["id"], data["content"], data["result"], data["limit"]);
                     }
                     else{
 
-                        if(SUPPORT_DEBUG && options['debug']){
+                        if(SUPPORT_DEBUG && options["debug"]){
 
                             console.log(data);
                         }
@@ -2532,15 +2531,15 @@ var SUPPORT_ASYNC = true;
                 core
             );
 
-            var fn_str = factory.toString();
+            var fnStr = factory.toString();
 
-            options['id'] = core;
+            options["id"] = core;
 
             thread.postMessage(core, {
 
-                'register': fn_str,
-                'options': options,
-                'id': core
+                "register": fnStr,
+                "options": options,
+                "id": core
             });
 
             return thread;
@@ -2548,10 +2547,10 @@ var SUPPORT_ASYNC = true;
     })(
         // Xone Worker Handler Fallback
 
-        SUPPORT_WORKER ? (function register_worker(){
+        SUPPORT_WORKER ? (function registerWorker(){
 
-            var worker_stack = {};
-            var inline_is_supported = !!((typeof Blob !== 'undefined') && (typeof URL !== 'undefined') && URL.createObjectURL);
+            var workerStack = {};
+            var inlineSupported = !!((typeof Blob !== "undefined") && (typeof URL !== "undefined") && URL.createObjectURL);
 
             return (
 
@@ -2566,9 +2565,9 @@ var SUPPORT_ASYNC = true;
                 function(_name, _id, _worker, _callback, _core){
 
                     var name = _name;
-                    var worker_payload = (
+                    var workerPayload = (
 
-                        inline_is_supported ?
+                        inlineSupported ?
 
                             /* Load Inline Worker */
 
@@ -2576,40 +2575,40 @@ var SUPPORT_ASYNC = true;
 
                                 new Blob([
 
-                                    'var SUPPORT_WORKER = true;' +
-                                    'var SUPPORT_BUILTINS = ' + (SUPPORT_BUILTINS ? 'true' : 'false') + ';' +
-                                    'var SUPPORT_DEBUG = ' + (SUPPORT_DEBUG ? 'true' : 'false') + ';' +
-                                    'var SUPPORT_CACHE = ' + (SUPPORT_CACHE ? 'true' : 'false') + ';' +
-                                    'var SUPPORT_ASYNC = ' + (SUPPORT_ASYNC ? 'true' : 'false') + ';' +
-                                    '(' + _worker.toString() + ')()'
+                                    "var SUPPORT_WORKER = true;" +
+                                    "var SUPPORT_BUILTINS = " + (SUPPORT_BUILTINS ? "true" : "false") + ";" +
+                                    "var SUPPORT_DEBUG = " + (SUPPORT_DEBUG ? "true" : "false") + ";" +
+                                    "var SUPPORT_CACHE = " + (SUPPORT_CACHE ? "true" : "false") + ";" +
+                                    "var SUPPORT_ASYNC = " + (SUPPORT_ASYNC ? "true" : "false") + ";" +
+                                    "(" + _worker.toString() + ")()"
                                 ],{
-                                    'type': 'text/javascript'
+                                    "type": "text/javascript"
                                 })
                             )
                         :
 
                             /* Load Extern Worker (but also requires CORS) */
 
-                            '../' + name + '.js'
+                            "../" + name + ".js"
                     );
 
-                    name += '-' + _id;
+                    name += "-" + _id;
 
-                    worker_stack[name] || (worker_stack[name] = []);
+                    workerStack[name] || (workerStack[name] = []);
 
-                    worker_stack[name][_core] = new Worker(worker_payload);
-                    worker_stack[name][_core]['onmessage'] = _callback;
+                    workerStack[name][_core] = new Worker(workerPayload);
+                    workerStack[name][_core]["onmessage"] = _callback;
 
                     if(SUPPORT_DEBUG){
 
-                        console.log('Register Worker: ' + name + '@' + _core);
+                        console.log("Register Worker: " + name + "@" + _core);
                     }
 
                     return {
 
-                        'postMessage': function(id, data){
+                        "postMessage": function(id, data){
 
-                            worker_stack[name][id]['postMessage'](data);
+                            workerStack[name][id]["postMessage"](data);
                         }
                     };
                 }
@@ -2632,7 +2631,7 @@ var SUPPORT_ASYNC = true;
         var prop;
 
         // AMD (RequireJS)
-        if((prop = root['define']) && prop['amd']){
+        if((prop = root["define"]) && prop["amd"]){
 
             prop([], function(){
 
@@ -2640,12 +2639,12 @@ var SUPPORT_ASYNC = true;
             });
         }
         // Closure (Xone)
-        else if((prop = root['modules'])){
+        else if((prop = root["modules"])){
 
             prop[name.toLowerCase()] = factory;
         }
         // CommonJS (Node.js)
-        else if(typeof module !== 'undefined'){
+        else if(typeof module !== "undefined"){
 
             /** @export */
             module.exports = factory;
