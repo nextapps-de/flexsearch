@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.66
+ * @preserve FlexSearch v0.2.67
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -126,9 +126,9 @@ var SUPPORT_ASYNC = true;
         /**  @const  {RegExp} */
         var regexSplit = regex("[ -\/]");
 
-        var filter = {};
+        var filter = Object.create(null);
 
-        var stemmer = {};
+        var stemmer = Object.create(null);
 
         /**
          * @param {string|Object<string, number|string|boolean|Object|function(string):string>=} options
@@ -268,7 +268,7 @@ var SUPPORT_ASYNC = true;
                 options || (options = defaults);
 
                 var custom = options["profile"];
-                var profile = custom ? profiles[custom] : {};
+                var profile = custom && profiles.hasOwnProperty(custom) ? profiles[custom] : Object.create(null);
 
                 // initialize worker
 
@@ -424,13 +424,21 @@ var SUPPORT_ASYNC = true;
 
             this._map = [
 
-                {/* 0 */}, {/* 1 */}, {/* 2 */}, {/* 3 */}, {/* 4 */},
-                {/* 5 */}, {/* 6 */}, {/* 7 */}, {/* 8 */}, {/* 9 */}
+                Object.create(null/* 0 */),
+                Object.create(null/* 1 */),
+                Object.create(null/* 2 */),
+                Object.create(null/* 3 */),
+                Object.create(null/* 4 */),
+                Object.create(null/* 5 */),
+                Object.create(null/* 6 */),
+                Object.create(null/* 7 */),
+                Object.create(null/* 8 */),
+                Object.create(null/* 9 */)
             ];
 
-            this._ctx = {};
-            this._ids = {};
-            this._stack = {};
+            this._ctx = Object.create(null);
+            this._ids = Object.create(null);
+            this._stack = Object.create(null);
             this._stackKeys = [];
 
             /**
@@ -632,7 +640,7 @@ var SUPPORT_ASYNC = true;
 
                     var dupes = {
 
-                        "_ctx": {}
+                        "_ctx": Object.create(null)
                     };
 
                     var threshold = this.threshold;
@@ -745,11 +753,19 @@ var SUPPORT_ASYNC = true;
 
                                     if(depth && (wordLength > 1) && (score >= threshold)){
 
-                                        var ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = {});
+                                        var ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = Object.create(null));
                                         var ctxTmp = this._ctx[value] || (this._ctx[value] = [
 
-                                            {/* 0 */}, {/* 1 */}, {/* 2 */}, {/* 3 */}, {/* 4 */},
-                                            {/* 5 */}, {/* 6 */}, {/* 7 */}, {/* 8 */}, {/* 9 */}
+                                            Object.create(null/* 0 */),
+                                            Object.create(null/* 1 */),
+                                            Object.create(null/* 2 */),
+                                            Object.create(null/* 3 */),
+                                            Object.create(null/* 4 */),
+                                            Object.create(null/* 5 */),
+                                            Object.create(null/* 6 */),
+                                            Object.create(null/* 7 */),
+                                            Object.create(null/* 8 */),
+                                            Object.create(null/* 9 */)
                                         ]);
 
                                         var x = i - depth;
@@ -1007,7 +1023,7 @@ var SUPPORT_ASYNC = true;
             var length = words.length;
             var found = true;
             var check = [];
-            var checkWords = {};
+            var checkWords = Object.create(null);
 
             if(length > 1){
 
@@ -1266,7 +1282,7 @@ var SUPPORT_ASYNC = true;
          * @final
          */
 
-        var globalEncoder = SUPPORT_BUILTINS ? {
+        var globalEncoder = Object.create(SUPPORT_BUILTINS ? {
 
             // case insensitive search
 
@@ -1467,13 +1483,13 @@ var SUPPORT_ASYNC = true;
 
             "icase": globalEncoderIcase,
             "balance": globalEncoderBalance
-        };
+        });
 
         // Xone Async Handler Fallback
 
         var queue = SUPPORT_ASYNC ? (function(){
 
-            var stack = {};
+            var stack = Object.create(null);
 
             return function(fn, delay, id){
 
@@ -1507,9 +1523,9 @@ var SUPPORT_ASYNC = true;
             /** @this {Cache} */
             Cache.prototype.reset = function(){
 
-                this.cache = {};
-                this.count = {};
-                this.index = {};
+                this.cache = Object.create(null);
+                this.count = Object.create(null);
+                this.index = Object.create(null);
                 this.ids = [];
             };
 
@@ -1919,7 +1935,7 @@ var SUPPORT_ASYNC = true;
 
         function initFilter(words, encoder){
 
-            var final = {};
+            var final = Object.create(null);
 
             if(words){
 
@@ -2034,7 +2050,7 @@ var SUPPORT_ASYNC = true;
 
                 // fill initial map
 
-                var check = {};
+                var check = Object.create(null);
                 var arr = arrays[0];
                 var length = arr.length;
                 var i = 0;
@@ -2549,7 +2565,7 @@ var SUPPORT_ASYNC = true;
 
         SUPPORT_WORKER ? (function registerWorker(){
 
-            var workerStack = {};
+            var workerStack = Object.create(null);
             var inlineSupported = !!((typeof Blob !== "undefined") && (typeof URL !== "undefined") && URL.createObjectURL);
 
             return (

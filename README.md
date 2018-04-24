@@ -3,10 +3,12 @@
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/flexsearch.svg" alt="Search Library" width="50%">
     <br><br>
     <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
-    <img src="https://img.shields.io/badge/status-BETA-orange.svg">
+    <!--<img src="https://img.shields.io/badge/status-BETA-orange.svg">-->
     <a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
     <a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master"></a>
-    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/xone.svg"></a><!--<img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">-->
+    <a target="_blank" href="https://www.codacy.com/app/ts-thomas/FlexSearch?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nextapps-de/flexsearch&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/a896e010f6b4429aa7bc9a89550320a7"/></a>
+    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/xone.svg"></a>
+    <!--<img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">-->
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/xone.svg"></a>
 </p>
 
