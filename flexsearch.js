@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.67
+ * @preserve FlexSearch v0.2.68
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -126,9 +126,23 @@ var SUPPORT_ASYNC = true;
         /**  @const  {RegExp} */
         var regexSplit = regex("[ -\/]");
 
-        var filter = Object.create(null);
+        var filter = createObject();
+        var stemmer = createObject();
 
-        var stemmer = Object.create(null);
+        /**  @const {Object} */
+        var indexBlacklist = (function(){
+
+            var array = Object.getOwnPropertyNames(/** @type {!Array} */ ({}.__proto__));
+            var map = createObject();
+
+            for(var i = 0; i < array.length; i++){
+
+                map[array[i]] = 1;
+            }
+
+            return map;
+
+        })();
 
         /**
          * @param {string|Object<string, number|string|boolean|Object|function(string):string>=} options
@@ -138,7 +152,7 @@ var SUPPORT_ASYNC = true;
 
         function FlexSearch(options){
 
-            if((typeof options === "string") && profiles.hasOwnProperty(options)){
+            if((typeof options === "string") && !indexBlacklist[options]){
 
                 options = profiles[options];
             }
@@ -213,7 +227,10 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.registerEncoder = function(name, encoder){
 
-            globalEncoder[name] = encoder;
+            if(!indexBlacklist[name]){
+
+                globalEncoder[name] = encoder;
+            }
 
             return this;
         };
@@ -226,17 +243,20 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.registerLanguage = function(lang, languagePack){
 
-            /**
-             * @type {Array<string>}
-             */
+            if(!indexBlacklist[lang]){
 
-            filter[lang] = languagePack["filter"];
+                /**
+                 * @type {Array<string>}
+                 */
 
-            /**
-             * @type {Object<string, string>}
-             */
+                filter[lang] = languagePack["filter"];
 
-            stemmer[lang] = languagePack["stemmer"];
+                /**
+                 * @type {Object<string, string>}
+                 */
+
+                stemmer[lang] = languagePack["stemmer"];
+            }
 
             return this;
         };
@@ -250,7 +270,14 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.encode = function(name, value){
 
-            return globalEncoder[name].call(globalEncoder, value);
+            if(indexBlacklist[name]){
+
+                return value;
+            }
+            else{
+
+                return globalEncoder[name].call(globalEncoder, value);
+            }
         };
 
         /**
@@ -268,7 +295,7 @@ var SUPPORT_ASYNC = true;
                 options || (options = defaults);
 
                 var custom = options["profile"];
-                var profile = custom && profiles.hasOwnProperty(custom) ? profiles[custom] : Object.create(null);
+                var profile = custom && !indexBlacklist[custom] ? profiles[custom] : createObject();
 
                 // initialize worker
 
@@ -387,7 +414,7 @@ var SUPPORT_ASYNC = true;
 
                 this.encoder = (
 
-                    (custom && globalEncoder[custom]) ||
+                    (custom && !indexBlacklist[custom] && globalEncoder[custom]) ||
                     (typeof custom === "function" ? custom : this.encoder || false)
                 );
 
@@ -409,12 +436,12 @@ var SUPPORT_ASYNC = true;
                     );
                 }
 
-                if((custom = options["filter"])) {
+                if((custom = options["filter"]) && !indexBlacklist[custom]) {
 
                     this.filter = initFilter(filter[custom] || custom, this.encoder);
                 }
 
-                if((custom = options["stemmer"])) {
+                if((custom = options["stemmer"]) && !indexBlacklist[custom]) {
 
                     this.stemmer = initStemmer(stemmer[custom] || custom, this.encoder);
                 }
@@ -422,23 +449,10 @@ var SUPPORT_ASYNC = true;
 
             // initialize primary index
 
-            this._map = [
-
-                Object.create(null/* 0 */),
-                Object.create(null/* 1 */),
-                Object.create(null/* 2 */),
-                Object.create(null/* 3 */),
-                Object.create(null/* 4 */),
-                Object.create(null/* 5 */),
-                Object.create(null/* 6 */),
-                Object.create(null/* 7 */),
-                Object.create(null/* 8 */),
-                Object.create(null/* 9 */)
-            ];
-
-            this._ctx = Object.create(null);
-            this._ids = Object.create(null);
-            this._stack = Object.create(null);
+            this._map = createObject(null, void 0, 10);
+            this._ctx = createObject();
+            this._ids = createObject();
+            this._stack = createObject();
             this._stackKeys = [];
 
             /**
@@ -541,8 +555,7 @@ var SUPPORT_ASYNC = true;
 
                 if(custom.hasOwnProperty(key)){
 
-                    matcher[matcher.length] = regex(key);
-                    matcher[matcher.length] = custom[key];
+                    matcher.push(regex(key), custom[key]);
                 }
             }
 
@@ -559,7 +572,7 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.prototype.add = function(id, content, _skipUpdate){
 
-            if((typeof content === "string") && content && (id || (id === 0))){
+            if((typeof content === "string") && content && ((id && !indexBlacklist[id]) || (id === 0))){
 
                 // check if index ID already exist
 
@@ -640,7 +653,7 @@ var SUPPORT_ASYNC = true;
 
                     var dupes = {
 
-                        "_ctx": Object.create(null)
+                        "_ctx": createObject()
                     };
 
                     var threshold = this.threshold;
@@ -653,7 +666,7 @@ var SUPPORT_ASYNC = true;
                     for(var i = 0; i < wordLength; i++){
 
                         /** @type {string} */
-                        var value = words[i];
+                        var value = "" + words[i];
 
                         if(value){
 
@@ -753,20 +766,8 @@ var SUPPORT_ASYNC = true;
 
                                     if(depth && (wordLength > 1) && (score >= threshold)){
 
-                                        var ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = Object.create(null));
-                                        var ctxTmp = this._ctx[value] || (this._ctx[value] = [
-
-                                            Object.create(null/* 0 */),
-                                            Object.create(null/* 1 */),
-                                            Object.create(null/* 2 */),
-                                            Object.create(null/* 3 */),
-                                            Object.create(null/* 4 */),
-                                            Object.create(null/* 5 */),
-                                            Object.create(null/* 6 */),
-                                            Object.create(null/* 7 */),
-                                            Object.create(null/* 8 */),
-                                            Object.create(null/* 9 */)
-                                        ]);
+                                        var ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = createObject());
+                                        var ctxTmp = this._ctx[value] || (this._ctx[value] = createObject(null, void 0, 10));
 
                                         var x = i - depth;
                                         var y = i + depth + 1;
@@ -832,7 +833,7 @@ var SUPPORT_ASYNC = true;
 
         FlexSearch.prototype.remove = function(id){
 
-            if(this._ids[id]){
+            if(this._ids[id] && !indexBlacklist[id]){
 
                 if(SUPPORT_WORKER && this.worker){
 
@@ -1023,7 +1024,7 @@ var SUPPORT_ASYNC = true;
             var length = words.length;
             var found = true;
             var check = [];
-            var checkWords = Object.create(null);
+            var checkWords = createObject();
 
             if(length > 1){
 
@@ -1489,7 +1490,7 @@ var SUPPORT_ASYNC = true;
 
         var queue = SUPPORT_ASYNC ? (function(){
 
-            var stack = Object.create(null);
+            var stack = createObject();
 
             return function(fn, delay, id){
 
@@ -1523,9 +1524,9 @@ var SUPPORT_ASYNC = true;
             /** @this {Cache} */
             Cache.prototype.reset = function(){
 
-                this.cache = Object.create(null);
-                this.count = Object.create(null);
-                this.index = Object.create(null);
+                this.cache = createObject();
+                this.count = createObject();
+                this.index = createObject();
                 this.ids = [];
             };
 
@@ -1641,7 +1642,7 @@ var SUPPORT_ASYNC = true;
 
         function regex(str){
 
-            return new RegExp(str, "g");
+            return new RegExp("" + str, "g");
         }
 
         /**
@@ -1712,6 +1713,7 @@ var SUPPORT_ASYNC = true;
         * @returns {number}
         */
 
+        /*
         function calcScore(part, ref){
 
             var contextIndex = ref.indexOf(part);
@@ -1722,6 +1724,7 @@ var SUPPORT_ASYNC = true;
                 (3 / ref.length * (ref.length - contextIndex)) + (6 / partial_index)
             );
         }
+        */
 
         /**
          * @param {Object} map
@@ -1935,7 +1938,7 @@ var SUPPORT_ASYNC = true;
 
         function initFilter(words, encoder){
 
-            var final = Object.create(null);
+            var final = createObject();
 
             if(words){
 
@@ -1962,16 +1965,22 @@ var SUPPORT_ASYNC = true;
 
             if(stemmer){
 
-                var count = 0;
-
                 for(var key in stemmer){
 
                     if(stemmer.hasOwnProperty(key)){
 
                         var tmp = encoder ? encoder.call(globalEncoder, key) : key;
 
-                        final[count++] = regex("(?=.{" + (tmp.length + 3) + ",})" + tmp + "$");
-                        final[count++] = encoder ? encoder.call(globalEncoder, stemmer[key]) : stemmer[key];
+                        final.push(
+
+                            regex("(?=.{" + (tmp.length + 3) + ",})" + tmp + "$"),
+
+                            encoder ?
+
+                                encoder.call(globalEncoder, stemmer[key])
+                            :
+                                stemmer[key]
+                        );
                     }
                 }
             }
@@ -2050,7 +2059,7 @@ var SUPPORT_ASYNC = true;
 
                 // fill initial map
 
-                var check = Object.create(null);
+                var check = createObject();
                 var arr = arrays[0];
                 var length = arr.length;
                 var i = 0;
@@ -2342,6 +2351,7 @@ var SUPPORT_ASYNC = true;
                 var start = time();
                 var key;
 
+                // TODO: optimize shift() using a loop and splice()
                 while((key = ref._stackKeys.shift()) || (key === 0)){
 
                     current = ref._stack[key];
@@ -2353,6 +2363,8 @@ var SUPPORT_ASYNC = true;
                             ref.add(current[1], current[2]);
                             break;
 
+                        // Note: Update is handled by .remove() + .add()
+                        //
                         // case enumTask.update:
                         //
                         //     ref.update(current[1], current[2]);
@@ -2364,7 +2376,6 @@ var SUPPORT_ASYNC = true;
                             break;
                     }
 
-                    ref._stack[key] = null;
                     delete ref._stack[key];
 
                     if((time() - start) > 100){
@@ -2417,6 +2428,32 @@ var SUPPORT_ASYNC = true;
                 :
                     (new Date()).getTime()
             );
+        }
+
+        /**
+         * @param {Object|null=} prototype
+         * @param {Object=} properties
+         * @param {number=} count
+         * @returns {Object|Array<Object>}
+         */
+
+        function createObject(prototype, properties, count){
+
+            if(count){
+
+                var array = new Array(count);
+
+                for(var i = 0; i < count; i++){
+
+                    array[i] = createObject(prototype, properties);
+                }
+
+                return array;
+            }
+            else{
+
+                return Object.create(prototype || null, properties);
+            }
         }
 
         function add_worker(id, core, options, callback){
@@ -2565,7 +2602,7 @@ var SUPPORT_ASYNC = true;
 
         SUPPORT_WORKER ? (function registerWorker(){
 
-            var workerStack = Object.create(null);
+            var workerStack =  Object.create(null);
             var inlineSupported = !!((typeof Blob !== "undefined") && (typeof URL !== "undefined") && URL.createObjectURL);
 
             return (
@@ -2673,3 +2710,10 @@ var SUPPORT_ASYNC = true;
     }
 
 }).call(this);
+
+/*
+    Future Benchmarks:
+
+    https://jsperf.com/comparison-var-let-const
+    https://jsperf.com/let-vs-var-performance/93
+ */
