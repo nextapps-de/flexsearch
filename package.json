@@ -50,7 +50,7 @@
   "dependencies": {},
   "devDependencies": {
     "chai": "^4.1.2",
-    "codacy-coverage": "^2.1.1",
+    "codacy-coverage": "^3.0.0",
     "coveralls": "^3.0.0",
     "google-closure-compiler": "^20180402.0.0",
     "mocha": "^5.1.1",
