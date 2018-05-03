@@ -129,7 +129,7 @@ var SUPPORT_ASYNC = true;
         var filter = createObject();
         var stemmer = createObject();
 
-        /**  @const {Object} */
+        /**  @const {Object<string|number, number>} */
         var indexBlacklist = (function(){
 
             var array = Object.getOwnPropertyNames(/** @type {!Array} */ ({}.__proto__));
@@ -328,7 +328,7 @@ var SUPPORT_ASYNC = true;
 
                             //self._ids_count[i] = 0;
 
-                            self._worker[i] = add_worker(self.id, i, options /*|| defaults*/, function(id, query, result, limit){
+                            self._worker[i] = addWorker(self.id, i, options /*|| defaults*/, function(id, query, result, limit){
 
                                 if(self._taskCompleted === self.worker){
 
@@ -449,7 +449,7 @@ var SUPPORT_ASYNC = true;
 
             // initialize primary index
 
-            this._map = createObject(null, void 0, 10);
+            this._map = createObject(10);
             this._ctx = createObject();
             this._ids = createObject();
             this._stack = createObject();
@@ -651,10 +651,8 @@ var SUPPORT_ASYNC = true;
                         )
                     );
 
-                    var dupes = {
-
-                        "_ctx": createObject()
-                    };
+                    var dupes = createObject();
+                        dupes["_ctx"] = createObject();
 
                     var threshold = this.threshold;
                     var depth = this.depth;
@@ -666,7 +664,7 @@ var SUPPORT_ASYNC = true;
                     for(var i = 0; i < wordLength; i++){
 
                         /** @type {string} */
-                        var value = "" + words[i];
+                        var value = words[i];
 
                         if(value){
 
@@ -767,7 +765,7 @@ var SUPPORT_ASYNC = true;
                                     if(depth && (wordLength > 1) && (score >= threshold)){
 
                                         var ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = createObject());
-                                        var ctxTmp = this._ctx[value] || (this._ctx[value] = createObject(null, void 0, 10));
+                                        var ctxTmp = this._ctx[value] || (this._ctx[value] = createObject(10));
 
                                         var x = i - depth;
                                         var y = i + depth + 1;
@@ -1047,7 +1045,7 @@ var SUPPORT_ASYNC = true;
 
             if(!useContextual || (ctxMap = this._ctx)[ctxRoot]){
 
-                for(var a = useContextual ? 1 : 0; a < length; a++){
+                for(var a = (useContextual ? 1 : 0); a < length; a++){
 
                     var value = words[a];
 
@@ -1265,7 +1263,7 @@ var SUPPORT_ASYNC = true;
             return function(value){
 
                 return collapseRepeatingChars(replace(value.toLowerCase(), regexPairs));
-            }
+            };
         })();
 
         /** @const */
@@ -1642,7 +1640,7 @@ var SUPPORT_ASYNC = true;
 
         function regex(str){
 
-            return new RegExp("" + str, "g");
+            return new RegExp(str, "g");
         }
 
         /**
@@ -2431,13 +2429,20 @@ var SUPPORT_ASYNC = true;
         }
 
         /**
-         * @param {Object|null=} prototype
-         * @param {Object=} properties
+         * @type {Function}
+         * @const
+         * @final
+         */
+
+        //var emptyObject = new Function("var o={};o.__proto__=null;return o;");
+
+        /**
+         * https://jsperf.com/comparison-object-index-type
          * @param {number=} count
          * @returns {Object|Array<Object>}
          */
 
-        function createObject(prototype, properties, count){
+        function createObject(count){
 
             if(count){
 
@@ -2445,18 +2450,18 @@ var SUPPORT_ASYNC = true;
 
                 for(var i = 0; i < count; i++){
 
-                    array[i] = createObject(prototype, properties);
+                    array[i] = createObject();
                 }
 
                 return array;
             }
             else{
 
-                return Object.create(prototype || null, properties);
+                return Object.create(null); //emptyObject();
             }
         }
 
-        function add_worker(id, core, options, callback){
+        function addWorker(id, core, options, callback){
 
             var thread = registerWorker(
 

@@ -53,7 +53,7 @@ var parameter = (function(opt){
     return parameter;
 })({
 
-    compilation_level: "ADVANCED_OPTIMIZATIONS",
+    compilation_level: "ADVANCED_OPTIMIZATIONS", //"WHITESPACE"
     use_types_for_optimization: true,
     new_type_inf: true,
     jscomp_warning: "newCheckTypes",
@@ -68,6 +68,7 @@ var parameter = (function(opt){
     output_manifest: "log/manifest.log",
     output_module_dependencies: "log/module_dependencies.log",
     property_renaming_report: "log/renaming_report.log"
+    //formatting: "PRETTY_PRINT"
 });
 
 if(options['RELEASE'] === 'lang'){
