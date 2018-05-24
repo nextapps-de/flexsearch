@@ -295,7 +295,7 @@ var SUPPORT_ASYNC = true;
                 options || (options = defaults);
 
                 var custom = options["profile"];
-                var profile = custom && !indexBlacklist[custom] ? profiles[custom] : createObject();
+                var profile = custom && !indexBlacklist[/** @type {string} */ (custom)] ? profiles[custom] : createObject();
 
                 // initialize worker
 
@@ -436,12 +436,12 @@ var SUPPORT_ASYNC = true;
                     );
                 }
 
-                if((custom = options["filter"]) && !indexBlacklist[custom]) {
+                if((custom = options["filter"]) && !indexBlacklist[/** @type {string} */ (custom)]) {
 
                     this.filter = initFilter(filter[custom] || custom, this.encoder);
                 }
 
-                if((custom = options["stemmer"]) && !indexBlacklist[custom]) {
+                if((custom = options["stemmer"]) && !indexBlacklist[/** @type {string} */ (custom)]) {
 
                     this.stemmer = initStemmer(stemmer[custom] || custom, this.encoder);
                 }
@@ -1511,7 +1511,6 @@ var SUPPORT_ASYNC = true;
 
         var Cache = SUPPORT_CACHE ? (function(){
 
-            /** @this {Cache} */
             function Cache(limit){
 
                 this.reset();
@@ -1519,7 +1518,6 @@ var SUPPORT_ASYNC = true;
                 this.limit = (limit !== true) && limit;
             }
 
-            /** @this {Cache} */
             Cache.prototype.reset = function(){
 
                 this.cache = createObject();
@@ -1528,7 +1526,6 @@ var SUPPORT_ASYNC = true;
                 this.ids = [];
             };
 
-            /** @this {Cache} */
             Cache.prototype.set = function(id, value){
 
                 if(this.limit && (typeof this.cache[id] === "undefined")){
@@ -1563,7 +1560,6 @@ var SUPPORT_ASYNC = true;
 
             /**
              * Note: It is better to have the complexity when fetching the cache:
-             * @this {Cache}
              */
 
             Cache.prototype.get = function(id){
