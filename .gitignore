@@ -1,3 +1,10 @@
-node_modules
+.idea
+.nyc_output
 .db
+coverage
+perf
+node_modules
 !*.keep
+src
+tmp
+log

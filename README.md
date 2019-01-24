@@ -15,53 +15,343 @@
 <h1></h1>
 <h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
 
-When it comes to raw search speed <a href="https://jsperf.com/compare-search-libraries" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
+When it comes to raw search speed <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
 It also has the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
 
-Comparison:
-- <a href="https://jsperf.com/compare-search-libraries" target="_blank">Library Query Benchmarks</a>
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Library Relevance Scoring</a>
-- <a href="#consumption">Library Memory Consumption</a>
-
 Supported Platforms:
 - Browser
 - Node.js
 
+Get Latest (Stable Release):
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Build</td>
+        <td>File</td>
+        <td>CDN</td>
+    </tr>
+    <tr>
+        <td>flexsearch.min.js</td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/flexsearch.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.min.js</a></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>flexsearch.light.js</td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/flexsearch.light.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.light.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.light.js</a></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>flexsearch.compact.js</td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/flexsearch.compact.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.compact.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.compact.js</a></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>flexsearch.custom.js</td>
+        <td><a href="#builds">Custom Build</a></td>
+        <td></td>
+    </tr>
+</table>
+
 All Features:
-<ul>
-    <li><a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)</li>
-    <li><a href="#contextual">Contextual Indexes</a></li>
-    <li>Partial Matching</li>
-    <li>Multi-Phrase Search</li>
-    <li><a href="#phonetic">Phonetic Mathching</a></li>
-    <li>Relevance-based Scoring</li>
-    <li>Auto-Balanced Cache by Popularity</li>
-    <li>Suggestions (Results)</li>
-    <li>Asynchronous Processing & Concurrency Control</li>
-    <li>Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter</li>
-</ul>
-
-These features are not available in the 50% smaller <a href="flexsearch.light.js">light version</a>:
-
-- WebWorker
-- Asynchronous Processing
-- Cache
-- Built-in encoders except 'balance' and 'icase' (you can still pass in customs) <!--- Built-in stemmer and filter (you can still pass in customs)-->
-- Debug logging
-- Methods: _index.info()_
-
-The light version is just available as compiled version (<a href="flexsearch.light.js">flexsearch.light.js</a>).
+<table>
+    <tr></tr>
+    <tr>
+        <td>Feature</td>
+        <td>flexsearch.min.js</td>
+        <td>flexsearch.compact.js</td>
+        <td>flexsearch.light.js</td>
+    </tr>
+    <tr>
+        <td>
+            <a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#contextual">Contextual Indexes</a>
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            Partial Matching
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            Multi-Phrase Search
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            Relevance-based Scoring
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            Auto-Balanced Cache by Popularity
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            Suggestions (Results)
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            Asynchronous Processing & Concurrency Control
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#phonetic">Phonetic Mathching</a>
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+    </tr>
+    <tr>
+        <td>File Size (gzip)</td>
+        <td>6.7 kb</td>
+        <td>4.5 kb</td>
+        <td>1.9 kb</td>
+    </tr>
+</table>
 
 > It is also pretty simple to make <a href="#builds">Custom Builds</a> 
 
-<a name="contextual"></a>
+<a name="compare" id="compare"></a>
+#### Benchmark Ranking 
 
+- Library Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+- Library Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
+- Library Comparison: <a href="#consumption">Memory Consumption</a>
+
+__Query Test: "Gulliver's Travels"__
+
+<table>
+    <tr></tr>
+    <tr>
+        <td align="left">Rank</td>
+        <td align="left">Library Name</td>
+        <td align="left">Library Version</td>
+        <td align="left">Library Size</td>
+        <td align="left">Operations per second</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>FlexSearch</td>
+        <td>0.3.0</td>
+        <td>2.9 kb</td>
+        <td><b>316336</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>2</td>
+        <td>Wade</td>
+        <td>0.3.3</td>
+        <td>1.6 kb</td>
+        <td><b>1524</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>3</td>
+        <td>JS Search</td>
+        <td>1.4.2</td>
+        <td>3.8 kb</td>
+        <td><b>739</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>4</td>
+        <td>JSii</td>
+        <td>1.0</td>
+        <td>3.9 kb</td>
+        <td><b>544</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>5</td>
+        <td>Lunr.js</td>
+        <td>2.3.5</td>
+        <td>8.8 kb</td>
+        <td><b>310</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>6</td>
+        <td>Elasticlunr.js</td>
+        <td>0.9.6</td>
+        <td>5.6 kb</td>
+        <td><b>286</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>7</td>
+        <td>BulkSearch</td>
+        <td>0.1.3</td>
+        <td>3.1 kb</td>
+        <td><b>265</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>8</td>
+        <td>bm25</td>
+        <td>0.2</td>
+        <td>3.5 kb</td>
+        <td><b>72</b></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>9</td>
+        <td>Fuse</td>
+        <td>3.3.0</td>
+        <td>3.7 kb</td>
+        <td><b>1</b></td>
+    </tr>
+</table>
+
+__Memory Test: "Gulliver's Travels"__
+
+<table>
+    <tr></tr>
+    <tr>
+        <td align="left">Rank</td>
+        <td align="left">Library Name</td>
+        <td align="left">Library Version</td>
+        <td align="left">Index Size <a href="#notes">*</a></td>
+        <td align="left">Memory Allocation <a href="#notes">**</a></td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>FlexSearch</td>
+        <td>0.3.0</td>
+        <td>1.33 Mb</td>
+        <td>20.31 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>2</td>
+        <td>Wade</td>
+        <td>0.3.3</td>
+        <td>3.18 Mb</td>
+        <td>68.53 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>3</td>
+        <td>JS Search</td>
+        <td>1.4.2</td>
+        <td>36.9 Mb</td>
+        <td>53.0 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>4</td>
+        <td>JSii</td>
+        <td>1.0</td>
+        <td>8.9 Mb</td>
+        <td>81.03 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>5</td>
+        <td>Lunr.js</td>
+        <td>2.3.5</td>
+        <td>16.24 Mb</td>
+        <td>84.73 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>6</td>
+        <td>Elasticlunr.js</td>
+        <td>0.9.6</td>
+        <td>11.83 Mb</td>
+        <td>68.69 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>7</td>
+        <td>BulkSearch</td>
+        <td>0.1.3</td>
+        <td>1.53 Mb</td>
+        <td>984.30 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>8</td>
+        <td>bm25</td>
+        <td>0.2</td>
+        <td>6.95 Mb</td>
+        <td>137.88 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>9</td>
+        <td>Fuse</td>
+        <td>3.3.0</td>
+        <td>0.22 Mb</td>
+        <td>156.46 kb</td>
+    </tr>
+</table>
+
+<a name="notes" id="notes"></a>
+_* Index Size: The size of memory the index requires_<br>
+_** Memory Allocation: The amount of memory which was additionally allocated during a row of 10 queries_
+
+Library Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+
+<a name="contextual"></a>
 #### Contextual Search
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://jsperf.com/compare-search-libraries" target="_blank">incredibly boost up queries to a complete new level</a>.
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires a lot of additionally memory.
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.
 Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?
 In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
@@ -226,7 +516,7 @@ Index methods:
 - <a href="#index.search">Index.__search__(\<options\>)</a>
 - <a href="#index.update">Index.__update__(id, string)</a>
 - <a href="#index.remove">Index.__remove__(id)</a>
-- <a href="#index.reset">Index.__reset__()</a>
+- <a href="#index.clear">Index.__clear__()</a>
 - <a href="#index.destroy">Index.__destroy__()</a>
 - <a href="#index.init">Index.__init__(\<options\>)</a>
 - <a href="#index.info">Index.__info__()</a>
@@ -352,6 +642,7 @@ When suggestion is enabled all results will be filled up (until limit, default 1
 ```js
 index.update(10025, "Road Runner");
 ```
+
 <a name="index.remove"></a>
 #### Remove item to the index
 
@@ -360,18 +651,20 @@ index.update(10025, "Road Runner");
 ```js
 index.remove(10025);
 ```
-<a name="index.reset"></a>
+<a name="index.clear"></a>
 #### Reset index
 
 ```js
-index.reset();
+index.clear();
 ```
+
 <a name="index.destroy"></a>
 #### Destroy the index
 
 ```js
 index.destroy();
 ```
+
 <a name="index.init"></a>
 #### Re-Initialize index
 
@@ -1175,6 +1468,11 @@ Full Build:
 npm run build
 ```
 
+Compact Build:
+```bash
+npm run build-compact
+```
+
 Light Build:
 ```bash
 npm run build-light
@@ -1190,27 +1488,69 @@ Custom Build:
 npm run build-custom SUPPORT_WORKER=true SUPPORT_ASYNC=true
 ```
 
-Supported flags:
-
-- SUPPORT_DEBUG
-- SUPPORT_WORKER
-- SUPPORT_CACHE
-- SUPPORT_ASYNC
-- SUPPORT_BUILTINS (built-in encoders)
-
-Supported language flags (includes stemmer and filter):
-
-- SUPPORT_LANG_EN
-- SUPPORT_LANG_DE
-
 Alternatively you can also use:
 ```bash
 node compile SUPPORT_WORKER=true
 ```
 
-The custom build was saved to flexsearch.custom.js
+> The custom build will be saved to flexsearch.custom.xxxxx.js (the "xxxxx" is a hash based on the used build flags).
+
+__Supported Build Flags__
+
+<table>
+    <tr></tr>
+    <tr>
+        <td align="left">Flag</td>
+        <td align="left">Values</td>
+    </tr>
+    <tr>
+        <td>SUPPORT_DEBUG</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_WORKER</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_CACHE</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_ASYNC</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_BUILTINS (built-in encoders)</td>
+        <td>true, false</td>
+    </tr>
+    <tr>
+        <td><br><b>Language Flags </b>(includes stemmer and filter)</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>SUPPORT_LANG_EN</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><a>SUPPORT_LANG_DE</td>
+        <td>true, false</td>
+    </tr>
+    <tr>
+        <td><br><b>Compiler Flags</b></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>LANGUAGE_OUT<br><br><br><br><br><br><br><br></td>
+        <td>ECMASCRIPT3<br>ECMASCRIPT5<br>ECMASCRIPT5_STRICT<br>ECMASCRIPT6<br>ECMASCRIPT6_STRICT<br>ECMASCRIPT_2015<br>ECMASCRIPT_2017<br>STABLE</td>
+    </tr>
+</table>
 
 ---
 
-Copyright 2018 Thomas Wilkerling<br>
+Copyright 2019 Nextapps GmbH<br>
 Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">Apache 2.0 License</a><br>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark</title>
+    <style>
+        body{
+            font-family: sans-serif;
+        }
+        table td{
+            padding: 1em 2em;
+        }
+        button{
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+<h2>Benchmark Comparison</h2>
+<button id="btn_start" onclick="start();" disabled>Start</button>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<hr>
+<div id="container"></div>
+<hr>
+Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 7 entries for the query "Gulliver".
+<script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.light.js"></script>
+<script src="https://rawgit.com/nextapps-de/bulksearch/master/bulksearch.light.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/elasticlunr/0.9.6/elasticlunr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/olivernn/lunr.js@2.3.5/lunr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/kbrsh/wade@0.3.3/dist/wade.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.3.0/fuse.min.js"></script>
+<script src="https://unpkg.com/js-search@1.4.2/dist/umd/js-search.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/BitSet.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/JSii.js"></script>
+<script src="https://rawgit.com/vlad-x/a25e0c5c1eeb6bf6aa38/raw/02d1a1703e4a99a7c733c85097f583579f6af4e2/bm25.js"></script>
+<script src="../data/gulliver.js"></script>
+<script>
+
+    //var data = [];
+
+    (function(){
+
+        var bulksearch;
+        var flexsearch;
+        // var flexsearch_cache;
+        // var flexsearch_worker;
+        // var flexsearch_cache_scale;
+        var elasticsearch;
+        var lunrsearch;
+        var wade;
+        //var wadesearch;
+        var fuse;
+        var jssearch;
+        var jsii;
+        var bm25;
+
+        var tests = {
+
+            flexsearch: {
+
+                init: function(){
+
+                    flexsearch = new FlexSearch({
+                        encode: "icase",
+                        mode: "strict",
+                        threshold: 9,
+                        depth: 0,
+                        async: false,
+                        cache: false,
+                        worker: false
+                    });
+                },
+                add: function(index, content){
+
+                    flexsearch.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch.search(query);
+                },
+                loops: 275000
+            },
+
+            /*
+            flexsearch_cache_unbound: {
+
+                init: function(){
+
+                    flexsearch_cache = new FlexSearch({
+                        encode: "icase",
+                        mode: "strict",
+                        threshold: 9,
+                        depth: 1,
+                        async: false,
+                        cache: true,
+                        worker: false
+                    });
+                },
+                add: function(index, content){
+
+                    flexsearch_cache.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_cache.search(query);
+                },
+                loops: 1000000
+            },
+            */
+
+            /*
+            flexsearch_cache_balanced: {
+
+                init: function(){
+
+                    flexsearch_cache_scale = new FlexSearch({
+                        encode: "icase",
+                        mode: "strict",
+                        threshold: 9,
+                        depth: 1,
+                        async: false,
+                        cache: 100,
+                        worker: false
+                    });
+                },
+                add: function(index, content){
+
+                    flexsearch_cache_scale.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_cache_scale.search(query);
+                },
+                loops: 1000000
+            },
+            */
+
+            /*
+            flexsearch_worker: {
+
+                init: function(){
+
+                    flexsearch_worker = new FlexSearch({
+                        encode: "icase",
+                        mode: "strict",
+                        threshold: 9,
+                        depth: 1,
+                        async: true,
+                        cache: false,
+                        worker: 4
+                    });
+                },
+                add: function(index, content){
+
+                    flexsearch_worker.add(index, content);
+                },
+                query: async function(query){
+
+                    return await new Promise(function(resolve){
+
+                        flexsearch_worker.search(query, resolve);
+                    });
+                },
+                loops: 5000
+            },
+            */
+
+            bulksearch: {
+
+                init: function(){
+
+                    bulksearch = new BulkSearch({
+                        type: "short", // this type specifies the maximum bitlength of assigned IDs!
+                        encode: "icase",
+                        multi: false,
+                        async: false,
+                        cache: false,
+                        worker: false
+                    });
+                },
+                add: function(index, content){
+
+                    bulksearch.add(index, content);
+                },
+                query: function(query){
+
+                    return bulksearch.search(query);
+                },
+                loops: 250
+            },
+
+            elasticlunr: {
+
+                init: function(){
+
+                    elasticsearch = elasticlunr(function(){
+                        this.setRef("id");
+                        this.addField("content");
+                    });
+                },
+                add: function(index, content){
+
+                    elasticsearch.addDoc({id: index, content: content});
+                },
+                query: function(query){
+
+                    return elasticsearch.search(query)/*.map(function(val){return val.ref})*/;
+                },
+                loops: 100
+            },
+
+            lunr: {
+
+                init: function(){
+
+                    lunrsearch = lunr(function(){
+                        this.ref("id");
+                        this.field("content");
+                        for(var i = 0; i < text_data.length; i++){
+                            this.add({id: i, content: text_data[i]});
+                        }
+                    });
+                },
+                add: function(index, content){},
+                query: function(query){
+
+                    return lunrsearch.search(query)/*.map(function(val){return val.ref})*/;
+                },
+                loops: 350
+            },
+
+            wade: {
+
+                init: function(){
+
+                    // wadesearch = function(query){
+                    //     return wade(query)/*.sort(sort_by_score_down)*/;
+                    // };
+                    //
+                    // function sort_by_score_down(a, b){
+                    //     var sum = a.score - b.score;
+                    //     return sum < 0 ? 1 : sum > 0 ? -1 : 0;
+                    // }
+
+                    wade = Wade(text_data.slice(0));
+                },
+                add: function(index, content){},
+                query: function(query){
+
+                    return wade(query)/*.map(function(val){return val.index})*/;
+                },
+                loops: 1500
+            },
+
+            fuse: {
+
+                init: function(){
+
+                    var payload = [];
+
+                    for(var i = 0; i < text_data.length; i++){
+                        payload[i] = {id: i, content: text_data[i]};
+                    }
+
+                    fuse = new Fuse(payload, {
+                        keys: ["content"],
+                        id: "id",
+                        shouldSort: true,
+                        threshold: 0.6,
+                        location: 0,
+                        distance: 100,
+                        findAllMatches: true,
+                        maxPatternLength: 32,
+                        minMatchCharLength: 1
+                    });
+                },
+                add: function(index, content){},
+                query: function(query){
+
+                    return fuse.search(query);
+                },
+                loops: 1
+            },
+
+            jssearch: {
+
+                init: function(){
+
+                    var payload = [];
+
+                    for(var i = 0; i < text_data.length; i++){
+                        payload[i] = {id: i, content: text_data[i]};
+                    }
+
+                    jssearch = new JsSearch.Search("id");
+                    jssearch.addIndex("content");
+                    jssearch.addDocuments(payload);
+                },
+                add: function(index, content){},
+                query: function(query){
+
+                    return jssearch.search(query)/*.map(function(val){return val.id})*/;
+                },
+                loops: 800
+            },
+
+            jsii: {
+
+                init: function(){
+
+                    var payload = [];
+
+                    for(var i = 0; i < text_data.length; i++){
+                        payload[i] = {id: i, text: text_data[i]};
+                    }
+
+                    jsii = new JSii();
+                    jsii.feedDocs(payload);
+                },
+                add: function(index, content){},
+                query: function(query){
+
+                    return jsii.search(query)/*.docs.map(function(val){return val.id})*/;
+                },
+                loops: 600
+            },
+
+            bm25: {
+
+                init: function(){
+
+                    bm25 = new BM25();
+
+                    for(var i = 0; i < text_data.length; i++){
+                        bm25.addDocument({id: i, body: text_data[i]});
+                    }
+
+                    bm25.updateIdf();
+                },
+                add: function(index, content){},
+                query: function(query){
+
+                    return bm25.search(query)/*.map(function(val){return val.id})*/;
+                },
+                loops: 95
+            }
+        };
+
+        function init_container(target){
+
+            var html = "<table>" +
+                       "<tr>" +
+                           "<th>Library</th>" +
+                           "<th>Benchmark</th>" +
+                       "</tr>";
+
+            for(var test in tests){
+
+                if(tests.hasOwnProperty(test)){
+
+                    html += "<tr>" +
+                                "<td>" + test + "</td>" +
+                                "<td id=\"test-" + test + "\">wait ...</td>" +
+                            "</tr>"
+                }
+            }
+
+            html += "</table>";
+
+            target.innerHTML = html;
+        }
+
+        function init_tests(index, keys){
+
+            var key = keys[index];
+
+            tests[key].init();
+
+            for(var i = 0; i < text_data.length; i++){
+
+                tests[key].add(i, text_data[i]);
+            }
+
+            document.getElementById("test-" + key).textContent = "ready ...";
+
+            if(++index < keys.length){
+
+                setTimeout(function(){
+
+                    init_tests(index, keys);
+
+                }, 50);
+            }
+            else{
+
+                window.start = function(){
+
+                    start_tests(0, Object.keys(tests));
+                };
+
+                document.getElementById("btn_start").disabled = false;
+
+                /*
+                setTimeout(function(){
+
+                    start_tests(0, keys);
+
+                }, 50);
+                */
+            }
+        }
+
+        function start_tests(index, keys){
+
+            var queries = text_queries;
+            var len = queries.length;
+            var key = keys[index];
+            var current = tests[key];
+            var loops = current.loops;
+            var query = current.query;
+
+            var start = Date.now();
+
+            for(var i = 0; i < len; i++){
+
+                var tmp = queries[i];
+
+                for(var x = 0; x < loops; x++){
+
+                    query(tmp);
+                }
+            }
+
+            var duration = Date.now() - start;
+
+            console.log(key + ":", duration);
+
+            document.getElementById("test-" + key).textContent = format_number((1000 / duration * loops + 0.5) >> 0) + " op/s";
+
+            if(++index < keys.length){
+
+                setTimeout(function(){
+
+                    start_tests(index, keys);
+
+                }, 50);
+            }
+        }
+
+        init_container(document.getElementById("container"));
+
+        setTimeout(function(){
+
+            init_tests(0, Object.keys(tests));
+
+        }, 50);
+
+        function format_number(num){
+
+            return ("" + num).replace(/(\d)(?=(\d{3})+\b)/g, '$1,');
+        }
+
+        // ---------------------------------------
+
+        window.tests = tests;
+    })();
+</script>
+</body>
+</html>
