@@ -48,8 +48,6 @@ var parameter = (function(opt){
         }
     }
 
-    //console.log(parameter);
-
     return parameter;
 })({
 
@@ -57,6 +55,7 @@ var parameter = (function(opt){
     use_types_for_optimization: true,
     new_type_inf: true,
     jscomp_warning: "newCheckTypes",
+    //jscomp_error: "strictCheckTypes",
     generate_exports: true,
     export_local_property_definitions: true,
     language_in: "ECMASCRIPT5_STRICT",

@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.2.68
+ * @preserve FlexSearch v0.2.70
  * Copyright 2018 Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
@@ -290,162 +290,159 @@ var SUPPORT_ASYNC = true;
             /** @type {Array} */
             this._matcher = [];
 
-            //if(options){
+            options || (options = defaults);
 
-                options || (options = defaults);
+            var custom =  /** @type {?string} */ (options["profile"]);
+            var profile = custom && !indexBlacklist[custom] ? profiles[custom] : createObject();
 
-                var custom = options["profile"];
-                var profile = custom && !indexBlacklist[/** @type {string} */ (custom)] ? profiles[custom] : createObject();
+            // initialize worker
 
-                // initialize worker
+            if(SUPPORT_WORKER && (custom = options["worker"])){
 
-                if(SUPPORT_WORKER && (custom = options["worker"])){
+                if(Worker){
 
-                    if(typeof Worker === "undefined"){
+                    var self = this;
+                    var threads = parseInt(custom, 10) || 4;
 
-                        options["worker"] = false;
+                    self._currentTask = -1;
+                    self._taskCompleted = 0;
+                    self._taskResult = [];
+                    self._currentCallback = null;
+                    //self._ids_count = new Array(threads);
+                    self._worker = new Array(threads);
 
-                        // if(SUPPORT_ASYNC){
-                        //
-                        //     options["async"] = true;
-                        // }
+                    for(var i = 0; i < threads; i++){
 
-                        this._worker = null;
-                    }
-                    else{
+                        //self._ids_count[i] = 0;
 
-                        var self = this;
-                        var threads = parseInt(custom, 10) || 4;
+                        self._worker[i] = addWorker(self.id, i, options /*|| defaults*/, function(id, query, result, limit){
 
-                        self._currentTask = -1;
-                        self._taskCompleted = 0;
-                        self._taskResult = [];
-                        self._currentCallback = null;
-                        //self._ids_count = new Array(threads);
-                        self._worker = new Array(threads);
+                            if(self._taskCompleted === self.worker){
 
-                        for(var i = 0; i < threads; i++){
+                                return;
+                            }
 
-                            //self._ids_count[i] = 0;
+                            self._taskResult = self._taskResult.concat(result);
+                            self._taskCompleted++;
 
-                            self._worker[i] = addWorker(self.id, i, options /*|| defaults*/, function(id, query, result, limit){
+                            if(limit && (self._taskResult.length >= limit)){
 
-                                if(self._taskCompleted === self.worker){
+                                self._taskCompleted = self.worker;
+                            }
 
-                                    return;
+                            if(self._currentCallback && (self._taskCompleted === self.worker)){
+
+                                // store result to cache
+                                // TODO: add worker cache, may remove global cache
+
+                                if(self.cache){
+
+                                    self._cache.set(query, self._taskResult);
                                 }
 
-                                self._taskResult = self._taskResult.concat(result);
-                                self._taskCompleted++;
+                                self._currentCallback(self._taskResult);
+                                self._taskResult = [];
+                            }
 
-                                if(limit && (self._taskResult.length >= limit)){
-
-                                    self._taskCompleted = self.worker;
-                                }
-
-                                if(self._currentCallback && (self._taskCompleted === self.worker)){
-
-                                    // store result to cache
-                                    // TODO: add worker cache, may remove global cache
-
-                                    if(self.cache){
-
-                                        self._cache.set(query, self._taskResult);
-                                    }
-
-                                    self._currentCallback(self._taskResult);
-                                    self._taskResult = [];
-                                }
-
-                                return self;
-                            });
-                        }
+                            return self;
+                        });
                     }
                 }
+                else{
 
-                // apply custom options
+                    options["worker"] = false;
 
-                this.mode = (
+                    // if(SUPPORT_ASYNC){
+                    //
+                    //     options["async"] = true;
+                    // }
 
-                    options["mode"] ||
-                    profile.mode ||
-                    this.mode ||
-                    defaults.mode
-                );
-
-                if(SUPPORT_ASYNC) this.async = (
-
-                    options["async"] ||
-                    this.async ||
-                    defaults.async
-                );
-
-                if(SUPPORT_WORKER) this.worker = (
-
-                    options["worker"] ||
-                    this.worker ||
-                    defaults.worker
-                );
-
-                this.threshold = (
-
-                    options["threshold"] ||
-                    profile.threshold ||
-                    this.threshold ||
-                    defaults.threshold
-                );
-
-                this.depth = (
-
-                    options["depth"] ||
-                    profile.depth ||
-                    this.depth ||
-                    defaults.depth
-                );
-
-                this.suggest = (
-
-                    options["suggest"] ||
-                    this.suggest ||
-                    defaults.suggest
-                );
-
-                custom = options["encode"] || profile.encode;
-
-                this.encoder = (
-
-                    (custom && !indexBlacklist[custom] && globalEncoder[custom]) ||
-                    (typeof custom === "function" ? custom : this.encoder || false)
-                );
-
-                if(SUPPORT_DEBUG){
-
-                    this.debug = (
-
-                        options["debug"] ||
-                        this.debug
-                    );
+                    this._worker = null;
                 }
+            }
 
-                if(custom = options["matcher"]) {
+            // apply custom options
 
-                    this.addMatcher(
+            this.mode = (
 
-                        /** @type {Object<string, string>} */
-                        (custom)
-                    );
-                }
+                options["mode"] ||
+                profile.mode ||
+                this.mode ||
+                defaults.mode
+            );
 
-                if((custom = options["filter"]) && !indexBlacklist[/** @type {string} */ (custom)]) {
+            if(SUPPORT_ASYNC) this.async = (
 
-                    this.filter = initFilter(filter[custom] || custom, this.encoder);
-                }
+                options["async"] ||
+                this.async ||
+                defaults.async
+            );
 
-                if((custom = options["stemmer"]) && !indexBlacklist[/** @type {string} */ (custom)]) {
+            if(SUPPORT_WORKER) this.worker = (
 
-                    this.stemmer = initStemmer(stemmer[custom] || custom, this.encoder);
-                }
-            //}
+                options["worker"] ||
+                this.worker ||
+                defaults.worker
+            );
+
+            this.threshold = (
+
+                options["threshold"] ||
+                profile.threshold ||
+                this.threshold ||
+                defaults.threshold
+            );
+
+            this.depth = (
+
+                options["depth"] ||
+                profile.depth ||
+                this.depth ||
+                defaults.depth
+            );
+
+            this.suggest = (
+
+                options["suggest"] ||
+                this.suggest ||
+                defaults.suggest
+            );
+
+            custom = options["encode"] || profile.encode;
+
+            this.encoder = (
+
+                (custom && !indexBlacklist[custom] && globalEncoder[custom]) ||
+                (typeof custom === "function" ? custom : this.encoder || false)
+            );
+
+            if(SUPPORT_DEBUG){
+
+                this.debug = (
+
+                    options["debug"] ||
+                    this.debug
+                );
+            }
+
+            if(custom = options["matcher"]) {
+
+                this.addMatcher(
+
+                    /** @type {Object<string, string>} */
+                    (custom)
+                );
+            }
+
+            if((custom = options["filter"]) /*&& !indexBlacklist[custom]*/) {
+
+                this.filter = initFilter(filter[custom] || custom, this.encoder);
+            }
+
+            if((custom = options["stemmer"]) /*&& !indexBlacklist[custom]*/) {
+
+                this.stemmer = initStemmer(stemmer[custom] || custom, this.encoder);
+            }
 
             // initialize primary index
 
@@ -902,7 +899,7 @@ var SUPPORT_ASYNC = true;
             var threshold;
             var result = [];
 
-            if(query && (typeof query === "object")){
+            if(typeof query === "object"){
 
                 // re-assign properties
 
@@ -912,16 +909,16 @@ var SUPPORT_ASYNC = true;
                 query = query["query"];
             }
 
-            threshold = (threshold || this.threshold || 0) | 0;
+            threshold || (threshold = this.threshold || 0);
 
             if(typeof limit === "function"){
 
                 callback = limit;
                 limit = 1000;
             }
-            else{
+            else {
 
-                limit || (limit = 1000);
+                limit || (limit === 0 ) || (limit = 1000);
             }
 
             if(SUPPORT_WORKER && this.worker){
@@ -1066,11 +1063,11 @@ var SUPPORT_ASYNC = true;
                                 :
                                     this._map
 
-                            )[z][value];
+                            )[z];
 
-                            if(map){
+                            if(map[value]){
 
-                                mapCheck[count++] = map;
+                                mapCheck[count++] = map[value];
                                 mapFound = true;
                             }
                         }
@@ -1675,14 +1672,13 @@ var SUPPORT_ASYNC = true;
 
         function addIndex(map, dupes, tmp, id, partialScore, contextScore, threshold){
 
-            if(typeof dupes[tmp] === "undefined"){
+            if(!dupes[tmp]){
 
                 var score = (
 
                     partialScore ?
 
                         ((9 - (threshold || 6)) * contextScore) + ((threshold || 6) * partialScore)
-                        // calcScore(tmp, content)
                     :
                         contextScore
                 );
@@ -1696,29 +1692,14 @@ var SUPPORT_ASYNC = true;
 
                     arr[arr.length] = id;
                 }
+
+                return score;
             }
+            else{
 
-            return score || dupes[tmp];
+                return dupes[tmp];
+            }
         }
-
-        /**
-        * @param {!string} part
-        * @param {!string} ref
-        * @returns {number}
-        */
-
-        /*
-        function calcScore(part, ref){
-
-            var contextIndex = ref.indexOf(part);
-            var partial_index = contextIndex - ref.lastIndexOf(" ", contextIndex);
-
-            return (
-
-                (3 / ref.length * (ref.length - contextIndex)) + (6 / partial_index)
-            );
-        }
-        */
 
         /**
          * @param {Object} map
@@ -2082,32 +2063,47 @@ var SUPPORT_ASYNC = true;
 
                     while(i < length){
 
-                        var checkVal = check[tmp = arr[++i]];
+                        tmp = arr[++i];
 
-                        if(checkVal === z){
+                        if(check[tmp]){
 
-                            // fill in during last round
+                            var checkVal = check[tmp];
 
-                            if(isFinalLoop){
+                            if(checkVal === z){
 
-                                result[count++] = tmp;
+                                // fill in during last round
 
-                                if(limit && (count === limit)){
+                                if(isFinalLoop){
 
-                                    return result;
+                                    result[count++] = tmp;
+
+                                    if(limit && (count === limit)){
+
+                                        return result;
+                                    }
                                 }
+                                else{
+
+                                    check[tmp] = z + 1;
+                                }
+
+                                // apply count status
+
+                                found = true;
                             }
+                            else if(suggest){
 
-                            // apply count status
+                                var currentSuggestion = (
 
-                            found = true;
-                            check[tmp] = z + 1;
-                        }
-                        else if(suggest){
+                                    suggestions[checkVal] ?
 
-                            var currentSuggestion = suggestions[checkVal] || (suggestions[checkVal] = []);
+                                        suggestions[checkVal]
+                                    :
+                                        suggestions[checkVal] = []
+                                );
 
-                            currentSuggestion[currentSuggestion.length] = tmp;
+                                currentSuggestion[currentSuggestion.length] = tmp;
+                            }
                         }
                     }
 
@@ -2121,11 +2117,10 @@ var SUPPORT_ASYNC = true;
 
                 if(suggest){
 
-                    limit || (limit = 1000);
                     count = result.length;
                     length = suggestions.length;
 
-                    if((count < limit) && length){
+                    if(length && (!limit || (count < limit))){
 
                         for(z = length - 1; z >= 0; z--){
 
@@ -2425,14 +2420,6 @@ var SUPPORT_ASYNC = true;
         }
 
         /**
-         * @type {Function}
-         * @const
-         * @final
-         */
-
-        //var emptyObject = new Function("var o={};o.__proto__=null;return o;");
-
-        /**
          * https://jsperf.com/comparison-object-index-type
          * @param {number=} count
          * @returns {Object|Array<Object>}
@@ -2446,14 +2433,14 @@ var SUPPORT_ASYNC = true;
 
                 for(var i = 0; i < count; i++){
 
-                    array[i] = createObject();
+                    array[i] = Object.create(null);
                 }
 
                 return array;
             }
             else{
 
-                return Object.create(null); //emptyObject();
+                return Object.create(null);
             }
         }
 
