@@ -70,10 +70,28 @@ All Features:
     </tr>
     <tr>
         <td>
-            <a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)
+            <a href="#profiles">Presets</a>
         </td>
         <td>x</td>
         <td>x</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#async">Async Processing</a>
+        </td>
+        <td>x</td>
+        <td>x</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)
+        </td>
+        <td>x</td>
+        <td>-</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -115,10 +133,10 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            Auto-Balanced Cache by Popularity
+            <a href="#cache">Auto-Balanced Cache by Popularity</a>
         </td>
         <td>x</td>
-        <td>x</td>
+        <td>-</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -127,22 +145,13 @@ All Features:
             Suggestions (Results)
         </td>
         <td>x</td>
-        <td>x</td>
+        <td>-</td>
         <td>-</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
-            Asynchronous Processing & Concurrency Control
-        </td>
-        <td>x</td>
-        <td>x</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#phonetic">Phonetic Mathching</a>
+            <a href="#phonetic">Phonetic Matching</a>
         </td>
         <td>x</td>
         <td>x</td>
@@ -161,7 +170,7 @@ All Features:
         <td>File Size (gzip)</td>
         <td>6.7 kb</td>
         <td>4.5 kb</td>
-        <td>1.9 kb</td>
+        <td>2.1 kb</td>
     </tr>
 </table>
 
@@ -188,9 +197,9 @@ __Query Test: "Gulliver's Travels"__
     <tr>
         <td>1</td>
         <td>FlexSearch</td>
-        <td>0.3.0</td>
-        <td>2.9 kb</td>
-        <td><b>316336</b></td>
+        <td>0.3.1</td>
+        <td>2.1 kb</td>
+        <td><b>327771</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -198,7 +207,7 @@ __Query Test: "Gulliver's Travels"__
         <td>Wade</td>
         <td>0.3.3</td>
         <td>1.6 kb</td>
-        <td><b>1524</b></td>
+        <td><b>1587</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -206,7 +215,7 @@ __Query Test: "Gulliver's Travels"__
         <td>JS Search</td>
         <td>1.4.2</td>
         <td>3.8 kb</td>
-        <td><b>739</b></td>
+        <td><b>771</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -214,7 +223,7 @@ __Query Test: "Gulliver's Travels"__
         <td>JSii</td>
         <td>1.0</td>
         <td>3.9 kb</td>
-        <td><b>544</b></td>
+        <td><b>584</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -222,7 +231,7 @@ __Query Test: "Gulliver's Travels"__
         <td>Lunr.js</td>
         <td>2.3.5</td>
         <td>8.8 kb</td>
-        <td><b>310</b></td>
+        <td><b>322</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -230,7 +239,7 @@ __Query Test: "Gulliver's Travels"__
         <td>Elasticlunr.js</td>
         <td>0.9.6</td>
         <td>5.6 kb</td>
-        <td><b>286</b></td>
+        <td><b>319</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -246,7 +255,7 @@ __Query Test: "Gulliver's Travels"__
         <td>bm25</td>
         <td>0.2</td>
         <td>3.5 kb</td>
-        <td><b>72</b></td>
+        <td><b>107</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -272,7 +281,7 @@ __Memory Test: "Gulliver's Travels"__
     <tr>
         <td>1</td>
         <td>FlexSearch</td>
-        <td>0.3.0</td>
+        <td>0.3.1</td>
         <td>1.33 Mb</td>
         <td>20.31 kb</td>
     </tr>
@@ -594,6 +603,27 @@ index.search("John", function(result){
 });
 ```
 
+Perform queries asynchronously (Promise-based):
+
+> Make sure the option "async" is enabled on this instance
+
+```js
+index.search("John").then(function(result){
+    
+    // array of results
+});
+```
+
+Alternatively ES6:
+
+```js
+async function search(query){
+    return await index.search(query);
+}
+
+const result = search("John");
+```
+
 Pass custom options for each query:
 
 ```js
@@ -905,6 +935,7 @@ var index = new FlexSearch({
 });
 ```
 
+<a name="cache"></a>
 #### Enable Auto-Balanced Cache
 
 Create index and just set a limit of cache entries:
@@ -1504,7 +1535,17 @@ __Supported Build Flags__
         <td align="left">Values</td>
     </tr>
     <tr>
-        <td>SUPPORT_DEBUG</td>
+        <td>DEBUG</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>PROFILER</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_ENCODER (built-in encoders)</td>
         <td>true, false</td>
     </tr>
     <tr></tr>
@@ -1524,7 +1565,7 @@ __Supported Build Flags__
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_BUILTINS (built-in encoders)</td>
+        <td>SUPPORT_PRESETS</td>
         <td>true, false</td>
     </tr>
     <tr>

@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.3.0
+ * @preserve FlexSearch v0.3.1
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -14,6 +14,7 @@
 /** @define {boolean} */ const SUPPORT_CACHE = true;
 /** @define {boolean} */ const SUPPORT_ASYNC = true;
 /** @define {boolean} */ const SUPPORT_PRESETS = true;
+/** @define {boolean} */ const SUPPORT_SUGGESTIONS = true;
 
 // noinspection ThisExpressionReferencesGlobalObjectJS
 (function(){
@@ -23,8 +24,8 @@
         "use strict";
 
         /**
-         * @struct
          * @const
+         * @enum {boolean|string|number}
          */
 
         const defaults = {
@@ -121,7 +122,6 @@
          */
 
         const regex_split = regex("[ -\/]");
-
         const filter = {};
         const stemmer = {};
 
@@ -140,7 +140,6 @@
             }
 
             return map;
-
         })();
 
         /**
@@ -161,7 +160,7 @@
 
                 if(DEBUG && !options){
 
-                    console.warn("Preset not found: " + presets[options]);
+                    console.warn("Preset not found: " + options);
                 }
             }
 
@@ -196,7 +195,7 @@
 
         FlexSearch.create = function(options){
 
-            return new this(options);
+            return new FlexSearch(options);
         };
 
         /**
@@ -232,44 +231,44 @@
 
         /**
          * @param {string} lang
-         * @param {Object} languagePack
+         * @param {Object} language_pack
          * @export
          */
 
-        FlexSearch.registerLanguage = function(lang, languagePack){
+        FlexSearch.registerLanguage = function(lang, language_pack){
 
             /**
              * @type {Array<string>}
              */
 
-            filter[lang] = languagePack["filter"];
+            filter[lang] = language_pack["filter"];
 
             /**
              * @type {Object<string, string>}
              */
 
-            stemmer[lang] = languagePack["stemmer"];
+            stemmer[lang] = language_pack["stemmer"];
 
             return this;
         };
 
         /**
-         * @param {!string} name
-         * @param {?string} value
+         * @param {string} name
+         * @param {string} value
          * @returns {string}
          * @export
          */
 
         FlexSearch.encode = function(name, value){
 
-            // if(index_blacklist[name]){
-            //
-            //     return value;
-            // }
-            // else{
+            if(index_blacklist[name]){
+
+                return value;
+            }
+            else{
 
                 return global_encoder[name](value);
-            //}
+            }
         };
 
         /**
@@ -279,13 +278,18 @@
 
         FlexSearch.prototype.init = function(options){
 
-            /** @type {Array} */
+            /** @type {Array} @private */
             this._matcher = [];
 
             options || (options = defaults);
 
             let custom = /** @type {?string} */ (options["profile"]);
             const profile = SUPPORT_PRESETS && custom ? presets[custom] : {};
+
+            if(DEBUG && !profile){
+
+                console.warn("Preset not found: " + custom);
+            }
 
             // initialize worker
 
@@ -296,11 +300,16 @@
                     const self = this;
                     const threads = parseInt(custom, 10) || 4;
 
+                    /** @private */
                     self._current_task = -1;
+                    /** @private */
                     self._task_completed = 0;
+                    /** @private */
                     self._task_result = [];
+                    /** @private */
                     self._current_callback = null;
                     //self._ids_count = new Array(threads);
+                    /** @private */
                     self._worker = new Array(threads);
 
                     for(let i = 0; i < threads; i++){
@@ -344,17 +353,14 @@
 
                     options["worker"] = false;
 
-                    // if(SUPPORT_ASYNC){
-                    //
-                    //     options["async"] = true;
-                    // }
-
+                    /** @private */
                     this._worker = null;
                 }
             }
 
             // apply custom options
 
+            /** @private */
             this.mode = (
 
                 options["mode"] ||
@@ -363,59 +369,76 @@
                 defaults.mode
             );
 
-            if(SUPPORT_ASYNC) this.async = (
+            if(SUPPORT_ASYNC) /** @private */ this.async = (
 
-                options["async"] ||
-                this.async ||
-                defaults.async
+                is_undefined(custom = options["async"]) ?
+
+                    this.async ||
+                    defaults.async
+                :
+                    custom
             );
 
-            if(SUPPORT_WORKER) this.worker = (
+            if(SUPPORT_WORKER) /** @private */ this.worker = (
 
-                options["worker"] ||
-                this.worker ||
-                defaults.worker
+                is_undefined(custom = options["worker"]) ?
+
+                    this.worker ||
+                    defaults.worker
+                :
+                    custom
             );
 
+            /** @private */
             this.threshold = (
 
-                options["threshold"] ||
-                profile.threshold ||
-                this.threshold ||
-                defaults.threshold
+                is_undefined(custom = options["threshold"]) ?
+
+                    profile.threshold ||
+                    this.threshold ||
+                    defaults.threshold
+                :
+                    custom
             );
 
+            /** @private */
             this.depth = (
 
-                options["depth"] ||
-                profile.depth ||
-                this.depth ||
-                defaults.depth
+                is_undefined(custom = options["depth"]) ?
+
+                    profile.depth ||
+                    this.depth ||
+                    defaults.depth
+                :
+                    custom
             );
 
-            this.suggest = (
+            if(SUPPORT_SUGGESTIONS){
 
-                options["suggest"] ||
-                this.suggest ||
-                defaults.suggest
-            );
+                /** @private */
+                this.suggest = (
 
-            custom = options["encode"] || profile.encode;
+                    is_undefined(custom = options["suggest"]) ?
 
+                        this.suggest ||
+                        defaults.suggest
+                    :
+                        custom
+                );
+            }
+
+            custom = is_undefined(custom = options["encode"]) ?
+
+                profile.encode
+            :
+                custom;
+
+            /** @private */
             this.encoder = (
 
                 (custom && global_encoder[custom] && global_encoder[custom].bind(global_encoder)) ||
-                (typeof custom === "function" ? custom : this.encoder || false)
+                (is_function(custom) ? custom : this.encoder || false)
             );
-
-            if(DEBUG){
-
-                this.debug = (
-
-                    options["debug"] ||
-                    this.debug
-                );
-            }
 
             if((custom = options["matcher"])) {
 
@@ -428,42 +451,56 @@
 
             if((custom = options["filter"])) {
 
+                /** @private */
                 this.filter = init_filter(filter[custom] || custom, this.encoder);
             }
 
             if((custom = options["stemmer"])) {
 
+                /** @private */
                 this.stemmer = init_stemmer(stemmer[custom] || custom, this.encoder);
             }
 
             // initialize primary index
 
+            /** @private */
             this._map = create_object_array(10);
+            /** @private */
             this._ctx = {};
+            /** @private */
             this._ids = {};
+            /** @private */
             this._stack = {};
+            /** @private */
             this._stack_keys = [];
 
             /**
              * @type {number|null}
+             * @private
              */
 
             this._timer = 0;
 
             if(SUPPORT_CACHE) {
 
+                /** @private */
                 this._cache_status = true;
 
+                /** @private */
                 this.cache = custom = (
 
-                    options["cache"] ||
-                    this.cache ||
-                    defaults.cache
+                    is_undefined(custom = options["cache"]) ?
+
+                        this.cache ||
+                        defaults.cache
+                    :
+                        custom
                 );
 
+                /** @private */
                 this._cache = custom ?
 
-                    (new Cache(custom))
+                    new Cache(custom)
                 :
                     false;
             }
@@ -563,7 +600,7 @@
 
         /**
          * @param {number|string} id
-         * @param {?string} content
+         * @param {string} content
          * @param {boolean=} _skip_update
          * @this {FlexSearch}
          * @export
@@ -571,7 +608,7 @@
 
         FlexSearch.prototype.add = function(id, content, _skip_update){
 
-            if(content && (typeof content === "string") && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
+            if(content && is_string(content) && ((id && !index_blacklist[id]) || (id === 0))){
 
                 // check if index ID already exist
 
@@ -641,7 +678,7 @@
 
                     const words = (
 
-                        typeof tokenizer === "function" ?
+                        is_function(tokenizer) ?
 
                             tokenizer(content)
                         :(
@@ -796,7 +833,7 @@
 
                     // update status
 
-                    this._ids[id] = "1";
+                    this._ids[id] = 1;
 
                     if(SUPPORT_CACHE){
 
@@ -821,7 +858,7 @@
 
         FlexSearch.prototype.update = function(id, content){
 
-            if(this._ids[id] && content && (typeof content === "string")){
+            if(this._ids[id] && is_string(content)){
 
                 if(PROFILER){
 
@@ -847,11 +884,11 @@
 
         FlexSearch.prototype.remove = function(id){
 
-            if(this._ids[id] /*&& !index_blacklist[id]*/){
+            if(this._ids[id]){
 
                 if(SUPPORT_WORKER && this.worker){
 
-                    const current_task = parseInt(this._ids[id], 10);
+                    const current_task = this._ids[id];
 
                     this._worker[current_task].postMessage(current_task, {
 
@@ -919,27 +956,38 @@
          * @param {!string} query
          * @param {number|Function=} limit
          * @param {Function=} callback
-         * @returns {Array|undefined}
+         * @param {boolean=} _recall
+         * @returns {Array|Promise|undefined}
          * @export
          */
 
-        FlexSearch.prototype.search = function(query, limit, callback){
+        FlexSearch.prototype.search = function(query, limit, callback, _recall){
 
+            let _query = query;
             let threshold;
             let result = [];
 
-            if(typeof query === "object"){
+            if(is_object(query)){
 
                 // re-assign properties
 
-                callback = query["callback"] || /** @type {?Function} */ (limit);
+                if(SUPPORT_ASYNC){
+
+                    callback = query["callback"] || /** @type {?Function} */ (limit);
+
+                    if(callback) {
+
+                        _query["callback"] = null;
+                    }
+                }
+
                 limit = query["limit"];
                 threshold = query["threshold"];
                 query = query["query"];
             }
 
             /*
-            if(!index_blacklist[query]){
+            if(index_blacklist[query]){
 
                 return result;
             }
@@ -947,7 +995,7 @@
 
             threshold || (threshold = this.threshold || 0);
 
-            if(typeof limit === "function"){
+            if(is_function(limit)){
 
                 callback = limit;
                 limit = 1000;
@@ -986,17 +1034,28 @@
 
                     queue(function(){
 
-                        callback(self.search(query, limit));
+                        callback(self.search(_query, limit, null, true));
                         self = null;
 
                     }, 1, "search-" + this.id);
                 }
                 else{
 
-                    callback(this.search(query, limit));
+                    callback(this.search(_query, limit, null, true));
                 }
 
                 return;
+            }
+            else if(SUPPORT_ASYNC && !_recall && this.async){
+
+                /** @type {FlexSearch} */
+                let self = this;
+
+                return new Promise(function(resolve){
+
+                    resolve(self.search(_query, limit, null, true));
+                    self = null;
+                });
             }
 
             if(PROFILER){
@@ -1004,13 +1063,13 @@
                 profile_start("search");
             }
 
-            if(!query || (typeof query !== "string")){
+            if(!query || !is_string(query)){
 
                 return result;
             }
 
             /** @type {!string|Array<string>} */
-            let _query = query;
+            (_query = query);
 
             if(SUPPORT_CACHE && this.cache){
 
@@ -1050,7 +1109,7 @@
 
             const words = (
 
-                typeof tokenizer === "function" ?
+                is_function(tokenizer) ?
 
                     tokenizer(_query)
                 :(
@@ -1077,8 +1136,9 @@
                 if(this.depth){
 
                     use_contextual = true;
+                    // TODO: alternative roots
                     ctx_root = words[0];
-                    check_words[ctx_root] = "1";
+                    check_words[ctx_root] = 1;
                 }
                 else{
 
@@ -1098,6 +1158,7 @@
                     if(value && !check_words[value]){
 
                         let map;
+                        let map_value;
                         let map_found = false;
                         const map_check = [];
                         let count = 0;
@@ -1111,25 +1172,16 @@
                                     ctx_map[ctx_root]
                                 :
                                     this._map
-
                             )[z];
 
-                            if(map[value]){
+                            if((map_value = map[value])){
 
-                                map_check[count++] = map[value];
+                                map_check[count++] = map_value;
                                 map_found = true;
                             }
                         }
 
-                        if(!map_found){
-
-                            if(!this.suggest){
-
-                                found = false;
-                                break;
-                            }
-                        }
-                        else {
+                        if(map_found){
 
                             // Not handled by intersection:
 
@@ -1145,10 +1197,18 @@
 
                             // Handled by intersection:
 
-                            // check[check.length] = map_check;
+                            //check[check.length] = map_check;
+                        }
+                        else {
+
+                            if(!SUPPORT_SUGGESTIONS || !this.suggest){
+
+                                found = false;
+                                break;
+                            }
                         }
 
-                        check_words[value] = "1";
+                        check_words[value] = 1;
                     }
 
                     ctx_root = value;
@@ -1163,7 +1223,7 @@
 
                 // Not handled by intersection:
 
-                result = intersect(check, limit, this.suggest);
+                result = intersect(check, limit, SUPPORT_SUGGESTIONS && this.suggest);
 
                 // Handled by intersection:
 
@@ -1332,7 +1392,6 @@
          * @dict {Function}
          * @private
          * @const
-         * @final
          */
 
         const global_encoder = SUPPORT_ENCODER ? {
@@ -1538,7 +1597,7 @@
             //"balance": global_encoder_balance
         };
 
-        // Xone Async Handler Fallback
+        // Async Handler
 
         const queue = SUPPORT_ASYNC ? (function(){
 
@@ -1569,14 +1628,19 @@
 
                 this.clear();
 
+                /** @private */
                 this.limit = (limit !== true) && limit;
             }
 
             Cache.prototype.clear = function(){
 
+                /** @private */
                 this.cache = {};
+                /** @private */
                 this.count = {};
+                /** @private */
                 this.index = {};
+                /** @private */
                 this.ids = [];
             };
 
@@ -1727,13 +1791,12 @@
         /**
          * @param {!string} str
          * @param {RegExp|Array} regex
-         * @param {string=} replacement
          * @returns {string}
          */
 
-        function replace(str, regex, replacement){
+        function replace(str, regex/*, replacement*/){
 
-            if(typeof replacement === "undefined"){
+            //if(is_undefined(replacement)){
 
                 for(let i = 0; i < /** @type {Array} */ (regex).length; i += 2){
 
@@ -1741,11 +1804,11 @@
                 }
 
                 return str;
-            }
-            else{
-
-                return str.replace(/** @type {!RegExp} */ (regex), replacement);
-            }
+            // }
+            // else{
+            //
+            //     return str.replace(/** @type {!RegExp} */ (regex), replacement || "");
+            // }
         }
 
         /**
@@ -1829,7 +1892,7 @@
 
                                 break;
                             }
-                            else if(typeof tmp[a] === "object"){
+                            else if(is_object(tmp[a])){
 
                                 remove_index(tmp[a], id);
                             }
@@ -2142,9 +2205,9 @@
                 // loop through arrays
 
                 let tmp, count = 0;
-                let z = 1;
+                let z = 0; // start from 1
 
-                while(z < length_z){
+                while(++z < length_z){
 
                     // get each array one by one
 
@@ -2154,11 +2217,11 @@
                     suggestions = [];
                     arr = arrays[z];
                     length = arr.length;
-                    i = -1;
+                    i = 0;
 
                     while(i < length){
 
-                        tmp = arr[++i];
+                        tmp = arr[i++];
 
                         if(check[tmp]){
 
@@ -2190,11 +2253,10 @@
 
                                 const current_suggestion = (
 
-                                    suggestions[check_val] ?
+                                    suggestions[check_val] || (
 
-                                        suggestions[check_val]
-                                    :
                                         suggestions[check_val] = []
+                                    )
                                 );
 
                                 current_suggestion[current_suggestion.length] = tmp;
@@ -2206,24 +2268,22 @@
 
                         break;
                     }
-
-                    z++;
                 }
 
                 if(suggest){
 
                     count = result.length;
-                    length = suggestions.length;
+                    z = suggestions.length;
 
-                    if(length && (!limit || (count < limit))){
+                    if(z && (!limit || (count < limit))){
 
-                        for(z = length - 1; z >= 0; z--){
+                        while(z--){
 
                             tmp = suggestions[z];
 
                             if(tmp){
 
-                                for(i = 0; i < tmp.length; i++){
+                                for(let i = 0, len = tmp.length; i < len; i++){
 
                                     result[count++] = tmp[i];
 
@@ -2256,16 +2316,18 @@
         }
 
         /**
-         * @param {!Array<Array<number|string>>} arrays
+         * @param {Array<Array<number|string>>|Array<number|string>} arrays
          * @param {number=} limit
+         * @param {boolean=} suggest
          * @returns {Array}
          */
 
         /*
-        function intersect_3d(arrays, limit) {
+        function intersect_3d(arrays, limit, suggest) {
 
-            const result = [];
+            let result = [];
             const length_z = arrays.length;
+            const check = {};
 
             if(length_z > 1){
 
@@ -2275,43 +2337,38 @@
 
                 const arr_tmp = arrays[0];
 
-                for(const a = 0; a < arr_tmp.length; a++){
+                for(let a = 0, len = arr_tmp.length; a < len; a++){
 
                     // fill initial map
 
-                    const check = {};
                     const arr = arr_tmp[a];
-                    const length = arr.length;
-                    const i = 0;
 
-                    while(i < length) {
+                    for(let i = 0, length = arr.length; i < length; i++) {
 
-                        check[arr[i++]] = 1;
+                        check[arr[i]] = 1;
                     }
                 }
 
                 // loop through arrays
 
-                const tmp, count = 0;
-                const z = 1;
+                let tmp, count = 0;
+                let z = 1;
 
                 while(z < length_z){
 
                     // get each array one by one
 
-                    const found = false;
+                    let found = false;
 
                     const arr_tmp = arrays[0];
 
-                    for(const a = 0; a < arr_tmp.length; a++){
+                    for(let a = 0, len = arr_tmp.length; a < len; a++){
 
-                        arr = arr_tmp[a];
-                        length = arr.length;
-                        i = 0;
+                        const arr = arr_tmp[a];
 
-                        while(i < length){
+                        for(let i = 0, length = arr.length; i < length; i++){
 
-                            if((check[tmp = arr[i++]]) === z){
+                            if((check[tmp = arr[i]]) === z){
 
                                 // fill in during last round
 
@@ -2441,9 +2498,19 @@
          * @returns {boolean}
          */
 
+        function is_function(val){
+
+            return typeof val === "function";
+        }
+
+        /**
+         * @param {*} val
+         * @returns {boolean}
+         */
+
         function is_object(val){
 
-            return val.constructor === Object;
+            return typeof val === "object";
         }
 
         /**
@@ -2600,11 +2667,6 @@
 
                         if(data){
 
-                            // if(flexsearch.debug){
-                            //
-                            //     console.log("Worker Job Started: " + data["id"]);
-                            // }
-
                             if(data["search"]){
 
                                 const results = flexsearch["search"](data["content"],
@@ -2650,10 +2712,7 @@
 
                                 info["worker"] = id;
 
-                                if(flexsearch.debug){
-
-                                    console.log(info);
-                                }
+                                console.log(info);
 
                                 /** @lends {Worker} */
                                 //self.postMessage(info);
@@ -2690,13 +2749,6 @@
 
                         callback(data["id"], data["content"], data["result"], data["limit"]);
                     }
-                    else{
-
-                        if(DEBUG && options["debug"]){
-
-                            console.log(data);
-                        }
-                    }
                 },
 
                 // cores:
@@ -2717,12 +2769,12 @@
             return thread;
         }
     })(
-        // Xone Worker Handler Fallback
+        // Worker Handler
 
         SUPPORT_WORKER ? (function register_worker(){
 
             const worker_stack =  Object.create(null);
-            const inline_supported = !!((typeof Blob !== "undefined") && (typeof URL !== "undefined") && URL.createObjectURL);
+            const inline_supported = (typeof Blob !== "undefined") && (typeof URL !== "undefined") && URL.createObjectURL;
 
             return (
 
@@ -2766,7 +2818,7 @@
                         :
                             // Load Extern Worker (but also requires CORS)
 
-                            "../" + name + "." + RELEASE + ".js"
+                            "../" + name + (RELEASE ? "." + RELEASE : "") + ".js"
                     );
 
                     name += "-" + _id;

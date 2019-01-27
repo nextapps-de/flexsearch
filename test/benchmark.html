@@ -17,7 +17,7 @@
 </head>
 <body>
 <h2>Benchmark Comparison</h2>
-<button id="btn_start" onclick="start();" disabled>Start</button>
+<!--<button id="btn_start" onclick="start();" disabled>Start</button>-->
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <hr>
 <div id="container"></div>
@@ -370,15 +370,23 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
             target.innerHTML = html;
         }
 
+        var is_mobile =  navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/);
+
         function init_tests(index, keys){
 
             var key = keys[index];
+            var test = tests[key];
 
-            tests[key].init();
+            test.init();
+
+            if(is_mobile && (test.loops > 1)){
+
+                test.loops = (test.loops / 5) >> 0;
+            }
 
             for(var i = 0; i < text_data.length; i++){
 
-                tests[key].add(i, text_data[i]);
+                test.add(i, text_data[i]);
             }
 
             document.getElementById("test-" + key).textContent = "ready ...";
@@ -389,24 +397,24 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
                     init_tests(index, keys);
 
-                }, 50);
+                }, 100);
             }
             else{
 
+                /*
                 window.start = function(){
 
                     start_tests(0, Object.keys(tests));
                 };
 
                 document.getElementById("btn_start").disabled = false;
+                */
 
-                /*
                 setTimeout(function(){
 
                     start_tests(0, keys);
 
-                }, 50);
-                */
+                }, 1000);
             }
         }
 
@@ -415,9 +423,9 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
             var queries = text_queries;
             var len = queries.length;
             var key = keys[index];
-            var current = tests[key];
-            var loops = current.loops;
-            var query = current.query;
+            var test = tests[key];
+            var loops = test.loops;
+            var query = test.query;
 
             var start = Date.now();
 
@@ -435,7 +443,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
             console.log(key + ":", duration);
 
-            document.getElementById("test-" + key).textContent = format_number((1000 / duration * loops + 0.5) >> 0) + " op/s";
+            document.getElementById("test-" + key).textContent = /*format_number*/((1000 / duration * loops + 0.5) >> 0) + " op/s";
 
             if(++index < keys.length){
 
@@ -443,7 +451,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
                     start_tests(index, keys);
 
-                }, 50);
+                }, 1000);
             }
         }
 
@@ -453,7 +461,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
             init_tests(0, Object.keys(tests));
 
-        }, 50);
+        }, 100);
 
         function format_number(num){
 
@@ -462,7 +470,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
         // ---------------------------------------
 
-        window.tests = tests;
+        //window.tests = tests;
     })();
 </script>
 </body>

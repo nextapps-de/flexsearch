@@ -513,18 +513,42 @@ if(env !== "light"){
             flexsearch_async.update(1, "foo");
 
             expect(flexsearch_async.length).to.equal(3);
-            expect(flexsearch_async.search("foo")).to.not.have.members([2, 1]);
-            expect(flexsearch_async.search("bar")).to.not.include(0);
-            expect(flexsearch_async.search("bar")).to.include(2);
-            expect(flexsearch_async.search("foobar")).to.not.include(2);
+
+            flexsearch_async.search("foo").then(function(result){
+                expect(result).to.not.have.members([2, 1]);
+            });
+
+            flexsearch_async.search("bar").then(function(result){
+                expect(result).to.not.include(0);
+            });
+
+            flexsearch_async.search("bar").then(function(result){
+                expect(result).to.include(2);
+            });
+
+            flexsearch_async.search("foobar").then(function(result){
+                expect(result).to.not.include(2);
+            });
 
             setTimeout(function(){
 
                 expect(flexsearch_async.length).to.equal(3);
-                expect(flexsearch_async.search("foo")).to.have.members([2, 1]);
-                expect(flexsearch_async.search("bar")).to.include(0);
-                expect(flexsearch_async.search("bar")).to.not.include(2);
-                expect(flexsearch_async.search("foobar")).to.include(2);
+
+                flexsearch_async.search("foo", function(result){
+                    expect(result).to.have.members([2, 1]);
+                });
+
+                flexsearch_async.search("bar", function(result){
+                    expect(result).to.include(0);
+                });
+
+                flexsearch_async.search("bar", function(result){
+                    expect(result).to.not.include(2);
+                });
+
+                flexsearch_async.search("foobar", function(result){
+                    expect(result).to.include(2);
+                });
 
                 done();
 
@@ -546,10 +570,22 @@ if(env !== "light"){
             setTimeout(function(){
 
                 expect(flexsearch_async.length).to.equal(3);
-                expect(flexsearch_async.search("foo")).to.have.members([2, 1]);
-                expect(flexsearch_async.search("bar")).to.include(0);
-                expect(flexsearch_async.search("bar")).to.not.include(2);
-                expect(flexsearch_async.search("foobar")).to.include(2);
+
+                flexsearch_async.search("foo").then(function(result){
+                    expect(result).to.have.members([2, 1]);
+                });
+
+                flexsearch_async.search("bar").then(function(result){
+                    expect(result).to.include(0);
+                });
+
+                flexsearch_async.search("bar").then(function(result){
+                    expect(result).to.not.include(2);
+                });
+
+                flexsearch_async.search("foobar").then(function(result){
+                    expect(result).to.include(2);
+                });
 
                 done();
 
@@ -570,9 +606,18 @@ if(env !== "light"){
             setTimeout(function(){
 
                 expect(flexsearch_async.length).to.equal(0);
-                expect(flexsearch_async.search("foo")).to.have.lengthOf(0);
-                expect(flexsearch_async.search("bar")).to.have.lengthOf(0);
-                expect(flexsearch_async.search("foobar")).to.have.lengthOf(0);
+
+                flexsearch_async.search("foo", function(result){
+                    expect(result).to.have.lengthOf(0);
+                });
+
+                flexsearch_async.search("bar", function(result){
+                    expect(result).to.have.lengthOf(0);
+                });
+
+                flexsearch_async.search("foobar", function(result){
+                    expect(result).to.have.lengthOf(0);
+                });
 
                 done();
 
@@ -766,6 +811,8 @@ if(env !== "light"){
     describe("Remove (Worker)", function(){
 
         it("Should have been removed from the index", function(done){
+
+            expect(flexsearch_worker.length).to.equal(3);
 
             flexsearch_worker.remove(0);
             flexsearch_worker.remove(2);
@@ -1039,28 +1086,31 @@ describe("Relevance", function(){
 // Suggestion Tests
 // ------------------------------------------------------------------------
 
-describe("Suggestion", function(){
+if(env !== "light"){
 
-    it("Should have been suggested properly by relevance", function(){
+    describe("Suggestion", function(){
 
-        var index = new FlexSearch({
-            encode: "advanced",
-            mode: "strict",
-            suggest: true
+        it("Should have been suggested properly by relevance", function(){
+
+            var index = new FlexSearch({
+                encode: "advanced",
+                mode: "strict",
+                suggest: true
+            });
+
+            index.add(0, "1 2 3 2 4 1 5 3");
+            index.add(1, "zero one two three four five six seven eight nine ten");
+            index.add(2, "four two zero one three ten five seven eight six nine");
+
+            expect(index.search("1 3 4 7")).to.have.members([0]);
+            expect(index.search("1 3 9 7")).to.have.members([0]);
+            expect(index.search("one foobar two")).to.have.members([1, 2]);
+            expect(index.search("zero one foobar two foobar")).to.have.members([1, 2]);
+            //TODO
+            //expect(index.search("zero one foobar two foobar")[0]).to.equal(1);
         });
-
-        index.add(0, "1 2 3 2 4 1 5 3");
-        index.add(1, "zero one two three four five six seven eight nine ten");
-        index.add(2, "four two zero one three ten five seven eight six nine");
-
-        expect(index.search("1 3 4 7")).to.have.members([0]);
-        expect(index.search("1 3 9 7")).to.have.members([0]);
-        expect(index.search("one foobar two")).to.have.members([1, 2]);
-        expect(index.search("zero one foobar two foobar")).to.have.members([1, 2]);
-        //TODO
-        //expect(index.search("zero one foobar two foobar")[0]).to.equal(1);
     });
-});
+}
 
 // ------------------------------------------------------------------------
 // Feature Tests
