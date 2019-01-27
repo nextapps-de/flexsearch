@@ -59,6 +59,6 @@
     "mocha-phantomjs": "^4.1.0",
     "nyc": "^13.1.0",
     "phantomjs-prebuilt": "^2.1.16",
-    "updtr": "^2.0.0"
+    "updtr": "^3.0.0"
   }
 }
