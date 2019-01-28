@@ -13,10 +13,10 @@
 </p>
 
 <h1></h1>
-<h3>World's fastest and most memory efficient full text search library with zero dependencies.</h3>
+<h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
 When it comes to raw search speed <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-It also has the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated continuously then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
+Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
@@ -173,9 +173,9 @@ All Features:
     </tr>
     <tr>
         <td>File Size (gzip)</td>
-        <td>6.7 kb</td>
-        <td>4.5 kb</td>
-        <td>4.1 kb</td>
+        <td>5.0 kb</td>
+        <td>3.9 kb</td>
+        <td>2.7 kb</td>
     </tr>
 </table>
 
@@ -194,79 +194,89 @@ __Query Test: "Gulliver's Travels"__
         <td align="left">Rank</td>
         <td align="left">Library Name</td>
         <td align="left">Library Version</td>
-        <td align="left">Library Size</td>
-        <td align="left">Operations per second</td>
+        <td align="left">Single Phrase (op/s)</td>
+        <td align="left">Multi Phrase (op/s)</td>
+        <td align="left">Not Found (op/s)</td>
     </tr>
     <tr>
         <td>1</td>
-        <td>FlexSearch</td>
+        <td>FlexSearch <a href="#notes">***</a></td>
         <td>0.3.2</td>
-        <td>4.1 kb</td>
-        <td><b>333738</b></td>
+        <td><b>342040</b></td>
+        <td><b>178456</b></td>
+        <td><b>1527778</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>2</td>
         <td>Wade</td>
         <td>0.3.3</td>
-        <td>1.6 kb</td>
-        <td><b>1587</b></td>
+        <td><b>899</b></td>
+        <td><b>6098</b></td>
+        <td><b>214286</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>3</td>
         <td>JS Search</td>
         <td>1.4.2</td>
-        <td>3.8 kb</td>
-        <td><b>771</b></td>
+        <td><b>735</b></td>
+        <td><b>8889</b></td>
+        <td><b>800000</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>4</td>
         <td>JSii</td>
         <td>1.0</td>
-        <td>3.9 kb</td>
-        <td><b>584</b></td>
+        <td><b>551</b></td>
+        <td><b>9970</b></td>
+        <td><b>75000</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>5</td>
         <td>Lunr.js</td>
         <td>2.3.5</td>
-        <td>8.8 kb</td>
-        <td><b>322</b></td>
+        <td><b>355</b></td>
+        <td><b>1051</b></td>
+        <td><b>25000</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>6</td>
         <td>Elasticlunr.js</td>
         <td>0.9.6</td>
-        <td>5.6 kb</td>
-        <td><b>319</b></td>
+        <td><b>327</b></td>
+        <td><b>781</b></td>
+        <td><b>6667</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>7</td>
         <td>BulkSearch</td>
         <td>0.1.3</td>
-        <td>3.1 kb</td>
         <td><b>265</b></td>
+        <td><b>535</b></td>
+        <td><b>2778</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>8</td>
         <td>bm25</td>
         <td>0.2</td>
-        <td>3.5 kb</td>
-        <td><b>107</b></td>
+        <td><b>71</b></td>
+        <td><b>116</b></td>
+        <td><b>2065</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>9</td>
         <td>Fuse</td>
         <td>3.3.0</td>
-        <td>3.7 kb</td>
-        <td><b>1</b></td>
+        <td><b>0.5</b></td>
+        <td><b>0.4</b></td>
+        <td><b>0.7</b></td>
     </tr>
 </table>
 
@@ -283,7 +293,7 @@ __Memory Test: "Gulliver's Travels"__
     </tr>
     <tr>
         <td>1</td>
-        <td>FlexSearch</td>
+        <td>FlexSearch <a href="#notes">****</a></td>
         <td>0.3.1</td>
         <td>1.33 Mb</td>
         <td>20.31 kb</td>
@@ -356,12 +366,16 @@ __Memory Test: "Gulliver's Travels"__
 
 <a name="notes" id="notes"></a>
 _* Index Size: The size of memory the index requires_<br>
-_** Memory Allocation: The amount of memory which was additionally allocated during a row of 10 queries_
+_** Memory Allocation: The amount of memory which was additionally allocated during a row of 10 queries_<br>
+_*** The preset "fastest" was used for this test_ <br>
+_**** The preset "memory" was used for this test_ 
 
 Library Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
 
 <a name="contextual"></a>
-#### Contextual Search
+## Contextual Search
+
+> "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithms today. They don't provide neither: a meaningful relevance of a term nor the importance of it! Like many pseudo-intelligent algorithms this is also just an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
 
 FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires a lot of additionally memory.
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.
@@ -372,27 +386,16 @@ In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/contextual-index.svg">
 </p>
 
-__Note:__ This feature is actually not enabled by default.
-
-###### TF-IDF / BM25?
-
-> "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithms today. They don't provide neither: a meaningful relevance of a term nor the importance of it! Like many pseudo-intelligent algorithms this is also just an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
-
-<a name="webworker"></a>
-#### Web-Worker Support
-
-Workers get its own dedicated memory. Especially for larger indexes, web worker improves speed and available memory a lot. FlexSearch index was tested with a 250 Mb text file including 10 Million words. The indexing was done silently in background by multiple parallel running workers in about 7 minutes. The final index reserves ~ 8.2 Mb memory/space. The search result took ~ 0.25 ms.
-
-__Note:__ It is slightly faster to use no web worker when the index or query isn't too big (index < 500,000 words, query < 25 words).
+__Note:__ This feature is actually not enabled by default. Read <a href="contextual_enable">here</a> how to enable.
 
 #### Compare BulkSearch vs. FlexSearch
 
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Description</th>
-        <td align="left">BulkSearch</th>
-        <td align="left">FlexSearch</th>
+        <td align="left"></th>
+        <td align="left"><b>BulkSearch</b></th>
+        <td align="left"><b>FlexSearch</b></th>
     </tr>
     <tr>
         <td>Access</td>
@@ -414,7 +417,7 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
     <tr></tr>
     <tr>
         <td>Strength</td>
-        <td><ul><li>fast adds / fast updates / fast removals</li></ul></td>
+        <td><ul><li>fast adds</li><li>fast updates</li><li>fast removals</li></ul></td>
         <td><ul><li>fast queries</li><li>memory-efficient index</li></ul></td>
     </tr>
     <tr></tr>
@@ -472,7 +475,9 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
 <a name="installation"></a>
 ## Installation
 
-##### HTML / Javascript
+#### HTML / Javascript
+
+> Use _flexsearch.min.js_ for production and _flexsearch.js_ for development.
 
 ```html
 <html>
@@ -481,14 +486,24 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
 </head>
 ...
 ```
-__Note:__ Use _flexsearch.min.js_ for production and _flexsearch.js_ for development.
 
 Use latest from CDN:
 ```html
 <script src="https://cdn.rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script>
 ```
 
-##### Node.js
+Or a specific version:
+```html
+<script src="https://cdn.rawgit.com/nextapps-de/flexsearch/0.3.2/flexsearch.min.js"></script>
+```
+
+__AMD__
+
+```javascript
+var FlexSearch = require("./flexsearch.js");
+```
+
+#### Node.js
 
 ```npm
 npm install flexsearch
@@ -504,12 +519,6 @@ Or pass in options when requiring:
 
 ```javascript
 var index = require("flexsearch").create({/* options */});
-```
-
-__AMD__
-
-```javascript
-var FlexSearch = require("./flexsearch.js");
 ```
 
 <a name="api"></a>
@@ -551,23 +560,23 @@ alternatively you can also use:
 var index = FlexSearch.create();
 ```
 
-##### Create a new index and choosing one of the built-in profiles
+Create a new index and choosing one of the built-in profiles:
 
 ```js
 var index = new FlexSearch("speed");
 ```
 
-##### Create a new index with custom options
+Create a new index with custom options:
 
 ```js
 var index = new FlexSearch({
 
     // default values:
 
-    profile: "balance",
-    encode: "icase",
-    tokenize: "ngram",
+    encode: "balance",
+    tokenize: "forward",
     async: false,
+    worker: false,
     cache: false
 });
 ```
@@ -577,7 +586,7 @@ var index = new FlexSearch({
 <a name="index.add"></a>
 #### Add items to an index
 
-> Index.__add___(id, string)
+> Index.__add(id, string)__
 
 ```js
 index.add(10025, "John Doe");
@@ -585,7 +594,7 @@ index.add(10025, "John Doe");
 <a name="index.search"></a>
 #### Search items
 
-> Index.__search(string|options, \<limit\>, \<callback\>)__
+> Index.__search(string | options, \<limit\>, \<callback\>)__
 
 ```js
 index.search("John");
@@ -597,6 +606,7 @@ Limit the result:
 index.search("John", 10);
 ```
 
+#### Async Search
 Perform queries asynchronously:
 
 ```js
@@ -605,6 +615,8 @@ index.search("John", function(result){
     // array of results
 });
 ```
+
+> Passing a callback always will perform as asynchronous even if the "async" option was not set.
 
 Perform queries asynchronously (Promise-based):
 
@@ -621,12 +633,12 @@ Alternatively ES6:
 
 ```js
 async function search(query){
-    return await index.search(query);
+    
+    const result = await index.search(query);
 }
-
-const result = search("John");
 ```
 
+#### Custom Search
 Pass custom options for each query:
 
 ```js
@@ -655,6 +667,7 @@ index.search("John", {
 });
 ```
 
+#### Suggestions
 Get also suggestions for a query:
 
 ```js
@@ -668,9 +681,9 @@ index.search({
 When suggestion is enabled all results will be filled up (until limit, default 1000) with similar matches ordered by relevance.
 
 <a name="index.update"></a>
-#### Update item to the index
+#### Update item of an index
 
-> Index.__update__(id, string)
+> Index.__update(id, string)__
 
 ```js
 index.update(10025, "Road Runner");
@@ -679,7 +692,7 @@ index.update(10025, "Road Runner");
 <a name="index.remove"></a>
 #### Remove item to the index
 
-> Index.__remove__(id)
+> Index.__remove(id)__
 
 ```js
 index.remove(10025);
@@ -699,11 +712,9 @@ index.destroy();
 ```
 
 <a name="index.init"></a>
-#### Re-Initialize index
+#### Re-Initialize the index
 
 > Index.__init(\<options\>)__
-
-__Note:__ Re-initialization will also destroy the old index!
 
 Initialize (with same options):
 ```js
@@ -717,6 +728,9 @@ index.init({
     /* options */
 });
 ```
+
+> Re-initialization will also destroy the old index.
+
 <a name="flexsearch.addmatcher"></a>
 #### Add custom matcher
 
@@ -731,6 +745,7 @@ FlexSearch.registerMatcher({
     '[ûúù]': 'u' // replaces multiple
 });
 ```
+
 <a name="index.addmatcher"></a>
 Add private matchers for a specific instance:
 ```js
@@ -741,10 +756,11 @@ index.addMatcher({
     '[ûúù]': 'u' // replaces multiple
 });
 ```
+
 <a name="flexsearch.encoder"></a>
 #### Add custom encoder
 
-Define a private custom encoder during creation/initialization:
+Assign a custom encoder by passing a function during index creation/initialization:
 ```js
 var index = new FlexSearch({
 
@@ -756,71 +772,66 @@ var index = new FlexSearch({
     }
 });
 ```
-<a name="flexsearch.register"></a>
-##### Register a global encoder to be used by all instances
 
-> FlexSearch.__registerEncoder(name, encoder)__
-
-```js
-FlexSearch.registerEncoder('whitespace', function(str){
-
-    return str.replace(/ /g, '');
-});
-```
-
-Use global encoders:
-```js
-var index = new FlexSearch({ encode: 'whitespace' });
-```
-<a name="index.encode"></a>
-##### Call encoders directly
-
-Private encoder:
+Call a custom encoder directly:
 ```js
 var encoded = index.encode("sample text");
 ```
-<a name="flexsearch.encode"></a>
-Global encoder:
+
+<a name="flexsearch.register"></a>
+#### Register a global encoder
+
+> FlexSearch.__registerEncoder(name, encoder)__
+
+Global encoders can be shared/used by all instances.
+
+```js
+FlexSearch.registerEncoder("whitespace", function(str){
+
+    return str.replace(/\s/g, "");
+});
+```
+
+Initialize index and assign a global encoder:
+```js
+var index = new FlexSearch({ encode: "whitespace" });
+```
+
+Call a global encoder directly:
 ```js
 var encoded = FlexSearch.encode("whitespace", "sample text");
 ```
 
-##### Mixup/Extend multiple encoders
+#### Mix/Extend multiple encoders
 
 ```js
 FlexSearch.registerEncoder('mixed', function(str){
   
-    str = this.encode("icase", str);  // built-in
+    str = this.encode("icase", str); // built-in
     str = this.encode("whitespace", str); // custom
     
-    return str;
-});
-```
-```js
-FlexSearch.registerEncoder('extended', function(str){
-  
-    str = this.encode("custom", str);
+     // do something additional with str ...
     
-    // do something additional with str ...
-
     return str;
 });
 ```
+
 <a name="flexsearch.tokenizer"></a>
 #### Add custom tokenizer
+
+> A tokenizer split words into components or chunks.
 
 Define a private custom tokenizer during creation/initialization:
 ```js
 var index = new FlexSearch({
 
     tokenize: function(str){
-    
-        // split string into components, e.g.:
-        
-        return str.split(/ -\//g);
+
+        return str.split(/\s-\//g);
     }
 });
 ```
+
 <a name="flexsearch.language"></a>
 #### Add language-specific stemmer and/or filter
 
@@ -828,7 +839,7 @@ var index = new FlexSearch({
 
 > __Filter:__ a blacklist of words to be filtered out from indexing at all (e.g. "and", "to" or "be")
 
-Define a private custom stemmer or filter during creation/initialization:
+Assign a private custom stemmer or filter during creation/initialization:
 ```js
 var index = new FlexSearch({
 
@@ -854,15 +865,18 @@ var index = new FlexSearch({
 ```
 
 Or assign stemmer/filters globally to a language:
-```js
-FlexSearch.registerLanguage('us', {
 
-    stemmer: {/* ... */},
-    filter: [/* ... */]
+> Stemmer are passed as a object (key-value-pair), filter as an array.
+
+```js
+FlexSearch.registerLanguage("us", {
+
+    stemmer: { /* ... */ },
+    filter:  [ /* ... */ ]
 });
 ```
 
-Or use built-in stemmer or filter of your preferred languages:
+Or use some pre-defined stemmer or filter of your preferred languages:
 ```html
 <html>
 <head>
@@ -875,15 +889,23 @@ Or use built-in stemmer or filter of your preferred languages:
 
 Now you can assign built-in stemmer during creation/initialization:
 ```js
-var index_en = new FlexSearch({stemmer: 'en', filter: 'en'});
-var index_de = new FlexSearch({stemmer: 'de', filter: [/* custom */]});
+var index_en = new FlexSearch({
+    stemmer: "en", 
+    filter: "en" 
+});
+
+var index_de = new FlexSearch({
+    stemmer: "de",
+    filter: [ /* custom */ ]
+});
 ```
 
-In Node.js you just need require the language pack files to make them available:
+In Node.js you just have to require the language pack files to make them available:
 
 ```js
-require('lang/en.js');
-require('lang/de.js');
+require("flexsearch.js");
+require("lang/en.js");
+require("lang/de.js");
 ```
 
 It is also possible to <a href="#builds">compile language packs into the build</a> as follows:
@@ -893,7 +915,9 @@ node compile SUPPORT_LANG_EN=true SUPPORT_LANG_DE=true
 ```
 
 <a name="index.info"></a>
-#### Get info about an index
+### Get info about an index
+
+> This feature is available in _DEBUG_ mode.
 
 ```js
 index.info();
@@ -903,15 +927,22 @@ Returns information e.g.:
 
 ```json
 {
-    "bytes": 64000,
     "id": 0,
+    "memory": 10000,
+    "items": 500,
+    "sequences": 3000,
     "matchers": 0,
-    "size": 10000,
-    "status": false
+    "chars": 3500,
+    "cache": false,
+    "matcher": 0,
+    "worker": false,
+    "threshold": 7,
+    "depth": 3,
+    "contextual": true                                 
 }
 ```
 <a name="chaining"></a>
-#### Chaining
+### Chaining
 
 Simply chain methods like:
 
@@ -926,20 +957,28 @@ var index = FlexSearch.create()
 index.remove(0).update(1, 'foo').add(2, 'foobar');
 ```
 
-#### Enable Contextual Index
+<a name="contextual_enable"></a>
+### Enable Contextual Scoring
 
-Create index and just set the limit of relevance ("depth"):
+Create an index and just set the limit of relevance as "depth":
 ```js
 var index = new FlexSearch({
 
     encode: "icase",
     tokenize: "strict",
+    threshold: 7,
     depth: 3
 });
 ```
 
+> Only the tokenizer "strict" is actually supported by the contextual index.
+
+> The contextual index requires <a href="#memory">additional amount of memory</a> depending on depth.
+
+> Try to use the __lowest depth__ and __highest threshold__ which fits your needs.
+
 <a name="cache"></a>
-#### Enable Auto-Balanced Cache
+### Enable Auto-Balanced Cache
 
 Create index and just set a limit of cache entries:
 ```js
@@ -950,7 +989,16 @@ var index = new FlexSearch({
 });
 ```
 
-#### Use WebWorker Sharding (Browser only)
+> When passing a number as a limit the cache automatically balance stored entries related to their popularity.
+
+> When just using "true" the cache is unbounded and perform actually 2-3 times faster (because the balancer do not have to run).
+
+<a name="webworker"></a>
+### WebWorker Sharding (Browser only)
+
+Worker get its own dedicated memory and also run in their own dedicated thread without blocking the UI while processing. Especially for larger indexes, web worker improves speed and available memory a lot. FlexSearch index was tested with a 250 Mb text file including 10 Million words. <!--The indexing was done silently in background by multiple parallel running workers in about 7 minutes. The final index reserves ~ 8.2 Mb memory/space. The search result took ~ 0.25 ms.-->
+
+> When the index isn't big enough it is faster to use no web worker.
 
 Create index and just set the count of parallel threads:
 ```js
@@ -971,6 +1019,14 @@ index.add(10025, "John Doe");
 Perform search and simply pass in callback like:
 ```js
 index.search("John Doe", function(results){
+
+    // do something with array of results
+});
+```
+
+Or use promises accordingly:
+```js
+index.search("John Doe").then(function(results){
 
     // do something with array of results
 });
@@ -1004,12 +1060,12 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">tokenize<br><br><br><br><br><br></td>
+        <td align="top">tokenize<br><br><br><br><br><!--<br>--></td>
         <td vertical="top" vertical-align="top">
             "strict"<br>
             "foward"<br>
             "reverse"<br>
-            "ngram"<br>
+            <!--"ngram"<br>-->
             "full"<br>
             function()
         </td>
@@ -1139,6 +1195,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
         <td>* 1</td>
     </tr>
     <tr></tr>
+    <!--
     <tr>
         <td><b>"ngram"</b> (default)</td>
         <td>index words partially through phonetic n-grams</td>
@@ -1146,6 +1203,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
         <td>* n / 3</td>
     </tr>
     <tr></tr>
+    -->
     <tr>
         <td><b>"foward"</b></td>
         <td>incrementally index words in forward direction</td>
@@ -1234,10 +1292,10 @@ Encoding effects the required memory also as query time and phonetic matches. Tr
     <tr></tr>
     <tr>
         <td align="left">Query</td>
-        <td align="left">iCase</td>
-        <td align="left">Simple</td>
-        <td align="left">Advanced</td>
-        <td align="left">Extra</td>
+        <td align="left">icase</td>
+        <td align="left">simple</td>
+        <td align="left">advanced</td>
+        <td align="left">extra</td>
     </tr>
     <tr>
         <td>björn</td>
@@ -1378,11 +1436,13 @@ The required memory for the index depends on several options:
         <td>"strict"</td>
         <td>* 1</td>
     </tr>
+    <!--
     <tr></tr>
     <tr>
         <td>"ngram" (default)</td>
         <td>* n / 3</td>
     </tr>
+    -->
     <tr></tr>
     <tr>
         <td>"forward"</td>
@@ -1417,11 +1477,11 @@ The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
 <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/memory-comparison.svg">
 
 <a name="profiles"></a>
-## Built-in Profiles
+## Presets
 
-You can pass a built-in profile during creation/initialization. They have these following settings:
+You can pass a preset during creation/initialization. They represents these following settings:
 
-Standard profile: __"default"__
+__"default"__: Standard profile
 ```js
 {
     encode: "icase",
@@ -1429,7 +1489,7 @@ Standard profile: __"default"__
 }
 ```
 
-Memory-optimized profile: __"memory"__
+__"memory"__: Memory-optimized profile
 ```js
 {
     encode: "extra",
@@ -1438,7 +1498,7 @@ Memory-optimized profile: __"memory"__
 }
 ```
 
-Speed-optimized profile: __"speed"__
+__"speed"__: Speed-optimized profile
 
 ```js
 {
@@ -1449,7 +1509,7 @@ Speed-optimized profile: __"speed"__
 }
 ```
 
-Matching-tolerant profile: __"match"__
+__"match"__: Matching-tolerant profile
 
 ```js
 {
@@ -1458,7 +1518,7 @@ Matching-tolerant profile: __"match"__
 }
 ```
 
-Relevance-optimized profile: __"score"__
+__"score"__: Relevance-optimized profile
 
 ```js
 {
@@ -1469,18 +1529,18 @@ Relevance-optimized profile: __"score"__
 }
 ```
 
-Most-balanced profile: __"balanced"__
+__"balance"__: Most-balanced profile
 
 ```js
 {
-    encode: "balanced",
-    tokenize: "ngram",
+    encode: "balance",
+    tokenize: "strict",
     threshold: 6,
     depth: 3
 }
 ```
 
-Absolute fastest profile: __"fastest"__
+__"fastest"__: Absolute fastest profile
 
 ```js
 {
@@ -1490,11 +1550,116 @@ Absolute fastest profile: __"fastest"__
 }
 ```
 
-<!--
-Compare these options above:
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmarks</a>
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching-flexsearch.html" target="_blank">Relevance Scoring</a>
--->
+Compare these presets:
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
+
+<a name="builds"></a>
+## Best Practices
+
+__Split Complexity__
+
+Whenenver you can, try to divide content by categories and add them to its own index, e.g.:
+```js
+var feeds_2017 = new FlexSearch();
+var feeds_2018 = new FlexSearch();
+var feeds_2019 = new FlexSearch();
+```
+
+__Use numeric IDs__
+
+It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
+
+e.g. instead of this:
+```js
+index.add("fdf12cad-8779-47ab-b614-4dbbd649178b", "content");
+```
+
+you should probably use this:
+```js
+var index_table = {
+    "fdf12cad-8779-47ab-b614-4dbbd649178b": 0,
+    "48b3041c-a243-4a52-b1ed-225041847366": 1,
+    "7236c8b5-86e1-451a-842f-d9aba9642e4d": 2,
+    // ....
+};
+
+index.add(index_table["fdf12cad-8779-47ab-b614-4dbbd649178b"], "content");
+```
+
+It is planned to provide a built-in feature which should replace this workaround.
+
+<a name="debug"></a>
+## Debug
+
+> Do not use DEBUG in production builds.
+
+If you get issues, you can temporary set the _DEBUG_ flag to _true_ on top of _flexsearch.js_:
+
+```js
+DEBUG = true;
+```
+
+This enables console logging of several processes. Just open the browsers console to make this information visible.
+
+<a name="profile"></a>
+## Profiler Stats
+
+> Do not use PROFILER in production builds.
+
+To collect some performance statistics of your indexes you need to temporary set the _PROFILER_ flag to _true_ on top of _flexsearch.js_:
+
+```js
+PROFILER = true;
+```
+
+This enables profiling of several processes.
+
+An array of all profiles is available on:
+
+```js
+window.stats;
+```
+
+You can also just open the browsers console and enter this line to get stats.
+
+> The index of the array corresponds to the _index.id_.
+
+Get stats from a specific index:
+
+```js
+index.stats;
+```
+
+The returning stats payload is divided into several categories. Each of these category provides its own statistic values.
+
+__Profiler Stats Properties__
+<table>
+    <tr></tr>
+    <tr>
+        <td>Property</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>time</td>
+        <td>The sum of time (ms) the process takes (lower is better)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>count</td>
+        <td>How often the process was called</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>ops</td>
+        <td>Average operations per seconds (higher is better)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>nano</td>
+        <td>Average cost (ns) per operation/call (lower is better)</td>
+    </tr>
+</table>
 
 <a name="builds"></a>
 ## Custom Builds

@@ -455,11 +455,12 @@ if(env !== "light"){
                 expect(result).to.include(1);
             });
 
-            setTimeout(function(){
+            // (async function(){
+            //
+            //     expect(await flexsearch_async.search("foo")).to.have.members([0, 1]);
+            // })();
 
-                done();
-
-            }, 25);
+            setTimeout(done, 25);
         });
 
         it("Should have been limited", function(done){
@@ -470,11 +471,7 @@ if(env !== "light"){
                 expect(result).to.not.include(1);
             });
 
-            setTimeout(function(){
-
-                done();
-
-            }, 25);
+            setTimeout(done, 25);
         });
 
         it("Should not have been matched from index", function(done){
@@ -499,11 +496,7 @@ if(env !== "light"){
                 expect(result).to.have.lengthOf(0);
             });
 
-            setTimeout(function(){
-
-                done();
-
-            }, 25);
+            setTimeout(done, 25);
         });
     });
 
@@ -671,11 +664,7 @@ if(env !== "light"){
                 expect(result).to.have.length(0);
             });
 
-            setTimeout(function(){
-
-                done();
-
-            }, 25);
+            setTimeout(done, 25);
         });
 
         it("Should not have been added to the index", function(done){
@@ -720,11 +709,7 @@ if(env !== "light"){
                 expect(result).to.have.lengthOf(1);
             });
 
-            setTimeout(function(){
-
-                done();
-
-            }, 25);
+            setTimeout(done, 25);
         });
 
         it("Should have been limited", function(done){
@@ -735,11 +720,7 @@ if(env !== "light"){
                 expect(result).to.not.include(1);
             });
 
-            setTimeout(function(){
-
-                done();
-
-            }, 25);
+            setTimeout(done, 25);
         });
 
         it("Should not have been matched from index", function(done){
@@ -764,11 +745,7 @@ if(env !== "light"){
                 expect(result).to.have.lengthOf(0);
             });
 
-            setTimeout(function(){
-
-                done();
-
-            }, 25);
+            setTimeout(done, 25);
         });
     });
 
@@ -801,11 +778,7 @@ if(env !== "light"){
                     expect(results).to.have.members([2]);
                 });
 
-                setTimeout(function(){
-
-                    done();
-
-                }, 25);
+                setTimeout(done, 25);
             }, 25);
         });
     });
@@ -842,11 +815,7 @@ if(env !== "light"){
                     expect(results).to.not.include(2);
                 });
 
-                setTimeout(function(){
-
-                    done();
-
-                }, 25);
+                setTimeout(done, 25);
             }, 25);
         });
 

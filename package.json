@@ -1,16 +1,17 @@
 {
   "name": "flexsearch",
-  "version": "0.3.21",
+  "version": "0.3.3",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
   "license": "Apache-2.0",
   "keywords": [
-    "full text search",
+    "fulltext search",
     "elastic search",
     "fastest search",
-    "contextual search"
+    "contextual search",
+    "fuzzy search"
   ],
   "bugs": {
     "url": "https://github.com/nextapps-de/flexsearch/issues",

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark Presets</title>
+    <style>
+        body{
+            font-family: sans-serif;
+        }
+        table td{
+            padding: 1em 2em;
+        }
+        button{
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+<h2>Presets Benchmark Comparison</h2>
+<!--<button id="btn_start" onclick="start();" disabled>Start</button>-->
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<hr>
+<div id="container"></div>
+<hr>
+<script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.compact.js"></script>
+<script src="../data/gulliver.js"></script>
+<script>
+
+    //var data = [];
+
+    (function(){
+
+        var flexsearch_default = new FlexSearch();
+        var flexsearch_memory = new FlexSearch("memory");
+        var flexsearch_speed = new FlexSearch("speed");
+        var flexsearch_fastest = new FlexSearch("fastest");
+        var flexsearch_match = new FlexSearch("match");
+        var flexsearch_score = new FlexSearch("score");
+        var flexsearch_balance = new FlexSearch("balance");
+
+        var tests = {
+
+            "fastest": {
+
+                init: function(){},
+                add: function(index, content){
+
+                    flexsearch_fastest.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_fastest.search(query);
+                },
+                loops: 250000
+            },
+
+            "speed": {
+
+                init: function(){},
+                add: function(index, content){
+
+                    flexsearch_speed.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_speed.search(query);
+                },
+                loops: 150000
+            },
+
+            "default": {
+
+                init: function(){},
+                add: function(index, content){
+
+                    flexsearch_default.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_default.search(query);
+                },
+                loops: 100000
+            },
+
+            "balance": {
+
+                init: function(){},
+                add: function(index, content){
+
+                    flexsearch_balance.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_balance.search(query);
+                },
+                loops: 75000
+            },
+
+            "memory": {
+
+                init: function(){},
+                add: function(index, content){
+
+                    flexsearch_memory.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_memory.search(query);
+                },
+                loops: 20000
+            },
+
+            "match": {
+
+                init: function(){},
+                add: function(index, content){
+
+                    flexsearch_match.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_match.search(query);
+                },
+                loops: 20000
+            },
+
+            "score": {
+
+                init: function(){},
+                add: function(index, content){
+
+                    flexsearch_score.add(index, content);
+                },
+                query: function(query){
+
+                    return flexsearch_score.search(query);
+                },
+                loops: 30000
+            }
+        };
+
+        function init_container(target){
+
+            var html = "<table>" +
+                       "<tr>" +
+                            "<th>Preset&emsp;</th>" +
+                            "<th>Benchmark (Single Phrase)&emsp;</th>" +
+                            "<th>Benchmark (Multi Phrase)&emsp;</th>" +
+                            "<th>Benchmark (Mixed Not Found)&emsp;</th>" +
+                       "</tr>";
+
+            for(var test in tests){
+
+                if(tests.hasOwnProperty(test)){
+
+                    html += "<tr>" +
+                                "<td>" + test + "</td>" +
+                                "<td id=\"test-" + test + "\">indexing ...</td>" +
+                                "<td id=\"test-multi-" + test + "\"></td>" +
+                                "<td id=\"test-notfound-" + test + "\"></td>" +
+                            "</tr>"
+                }
+            }
+
+            html += "</table>";
+
+            target.innerHTML = html;
+        }
+
+        var is_mobile =  navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone/);
+
+        function init_tests(index, keys){
+
+            var key = keys[index];
+            var test = tests[key];
+
+            test.init();
+
+            if(is_mobile && (test.loops > 1)){
+
+                test.loops = (test.loops / 5) >> 0;
+            }
+
+            for(var i = 0; i < text_data.length; i++){
+
+                test.add(i, text_data[i]);
+            }
+
+            document.getElementById("test-" + key).textContent = "ready ...";
+
+            if(++index < keys.length){
+
+                setTimeout(function(){
+
+                    init_tests(index, keys);
+
+                }, 100);
+            }
+            else{
+
+                /*
+                window.start = function(){
+
+                    start_tests(0, Object.keys(tests));
+                };
+
+                document.getElementById("btn_start").disabled = false;
+                */
+
+                setTimeout(function(){
+
+                    start_tests(0, 0, keys);
+
+                }, 1000);
+            }
+        }
+
+        var text_queries_notfound = [
+
+            "undefined1 undefined2 undefined3",
+            "undefined"
+        ];
+
+        function start_tests(suite, index, keys){
+
+            var queries = suite === 0 ? text_queries : (suite === 1 ? text_queries_multi : text_queries_notfound);
+            var len = queries.length;
+            var key = keys[index];
+            var test = tests[key];
+            var loops = test.loops;
+            var query = test.query;
+            var start = Date.now();
+
+            for(var i = 0; i < len; i++){
+
+                var phrase = queries[i];
+
+                for(var x = 0; x < loops; x++){
+
+                    query(phrase);
+                }
+            }
+
+            var duration = Date.now() - start;
+
+            console.log("[Suite " + suite + "] " + key + ":", duration);
+
+            document.getElementById("test-" + (suite === 1 ? "multi-" : (suite === 2 ? "notfound-" : "")) + key).textContent = format_number(((1000 / duration * loops * 10 + 0.5) >> 0) / 10) + " op/s";
+
+            if(++index >= keys.length){
+
+                if(++suite < 3){
+
+                    index = 0;
+                }
+            }
+
+            if(index < keys.length){
+
+                setTimeout(function(){
+
+                    start_tests(suite, index, keys);
+
+                }, 1000);
+            }
+        }
+
+        init_container(document.getElementById("container"));
+
+        setTimeout(function(){
+
+            init_tests(0, Object.keys(tests));
+
+        }, 100);
+
+        function format_number(num){
+
+            return ("" + num).replace(/(\d)(?=(\d{3})+\b)/g, '$1,');
+        }
+
+        // ---------------------------------------
+
+        window.tests = tests;
+    })();
+</script>
+</body>
+</html>

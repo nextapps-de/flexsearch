@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.3.21
+ * @preserve FlexSearch v0.3.3
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -121,7 +121,7 @@
          * @const  {RegExp}
          */
 
-        const regex_split = regex("[\\s/-]");
+        const regex_split = regex("\\W+"); // regex("[\\s/-_]");
         const filter = {};
         const stemmer = {};
 
@@ -133,7 +133,7 @@
         const index_blacklist = (function(){
 
             const array = Object.getOwnPropertyNames(/** @type {!Array} */ (({}).__proto__));
-            const map = {};
+            const map = create_object();
 
             for(let i = 0; i < array.length; i++){
 
@@ -152,7 +152,10 @@
 
             if(PROFILER){
 
-                this["stats"] = profile = profiles[id_counter] || (profiles[id_counter] = {});
+                profile = profiles[id_counter] || (profiles[id_counter] = {});
+
+                /** @export */
+                this.stats = profile;
             }
 
             if(SUPPORT_PRESETS && is_string(options)){
@@ -262,14 +265,14 @@
 
         FlexSearch.encode = function(name, value){
 
-            if(index_blacklist[name]){
-
-                return value;
-            }
-            else{
+            // if(index_blacklist[name]){
+            //
+            //     return value;
+            // }
+            // else{
 
                 return global_encoder[name](value);
-            }
+            // }
         };
 
         /**
@@ -467,11 +470,11 @@
             /** @private */
             this._map = create_object_array(10);
             /** @private */
-            this._ctx = {};
+            this._ctx = create_object();
             /** @private */
-            this._ids = {};
+            this._ids = create_object();
             /** @private */
-            this._stack = {};
+            this._stack = create_object();
             /** @private */
             this._stack_keys = [];
 
@@ -609,7 +612,7 @@
 
         FlexSearch.prototype.add = function(id, content, _skip_update){
 
-            if(content && is_string(content) && ((id && !index_blacklist[id]) || (id === 0))){
+            if(content && is_string(content) && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
 
                 // check if index ID already exist
 
@@ -683,17 +686,18 @@
 
                             tokenizer(content)
                         :(
-                            SUPPORT_ENCODER && (tokenizer === "ngram") ?
+                            //SUPPORT_ENCODER && (tokenizer === "ngram") ?
 
                                 /** @type {!Array<string>} */
-                                (ngram(/** @type {!string} */(content)))
-                            :
+                                //(ngram(/** @type {!string} */(content)))
+                            //:
                                 /** @type {string} */
                                 (content).split(regex_split)
                         )
                     );
 
-                    const dupes = { "_ctx": {} };
+                    const dupes = create_object();
+                          dupes["_ctx"] = create_object();
 
                     const threshold = this.threshold;
                     const depth = this.depth;
@@ -803,7 +807,7 @@
 
                                     if(depth && (word_length > 1) && (score >= threshold)){
 
-                                        const ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = {});
+                                        const ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = create_object());
                                         const ctxTmp = this._ctx[value] || (this._ctx[value] = create_object_array(10));
 
                                         let x = i - depth;
@@ -1114,11 +1118,11 @@
 
                     tokenizer(_query)
                 :(
-                    SUPPORT_ENCODER && (tokenizer === "ngram") ?
+                    //SUPPORT_ENCODER && (tokenizer === "ngram") ?
 
                         /** @type {!Array<string>} */
-                        (ngram(_query))
-                    :
+                        //(ngram(_query))
+                    //:
                         /** @type {string} */
                         (_query).split(regex_split)
                 )
@@ -1127,7 +1131,7 @@
             const length = words.length;
             let found = true;
             const check = [];
-            const check_words = {};
+            const check_words = create_object();
 
             let ctx_root;
             let use_contextual;
@@ -1137,8 +1141,7 @@
                 if(this.depth){
 
                     use_contextual = true;
-                    // TODO: iterate roots
-                    ctx_root = words[0];
+                    ctx_root = words[0]; // TODO: iterate roots?
                     check_words[ctx_root] = 1;
                 }
                 else{
@@ -1156,63 +1159,66 @@
 
                     const value = words[a];
 
-                    if(value && !check_words[value]){
+                    if(value){
 
-                        let map;
-                        let map_value;
-                        let map_found = false;
-                        const map_check = [];
-                        let count = 0;
+                        if(!check_words[value]){
 
-                        for(let z = 9; z >= threshold; z--){
+                            const map_check = [];
+                            let map_found = false;
+                            let count = 0;
 
-                            map = (
+                            const map = use_contextual ?
 
-                                use_contextual ?
+                                ctx_map[ctx_root]
+                            :
+                                this._map;
 
-                                    ctx_map[ctx_root]
-                                :
-                                    this._map
-                            )[z];
+                            if(map){
 
-                            if((map_value = map[value])){
+                                let map_value;
 
-                                map_check[count++] = map_value;
-                                map_found = true;
+                                for(let z = 9; z >= threshold; z--){
+
+                                    if((map_value = map[z][value])){
+
+                                        map_check[count++] = map_value;
+                                        map_found = true;
+                                    }
+                                }
                             }
-                        }
 
-                        if(map_found){
+                            if(map_found){
 
-                            // Not handled by intersection:
+                                // not handled by intersection:
 
-                            check[check.length] = (
+                                check[check.length] = (
 
-                                count > 1 ?
+                                    count > 1 ?
 
-                                    // https://jsperf.com/merge-arrays-comparison
-                                    check.concat.apply([], map_check)
-                                :
-                                    map_check[0]
-                            );
+                                        // https://jsperf.com/merge-arrays-comparison
+                                        map_check.concat.apply([], map_check)
+                                    :
+                                        map_check[0]
+                                );
 
-                            // Handled by intersection:
+                                // handled by intersection:
 
-                            //check[check.length] = map_check;
-                        }
-                        else {
-
-                            if(!SUPPORT_SUGGESTIONS || !this.suggest){
-
-                                found = false;
-                                break;
+                                //check[check.length] = map_check;
                             }
+                            else{
+
+                                if(!SUPPORT_SUGGESTIONS || !this.suggest){
+
+                                    found = false;
+                                    break;
+                                }
+                            }
+
+                            check_words[value] = 1;
                         }
 
-                        check_words[value] = 1;
+                        ctx_root = value;
                     }
-
-                    ctx_root = value;
                 }
             }
             else{
@@ -1604,7 +1610,7 @@
 
         const queue = SUPPORT_ASYNC ? (function(){
 
-            const stack = {};
+            const stack = create_object();
 
             return function(fn, delay, id){
 
@@ -1638,11 +1644,11 @@
             Cache.prototype.clear = function(){
 
                 /** @private */
-                this.cache = {};
+                this.cache = create_object();
                 /** @private */
-                this.count = {};
+                this.count = create_object();
                 /** @private */
-                this.index = {};
+                this.index = create_object();
                 /** @private */
                 this.ids = [];
             };
@@ -1817,25 +1823,25 @@
         /**
          * @param {Array} map
          * @param {Object} dupes
-         * @param {string} tmp
+         * @param {string} value
          * @param {string|number} id
          * @param {number} partial_score
          * @param {number} context_score
          * @param {number} threshold
          */
 
-        function add_index(map, dupes, tmp, id, partial_score, context_score, threshold){
+        function add_index(map, dupes, value, id, partial_score, context_score, threshold){
 
             /*
-            if(index_blacklist[tmp]){
+            if(index_blacklist[value]){
 
                 return 0;
             }
             */
 
-            if(dupes[tmp]){
+            if(dupes[value]){
 
-                return dupes[tmp];
+                return dupes[value];
             }
             else{
 
@@ -1848,12 +1854,12 @@
                         context_score
                 );
 
-                dupes[tmp] = score;
+                dupes[value] = score;
 
                 if(score >= threshold){
 
                     let arr = map[((score + 0.5) >> 0)];
-                        arr = arr[tmp] || (arr[tmp] = []);
+                        arr = arr[value] || (arr[value] = []);
 
                     arr[arr.length] = id;
                 }
@@ -1929,65 +1935,62 @@
             for(let i = 0; i < length; i++){
 
                 const char = value[i];
-                const char_is_vowel = (
+                const char_is_whitespace = (char === " ");
 
-                    (char === "a") ||
-                    (char === "e") ||
-                    (char === "i") ||
-                    (char === "o") ||
-                    (char === "u") ||
-                    (char === "y")
-                );
+                if(!char_is_whitespace){
 
-                if(char_is_vowel){
+                    if((char === "a") ||
+                       (char === "e") ||
+                       (char === "i") ||
+                       (char === "o") ||
+                       (char === "u") ||
+                       (char === "y")){
 
-                    count_vowels++;
-                }
-                else{
+                        count_vowels++;
+                    }
+                    else{
 
-                    count_literal++;
-                }
-
-                if(char !== " ") {
+                        count_literal++;
+                    }
 
                     tmp += char;
                 }
 
-                //console.log(tmp);
-
                 // dynamic n-gram sequences
 
-                if((char === " ") || (
+                if(char_is_whitespace || (
 
-                    (count_vowels >= (length > 8 ? 2 : 1)) &&
-                    (count_literal >= 2)
+                    (count_vowels > (length > 7 ? 1 : 0)) &&
+                    (count_literal > 1)
 
                 ) || (
 
-                    (count_vowels >= 2) &&
-                    (count_literal >= (length > 8 ? 2 : 1))
+                    (count_vowels > 1) &&
+                    (count_literal > (length > 7 ? 1 : 0))
 
                 ) || (i === length - 1)){
 
                     if(tmp){
 
-                        if(parts[count_parts] && (tmp.length > 2)){
+                        if(char_is_whitespace){
 
                             count_parts++;
-                        }
-
-                        if(parts[count_parts]){
-
-                            parts[count_parts] += tmp;
                         }
                         else{
 
-                            parts[count_parts] = tmp;
-                        }
+                            if(parts[count_parts] && (tmp.length > 2)){
 
-                        if(char === " "){
+                                count_parts++;
+                            }
 
-                            count_parts++;
+                            if(parts[count_parts]){
+
+                                parts[count_parts] += tmp;
+                            }
+                            else{
+
+                                parts[count_parts] = tmp;
+                            }
                         }
 
                         tmp = "";
@@ -2074,7 +2077,7 @@
 
         function init_filter(words, encoder){
 
-            const final = {};
+            const final = create_object();
 
             if(words){
 
@@ -2195,7 +2198,7 @@
 
                 // fill initial map
 
-                const check = {};
+                const check = create_object();
                 let arr = arrays[0];
                 let length = arr.length;
                 let i = 0;
@@ -2639,10 +2642,15 @@
 
             for(let i = 0; i < count; i++){
 
-                array[i] = {};
+                array[i] = create_object();
             }
 
             return array;
+        }
+
+        function create_object(){
+
+            return Object.create(null);
         }
 
         function addWorker(id, core, options, callback){
@@ -2776,7 +2784,7 @@
 
         SUPPORT_WORKER ? (function register_worker(){
 
-            const worker_stack =  Object.create(null);
+            const worker_stack = {};
             const inline_supported = (typeof Blob !== "undefined") && (typeof URL !== "undefined") && URL.createObjectURL;
 
             return (
