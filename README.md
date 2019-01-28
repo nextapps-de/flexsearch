@@ -170,7 +170,7 @@ All Features:
         <td>File Size (gzip)</td>
         <td>6.7 kb</td>
         <td>4.5 kb</td>
-        <td>2.1 kb</td>
+        <td>4.1 kb</td>
     </tr>
 </table>
 
@@ -197,9 +197,9 @@ __Query Test: "Gulliver's Travels"__
     <tr>
         <td>1</td>
         <td>FlexSearch</td>
-        <td>0.3.1</td>
-        <td>2.1 kb</td>
-        <td><b>327771</b></td>
+        <td>0.3.2</td>
+        <td>4.1 kb</td>
+        <td><b>333738</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -418,7 +418,7 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
     <tr>
         <td>Weaks</td>
         <td><ul><li>less powerful contextual search</li><li>less memory efficient (has to be defragmented from time to time)</li></ul></td>
-        <td><ul><li>updating / deleting extisting items from index is slow</li><li>adding items to the index optimized for super partial matching (mode: "full") is slow</li></ul></td>
+        <td><ul><li>updating / deleting extisting items from index is slow</li><li>adding items to the index optimized for super partial matching (tokenize: "full") is slow</li></ul></td>
     </tr>
     <tr></tr>
     <tr>
@@ -563,7 +563,7 @@ var index = new FlexSearch({
 
     profile: "balance",
     encode: "icase",
-    mode: "ngram",
+    tokenize: "ngram",
     async: false,
     cache: false
 });
@@ -810,7 +810,7 @@ Define a private custom tokenizer during creation/initialization:
 ```js
 var index = new FlexSearch({
 
-    mode: function(str){
+    tokenize: function(str){
     
         // split string into components, e.g.:
         
@@ -930,7 +930,7 @@ Create index and just set the limit of relevance ("depth"):
 var index = new FlexSearch({
 
     encode: "icase",
-    mode: "strict",
+    tokenize: "strict",
     depth: 3
 });
 ```
@@ -954,7 +954,7 @@ Create index and just set the count of parallel threads:
 var index = new FlexSearch({
 
     encode: "icase",
-    mode: "full",
+    tokenize: "full",
     async: true,
     worker: 4
 });
@@ -1001,7 +1001,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">mode<br><br><br><br><br><br></td>
+        <td align="top">tokenize<br><br><br><br><br><br></td>
         <td vertical="top" vertical-align="top">
             "strict"<br>
             "foward"<br>
@@ -1422,7 +1422,7 @@ Standard profile: __"default"__
 ```js
 {
     encode: "icase",
-    mode: "forward"
+    tokenize: "forward"
 }
 ```
 
@@ -1430,7 +1430,7 @@ Memory-optimized profile: __"memory"__
 ```js
 {
     encode: "extra",
-    mode: "strict",
+    tokenize: "strict",
     threshold: 7
 }
 ```
@@ -1440,7 +1440,7 @@ Speed-optimized profile: __"speed"__
 ```js
 {
     encode: "icase",
-    mode: "strict",
+    tokenize: "strict",
     threshold: 7,
     depth: 2
 }
@@ -1451,7 +1451,7 @@ Matching-tolerant profile: __"match"__
 ```js
 {
     encode: "extra",
-    mode: "full"
+    tokenize: "full"
 }
 ```
 
@@ -1460,7 +1460,7 @@ Relevance-optimized profile: __"score"__
 ```js
 {
     encode: "extra",
-    mode: "strict",
+    tokenize: "strict",
     threshold: 5,
     depth: 5
 }
@@ -1471,7 +1471,7 @@ Most-balanced profile: __"balanced"__
 ```js
 {
     encode: "balanced",
-    mode: "ngram",
+    tokenize: "ngram",
     threshold: 6,
     depth: 3
 }

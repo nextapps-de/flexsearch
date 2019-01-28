@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -28,8 +28,9 @@
     "build-light": "node compile RELEASE=light DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESETS=false SUPPORT_SUGGESTIONS=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
     "build-compact": "node compile RELEASE=compact DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
     "build-custom": "node compile RELEASE=custom DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESETS=false SUPPORT_SUGGESTIONS=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
+    "build-es5": "node compile RELEASE=es5 DEBUG=false PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false LANGUAGE_OUT=ECMASCRIPT5_STRICT",
     "build-lang": "node compile RELEASE=lang",
-    "build-all": "npm run build && npm run build-light && npm run build-compact && npm run build-lang",
+    "build-all": "npm run build && npm run build-light && npm run build-compact && npm run build-es5 && npm run build-lang",
     "test-production": "nyc --reporter=html --reporter=text mocha --timeout=3000 test --exit",
     "test-light": "nyc --reporter=html --reporter=text mocha --timeout=3000 test/ --exit",
     "test-develop": "nyc --reporter=html --reporter=text mocha --timeout=3000 --exit",
