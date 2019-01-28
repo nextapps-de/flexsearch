@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.3.2
+ * @preserve FlexSearch v0.3.21
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -121,11 +121,12 @@
          * @const  {RegExp}
          */
 
-        const regex_split = regex("[ -\/]");
+        const regex_split = regex("[\\s/-]");
         const filter = {};
         const stemmer = {};
 
         /**
+         *
          * @const {Object<string|number, number>}
          */
 
@@ -1359,9 +1360,9 @@
 
         const global_encoder_balance = (function(){
 
-            const regex_whitespace = regex("\\s\\s+"),
+            const regex_whitespace = regex("\\s+"),
                   regex_strip = regex("[^a-z0-9 ]"),
-                  regex_space = regex("[-\/]"),
+                  regex_space = regex("[-/]"),
                   regex_vowel = regex("[aeiouy]");
 
             /** @const {Array} */
@@ -1406,9 +1407,9 @@
 
             "simple": (function(){
 
-                const regex_whitespace = regex("\\s\\s+"),
+                const regex_whitespace = regex("\\s+"),
                       regex_strip = regex("[^a-z0-9 ]"),
-                      regex_space = regex("[-\/]"),
+                      regex_space = regex("[-/]"),
                       regex_a = regex("[àáâãäå]"),
                       regex_e = regex("[èéêë]"),
                       regex_i = regex("[ìíîï]"),
