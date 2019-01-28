@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.3.1
+ * @preserve FlexSearch v0.3.2
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -31,7 +31,7 @@
         const defaults = {
 
             encode: "icase",
-            mode: "forward",
+            tokenize: "forward",
             suggest: false,
             cache: false,
             async: false,
@@ -53,39 +53,39 @@
 
             "memory": {
                 encode: SUPPORT_ENCODER ? "extra" : "icase",
-                mode: "strict",
+                tokenize: "strict",
                 threshold: 7
             },
 
             "speed": {
                 encode: "icase",
-                mode: "strict",
+                tokenize: "strict",
                 threshold: 7,
                 depth: 2
             },
 
             "match": {
                 encode: SUPPORT_ENCODER ? "extra" : "icase",
-                mode: "full"
+                tokenize: "full"
             },
 
             "score": {
                 encode: SUPPORT_ENCODER ? "extra" : "icase",
-                mode: "strict",
+                tokenize: "strict",
                 threshold: 5,
                 depth: 4
             },
 
             "balance": {
                 encode: SUPPORT_ENCODER ? "balance" : "icase",
-                mode: "strict",
+                tokenize: "strict",
                 threshold: 6,
                 depth: 3
             },
 
             "fastest": {
                 encode: "icase",
-                mode: "strict",
+                tokenize: "strict",
                 threshold: 9,
                 depth: 1
             }
@@ -361,12 +361,12 @@
             // apply custom options
 
             /** @private */
-            this.mode = (
+            this.tokenize = (
 
-                options["mode"] ||
-                profile.mode ||
-                this.mode ||
-                defaults.mode
+                options["tokenize"] ||
+                profile.tokenize ||
+                this.tokenize ||
+                defaults.tokenize
             );
 
             if(SUPPORT_ASYNC) /** @private */ this.async = (
@@ -674,7 +674,7 @@
                         return this;
                     }
 
-                    const tokenizer = this.mode;
+                    const tokenizer = this.tokenize;
 
                     const words = (
 
@@ -1046,7 +1046,7 @@
 
                 return;
             }
-            else if(SUPPORT_ASYNC && !_recall && this.async){
+            else if(SUPPORT_ASYNC && !_recall && this.async && (typeof importScripts !== "function")){
 
                 /** @type {FlexSearch} */
                 let self = this;
@@ -1105,7 +1105,7 @@
 
             // convert words into single components
 
-            const tokenizer = this.mode;
+            const tokenizer = this.tokenize;
 
             const words = (
 
@@ -1136,7 +1136,7 @@
                 if(this.depth){
 
                     use_contextual = true;
-                    // TODO: alternative roots
+                    // TODO: iterate roots
                     ctx_root = words[0];
                     check_words[ctx_root] = 1;
                 }
@@ -1302,10 +1302,12 @@
                     "items": items,
                     "sequences": words,
                     "chars": chars,
-                    //"status": this._cache_status,
-                    "cache": this._stack_keys.length,
-                    "matcher": global_matcher.length,
-                    "worker": this.worker
+                    "cache": this.cache && this.cache.ids ? this.cache.ids.length : false,
+                    "matcher": global_matcher.length + (this._matcher ? this._matcher.length : 0),
+                    "worker": this.worker,
+                    "threshold": this.threshold,
+                    "depth": this.depth,
+                    "contextual": !!this.depth
                 };
             };
         }
@@ -2818,7 +2820,7 @@
                         :
                             // Load Extern Worker (but also requires CORS)
 
-                            "../" + name + (RELEASE ? "." + RELEASE : "") + ".js"
+                            name + (RELEASE ? "." + RELEASE : "") + ".js"
                     );
 
                     name += "-" + _id;

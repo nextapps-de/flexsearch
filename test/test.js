@@ -41,7 +41,7 @@ describe("Initialize", function(){
 
         flexsearch_sync = new FlexSearch({
 
-            mode: "forward",
+            tokenize: "forward",
             encode: false,
             async: false,
             worker: false
@@ -49,7 +49,7 @@ describe("Initialize", function(){
 
         flexsearch_async = FlexSearch.create({
 
-            mode: "forward",
+            tokenize: "forward",
             encode: false,
             async: true,
             worker: false
@@ -93,7 +93,7 @@ describe("Initialize", function(){
         flexsearch_strict = new FlexSearch({
 
             encode: "icase",
-            mode: "strict",
+            tokenize: "strict",
             async: false,
             worker: false
         });
@@ -101,7 +101,7 @@ describe("Initialize", function(){
         flexsearch_forward = new FlexSearch({
 
             encode: "icase",
-            mode: "forward",
+            tokenize: "forward",
             async: false,
             worker: false
         });
@@ -109,7 +109,7 @@ describe("Initialize", function(){
         flexsearch_reverse = new FlexSearch({
 
             encode: "icase",
-            mode: "reverse",
+            tokenize: "reverse",
             async: false,
             worker: false
         });
@@ -117,7 +117,7 @@ describe("Initialize", function(){
         flexsearch_full = new FlexSearch({
 
             encode: "icase",
-            mode: "full",
+            tokenize: "full",
             async: false,
             worker: false
         });
@@ -125,7 +125,7 @@ describe("Initialize", function(){
         flexsearch_ngram = new FlexSearch({
 
             encode: "advanced",
-            mode: "ngram",
+            tokenize: "ngram",
             async: false,
             worker: false
         });
@@ -133,7 +133,7 @@ describe("Initialize", function(){
         flexsearch_cache = new FlexSearch({
 
             encode: "icase",
-            mode: "reverse",
+            tokenize: "reverse",
             cache: true
         });
 
@@ -177,12 +177,15 @@ describe("Initialize", function(){
             expect(flexsearch_async.async).to.equal(true);
         }
 
-        expect(flexsearch_default.mode).to.equal("forward");
-        expect(flexsearch_strict.mode).to.equal("strict");
-        expect(flexsearch_forward.mode).to.equal("forward");
-        expect(flexsearch_reverse.mode).to.equal("reverse");
-        expect(flexsearch_full.mode).to.equal("full");
-        expect(flexsearch_ngram.mode).to.equal("ngram");
+        if((env !== "light") && (env !== "min")){
+
+            expect(flexsearch_default.tokenize).to.equal("forward");
+            expect(flexsearch_strict.tokenize).to.equal("strict");
+            expect(flexsearch_forward.tokenize).to.equal("forward");
+            expect(flexsearch_reverse.tokenize).to.equal("reverse");
+            expect(flexsearch_full.tokenize).to.equal("full");
+            expect(flexsearch_ngram.tokenize).to.equal("ngram");
+        }
 
         // not available in compiled version:
         if(typeof flexsearch_custom.encoder !== "undefined"){
@@ -648,7 +651,7 @@ if(env !== "light"){
             flexsearch_worker = new FlexSearch({
 
                 encode: "icase",
-                mode: "strict",
+                tokenize: "strict",
                 async: false,
                 worker: 4
             });
@@ -933,7 +936,7 @@ describe("Context", function(){
         var flexsearch_depth = new FlexSearch({
 
             encode: "icase",
-            mode: "strict",
+            tokenize: "strict",
             depth: 2,
             async: false,
             worker: false
@@ -1033,7 +1036,7 @@ describe("Relevance", function(){
 
         var index = new FlexSearch({
             encode: "advanced",
-            mode: "strict"
+            tokenize: "strict"
         });
 
         index.add(0, "1 2 3 2 4 1 5 3");
@@ -1047,7 +1050,7 @@ describe("Relevance", function(){
 
         var index = new FlexSearch({
             encode: "advanced",
-            mode: "strict",
+            tokenize: "strict",
             threshold: 5,
             depth: 3
         });
@@ -1063,7 +1066,7 @@ describe("Relevance", function(){
 
         var index = new FlexSearch({
             encode: "extra",
-            mode: "ngram",
+            tokenize: "ngram",
             threshold: 5,
             depth: 3
         });
@@ -1094,7 +1097,7 @@ if(env !== "light"){
 
             var index = new FlexSearch({
                 encode: "advanced",
-                mode: "strict",
+                tokenize: "strict",
                 suggest: true
             });
 
@@ -1207,13 +1210,15 @@ if(env !== "light" && env !== "min"){
 
                 "id",
                 "chars",
-                //"status",
                 "cache",
                 "items",
                 "matcher",
                 "memory",
                 "sequences",
-                "worker"
+                "worker",
+                "contextual",
+                "depth",
+                "threshold"
             ]);
         });
     });
@@ -1227,7 +1232,7 @@ describe("Chaining", function(){
 
     it("Should have been chained properly", function(){
 
-        var index = FlexSearch.create({mode: "forward", encode: "icase"})
+        var index = FlexSearch.create({tokenize: "forward", encode: "icase"})
                               .addMatcher({"â": "a"})
                               .add(0, "foo")
                               .add(1, "bar");

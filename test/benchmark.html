@@ -360,7 +360,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
                     html += "<tr>" +
                                 "<td>" + test + "</td>" +
-                                "<td id=\"test-" + test + "\">wait ...</td>" +
+                                "<td id=\"test-" + test + "\">indexing ...</td>" +
                             "</tr>"
                 }
             }
@@ -443,7 +443,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
             console.log(key + ":", duration);
 
-            document.getElementById("test-" + key).textContent = /*format_number*/((1000 / duration * loops + 0.5) >> 0) + " op/s";
+            document.getElementById("test-" + key).textContent = /*format_number*/(((1000 / duration * loops * 10 + 0.5) >> 0) / 10) + " op/s";
 
             if(++index < keys.length){
 

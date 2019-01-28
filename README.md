@@ -25,6 +25,11 @@ Supported Platforms:
 - Browser
 - Node.js
 
+Library Comparison:
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
+- <a href="#consumption">Memory Consumption</a>
+
 Get Latest (Stable Release):
 
 <table>
@@ -170,18 +175,16 @@ All Features:
         <td>File Size (gzip)</td>
         <td>6.7 kb</td>
         <td>4.5 kb</td>
-        <td>2.1 kb</td>
+        <td>4.1 kb</td>
     </tr>
 </table>
 
 > It is also pretty simple to make <a href="#builds">Custom Builds</a> 
 
 <a name="compare" id="compare"></a>
-#### Benchmark Ranking 
+## Benchmark Ranking 
 
-- Library Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
-- Library Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
-- Library Comparison: <a href="#consumption">Memory Consumption</a>
+Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
 
 __Query Test: "Gulliver's Travels"__
 
@@ -197,9 +200,9 @@ __Query Test: "Gulliver's Travels"__
     <tr>
         <td>1</td>
         <td>FlexSearch</td>
-        <td>0.3.1</td>
-        <td>2.1 kb</td>
-        <td><b>327771</b></td>
+        <td>0.3.2</td>
+        <td>4.1 kb</td>
+        <td><b>333738</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -296,10 +299,10 @@ __Memory Test: "Gulliver's Travels"__
     <tr></tr>
     <tr>
         <td>3</td>
-        <td>JS Search</td>
-        <td>1.4.2</td>
-        <td>36.9 Mb</td>
-        <td>53.0 kb</td>
+        <td>Fuse</td>
+        <td>3.3.0</td>
+        <td>0.22 Mb</td>
+        <td>156.46 kb</td>
     </tr>
     <tr></tr>
     <tr>
@@ -312,30 +315,6 @@ __Memory Test: "Gulliver's Travels"__
     <tr></tr>
     <tr>
         <td>5</td>
-        <td>Lunr.js</td>
-        <td>2.3.5</td>
-        <td>16.24 Mb</td>
-        <td>84.73 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>6</td>
-        <td>Elasticlunr.js</td>
-        <td>0.9.6</td>
-        <td>11.83 Mb</td>
-        <td>68.69 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>7</td>
-        <td>BulkSearch</td>
-        <td>0.1.3</td>
-        <td>1.53 Mb</td>
-        <td>984.30 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>8</td>
         <td>bm25</td>
         <td>0.2</td>
         <td>6.95 Mb</td>
@@ -343,11 +322,35 @@ __Memory Test: "Gulliver's Travels"__
     </tr>
     <tr></tr>
     <tr>
+        <td>6</td>
+        <td>BulkSearch</td>
+        <td>0.1.3</td>
+        <td>1.53 Mb</td>
+        <td>984.30 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>7</td>
+        <td>Elasticlunr.js</td>
+        <td>0.9.6</td>
+        <td>11.83 Mb</td>
+        <td>68.69 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>8</td>
+        <td>Lunr.js</td>
+        <td>2.3.5</td>
+        <td>16.24 Mb</td>
+        <td>84.73 kb</td>
+    </tr>
+    <tr></tr>
+    <tr>
         <td>9</td>
-        <td>Fuse</td>
-        <td>3.3.0</td>
-        <td>0.22 Mb</td>
-        <td>156.46 kb</td>
+        <td>JS Search</td>
+        <td>1.4.2</td>
+        <td>36.9 Mb</td>
+        <td>53.0 kb</td>
     </tr>
 </table>
 
@@ -418,7 +421,7 @@ __Note:__ It is slightly faster to use no web worker when the index or query isn
     <tr>
         <td>Weaks</td>
         <td><ul><li>less powerful contextual search</li><li>less memory efficient (has to be defragmented from time to time)</li></ul></td>
-        <td><ul><li>updating / deleting extisting items from index is slow</li><li>adding items to the index optimized for super partial matching (mode: "full") is slow</li></ul></td>
+        <td><ul><li>updating / deleting extisting items from index is slow</li><li>adding items to the index optimized for super partial matching (tokenize: "full") is slow</li></ul></td>
     </tr>
     <tr></tr>
     <tr>
@@ -563,7 +566,7 @@ var index = new FlexSearch({
 
     profile: "balance",
     encode: "icase",
-    mode: "ngram",
+    tokenize: "ngram",
     async: false,
     cache: false
 });
@@ -810,7 +813,7 @@ Define a private custom tokenizer during creation/initialization:
 ```js
 var index = new FlexSearch({
 
-    mode: function(str){
+    tokenize: function(str){
     
         // split string into components, e.g.:
         
@@ -930,7 +933,7 @@ Create index and just set the limit of relevance ("depth"):
 var index = new FlexSearch({
 
     encode: "icase",
-    mode: "strict",
+    tokenize: "strict",
     depth: 3
 });
 ```
@@ -954,7 +957,7 @@ Create index and just set the count of parallel threads:
 var index = new FlexSearch({
 
     encode: "icase",
-    mode: "full",
+    tokenize: "full",
     async: true,
     worker: 4
 });
@@ -1001,7 +1004,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">mode<br><br><br><br><br><br></td>
+        <td align="top">tokenize<br><br><br><br><br><br></td>
         <td vertical="top" vertical-align="top">
             "strict"<br>
             "foward"<br>
@@ -1422,7 +1425,7 @@ Standard profile: __"default"__
 ```js
 {
     encode: "icase",
-    mode: "forward"
+    tokenize: "forward"
 }
 ```
 
@@ -1430,7 +1433,7 @@ Memory-optimized profile: __"memory"__
 ```js
 {
     encode: "extra",
-    mode: "strict",
+    tokenize: "strict",
     threshold: 7
 }
 ```
@@ -1440,7 +1443,7 @@ Speed-optimized profile: __"speed"__
 ```js
 {
     encode: "icase",
-    mode: "strict",
+    tokenize: "strict",
     threshold: 7,
     depth: 2
 }
@@ -1451,7 +1454,7 @@ Matching-tolerant profile: __"match"__
 ```js
 {
     encode: "extra",
-    mode: "full"
+    tokenize: "full"
 }
 ```
 
@@ -1460,7 +1463,7 @@ Relevance-optimized profile: __"score"__
 ```js
 {
     encode: "extra",
-    mode: "strict",
+    tokenize: "strict",
     threshold: 5,
     depth: 5
 }
@@ -1471,7 +1474,7 @@ Most-balanced profile: __"balanced"__
 ```js
 {
     encode: "balanced",
-    mode: "ngram",
+    tokenize: "ngram",
     threshold: 6,
     depth: 3
 }
@@ -1487,9 +1490,11 @@ Absolute fastest profile: __"fastest"__
 }
 ```
 
+<!--
 Compare these options above:
-- <a href="https://jsperf.com/compare-flexsearch-options" target="_blank">Benchmarks</a>
+- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmarks</a>
 - <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching-flexsearch.html" target="_blank">Relevance Scoring</a>
+-->
 
 <a name="builds"></a>
 ## Custom Builds
