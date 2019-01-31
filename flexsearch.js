@@ -1,5 +1,5 @@
 ;/**!
- * @preserve FlexSearch v0.3.3
+ * @preserve FlexSearch v0.3.5
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -15,6 +15,8 @@
 /** @define {boolean} */ const SUPPORT_ASYNC = true;
 /** @define {boolean} */ const SUPPORT_PRESETS = true;
 /** @define {boolean} */ const SUPPORT_SUGGESTIONS = true;
+/** @define {boolean} */ const SUPPORT_SERIALIZE = true;
+/** @define {boolean} */ const SUPPORT_INFO = true;
 
 // noinspection ThisExpressionReferencesGlobalObjectJS
 (function(){
@@ -110,12 +112,14 @@
          * @enum {number}
          */
 
+        /*
         const enum_task = {
 
             add: 0,
             update: 1,
             remove: 2
         };
+        */
 
         /**
          * @const  {RegExp}
@@ -258,7 +262,7 @@
 
         /**
          * @param {string} name
-         * @param {string} value
+         * @param {number|string} value
          * @returns {string}
          * @export
          */
@@ -299,7 +303,7 @@
 
             if(SUPPORT_WORKER && (custom = options["worker"])){
 
-                if(Worker){
+                if(typeof Worker !== "undefined"){
 
                     const self = this;
                     const threads = parseInt(custom, 10) || 4;
@@ -330,15 +334,14 @@
                             self._task_result = self._task_result.concat(result);
                             self._task_completed++;
 
+                            // TODO: sort results, return array of relevance [0...9] and apply in main thread
+
                             if(limit && (self._task_result.length >= limit)){
 
                                 self._task_completed = self.worker;
                             }
 
                             if(self._current_callback && (self._task_completed === self.worker)){
-
-                                // store result to cache
-                                // TODO: add worker cache, may remove global cache
 
                                 if(self.cache){
 
@@ -375,7 +378,7 @@
 
             if(SUPPORT_ASYNC) /** @private */ this.async = (
 
-                is_undefined(custom = options["async"]) ?
+                (typeof Promise === "undefined") || is_undefined(custom = options["async"]) ?
 
                     this.async ||
                     defaults.async
@@ -474,9 +477,9 @@
             /** @private */
             this._ids = create_object();
             /** @private */
-            this._stack = create_object();
+            //this._stack = create_object();
             /** @private */
-            this._stack_keys = [];
+            //this._stack_keys = [];
 
             /**
              * @type {number|null}
@@ -605,252 +608,274 @@
         /**
          * @param {number|string} id
          * @param {string} content
+         * @param {Function=} callback
          * @param {boolean=} _skip_update
+         * @param {boolean=} _recall
          * @this {FlexSearch}
          * @export
          */
 
-        FlexSearch.prototype.add = function(id, content, _skip_update){
+        FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall){
 
             if(content && is_string(content) && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
 
                 const index = "@" + id;
 
-                // check if index ID already exist
-
                 if(this._ids[index] && !_skip_update){
 
-                    this.update(id, content);
+                    return this.update(id, content);
                 }
-                else{
 
-                    if(SUPPORT_WORKER && this.worker){
+                if(SUPPORT_WORKER && this.worker){
 
-                        if(++this._current_task >= this._worker.length){
+                    if(++this._current_task >= this._worker.length){
 
-                            this._current_task = 0;
-                        }
+                        this._current_task = 0;
+                    }
 
-                        this._worker[this._current_task].postMessage(this._current_task, {
+                    this._worker[this._current_task].postMessage({
 
-                            "add": true,
-                            "id": id,
-                            "content": content
+                        "add": true,
+                        "id": id,
+                        "content": content
+                    });
+
+                    this._ids[index] = "" + this._current_task;
+
+                    // TODO: provide worker auto-balancing instead of rotation
+                    //this._ids_count[this._current_task]++;
+
+                    if(callback){
+
+                        callback();
+                    }
+
+                    return this;
+                }
+
+                if(!_recall){
+
+                    if(SUPPORT_ASYNC && this.async && (typeof importScripts !== "function")){
+
+                        let self = this;
+
+                        /**
+                         * @param fn
+                         * @constructor
+                         */
+
+                        const promise = new Promise(function(resolve){
+
+                            setTimeout(function(){
+
+                                self.add(id, content, null, _skip_update, true);
+                                self = null;
+                                resolve();
+                            });
                         });
 
-                        this._ids[index] = "" + this._current_task;
+                        if(callback){
 
-                        // TODO: improve auto-balancing
-                        //this._ids_count[this._current_task]++;
+                            promise.then(callback);
+                        }
+                        else{
 
-                        return this;
-                    }
-
-                    // collect tasks for non-blocking processing
-                    // TODO: actually auto-enabled in worker
-
-                    if(SUPPORT_ASYNC && this.async){
-
-                        this._stack[index] || (
-
-                            this._stack_keys[this._stack_keys.length] = index
-                        );
-
-                        this._stack[index] = [
-
-                            enum_task.add,
-                            id,
-                            content
-                        ];
-
-                        register_task(this);
+                            return promise;
+                        }
 
                         return this;
                     }
+                    else if(callback){
 
-                    if(PROFILER){
-
-                        profile_start("add");
-                    }
-
-                    content = this.encode(content);
-
-                    if(!content.length){
+                        this.add(id, content, null, _skip_update, true);
+                        callback();
 
                         return this;
                     }
+                }
 
-                    const tokenizer = this.tokenize;
+                if(PROFILER){
 
-                    const words = (
+                    profile_start("add");
+                }
 
-                        is_function(tokenizer) ?
+                content = this.encode(content);
 
-                            tokenizer(content)
-                        :(
-                            //SUPPORT_ENCODER && (tokenizer === "ngram") ?
+                if(!content.length){
 
-                                /** @type {!Array<string>} */
-                                //(ngram(/** @type {!string} */(content)))
-                            //:
-                                /** @type {string} */
-                                (content).split(regex_split)
-                        )
-                    );
+                    return this;
+                }
 
-                    const dupes = create_object();
-                          dupes["_ctx"] = create_object();
+                const tokenizer = this.tokenize;
 
-                    const threshold = this.threshold;
-                    const depth = this.depth;
-                    const map = this._map;
-                    const word_length = words.length;
+                const words = (
 
-                    // tokenize
+                    is_function(tokenizer) ?
 
-                    for(let i = 0; i < word_length; i++){
+                        tokenizer(content)
+                    :(
+                        //SUPPORT_ENCODER && (tokenizer === "ngram") ?
 
-                        /** @type {string} */
-                        const value = words[i];
+                            /** @type {!Array<string>} */
+                            //(ngram(/** @type {!string} */(content)))
+                        //:
+                            /** @type {string} */
+                            (content).split(regex_split)
+                    )
+                );
 
-                        if(value){
+                const dupes = create_object();
+                      dupes["_ctx"] = create_object();
 
-                            const length = value.length;
-                            const context_score = (word_length - i) / word_length;
+                const threshold = this.threshold;
+                const depth = this.depth;
+                const map = this._map;
+                const word_length = words.length;
 
-                            let tmp = "";
+                // tokenize
 
-                            switch(tokenizer){
+                for(let i = 0; i < word_length; i++){
 
-                                case "reverse":
-                                case "both":
+                    /** @type {string} */
+                    const value = words[i];
 
-                                    for(let a = length - 1; a >= 1; a--){
+                    if(value){
 
-                                        tmp = value[a] + tmp;
+                        const length = value.length;
+                        const context_score = (word_length - i) / word_length;
 
-                                        add_index(
+                        let tmp = "";
 
-                                            map,
-                                            dupes,
-                                            tmp,
-                                            id,
-                                            (length - a) / length,
-                                            context_score,
-                                            threshold
-                                        );
-                                    }
+                        switch(tokenizer){
 
-                                    tmp = "";
+                            case "reverse":
+                            case "both":
 
-                                // Note: no break here, fallthrough to next case
+                                for(let a = length - 1; a >= 1; a--){
 
-                                case "forward":
+                                    tmp = value[a] + tmp;
 
-                                    for(let a = 0; a < length; a++){
-
-                                        tmp += value[a];
-
-                                        add_index(
-
-                                            map,
-                                            dupes,
-                                            tmp,
-                                            id,
-                                            1,
-                                            context_score,
-                                            threshold
-                                        );
-                                    }
-
-                                    break;
-
-                                case "full":
-
-                                    for(let x = 0; x < length; x++){
-
-                                        const partial_score = (length - x) / length;
-
-                                        for(let y = length; y > x; y--){
-
-                                            tmp = value.substring(x, y);
-
-                                            add_index(
-
-                                                map,
-                                                dupes,
-                                                tmp,
-                                                id,
-                                                partial_score,
-                                                context_score,
-                                                threshold
-                                            );
-                                        }
-                                    }
-
-                                    break;
-
-                                //case "strict":
-                                //case "ngram":
-                                default:
-
-                                    const score = add_index(
+                                    add_index(
 
                                         map,
                                         dupes,
-                                        value,
+                                        tmp,
                                         id,
-                                        // Note: ngrams has partial scoring (sequence->word) and contextual scoring (word->context)
-                                        // TODO compute and pass distance of ngram sequences as the initial score for each word
+                                        (length - a) / length,
+                                        context_score,
+                                        threshold
+                                    );
+                                }
+
+                                tmp = "";
+
+                            // Note: no break here, fallthrough to next case
+
+                            case "forward":
+
+                                for(let a = 0; a < length; a++){
+
+                                    tmp += value[a];
+
+                                    add_index(
+
+                                        map,
+                                        dupes,
+                                        tmp,
+                                        id,
                                         1,
                                         context_score,
                                         threshold
                                     );
+                                }
 
-                                    if(depth && (word_length > 1) && (score >= threshold)){
+                                break;
 
-                                        const ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = create_object());
-                                        const ctxTmp = this._ctx[value] || (this._ctx[value] = create_object_array(10 - (threshold || 0)));
+                            case "full":
 
-                                        let x = i - depth;
-                                        let y = i + depth + 1;
+                                for(let x = 0; x < length; x++){
 
-                                        if(x < 0) x = 0;
-                                        if(y > word_length) y = word_length;
+                                    const partial_score = (length - x) / length;
 
-                                        for(; x < y; x++){
+                                    for(let y = length; y > x; y--){
 
-                                            if(x !== i) add_index(
+                                        tmp = value.substring(x, y);
 
-                                                ctxTmp,
-                                                ctxDupes,
-                                                words[x],
-                                                id,
-                                                0,
-                                                10 - (x < i ? i - x : x - i),
-                                                threshold
-                                            );
-                                        }
+                                        add_index(
+
+                                            map,
+                                            dupes,
+                                            tmp,
+                                            id,
+                                            partial_score,
+                                            context_score,
+                                            threshold
+                                        );
                                     }
+                                }
 
-                                    break;
-                            }
+                                break;
+
+                            //case "strict":
+                            //case "ngram":
+                            default:
+
+                                const score = add_index(
+
+                                    map,
+                                    dupes,
+                                    value,
+                                    id,
+                                    // Note: ngrams has partial scoring (sequence->word) and contextual scoring (word->context)
+                                    // TODO compute and pass distance of ngram sequences as the initial score for each word
+                                    1,
+                                    context_score,
+                                    threshold
+                                );
+
+                                if(depth && (word_length > 1) && (score >= threshold)){
+
+                                    const ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = create_object());
+                                    const ctxTmp = this._ctx[value] || (this._ctx[value] = create_object_array(10 - (threshold || 0)));
+
+                                    let x = i - depth;
+                                    let y = i + depth + 1;
+
+                                    if(x < 0) x = 0;
+                                    if(y > word_length) y = word_length;
+
+                                    for(; x < y; x++){
+
+                                        if(x !== i) add_index(
+
+                                            ctxTmp,
+                                            ctxDupes,
+                                            words[x],
+                                            id,
+                                            0,
+                                            10 - (x < i ? i - x : x - i),
+                                            threshold
+                                        );
+                                    }
+                                }
+
+                                break;
                         }
                     }
+                }
 
-                    // update status
+                // update status
 
-                    this._ids[index] = 1;
+                this._ids[index] = 1;
 
-                    if(SUPPORT_CACHE){
+                if(SUPPORT_CACHE){
 
-                        this._cache_status = false;
-                    }
+                    this._cache_status = false;
+                }
 
-                    if(PROFILER){
+                if(PROFILER){
 
-                        profile_end("add");
-                    }
+                    profile_end("add");
                 }
             }
 
@@ -858,12 +883,13 @@
         };
 
         /**
-         * @param id
-         * @param content
+         * @param {number|string} id
+         * @param {string} content
+         * @param {Function=} callback
          * @export
          */
 
-        FlexSearch.prototype.update = function(id, content){
+        FlexSearch.prototype.update = function(id, content, callback){
 
             const index = "@" + id;
 
@@ -875,7 +901,7 @@
                 }
 
                 this.remove(id);
-                this.add(id, content, /* skip_update: */ true);
+                this.add(id, content, callback, /* skip_update: */ true);
 
                 if(PROFILER){
 
@@ -887,11 +913,13 @@
         };
 
         /**
-         * @param id
+         * @param {number|string} id
+         * @param {Function=} callback
+         * @param {boolean=} _recall
          * @export
          */
 
-        FlexSearch.prototype.remove = function(id){
+        FlexSearch.prototype.remove = function(id, callback, _recall){
 
             const index = "@" + id;
 
@@ -901,7 +929,7 @@
 
                     const current_task = this._ids[index];
 
-                    this._worker[current_task].postMessage(current_task, {
+                    this._worker[current_task].postMessage({
 
                         "remove": true,
                         "id": id
@@ -911,25 +939,48 @@
 
                     delete this._ids[index];
 
+                    if(callback){
+
+                        callback();
+                    }
+
                     return this;
                 }
 
-                if(SUPPORT_ASYNC && this.async){
+                if(!_recall){
 
-                    this._stack[index] || (
+                    if(SUPPORT_ASYNC && this.async && (typeof importScripts !== "function")){
 
-                        this._stack_keys[this._stack_keys.length] = index
-                    );
+                        let self = this;
 
-                    this._stack[index] = [
+                        const promise = new Promise(function(resolve){
 
-                        enum_task.remove,
-                        id
-                    ];
+                            setTimeout(function(){
 
-                    register_task(this);
+                                self.remove(id, null, true);
+                                self = null;
+                                resolve();
+                            });
+                        });
 
-                    return this;
+                        if(callback){
+
+                            promise.then(callback);
+                        }
+                        else{
+
+                            return promise;
+                        }
+
+                        return this;
+                    }
+                    else if(callback){
+
+                        this.remove(id, null, true);
+                        callback();
+
+                        return this;
+                    }
                 }
 
                 if(PROFILER){
@@ -968,7 +1019,7 @@
          * @param {number|Function=} limit
          * @param {Function=} callback
          * @param {boolean=} _recall
-         * @returns {Array|Promise|undefined}
+         * @returns {FlexSearch|Array|Promise|undefined}
          * @export
          */
 
@@ -1024,7 +1075,7 @@
 
                 for(let i = 0; i < this.worker; i++){
 
-                    this._worker[i].postMessage(i, {
+                    this._worker[i].postMessage({
 
                         "search": true,
                         "limit": limit,
@@ -1036,37 +1087,38 @@
                 return;
             }
 
-            if(callback){
+            if(!_recall){
 
-                if(SUPPORT_ASYNC){
+                if(SUPPORT_ASYNC && this.async && (typeof importScripts !== "function")){
 
-                    /** @type {FlexSearch} */
                     let self = this;
 
-                    queue(function(){
+                    const promise = new Promise(function(resolve){
 
-                        callback(self.search(_query, limit, null, true));
-                        self = null;
+                        setTimeout(function(){
 
-                    }, 1, "search-" + this.id);
+                            resolve(self.search(_query, limit, null, true));
+                            self = null;
+                        });
+                    });
+
+                    if(callback){
+
+                        promise.then(callback);
+                    }
+                    else{
+
+                        return promise;
+                    }
+
+                    return this;
                 }
-                else{
+                else if(callback){
 
                     callback(this.search(_query, limit, null, true));
+
+                    return this;
                 }
-
-                return;
-            }
-            else if(SUPPORT_ASYNC && !_recall && this.async && (typeof importScripts !== "function")){
-
-                /** @type {FlexSearch} */
-                let self = this;
-
-                return new Promise(function(resolve){
-
-                    resolve(self.search(_query, limit, null, true));
-                    self = null;
-                });
             }
 
             if(PROFILER){
@@ -1258,7 +1310,7 @@
             return result;
         };
 
-        if(DEBUG){
+        if(SUPPORT_INFO){
 
             /**
              * @export
@@ -1268,7 +1320,7 @@
 
                 if(SUPPORT_WORKER && this.worker){
 
-                    for(let i = 0; i < this.worker; i++) this._worker[i].postMessage(i, {
+                    for(let i = 0; i < this.worker; i++) this._worker[i].postMessage({
 
                         "info": true,
                         "id": this.id
@@ -1331,13 +1383,9 @@
 
         FlexSearch.prototype.clear = function(){
 
-            // destroy index
+            // destroy + initialize index
 
-            this.destroy();
-
-            // initialize index
-
-            return this.init();
+            return this.destroy().init();
         };
 
         /**
@@ -1356,44 +1404,47 @@
 
             // release references
 
-            this.filter =
-            this.stemmer =
-            this._scores =
+            //this.filter =
+            //this.stemmer =
+            //this._scores =
             this._map =
             this._ctx =
             this._ids =
-            this._stack =
-            this._stack_keys = null;
+            /*this._stack =
+            this._stack_keys =*/ null;
 
             return this;
         };
 
-        /**
-         * @export
-         */
+        if(SUPPORT_SERIALIZE){
 
-        FlexSearch.prototype.export = function(){
+            /**
+             * @export
+             */
 
-            return JSON.stringify([
+            FlexSearch.prototype.export = function(){
 
-                this._map,
-                this._ctx,
-                this._ids
-            ]);
-        };
+                return JSON.stringify([
 
-        /**
-         * @export
-         */
+                    this._map,
+                    this._ctx,
+                    this._ids
+                ]);
+            };
 
-        FlexSearch.prototype.import = function(payload){
+            /**
+             * @export
+             */
 
-            payload = JSON.parse(payload);
+            FlexSearch.prototype.import = function(payload){
 
-            this._map = payload[0];
-            this._ctx = payload[1];
-            this._ids = payload[2];
-        };
+                payload = JSON.parse(payload);
+
+                this._map = payload[0];
+                this._ctx = payload[1];
+                this._ids = payload[2];
+            };
+        }
 
         /** @const */
 
@@ -1641,6 +1692,7 @@
 
         // Async Handler
 
+        /*
         const queue = SUPPORT_ASYNC ? (function(){
 
             const stack = create_object();
@@ -1661,6 +1713,7 @@
             };
 
         })() : null;
+        */
 
         // Flexi-Cache
 
@@ -2578,6 +2631,7 @@
          * @param {FlexSearch} ref
          */
 
+        /*
         function runner(ref){
 
             const async = ref.async;
@@ -2637,11 +2691,13 @@
                 ref.async = async;
             }
         }
+        */
 
         /**
          * @param {FlexSearch} ref
          */
 
+        /*
         function register_task(ref){
 
             ref._timer || (
@@ -2655,6 +2711,7 @@
                 }, 1, "@" + ref.id)
             );
         }
+        */
 
         /**
          * @returns {number}
@@ -2704,7 +2761,7 @@
                     let id;
 
                     /** @type {FlexSearch} */
-                    let flexsearch;
+                    let FlexSearchWorker;
 
                     /** @lends {Worker} */
                     self.onmessage = function(event){
@@ -2715,7 +2772,7 @@
 
                             if(data["search"]){
 
-                                const results = flexsearch["search"](data["content"],
+                                const results = FlexSearchWorker["search"](data["content"],
 
                                     data["threshold"] ?
 
@@ -2738,23 +2795,23 @@
                             }
                             else if(data["add"]){
 
-                                flexsearch["add"](data["id"], data["content"]);
+                                FlexSearchWorker["add"](data["id"], data["content"]);
                             }
                             else if(data["update"]){
 
-                                flexsearch["update"](data["id"], data["content"]);
+                                FlexSearchWorker["update"](data["id"], data["content"]);
                             }
                             else if(data["remove"]){
 
-                                flexsearch["remove"](data["id"]);
+                                FlexSearchWorker["remove"](data["id"]);
                             }
                             else if(data["clear"]){
 
-                                flexsearch["clear"]();
+                                FlexSearchWorker["clear"]();
                             }
-                            else if(DEBUG && data["info"]){
+                            else if(SUPPORT_INFO && data["info"]){
 
-                                const info = flexsearch["info"]();
+                                const info = FlexSearchWorker["info"]();
 
                                 info["worker"] = id;
 
@@ -2768,10 +2825,10 @@
                                 id = data["id"];
 
                                 data["options"]["cache"] = false;
-                                data["options"]["async"] = true;
+                                data["options"]["async"] = false;
                                 data["options"]["worker"] = false;
 
-                                flexsearch = new Function(
+                                FlexSearchWorker = new Function(
 
                                     data["register"].substring(
 
@@ -2780,7 +2837,7 @@
                                     )
                                 )();
 
-                                flexsearch = new flexsearch(data["options"]);
+                                FlexSearchWorker = new FlexSearchWorker(data["options"]);
                             }
                         }
                     };
@@ -2805,7 +2862,7 @@
 
             options["id"] = core;
 
-            thread.postMessage(core, {
+            thread.postMessage({
 
                 "register": fnStr,
                 "options": options,
@@ -2814,7 +2871,7 @@
 
             return thread;
         }
-    })(
+    }(
         // Worker Handler
 
         SUPPORT_WORKER ? (function register_worker(){
@@ -2857,6 +2914,8 @@
                                         "var SUPPORT_ENCODER = " + (SUPPORT_ENCODER ? "true" : "false") + ";" +
                                         "var SUPPORT_CACHE = " + (SUPPORT_CACHE ? "true" : "false") + ";" +
                                         "var SUPPORT_ASYNC = " + (SUPPORT_ASYNC ? "true" : "false") + ";" +
+                                        "var SUPPORT_SERIALIZE = " + (SUPPORT_SERIALIZE ? "true" : "false") + ";" +
+                                        "var SUPPORT_INFO = " + (SUPPORT_INFO ? "true" : "false") + ";" +
                                         "var SUPPORT_WORKER = true;"
 
                                     ) + "(" + _worker.toString() + ")()"
@@ -2881,18 +2940,12 @@
                         console.log("Register Worker: " + name + "@" + _core);
                     }
 
-                    return {
-
-                        "postMessage": function(id, data){
-
-                            worker_stack[name][id]["postMessage"](data);
-                        }
-                    };
+                    return worker_stack[name][_core];
                 }
             );
-        })() : false
+        }()) : false
 
-    ), this);
+    )), this);
 
     /** --------------------------------------------------------------------------------------
      * UMD Wrapper for Browser and Node.js

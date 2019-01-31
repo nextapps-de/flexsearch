@@ -396,6 +396,8 @@ if(env !== "light"){
 
         it("Should have been added to the index", function(done){
 
+            expect(flexsearch_async.length).to.equal(0);
+
             flexsearch_async.add(0, "foo");
             flexsearch_async.add(2, "bar");
             flexsearch_async.add(1, "foobar");
@@ -422,8 +424,7 @@ if(env !== "light"){
             flexsearch_async.add(3, false);
             flexsearch_async.add(3, []);
             flexsearch_async.add(3, {});
-            flexsearch_async.add(3, function(){
-            });
+            flexsearch_async.add(3, function(){});
 
             setTimeout(function(){
 
@@ -453,14 +454,9 @@ if(env !== "light"){
             flexsearch_async.search("foobar", function(result){
 
                 expect(result).to.include(1);
+
+                done();
             });
-
-            // (async function(){
-            //
-            //     expect(await flexsearch_async.search("foo")).to.have.members([0, 1]);
-            // })();
-
-            setTimeout(done, 25);
         });
 
         it("Should have been limited", function(done){
@@ -469,9 +465,9 @@ if(env !== "light"){
 
                 expect(result).to.include(0);
                 expect(result).to.not.include(1);
-            });
 
-            setTimeout(done, 25);
+                done();
+            });
         });
 
         it("Should not have been matched from index", function(done){
@@ -494,9 +490,9 @@ if(env !== "light"){
             flexsearch_async.search(" o ", function(result){
 
                 expect(result).to.have.lengthOf(0);
-            });
 
-            setTimeout(done, 25);
+                done();
+            });
         });
     });
 
@@ -507,24 +503,6 @@ if(env !== "light"){
             flexsearch_async.update(0, "bar");
             flexsearch_async.update(2, "foobar");
             flexsearch_async.update(1, "foo");
-
-            expect(flexsearch_async.length).to.equal(3);
-
-            flexsearch_async.search("foo").then(function(result){
-                expect(result).to.not.have.members([2, 1]);
-            });
-
-            flexsearch_async.search("bar").then(function(result){
-                expect(result).to.not.include(0);
-            });
-
-            flexsearch_async.search("bar").then(function(result){
-                expect(result).to.include(2);
-            });
-
-            flexsearch_async.search("foobar").then(function(result){
-                expect(result).to.not.include(2);
-            });
 
             setTimeout(function(){
 
@@ -544,9 +522,9 @@ if(env !== "light"){
 
                 flexsearch_async.search("foobar", function(result){
                     expect(result).to.include(2);
-                });
 
-                done();
+                    done();
+                });
 
             }, 25);
         });
@@ -581,9 +559,9 @@ if(env !== "light"){
 
                 flexsearch_async.search("foobar").then(function(result){
                     expect(result).to.include(2);
-                });
 
-                done();
+                    done();
+                });
 
             }, 25);
         });
@@ -595,29 +573,25 @@ if(env !== "light"){
 
             flexsearch_async.remove(0);
             flexsearch_async.remove(2);
-            flexsearch_async.remove(1);
+            flexsearch_async.remove(1).then(function(){
+                expect(flexsearch_async.length).to.equal(0);
+            });
 
             expect(flexsearch_async.length).to.equal(3);
 
-            setTimeout(function(){
+            flexsearch_async.search("foo", function(result){
+                expect(result).to.have.lengthOf(0);
+            });
 
-                expect(flexsearch_async.length).to.equal(0);
+            flexsearch_async.search("bar", function(result){
+                expect(result).to.have.lengthOf(0);
+            });
 
-                flexsearch_async.search("foo", function(result){
-                    expect(result).to.have.lengthOf(0);
-                });
-
-                flexsearch_async.search("bar", function(result){
-                    expect(result).to.have.lengthOf(0);
-                });
-
-                flexsearch_async.search("foobar", function(result){
-                    expect(result).to.have.lengthOf(0);
-                });
+            flexsearch_async.search("foobar", function(result){
+                expect(result).to.have.lengthOf(0);
 
                 done();
-
-            }, 25);
+            });
         });
     });
 
@@ -625,176 +599,169 @@ if(env !== "light"){
 // Worker Tests
 // ------------------------------------------------------------------------
 
-    describe("Add (Worker)", function(){
+    if(typeof Worker !== "undefined" && !this._phantom){
 
-        it("Should support worker", function(){
+        describe("Add (Worker)", function(){
 
-            if(typeof Worker === "undefined"){
+            it("Should support worker", function(){
 
-                Worker = function(){};
+                flexsearch_worker = new FlexSearch({
 
-                Worker.prototype.postMessage = function(val){
-                    this.onmessage(val);
-                };
-                Worker.prototype.onmessage = function(val){
-                    return val;
-                };
-            }
+                    encode: "icase",
+                    tokenize: "reverse",
+                    async: false,
+                    worker: 4
+                });
+            });
 
-            flexsearch_worker = new FlexSearch({
+            it("Should have been added to the index", function(done){
 
-                encode: "icase",
-                tokenize: "strict",
-                async: false,
-                worker: 4
+                flexsearch_worker.add(0, "foo");
+                flexsearch_worker.add(2, "bar");
+                flexsearch_worker.add(1, "foobar");
+
+                setTimeout(function(){
+
+                    expect(flexsearch_worker.length).to.equal(3);
+                    expect(flexsearch_worker.index).to.have.keys(["@0", "@1", "@2"]);
+
+                    flexsearch_worker.search("foo", function(result){
+
+                        expect(result).to.have.length(2);
+                        expect(result).to.have.members([0, 1]);
+
+                        done();
+                    });
+
+                }, 25);
+            });
+
+            it("Should not have been added to the index", function(done){
+
+                flexsearch_worker.add("foo");
+                flexsearch_worker.add(3);
+                flexsearch_worker.add(null, "foobar");
+                flexsearch_worker.add(void 0, "foobar");
+                flexsearch_worker.add(4, null);
+                flexsearch_worker.add(5, false);
+                flexsearch_worker.add(6, []);
+                flexsearch_worker.add(7, {});
+                flexsearch_worker.add(8, function(){
+                });
+
+                setTimeout(function(){
+
+                    expect(flexsearch_worker.length).to.equal(3);
+                    expect(flexsearch_worker.index).to.have.keys(["@0", "@1", "@2"]);
+
+                    done();
+
+                }, 25);
             });
         });
 
-        it("Should have been added to the index", function(done){
+        describe("Search (Worker)", function(){
 
-            flexsearch_worker.add(0, "foo");
-            flexsearch_worker.add(2, "bar");
-            flexsearch_worker.add(1, "foobar");
+            it("Should have been matched from index", function(done){
 
-            expect(flexsearch_worker.length).to.equal(3);
-            expect(flexsearch_worker.index).to.have.keys(["@0", "@1", "@2"]);
+                flexsearch_worker.search("foo", function(result){
 
-            flexsearch_worker.search("foo", function(result){
+                    expect(result).to.have.lengthOf(2);
 
-                expect(result).to.have.length(0);
+                    flexsearch_worker.search("bar", function(result){
+
+                        expect(result).to.have.lengthOf(2);
+
+                        flexsearch_worker.search("foobar", function(result){
+
+                            expect(result).to.have.lengthOf(1);
+
+                            done();
+                        });
+                    });
+                });
             });
 
-            setTimeout(done, 25);
+            it("Should have been limited", function(done){
+
+                flexsearch_worker.search("foo", 1, function(result){
+
+                    expect(result).to.have.lengthOf(1);
+
+                    done();
+                });
+            });
+
+            it("Should not have been matched from index", function(done){
+
+                flexsearch_worker.search("barfoo", function(result){
+
+                    expect(result).to.have.lengthOf(0);
+
+                    flexsearch_worker.search("", function(result){
+
+                        expect(result).to.have.lengthOf(0);
+
+                        flexsearch_worker.search(" ", function(result){
+
+                            expect(result).to.have.lengthOf(0);
+
+                            flexsearch_worker.search(" o ", function(result){
+
+                                expect(result).to.have.lengthOf(1);
+
+                                flexsearch_worker.search(" fob ", function(result){
+
+                                    expect(result).to.have.lengthOf(0);
+
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
         });
 
-        it("Should not have been added to the index", function(done){
+        describe("Update (Worker)", function(){
 
-            flexsearch_worker.add("foo");
-            flexsearch_worker.add(3);
-            flexsearch_worker.add(null, "foobar");
-            flexsearch_worker.add(void 0, "foobar");
-            flexsearch_worker.add(4, null);
-            flexsearch_worker.add(5, false);
-            flexsearch_worker.add(6, []);
-            flexsearch_worker.add(7, {});
-            flexsearch_worker.add(8, function(){});
+            it("Should have been updated to the index", function(done){
 
-            setTimeout(function(){
+                flexsearch_worker.update(0, "bar");
+                flexsearch_worker.update(2, "foobar");
+                flexsearch_worker.update(1, "foo", function(){
+
+                    expect(flexsearch_worker.length).to.equal(3);
+
+                    flexsearch_worker.search("foo", function(results){
+
+                        expect(results).to.have.members([2, 1]);
+
+                        flexsearch_worker.search("bar", function(results){
+
+                            expect(results).to.have.members([0, 2]);
+
+                            flexsearch_worker.search("foobar", function(results){
+
+                                expect(results).to.have.members([2]);
+
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        describe("Remove (Worker)", function(){
+
+            it("Should have been removed from the index", function(done){
 
                 expect(flexsearch_worker.length).to.equal(3);
-                expect(flexsearch_worker.index).to.have.keys(["@0", "@1", "@2"]);
 
-                done();
-
-            }, 25);
-        });
-    });
-
-    describe("Search (Worker)", function(){
-
-        it("Should have been matched from index", function(done){
-
-            flexsearch_worker.search("foo", function(result){
-
-                expect(result).to.have.lengthOf(2);
-            });
-
-            flexsearch_worker.search("bar", function(result){
-
-                expect(result).to.have.lengthOf(2);
-            });
-
-            flexsearch_worker.search("foobar", function(result){
-
-                expect(result).to.have.lengthOf(1);
-            });
-
-            setTimeout(done, 25);
-        });
-
-        it("Should have been limited", function(done){
-
-            flexsearch_worker.search("foo", 1, function(result){
-
-                expect(result).to.include(0);
-                expect(result).to.not.include(1);
-            });
-
-            setTimeout(done, 25);
-        });
-
-        it("Should not have been matched from index", function(done){
-
-            flexsearch_worker.search("barfoo", function(result){
-
-                expect(result).to.have.lengthOf(0);
-            });
-
-            flexsearch_worker.search("", function(result){
-
-                expect(result).to.have.lengthOf(0);
-            });
-
-            flexsearch_worker.search(" ", function(result){
-
-                expect(result).to.have.lengthOf(0);
-            });
-
-            flexsearch_worker.search(" o ", function(result){
-
-                expect(result).to.have.lengthOf(0);
-            });
-
-            setTimeout(done, 25);
-        });
-    });
-
-    // TODO:
-    /*
-    describe("Update (Worker)", function(){
-
-        it("Should have been updated to the index", function(done){
-
-            flexsearch_worker.update(0, "bar");
-            flexsearch_worker.update(2, "foobar");
-            flexsearch_worker.update(1, "foo");
-
-            setTimeout(function(){
-
-                expect(flexsearch_worker.length).to.equal(3);
-
-                flexsearch_worker.search("foo", function(results){
-
-                    expect(results).to.have.members([2, 1]);
-                });
-
-                flexsearch_worker.search("bar", function(results){
-
-                    expect(results).to.have.members([0, 2]);
-                });
-
-                flexsearch_worker.search("foobar", function(results){
-
-                    expect(results).to.have.members([2]);
-                });
-
-                setTimeout(done, 25);
-            }, 25);
-        });
-    });
-    */
-
-    describe("Remove (Worker)", function(){
-
-        it("Should have been removed from the index", function(done){
-
-            expect(flexsearch_worker.length).to.equal(3);
-
-            flexsearch_worker.remove(0);
-            flexsearch_worker.remove(2);
-            flexsearch_worker.remove(1);
-
-            setTimeout(function(){
+                flexsearch_worker.remove(0);
+                flexsearch_worker.remove(2);
+                flexsearch_worker.remove(1);
 
                 expect(flexsearch_worker.length).to.equal(0);
 
@@ -802,31 +769,31 @@ if(env !== "light"){
 
                     expect(results).to.not.include(1);
                     expect(results).to.not.include(2);
+
+                    flexsearch_worker.search("bar", function(results){
+
+                        expect(results).to.not.include(0);
+                        expect(results).to.not.include(2);
+
+                        flexsearch_worker.search("foobar", function(results){
+
+                            expect(results).to.not.include(2);
+
+                            done();
+                        });
+                    });
                 });
-
-                flexsearch_worker.search("bar", function(results){
-
-                    expect(results).to.not.include(0);
-                    expect(results).to.not.include(2);
-                });
-
-                flexsearch_worker.search("foobar", function(results){
-
-                    expect(results).to.not.include(2);
-                });
-
-                setTimeout(done, 25);
-            }, 25);
-        });
-
-        if(env !== "light" && env !== "min"){
-
-            it("Should have been debug mode activated", function(){
-
-                flexsearch_worker.info();
             });
-        }
-    });
+
+            if(env !== "light" && env !== "min"){
+
+                it("Should have been debug mode activated", function(){
+
+                    flexsearch_worker.info();
+                });
+            }
+        });
+    }
 
     describe("Worker Not Supported", function(){
 
@@ -840,7 +807,7 @@ if(env !== "light"){
             flexsearch_worker = new FlexSearch({
 
                 encode: false,
-                async: true,
+                async: false,
                 worker: 4
             });
 

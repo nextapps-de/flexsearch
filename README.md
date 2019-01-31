@@ -1559,17 +1559,62 @@ Compare these presets:
 - <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
 - <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
 
-<a name="builds"></a>
 ## Best Practices
 
 __Split Complexity__
 
 Whenever you can, try to divide content by categories and add them to its own index, e.g.:
+
 ```js
-var feeds_2017 = new FlexSearch();
-var feeds_2018 = new FlexSearch();
-var feeds_2019 = new FlexSearch();
+var action = new FlexSearch();
+var adventure = new FlexSearch();
+var comedy = new FlexSearch();
 ```
+
+This way you can also provide different settings for each category.
+
+To make this workaround more extendable you can define a tiny helper:
+```js
+var settings = {};
+var index = {};
+
+function add(id, cat, content){
+    (index[cat] || (
+        index[cat] = new FlexSearch(settings[cat])
+    )).add(id, content);
+}
+
+function search(cat, query){
+    return index[cat] ? index[cat].search(query) : [];
+}
+```
+
+Provide settings optionally (or skip and use defaults):
+```js
+settings = {
+    action: "score", 
+    adventure: "match", 
+    comedy: {
+        encode: "advanced",
+        tokenize: "forward",
+        threshold: 5
+    }
+};
+```
+
+Add content to the index:
+```js
+add(1, "action", "Movie Title");
+add(2, "adventure", "Movie Title");
+add(3, "comedy", "Movie Title");
+```
+
+Perform queries:
+```js
+var results = search("action", "movie title"); // --> [1]
+```
+
+Filter queries by categories will hugely improve performance.
 
 __Use numeric IDs__
 
@@ -1769,6 +1814,11 @@ __Supported Build Flags__
     <tr></tr>
     <tr>
         <td>SUPPORT_PRESETS</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_SERIALIZE</td>
         <td>true, false</td>
     </tr>
     <tr>

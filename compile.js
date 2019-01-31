@@ -72,6 +72,7 @@ var parameter = (function(opt){
     export_local_property_definitions: true,
     language_in: "ECMASCRIPT6_STRICT",
     language_out: language_out || "ECMASCRIPT6_STRICT",
+    //rewrite_polyfills: false,
     process_closure_primitives: true,
     summary_detail_level: 3,
     warning_level: "VERBOSE",
