@@ -468,7 +468,7 @@
             // initialize primary index
 
             /** @private */
-            this._map = create_object_array(10);
+            this._map = create_object_array(10 - (this.threshold || 0));
             /** @private */
             this._ctx = create_object();
             /** @private */
@@ -614,9 +614,11 @@
 
             if(content && is_string(content) && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
 
+                const index = "@" + id;
+
                 // check if index ID already exist
 
-                if(this._ids[id] && !_skip_update){
+                if(this._ids[index] && !_skip_update){
 
                     this.update(id, content);
                 }
@@ -636,7 +638,7 @@
                             "content": content
                         });
 
-                        this._ids[id] = "" + this._current_task;
+                        this._ids[index] = "" + this._current_task;
 
                         // TODO: improve auto-balancing
                         //this._ids_count[this._current_task]++;
@@ -649,12 +651,12 @@
 
                     if(SUPPORT_ASYNC && this.async){
 
-                        this._stack[id] || (
+                        this._stack[index] || (
 
-                            this._stack_keys[this._stack_keys.length] = id
+                            this._stack_keys[this._stack_keys.length] = index
                         );
 
-                        this._stack[id] = [
+                        this._stack[index] = [
 
                             enum_task.add,
                             id,
@@ -808,7 +810,7 @@
                                     if(depth && (word_length > 1) && (score >= threshold)){
 
                                         const ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = create_object());
-                                        const ctxTmp = this._ctx[value] || (this._ctx[value] = create_object_array(10));
+                                        const ctxTmp = this._ctx[value] || (this._ctx[value] = create_object_array(10 - (threshold || 0)));
 
                                         let x = i - depth;
                                         let y = i + depth + 1;
@@ -838,7 +840,7 @@
 
                     // update status
 
-                    this._ids[id] = 1;
+                    this._ids[index] = 1;
 
                     if(SUPPORT_CACHE){
 
@@ -863,7 +865,9 @@
 
         FlexSearch.prototype.update = function(id, content){
 
-            if(this._ids[id] && is_string(content)){
+            const index = "@" + id;
+
+            if(this._ids[index] && is_string(content)){
 
                 if(PROFILER){
 
@@ -889,11 +893,13 @@
 
         FlexSearch.prototype.remove = function(id){
 
-            if(this._ids[id]){
+            const index = "@" + id;
+
+            if(this._ids[index]){
 
                 if(SUPPORT_WORKER && this.worker){
 
-                    const current_task = this._ids[id];
+                    const current_task = this._ids[index];
 
                     this._worker[current_task].postMessage(current_task, {
 
@@ -903,19 +909,19 @@
 
                     //this._ids_count[current_task]--;
 
-                    delete this._ids[id];
+                    delete this._ids[index];
 
                     return this;
                 }
 
                 if(SUPPORT_ASYNC && this.async){
 
-                    this._stack[id] || (
+                    this._stack[index] || (
 
-                        this._stack_keys[this._stack_keys.length] = id
+                        this._stack_keys[this._stack_keys.length] = index
                     );
 
-                    this._stack[id] = [
+                    this._stack[index] = [
 
                         enum_task.remove,
                         id
@@ -931,7 +937,7 @@
                     profile_start("remove");
                 }
 
-                for(let z = 0; z < 10; z++){
+                for(let z = 0; z < (10 - (this.threshold || 0)); z++){
 
                     remove_index(this._map[z], id);
                 }
@@ -941,7 +947,7 @@
                     remove_index(this._ctx, id);
                 }
 
-                delete this._ids[id];
+                delete this._ids[index];
 
                 if(SUPPORT_CACHE){
 
@@ -1177,7 +1183,7 @@
 
                                 let map_value;
 
-                                for(let z = 9; z >= threshold; z--){
+                                for(let z = 0; z < (10 - threshold); z++){
 
                                     if((map_value = map[z][value])){
 
@@ -1278,7 +1284,7 @@
                     words = 0,
                     chars = 0;
 
-                for(let z = 0; z < 10; z++){
+                for(let z = 0; z < (10 - (this.threshold || 0)); z++){
 
                     keys = get_keys(this._map[z]);
 
@@ -1314,7 +1320,7 @@
                     "worker": this.worker,
                     "threshold": this.threshold,
                     "depth": this.depth,
-                    "contextual": !!this.depth
+                    "contextual": this.depth && (this.tokenize === "strict")
                 };
             };
         }
@@ -1360,6 +1366,33 @@
             this._stack_keys = null;
 
             return this;
+        };
+
+        /**
+         * @export
+         */
+
+        FlexSearch.prototype.export = function(){
+
+            return JSON.stringify([
+
+                this._map,
+                this._ctx,
+                this._ids
+            ]);
+        };
+
+        /**
+         * @export
+         */
+
+        FlexSearch.prototype.import = function(payload){
+
+            payload = JSON.parse(payload);
+
+            this._map = payload[0];
+            this._ctx = payload[1];
+            this._ids = payload[2];
         };
 
         /** @const */
@@ -1612,9 +1645,9 @@
 
             const stack = create_object();
 
-            return function(fn, delay, id){
+            return function(fn, delay, key){
 
-                const timer = stack[id];
+                const timer = stack[key];
 
                 if(timer){
 
@@ -1623,7 +1656,7 @@
 
                 return (
 
-                    stack[id] = setTimeout(fn, delay)
+                    stack[key] = setTimeout(fn, delay)
                 );
             };
 
@@ -1653,9 +1686,9 @@
                 this.ids = [];
             };
 
-            Cache.prototype.set = function(id, value){
+            Cache.prototype.set = function(key, value){
 
-                if(this.limit && is_undefined(this.cache[id])){
+                if(this.limit && is_undefined(this.cache[key])){
 
                     let length = this.ids.length;
 
@@ -1670,18 +1703,18 @@
                         delete this.index[last_id];
                     }
 
-                    this.index[id] = length;
-                    this.ids[length] = id;
-                    this.count[id] = -1;
-                    this.cache[id] = value;
+                    this.index[key] = length;
+                    this.ids[length] = key;
+                    this.count[key] = -1;
+                    this.cache[key] = value;
 
                     // shift up counter +1
 
-                    this.get(id);
+                    this.get(key);
                 }
                 else{
 
-                    this.cache[id] = value;
+                    this.cache[key] = value;
                 }
             };
 
@@ -1689,15 +1722,15 @@
              * Note: It is better to have the complexity when fetching the cache:
              */
 
-            Cache.prototype.get = function(id){
+            Cache.prototype.get = function(key){
 
-                const cache = this.cache[id];
+                const cache = this.cache[key];
 
                 if(this.limit && cache){
 
-                    const count = ++this.count[id];
+                    const count = ++this.count[key];
                     const index = this.index;
-                    let current_index = index[id];
+                    let current_index = index[key];
 
                     if(current_index > 0){
 
@@ -1728,8 +1761,8 @@
                             }
 
                             // push new value on top
-                            ids[current_index] = id;
-                            index[id] = current_index;
+                            ids[current_index] = key;
+                            index[key] = current_index;
                         }
                     }
                 }
@@ -1858,7 +1891,7 @@
 
                 if(score >= threshold){
 
-                    let arr = map[((score + 0.5) >> 0)];
+                    let arr = map[9 - ((score + 0.5) >> 0)];
                         arr = arr[value] || (arr[value] = []);
 
                     arr[arr.length] = id;
@@ -2187,7 +2220,7 @@
         function intersect(arrays, limit, suggest) {
 
             let result = [];
-            let suggestions = [];
+            let suggestions;
             const length_z = arrays.length;
 
             if(length_z > 1){
@@ -2205,7 +2238,7 @@
 
                 while(i < length) {
 
-                    check[arr[i++]] = 1;
+                    check["@" + arr[i++]] = 1;
                 }
 
                 // loop through arrays
@@ -2229,9 +2262,11 @@
 
                         tmp = arr[i++];
 
-                        if(check[tmp]){
+                        const index = "@" + tmp;
 
-                            const check_val = check[tmp];
+                        if(check[index]){
+
+                            const check_val = check[index];
 
                             if(check_val === z){
 
@@ -2248,7 +2283,7 @@
                                 }
                                 else{
 
-                                    check[tmp] = z + 1;
+                                    check[index] = z + 1;
                                 }
 
                                 // apply count status
@@ -2617,7 +2652,7 @@
 
                     runner(ref);
 
-                }, 1, "search-async-" + ref.id)
+                }, 1, "@" + ref.id)
             );
         }
 
@@ -2814,12 +2849,15 @@
 
                                         ""
                                     :
-                                        "const SUPPORT_WORKER = true;" +
-                                        "const DEBUG = " + (DEBUG ? "true" : "false") + ";" +
-                                        "const PROFILER = " + (PROFILER ? "true" : "false") + ";" +
-                                        "const SUPPORT_ENCODER = " + (SUPPORT_ENCODER ? "true" : "false") + ";" +
-                                        "const SUPPORT_CACHE = " + (SUPPORT_CACHE ? "true" : "false") + ";" +
-                                        "const SUPPORT_ASYNC = " + (SUPPORT_ASYNC ? "true" : "false") + ";"
+                                        "var RELEASE = '" + RELEASE + "';" +
+                                        "var DEBUG = " + (DEBUG ? "true" : "false") + ";" +
+                                        "var PROFILER = " + (PROFILER ? "true" : "false") + ";" +
+                                        "var SUPPORT_PRESETS = " + (SUPPORT_PRESETS ? "true" : "false") + ";" +
+                                        "var SUPPORT_SUGGESTIONS = " + (SUPPORT_SUGGESTIONS ? "true" : "false") + ";" +
+                                        "var SUPPORT_ENCODER = " + (SUPPORT_ENCODER ? "true" : "false") + ";" +
+                                        "var SUPPORT_CACHE = " + (SUPPORT_CACHE ? "true" : "false") + ";" +
+                                        "var SUPPORT_ASYNC = " + (SUPPORT_ASYNC ? "true" : "false") + ";" +
+                                        "var SUPPORT_WORKER = true;"
 
                                     ) + "(" + _worker.toString() + ")()"
                                 ],{

@@ -7,9 +7,9 @@
     <a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
     <a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master"></a>
     <a target="_blank" href="https://www.codacy.com/app/ts-thomas/FlexSearch?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nextapps-de/flexsearch&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/a896e010f6b4429aa7bc9a89550320a7"/></a>
-    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/xone.svg"></a>
+    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>
     <!--<img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">-->
-    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/xone.svg"></a>
+    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 </p>
 
 <h1></h1>
@@ -19,11 +19,13 @@ When it comes to raw search speed <a href="https://rawgit.com/nextapps-de/flexse
 Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a>
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a>
 
 Supported Platforms:
 - Browser
 - Node.js
+
+> FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>
 
 Library Comparison:
 - <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
@@ -201,10 +203,10 @@ __Query Test: "Gulliver's Travels"__
     <tr>
         <td>1</td>
         <td>FlexSearch <a href="#notes">***</a></td>
-        <td>0.3.2</td>
-        <td><b>342040</b></td>
-        <td><b>178456</b></td>
-        <td><b>1527778</b></td>
+        <td>0.3.3</td>
+        <td><b>363757</b></td>
+        <td><b>182603</b></td>
+        <td><b>1627219</b></td>
     </tr>
     <tr></tr>
     <tr>
@@ -543,6 +545,8 @@ Index methods:
 - <a href="#index.info">Index.__info__()</a>
 - <a href="#index.addmatcher">Index.__addMatcher__({_KEY: VALUE_})</a>
 - <a href="#index.encode">Index.__encode__(string)</a>
+- <a href="#index.export">Index.__export__()</a>
+- <a href="#index.import">Index.__import__(string)</a>
 
 ## Usage
 <a name="flexsearch.create"></a>
@@ -1588,6 +1592,34 @@ index.add(index_table["fdf12cad-8779-47ab-b614-4dbbd649178b"], "content");
 ```
 
 It is planned to provide a built-in feature which should replace this workaround.
+
+<a name="export"></a>
+## Export/Import Index
+
+> index.export() returns a serialized dump as a string.
+
+> index.import(string) takes a serialized dump as a string and load it to the index.
+
+Assuming you have one or several indexes:
+```js
+var feeds_2017 = new FlexSearch();
+var feeds_2018 = new FlexSearch();
+var feeds_2019 = new FlexSearch();
+```
+
+Export indexes, e.g. to the local storage:
+```js
+localStorage.setItem("feeds_2017", feeds_2017.export());
+localStorage.setItem("feeds_2018", feeds_2018.export());
+localStorage.setItem("feeds_2019", feeds_2019.export());
+```
+
+Import indexes, e.g. from the local storage:
+```js
+feeds_2017.import(localStorage.getItem("feeds_2017"));
+feeds_2018.import(localStorage.getItem("feeds_2018"));
+feeds_2019.import(localStorage.getItem("feeds_2019"));
+```
 
 <a name="debug"></a>
 ## Debug

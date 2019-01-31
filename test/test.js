@@ -203,7 +203,7 @@ describe("Add (Sync)", function(){
         flexsearch_sync.add(2, "bar");
         flexsearch_sync.add(1, "foobar");
 
-        expect(flexsearch_sync.index).to.have.keys([0, 1, 2]);
+        expect(flexsearch_sync.index).to.have.keys(["@0", "@1", "@2"]);
         expect(flexsearch_sync.length).to.equal(3);
     });
 
@@ -405,7 +405,7 @@ if(env !== "light"){
             setTimeout(function(){
 
                 expect(flexsearch_async.length).to.equal(3);
-                expect(flexsearch_async.index).to.have.keys([0, 1, 2]);
+                expect(flexsearch_async.index).to.have.keys(["@0", "@1", "@2"]);
 
                 done();
 
@@ -428,7 +428,7 @@ if(env !== "light"){
             setTimeout(function(){
 
                 expect(flexsearch_async.length).to.equal(3);
-                expect(flexsearch_async.index).to.have.keys([0, 1, 2]);
+                expect(flexsearch_async.index).to.have.keys(["@0", "@1", "@2"]);
 
                 done();
 
@@ -657,7 +657,7 @@ if(env !== "light"){
             flexsearch_worker.add(1, "foobar");
 
             expect(flexsearch_worker.length).to.equal(3);
-            expect(flexsearch_worker.index).to.have.keys([0, 1, 2]);
+            expect(flexsearch_worker.index).to.have.keys(["@0", "@1", "@2"]);
 
             flexsearch_worker.search("foo", function(result){
 
@@ -682,7 +682,7 @@ if(env !== "light"){
             setTimeout(function(){
 
                 expect(flexsearch_worker.length).to.equal(3);
-                expect(flexsearch_worker.index).to.have.keys([0, 1, 2]);
+                expect(flexsearch_worker.index).to.have.keys(["@0", "@1", "@2"]);
 
                 done();
 

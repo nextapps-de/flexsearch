@@ -23,7 +23,7 @@
 <div id="container"></div>
 <hr>
 Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 7 matches for the query "gulliver", 4. result should be ordered by relevance
-<script src="https://rawgit.com/nextapps-de/flexsearch/master/flexsearch.light.js"></script>
+<script src="../flexsearch.light.js"></script>
 <script src="https://rawgit.com/nextapps-de/bulksearch/master/bulksearch.light.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/elasticlunr/0.9.6/elasticlunr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/olivernn/lunr.js@2.3.5/lunr.min.js"></script>
@@ -346,7 +346,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
                             "<th>Library&emsp;</th>" +
                             "<th>Benchmark (Single Phrase)&emsp;</th>" +
                             "<th>Benchmark (Multi Phrase)&emsp;</th>" +
-                            "<th>Benchmark (Mixed Not Found)&emsp;</th>" +
+                            "<th>Benchmark (Not Found)&emsp;</th>" +
                        "</tr>";
 
             for(var test in tests){

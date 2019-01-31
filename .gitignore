@@ -4,6 +4,7 @@
 coverage
 perf
 node_modules
+server
 !*.keep
 src
 tmp
