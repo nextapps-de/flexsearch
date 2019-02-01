@@ -86,7 +86,7 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            <a href="#async">Async Processing</a>
+            <a href="#async_search">Async Search</a>
         </td>
         <td>x</td>
         <td>x</td>
@@ -610,6 +610,7 @@ Limit the result:
 index.search("John", 10);
 ```
 
+<a name="async_search"></a>
 #### Async Search
 Perform queries asynchronously:
 
