@@ -16,7 +16,7 @@
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
 When it comes to raw search speed <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
+Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a>
@@ -86,7 +86,7 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            <a href="#async">Async Processing</a>
+            <a href="#async_search">Async Search</a>
         </td>
         <td>x</td>
         <td>x</td>
@@ -388,7 +388,7 @@ In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/contextual-index.svg">
 </p>
 
-__Note:__ This feature is actually not enabled by default. Read <a href="#contextual">here</a> how to enable.
+__Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
 
 #### Compare BulkSearch vs. FlexSearch
 
@@ -426,7 +426,7 @@ __Note:__ This feature is actually not enabled by default. Read <a href="#contex
     <tr>
         <td>Weaks</td>
         <td><ul><li>less powerful contextual search</li><li>less memory efficient (has to be defragmented from time to time)</li></ul></td>
-        <td><ul><li>updating / deleting extisting items from index is slow</li><li>adding items to the index optimized for super partial matching (tokenize: "full") is slow</li></ul></td>
+        <td><ul><li>updating / deleting existing items from index is slow</li><li>adding items to the index optimized for super partial matching (tokenize: "full") is slow</li></ul></td>
     </tr>
     <tr></tr>
     <tr>
@@ -610,6 +610,7 @@ Limit the result:
 index.search("John", 10);
 ```
 
+<a name="async_search"></a>
 #### Async Search
 Perform queries asynchronously:
 
@@ -1067,7 +1068,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
         <td align="top">tokenize<br><br><br><br><br><!--<br>--></td>
         <td vertical="top" vertical-align="top">
             "strict"<br>
-            "foward"<br>
+            "forward"<br>
             "reverse"<br>
             <!--"ngram"<br>-->
             "full"<br>
@@ -1209,7 +1210,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
     <tr></tr>
     -->
     <tr>
-        <td><b>"foward"</b></td>
+        <td><b>"forward"</b></td>
         <td>incrementally index words in forward direction</td>
         <td><b>fo</b>obar<br><b>foob</b>ar<br></td>
         <td>* n</td>
@@ -1563,7 +1564,7 @@ Compare these presets:
 
 __Split Complexity__
 
-Whenenver you can, try to divide content by categories and add them to its own index, e.g.:
+Whenever you can, try to divide content by categories and add them to its own index, e.g.:
 ```js
 var feeds_2017 = new FlexSearch();
 var feeds_2018 = new FlexSearch();
