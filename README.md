@@ -16,7 +16,7 @@
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
 When it comes to raw search speed <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="bulksearch/" target="_blank">BulkSearch</a> may be a better choice.
+Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a>
