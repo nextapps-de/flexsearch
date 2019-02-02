@@ -426,7 +426,7 @@ __Note:__ This feature is actually not enabled by default. Read <a href="context
     <tr>
         <td>Weaks</td>
         <td><ul><li>less powerful contextual search</li><li>less memory efficient (has to be defragmented from time to time)</li></ul></td>
-        <td><ul><li>updating / deleting extisting items from index is slow</li><li>adding items to the index optimized for super partial matching (tokenize: "full") is slow</li></ul></td>
+        <td><ul><li>updating / deleting existing items from index is slow</li><li>adding items to the index optimized for super partial matching (tokenize: "full") is slow</li></ul></td>
     </tr>
     <tr></tr>
     <tr>
@@ -1067,7 +1067,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
         <td align="top">tokenize<br><br><br><br><br><!--<br>--></td>
         <td vertical="top" vertical-align="top">
             "strict"<br>
-            "foward"<br>
+            "forward"<br>
             "reverse"<br>
             <!--"ngram"<br>-->
             "full"<br>
@@ -1209,7 +1209,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
     <tr></tr>
     -->
     <tr>
-        <td><b>"foward"</b></td>
+        <td><b>"forward"</b></td>
         <td>incrementally index words in forward direction</td>
         <td><b>fo</b>obar<br><b>foob</b>ar<br></td>
         <td>* n</td>
@@ -1563,7 +1563,7 @@ Compare these presets:
 
 __Split Complexity__
 
-Whenenver you can, try to divide content by categories and add them to its own index, e.g.:
+Whenever you can, try to divide content by categories and add them to its own index, e.g.:
 ```js
 var feeds_2017 = new FlexSearch();
 var feeds_2018 = new FlexSearch();
