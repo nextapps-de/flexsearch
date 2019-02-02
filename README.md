@@ -388,7 +388,7 @@ In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch
     <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/contextual-index.svg">
 </p>
 
-__Note:__ This feature is actually not enabled by default. Read <a href="contextual_enable">here</a> how to enable.
+__Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
 
 #### Compare BulkSearch vs. FlexSearch
 
