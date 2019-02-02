@@ -8,7 +8,7 @@ if(typeof module !== "undefined"){
 
     var env = process.argv[3] === "test" ? "min" : process.argv[3] === "test/" ? "light" : "";
     var expect = require("chai").expect;
-    var FlexSearch = require("../flexsearch" + (env ? "." + env : "") + ".js");
+    var FlexSearch = require("../" + (env ? "dist/": "") + "flexsearch" + (env ? "." + env : "") + ".js");
 }
 
 var flexsearch_default;

@@ -43,20 +43,20 @@ Get Latest (Stable Release):
     </tr>
     <tr>
         <td>flexsearch.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/flexsearch.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/flexsearch.light.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.light.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.light.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.light.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.light.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.light.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/flexsearch.compact.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.compact.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/flexsearch.compact.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.compact.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.compact.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.compact.js</a></td>
     </tr>
     <tr></tr>
     <tr>
@@ -188,7 +188,7 @@ All Features:
 
 Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
 
-__Query Test: "Gulliver's Travels"__
+##### Query Test: "Gulliver's Travels"
 
 <table>
     <tr></tr>
@@ -282,7 +282,7 @@ __Query Test: "Gulliver's Travels"__
     </tr>
 </table>
 
-__Memory Test: "Gulliver's Travels"__
+##### Memory Test: "Gulliver's Travels"
 
 <table>
     <tr></tr>
@@ -491,15 +491,15 @@ __Note:__ This feature is actually not enabled by default. Read <a href="#contex
 
 Use latest from CDN:
 ```html
-<script src="https://cdn.rawgit.com/nextapps-de/flexsearch/master/flexsearch.min.js"></script>
+<script src="https://cdn.rawgit.com/nextapps-de/flexsearch/master/dist/flexsearch.min.js"></script>
 ```
 
 Or a specific version:
 ```html
-<script src="https://cdn.rawgit.com/nextapps-de/flexsearch/0.3.2/flexsearch.min.js"></script>
+<script src="https://cdn.rawgit.com/nextapps-de/flexsearch/0.3.51/dist/flexsearch.min.js"></script>
 ```
 
-__AMD__
+AMD:
 
 ```javascript
 var FlexSearch = require("./flexsearch.js");
@@ -549,6 +549,7 @@ Index methods:
 - <a href="#index.import">Index.__import__(string)</a>
 
 ## Usage
+
 <a name="flexsearch.create"></a>
 #### Create a new index
 
@@ -612,6 +613,7 @@ index.search("John", 10);
 
 <a name="async_search"></a>
 #### Async Search
+
 Perform queries asynchronously:
 
 ```js
@@ -644,6 +646,7 @@ async function search(query){
 ```
 
 #### Custom Search
+
 Pass custom options for each query:
 
 ```js
@@ -673,6 +676,7 @@ index.search("John", {
 ```
 
 #### Suggestions
+
 Get also suggestions for a query:
 
 ```js
@@ -1561,7 +1565,7 @@ Compare these presets:
 
 ## Best Practices
 
-__Split Complexity__
+##### Split Complexity
 
 Whenever you can, try to divide content by categories and add them to its own index, e.g.:
 
@@ -1616,7 +1620,7 @@ var results = search("action", "movie title"); // --> [1]
 
 Filter queries by categories will hugely improve performance.
 
-__Use numeric IDs__
+##### Use numeric IDs
 
 It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
 
@@ -1711,7 +1715,7 @@ index.stats;
 
 The returning stats payload is divided into several categories. Each of these category provides its own statistic values.
 
-__Profiler Stats Properties__
+##### Profiler Stats Properties
 <table>
     <tr></tr>
     <tr>
@@ -1774,7 +1778,7 @@ node compile SUPPORT_WORKER=true
 
 > The custom build will be saved to flexsearch.custom.xxxxx.js (the "xxxxx" is a hash based on the used build flags).
 
-__Supported Build Flags__
+##### Supported Build Flags
 
 <table>
     <tr></tr>

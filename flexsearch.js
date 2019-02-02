@@ -1,5 +1,5 @@
-;/**!
- * @preserve FlexSearch v0.3.5
+/**!
+ * @preserve FlexSearch v0.3.51
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -122,6 +122,8 @@
         */
 
         /**
+         * NOTE: This could make issues on some languages (chinese, korean, thai)
+         * TODO: extract all language-specific stuff from the core
          * @const  {RegExp}
          */
 
@@ -130,22 +132,22 @@
         const stemmer = {};
 
         /**
-         *
+         * NOTE: Actually not really required when using bare objects: Object.create(null)
          * @const {Object<string|number, number>}
          */
 
-        const index_blacklist = (function(){
-
-            const array = Object.getOwnPropertyNames(/** @type {!Array} */ (({}).__proto__));
-            const map = create_object();
-
-            for(let i = 0; i < array.length; i++){
-
-                map[array[i]] = 1;
-            }
-
-            return map;
-        })();
+        // const index_blacklist = (function(){
+        //
+        //     const array = Object.getOwnPropertyNames(/** @type {!Array} */ (({}).__proto__));
+        //     const map = create_object();
+        //
+        //     for(let i = 0; i < array.length; i++){
+        //
+        //         map[array[i]] = 1;
+        //     }
+        //
+        //     return map;
+        // }());
 
         /**
          * @param {string|Object<string, number|string|boolean|Object|function(string):string>=} options
@@ -213,7 +215,7 @@
 
         FlexSearch.registerMatcher = function(matcher){
 
-            for(let key in matcher){
+            for(const key in matcher){
 
                 if(matcher.hasOwnProperty(key)){
 
@@ -279,6 +281,35 @@
             // }
         };
 
+        function worker_handler(id, query, result, limit){
+
+            if(this._task_completed !== this.worker){
+
+                this._task_result = this._task_result.concat(result);
+                this._task_completed++;
+
+                // TODO: sort results, return array of relevance [0...9] and apply in main thread
+
+                if(limit && (this._task_result.length >= limit)){
+
+                    this._task_completed = this.worker;
+                }
+
+                if(this._current_callback && (this._task_completed === this.worker)){
+
+                    if(this.cache){
+
+                        this._cache.set(query, this._task_result);
+                    }
+
+                    this._current_callback(this._task_result);
+                    this._task_result = [];
+                }
+            }
+
+            return this;
+        }
+
         /**
          * @param {Object<string, number|string|boolean|Object|function(string):string>=} options
          * @export
@@ -291,10 +322,10 @@
 
             options || (options = defaults);
 
-            let custom = /** @type {?string} */ (options["profile"]);
-            const profile = SUPPORT_PRESETS && custom ? presets[custom] : {};
+            let custom = /** @type {?string} */ (options["preset"]);
+            const preset = SUPPORT_PRESETS && custom ? presets[custom] : {};
 
-            if(DEBUG && !profile){
+            if(DEBUG && !preset){
 
                 console.warn("Preset not found: " + custom);
             }
@@ -303,65 +334,35 @@
 
             if(SUPPORT_WORKER && (custom = options["worker"])){
 
-                if(typeof Worker !== "undefined"){
-
-                    const self = this;
-                    const threads = parseInt(custom, 10) || 4;
-
-                    /** @private */
-                    self._current_task = -1;
-                    /** @private */
-                    self._task_completed = 0;
-                    /** @private */
-                    self._task_result = [];
-                    /** @private */
-                    self._current_callback = null;
-                    //self._ids_count = new Array(threads);
-                    /** @private */
-                    self._worker = new Array(threads);
-
-                    for(let i = 0; i < threads; i++){
-
-                        //self._ids_count[i] = 0;
-
-                        self._worker[i] = addWorker(self.id, i, options /*|| defaults*/, function(id, query, result, limit){
-
-                            if(self._task_completed === self.worker){
-
-                                return;
-                            }
-
-                            self._task_result = self._task_result.concat(result);
-                            self._task_completed++;
-
-                            // TODO: sort results, return array of relevance [0...9] and apply in main thread
-
-                            if(limit && (self._task_result.length >= limit)){
-
-                                self._task_completed = self.worker;
-                            }
-
-                            if(self._current_callback && (self._task_completed === self.worker)){
-
-                                if(self.cache){
-
-                                    self._cache.set(query, self._task_result);
-                                }
-
-                                self._current_callback(self._task_result);
-                                self._task_result = [];
-                            }
-
-                            return self;
-                        });
-                    }
-                }
-                else{
+                if(typeof Worker === "undefined"){
 
                     options["worker"] = false;
 
                     /** @private */
                     this._worker = null;
+                }
+                else{
+
+                    const threads = parseInt(custom, 10) || 4;
+
+                    /** @private */
+                    this._current_task = -1;
+                    /** @private */
+                    this._task_completed = 0;
+                    /** @private */
+                    this._task_result = [];
+                    /** @private */
+                    this._current_callback = null;
+                    //this._ids_count = new Array(threads);
+                    /** @private */
+                    this._worker = new Array(threads);
+
+                    for(let i = 0; i < threads; i++){
+
+                        //this._ids_count[i] = 0;
+
+                        this._worker[i] = addWorker(this.id, i, options /*|| defaults*/, worker_handler.bind(this));
+                    }
                 }
             }
 
@@ -371,7 +372,7 @@
             this.tokenize = (
 
                 options["tokenize"] ||
-                profile.tokenize ||
+                preset.tokenize ||
                 this.tokenize ||
                 defaults.tokenize
             );
@@ -401,7 +402,7 @@
 
                 is_undefined(custom = options["threshold"]) ?
 
-                    profile.threshold ||
+                    preset.threshold ||
                     this.threshold ||
                     defaults.threshold
                 :
@@ -413,7 +414,7 @@
 
                 is_undefined(custom = options["depth"]) ?
 
-                    profile.depth ||
+                    preset.depth ||
                     this.depth ||
                     defaults.depth
                 :
@@ -436,7 +437,7 @@
 
             custom = is_undefined(custom = options["encode"]) ?
 
-                profile.encode
+                preset.encode
             :
                 custom;
 
@@ -685,7 +686,8 @@
 
                         return this;
                     }
-                    else if(callback){
+
+                    if(callback){
 
                         this.add(id, content, null, _skip_update, true);
                         callback();
@@ -974,7 +976,8 @@
 
                         return this;
                     }
-                    else if(callback){
+
+                    if(callback){
 
                         this.remove(id, null, true);
                         callback();
@@ -1113,7 +1116,8 @@
 
                     return this;
                 }
-                else if(callback){
+
+                if(callback){
 
                     callback(this.search(_query, limit, null, true));
 
@@ -1138,15 +1142,7 @@
 
                 // invalidate cache
 
-                if(!this._cache_status){
-
-                    this._cache.clear();
-                    this._cache_status = true;
-                }
-
-                // validate cache
-
-                else {
+                if(this._cache_status){
 
                     const cache = this._cache.get(query);
 
@@ -1154,6 +1150,14 @@
 
                         return cache;
                     }
+                }
+
+                // validate cache
+
+                else {
+
+                    this._cache.clear();
+                    this._cache_status = true;
                 }
             }
 
@@ -1263,13 +1267,10 @@
 
                                 //check[check.length] = map_check;
                             }
-                            else{
+                            else if(!SUPPORT_SUGGESTIONS || !this.suggest){
 
-                                if(!SUPPORT_SUGGESTIONS || !this.suggest){
-
-                                    found = false;
-                                    break;
-                                }
+                                found = false;
+                                break;
                             }
 
                             check_words[value] = 1;
@@ -1452,8 +1453,8 @@
 
             const regex_whitespace = regex("\\s+"),
                   regex_strip = regex("[^a-z0-9 ]"),
-                  regex_space = regex("[-/]"),
-                  regex_vowel = regex("[aeiouy]");
+                  regex_space = regex("[-/]");
+                  //regex_vowel = regex("[aeiouy]");
 
             /** @const {Array} */
             const regex_pairs = [
@@ -1471,7 +1472,7 @@
                     replace(value.toLowerCase(), regex_pairs)
                 );
             };
-        })();
+        }());
 
         /** @const */
 
@@ -1535,7 +1536,7 @@
 
                     return (
 
-                        str !== " " ? str : ""
+                        str === " " ? "" : str
                     );
                 };
             }()),
@@ -1544,7 +1545,7 @@
 
             "advanced": (function(){
 
-                const regex_space = regex(" "),
+                const //regex_space = regex(" "),
                       regex_ae = regex("ae"),
                       regex_ai = regex("ai"),
                       regex_ay = regex("ay"),
@@ -1600,7 +1601,7 @@
                     // normalize special pairs
                     if(string.length > 2){
 
-                        string = replace(string, regex_pairs)
+                        string = replace(string, regex_pairs);
                     }
 
                     if(!_skip_post_processing){
@@ -1618,7 +1619,7 @@
                     return string;
                 };
 
-            })(),
+            }()),
 
             // phonetic transformation
 
@@ -1680,7 +1681,7 @@
 
                     return str;
                 };
-            })(),
+            }()),
 
             "balance": global_encoder_balance
 
@@ -1712,14 +1713,14 @@
                 );
             };
 
-        })() : null;
+        }()) : null;
         */
 
         // Flexi-Cache
 
         const Cache = SUPPORT_CACHE ? (function(){
 
-            function Cache(limit){
+            function CacheClass(limit){
 
                 this.clear();
 
@@ -1727,7 +1728,7 @@
                 this.limit = (limit !== true) && limit;
             }
 
-            Cache.prototype.clear = function(){
+            CacheClass.prototype.clear = function(){
 
                 /** @private */
                 this.cache = create_object();
@@ -1739,7 +1740,7 @@
                 this.ids = [];
             };
 
-            Cache.prototype.set = function(key, value){
+            CacheClass.prototype.set = function(key, value){
 
                 if(this.limit && is_undefined(this.cache[key])){
 
@@ -1775,7 +1776,7 @@
              * Note: It is better to have the complexity when fetching the cache:
              */
 
-            Cache.prototype.get = function(key){
+            CacheClass.prototype.get = function(key){
 
                 const cache = this.cache[key];
 
@@ -1807,10 +1808,10 @@
                             // copy values from predecessors
                             for(let i = old_index; i > current_index; i--) {
 
-                                const key = ids[i - 1];
+                                const tmp = ids[i - 1];
 
-                                ids[i] = key;
-                                index[key] = i;
+                                ids[i] = tmp;
+                                index[tmp] = i;
                             }
 
                             // push new value on top
@@ -1823,9 +1824,9 @@
                 return cache;
             };
 
-            return Cache;
+            return CacheClass;
 
-        })() : null;
+        }()) : null;
 
         if(PROFILER){
 
@@ -1885,17 +1886,17 @@
 
         /**
          * @param {!string} str
-         * @param {RegExp|Array} regex
+         * @param {RegExp|Array} regexp
          * @returns {string}
          */
 
-        function replace(str, regex/*, replacement*/){
+        function replace(str, regexp/*, replacement*/){
 
             //if(is_undefined(replacement)){
 
-                for(let i = 0; i < /** @type {Array} */ (regex).length; i += 2){
+                for(let i = 0; i < /** @type {Array} */ (regexp).length; i += 2){
 
-                    str = str.replace(regex[i], regex[i + 1]);
+                    str = str.replace(regexp[i], regexp[i + 1]);
                 }
 
                 return str;
@@ -1929,29 +1930,27 @@
 
                 return dupes[value];
             }
-            else{
 
-                const score = (
+            const score = (
 
-                    partial_score ?
+                partial_score ?
 
-                        ((9 - (threshold || 6)) * context_score) + ((threshold || 6) * partial_score)
-                    :
-                        context_score
-                );
+                    ((9 - (threshold || 6)) * context_score) + ((threshold || 6) * partial_score)
+                :
+                    context_score
+            );
 
-                dupes[value] = score;
+            dupes[value] = score;
 
-                if(score >= threshold){
+            if(score >= threshold){
 
-                    let arr = map[9 - ((score + 0.5) >> 0)];
-                        arr = arr[value] || (arr[value] = []);
+                let arr = map[9 - ((score + 0.5) >> 0)];
+                    arr = arr[value] || (arr[value] = []);
 
-                    arr[arr.length] = id;
-                }
-
-                return score;
+                arr[arr.length] = id;
             }
+
+            return score;
         }
 
         /**
@@ -2179,20 +2178,20 @@
         }
 
         /**
-         * @param {Object<string, string>} stemmer
+         * @param {Object<string, string>} stem
          * @param encoder
          * @returns {Array}
          */
 
-        function init_stemmer(stemmer, encoder){
+        function init_stemmer(stem, encoder){
 
             const final = [];
 
-            if(stemmer){
+            if(stem){
 
-                for(const key in stemmer){
+                for(const key in stem){
 
-                    if(stemmer.hasOwnProperty(key)){
+                    if(stem.hasOwnProperty(key)){
 
                         const tmp = encoder ? encoder(key) : key;
 
@@ -2202,9 +2201,9 @@
 
                             encoder ?
 
-                                encoder(stemmer[key])
+                                encoder(stem[key])
                             :
-                                stemmer[key]
+                                stem[key]
                         );
                     }
                 }
@@ -2377,7 +2376,7 @@
 
                             if(tmp){
 
-                                for(let i = 0, len = tmp.length; i < len; i++){
+                                for(i = 0, length = tmp.length; i < length; i++){
 
                                     result[count++] = tmp[i];
 
@@ -2745,6 +2744,93 @@
             return Object.create(null);
         }
 
+        function worker_module(){
+
+            let id;
+
+            /** @type {FlexSearch} */
+            let FlexSearchWorker;
+
+            /** @lends {Worker} */
+            self.onmessage = function(event){
+
+                const data = event["data"];
+
+                if(data){
+
+                    if(data["search"]){
+
+                        const results = FlexSearchWorker["search"](data["content"],
+
+                            data["threshold"] ?
+
+                                {
+                                    "limit": data["limit"],
+                                    "threshold": data["threshold"]
+                                }
+                            :
+                                data["limit"]
+                        );
+
+                        /** @lends {Worker} */
+                        self.postMessage({
+
+                            "id": id,
+                            "content": data["content"],
+                            "limit": data["limit"],
+                            "result": results
+                        });
+                    }
+                    else if(data["add"]){
+
+                        FlexSearchWorker["add"](data["id"], data["content"]);
+                    }
+                    else if(data["update"]){
+
+                        FlexSearchWorker["update"](data["id"], data["content"]);
+                    }
+                    else if(data["remove"]){
+
+                        FlexSearchWorker["remove"](data["id"]);
+                    }
+                    else if(data["clear"]){
+
+                        FlexSearchWorker["clear"]();
+                    }
+                    else if(SUPPORT_INFO && data["info"]){
+
+                        const info = FlexSearchWorker["info"]();
+
+                        info["worker"] = id;
+
+                        console.log(info);
+
+                        /** @lends {Worker} */
+                        //self.postMessage(info);
+                    }
+                    else if(data["register"]){
+
+                        id = data["id"];
+
+                        data["options"]["cache"] = false;
+                        data["options"]["async"] = false;
+                        data["options"]["worker"] = false;
+
+                        FlexSearchWorker = new Function(
+
+                            data["register"].substring(
+
+                                data["register"].indexOf("{") + 1,
+                                data["register"].lastIndexOf("}")
+                            )
+                        )();
+
+                        FlexSearchWorker = new FlexSearchWorker(data["options"]);
+                    }
+                }
+            };
+        }
+
         function addWorker(id, core, options, callback){
 
             const thread = register_worker(
@@ -2756,92 +2842,7 @@
                 "id" + id,
 
                 // worker:
-                function(){
-
-                    let id;
-
-                    /** @type {FlexSearch} */
-                    let FlexSearchWorker;
-
-                    /** @lends {Worker} */
-                    self.onmessage = function(event){
-
-                        const data = event["data"];
-
-                        if(data){
-
-                            if(data["search"]){
-
-                                const results = FlexSearchWorker["search"](data["content"],
-
-                                    data["threshold"] ?
-
-                                        {
-                                            "limit": data["limit"],
-                                            "threshold": data["threshold"]
-                                        }
-                                    :
-                                        data["limit"]
-                                );
-
-                                /** @lends {Worker} */
-                                self.postMessage({
-
-                                    "id": id,
-                                    "content": data["content"],
-                                    "limit": data["limit"],
-                                    "result": results
-                                });
-                            }
-                            else if(data["add"]){
-
-                                FlexSearchWorker["add"](data["id"], data["content"]);
-                            }
-                            else if(data["update"]){
-
-                                FlexSearchWorker["update"](data["id"], data["content"]);
-                            }
-                            else if(data["remove"]){
-
-                                FlexSearchWorker["remove"](data["id"]);
-                            }
-                            else if(data["clear"]){
-
-                                FlexSearchWorker["clear"]();
-                            }
-                            else if(SUPPORT_INFO && data["info"]){
-
-                                const info = FlexSearchWorker["info"]();
-
-                                info["worker"] = id;
-
-                                console.log(info);
-
-                                /** @lends {Worker} */
-                                //self.postMessage(info);
-                            }
-                            else if(data["register"]){
-
-                                id = data["id"];
-
-                                data["options"]["cache"] = false;
-                                data["options"]["async"] = false;
-                                data["options"]["worker"] = false;
-
-                                FlexSearchWorker = new Function(
-
-                                    data["register"].substring(
-
-                                        data["register"].indexOf("{") + 1,
-                                        data["register"].lastIndexOf("}")
-                                    )
-                                )();
-
-                                FlexSearchWorker = new FlexSearchWorker(data["options"]);
-                            }
-                        }
-                    };
-                },
+                worker_module,
 
                 // callback:
                 function(event){
