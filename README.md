@@ -1,6 +1,6 @@
 <p align="center">
     <br>
-    <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/flexsearch.svg" alt="Search Library" width="50%">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch.svg" alt="Search Library" width="50%">
     <br><br>
     <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
     <!--<img src="https://img.shields.io/badge/status-BETA-orange.svg">-->
@@ -15,7 +15,7 @@
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
-When it comes to raw search speed <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
+When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
 Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
@@ -28,8 +28,8 @@ Supported Platforms:
 > FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>
 
 Library Comparison:
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
+- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
 - <a href="#consumption">Memory Consumption</a>
 
 Get Latest (Stable Release):
@@ -186,7 +186,7 @@ All Features:
 <a name="compare" id="compare"></a>
 ## Benchmark Ranking 
 
-Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
 
 ##### Query Test: "Gulliver's Travels"
 
@@ -372,20 +372,20 @@ _** Memory Allocation: The amount of memory which was additionally allocated dur
 _*** The preset "fastest" was used for this test_ <br>
 _**** The preset "memory" was used for this test_ 
 
-Library Comparison: <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+Library Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
 
 <a name="contextual"></a>
 ## Contextual Search
 
 > "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithms today. They don't provide neither: a meaningful relevance of a term nor the importance of it! Like many pseudo-intelligent algorithms this is also just an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires a lot of additionally memory.
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires a lot of additionally memory.
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.
 Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?
-In this way contextual search <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
+In this way contextual search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
 
 <p align="center">
-    <img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/contextual-index.svg">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg">
 </p>
 
 __Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
@@ -491,12 +491,12 @@ __Note:__ This feature is actually not enabled by default. Read <a href="#contex
 
 Use latest from CDN:
 ```html
-<script src="https://cdn.rawgit.com/nextapps-de/flexsearch/master/dist/flexsearch.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.min.js"></script>
 ```
 
 Or a specific version:
 ```html
-<script src="https://cdn.rawgit.com/nextapps-de/flexsearch/0.3.51/dist/flexsearch.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.3.51/dist/flexsearch.min.js"></script>
 ```
 
 AMD:
@@ -1537,7 +1537,7 @@ The required memory for the index depends on several options:
 The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
 
 <br>
-<img src="https://rawgithub.com/nextapps-de/flexsearch/master/doc/memory-comparison.svg">
+<img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg">
 
 <a name="profiles"></a>
 ## Presets
@@ -1614,8 +1614,8 @@ __"fastest"__: Absolute fastest profile
 ```
 
 Compare these presets:
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
-- <a href="https://rawgit.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
+- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
+- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
 
 ## Best Practices
 
