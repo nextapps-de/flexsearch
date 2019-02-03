@@ -689,8 +689,10 @@ index.search({
 
 When suggestion is enabled all results will be filled up (until limit, default 1000) with similar matches ordered by relevance.
 
+Actually phonetic suggestions are not supported, for that purpose use the encoder and tokenizer which provides similar functionality. Suggestions comes into game when a query has multiple words/phrases. Assume a query contains 3 words. When the index just match 2 of 3 words then normally you will get no results, but with suggestion enabled you will also get results when 2 of 3 words was matched as well 1 of 3 words was matched (depends on the limit), also sorted by relevance.
+
 <a name="index.update"></a>
-#### Update item of an index
+#### Update item from an index
 
 > Index.__update(id, string)__
 
@@ -699,7 +701,7 @@ index.update(10025, "Road Runner");
 ```
 
 <a name="index.remove"></a>
-#### Remove item to the index
+#### Remove item from an index
 
 > Index.__remove(id)__
 
@@ -921,6 +923,49 @@ It is also possible to <a href="#builds">compile language packs into the build</
 
 ```bash
 node compile SUPPORT_LANG_EN=true SUPPORT_LANG_DE=true
+```
+
+<a name="rtl"></a>
+### Right-To-Left Support
+
+> Set the tokenizer at least to "reverse" or "full" when using RTL.
+
+Just set the field "rtl" to _true_ and use a compatible tokenizer:
+
+```js
+var index = FlexSearch.create({
+    encode: "icase",
+    tokenize: "reverse", 
+    rtl: true
+});
+```
+
+<a name="cjk"></a>
+### CJK Word Break (Chinese, Japanese, Korean)
+
+Set a custom tokenizer which fits your needs, e.g.:
+
+```js
+var index = FlexSearch.create({
+    encode: false,
+    tokenize: function(str){
+        return str.split(/[\x00-\x7F]+/);
+    }
+});
+```
+
+You can also pass a custom encoder function to apply some linguistic transformations.
+
+```js
+index.add(0, "서울시가 잠이 든 시간에 아무 말, 미뤄, 미뤄");
+```
+
+```js
+var results = index.search("든");
+```
+
+```js
+var results = index.search("시간에");
 ```
 
 <a name="index.info"></a>
@@ -1181,6 +1226,15 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
             {function}
         </td>
         <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="top">rtl<br><br><br></td>
+        <td>
+            true<br>
+            false
+        </td>
+        <td>Enables Right-To-Left encoding.</td>
     </tr>
 </table>
 

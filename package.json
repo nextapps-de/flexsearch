@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.3.51",
+  "version": "0.3.6",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -64,5 +64,22 @@
     "nyc": "^13.1.0",
     "phantomjs-prebuilt": "^2.1.16",
     "updtr": "^3.0.0"
+  },
+  "flexsearch": {
+    "server": {
+      "debug": true,
+      "port": 80,
+      "port_ssl": 443,
+      "force_ssl": false,
+      "https": true,
+      "compress": true,
+      "autosave": 2000,
+      "worker": "auto"
+    },
+    "client": {
+      "async": false,
+      "cache": 0,
+      "worker": 4
+    }
   }
 }

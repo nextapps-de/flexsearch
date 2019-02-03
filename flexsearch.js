@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.3.51
+ * @preserve FlexSearch v0.3.6
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -38,6 +38,7 @@
             cache: false,
             async: false,
             worker: false,
+            rtl: false,
 
             // minimum scoring (0 - 9)
             threshold: 0,
@@ -377,6 +378,14 @@
                 defaults.tokenize
             );
 
+            /** @private */
+            this.rtl = (
+
+                options["rtl"] ||
+                this.rtl ||
+                defaults.rtl
+            );
+
             if(SUPPORT_ASYNC) /** @private */ this.async = (
 
                 (typeof Promise === "undefined") || is_undefined(custom = options["async"]) ?
@@ -620,6 +629,8 @@
 
             if(content && is_string(content) && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
 
+                // TODO: do not mix ids as string "1" and as number 1
+
                 const index = "@" + id;
 
                 if(this._ids[index] && !_skip_update){
@@ -733,6 +744,7 @@
                 const depth = this.depth;
                 const map = this._map;
                 const word_length = words.length;
+                const rtl = this.rtl;
 
                 // tokenize
 
@@ -744,32 +756,34 @@
                     if(value){
 
                         const length = value.length;
-                        const context_score = (word_length - i) / word_length;
+                        const context_score = (rtl ? i + 1 : word_length - i) / word_length;
 
-                        let tmp = "";
+                        let token = "";
 
                         switch(tokenizer){
 
                             case "reverse":
                             case "both":
 
-                                for(let a = length - 1; a >= 1; a--){
+                                // NOTE: skip last round (this token exist already in "forward")
 
-                                    tmp = value[a] + tmp;
+                                for(let a = length; --a;){
+
+                                    token = value[a] + token;
 
                                     add_index(
 
                                         map,
                                         dupes,
-                                        tmp,
+                                        token,
                                         id,
-                                        (length - a) / length,
+                                        rtl ? 1 : (length - a) / length,
                                         context_score,
                                         threshold
                                     );
                                 }
 
-                                tmp = "";
+                                token = "";
 
                             // Note: no break here, fallthrough to next case
 
@@ -777,15 +791,15 @@
 
                                 for(let a = 0; a < length; a++){
 
-                                    tmp += value[a];
+                                    token += value[a];
 
                                     add_index(
 
                                         map,
                                         dupes,
-                                        tmp,
+                                        token,
                                         id,
-                                        1,
+                                        rtl ? (a + 1) / length : 1,
                                         context_score,
                                         threshold
                                     );
@@ -797,17 +811,17 @@
 
                                 for(let x = 0; x < length; x++){
 
-                                    const partial_score = (length - x) / length;
+                                    const partial_score = (rtl ? x + 1 : length - x) / length;
 
                                     for(let y = length; y > x; y--){
 
-                                        tmp = value.substring(x, y);
+                                        token = value.substring(x, y);
 
                                         add_index(
 
                                             map,
                                             dupes,
-                                            tmp,
+                                            token,
                                             id,
                                             partial_score,
                                             context_score,
@@ -1935,7 +1949,8 @@
 
                 partial_score ?
 
-                    ((9 - (threshold || 6)) * context_score) + ((threshold || 6) * partial_score)
+                    //((9 - (threshold || 6)) * context_score) + ((threshold || 6) * partial_score)
+                    4.5 * (context_score + partial_score)
                 :
                     context_score
             );
