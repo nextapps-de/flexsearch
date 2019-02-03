@@ -861,6 +861,54 @@ describe("Encoding", function(){
     });
 });
 
+
+// ------------------------------------------------------------------------
+// CJK Word Break
+// ------------------------------------------------------------------------
+
+describe("CJK Word Break", function(){
+
+    it("Should have been tokenized properly", function(){
+
+        var index = FlexSearch.create({
+            encode: false,
+            tokenize: function(str){
+                return str.split(/[\x00-\x7F]+/);
+            }
+        });
+
+        index.add(0, "서울시가 잠이 든 시간에 아무 말, 미뤄, 미뤄");
+
+        expect(index.search("든")).to.include(0);
+        expect(index.search("시간에")).to.include(0);
+    });
+});
+
+// ------------------------------------------------------------------------
+// Right-To-Left
+// ------------------------------------------------------------------------
+
+describe("RTL Support", function(){
+
+    it("Should have been scored properly", function(){
+
+        var index = new FlexSearch({
+
+            encode: "icase",
+            tokenize: "reverse",
+            rtl: true
+        });
+
+        index.add(0, "54321 4 3 2 1 0");
+        index.add(1, "0 1 2 3 4 54321");
+        index.add(2, "0 1 2 3 4 12345");
+
+        expect(index.search("5")[0]).to.equal(2);
+        expect(index.search("5")[1]).to.equal(1);
+        expect(index.search("5")[2]).to.equal(0);
+    });
+});
+
 // ------------------------------------------------------------------------
 // Contextual Indexing
 // ------------------------------------------------------------------------
