@@ -16,7 +16,7 @@
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
 When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-Depending on the used options it also providing the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
+Depending on the used options it also provides the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a>
@@ -79,8 +79,8 @@ All Features:
         <td>
             <a href="#profiles">Presets</a>
         </td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -88,8 +88,8 @@ All Features:
         <td>
             <a href="#async_search">Async Search</a>
         </td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -97,7 +97,7 @@ All Features:
         <td>
             <a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)
         </td>
-        <td>x</td>
+        <td>✅</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -106,43 +106,43 @@ All Features:
         <td>
             <a href="#contextual">Contextual Indexes</a>
         </td>
-        <td>x</td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             Partial Matching
         </td>
-        <td>x</td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             Multi-Phrase Search
         </td>
-        <td>x</td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             Relevance-based Scoring
         </td>
-        <td>x</td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             <a href="#cache">Auto-Balanced Cache by Popularity</a>
         </td>
-        <td>x</td>
+        <td>✅</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -151,7 +151,7 @@ All Features:
         <td>
             Suggestions (Results)
         </td>
-        <td>x</td>
+        <td>✅</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -160,8 +160,8 @@ All Features:
         <td>
             <a href="#phonetic">Phonetic Matching</a>
         </td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -169,9 +169,9 @@ All Features:
         <td>
             Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter
         </td>
-        <td>x</td>
-        <td>x</td>
-        <td>x</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
     </tr>
     <tr>
         <td>File Size (gzip)</td>
