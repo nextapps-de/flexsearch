@@ -873,7 +873,7 @@ describe("CJK Word Break", function(){
         var index = FlexSearch.create({
             encode: false,
             tokenize: function(str){
-                return str.split(/[\x00-\x7F]+/);
+                return str.replace(/[\x00-\x7F]/g, "").split("");
             }
         });
 
@@ -881,6 +881,10 @@ describe("CJK Word Break", function(){
 
         expect(index.search("든")).to.include(0);
         expect(index.search("시간에")).to.include(0);
+
+        index.add(1, "一个单词");
+
+        expect(index.search("单词")).to.include(1);
     });
 });
 

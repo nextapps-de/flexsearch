@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.3.61
+ * @preserve FlexSearch v0.3.62
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -165,6 +165,7 @@
                 this.stats = profile;
             }
 
+            /*
             if(SUPPORT_PRESETS && is_string(options)){
 
                 options = presets[options];
@@ -174,13 +175,14 @@
                     console.warn("Preset not found: " + options);
                 }
             }
+            */
 
-            options || (options = defaults);
+            //options || (options = defaults);
 
             // generate UID
 
             /** @export */
-            this.id = options["id"] || id_counter++;
+            this.id = options && !is_undefined(options["id"]) ? options["id"] : id_counter++;
 
             // initialize index
 
@@ -312,7 +314,7 @@
         }
 
         /**
-         * @param {Object<string, number|string|boolean|Object|function(string):string>=} options
+         * @param {Object<string, number|string|boolean|Object|function(string):string>|string=} options
          * @export
          */
 
@@ -324,11 +326,30 @@
             options || (options = defaults);
 
             let custom = /** @type {?string} */ (options["preset"]);
-            const preset = SUPPORT_PRESETS && custom ? presets[custom] : {};
+            let preset = {};
 
-            if(DEBUG && !preset){
+            if(SUPPORT_PRESETS){
 
-                console.warn("Preset not found: " + custom);
+                if(is_string(options)){
+
+                    preset = presets[options];
+
+                    if(DEBUG && !preset){
+
+                        console.warn("Preset not found: " + options);
+                    }
+
+                    options = {};
+                }
+                else if(custom){
+
+                    preset = presets[custom];
+
+                    if(DEBUG && !preset){
+
+                        console.warn("Preset not found: " + custom);
+                    }
+                }
             }
 
             // initialize worker
@@ -2963,6 +2984,8 @@
         }()) : false
 
     )), this);
+
+    /* istanbul ignore next */
 
     /** --------------------------------------------------------------------------------------
      * UMD Wrapper for Browser and Node.js

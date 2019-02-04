@@ -19,13 +19,16 @@ When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/f
 Depending on the used options it also provides the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
+FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
+
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a>
 
 Supported Platforms:
 - Browser
 - Node.js
 
-> FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>
+Demos:
+- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/demo/autocomplete.html" target="_blank">Auto-Complete</a>
 
 Library Comparison:
 - <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
@@ -79,8 +82,8 @@ All Features:
         <td>
             <a href="#profiles">Presets</a>
         </td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -88,8 +91,8 @@ All Features:
         <td>
             <a href="#async_search">Async Search</a>
         </td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -97,7 +100,7 @@ All Features:
         <td>
             <a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)
         </td>
-        <td>✅</td>
+        <td>✔</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -106,43 +109,43 @@ All Features:
         <td>
             <a href="#contextual">Contextual Indexes</a>
         </td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             Partial Matching
         </td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             Multi-Phrase Search
         </td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             Relevance-based Scoring
         </td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             <a href="#cache">Auto-Balanced Cache by Popularity</a>
         </td>
-        <td>✅</td>
+        <td>✔</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -151,7 +154,7 @@ All Features:
         <td>
             Suggestions (Results)
         </td>
-        <td>✅</td>
+        <td>✔</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -160,8 +163,8 @@ All Features:
         <td>
             <a href="#phonetic">Phonetic Matching</a>
         </td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -169,9 +172,9 @@ All Features:
         <td>
             Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter
         </td>
-        <td>✅</td>
-        <td>✅</td>
-        <td>✅</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
     </tr>
     <tr>
         <td>File Size (gzip)</td>
@@ -949,7 +952,7 @@ Set a custom tokenizer which fits your needs, e.g.:
 var index = FlexSearch.create({
     encode: false,
     tokenize: function(str){
-        return str.split(/[\x00-\x7F]+/);
+        return str.replace(/[\x00-\x7F]/g, "").split("");
     }
 });
 ```
@@ -957,15 +960,11 @@ var index = FlexSearch.create({
 You can also pass a custom encoder function to apply some linguistic transformations.
 
 ```js
-index.add(0, "서울시가 잠이 든 시간에 아무 말, 미뤄, 미뤄");
+index.add(0, "一个单词");
 ```
 
 ```js
-var results = index.search("든");
-```
-
-```js
-var results = index.search("시간에");
+var results = index.search("单词");
 ```
 
 <a name="index.info"></a>
