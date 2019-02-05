@@ -4,61 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
     <title>Demo: Auto-Complete</title>
-    <script src="../dist/flexsearch.min.js"></script>
+    <script src="../dist/flexsearch.compact.js"></script>
     <script src="../data/movies.js"></script>
     <style>
+        body{
+            padding:0;
+            margin:0 10px;
+        }
         table{
-            width: 500px;
+            width: 300px;
             table-layout: fixed;
+            position: sticky;
+            top: 0;
+            padding-top: 10px;
+            background-color: #fff;
+            z-index: 1;
         }
         td, tr{
-            width: 500px;
+            width: 300px;
             border: none;
         }
         input{
-            width: 500px;
+            width: 300px;
             border: 1px solid #ddd;
-            border-radius: 3px;
+            border-radius: 4px;
             outline: none;
             background-color: transparent;
-            position: relative;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            position: absolute;
+            -webkit-appearance: none;
         }
         #autocomplete{
             color: #999;
             background-color: #f5f5f5;
-            position: absolute;
         }
-
-        input, div{
-            padding:5px 5px;
+        input{
+            padding:7px 5px;
             box-sizing: border-box;
+        }
+        #suggestions{
+            position: relative;
+            top: 35px;
         }
         #suggestions div{
             padding: 10px 0;
+            margin: 0 8px;
             border-bottom: 1px solid #ddd;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+        }
+        @media only screen and (max-width: 600px) {
+            table,
+            td,
+            tr,
+            input{
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 <table>
     <tr>
-        <td>
+        <td style="position: relative">
             <input type="text" id="autocomplete">
             <input type="text" id="userinput" placeholder="Search by movie title ...">
         </td>
     </tr>
-    <tr>
-        <td>
-            <div id="suggestions"></div>
-        </td>
-    </tr>
 </table>
+<div id="suggestions"></div>
 <script>
     (function(){
 
@@ -79,12 +93,13 @@
         }
 
         userinput.addEventListener("input", show_results, true);
-        userinput.addEventListener("keyup", accept_result, true);
+        userinput.addEventListener("keyup", accept_autocomplete, true);
+        suggestions.addEventListener("click", accept_suggestion, true);
 
         function show_results(){
 
             var value = this.value;
-            var results = index.search(value, 10);
+            var results = index.search(value, 20);
             var entry, childs = suggestions.childNodes;
             var i = 0, len = results.length;
 
@@ -121,12 +136,26 @@
             }
         }
 
-        function accept_result(event){
+        function accept_autocomplete(event){
 
             if((event || window.event).keyCode === 13) {
 
                 this.value = autocomplete.value = autocomplete.current;
             }
+        }
+
+        function accept_suggestion(event){
+
+            var target = (event || window.event).target;
+
+            userinput.value = autocomplete.value = target.textContent;
+
+            while(suggestions.lastChild){
+
+                suggestions.removeChild(suggestions.lastChild);
+            }
+
+            return false;
         }
 
     }());

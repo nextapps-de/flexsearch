@@ -21,7 +21,7 @@ FlexSearch also provides you a non-blocking asynchronous processing model as wel
 
 FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
 
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a>
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
 Supported Platforms:
 - Browser
@@ -112,6 +112,15 @@ All Features:
         <td>✔</td>
         <td>✔</td>
         <td>✔</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#docs">Index Documents (Field-Search)</a>
+        </td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>-</td>
     </tr>
     <tr></tr>
     <tr>
@@ -994,6 +1003,201 @@ Returns information e.g.:
     "contextual": true                                 
 }
 ```
+
+<a name="docs"></a>
+## Index Documents (Field-Search)
+
+#### The Document Descriptor
+
+Assume the document is an array of data like:
+
+```js
+var docs = [{
+    id: 0,
+    title: "Title",
+    cat: "Category",
+    content: "Body"
+},{
+    id: 1,
+    title: "Title",
+    cat: "Category",
+    content: "Body"
+}];
+```
+
+Provide a document descriptor ___doc___ when initializing a new index, e.g. related to the example above:
+
+```js
+var index = new FlexSearch({
+    tokenize: "strict",
+    depth: 3,
+    doc: {
+        id: "id",
+        field: "content"
+    }
+});
+```
+
+The above example will index one field ("content"), to index multiple fields just pass an array:
+
+```js
+var index = new FlexSearch({
+    doc: {
+        id: "id",
+        field: [
+            "title",
+            "cat",
+            "content"
+        ]
+    }
+});
+```
+
+#### Complex Objects
+
+Assume the document array looks more complex (has nested branches etc.), e.g.:
+
+```js
+var docs = [{
+    data:{
+        id: 0,
+        title: "Title",
+        body: {
+            content: "Body"
+        }
+    }
+},{
+    data:{
+        id: 1,
+        title: "Title",
+        body: {
+            content: "Body"
+        }
+    }
+}];
+```
+
+Then use the colon separated notation ___"root:child"___ to define hierarchy within the document descriptor:
+
+```js
+var index = new FlexSearch({
+    doc: {
+        id: "data:id",
+        field: [
+            "data:title",
+            "data:content:body"
+        ]
+    }
+});
+```
+
+#### Add/Update/Remove Documents to the Index
+
+Just pass the document array (or one single object) to the index:
+```js
+index.add(docs);
+```
+
+Update (single object or array of objects):
+```js
+index.update({
+    data:{
+        id: 0,
+        title: "Foo",
+        body: {
+            content: "Bar"
+        }
+    }
+});
+```
+
+Remove (single object or array of objects):
+```js
+index.remove(docs);
+```
+
+When you know the id, you can also simply remove by:
+```js
+index.remove(id);
+```
+
+#### Field-Search
+
+When searching you have several options when using documents.
+
+This will search through all indexed fields:
+```js
+var results = index.search("body");
+```
+
+This will search on a specific field):
+
+```js
+var results = index.search({
+    field: "title",
+    query: "title"
+});
+```
+
+The colon notation also has to be applied for the searching respectively, e.g.:
+
+```js
+var results = index.search({
+    field: "data:body",
+    query: "body"
+});
+```
+
+This could also be written as:
+```js
+var results = index.search("body", {
+    field: "data:body",
+});
+```
+
+Search the same query on multiple fields:
+
+```js
+var results = index.search({
+    query: "title",
+    field: ["title", "body"]
+});
+```
+
+Could also be written as:
+
+```js
+var results = index.search("title", {
+    field: ["title", "body"]
+});
+```
+
+Search different queries on multiple fields:
+
+```js
+var results = index.search([{
+    field: "title",
+    query: "title"
+},{
+    field: "body",
+    query: "body"
+}]);
+```
+
+Boost scoring on specific fields:
+
+```js
+var results = index.search([{
+    field: "title",
+    query: "title",
+    boost: 2
+},{
+    field: "body",
+    query: "body",
+    boost: 0.5
+}]);
+```
+
 <a name="chaining"></a>
 ### Chaining
 
@@ -1011,7 +1215,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 ```
 
 <a name="contextual_enable"></a>
-### Enable Contextual Scoring
+## Enable Contextual Scoring
 
 Create an index and just set the limit of relevance as "depth":
 ```js
@@ -1031,7 +1235,7 @@ var index = new FlexSearch({
 > Try to use the __lowest depth__ and __highest threshold__ which fits your needs.
 
 <a name="cache"></a>
-### Enable Auto-Balanced Cache
+## Enable Auto-Balanced Cache
 
 Create index and just set a limit of cache entries:
 ```js
@@ -1047,7 +1251,7 @@ var index = new FlexSearch({
 > When just using "true" the cache is unbounded and perform actually 2-3 times faster (because the balancer do not have to run).
 
 <a name="webworker"></a>
-### WebWorker Sharding (Browser only)
+## WebWorker Sharding (Browser only)
 
 Worker get its own dedicated memory and also run in their own dedicated thread without blocking the UI while processing. Especially for larger indexes, web worker improves speed and available memory a lot. FlexSearch index was tested with a 250 Mb text file including 10 Million words. <!--The indexing was done silently in background by multiple parallel running workers in about 7 minutes. The final index reserves ~ 8.2 Mb memory/space. The search result took ~ 0.25 ms.-->
 
@@ -1900,6 +2104,8 @@ node compile SUPPORT_WORKER=true
         <td>ECMASCRIPT3<br>ECMASCRIPT5<br>ECMASCRIPT5_STRICT<br>ECMASCRIPT6<br>ECMASCRIPT6_STRICT<br>ECMASCRIPT_2015<br>ECMASCRIPT_2017<br>STABLE</td>
     </tr>
 </table>
+
+<a href="CHANGELOG.md">Changelog</a>
 
 ---
 

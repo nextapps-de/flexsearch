@@ -1077,31 +1077,103 @@ describe("Relevance", function(){
 // Suggestion Tests
 // ------------------------------------------------------------------------
 
-if(env !== "light"){
+if(env !== "light") describe("Suggestion", function(){
 
-    describe("Suggestion", function(){
+    it("Should have been suggested properly by relevance", function(){
 
-        it("Should have been suggested properly by relevance", function(){
-
-            var index = new FlexSearch({
-                encode: "advanced",
-                tokenize: "strict",
-                suggest: true
-            });
-
-            index.add(0, "1 2 3 2 4 1 5 3");
-            index.add(1, "zero one two three four five six seven eight nine ten");
-            index.add(2, "four two zero one three ten five seven eight six nine");
-
-            expect(index.search("1 3 4 7")).to.have.members([0]);
-            expect(index.search("1 3 9 7")).to.have.members([0]);
-            expect(index.search("one foobar two")).to.have.members([1, 2]);
-            expect(index.search("zero one foobar two foobar")).to.have.members([1, 2]);
-            //TODO
-            //expect(index.search("zero one foobar two foobar")[0]).to.equal(1);
+        var index = new FlexSearch({
+            encode: "advanced",
+            tokenize: "strict",
+            suggest: true
         });
+
+        index.add(0, "1 2 3 2 4 1 5 3");
+        index.add(1, "zero one two three four five six seven eight nine ten");
+        index.add(2, "four two zero one three ten five seven eight six nine");
+
+        expect(index.search("1 3 4 7")).to.have.members([0]);
+        expect(index.search("1 3 9 7")).to.have.members([0]);
+        expect(index.search("one foobar two")).to.have.members([1, 2]);
+        expect(index.search("zero one foobar two foobar")).to.have.members([1, 2]);
+        //TODO
+        //expect(index.search("zero one foobar two foobar")[0]).to.equal(1);
     });
+});
+
+// ------------------------------------------------------------------------
+//  Multi-Field Documents
+// ------------------------------------------------------------------------
+
+if(!this._phantom){
+
+    require("./test.es6.js")(FlexSearch, env);
 }
+
+// ------------------------------------------------------------------------
+// Export / Import
+// ------------------------------------------------------------------------
+
+if(env !== "light") describe("Export / Import", function(){
+
+    var data;
+
+    it("Should have been exported properly", function(){
+
+        var index = new FlexSearch({
+            tokenize: "reverse",
+            doc: {
+                id: "id",
+                field: "title"
+            }
+        });
+
+        index.add({id: 0, title: "foo"});
+        index.add({id: 1, title: "bar"});
+        index.add({id: 2, title: "foobar"});
+
+        if(env === ""){
+
+            expect(index.doc.index[0].length).to.equal(3);
+
+            data = index.export();
+
+            expect(data).to.equal(JSON.stringify([
+                [
+                    index.doc.index[0]._map,
+                    index.doc.index[0]._ctx,
+                    index.doc.index[0]._ids
+                ],
+                index._doc
+            ]));
+        }
+        else{
+
+            data = index.export();
+        }
+    });
+
+    it("Should have been imported properly", function(){
+
+        var index = new FlexSearch("score", {
+            doc: {
+                id: "id",
+                field: "title"
+            }
+        });
+
+        index.import(data);
+
+        if(env === ""){
+
+            expect(index.doc.index[0].length).to.equal(3);
+        }
+
+        expect(index.search("foo")).to.have.lengthOf(2);
+        expect(index.search("bar")).to.have.lengthOf(2);
+        expect(index.search("foobar")).to.have.lengthOf(1);
+        expect(index.search("foobar")[0].id).to.equal(2);
+    });
+});
 
 // ------------------------------------------------------------------------
 // Feature Tests

@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.3.62",
+  "version": "0.4.0",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -26,12 +26,12 @@
     "url": "https://github.com/nextapps-de/flexsearch.git"
   },
   "scripts": {
-    "build": "node compile RELEASE=min DEBUG=false PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
-    "build-light": "node compile RELEASE=light DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESETS=false SUPPORT_SUGGESTIONS=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
-    "build-compact": "node compile RELEASE=compact DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
-    "build-custom": "node compile RELEASE=custom DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESETS=false SUPPORT_SUGGESTIONS=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
-    "build-es5": "node compile RELEASE=es5 DEBUG=true PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false LANGUAGE_OUT=ECMASCRIPT5_STRICT",
-    "build-node": "node compile RELEASE=node DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
+    "build": "node compile RELEASE=min DEBUG=false PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENTS=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
+    "build-light": "node compile RELEASE=light DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESETS=false SUPPORT_SUGGESTIONS=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_DOCUMENTS=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
+    "build-compact": "node compile RELEASE=compact DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_DOCUMENTS=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
+    "build-custom": "node compile RELEASE=custom DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESETS=false SUPPORT_SUGGESTIONS=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_DOCUMENTS=false  SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
+    "build-es5": "node compile RELEASE=es5 DEBUG=true PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENTS=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false LANGUAGE_OUT=ECMASCRIPT5_STRICT",
+    "build-node": "node compile RELEASE=node DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESETS=true SUPPORT_SUGGESTIONS=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENTS=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
     "build-lang": "node compile RELEASE=lang",
     "build-all": "npm run build && npm run build-light && npm run build-compact && npm run build-es5 && npm run build-node && npm run build-lang",
     "test-production": "nyc --reporter=html --reporter=text mocha --timeout=3000 test --exit",
@@ -49,6 +49,7 @@
     "test/",
     "compile.js",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "readme": "README.md",

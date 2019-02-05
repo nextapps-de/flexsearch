@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.3.62
+ * @preserve FlexSearch v0.4.0
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -17,6 +17,7 @@
 /** @define {boolean} */ const SUPPORT_SUGGESTIONS = true;
 /** @define {boolean} */ const SUPPORT_SERIALIZE = true;
 /** @define {boolean} */ const SUPPORT_INFO = true;
+/** @define {boolean} */ const SUPPORT_DOCUMENTS = true;
 
 // noinspection ThisExpressionReferencesGlobalObjectJS
 (function(){
@@ -44,7 +45,10 @@
             threshold: 0,
 
             // contextual depth
-            depth: 0
+            depth: 0,
+
+            // multi-field documents
+            doc: false
         };
 
         /**
@@ -152,10 +156,11 @@
 
         /**
          * @param {string|Object<string, number|string|boolean|Object|function(string):string>=} options
+         * @param {Object<string, number|string|boolean>=} settings
          * @constructor
          */
 
-        function FlexSearch(options){
+        function FlexSearch(options, settings){
 
             if(PROFILER){
 
@@ -165,28 +170,11 @@
                 this.stats = profile;
             }
 
-            /*
-            if(SUPPORT_PRESETS && is_string(options)){
-
-                options = presets[options];
-
-                if(DEBUG && !options){
-
-                    console.warn("Preset not found: " + options);
-                }
-            }
-            */
-
-            //options || (options = defaults);
-
-            // generate UID
+            const id = settings ? settings["id"] : options && options["id"];
 
             /** @export */
-            this.id = options && !is_undefined(options["id"]) ? options["id"] : id_counter++;
-
-            // initialize index
-
-            this.init(options);
+            this.id = id || (id === 0) ? id : id_counter++;
+            this.init(options, settings);
 
             // define functional properties
 
@@ -274,14 +262,7 @@
 
         FlexSearch.encode = function(name, value){
 
-            // if(index_blacklist[name]){
-            //
-            //     return value;
-            // }
-            // else{
-
-                return global_encoder[name](value);
-            // }
+            return global_encoder[name](value);
         };
 
         function worker_handler(id, query, result, limit){
@@ -315,17 +296,28 @@
 
         /**
          * @param {Object<string, number|string|boolean|Object|function(string):string>|string=} options
+         * @param {Object<string, number|string|boolean>=} settings
          * @export
          */
 
-        FlexSearch.prototype.init = function(options){
+        FlexSearch.prototype.init = function(options, settings){
 
             /** @type {Array} @private */
             this._matcher = [];
 
-            options || (options = defaults);
+            let custom;
 
-            let custom = /** @type {?string} */ (options["preset"]);
+            if(settings){
+
+                custom = /** @type {?string} */ (settings["preset"]);
+                options = settings;
+            }
+            else{
+
+                options || (options = defaults);
+                custom = /** @type {?string} */ (options["preset"]);
+            }
+
             let preset = {};
 
             if(SUPPORT_PRESETS){
@@ -467,7 +459,8 @@
 
             custom = is_undefined(custom = options["encode"]) ?
 
-                preset.encode
+                preset.encode ||
+                defaults.encode
             :
                 custom;
 
@@ -499,6 +492,17 @@
                 this.stemmer = init_stemmer(stemmer[custom] || custom, this.encoder);
             }
 
+            let doc;
+
+            if(SUPPORT_DOCUMENTS) /** @private */ this.doc = doc = (
+
+                (custom = options["doc"]) ?
+
+                    custom
+                :
+                    this.doc || defaults.doc
+            );
+
             // initialize primary index
 
             /** @private */
@@ -507,10 +511,46 @@
             this._ctx = create_object();
             /** @private */
             this._ids = create_object();
+
+            if(SUPPORT_DOCUMENTS){
+
+                /** @private */
+                this._doc = doc && create_object();
+            }
+
             /** @private */
             //this._stack = create_object();
             /** @private */
             //this._stack_keys = [];
+
+            if(doc){
+
+                options["doc"] = null;
+
+                const field = doc["field"];
+                const index = doc["index"] = [];
+                const ref = doc["ref"] = {};
+
+                doc["id"] = doc["id"].split(":");
+
+                if(is_array(field)){
+
+                    for(let i = 0; i < field.length; i++){
+
+                        ref[field[i]] = i;
+                        field[i] = field[i].split(":");
+                        index[i] = new FlexSearch(options);
+                        index[i]._doc = this._doc;
+                    }
+                }
+                else{
+
+                    ref[field] = 0;
+                    doc["field"] = [field.split(":")];
+                    index[0] = new FlexSearch(options);
+                    index[0]._doc = this._doc;
+                }
+            }
 
             /**
              * @type {number|null}
@@ -638,7 +678,7 @@
 
         /**
          * @param {number|string} id
-         * @param {string} content
+         * @param {string|Function} content
          * @param {Function=} callback
          * @param {boolean=} _skip_update
          * @param {boolean=} _recall
@@ -647,6 +687,11 @@
          */
 
         FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall){
+
+            if(SUPPORT_DOCUMENTS && this.doc && is_object(id)){
+
+                return this.handle_docs("add", id, /** @type {Function} */ (content));
+            }
 
             if(content && is_string(content) && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
 
@@ -733,7 +778,7 @@
                     profile_start("add");
                 }
 
-                content = this.encode(content);
+                content = this.encode(/** @type {string} */ (content));
 
                 if(!content.length){
 
@@ -919,14 +964,109 @@
             return this;
         };
 
+        if(SUPPORT_DOCUMENTS){
+
+            /**
+             * @param {!string} job
+             * @param docs
+             * @param {Function=} callback
+             * @returns {*}
+             */
+
+            FlexSearch.prototype.handle_docs = function(job, docs, callback){
+
+                if(is_array(docs)){
+
+                    for(let i = 0, len = docs.length; i < len; i++){
+
+                        if(i === len - 1){
+
+                            return this.handle_docs(job, docs[i], callback);
+                        }
+                        else{
+
+                            this.handle_docs(job, docs[i]);
+                        }
+                    }
+                }
+                else{
+
+                    const index = this.doc["index"];
+                    let tree = this.doc["id"];
+                    let id;
+
+                    for(let i = 0; i < tree.length; i++){
+
+                        id = (id || docs)[tree[i]];
+                    }
+
+                    if(job === "remove"){
+
+                        delete this._doc["@" + id];
+
+                        for(let z = 0, length = index.length; z < length; z++){
+
+                            if(z === length - 1){
+
+                                return index[z].remove(id, callback);
+                            }
+                            else{
+
+                                index[z].remove(id);
+                            }
+                        }
+                    }
+
+                    tree = this.doc["field"];
+
+                    for(let i = 0, len = tree.length; i < len; i++){
+
+                        const branch = tree[i];
+                        let content;
+
+                        for(let x = 0; x < branch.length; x++){
+
+                            content = (content || docs)[branch[x]];
+                        }
+
+                        this._doc["@" + id] = docs;
+
+                        const self = index[i];
+                        const fn = (
+
+                            job === "add" ?
+
+                                self.add
+                            :
+                                self.update
+                        );
+
+                        if(i === len - 1){
+
+                            return fn.call(self, id, content, callback);
+                        }
+                        else{
+
+                            fn.call(self, id, content);
+                        }
+                    }
+                }
+            };
+        }
+
         /**
          * @param {number|string} id
-         * @param {string} content
+         * @param {string|Function} content
          * @param {Function=} callback
          * @export
          */
 
         FlexSearch.prototype.update = function(id, content, callback){
+
+            if(SUPPORT_DOCUMENTS && this.doc && is_object(id)){
+
+                return this.handle_docs("update", id, /** @type {Function} */ (content));
+            }
 
             const index = "@" + id;
 
@@ -957,6 +1097,11 @@
          */
 
         FlexSearch.prototype.remove = function(id, callback, _recall){
+
+            if(SUPPORT_DOCUMENTS && this.doc && is_object(id)){
+
+                return this.handle_docs("remove", id, callback);
+            }
 
             const index = "@" + id;
 
@@ -1053,7 +1198,7 @@
         };
 
         /**
-         * @param {!string} query
+         * @param {!string|Object|Array<Object>} query
          * @param {number|Function=} limit
          * @param {Function=} callback
          * @param {boolean=} _recall
@@ -1063,11 +1208,30 @@
 
         FlexSearch.prototype.search = function(query, limit, callback, _recall){
 
+            if(SUPPORT_DOCUMENTS && is_object(limit)){
+
+                if(is_array(limit)){
+
+                    for(let i = 0; i < limit.length; i++){
+
+                        limit[i]["query"] = query;
+                    }
+                }
+                else{
+
+                    limit["query"] = query;
+                }
+
+                query = /** @type {Object} */ (limit);
+                limit = 0;
+            }
+
             let _query = query;
             let threshold;
+            let boost;
             let result = [];
 
-            if(is_object(query)){
+            if(is_object(query) && (!SUPPORT_DOCUMENTS || !is_array(query))){
 
                 // re-assign properties
 
@@ -1083,15 +1247,86 @@
 
                 limit = query["limit"];
                 threshold = query["threshold"];
+                boost = query["boost"];
                 query = query["query"];
             }
 
-            /*
-            if(index_blacklist[query]){
+            if(SUPPORT_DOCUMENTS && this.doc){
 
-                return result;
+                const doc_ref = this.doc["ref"];
+                const doc_idx = this.doc["index"];
+
+                let queries;
+                let field = _query["field"];
+
+                if(field){
+
+                    _query["field"] = null;
+                }
+                else if(is_array(_query)){
+
+                    queries = _query;
+                    field = [];
+
+                    for(let i = 0; i < _query.length; i++){
+
+                        field[i] = _query[i]["field"];
+                    }
+                }
+                else{
+
+                    field = get_keys(doc_ref);
+                }
+
+                if(is_object(field)){
+
+                    if(!is_array(field)){
+
+                        field = [field];
+                    }
+
+                    const len = field.length;
+
+                    for(let i = 0; i < len; i++){
+
+                        if(queries){
+
+                            _query = queries[i];
+                        }
+
+                        const ref = doc_ref[field[i]];
+
+                        // TODO: Support Field-Merging (return array before intersection and apply here)
+
+                        result[i] = doc_idx[ref].search(_query);
+                    }
+
+                    if(SUPPORT_ASYNC && callback){
+
+                        return callback(result.concat.apply([], result));
+                    }
+                    else if(SUPPORT_ASYNC && this.async){
+
+                        return new Promise(function(resolve){
+
+                            Promise.all(/** @type {!Iterable<Promise>} */ (result)).then(function(values){
+
+                                resolve(values.concat.apply([], values));
+                            });
+                        });
+                    }
+                    else{
+
+                        return result.concat.apply([], result);
+                    }
+                }
+                else{
+
+                    const ref = doc_ref[field];
+
+                    return doc_idx[ref].search(_query, callback);
+                }
             }
-            */
 
             threshold || (threshold = this.threshold || 0);
 
@@ -1215,6 +1450,7 @@
 
                     tokenizer(_query)
                 :(
+                    // NOTE: ngram matches inconsistently, research or remove
                     //SUPPORT_ENCODER && (tokenizer === "ngram") ?
 
                         /** @type {!Array<string>} */
@@ -1238,7 +1474,7 @@
                 if(this.depth){
 
                     use_contextual = true;
-                    ctx_root = words[0]; // TODO: iterate roots?
+                    ctx_root = words[0]; // TODO: iterate roots
                     check_words[ctx_root] = 1;
                 }
                 else{
@@ -1251,6 +1487,18 @@
             let ctx_map;
 
             if(!use_contextual || (ctx_map = this._ctx)[ctx_root]){
+
+                let initial_z = 0;
+
+                if(SUPPORT_DOCUMENTS && boost){
+
+                    threshold = (threshold || 1) / boost;
+
+                    if(boost < 0){
+
+                        initial_z = threshold;
+                    }
+                }
 
                 for(let a = (use_contextual ? 1 : 0); a < length; a++){
 
@@ -1274,7 +1522,7 @@
 
                                 let map_value;
 
-                                for(let z = 0; z < (10 - threshold); z++){
+                                for(let z = initial_z; z < (10 - threshold); z++){
 
                                     if((map_value = map[z][value])){
 
@@ -1324,7 +1572,7 @@
 
                 // Not handled by intersection:
 
-                result = intersect(check, limit, SUPPORT_SUGGESTIONS && this.suggest);
+                result = intersect(check, limit, SUPPORT_DOCUMENTS && this._doc, SUPPORT_SUGGESTIONS && this.suggest);
 
                 // Handled by intersection:
 
@@ -1380,7 +1628,7 @@
 
                         length = this._map[z][keys[i]].length;
 
-                        // Note: 1 char values allocates 1 byte "Map (OneByteInternalizedString)"
+                        // TODO: Proof if 1 char values allocates 1 byte "Map (OneByteInternalizedString)"
                         bytes += length * 1 + keys[i].length * 2 + 4;
                         words += length;
                         chars += keys[i].length * 2;
@@ -1419,8 +1667,6 @@
 
         FlexSearch.prototype.clear = function(){
 
-            // destroy + initialize index
-
             return this.destroy().init();
         };
 
@@ -1430,24 +1676,27 @@
 
         FlexSearch.prototype.destroy = function(){
 
-            // cleanup cache
-
             if(SUPPORT_CACHE && this.cache){
 
                 this._cache.clear();
                 this._cache = null;
             }
 
-            // release references
-
-            //this.filter =
-            //this.stemmer =
-            //this._scores =
             this._map =
             this._ctx =
-            this._ids =
-            /*this._stack =
-            this._stack_keys =*/ null;
+            this._ids = null;
+
+            if(SUPPORT_DOCUMENTS && this.doc){
+
+                const index = this._doc["index"];
+
+                for(let i = 0; i < index.length; i++){
+
+                    index.destroy();
+                }
+
+                this._doc = null;
+            }
 
             return this;
         };
@@ -1459,6 +1708,29 @@
              */
 
             FlexSearch.prototype.export = function(){
+
+                if(SUPPORT_DOCUMENTS && this.doc){
+
+                    const index = this.doc["index"];
+                    const length = index.length;
+                    const payload = new Array(length + 1);
+
+                    let i = 0;
+
+                    for(; i < index.length; i++){
+
+                        payload[i] = [
+
+                            index[i]._map,
+                            index[i]._ctx,
+                            index[i]._ids
+                        ];
+                    }
+
+                    payload[i] = this._doc;
+
+                    return JSON.stringify(payload);
+                }
 
                 return JSON.stringify([
 
@@ -1476,9 +1748,30 @@
 
                 payload = JSON.parse(payload);
 
-                this._map = payload[0];
-                this._ctx = payload[1];
-                this._ids = payload[2];
+                if(SUPPORT_DOCUMENTS && this.doc){
+
+                    const index = this.doc["index"];
+                    const length = index.length;
+
+                    for(let i = 0; i < length; i++){
+
+                        const idx = index[i];
+
+                        idx._map = payload[i][0];
+                        idx._ctx = payload[i][1];
+                        idx._ids = payload[i][2];
+                        idx._doc = payload[length];
+                    }
+
+                    this._doc = payload[length];
+                }
+                else{
+
+                    this._map = payload[0];
+                    this._ctx = payload[1];
+                    this._ids = payload[2];
+                    this._doc = payload[3];
+                }
             };
         }
 
@@ -2302,11 +2595,12 @@
         /**
          * @param {!Array<Array<number|string>>} arrays
          * @param {number=} limit
+         * @param {Object=} docs
          * @param {boolean=} suggest
          * @returns {Array}
          */
 
-        function intersect(arrays, limit, suggest) {
+        function intersect(arrays, limit, docs, suggest) {
 
             let result = [];
             let suggestions;
@@ -2363,7 +2657,7 @@
 
                                 if(is_final_loop){
 
-                                    result[count++] = tmp;
+                                    result[count++] = docs ? docs[index] : tmp;
 
                                     if(limit && (count === limit)){
 
@@ -2415,7 +2709,7 @@
 
                                 for(i = 0, length = tmp.length; i < length; i++){
 
-                                    result[count++] = tmp[i];
+                                    result[count++] = docs ? docs["@" + tmp[i]] : tmp[i];
 
                                     if(limit && (count === limit)){
 
@@ -2429,13 +2723,33 @@
             }
             else if(length_z){
 
-                result = arrays[0];
+                if(docs){
 
-                if(limit && /*result &&*/ (result.length > limit)){
+                    const arr = arrays[0];
+                    let length = arr.length;
 
-                    // Note: do not modify the original index array!
+                    if(limit && (limit < length)){
 
-                    result = result.slice(0, limit);
+                        length = limit;
+                    }
+
+                    result = new Array(length);
+
+                    for(let i = 0; i < length; i++){
+
+                        result[i] = docs["@" + arr[i]];
+                    }
+                }
+                else{
+
+                    result = arrays[0];
+
+                    if(limit && /*result &&*/ (result.length > limit)){
+
+                        // Note: do not modify the original index array!
+
+                        result = result.slice(0, limit);
+                    }
                 }
 
                 // Note: handle references to the original index array
@@ -2954,6 +3268,7 @@
                                         "var SUPPORT_ASYNC = " + (SUPPORT_ASYNC ? "true" : "false") + ";" +
                                         "var SUPPORT_SERIALIZE = " + (SUPPORT_SERIALIZE ? "true" : "false") + ";" +
                                         "var SUPPORT_INFO = " + (SUPPORT_INFO ? "true" : "false") + ";" +
+                                        "var SUPPORT_DOCUMENTS = " + (SUPPORT_DOCUMENTS ? "true" : "false") + ";" +
                                         "var SUPPORT_WORKER = true;"
 
                                     ) + "(" + _worker.toString() + ")()"
