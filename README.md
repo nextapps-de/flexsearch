@@ -21,7 +21,7 @@ FlexSearch also provides you a non-blocking asynchronous processing model as wel
 
 FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
 
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#profiles">Example Options</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#presets">Presets</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
 Supported Platforms:
 - Browser
@@ -80,7 +80,7 @@ All Features:
     </tr>
     <tr>
         <td>
-            <a href="#profiles">Presets</a>
+            <a href="#presets">Presets</a>
         </td>
         <td>✔</td>
         <td>✔</td>
@@ -391,7 +391,7 @@ Library Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/mast
 
 > "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithms today. They don't provide neither: a meaningful relevance of a term nor the importance of it! Like many pseudo-intelligent algorithms this is also just an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires a lot of additionally memory.
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additionally memory.
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.
 Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?
 In this way contextual search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
@@ -577,7 +577,7 @@ alternatively you can also use:
 var index = FlexSearch.create();
 ```
 
-Create a new index and choosing one of the built-in profiles:
+Create a new index and choosing one of the presets:
 
 ```js
 var index = new FlexSearch("speed");
@@ -592,16 +592,27 @@ var index = new FlexSearch({
 
     encode: "balance",
     tokenize: "forward",
+    threshold: 0,
     async: false,
     worker: false,
     cache: false
 });
 ```
 
-<a href="#options">Read more about custom options</a>
+Create a new index and extend a preset with custom options:
+
+```js
+var index = new FlexSearch("memory", {
+    encode: "balance",
+    tokenize: "forward",
+    threshold: 0
+});
+```
+
+<a href="#options">See all available custom options.</a>
 
 <a name="index.add"></a>
-#### Add items to an index
+#### Add text item to an index
 
 > Index.__add(id, string)__
 
@@ -639,7 +650,7 @@ index.search("John", function(result){
 
 Perform queries asynchronously (Promise-based):
 
-> Make sure the option "async" is enabled on this instance
+> Make sure the option "async" is enabled on this instance to receive promises.
 
 ```js
 index.search("John").then(function(result){
@@ -652,8 +663,10 @@ Alternatively ES6:
 
 ```js
 async function search(query){
-    
+
     const result = await index.search(query);
+    
+    // ...
 }
 ```
 
@@ -663,11 +676,11 @@ Pass custom options for each query:
 
 ```js
 index.search({
-    
+
     query: "John",
     limit: 1000,
-    threshold: 5, // >= initial threshold
-    depth: 3,     // <= initial depth
+    threshold: 5, // >= threshold
+    depth: 3,     // <= depth
     callback: function(results){/* ... */}
 });
 ```
@@ -702,6 +715,8 @@ index.search({
 When suggestion is enabled all results will be filled up (until limit, default 1000) with similar matches ordered by relevance.
 
 Actually phonetic suggestions are not supported, for that purpose use the encoder and tokenizer which provides similar functionality. Suggestions comes into game when a query has multiple words/phrases. Assume a query contains 3 words. When the index just match 2 of 3 words then normally you will get no results, but with suggestion enabled you will also get results when 2 of 3 words was matched as well 1 of 3 words was matched (depends on the limit), also sorted by relevance.
+
+__Note:__ Is is planned to improve this feature and providing more flexibility.
 
 <a name="index.update"></a>
 #### Update item from an index
@@ -796,6 +811,8 @@ var index = new FlexSearch({
 });
 ```
 
+> The encoder function gets a string as a parameter and has to return the modified string.
+
 Call a custom encoder directly:
 ```js
 var encoded = index.encode("sample text");
@@ -854,6 +871,8 @@ var index = new FlexSearch({
     }
 });
 ```
+
+> The tokenizer function gets a string as a parameter and has to return an array of strings (parts).
 
 <a name="flexsearch.language"></a>
 #### Add language-specific stemmer and/or filter
@@ -1038,7 +1057,7 @@ var index = new FlexSearch({
 });
 ```
 
-The above example will index one field ("content"), to index multiple fields just pass an array:
+The above example will just index the field "content", to index multiple fields pass an array:
 
 ```js
 var index = new FlexSearch({
@@ -1091,14 +1110,16 @@ var index = new FlexSearch({
 });
 ```
 
-#### Add/Update/Remove Documents to the Index
+#### Add/Update/Remove Documents to/from the Index
 
-Just pass the document array (or one single object) to the index:
+Just pass the document array (or a single object) to the index:
+
 ```js
 index.add(docs);
 ```
 
-Update (single object or array of objects):
+Update index with a single object or an array of objects:
+
 ```js
 index.update({
     data:{
@@ -1111,21 +1132,24 @@ index.update({
 });
 ```
 
-Remove (single object or array of objects):
+Remove a single object or an array of objects from the index:
+
 ```js
 index.remove(docs);
 ```
 
-When you know the id, you can also simply remove by:
+When the id is known, you can also simply remove by (faster):
+
 ```js
 index.remove(id);
 ```
 
 #### Field-Search
 
-When searching you have several options when using documents.
+Searching gives you several options when using documents.
 
 This will search through all indexed fields:
+
 ```js
 var results = index.search("body");
 ```
@@ -1149,6 +1173,7 @@ var results = index.search({
 ```
 
 This could also be written as:
+
 ```js
 var results = index.search("body", {
     field: "data:body",
@@ -1234,6 +1259,8 @@ var index = new FlexSearch({
 
 > Try to use the __lowest depth__ and __highest threshold__ which fits your needs.
 
+It is possible to modify values for _threshold_ and _depth_ during search (see custom search). The restriction is that the _threshold_ can only be raised, on the other hand the _depth_ can only be lowered.
+
 <a name="cache"></a>
 ## Enable Auto-Balanced Cache
 
@@ -1269,11 +1296,13 @@ var index = new FlexSearch({
 ```
 
 Adding items to worker index as usual (async enabled):
+
 ```js
 index.add(10025, "John Doe");
 ```
 
 Perform search and simply pass in callback like:
+
 ```js
 index.search("John Doe", function(results){
 
@@ -1282,6 +1311,7 @@ index.search("John Doe", function(results){
 ```
 
 Or use promises accordingly:
+
 ```js
 index.search("John Doe").then(function(results){
 
@@ -1292,7 +1322,7 @@ index.search("John Doe").then(function(results){
 <a name="options"></a>
 ## Options
 
-FlexSearch ist highly customizable. Make use of the the <a href="#profiles">right options</a> can really improve your results as well as memory economy or query time.
+FlexSearch ist highly customizable. Make use of the the <a href="#presets">right options</a> can really improve your results as well as memory economy or query time.
 
 <table>
     <tr></tr>
@@ -1312,7 +1342,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#profiles">righ
             "fastest"
         </td>
         <td vertical-align="top">
-            The <a href="#profiles">configuration profile</a>. Choose your preferation.<br>
+            The <a href="#presets">configuration profile</a>. Choose your preferation.<br>
         </td>
     </tr>
     <tr></tr>
@@ -1742,7 +1772,7 @@ The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
 <br>
 <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg">
 
-<a name="profiles"></a>
+<a name="presets"></a>
 ## Presets
 
 You can pass a preset during creation/initialization. They represents these following settings:
@@ -2055,6 +2085,11 @@ node compile SUPPORT_WORKER=true
     <tr></tr>
     <tr>
         <td>SUPPORT_ENCODER (built-in encoders)</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_DOCUMENTS</td>
         <td>true, false</td>
     </tr>
     <tr></tr>
