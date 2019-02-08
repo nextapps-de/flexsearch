@@ -21,7 +21,7 @@ FlexSearch also provides you a non-blocking asynchronous processing model as wel
 
 FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
 
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#presets">Presets</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
 Supported Platforms:
 - Browser
@@ -120,6 +120,15 @@ All Features:
         </td>
         <td>✔</td>
         <td>✔</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#where">Where / Find</a> / <a href="#tags">Tags</a>
+        </td>
+        <td>✔</td>
+        <td>-</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -681,7 +690,9 @@ index.search({
     limit: 1000,
     threshold: 5, // >= threshold
     depth: 3,     // <= depth
-    callback: function(results){/* ... */}
+    callback: function(results){
+        // ...
+    }
 });
 ```
 
@@ -1080,23 +1091,23 @@ Assume the document array looks more complex (has nested branches etc.), e.g.:
 var docs = [{
     data:{
         id: 0,
-        title: "Title",
+        title: "Foo",
         body: {
-            content: "Body"
+            content: "Foobar"
         }
     }
 },{
     data:{
         id: 1,
-        title: "Title",
+        title: "Bar",
         body: {
-            content: "Body"
+            content: "Foobar"
         }
     }
 }];
 ```
 
-Then use the colon separated notation ___"root:child"___ to define hierarchy within the document descriptor:
+Then use the colon separated notation ___"root:child:child"___ to define hierarchy within the document descriptor:
 
 ```js
 var index = new FlexSearch({
@@ -1104,7 +1115,7 @@ var index = new FlexSearch({
         id: "data:id",
         field: [
             "data:title",
-            "data:content:body"
+            "data:body:content"
         ]
     }
 });
@@ -1146,7 +1157,9 @@ index.remove(id);
 
 #### Field-Search
 
-Searching gives you several options when using documents.
+The search gives you several options when using documents.
+
+> The colon notation also has to be applied for the searching respectively.
 
 This will search through all indexed fields:
 
@@ -1159,24 +1172,22 @@ This will search on a specific field):
 ```js
 var results = index.search({
     field: "title",
-    query: "title"
+    query: "foobar"
 });
 ```
 
-The colon notation also has to be applied for the searching respectively, e.g.:
-
 ```js
 var results = index.search({
-    field: "data:body",
-    query: "body"
+    field: "data:body:content",
+    query: "foobar"
 });
 ```
 
 This could also be written as:
 
 ```js
-var results = index.search("body", {
-    field: "data:body",
+var results = index.search("foobar", {
+    field: "data:body:content",
 });
 ```
 
@@ -1184,7 +1195,7 @@ Search the same query on multiple fields:
 
 ```js
 var results = index.search({
-    query: "title",
+    query: "foobar",
     field: ["title", "body"]
 });
 ```
@@ -1202,10 +1213,10 @@ Search different queries on multiple fields:
 ```js
 var results = index.search([{
     field: "title",
-    query: "title"
+    query: "foo"
 },{
     field: "body",
-    query: "body"
+    query: "bar"
 }]);
 ```
 
@@ -1214,13 +1225,204 @@ Boost scoring on specific fields:
 ```js
 var results = index.search([{
     field: "title",
-    query: "title",
+    query: "foo",
     boost: 2
 },{
     field: "body",
-    query: "body",
+    query: "bar",
     boost: 0.5
 }]);
+```
+
+<a name="where"></a>
+## Find / Where
+
+When indexing documents, you are also able to get results by specific attributes.
+
+> The colon notation also has to be applied for using "where" and "find" respectively.
+
+#### Find a document by an attribute
+
+```js
+index.find("cat", "comedy");
+```
+
+Same as:
+```js
+index.find({"cat": "comedy"});
+```
+
+To get by ID, you can also use short form:
+```js
+index.find(1);
+```
+
+Find by a custom function:
+```js
+index.find(function(item){
+    return item.cat === "comedy";
+});
+```
+
+#### Find documents by multiple attributes
+
+Get just the first result:
+```js
+index.find({
+    cat: "comedy", 
+    year: "2018"
+});
+```
+
+Get all matched results:
+```js
+index.where({
+    cat: "comedy",
+    year: "2018"
+});
+```
+
+Get all results and set a limit:
+```js
+index.where({
+    cat: "comedy",
+    year: "2018"
+ }, 100);
+```
+
+Get all by a custom function:
+```js
+index.where(function(item){
+    return item.cat === "comedy";
+});
+```
+
+#### Combine fuzzy search with a where-clause:
+
+Add some content, e.g.:
+```js
+index.add([{
+    id: 0,
+    title: "Foobar",
+    cat: "adventure",
+    content: "Body"
+},{
+    id: 1,
+    title: "Title",
+    cat: "comedy",
+    content: "Foobar"
+}]);
+```
+
+Using search and also apply a where-clause:
+```js
+index.search("foo", {
+    field: [
+        "title", 
+        "body"
+    ],
+    where: {
+        "cat": "comedy"
+    },
+    limit: 10
+});
+```
+
+<a name="tags"></a>
+## Tags
+
+Tagging is pretty much the same like adding an index to a database column. Whenever you use ___where___ on an indexed/tagged attribute will improve performance drastically but also at a cost of additional memory.
+
+> The colon notation also has to be applied for tags respectively.
+
+Add one single tag to the index:
+```js
+var index = new FlexSearch({
+    doc: {
+        id: "id",
+        field: ["title", "content"],
+        tag: "cat"
+    }
+});
+```
+
+Or add multiple tags to the index:
+```js
+var index = new FlexSearch({
+    doc: {
+        id: "id",
+        field: ["title", "content"],
+        tag: ["cat", "year"]
+    }
+});
+```
+
+Add some content:
+```js
+index.add([{
+    id: 0,
+    title: "Foobar",
+    cat: "adventure",
+    year: "2018",
+    content: "Body"
+},{
+    id: 1,
+    title: "Title",
+    cat: "comedy",
+    year: "2018",
+    content: "Foobar"
+}]);
+```
+
+Find all documents by an attribute:
+```js
+index.where({"cat": "comedy"}, 10);
+```
+
+Since the attribute "cat" was tagged (has its own index) this expression performs extremely fast. This is actually the fastest way to retrieve results from documents.
+
+Search documents and also apply a where-clause:
+```js
+index.search("foo", {
+    field: [
+        "title", 
+        "content"
+    ],
+    where: {
+        "cat": "comedy"
+    },
+    limit: 10
+});
+```
+
+For a better understanding, using the same expression without the where clause has pretty much the same performance. On the other hand, using a where-clause without a tag on its property has an additional cost.
+
+<a name="sort"></a>
+## Custom Sort
+
+> The colon notation also has to be applied for a custom sort respectively.
+
+Sort by an attribute:
+```js
+var results = index.search("John", {
+
+    limit: 100,
+    sort: "data:title"
+});
+```
+
+Sort by a custom function:
+```js
+var results = index.search("John", {
+
+    limit: 100,
+    sort: function(a, b){
+        return (
+            a.id < b.id ? -1 : (
+                a.id > b.id ? 1 : 0
+        ));
+    }
+});
 ```
 
 <a name="chaining"></a>
@@ -1864,45 +2066,36 @@ var comedy = new FlexSearch();
 
 This way you can also provide different settings for each category.
 
-To make this workaround more extendable you can define a tiny helper:
+You can also gets the same effect when using documents in combination with tags and a ___where___ clause, e.g.:
+
 ```js
-var settings = {};
-var index = {};
-
-function add(id, cat, content){
-    (index[cat] || (
-        index[cat] = new FlexSearch(settings[cat])
-    )).add(id, content);
-}
-
-function search(cat, query){
-    return index[cat] ? index[cat].search(query) : [];
-}
-```
-
-Provide settings optionally (or skip and use defaults):
-```js
-settings = {
-    action: "score", 
-    adventure: "match", 
-    comedy: {
-        encode: "advanced",
-        tokenize: "forward",
-        threshold: 5
+var movies = new FlexSearch({
+    doc: {
+        id: "id",
+        title: "title"
+    },
+    tag:{
+        cat: "cat",
     }
-};
+});
 ```
 
 Add content to the index:
+
 ```js
-add(1, "action", "Movie Title");
-add(2, "adventure", "Movie Title");
-add(3, "comedy", "Movie Title");
+add({ id: 1, cat: "action", title: "Movie Title" });
+add({ id: 2, cat: "adventure", title: "Movie Title" });
+add({ id: 3, cat: "comedy", title: "Movie Title" });
 ```
 
 Perform queries:
 ```js
-var results = search("action", "movie title"); // --> [1]
+var results = search("movie title", {
+    field: "title",
+    where: {
+        cat: "adventure"
+    }
+});
 ```
 
 Filter queries by categories will hugely improve performance.

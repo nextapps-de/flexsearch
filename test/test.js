@@ -1077,7 +1077,7 @@ describe("Relevance", function(){
 // Suggestion Tests
 // ------------------------------------------------------------------------
 
-if(env !== "light") describe("Suggestion", function(){
+if(env !== "light") describe("Suggestions", function(){
 
     it("Should have been suggested properly by relevance", function(){
 
@@ -1101,10 +1101,81 @@ if(env !== "light") describe("Suggestion", function(){
 });
 
 // ------------------------------------------------------------------------
+// Where Clause
+// ------------------------------------------------------------------------
+
+if(env === "") describe("Where/Find", function(){
+
+    var data = [{
+        id: 0,
+        title: "Title 1",
+        cat: "1",
+        flag: false
+    },{
+        id: 1,
+        title: "Title 2",
+        cat: "2",
+        flag: false
+    },{
+        id: 2,
+        title: "Title 3",
+        cat: "1",
+        flag: true
+    }];
+
+    it("Should have been found properly", function(){
+
+        var index = new FlexSearch({
+            doc: {
+                id: "id",
+                field: "title",
+                tag: "cat"
+            }
+        });
+
+        index.add(data);
+
+        //expect(index.length).to.equal(3);
+
+        //expect(index.find(0)).to.equal(data[0]);
+        expect(index.find("id", 0)).to.equal(data[0]);
+        expect(index.where("id", 0)).to.have.members([data[0]]);
+        expect(index.find(function(val){return val.id === 0;})).to.equal(data[0]);
+
+        expect(index.find({id: 1})).to.equal(data[1]);
+        expect(index.where({id: 1})).to.have.members([data[1]]);
+        expect(index.where(function(val){return val.id === 1;})).to.have.members([data[1]]);
+
+        expect(index.find({cat: "1"})).to.equal(data[0]);
+        expect(index.find({cat: "2"})).to.equal(data[1]);
+        expect(index.find({cat: "2", flag: true})).to.equal(null);
+        expect(index.find(data[2])).to.equal(data[2]);
+        expect(index.where(data[2])).to.have.members([data[2]]);
+
+        expect(index.where({cat: "1"})).to.have.members([data[0], data[2]]);
+        expect(index.search("title", {sort: "cat"})[1]).to.equal(data[2]);
+        expect(index.search("title")).to.have.members(data);
+
+        expect(index.search("title", {
+            where: {
+                cat: "1"
+            }
+        })).to.have.members([data[0], data[2]]);
+
+        expect(index.search("title", {
+            where: {
+                cat: "1",
+                flag: true
+            }
+        })).to.have.members([data[2]]);
+    });
+});
+
+// ------------------------------------------------------------------------
 //  Multi-Field Documents
 // ------------------------------------------------------------------------
 
-if(!this._phantom){
+if((typeof require !== "undefined") && !this._phantom){
 
     require("./test.es6.js")(FlexSearch, env);
 }

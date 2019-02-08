@@ -1,5 +1,11 @@
 # Changelog
 
+#### v0.5.0
+
+- Where / Find Documents
+- Document Tags
+- Custom Sort
+
 #### v0.4.0
 
 - Index Documents (Field-Search)

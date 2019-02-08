@@ -13,41 +13,41 @@ module.exports = function(FlexSearch, env){
 
         var data = [{
 
+            id: 2,
             data:{
-                id: 0,
-                title: "Title 1",
-                body: "Body 1"
+                title: "Title 3",
+                body: "Body 3"
             }
         },{
+            id: 1,
             data:{
-                id: 1,
                 title: "Title 2",
                 body: "Body 2"
             }
         },{
+            id: 0,
             data:{
-                id: 2,
-                title: "Title 3",
-                body: "Body 3"
+                title: "Title 1",
+                body: "Body 1"
             }
         }];
 
         var update = [{
 
+            id: 0,
             data:{
-                id: 0,
                 title: "Foo 1",
                 body: "Bar 1"
             }
         },{
+            id: 1,
             data:{
-                id: 1,
                 title: "Foo 2",
                 body: "Bar 2"
             }
         },{
+            id: 2,
             data:{
-                id: 2,
                 title: "Foo 3",
                 body: "Bar 3"
             }
@@ -59,7 +59,7 @@ module.exports = function(FlexSearch, env){
 
                 doc: {
 
-                    id: "data:id",
+                    id: "id",
                     field: [
                         "data:title",
                         "data:body"
@@ -200,7 +200,7 @@ module.exports = function(FlexSearch, env){
                 async: true,
                 doc: {
 
-                    id: "data:id",
+                    id: "id",
                     field: [
                         "data:title",
                         "data:body"
@@ -246,7 +246,7 @@ module.exports = function(FlexSearch, env){
                 async: true,
                 doc: {
 
-                    id: "data:id",
+                    id: "id",
                     field: [
                         "data:title",
                         "data:body"
@@ -282,6 +282,69 @@ module.exports = function(FlexSearch, env){
 
             expect(await index.doc.index[0].length).to.equal(0);
             expect(await index.doc.index[1].length).to.equal(0);
+        });
+
+        it("Should have been sorted properly", function(){
+
+            var index = new FlexSearch({
+
+                doc: {
+
+                    id: "id",
+                    field: [
+                        "data:title"
+                    ]
+                }
+            });
+
+            index.add(data);
+
+            var results = index.search({
+
+                field: "data:title",
+                query: "title"
+            });
+
+            expect(results[0]).to.equal(data[0]);
+            expect(results[1]).to.equal(data[1]);
+            expect(results[2]).to.equal(data[2]);
+
+            results = index.search({
+
+                query: "title",
+                field: "data:title",
+                sort: function(a, b){
+
+                    const diff = a.id - b.id;
+                    return (diff < 0 ? -1 : (diff ? 1 : 0));
+                }
+            });
+
+            expect(results[0]).to.equal(data[2]);
+            expect(results[1]).to.equal(data[1]);
+            expect(results[2]).to.equal(data[0]);
+
+            results = index.search({
+
+                query: "title",
+                field: "data:title",
+                sort: "id"
+            });
+
+            expect(results[0]).to.equal(data[2]);
+            expect(results[1]).to.equal(data[1]);
+            expect(results[2]).to.equal(data[0]);
+
+            results = index.search({
+
+                query: "title",
+                field: "data:title",
+                sort: "data:title"
+            });
+
+            expect(results[0]).to.equal(data[2]);
+            expect(results[1]).to.equal(data[1]);
+            expect(results[2]).to.equal(data[0]);
         });
     });
 

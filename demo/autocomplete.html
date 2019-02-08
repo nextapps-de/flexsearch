@@ -14,7 +14,7 @@
         table{
             width: 300px;
             table-layout: fixed;
-            position: sticky;
+            position: fixed;
             top: 0;
             padding-top: 10px;
             background-color: #fff;
@@ -43,7 +43,7 @@
         }
         #suggestions{
             position: relative;
-            top: 35px;
+            top: 50px;
         }
         #suggestions div{
             padding: 10px 0;
@@ -58,7 +58,7 @@
             td,
             tr,
             input{
-                width: 100%;
+                width: 97%;
             }
         }
     </style>
@@ -83,14 +83,14 @@
             suggest: true
         });
 
-        var suggestions = document.getElementById("suggestions");
-        var autocomplete = document.getElementById("autocomplete");
-        var userinput = document.getElementById("userinput");
-
         for(var i = 0; i < data.length; i++){
 
             index.add(i, data[i]);
         }
+
+        var suggestions = document.getElementById("suggestions");
+        var autocomplete = document.getElementById("autocomplete");
+        var userinput = document.getElementById("userinput");
 
         userinput.addEventListener("input", show_results, true);
         userinput.addEventListener("keyup", accept_autocomplete, true);
@@ -99,7 +99,7 @@
         function show_results(){
 
             var value = this.value;
-            var results = index.search(value, 20);
+            var results = index.search(value, 25);
             var entry, childs = suggestions.childNodes;
             var i = 0, len = results.length;
 
@@ -131,8 +131,7 @@
             }
             else{
 
-                autocomplete.value = value;
-                autocomplete.current = value;
+                autocomplete.value = autocomplete.current = value;
             }
         }
 
@@ -157,7 +156,6 @@
 
             return false;
         }
-
     }());
 </script>
 </body>

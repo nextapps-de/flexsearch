@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.4.0
+ * @preserve FlexSearch v0.5.0
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -18,6 +18,7 @@
 /** @define {boolean} */ const SUPPORT_SERIALIZE = true;
 /** @define {boolean} */ const SUPPORT_INFO = true;
 /** @define {boolean} */ const SUPPORT_DOCUMENTS = true;
+/** @define {boolean} */ const SUPPORT_WHERE = true;
 
 // noinspection ThisExpressionReferencesGlobalObjectJS
 (function(){
@@ -494,14 +495,18 @@
 
             let doc;
 
-            if(SUPPORT_DOCUMENTS) /** @private */ this.doc = doc = (
+            if(SUPPORT_DOCUMENTS) {
 
-                (custom = options["doc"]) ?
+                /** @private */
+                this.doc = doc = (
 
-                    custom
-                :
-                    this.doc || defaults.doc
-            );
+                    (custom = options["doc"]) ?
+
+                        custom
+                    :
+                        this.doc || defaults.doc
+                );
+            }
 
             // initialize primary index
 
@@ -512,28 +517,43 @@
             /** @private */
             this._ids = create_object();
 
-            if(SUPPORT_DOCUMENTS){
-
-                /** @private */
-                this._doc = doc && create_object();
-            }
-
-            /** @private */
-            //this._stack = create_object();
-            /** @private */
-            //this._stack_keys = [];
-
             if(doc){
+
+                this._doc = create_object();
 
                 options["doc"] = null;
 
-                const field = doc["field"];
                 const index = doc["index"] = [];
                 const ref = doc["ref"] = {};
 
+                let field = doc["field"];
+                let tag = doc["tag"];
+
                 doc["id"] = doc["id"].split(":");
 
-                if(is_array(field)){
+                if(SUPPORT_WHERE && tag){
+
+                    this._tag = create_object();
+
+                    if(!is_array(tag)){
+
+                        doc["tag"] = tag = [tag];
+                    }
+
+                    for(let i = 0; i < tag.length; i++){
+
+                        this._tag[tag[i]] = create_object();
+
+                        tag[i] = tag[i].split(":");
+                    }
+                }
+
+                if(field){
+
+                    if(!is_array(field)){
+
+                        doc["field"] = field = [field];
+                    }
 
                     for(let i = 0; i < field.length; i++){
 
@@ -541,14 +561,12 @@
                         field[i] = field[i].split(":");
                         index[i] = new FlexSearch(options);
                         index[i]._doc = this._doc;
-                    }
-                }
-                else{
 
-                    ref[field] = 0;
-                    doc["field"] = [field.split(":")];
-                    index[0] = new FlexSearch(options);
-                    index[0]._doc = this._doc;
+                        if(SUPPORT_WHERE && tag){
+
+                            index[i]._tag = this._tag;
+                        }
+                    }
                 }
             }
 
@@ -992,12 +1010,22 @@
                 else{
 
                     const index = this.doc["index"];
+                    const tags = this.doc["tag"];
                     let tree = this.doc["id"];
                     let id;
+                    let tag;
 
                     for(let i = 0; i < tree.length; i++){
 
                         id = (id || docs)[tree[i]];
+                    }
+
+                    if(tags){
+
+                        for(let i = 0; i < tags.length; i++){
+
+                            tag = (tag || docs)[tags[i]];
+                        }
                     }
 
                     if(job === "remove"){
@@ -1197,6 +1225,37 @@
             return this;
         };
 
+        let field_to_sort;
+
+        // TODO: apply intersect here
+
+        function merge_and_sort(arrays, sort){
+
+            arrays = arrays.concat.apply([], arrays);
+
+            if(sort){
+
+                if(!is_function(sort)){
+
+                    field_to_sort = sort.split(":");
+
+                    if(field_to_sort.length > 1){
+
+                        sort = sort_by_deep_field_up;
+                    }
+                    else{
+
+                        field_to_sort = field_to_sort[0];
+                        sort = sort_by_field_up;
+                    }
+                }
+
+                arrays.sort(sort);
+            }
+
+            return arrays;
+        }
+
         /**
          * @param {!string|Object|Array<Object>} query
          * @param {number|Function=} limit
@@ -1229,6 +1288,8 @@
             let _query = query;
             let threshold;
             let boost;
+            let where;
+            let sort;
             let result = [];
 
             if(is_object(query) && (!SUPPORT_DOCUMENTS || !is_array(query))){
@@ -1245,9 +1306,15 @@
                     }
                 }
 
+                if(SUPPORT_DOCUMENTS){
+
+                    boost = query["boost"];
+                    where = query["where"];
+                    sort = query["sort"];
+                }
+
                 limit = query["limit"];
                 threshold = query["threshold"];
-                boost = query["boost"];
                 query = query["query"];
             }
 
@@ -1303,7 +1370,7 @@
 
                     if(SUPPORT_ASYNC && callback){
 
-                        return callback(result.concat.apply([], result));
+                        return callback(merge_and_sort(result, sort));
                     }
                     else if(SUPPORT_ASYNC && this.async){
 
@@ -1311,13 +1378,13 @@
 
                             Promise.all(/** @type {!Iterable<Promise>} */ (result)).then(function(values){
 
-                                resolve(values.concat.apply([], values));
+                                resolve(merge_and_sort(values, sort));
                             });
                         });
                     }
                     else{
 
-                        return result.concat.apply([], result);
+                        return merge_and_sort(result, sort);
                     }
                 }
                 else{
@@ -1579,6 +1646,16 @@
                 //result = intersect_3d(check, limit, this.suggest);
             }
 
+            if(SUPPORT_WHERE && where){
+
+                result = this.where(where, null, limit, result);
+            }
+
+            if(sort){
+
+                result = merge_and_sort([result], sort);
+            }
+
             // store result to cache
 
             if(SUPPORT_CACHE && this.cache){
@@ -1593,6 +1670,137 @@
 
             return result;
         };
+
+        if(SUPPORT_DOCUMENTS && SUPPORT_WHERE){
+
+            /**
+             * @export
+             */
+
+            FlexSearch.prototype.find = function(key, value){
+
+                return this.where(key, value, 1)[0] || null;
+            };
+
+            /**
+             * @param key
+             * @param value
+             * @param limit
+             * @param {Array<Object>=} result
+             * @returns {Array<Object>}
+             * @export
+             */
+
+            FlexSearch.prototype.where = function(key, value, limit, result){
+
+                const doc = result || this._doc;
+                const results = [];
+
+                let count = 0;
+                let keys;
+                let keys_len;
+                let has_value;
+                let tree;
+
+                if(is_string(key)){
+
+                    if(key === "id"){
+
+                        return [doc["@" + value]];
+                    }
+
+                    //keys = [key];
+                    keys_len = 1;
+                    tree = [key.split(":")];
+                    has_value = true;
+                }
+                else if(is_function(key)){
+
+                    const ids = result || get_keys(doc);
+                    const length = ids.length;
+
+                    for(let x = 0; x < length; x++){
+
+                        const obj = result ? result[x] : doc[ids[x]];
+
+                        if(key(obj)){
+
+                            results[count++] = obj;
+                        }
+                    }
+
+                    return results;
+                }
+                else{
+
+                    limit || (limit = value);
+                    keys = get_keys(key);
+                    keys_len = keys.length;
+                    has_value = false;
+
+                    if((keys_len === 1) && (keys[0] === "id")){
+
+                        return [doc["@" + key["id"]]];
+                    }
+
+                    tree = new Array(keys_len);
+
+                    for(let i = 0; i < keys_len; i++){
+
+                        tree[i] = keys[i].split(":");
+                    }
+                }
+
+                const ids = result || get_keys(doc); // this._ids;
+                const length = ids.length;
+
+                for(let x = 0; x < length; x++){
+
+                    const obj = result ? result[x] : doc[ids[x]];
+                    let found = true;
+
+                    for(let i = 0; i < keys_len; i++){
+
+                        has_value || (value = key[keys[i]]);
+
+                        const tree_cur = tree[i];
+                        const tree_len = tree_cur.length;
+
+                        let ref = obj;
+
+                        if(tree_len > 1){
+
+                            for(let z = 0; z < tree_len; z++){
+
+                                ref = ref[tree_cur[z]];
+                            }
+                        }
+                        else{
+
+                            ref = ref[tree_cur[0]];
+                        }
+
+                        if(ref !== value){
+
+                            found = false;
+                            break;
+                        }
+                    }
+
+                    if(found){
+
+                        results[count++] = obj;
+
+                        if(limit && (count === limit)){
+
+                            break;
+                        }
+                    }
+                }
+
+                return results;
+            }
+        }
 
         if(SUPPORT_INFO){
 
@@ -1704,6 +1912,7 @@
         if(SUPPORT_SERIALIZE){
 
             /**
+             * TODO: also export settings?
              * @export
              */
 
@@ -2592,6 +2801,51 @@
             );
         }
 
+        function sort_by_field_up(a, b){
+
+            a = a[field_to_sort];
+            b = b[field_to_sort];
+
+            return (
+
+                a < b ?
+
+                    -1
+                :(
+                    a > b ?
+
+                        1
+                    :
+                        0
+                )
+            );
+        }
+
+        function sort_by_deep_field_up(a, b){
+
+            const field_len = field_to_sort.length;
+
+            for(let i = 0; i < field_len; i++){
+
+                a = a[field_to_sort[i]];
+                b = b[field_to_sort[i]];
+            }
+
+            return (
+
+                a < b ?
+
+                    -1
+                :(
+                    a > b ?
+
+                        1
+                    :
+                        0
+                )
+            );
+        }
+
         /**
          * @param {!Array<Array<number|string>>} arrays
          * @param {number=} limit
@@ -3269,6 +3523,7 @@
                                         "var SUPPORT_SERIALIZE = " + (SUPPORT_SERIALIZE ? "true" : "false") + ";" +
                                         "var SUPPORT_INFO = " + (SUPPORT_INFO ? "true" : "false") + ";" +
                                         "var SUPPORT_DOCUMENTS = " + (SUPPORT_DOCUMENTS ? "true" : "false") + ";" +
+                                        "var SUPPORT_WHERE = " + (SUPPORT_WHERE ? "true" : "false") + ";" +
                                         "var SUPPORT_WORKER = true;"
 
                                     ) + "(" + _worker.toString() + ")()"
