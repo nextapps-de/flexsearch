@@ -17,7 +17,6 @@
 </head>
 <body>
 <h2>Presets Benchmark Comparison</h2>
-<!--<button id="btn_start" onclick="start();" disabled>Start</button>-->
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <hr>
 <div id="container"></div>
@@ -26,30 +25,28 @@
 <script src="../data/gulliver.js"></script>
 <script>
 
-    //var data = [];
-
     (function(){
 
         var flexsearch_default = new FlexSearch();
         var flexsearch_memory = new FlexSearch("memory");
         var flexsearch_speed = new FlexSearch("speed");
-        var flexsearch_fastest = new FlexSearch("fastest");
+        var flexsearch_fast = new FlexSearch("fast");
         var flexsearch_match = new FlexSearch("match");
         var flexsearch_score = new FlexSearch("score");
         var flexsearch_balance = new FlexSearch("balance");
 
         var tests = {
 
-            "fastest": {
+            "fast": {
 
                 init: function(){},
                 add: function(index, content){
 
-                    flexsearch_fastest.add(index, content);
+                    flexsearch_fast.add(index, content);
                 },
                 query: function(query){
 
-                    return flexsearch_fastest.search(query);
+                    return flexsearch_fast.search(query);
                 },
                 loops: 250000
             },
@@ -146,7 +143,7 @@
                             "<th>Preset&emsp;</th>" +
                             "<th>Benchmark (Single Phrase)&emsp;</th>" +
                             "<th>Benchmark (Multi Phrase)&emsp;</th>" +
-                            "<th>Benchmark (Mixed Not Found)&emsp;</th>" +
+                            "<th>Benchmark (Not Found)&emsp;</th>" +
                        "</tr>";
 
             for(var test in tests){
@@ -197,15 +194,6 @@
                 }, 100);
             }
             else{
-
-                /*
-                window.start = function(){
-
-                    start_tests(0, Object.keys(tests));
-                };
-
-                document.getElementById("btn_start").disabled = false;
-                */
 
                 setTimeout(function(){
 
@@ -280,7 +268,7 @@
 
         // ---------------------------------------
 
-        window.tests = tests;
+        //window.tests = tests;
     })();
 </script>
 </body>

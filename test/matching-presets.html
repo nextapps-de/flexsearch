@@ -28,7 +28,7 @@
             <th>matching</th>
             <th>scoring</th>
             <th>balanced</th>
-            <th>fastest</th>
+            <th>fast</th>
         </tr>
         <tr id="test-1">
             <td style="width: 200px">"without breach of modesty"</td>
@@ -175,7 +175,7 @@
         var flexsearch_default = new FlexSearch();
         var flexsearch_memory = new FlexSearch("memory");
         var flexsearch_speed = new FlexSearch("speed");
-        var flexsearch_fastest = new FlexSearch("fastest");
+        var flexsearch_fast = new FlexSearch("fast");
         var flexsearch_match = new FlexSearch("match");
         var flexsearch_score = new FlexSearch("score");
         var flexsearch_balance = new FlexSearch("balance");
@@ -242,13 +242,13 @@
 
         // ---------------------------------------
 
-        console.time('flexsearch_fastest');
+        console.time('flexsearch_fast');
 
         for(var i = 0; i < data.length; i++){
-            flexsearch_fastest.add(i, data[i]);
+            flexsearch_fast.add(i, data[i]);
         }
 
-        console.timeEnd('flexsearch_fastest');
+        console.timeEnd('flexsearch_fast');
 
         // ---------------------------------------
 
@@ -301,7 +301,7 @@
                         break;
 
                     case 7:
-                        results = flexsearch_fastest.search(query);
+                        results = flexsearch_fast.search(query);
                         break;
                 }
 

@@ -1,11 +1,5 @@
 if(typeof module !== "undefined"){
 
-    // Node.js Stub
-
-    URL = function(string){};
-    URL.createObjectURL = function(val){};
-    Blob = function(string){};
-
     var env = process.argv[3] === "test" ? "min" : process.argv[3] === "test/" ? "light" : "";
     var expect = require("chai").expect;
     var FlexSearch = require("../" + (env ? "dist/": "") + "flexsearch" + (env ? "." + env : "") + ".js");
@@ -110,6 +104,7 @@ describe("Initialize", function(){
 
             encode: "icase",
             tokenize: "reverse",
+            resolution: 10,
             async: false,
             worker: false
         });
@@ -140,6 +135,17 @@ describe("Initialize", function(){
         expect(flexsearch_default).to.be.an.instanceOf(FlexSearch);
         expect(flexsearch_sync).to.be.an.instanceOf(FlexSearch);
         expect(flexsearch_async).to.be.an.instanceOf(FlexSearch);
+
+        it("Should have correct uuids", function(){
+
+            expect(flexsearch_default.id).to.equal(0);
+            expect(flexsearch_sync.id).to.equal(1);
+            expect(flexsearch_async.id).to.equal(2);
+            expect(flexsearch_icase.id).to.equal(3);
+            expect(flexsearch_simple.id).to.equal(4);
+            expect(flexsearch_advanced.id).to.equal(5);
+            expect(flexsearch_extra.id).to.equal(6);
+        });
     });
 
     it("Should have all provided methods", function(){
@@ -155,17 +161,6 @@ describe("Initialize", function(){
 
             expect(flexsearch_default).to.respondTo("info");
         }
-    });
-
-    it("Should have correct uuids", function(){
-
-        expect(flexsearch_default.id).to.equal(0);
-        expect(flexsearch_sync.id).to.equal(1);
-        expect(flexsearch_async.id).to.equal(2);
-        expect(flexsearch_icase.id).to.equal(3);
-        expect(flexsearch_simple.id).to.equal(4);
-        expect(flexsearch_advanced.id).to.equal(5);
-        expect(flexsearch_extra.id).to.equal(6);
     });
 
     it("Should have the correct options", function(){
@@ -1104,7 +1099,7 @@ if(env !== "light") describe("Suggestions", function(){
 // Where Clause
 // ------------------------------------------------------------------------
 
-if(env === "") describe("Where/Find", function(){
+if(env === "" || env === "min") describe("Where/Find", function(){
 
     var data = [{
         id: 0,
@@ -1128,8 +1123,7 @@ if(env === "") describe("Where/Find", function(){
         var index = new FlexSearch({
             doc: {
                 id: "id",
-                field: "title",
-                tag: "cat"
+                field: ["title"]
             }
         });
 
@@ -1175,10 +1169,445 @@ if(env === "") describe("Where/Find", function(){
 //  Multi-Field Documents
 // ------------------------------------------------------------------------
 
-if((typeof require !== "undefined") && !this._phantom){
+if(env !== "light") describe("Index Multi-Field Documents", function(){
 
-    require("./test.es6.js")(FlexSearch, env);
-}
+    var data = [{
+
+        id: 2,
+        data:{
+            title: "Title 3",
+            body: "Body 3"
+        }
+    },{
+        id: 1,
+        data:{
+            title: "Title 2",
+            body: "Body 2"
+        }
+    },{
+        id: 0,
+        data:{
+            title: "Title 1",
+            body: "Body 1"
+        }
+    }];
+
+    var update = [{
+
+        id: 0,
+        data:{
+            title: "Foo 1",
+            body: "Bar 1"
+        }
+    },{
+        id: 1,
+        data:{
+            title: "Foo 2",
+            body: "Bar 2"
+        }
+    },{
+        id: 2,
+        data:{
+            title: "Foo 3",
+            body: "Bar 3"
+        }
+    }];
+
+    it("Should have been indexed properly", function(){
+
+        var index = new FlexSearch({
+
+            doc: {
+
+                id: "id",
+                field: [
+                    "data:title",
+                    "data:body"
+                ]
+            }
+        });
+
+        index.add(data);
+
+        if(env === ""){
+
+            expect(index.doc.index[0].length).to.equal(3);
+            expect(index.doc.index[1].length).to.equal(3);
+        }
+
+        expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
+        expect(index.search({field: "data:title", query: "title"})).to.have.members(data);
+
+        expect(index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
+        expect(index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
+
+        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
+        expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
+
+        expect(index.search({query: "body"})).to.have.members(data);
+        expect(index.search("title")).to.have.members(data);
+
+        expect(index.search({
+
+            field: "data:title",
+            query: "title",
+            boost: 2
+
+        })).to.have.members(data);
+
+        expect(index.search([{
+
+            field: "data:title",
+            query: "body",
+            boost: 2
+        },{
+            field: "data:body",
+            query: "body",
+            boost: 2
+
+        }])).to.have.members(data);
+
+        expect(index.search("title", {
+
+            field: "data:title",
+            boost: 2
+
+        })).to.have.members(data);
+
+        expect(index.search("title", {
+
+            field: "data:body",
+            boost: 2
+
+        })).to.have.lengthOf(0);
+
+        expect(index.search("body", [{
+
+            field: "data:title",
+            boost: 2
+        },{
+            field: "data:body",
+            boost: 2
+
+        }])).to.have.members(data);
+
+        index.update(update);
+
+        expect(index.search("foo")).not.to.have.members(data);
+        expect(index.search("bar")).not.to.have.members(data);
+        expect(index.search("foo")).to.have.members(update);
+        expect(index.search("bar")).to.have.members(update);
+
+        index.remove(update);
+
+        if(env === ""){
+
+            expect(index.doc.index[0].length).to.equal(0);
+            expect(index.doc.index[1].length).to.equal(0);
+        }
+    });
+
+    it("Should have been indexed properly (custom fields)", function(){
+
+        var index = new FlexSearch({
+
+            doc: {
+
+                id: "id",
+                field: {
+                    "data:title": {
+                        encode: "advanced",
+                        tokenize: "reverse"
+                    },
+                    "data:body": {
+                        encode: "icase",
+                        tokenize: "strict"
+                    }
+                }
+            }
+        });
+
+        index.add(data);
+
+        if(env === ""){
+
+            expect(index.doc.index[0].length).to.equal(3);
+            expect(index.doc.index[1].length).to.equal(3);
+        }
+
+        expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
+        expect(index.search({field: "data:title", query: "tle"})).to.have.members(data);
+
+        expect(index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
+        expect(index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
+
+        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
+        expect(index.search({field: ["data:body", "data:title"], query: "tle"})).to.have.members(data);
+
+        expect(index.search({query: "body"})).to.have.members(data);
+        expect(index.search("tle")).to.have.members(data);
+
+        expect(index.search({
+
+            field: "data:title",
+            query: "tle"
+
+        })).to.have.members(data);
+
+        expect(index.search([{
+
+            field: "data:title",
+            query: "body"
+        },{
+            field: "data:body",
+            query: "body"
+
+        }])).to.have.members(data);
+
+        expect(index.search("tle", {
+
+            field: "data:title"
+
+        })).to.have.members(data);
+
+        expect(index.search("tle", {
+
+            field: "data:body"
+
+        })).to.have.lengthOf(0);
+
+        expect(index.search("body", [{
+
+            field: "data:title"
+        },{
+            field: "data:body"
+
+        }])).to.have.members(data);
+
+        index.update(update);
+
+        expect(index.search("foo")).not.to.have.members(data);
+        expect(index.search("bar")).not.to.have.members(data);
+        expect(index.search("foo")).to.have.members(update);
+        expect(index.search("bar")).to.have.members(update);
+
+        index.remove(update);
+
+        if(env === ""){
+
+            expect(index.doc.index[0].length).to.equal(0);
+            expect(index.doc.index[1].length).to.equal(0);
+        }
+    });
+
+    /*
+    it("Should have been indexed properly (tag)", function(){
+
+        var index = new FlexSearch({
+
+            doc: {
+
+                id: "id",
+                field: "data:body",
+                tag: "data:title"
+            }
+        });
+
+        index.add(data);
+
+        expect(index.doc.index[0].length).to.equal(3);
+        expect(index.doc.index[1].length).to.equal(3);
+
+        expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
+        expect(index.search({field: "data:title", query: "title"})).to.have.lengthOf(0);
+        expect(index.search({field: "data:title", query: "Title 1"})).to.have.members(data[0]);
+
+        expect(index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
+        expect(index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
+
+        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
+        expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
+
+        expect(index.search({query: "body"})).to.have.members(data);
+        expect(index.search("title")).to.have.members(data);
+
+        expect(index.search({
+
+            field: "data:title",
+            query: "title",
+            boost: 2
+
+        })).to.have.members(data);
+
+        expect(index.search([{
+
+            field: "data:title",
+            query: "body",
+            boost: 2
+        },{
+            field: "data:body",
+            query: "body",
+            boost: 2
+
+        }])).to.have.members(data);
+
+        expect(index.search("title", {
+
+            field: "data:title",
+            boost: 2
+
+        })).to.have.members(data);
+
+        expect(index.search("title", {
+
+            field: "data:body",
+            boost: 2
+
+        })).to.have.lengthOf(0);
+
+        expect(index.search("body", [{
+
+            field: "data:title",
+            boost: 2
+        },{
+            field: "data:body",
+            boost: 2
+
+        }])).to.have.members(data);
+
+        index.update(update);
+
+        expect(index.search("foo")).not.to.have.members(data);
+        expect(index.search("bar")).not.to.have.members(data);
+        expect(index.search("foo")).to.have.members(update);
+        expect(index.search("bar")).to.have.members(update);
+
+        index.remove(update);
+
+        expect(index.doc.index[0].length).to.equal(0);
+        expect(index.doc.index[1].length).to.equal(0);
+    });
+    */
+
+    /*
+    it("Should have been boosted properly", function(){
+
+        var index = new FlexSearch({
+
+            tokenize: "strict",
+            depth: 3,
+            doc: {
+                id: "id",
+                field: ["title", "body"]
+            }
+        });
+
+        index.add([{
+
+            id: 0,
+            title: "1 2 3 4 5",
+            body: "1 2 3 4 5"
+        },{
+            id: 1,
+            title: "1 2 3 4 5",
+            body: "1 2 5 4 3" // <-- body
+        },{
+            id: 2,
+            title: "1 2 5 4 3", // <-- title
+            body: "1 2 3 4 5"
+        }]);
+
+        expect(index.search([{
+
+            field: "title",
+            query: "5",
+            boost: 0.1
+        },{
+            field: "body",
+            query: "5",
+            boost: 9
+
+        }])[0].id).to.equal(1);
+
+        expect(index.search([{
+
+            field: "title",
+            query: "5",
+            boost: 9
+        },{
+            field: "body",
+            query: "5",
+            boost: 0.1
+
+        }])[0].id).to.equal(2);
+    });
+    */
+
+    it("Should have been sorted properly", function(){
+
+        var index = new FlexSearch({
+
+            doc: {
+                id: "id",
+                field: "data:title"
+            }
+        });
+
+        index.add(data);
+
+        var results = index.search({
+
+            field: "data:title",
+            query: "title"
+        });
+
+        expect(results[0]).to.equal(data[0]);
+        expect(results[1]).to.equal(data[1]);
+        expect(results[2]).to.equal(data[2]);
+
+        results = index.search({
+
+            query: "title",
+            field: "data:title",
+            sort: function(a, b){
+
+                const diff = a.id - b.id;
+                return (diff < 0 ? -1 : (diff ? 1 : 0));
+            }
+        });
+
+        expect(results[0]).to.equal(data[2]);
+        expect(results[1]).to.equal(data[1]);
+        expect(results[2]).to.equal(data[0]);
+
+        results = index.search({
+
+            query: "title",
+            field: "data:title",
+            sort: "id"
+        });
+
+        expect(results[0]).to.equal(data[2]);
+        expect(results[1]).to.equal(data[1]);
+        expect(results[2]).to.equal(data[0]);
+
+        results = index.search({
+
+            query: "title",
+            field: "data:title",
+            sort: "data:title"
+        });
+
+        expect(results[0]).to.equal(data[2]);
+        expect(results[1]).to.equal(data[1]);
+        expect(results[2]).to.equal(data[0]);
+    });
+
+    if(env === "" && (typeof require !== "undefined") && !this._phantom){
+
+        require("./test.es6.js");
+    }
+});
 
 // ------------------------------------------------------------------------
 // Export / Import
@@ -1202,12 +1631,11 @@ if(env !== "light") describe("Export / Import", function(){
         index.add({id: 1, title: "bar"});
         index.add({id: 2, title: "foobar"});
 
+        data = index.export();
+
         if(env === ""){
 
             expect(index.doc.index[0].length).to.equal(3);
-
-            data = index.export();
-
             expect(data).to.equal(JSON.stringify([
                 [
                     index.doc.index[0]._map,
@@ -1216,10 +1644,6 @@ if(env !== "light") describe("Export / Import", function(){
                 ],
                 index._doc
             ]));
-        }
-        else{
-
-            data = index.export();
         }
     });
 

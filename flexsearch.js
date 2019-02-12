@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.5.0
+ * @preserve FlexSearch v0.5.1
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -41,15 +41,17 @@
             async: false,
             worker: false,
             rtl: false,
+            doc: false,
+            paging: false,
 
-            // minimum scoring (0 - 9)
+            // maximum scoring
+            resolution: 9,
+
+            // minimum scoring
             threshold: 0,
 
             // contextual depth
-            depth: 0,
-
-            // multi-field documents
-            doc: false
+            depth: 0
         };
 
         /**
@@ -62,39 +64,46 @@
             "memory": {
                 encode: SUPPORT_ENCODER ? "extra" : "icase",
                 tokenize: "strict",
-                threshold: 7
+                threshold: 0,
+                resolution: 1
             },
 
             "speed": {
                 encode: "icase",
                 tokenize: "strict",
-                threshold: 7,
+                threshold: 1,
+                resolution: 3,
                 depth: 2
             },
 
             "match": {
                 encode: SUPPORT_ENCODER ? "extra" : "icase",
-                tokenize: "full"
+                tokenize: "full",
+                threshold: 1,
+                resolution: 3
             },
 
             "score": {
                 encode: SUPPORT_ENCODER ? "extra" : "icase",
                 tokenize: "strict",
-                threshold: 5,
+                threshold: 1,
+                resolution: 9,
                 depth: 4
             },
 
             "balance": {
                 encode: SUPPORT_ENCODER ? "balance" : "icase",
                 tokenize: "strict",
-                threshold: 6,
+                threshold: 0,
+                resolution: 3,
                 depth: 3
             },
 
-            "fastest": {
+            "fast": {
                 encode: "icase",
                 tokenize: "strict",
-                threshold: 9,
+                threshold: 8,
+                resolution: 9,
                 depth: 1
             }
         };
@@ -113,19 +122,6 @@
          */
 
         let id_counter = 0;
-
-        /**
-         * @enum {number}
-         */
-
-        /*
-        const enum_task = {
-
-            add: 0,
-            update: 1,
-            remove: 2
-        };
-        */
 
         /**
          * NOTE: This could make issues on some languages (chinese, korean, thai)
@@ -295,6 +291,14 @@
             return this;
         }
 
+        const tag_options = {
+
+            "encode": false,
+            "tokenize": function(doc){
+                return [doc];
+            }
+        };
+
         /**
          * @param {Object<string, number|string|boolean|Object|function(string):string>|string=} options
          * @param {Object<string, number|string|boolean>=} settings
@@ -433,6 +437,23 @@
             );
 
             /** @private */
+            this.resolution = (
+
+                is_undefined(custom = options["resolution"]) ?
+
+                    custom = preset.resolution ||
+                    this.resolution ||
+                    defaults.resolution
+                :
+                    custom
+            );
+
+            if(custom <= this.threshold){
+
+                this.resolution = this.threshold + 1;
+            }
+
+            /** @private */
             this.depth = (
 
                 is_undefined(custom = options["depth"]) ?
@@ -443,6 +464,27 @@
                 :
                     custom
             );
+
+            /** @private */
+            this.paging = (
+
+                is_undefined(custom = options["paging"]) ?
+
+                    this.paging ||
+                    defaults.paging
+                :
+                    custom
+            );
+
+            // TODO: provide boost
+
+            /** @private */
+            /*
+            this.boost = (
+
+                (custom = options["boost"]) ? custom : 0
+            );
+            */
 
             if(SUPPORT_SUGGESTIONS){
 
@@ -511,7 +553,7 @@
             // initialize primary index
 
             /** @private */
-            this._map = create_object_array(10 - (this.threshold || 0));
+            this._map = create_object_array(this.resolution - (this.threshold || 0));
             /** @private */
             this._ctx = create_object();
             /** @private */
@@ -529,11 +571,35 @@
                 let field = doc["field"];
                 let tag = doc["tag"];
 
-                doc["id"] = doc["id"].split(":");
+                if(!is_array(doc["id"])){
+
+                    doc["id"] = doc["id"].split(":");
+                }
 
                 if(SUPPORT_WHERE && tag){
 
                     this._tag = create_object();
+
+                    let field_custom = create_object();
+
+                    if(field){
+
+                        if(is_string(field)){
+
+                            field_custom[field] = options;
+                        }
+                        else if(is_array(field)){
+
+                            for(let i = 0; i < field.length; i++){
+
+                                field_custom[field[i]] = options;
+                            }
+                        }
+                        else if(is_object(field)){
+
+                            field_custom = field;
+                        }
+                    }
 
                     if(!is_array(tag)){
 
@@ -542,30 +608,57 @@
 
                     for(let i = 0; i < tag.length; i++){
 
-                        this._tag[tag[i]] = create_object();
+                        //TODO: delegate tag indexes to intersection
+                        //field_custom[tag[i]] = tag_options;
 
-                        tag[i] = tag[i].split(":");
+                        this._tag[tag[i]] = create_object();
                     }
+
+                    this._tags = tag;
+
+                    field = field_custom;
                 }
 
                 if(field){
 
+                    let has_custom;
+
                     if(!is_array(field)){
 
-                        doc["field"] = field = [field];
+                        if(is_object(field)){
+
+                            has_custom = field;
+                            doc["field"] = field = get_keys(field);
+                        }
+                        else{
+
+                            doc["field"] = field = [field];
+                        }
                     }
 
                     for(let i = 0; i < field.length; i++){
 
-                        ref[field[i]] = i;
-                        field[i] = field[i].split(":");
+                        if(!is_array(field[i])){
+
+                            if(has_custom){
+
+                                options = has_custom[field[i]];
+                            }
+
+                            ref[field[i]] = i;
+                            field[i] = field[i].split(":");
+                        }
+
+                        // TODO: move fields to main index to provide pagination
+
                         index[i] = new FlexSearch(options);
                         index[i]._doc = this._doc;
 
-                        if(SUPPORT_WHERE && tag){
-
-                            index[i]._tag = this._tag;
-                        }
+                        // if(SUPPORT_WHERE && tag){
+                        //
+                        //     index[i]._tag = this._tag;
+                        //     index[i]._tags = tag;
+                        // }
                     }
                 }
             }
@@ -826,6 +919,7 @@
 
                 const threshold = this.threshold;
                 const depth = this.depth;
+                const resolution = this.resolution;
                 const map = this._map;
                 const word_length = words.length;
                 const rtl = this.rtl;
@@ -863,7 +957,8 @@
                                         id,
                                         rtl ? 1 : (length - a) / length,
                                         context_score,
-                                        threshold
+                                        threshold,
+                                        resolution - 1
                                     );
                                 }
 
@@ -885,7 +980,8 @@
                                         id,
                                         rtl ? (a + 1) / length : 1,
                                         context_score,
-                                        threshold
+                                        threshold,
+                                        resolution - 1
                                     );
                                 }
 
@@ -909,7 +1005,8 @@
                                             id,
                                             partial_score,
                                             context_score,
-                                            threshold
+                                            threshold,
+                                            resolution - 1
                                         );
                                     }
                                 }
@@ -930,13 +1027,14 @@
                                     // TODO compute and pass distance of ngram sequences as the initial score for each word
                                     1,
                                     context_score,
-                                    threshold
+                                    threshold,
+                                    resolution - 1
                                 );
 
                                 if(depth && (word_length > 1) && (score >= threshold)){
 
                                     const ctxDupes = dupes["_ctx"][value] || (dupes["_ctx"][value] = create_object());
-                                    const ctxTmp = this._ctx[value] || (this._ctx[value] = create_object_array(10 - (threshold || 0)));
+                                    const ctxTmp = this._ctx[value] || (this._ctx[value] = create_object_array(resolution - (threshold || 0)));
 
                                     let x = i - depth;
                                     let y = i + depth + 1;
@@ -953,8 +1051,9 @@
                                             words[x],
                                             id,
                                             0,
-                                            10 - (x < i ? i - x : x - i),
-                                            threshold
+                                            resolution - (x < i ? i - x : x - i),
+                                            threshold,
+                                            resolution - 1
                                         );
                                     }
                                 }
@@ -986,24 +1085,24 @@
 
             /**
              * @param {!string} job
-             * @param docs
+             * @param doc
              * @param {Function=} callback
              * @returns {*}
              */
 
-            FlexSearch.prototype.handle_docs = function(job, docs, callback){
+            FlexSearch.prototype.handle_docs = function(job, doc, callback){
 
-                if(is_array(docs)){
+                if(is_array(doc)){
 
-                    for(let i = 0, len = docs.length; i < len; i++){
+                    for(let i = 0, len = doc.length; i < len; i++){
 
                         if(i === len - 1){
 
-                            return this.handle_docs(job, docs[i], callback);
+                            return this.handle_docs(job, doc[i], callback);
                         }
                         else{
 
-                            this.handle_docs(job, docs[i]);
+                            this.handle_docs(job, doc[i]);
                         }
                     }
                 }
@@ -1014,23 +1113,37 @@
                     let tree = this.doc["id"];
                     let id;
                     let tag;
+                    let tag_key;
+                    let tag_value;
 
                     for(let i = 0; i < tree.length; i++){
 
-                        id = (id || docs)[tree[i]];
+                        id = (id || doc)[tree[i]];
                     }
 
                     if(tags){
 
                         for(let i = 0; i < tags.length; i++){
 
-                            tag = (tag || docs)[tags[i]];
+                            tag_key = tags[i];
+
+                            const tag_split = tag_key.split(":");
+
+                            for(let i = 0; i < tag_split.length; i++){
+
+                                tag_value = (tag_value || doc)[tag_split[i]];
+                            }
+
+                            tag_value = "@" + tag_value;
                         }
+
+                        tag = this._tag[tag_key];
+                        tag = tag[tag_value] || (tag[tag_value] = []);
                     }
 
                     if(job === "remove"){
 
-                        delete this._doc["@" + id];
+                        delete this._doc[id];
 
                         for(let z = 0, length = index.length; z < length; z++){
 
@@ -1047,6 +1160,11 @@
 
                     tree = this.doc["field"];
 
+                    if(tag){
+
+                        tag[tag.length] = doc; // tag[tag.length] = id;
+                    }
+
                     for(let i = 0, len = tree.length; i < len; i++){
 
                         const branch = tree[i];
@@ -1054,20 +1172,23 @@
 
                         for(let x = 0; x < branch.length; x++){
 
-                            content = (content || docs)[branch[x]];
+                            content = (content || doc)[branch[x]];
                         }
 
-                        this._doc["@" + id] = docs;
+                        this._doc[id] = doc;
 
                         const self = index[i];
-                        const fn = (
 
-                            job === "add" ?
+                        let fn;
 
-                                self.add
-                            :
-                                self.update
-                        );
+                        if(job === "add"){
+
+                            fn = self.add;
+                        }
+                        else{
+
+                            fn = self.update;
+                        }
 
                         if(i === len - 1){
 
@@ -1199,7 +1320,7 @@
                     profile_start("remove");
                 }
 
-                for(let z = 0; z < (10 - (this.threshold || 0)); z++){
+                for(let z = 0; z < (this.resolution - (this.threshold || 0)); z++){
 
                     remove_index(this._map[z], id);
                 }
@@ -1257,6 +1378,8 @@
         }
 
         /**
+         * TODO: move fields to main index to provide pagination
+         *
          * @param {!string|Object|Array<Object>} query
          * @param {number|Function=} limit
          * @param {Function=} callback
@@ -1287,9 +1410,10 @@
 
             let _query = query;
             let threshold;
-            let boost;
+            //let boost;
             let where;
             let sort;
+            let cursor;
             let result = [];
 
             if(is_object(query) && (!SUPPORT_DOCUMENTS || !is_array(query))){
@@ -1308,11 +1432,12 @@
 
                 if(SUPPORT_DOCUMENTS){
 
-                    boost = query["boost"];
+                    //boost = query["boost"];
                     where = query["where"];
                     sort = query["sort"];
                 }
 
+                //cursor = this.paging && query["cursor"];
                 limit = query["limit"];
                 threshold = query["threshold"];
                 query = query["query"];
@@ -1347,6 +1472,11 @@
 
                 if(is_object(field)){
 
+                    if(sort){
+
+                        _query["sort"] = null;
+                    }
+
                     if(!is_array(field)){
 
                         field = [field];
@@ -1364,7 +1494,6 @@
                         const ref = doc_ref[field[i]];
 
                         // TODO: Support Field-Merging (return array before intersection and apply here)
-
                         result[i] = doc_idx[ref].search(_query);
                     }
 
@@ -1419,6 +1548,7 @@
 
                         "search": true,
                         "limit": limit,
+                        //"cursor": cursor,
                         "threshold": threshold,
                         "content": query
                     });
@@ -1551,21 +1681,45 @@
                 }
             }
 
+            /*
+            if(SUPPORT_WHERE && where){
+
+                const tags = this._tags;
+
+                if(tags){
+
+                    for(let i = 0; i < tags.length; i++){
+
+                        const current_tag = tags[i];
+                        const current_where = where[current_tag];
+
+                        if(!is_undefined(current_where)){
+
+                            check[check.length] = this._tag[current_tag]["@" + current_where];
+
+                            delete where[current_tag];
+                        }
+                    }
+
+                    if(get_keys(where).length === 0){
+
+                        where = false;
+                    }
+                }
+            }
+            */
+
             let ctx_map;
 
             if(!use_contextual || (ctx_map = this._ctx)[ctx_root]){
 
-                let initial_z = 0;
+                let resolution = this.resolution;
 
-                if(SUPPORT_DOCUMENTS && boost){
-
-                    threshold = (threshold || 1) / boost;
-
-                    if(boost < 0){
-
-                        initial_z = threshold;
-                    }
-                }
+                // TODO: boost on custom search is actually not possible, move to adding index instead
+                // if(SUPPORT_DOCUMENTS && boost){
+                //
+                //     threshold = (threshold || 1) / boost;
+                // }
 
                 for(let a = (use_contextual ? 1 : 0); a < length; a++){
 
@@ -1589,7 +1743,7 @@
 
                                 let map_value;
 
-                                for(let z = initial_z; z < (10 - threshold); z++){
+                                for(let z = 0; z < (resolution - threshold); z++){
 
                                     if((map_value = map[z][value])){
 
@@ -1639,7 +1793,7 @@
 
                 // Not handled by intersection:
 
-                result = intersect(check, limit, SUPPORT_DOCUMENTS && this._doc, SUPPORT_SUGGESTIONS && this.suggest);
+                result = intersect(check, limit, cursor, SUPPORT_DOCUMENTS && this._doc, SUPPORT_SUGGESTIONS && this.suggest);
 
                 // Handled by intersection:
 
@@ -1651,7 +1805,7 @@
                 result = this.where(where, null, limit, result);
             }
 
-            if(sort){
+            if(SUPPORT_DOCUMENTS && sort){
 
                 result = merge_and_sort([result], sort);
             }
@@ -1702,11 +1856,20 @@
                 let has_value;
                 let tree;
 
-                if(is_string(key)){
+                if(typeof key === "number"){
+
+                    return [doc[key]];
+                }
+                else if(is_string(key)){
+
+                    if(is_undefined(value)){
+
+                        return [doc[key]];
+                    }
 
                     if(key === "id"){
 
-                        return [doc["@" + value]];
+                        return [doc[value]];
                     }
 
                     //keys = [key];
@@ -1740,7 +1903,40 @@
 
                     if((keys_len === 1) && (keys[0] === "id")){
 
-                        return [doc["@" + key["id"]]];
+                        return [doc[key["id"]]];
+                    }
+
+                    const tags = this._tags;
+
+                    if(tags && !result){
+
+                        for(let i = 0; i < tags.length; i++){
+
+                            const current_tag = tags[i];
+                            const current_where = key[current_tag];
+
+                            if(!is_undefined(current_where)){
+
+                                result = this._tag[current_tag]["@" + current_where];
+                                //result = result.slice(0, limit && (limit < result.length) ? limit : result.length);
+
+                                if(--keys_len === 0){
+
+                                    return result;
+                                }
+
+                                keys.splice(keys.indexOf(current_tag), 1);
+
+                                // TODO: delete from original reference?
+                                delete key[current_tag];
+                                break;
+                            }
+                        }
+
+                        // for(let i = 0; i < result.length; i++){
+                        //
+                        //     result[i] = this._doc[result[i]];
+                        // }
                     }
 
                     tree = new Array(keys_len);
@@ -1799,7 +1995,7 @@
                 }
 
                 return results;
-            }
+            };
         }
 
         if(SUPPORT_INFO){
@@ -1828,7 +2024,7 @@
                     words = 0,
                     chars = 0;
 
-                for(let z = 0; z < (10 - (this.threshold || 0)); z++){
+                for(let z = 0; z < (this.resolution - (this.threshold || 0)); z++){
 
                     keys = get_keys(this._map[z]);
 
@@ -2225,35 +2421,7 @@
         } : {
 
             "icase": global_encoder_icase
-            //"balance": global_encoder_balance
         };
-
-        // Async Handler
-
-        /*
-        const queue = SUPPORT_ASYNC ? (function(){
-
-            const stack = create_object();
-
-            return function(fn, delay, key){
-
-                const timer = stack[key];
-
-                if(timer){
-
-                    clearTimeout(timer);
-                }
-
-                return (
-
-                    stack[key] = setTimeout(fn, delay)
-                );
-            };
-
-        }()) : null;
-        */
-
-        // Flexi-Cache
 
         const Cache = SUPPORT_CACHE ? (function(){
 
@@ -2452,9 +2620,10 @@
          * @param {number} partial_score
          * @param {number} context_score
          * @param {number} threshold
+         * @param {number} resolution
          */
 
-        function add_index(map, dupes, value, id, partial_score, context_score, threshold){
+        function add_index(map, dupes, value, id, partial_score, context_score, threshold, resolution){
 
             /*
             if(index_blacklist[value]){
@@ -2472,7 +2641,7 @@
 
                 partial_score ?
 
-                    (9 - (threshold || 6)) * context_score + (threshold || 6) * partial_score
+                    (resolution - (threshold || (resolution / 1.5))) * context_score + (threshold || (resolution / 1.5)) * partial_score
                     //(9 - (threshold || 4.5)) * context_score + (threshold || 4.5) * partial_score
                     //4.5 * (context_score + partial_score)
                 :
@@ -2483,7 +2652,7 @@
 
             if(score >= threshold){
 
-                let arr = map[9 - ((score + 0.5) >> 0)];
+                let arr = map[resolution - ((score + 0.5) >> 0)];
                     arr = arr[value] || (arr[value] = []);
 
                 arr[arr.length] = id;
@@ -2849,12 +3018,13 @@
         /**
          * @param {!Array<Array<number|string>>} arrays
          * @param {number=} limit
+         * @param {number=} cursor
          * @param {Object=} docs
          * @param {boolean=} suggest
          * @returns {Array}
          */
 
-        function intersect(arrays, limit, docs, suggest) {
+        function intersect(arrays, limit, cursor, docs, suggest) {
 
             let result = [];
             let suggestions;
@@ -2885,8 +3055,6 @@
 
                 while(++z < length_z){
 
-                    // get each array one by one
-
                     let found = false;
                     const is_final_loop = (z === (length_z - 1));
 
@@ -2911,9 +3079,20 @@
 
                                 if(is_final_loop){
 
-                                    result[count++] = docs ? docs[index] : tmp;
+                                    result[count++] = docs ? docs[tmp] : tmp;
 
                                     if(limit && (count === limit)){
+
+                                        // if(cursor){
+                                        //
+                                        //     return {
+                                        //
+                                        //         "current": cursor,
+                                        //         "prev": null,
+                                        //         "next": z + ":" + i,
+                                        //         "result": result
+                                        //     };
+                                        // }
 
                                         return result;
                                     }
@@ -2963,7 +3142,7 @@
 
                                 for(i = 0, length = tmp.length; i < length; i++){
 
-                                    result[count++] = docs ? docs["@" + tmp[i]] : tmp[i];
+                                    result[count++] = docs ? docs[tmp[i]] : tmp[i];
 
                                     if(limit && (count === limit)){
 
@@ -2991,7 +3170,7 @@
 
                     for(let i = 0; i < length; i++){
 
-                        result[i] = docs["@" + arr[i]];
+                        result[i] = docs[arr[i]];
                     }
                 }
                 else{
