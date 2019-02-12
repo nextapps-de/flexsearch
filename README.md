@@ -3,23 +3,21 @@
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch.svg" alt="Search Library" width="50%">
     <br><br>
     <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
-    <!--<img src="https://img.shields.io/badge/status-BETA-orange.svg">-->
     <a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
     <a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master"></a>
     <a target="_blank" href="https://www.codacy.com/app/ts-thomas/FlexSearch?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nextapps-de/flexsearch&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/a896e010f6b4429aa7bc9a89550320a7"/></a>
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>
-    <!--<img src="https://badges.greenkeeper.io/nextapps-de/flexsearch.svg">-->
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 </p>
 
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
-When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-word matching, phonetic transformations or partial matching. 
-Depending on the used options it also provides the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating and/or removing existing items from the index has a significant cost. When your index needs to be updated very often then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
+When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
+Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating __existing__ items or removing items from the index has a significant cost. When existing items of your index needs to be updated/removed continuously then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
-FlexSearch Server is also available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
+FlexSearch Server is available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
 
 <a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
@@ -390,7 +388,7 @@ Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/
 <a name="notes" id="notes"></a>
 _* Index Size: The size of memory the index requires_<br>
 _** Memory Allocation: The amount of memory which was additionally allocated during a row of 10 queries_<br>
-_*** The preset "fastest" was used for this test_ <br>
+_*** The preset "fast" was used for this test_ <br>
 _**** The preset "memory" was used for this test_ 
 
 Library Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
@@ -398,27 +396,56 @@ Library Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/mast
 <a name="contextual"></a>
 ## Contextual Search
 
+> __Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
+
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additionally memory (depending on ___depth___).
+The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.<!--Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?-->
+In this way contextual search also <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
+
 > "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithms today. They don't provide neither: a meaningful relevance of a term nor the importance of it! Like many pseudo-intelligent algorithms this is also just an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additionally memory.
-The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.
-Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?
-In this way contextual search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">also improves the results of relevance-based queries</a> on large amount of text data.
+#### Model of context-based scoring
 
 <p align="center">
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg">
 </p>
 
-__Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
-
-#### Compare BulkSearch vs. FlexSearch
+<a name="dictionary"></a>
+#### Lexical Pre-Scored Dictionary / Context-based Map
+The index consists of an in-memory pre-scored dictionary as its base. The biggest complexity of these algorithm occurs during the calculation of intersections. As a consequence each additional term in the query has a significant potential to increase complexity. A contextual map comes into play __when the query contains more than 1 term__ and increase effect for each additional term by cutting down the complexity for the intersection calculations. Instead of an increase, the complexity is lowered for each additional term. The contextual index itself is also based on a pre-scored dictionary and follows a memory-friendly strategy.
 
 <table>
     <tr></tr>
     <tr>
-        <td align="left"></th>
-        <td align="left"><b>BulkSearch</b></th>
-        <td align="left"><b>FlexSearch</b></th>
+        <td align="left">Type</td>
+        <td align="left">Complexity</td>
+    </tr>
+    <tr>
+        <td align="left">Each single term query:</td>
+        <td align="left"><i>1</i></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="left">Lexical Pre-Scored Dictionary (Solo):</td>
+        <td align="left"><i>TERM_COUNT * TERM_MATCHES</i></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="left">Lexical Pre-Scored Dictionary + Context-based Map:</td>
+        <td align="left"><i>TERM_MATCHES / TERM_COUNT</i></td>
+    </tr>
+</table>
+
+The complexity for one single term is always 1.
+
+## Compare BulkSearch vs. FlexSearch
+
+<table>
+    <tr></tr>
+    <tr>
+        <td align="left"></td>
+        <td align="left"><b>BulkSearch</b></td>
+        <td align="left"><b>FlexSearch</b></td>
     </tr>
     <tr>
         <td>Access</td>
@@ -435,7 +462,7 @@ __Note:__ This feature is actually not enabled by default. Read <a href="#contex
     <tr>
         <td>Index Type</td>
         <td>Bulk of encoded string data divided into chunks</td>
-        <td><ol><li>Lexical pre-scored dictionary</li><li>Contextual-based map</li></ol></td>
+        <td><ol><li>Lexical pre-scored dictionary</li><li>Context-based map</li></ol></td>
     </tr>
     <tr></tr>
     <tr>
@@ -447,7 +474,7 @@ __Note:__ This feature is actually not enabled by default. Read <a href="#contex
     <tr>
         <td>Weaks</td>
         <td><ul><li>less powerful contextual search</li><li>less memory efficient (has to be defragmented from time to time)</li></ul></td>
-        <td><ul><li>updating / deleting existing items from index is slow</li><li>adding items to the index optimized for super partial matching (tokenize: "full") is slow</li></ul></td>
+        <td><ul><li>updating existing / deleting items from index is slow</li><li>adding items to the index optimized for partial matching (tokenize: "forward" / "reverse" / "full") is slow</li></ul></td>
     </tr>
     <tr></tr>
     <tr>
@@ -455,14 +482,14 @@ __Note:__ This feature is actually not enabled by default. Read <a href="#contex
         <td>Yes</td>
         <td>No</td>
     </tr>
-    <!--
     <tr></tr>
     <tr>
-        <td>Query Wildcards</td>
+        <td>Wildcards</td>
         <td>Yes</td>
         <td>No</td>
     </tr>
     <tr></tr>
+    <!--
     <tr>
         <td>Ranked Searching</td>
         <td>Yes</td>
@@ -564,6 +591,8 @@ Index methods:
 - <a href="#index.destroy">Index.__destroy__()</a>
 - <a href="#index.init">Index.__init__(\<options\>)</a>
 - <a href="#index.info">Index.__info__()</a>
+- <a href="#where">Index.__find__()</a>
+- <a href="#where">Index.__where__()</a>
 - <a href="#index.addmatcher">Index.__addMatcher__({_KEY: VALUE_})</a>
 - <a href="#index.encode">Index.__encode__(string)</a>
 - <a href="#index.export">Index.__export__()</a>
@@ -1297,7 +1326,7 @@ index.where(function(item){
 });
 ```
 
-#### Combine fuzzy search with a where-clause:
+#### Combine fuzzy search with a where-clause
 
 Add some content, e.g.:
 ```js
@@ -1331,7 +1360,9 @@ index.search("foo", {
 <a name="tags"></a>
 ## Tags
 
-Tagging is pretty much the same like adding an index to a database column. Whenever you use ___where___ on an indexed/tagged attribute will improve performance drastically but also at a cost of additional memory.
+> __IMPORTANT NOTICE:__ This feature will be removed due to the lack of scaling and redundancy.
+
+Tagging is pretty much the same like adding an additional index to a database column. Whenever you use ___where___ on an indexed/tagged attribute will improve performance drastically but also at a cost of additional memory.
 
 > The colon notation also has to be applied for tags respectively.
 
@@ -1541,7 +1572,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
             "match"<br>
             "score"<br>
             "balance"<br>
-            "fastest"
+            "fast"
         </td>
         <td vertical-align="top">
             The <a href="#presets">configuration profile</a>. Choose your preferation.<br>
@@ -1629,7 +1660,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
         <td align="top">depth<br><br></td>
         <td>
             false<br>
-            {number:0-9}
+            {number}
         </td>
         <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance.</td>
     </tr>
@@ -1638,9 +1669,17 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
         <td align="top">threshold<br><br></td>
         <td>
             false<br>
-            {number:0-9}
+            {number}
         </td>
         <td>Enable/Disable the threshold of minimum relevance all results should have.<br><br>Note: It is also possible to set a lower threshold for indexing and pass a higher value when calling <i>index.search(options)</i>.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td align="top">resolution</td>
+        <td>
+            {number}
+        </td>
+        <td>Sets the scoring resolution (default: 9).</td>
     </tr>
     <tr></tr>
     <tr>
@@ -1664,7 +1703,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">rtl<br><br><br></td>
+        <td align="top">rtl<br><br></td>
         <td>
             true<br>
             false
@@ -1966,6 +2005,8 @@ The required memory for the index depends on several options:
     </tr>
 </table>
 
+Adding, removing or updating existing items has a similar complexity.
+
 <a name="consumption"></a>
 #### Compare Memory Consumption
 
@@ -1983,7 +2024,8 @@ __"default"__: Standard profile
 ```js
 {
     encode: "icase",
-    tokenize: "forward"
+    tokenize: "forward",
+    resolution: 9
 }
 ```
 
@@ -1992,7 +2034,8 @@ __"memory"__: Memory-optimized profile
 {
     encode: "extra",
     tokenize: "strict",
-    threshold: 7
+    threshold: 0,
+    resolution: 1
 }
 ```
 
@@ -2002,7 +2045,8 @@ __"speed"__: Speed-optimized profile
 {
     encode: "icase",
     tokenize: "strict",
-    threshold: 7,
+    threshold: 1,
+    resolution: 3,
     depth: 2
 }
 ```
@@ -2012,7 +2056,9 @@ __"match"__: Matching-tolerant profile
 ```js
 {
     encode: "extra",
-    tokenize: "full"
+    tokenize: "full",
+    threshold: 1,
+    resolution: 3
 }
 ```
 
@@ -2022,8 +2068,9 @@ __"score"__: Relevance-optimized profile
 {
     encode: "extra",
     tokenize: "strict",
-    threshold: 5,
-    depth: 5
+    threshold: 1,
+    resolution: 9,
+    depth: 4
 }
 ```
 
@@ -2033,17 +2080,19 @@ __"balance"__: Most-balanced profile
 {
     encode: "balance",
     tokenize: "strict",
-    threshold: 6,
+    threshold: 0,
+    resolution: 3,
     depth: 3
 }
 ```
 
-__"fastest"__: Absolute fastest profile
+__"fast"__: Absolute fastest profile
 
 ```js
 {
     encode: "icase",
-    threshold: 9,
+    threshold: 8,
+    resolution: 9,
     depth: 1
 }
 ```
@@ -2051,6 +2100,41 @@ __"fastest"__: Absolute fastest profile
 Compare these presets:
 - <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
 - <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
+
+## Performance Guide
+
+Methods to retrieve results sorted from fastest to slowest:
+
+1. `index.find(id) -> doc`
+2. `index.where({field: string}) -> Arrary<doc>` with a tag on the same field
+3. `index.search(query) -> Arrary<id>` when just adding _id_ and _content_ to the index (no documents)
+4. `index.search(query) -> Arrary<doc>` when using documents
+5. `index.search(query, { where }) -> Arrary<doc>` when using documents and a where clause
+6. `index.where({field: [string, string]}) -> Arrary<doc>` when a tag was set to one of two fields
+7. `index.where({field: string}) -> Arrary<doc>` when no tag was set to this field
+
+Methods to change index from fastest to slowest:
+
+1. `index.add(id, string)`
+2. `index.add(docs)`
+3. `index.delete(id, string)`
+4. `index.delete(docs)`
+5. `index.update(id, string)`
+6. `index.update(docs)`
+
+Performance Checklist:
+
+- Using just id-content-pairs for the index performs almost faster than using docs
+- An additional where-clause in `index.search()` has a significant cost
+- When adding multiple fields of documents to the index try to set the lowest possible preset for each field
+- Make sure the auto-balanced ___cache___ is enabled and has a meaningful value
+- Using `index.where()` to find documents is very slow when not using a tagged field
+- Getting a document by ID via `index.find(id)` is extremely fast
+- Do not enable ___async___ as well as ___worker___ when the index does not claim it
+- Use numeric IDs (the datatype length of IDs influences the memory consumption significantly)
+- Verify if you can activate _contextual index_ by setting the ___depth___ to a minimum meaningful value and tokenizer to ___"strict"___
+- Pass a ___limit___ when searching (lower values performs better)
+- Pass a minimum ___threshold___ when searching (higher values performs better)
 
 ## Best Practices
 
@@ -2064,7 +2148,39 @@ var adventure = new FlexSearch();
 var comedy = new FlexSearch();
 ```
 
-This way you can also provide different settings for each category.
+This way you can also provide different settings for each category. This is actually the fastest way to perform a fuzzy search.
+
+To make this workaround more extendable you can use a short helper:
+
+```js
+var index = {};
+
+function add(id, cat, content){
+    (index[cat] || (
+        index[cat] = new FlexSearch
+    )).add(id, content);
+}
+
+function search(cat, query){
+    return index[cat] ? 
+        index[cat].search(query) : [];
+}
+```
+
+Add content to the index:
+```js
+add(1, "action", "Movie Title");
+add(2, "adventure", "Movie Title");
+add(3, "comedy", "Movie Title");
+```
+
+Perform queries:
+```js
+var results = search("action", "movie title"); // --> [1]
+```
+
+<!--
+##### Split Complexity by Tags (Document Indexes)
 
 You can also gets the same effect when using documents in combination with tags and a ___where___ clause, e.g.:
 
@@ -2075,7 +2191,7 @@ var movies = new FlexSearch({
         title: "title"
     },
     tag:{
-        cat: "cat",
+        cat: "cat"
     }
 });
 ```
@@ -2097,13 +2213,16 @@ var results = search("movie title", {
     }
 });
 ```
+-->
 
-Filter queries by categories will hugely improve performance.
+Split indexes by categories improves performance significantly.
+
 
 ##### Use numeric IDs
 
 It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
 
+<!--
 e.g. instead of this:
 ```js
 index.add("fdf12cad-8779-47ab-b614-4dbbd649178b", "content");
@@ -2122,6 +2241,7 @@ index.add(index_table["fdf12cad-8779-47ab-b614-4dbbd649178b"], "content");
 ```
 
 It is planned to provide a built-in feature which should replace this workaround.
+-->
 
 <a name="export"></a>
 ## Export/Import Index
@@ -2283,6 +2403,11 @@ node compile SUPPORT_WORKER=true
     <tr></tr>
     <tr>
         <td>SUPPORT_DOCUMENTS</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_WHERE</td>
         <td>true, false</td>
     </tr>
     <tr></tr>
