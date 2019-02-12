@@ -1010,6 +1010,92 @@ describe("Options", function(){
 });
 
 // ------------------------------------------------------------------------
+// Filter Tests
+// ------------------------------------------------------------------------
+
+describe("Filter", function(){
+
+    it("Should have been filtered properly", function(){
+
+        var index = new FlexSearch({
+            encode: "icase",
+            tokenize: "strict",
+            filter: ["in", "the"]
+        });
+
+        index.add(0, "Today in the morning.");
+
+        expect(index.length).to.equal(1);
+        expect(index.search("today in the morning.")).to.include(0);
+        expect(index.search("today morning")).to.include(0);
+        expect(index.search("in the")).to.have.length(0);
+    });
+
+    it("Should have been filtered properly (custom function)", function(){
+
+        var index = new FlexSearch({
+            encode: "icase",
+            tokenize: "strict",
+            filter: function(word){
+                return word.length > 3;
+            }
+        });
+
+        index.add(0, "Today in the morning.");
+
+        expect(index.length).to.equal(1);
+        expect(index.search("today in the morning.")).to.include(0);
+        expect(index.search("today morning")).to.include(0);
+        expect(index.search("in the")).to.have.length(0);
+    });
+});
+
+describe("Stemmer", function(){
+
+    it("Should have been stemmed properly", function(){
+
+        var index = new FlexSearch({
+            encode: "icase",
+            tokenize: "reverse",
+            stemmer: {
+                "ization": "ize",
+                "tional": "tion"
+            }
+        });
+
+        index.add(0, "Just a multinational colonization.");
+
+        expect(index.length).to.equal(1);
+        expect(index.search("Just a multinational colonization.")).to.include(0);
+        expect(index.search("multinational colonization")).to.include(0);
+        expect(index.search("tional tion")).to.have.length(0);
+    });
+
+    it("Should have been stemmed properly (custom function)", function(){
+
+        var stems = {
+            "ization": "ize",
+            "tional": "tion"
+        };
+
+        var index = new FlexSearch({
+            encode: "icase",
+            tokenize: "strict",
+            stemmer: function(word){
+                return stems[word] || word;
+            }
+        });
+
+        index.add(0, "Just a multinational colonization.");
+
+        expect(index.length).to.equal(1);
+        expect(index.search("Just a multinational colonization.")).to.include(0);
+        expect(index.search("multinational colonization")).to.include(0);
+        expect(index.search("tional tion")).to.have.length(0);
+    });
+});
+
+// ------------------------------------------------------------------------
 // Relevance Tests
 // ------------------------------------------------------------------------
 
@@ -1031,7 +1117,7 @@ describe("Relevance", function(){
         expect(index.search("one two")).to.have.members([1, 2]);
         expect(index.search("four one")).to.have.members([1, 2]);
 
-        var index = new FlexSearch({
+        index = new FlexSearch({
             encode: "advanced",
             tokenize: "strict",
             threshold: 5,
@@ -1047,7 +1133,7 @@ describe("Relevance", function(){
         expect(index.search("one two")).to.have.members([1, 2]);
         expect(index.search("four one")).to.have.members([1, 2]);
 
-        var index = new FlexSearch({
+        index = new FlexSearch({
             encode: "extra",
             tokenize: "ngram",
             threshold: 5,
@@ -1231,8 +1317,8 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         if(env === ""){
 
-            expect(index.doc.index[0].length).to.equal(3);
-            expect(index.doc.index[1].length).to.equal(3);
+            expect(index.doc.index["data:title"].length).to.equal(3);
+            expect(index.doc.index["data:body"].length).to.equal(3);
         }
 
         expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
@@ -1241,11 +1327,17 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
         expect(index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
         expect(index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
 
-        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
-        expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        //expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
+        //expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
+        expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
+        expect(index.search({field: ["data:title"], query: "title"})).to.have.members(data);
 
-        expect(index.search({query: "body"})).to.have.members(data);
-        expect(index.search("title")).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        //expect(index.search({query: "body"})).to.have.members(data);
+        //expect(index.search("title")).to.have.members(data);
+        expect(index.search("body", {field: "data:body"})).to.have.members(data);
+        expect(index.search("title", {field: ["data:title"]})).to.have.members(data);
 
         expect(index.search({
 
@@ -1255,17 +1347,18 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         })).to.have.members(data);
 
-        expect(index.search([{
-
-            field: "data:title",
-            query: "body",
-            boost: 2
-        },{
-            field: "data:body",
-            query: "body",
-            boost: 2
-
-        }])).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        // expect(index.search([{
+        //
+        //     field: "data:title",
+        //     query: "body",
+        //     boost: 2
+        // },{
+        //     field: "data:body",
+        //     query: "body",
+        //     boost: 2
+        //
+        // }])).to.have.members(data);
 
         expect(index.search("title", {
 
@@ -1281,29 +1374,35 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         })).to.have.lengthOf(0);
 
-        expect(index.search("body", [{
-
-            field: "data:title",
-            boost: 2
-        },{
-            field: "data:body",
-            boost: 2
-
-        }])).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        // expect(index.search("body", [{
+        //
+        //     field: "data:title",
+        //     boost: 2
+        // },{
+        //     field: "data:body",
+        //     boost: 2
+        //
+        // }])).to.have.members(data);
 
         index.update(update);
 
-        expect(index.search("foo")).not.to.have.members(data);
-        expect(index.search("bar")).not.to.have.members(data);
-        expect(index.search("foo")).to.have.members(update);
-        expect(index.search("bar")).to.have.members(update);
+        //TODO: provide logical operator "OR"
+        // expect(index.search("foo")).not.to.have.members(data);
+        // expect(index.search("bar")).not.to.have.members(data);
+        // expect(index.search("foo")).to.have.members(update);
+        // expect(index.search("bar")).to.have.members(update);
+        expect(index.search("foo", {field: "data:title"})).not.to.have.members(data);
+        expect(index.search("bar", {field: "data:body"})).not.to.have.members(data);
+        expect(index.search("foo", {field: "data:title"})).to.have.members(update);
+        expect(index.search("bar", {field: "data:body"})).to.have.members(update);
 
         index.remove(update);
 
         if(env === ""){
 
-            expect(index.doc.index[0].length).to.equal(0);
-            expect(index.doc.index[1].length).to.equal(0);
+            expect(index.doc.index["data:title"].length).to.equal(0);
+            expect(index.doc.index["data:body"].length).to.equal(0);
         }
     });
 
@@ -1331,8 +1430,8 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         if(env === ""){
 
-            expect(index.doc.index[0].length).to.equal(3);
-            expect(index.doc.index[1].length).to.equal(3);
+            expect(index.doc.index["data:title"].length).to.equal(3);
+            expect(index.doc.index["data:body"].length).to.equal(3);
         }
 
         expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
@@ -1341,11 +1440,17 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
         expect(index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
         expect(index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
 
-        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
-        expect(index.search({field: ["data:body", "data:title"], query: "tle"})).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        //expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
+        //expect(index.search({field: ["data:body", "data:title"], query: "tle"})).to.have.members(data);
+        expect(index.search({field: ["data:body"], query: "body"})).to.have.members(data);
+        expect(index.search({field: "data:title", query: "tle"})).to.have.members(data);
 
-        expect(index.search({query: "body"})).to.have.members(data);
-        expect(index.search("tle")).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        //expect(index.search({query: "body"})).to.have.members(data);
+        //expect(index.search("tle")).to.have.members(data);
+        expect(index.search({query: "body", field: "data:body"})).to.have.members(data);
+        expect(index.search("tle", {field: "data:title"})).to.have.members(data);
 
         expect(index.search({
 
@@ -1354,15 +1459,16 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         })).to.have.members(data);
 
-        expect(index.search([{
-
-            field: "data:title",
-            query: "body"
-        },{
-            field: "data:body",
-            query: "body"
-
-        }])).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        // expect(index.search([{
+        //
+        //     field: "data:title",
+        //     query: "body"
+        // },{
+        //     field: "data:body",
+        //     query: "body"
+        //
+        // }])).to.have.members(data);
 
         expect(index.search("tle", {
 
@@ -1376,28 +1482,55 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         })).to.have.lengthOf(0);
 
-        expect(index.search("body", [{
-
-            field: "data:title"
-        },{
-            field: "data:body"
-
-        }])).to.have.members(data);
+        //TODO: provide logical operator "OR"
+        // expect(index.search("body", [{
+        //
+        //     field: "data:title"
+        // },{
+        //     field: "data:body"
+        //
+        // }])).to.have.members(data);
 
         index.update(update);
 
-        expect(index.search("foo")).not.to.have.members(data);
-        expect(index.search("bar")).not.to.have.members(data);
-        expect(index.search("foo")).to.have.members(update);
-        expect(index.search("bar")).to.have.members(update);
+        //TODO: provide logical operator "OR"
+        // expect(index.search("foo")).not.to.have.members(data);
+        // expect(index.search("bar")).not.to.have.members(data);
+        // expect(index.search("foo")).to.have.members(update);
+        // expect(index.search("bar")).to.have.members(update);
+        expect(index.search("foo", {field: "data:title"})).not.to.have.members(data);
+        expect(index.search("bar", {field: "data:body"})).not.to.have.members(data);
+        expect(index.search("foo", {field: "data:title"})).to.have.members(update);
+        expect(index.search("bar", {field: "data:body"})).to.have.members(update);
 
         index.remove(update);
 
         if(env === ""){
 
-            expect(index.doc.index[0].length).to.equal(0);
-            expect(index.doc.index[1].length).to.equal(0);
+            expect(index.doc.index["data:title"].length).to.equal(0);
+            expect(index.doc.index["data:body"].length).to.equal(0);
         }
+    });
+
+    it("Should have been unique results", function(){
+
+        var index = new FlexSearch({
+            doc: {
+                id: "id",
+                field: ["field1", "field2"]
+            }
+        });
+
+        var docs = [{
+            id: 1,
+            field1: "phrase",
+            field2: "phrase"
+        }];
+
+        index.add(docs);
+
+        expect(index.search("phrase")).to.have.lengthOf(1);
+        expect(index.search("phrase")).to.have.members(docs);
     });
 
     /*
@@ -1635,12 +1768,12 @@ if(env !== "light") describe("Export / Import", function(){
 
         if(env === ""){
 
-            expect(index.doc.index[0].length).to.equal(3);
+            expect(index.doc.index["title"].length).to.equal(3);
             expect(data).to.equal(JSON.stringify([
                 [
-                    index.doc.index[0]._map,
-                    index.doc.index[0]._ctx,
-                    index.doc.index[0]._ids
+                    index.doc.index["title"]._map,
+                    index.doc.index["title"]._ctx,
+                    index.doc.index["title"]._ids
                 ],
                 index._doc
             ]));
@@ -1660,7 +1793,7 @@ if(env !== "light") describe("Export / Import", function(){
 
         if(env === ""){
 
-            expect(index.doc.index[0].length).to.equal(3);
+            expect(index.doc.index["title"].length).to.equal(3);
         }
 
         expect(index.search("foo")).to.have.lengthOf(2);

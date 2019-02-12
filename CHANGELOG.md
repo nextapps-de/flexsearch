@@ -1,5 +1,9 @@
 # Changelog
 
+#### v0.5.2
+
+- Intersect Partial Results
+
 #### v0.5.1
 
 - Provide customizable scoring resolution
