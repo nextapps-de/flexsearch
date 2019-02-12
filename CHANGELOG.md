@@ -1,5 +1,9 @@
 # Changelog
 
+#### v0.5.1
+
+- Provide customizable scoring resolution
+
 #### v0.5.0
 
 - Where / Find Documents

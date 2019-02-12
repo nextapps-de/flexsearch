@@ -946,6 +946,33 @@ var index = new FlexSearch({
 });
 ```
 
+Using a custom stemmer, e.g.:
+```js
+var index = new FlexSearch({
+
+    stemmer: function(value){
+
+        // apply some replacements
+        // ...
+        
+        return value;
+    }
+});
+```
+
+Using a custom filter, e.g.:
+```js
+var index = new FlexSearch({
+
+    filter: function(value){
+        
+        // just add values with length > 1 to the index
+        
+        return value.length > 1;
+    }
+});
+```
+
 Or assign stemmer/filters globally to a language:
 
 > Stemmer are passed as a object (key-value-pair), filter as an array.
@@ -1112,6 +1139,30 @@ var index = new FlexSearch({
 });
 ```
 
+You are also able to provide custom presets for each field separately:
+
+```js
+var index = new FlexSearch({
+    doc: {
+        id: "id",
+        field: {
+            title: {
+                encode: "extra",
+                tokenize: "reverse",
+                threshold: 7
+            },
+            cat: {
+                encode: false,
+                tokenize: function(val){
+                    return [val];
+                }
+            },
+            content: "memory"
+        }
+    }
+});
+```
+
 #### Complex Objects
 
 Assume the document array looks more complex (has nested branches etc.), e.g.:
@@ -1149,6 +1200,8 @@ var index = new FlexSearch({
     }
 });
 ```
+
+> __Hint:__ This is an alternative for indexing documents which are much more complex: https://github.com/nextapps-de/flexsearch/issues/36
 
 #### Add/Update/Remove Documents to/from the Index
 
@@ -1286,6 +1339,8 @@ To get by ID, you can also use short form:
 index.find(1);
 ```
 
+Getting a doc by ID is actually the fastest way to retrieve a result from documents.
+
 Find by a custom function:
 ```js
 index.find(function(item){
@@ -1362,7 +1417,7 @@ index.search("foo", {
 
 > __IMPORTANT NOTICE:__ This feature will be removed due to the lack of scaling and redundancy.
 
-Tagging is pretty much the same like adding an additional index to a database column. Whenever you use ___where___ on an indexed/tagged attribute will improve performance drastically but also at a cost of additional memory.
+Tagging is pretty much the same like adding an additional index to a database column. Whenever you use ___index.where()___ on an indexed/tagged attribute will really improve performance but also at a cost of some additional memory.
 
 > The colon notation also has to be applied for tags respectively.
 
@@ -1410,7 +1465,7 @@ Find all documents by an attribute:
 index.where({"cat": "comedy"}, 10);
 ```
 
-Since the attribute "cat" was tagged (has its own index) this expression performs extremely fast. This is actually the fastest way to retrieve results from documents.
+Since the attribute "cat" was tagged (has its own index) this expression performs really fast. This is actually the fastest way to retrieve multiple results from documents.
 
 Search documents and also apply a where-clause:
 ```js
@@ -1426,7 +1481,7 @@ index.search("foo", {
 });
 ```
 
-For a better understanding, using the same expression without the where clause has pretty much the same performance. On the other hand, using a where-clause without a tag on its property has an additional cost.
+An additional where-clause has a significant cost. Using the same expression without _where_ performs significantly better (depending on the count of matches).
 
 <a name="sort"></a>
 ## Custom Sort
@@ -1728,7 +1783,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
     <tr>
         <td><b>"strict"</b></td>
         <td>index whole words</td>
-        <td><b>foobar</b></td>
+        <td><code>foobar</code></td>
         <td>* 1</td>
     </tr>
     <tr></tr>
@@ -1736,7 +1791,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
     <tr>
         <td><b>"ngram"</b> (default)</td>
         <td>index words partially through phonetic n-grams</td>
-        <td><b>foo</b>bar<br>foo<b>bar</b></td>
+        <td><code>foo</code>bar<br>foo<code>bar</code></td>
         <td>* n / 3</td>
     </tr>
     <tr></tr>
@@ -1744,28 +1799,27 @@ Tokenizer effects the required memory also as query time and flexibility of part
     <tr>
         <td><b>"forward"</b></td>
         <td>incrementally index words in forward direction</td>
-        <td><b>fo</b>obar<br><b>foob</b>ar<br></td>
+        <td><code>fo</code>obar<br><code>foob</code>ar<br></td>
         <td>* n</td>
     </tr>
     <tr></tr>
     <tr>
         <td><b>"reverse"</b></td>
         <td>incrementally index words in both directions</td>
-        <td>foob<b>ar</b><br>fo<b>obar</b></td>
+        <td>foob<code>ar</code><br>fo<code>obar</code></td>
         <td>* 2n - 1</td>
     </tr>
     <tr></tr>
     <tr>
         <td><b>"full"</b></td>
         <td>index every possible combination</td>
-        <td>fo<b>oba</b>r<br>f<b>oob</b>ar</td>
+        <td>fo<code>oba</code>r<br>f<code>oob</code>ar</td>
         <td>* n * (n - 1)</td>
     </tr>
-
 </table>
 
 <a name="phonetic"></a>
-## Phonetic Encoding
+## Encoders
 
 Encoding effects the required memory also as query time and phonetic matches. Try to choose the most upper of these encoders which fits your needs, or pass in a <a href="#flexsearch.encoder">custom encoder</a>:
 
@@ -1814,14 +1868,14 @@ Encoding effects the required memory also as query time and phonetic matches. Tr
     <tr></tr>
     <tr>
         <td><b>function()</b></td>
-        <td>Pass custom encoding: function(string):string</td>
+        <td>Pass custom encoding via <i>function(string):string</i></td>
         <td></td>
         <td></td>
     </tr>
 </table>
 
 <a name="compare" id="compare"></a>
-#### Comparison (Matching)
+#### Encoder Matching Comparison
 
 > Reference String: __"Björn-Phillipp Mayer"__
 
@@ -1967,7 +2021,7 @@ The required memory for the index depends on several options:
     </tr>
     <tr>
         <td align="left">Mode</td>
-        <td align="left">Multiplied with: (n = <u>average</u> length of indexed words)</td>
+        <td align="left">Multiplied with: (n = average length of indexed words)</td>
     </tr>
     <tr>
         <td>"strict"</td>
@@ -2005,7 +2059,7 @@ The required memory for the index depends on several options:
     </tr>
 </table>
 
-Adding, removing or updating existing items has a similar complexity.
+Adding, removing or updating existing items has a similar complexity. The contextual index grows exponentially, that's why it is actually just supported for the tokenizer ___"strict"___.
 
 <a name="consumption"></a>
 #### Compare Memory Consumption
@@ -2126,15 +2180,16 @@ Performance Checklist:
 
 - Using just id-content-pairs for the index performs almost faster than using docs
 - An additional where-clause in `index.search()` has a significant cost
-- When adding multiple fields of documents to the index try to set the lowest possible preset for each field
+- When adding multiple fields of documents to the index try to set the lowest possible preset for each field separately
 - Make sure the auto-balanced ___cache___ is enabled and has a meaningful value
 - Using `index.where()` to find documents is very slow when not using a tagged field
 - Getting a document by ID via `index.find(id)` is extremely fast
 - Do not enable ___async___ as well as ___worker___ when the index does not claim it
 - Use numeric IDs (the datatype length of IDs influences the memory consumption significantly)
-- Verify if you can activate _contextual index_ by setting the ___depth___ to a minimum meaningful value and tokenizer to ___"strict"___
+- Try to enable _contextual index_ by setting the ___depth___ to a minimum meaningful value and tokenizer to ___"strict"___
 - Pass a ___limit___ when searching (lower values performs better)
 - Pass a minimum ___threshold___ when searching (higher values performs better)
+- Try to minify the content size of indexed documents by just adding attributes you really need to get back from results
 
 ## Best Practices
 
