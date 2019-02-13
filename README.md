@@ -398,7 +398,7 @@ Library Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/mast
 
 > __Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by Thomas Wilkerling, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additionally memory (depending on ___depth___).
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additionally memory (depending on ___depth___).
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.<!--Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?-->
 In this way contextual search also <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
 
@@ -1275,10 +1275,13 @@ var results = index.search("foobar", {
 
 Search the same query on multiple fields:
 
+> Using ___bool___ as a logical operator when searching through multiple fields. The default operator when not set is ___"and"___. It is planned to extend the concept of logical operators to make combinations of ___and___ / ___or___ / ___not___.
+
 ```js
 var results = index.search({
     query: "foobar",
-    field: ["title", "body"]
+    field: ["title", "body"],
+    bool: "or"
 });
 ```
 
@@ -1286,7 +1289,8 @@ Could also be written as:
 
 ```js
 var results = index.search("title", {
-    field: ["title", "body"]
+    field: ["title", "body"],
+    bool: "or"
 });
 ```
 
@@ -1295,13 +1299,16 @@ Search different queries on multiple fields:
 ```js
 var results = index.search([{
     field: "title",
-    query: "foo"
+    query: "foo",
+    bool: "and"
 },{
     field: "body",
-    query: "bar"
+    query: "bar",
+    bool: "and"
 }]);
 ```
 
+<!--
 Boost scoring on specific fields:
 
 ```js
@@ -1315,6 +1322,7 @@ var results = index.search([{
     boost: 0.5
 }]);
 ```
+-->
 
 <a name="where"></a>
 ## Find / Where
@@ -2512,6 +2520,10 @@ node compile SUPPORT_WORKER=true
         <td>ECMASCRIPT3<br>ECMASCRIPT5<br>ECMASCRIPT5_STRICT<br>ECMASCRIPT6<br>ECMASCRIPT6_STRICT<br>ECMASCRIPT_2015<br>ECMASCRIPT_2017<br>STABLE</td>
     </tr>
 </table>
+
+## Contribution
+
+I would be glad about any kind of help. Feel free to contribute to this project and also feel free to contact me (https://github.com/ts-thomas) when you have any questions. There are just one simple (and maybe unusual) coding convention: all public accessible identifiers should be singular.
 
 <a href="CHANGELOG.md">Changelog</a>
 

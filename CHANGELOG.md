@@ -1,5 +1,9 @@
 # Changelog
 
+#### v0.5.3
+
+- Logical Operator
+
 #### v0.5.2
 
 - Intersect Partial Results

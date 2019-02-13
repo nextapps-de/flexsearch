@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.5.2
+ * @preserve FlexSearch v0.5.3
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -1381,12 +1381,12 @@
             return result;
         }
 
-        function merge_and_sort(query, result, sort, limit, where, cursor){
+        function merge_and_sort(query, bool, result, sort, limit, where, cursor){
 
             const doc = this._doc;
             const suggest = SUPPORT_SUGGESTIONS && this.suggest;
 
-            result = intersect(result, where ? 0 : limit, cursor, suggest);
+            result = intersect(result, bool, where ? 0 : limit, cursor, suggest);
             result = enrich_documents(result, doc);
 
             if(where){
@@ -1455,9 +1455,6 @@
 
             let _query = query;
             let threshold;
-            //let boost;
-            let where;
-            let sort;
             let cursor;
             let result = [];
 
@@ -1475,17 +1472,6 @@
                     }
                 }
 
-                if(SUPPORT_DOCUMENTS){
-
-                    //boost = query["boost"];
-                    sort = query["sort"];
-
-                    if(SUPPORT_WHERE){
-
-                        where = query["where"];
-                    }
-                }
-
                 //cursor = this.paging && query["cursor"];
                 limit = query["limit"];
                 threshold = query["threshold"];
@@ -1494,6 +1480,10 @@
 
             if(SUPPORT_DOCUMENTS && this.doc){
 
+                //let boost = query["boost"];
+                let where = SUPPORT_WHERE && _query["where"];
+                let bool = _query["bool"];
+                let sort = _query["sort"];
                 const doc_idx = this.doc["index"];
 
                 let queries;
@@ -1515,7 +1505,14 @@
 
                     for(let i = 0; i < _query.length; i++){
 
-                        field[i] = _query[i]["field"];
+                        const current = _query[i];
+
+                        field[i] = current["field"];
+
+                        // TODO: improve array notation (redundancy)
+                        bool = current["bool"];
+                        sort = current["sort"];
+                        where = SUPPORT_WHERE && current["where"];
                     }
                 }
                 else{
@@ -1523,10 +1520,10 @@
                     field = this.doc["keys"];
                 }
 
-                if(sort){
-
-                    _query["sort"] = null;
-                }
+                // if(sort){
+                //
+                //     _query["sort"] = null;
+                // }
 
                 const len = field.length;
 
@@ -1542,7 +1539,7 @@
 
                 if(callback){
 
-                    return callback(merge_and_sort.call(this, query, result, sort, limit, where, cursor));
+                    return callback(merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor));
                 }
                 else if(SUPPORT_ASYNC && this.async){
 
@@ -1552,13 +1549,13 @@
 
                         Promise.all(/** @type {!Iterable<Promise>} */ (result)).then(function(values){
 
-                            resolve(merge_and_sort.call(self, query, values, sort, limit, where, cursor));
+                            resolve(merge_and_sort.call(self, query, bool, values, sort, limit, where, cursor));
                         });
                     });
                 }
                 else{
 
-                    return merge_and_sort.call(this, query, result, sort, limit, where, cursor);
+                    return merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor);
                 }
             }
 
@@ -1588,7 +1585,7 @@
                         "limit": limit,
                         "cursor": cursor,
                         "threshold": threshold,
-                        "where": where,
+                        //"where": where,
                         "content": query
                     });
                 }
@@ -1833,22 +1830,25 @@
                 found = false;
             }
 
-            if(found){
+            if(!SUPPORT_DOCUMENTS || !this.doc){
 
-                // Not handled by intersection:
+                if(found){
 
-                result = intersect(check, limit, cursor, /*SUPPORT_DOCUMENTS && this._doc,*/ SUPPORT_SUGGESTIONS && this.suggest);
+                    // Not handled by intersection:
 
-                // Handled by intersection:
+                    result = intersect(check, false, limit, cursor, /*SUPPORT_DOCUMENTS && this._doc,*/ SUPPORT_SUGGESTIONS && this.suggest);
 
-                //result = intersect_3d(check, limit, this.suggest);
-            }
+                    // Handled by intersection:
 
-            // store result to cache
+                    //result = intersect_3d(check, limit, this.suggest);
+                }
 
-            if(SUPPORT_CACHE && this.cache && (!SUPPORT_DOCUMENTS || !this.doc)){
+                // store result to cache
 
-                this._cache.set(query, result);
+                if(SUPPORT_CACHE && this.cache){
+
+                    this._cache.set(query, result);
+                }
             }
 
             if(PROFILER){
@@ -3047,13 +3047,14 @@
 
         /**
          * @param {!Array<Array<number|string>>} arrays
+         * @param {string|boolean=} bool
          * @param {number=} limit
          * @param {number=} cursor
          * @param {boolean=} suggest
          * @returns {Array}
          */
 
-        function intersect(arrays, limit, cursor, /*docs,*/ suggest) {
+        function intersect(arrays, bool, limit, cursor, /*docs,*/ suggest) {
 
             let result = [];
             let suggestions;
@@ -3061,36 +3062,73 @@
 
             if(length_z > 1){
 
+                bool = (bool === "or");
+                // const bool_or = (bool === "or");
+                // const bool_and = (bool === "and") || !bool;
+                // const bool_not = (bool === "not");
+
                 // pre-sort arrays
 
                 //TODO: test strategy
                 //arrays.sort(sort_by_length_down);
 
+                const check = create_object();
+                let arr /*= arrays[0]*/;
+                let z = -1; // start from 0
+                let length /*= arr.length*/;
+
                 // fill initial map
 
-                const check = create_object();
-                let arr = arrays[0];
-                let length = arr.length;
                 let i = 0;
-
-                while(i < length) {
-
-                    check["@" + arr[i++]] = 1;
-                }
+                let first_result;
 
                 // loop through arrays
 
-                let tmp, count = 0;
-                let z = 0; // start from 1
+                let tmp, init = true, count = 0;
 
                 while(++z < length_z){
 
-                    let found = false;
                     const is_final_loop = (z === (length_z - 1));
 
-                    suggestions = [];
                     arr = arrays[z];
                     length = arr.length;
+
+                    if(!length){
+
+                        if(!bool && !suggest){
+
+                            return result;
+                        }
+
+                        if(is_final_loop && !count){
+
+                            return first_result || result;
+                        }
+
+                        continue;
+                    }
+
+                    if(init){
+
+                        if(is_final_loop){
+
+                            return arr;
+                        }
+
+                        while(i < length) {
+
+                            check["@" + arr[i++]] = 1;
+                        }
+
+                        first_result = arr;
+                        init = false;
+
+                        continue;
+                    }
+
+                    let found = false;
+
+                    suggestions = [];
                     i = 0;
 
                     while(i < length){
@@ -3103,7 +3141,7 @@
 
                             const check_val = check[index];
 
-                            if(check_val === z){
+                            if(bool || (check_val === z) /*|| (bool_not && !check_val)*/){
 
                                 // fill in during last round
 
@@ -3681,8 +3719,6 @@
 
     )), this);
 
-    /* istanbul ignore next */
-
     /** --------------------------------------------------------------------------------------
      * UMD Wrapper for Browser and Node.js
      * @param {!string} name
@@ -3693,6 +3729,8 @@
      */
 
     function provide(name, factory, root){
+
+        /* istanbul ignore next */
 
         let prop;
 

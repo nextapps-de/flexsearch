@@ -80,25 +80,25 @@ describe("Index Multi-Field Documents (ES6)", function(){
         expect(await index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
         expect(await index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
 
-        //TODO: provide logical operator "OR"
-        // expect(await index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
-        // expect(await index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
+        expect(await index.search({field: ["data:title", "data:body"], query: "body", bool: "or"})).to.have.members(data);
+        expect(await index.search({field: ["data:body", "data:title"], query: "title", bool: "or"})).to.have.members(data);
+
         expect(await index.search({field: ["data:body"], query: "body"})).to.have.members(data);
         expect(await index.search({field: "data:title", query: "title"})).to.have.members(data);
 
-        //TODO: provide logical operator "OR"
-        // expect(await index.search({query: "body"})).to.have.members(data);
-        // expect(await index.search("title")).to.have.members(data);
+        expect(await index.search({query: "body", bool: "or"})).to.have.members(data);
+        expect(await index.search("title", {bool: "or"})).to.have.members(data);
+
         expect(await index.search({field: ["data:body"], query: "body"})).to.have.members(data);
         expect(await index.search({field: "data:title", query: "title"})).to.have.members(data);
 
         await index.update(update);
 
-        //TODO: provide logical operator "OR"
-        // expect(await index.search("foo")).not.to.have.members(data);
-        // expect(await index.search("bar")).not.to.have.members(data);
-        // expect(await index.search("foo")).to.have.members(update);
-        // expect(await index.search("bar")).to.have.members(update);
+        expect(await index.search("foo", {bool: "or"})).not.to.have.members(data);
+        expect(await index.search("bar", {bool: "or"})).not.to.have.members(data);
+        expect(await index.search("foo", {bool: "or"})).to.have.members(update);
+        expect(await index.search("bar", {bool: "or"})).to.have.members(update);
+
         expect(await index.search("foo", {field: "data:title"})).not.to.have.members(data);
         expect(await index.search("bar", {field: "data:body"})).not.to.have.members(data);
         expect(await index.search("foo", {field: "data:title"})).to.have.members(update);
@@ -137,25 +137,25 @@ describe("Index Multi-Field Documents (ES6)", function(){
         expect(await index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
         expect(await index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
 
-        //TODO: provide logical operator "OR"
-        // expect(await index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
-        // expect(await index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
+        expect(await index.search({field: ["data:title", "data:body"], query: "body", bool: "or"})).to.have.members(data);
+        expect(await index.search({field: ["data:body", "data:title"], query: "title", bool: "or"})).to.have.members(data);
+
         expect(await index.search({field: ["data:body"], query: "body"})).to.have.members(data);
         expect(await index.search({field: "data:title", query: "title"})).to.have.members(data);
 
-        //TODO: provide logical operator "OR"
-        // expect(await index.search({query: "body"})).to.have.members(data);
-        // expect(await index.search("title")).to.have.members(data);
+        expect(await index.search({query: "body", bool: "or"})).to.have.members(data);
+        expect(await index.search("title", {bool: "or"})).to.have.members(data);
+
         expect(await index.search({query: "body", field: "data:body"})).to.have.members(data);
         expect(await index.search("title", {field: "data:title"})).to.have.members(data);
 
         await index.update(update);
 
-        //TODO: provide logical operator "OR"
-        // expect(await index.search("foo")).not.to.have.members(data);
-        // expect(await index.search("bar")).not.to.have.members(data);
-        // expect(await index.search("foo")).to.have.members(update);
-        // expect(await index.search("bar")).to.have.members(update);
+        expect(await index.search("foo", {bool: "or"})).not.to.have.members(data);
+        expect(await index.search("bar", {bool: "or"})).not.to.have.members(data);
+        expect(await index.search("foo", {bool: "or"})).to.have.members(update);
+        expect(await index.search("bar", {bool: "or"})).to.have.members(update);
+
         expect(await index.search("foo", {field: "data:title"})).not.to.have.members(data);
         expect(await index.search("bar", {field: "data:body"})).not.to.have.members(data);
         expect(await index.search("foo", {field: "data:title"})).to.have.members(update);

@@ -132,9 +132,12 @@ describe("Initialize", function(){
             cache: true
         });
 
-        expect(flexsearch_default).to.be.an.instanceOf(FlexSearch);
-        expect(flexsearch_sync).to.be.an.instanceOf(FlexSearch);
-        expect(flexsearch_async).to.be.an.instanceOf(FlexSearch);
+        it("Should have correct constructors", function(){
+
+            expect(flexsearch_default).to.be.an.instanceOf(FlexSearch);
+            expect(flexsearch_sync).to.be.an.instanceOf(FlexSearch);
+            expect(flexsearch_async).to.be.an.instanceOf(FlexSearch);
+        });
 
         it("Should have correct uuids", function(){
 
@@ -156,6 +159,16 @@ describe("Initialize", function(){
         expect(flexsearch_default).to.respondTo("remove");
         expect(flexsearch_default).to.respondTo("clear");
         expect(flexsearch_default).to.respondTo("init");
+        expect(flexsearch_default).to.respondTo("destroy");
+
+        expect(flexsearch_default).to.hasOwnProperty("length");
+        expect(flexsearch_default).to.hasOwnProperty("index");
+
+        if(env !== "light"){
+
+            expect(flexsearch_default).to.respondTo("where");
+            expect(flexsearch_default).to.respondTo("find");
+        }
 
         if(env !== "light" && env !== "min"){
 
@@ -1327,17 +1340,21 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
         expect(index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
         expect(index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
 
-        //TODO: provide logical operator "OR"
-        //expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
-        //expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
         expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
         expect(index.search({field: ["data:title"], query: "title"})).to.have.members(data);
 
-        //TODO: provide logical operator "OR"
-        //expect(index.search({query: "body"})).to.have.members(data);
-        //expect(index.search("title")).to.have.members(data);
+        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.lengthOf(0);
+        expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.lengthOf(0);
+        expect(index.search({field: ["data:title", "data:body"], query: "body", bool: "and"})).to.have.lengthOf(0);
+        expect(index.search({field: ["data:body", "data:title"], query: "title", bool: "and"})).to.have.lengthOf(0);
+        expect(index.search({field: ["data:title", "data:body"], query: "body", bool: "or"})).to.have.members(data);
+        expect(index.search({field: ["data:body", "data:title"], query: "title", bool: "or"})).to.have.members(data);
+
         expect(index.search("body", {field: "data:body"})).to.have.members(data);
         expect(index.search("title", {field: ["data:title"]})).to.have.members(data);
+
+        expect(index.search({query: "body", bool: "or"})).to.have.members(data);
+        //expect(index.search("title", {bool: "or"})).to.have.members(data);
 
         expect(index.search({
 
@@ -1347,51 +1364,47 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         })).to.have.members(data);
 
-        //TODO: provide logical operator "OR"
-        // expect(index.search([{
-        //
-        //     field: "data:title",
-        //     query: "body",
-        //     boost: 2
-        // },{
-        //     field: "data:body",
-        //     query: "body",
-        //     boost: 2
-        //
-        // }])).to.have.members(data);
+        expect(index.search([{
+
+            field: "data:title",
+            query: "body",
+            bool: "or"
+        },{
+            field: "data:body",
+            query: "body",
+            bool: "or"
+
+        }])).to.have.members(data);
 
         expect(index.search("title", {
 
-            field: "data:title",
-            boost: 2
+            field: "data:title"
 
         })).to.have.members(data);
 
         expect(index.search("title", {
 
-            field: "data:body",
-            boost: 2
+            field: "data:body"
 
         })).to.have.lengthOf(0);
 
-        //TODO: provide logical operator "OR"
-        // expect(index.search("body", [{
-        //
-        //     field: "data:title",
-        //     boost: 2
-        // },{
-        //     field: "data:body",
-        //     boost: 2
-        //
-        // }])).to.have.members(data);
+        expect(index.search("body", [{
+
+            field: "data:title",
+            bool: "or"
+        },{
+            field: "data:body",
+            bool: "or"
+
+        }])).to.have.members(data);
 
         index.update(update);
 
-        //TODO: provide logical operator "OR"
-        // expect(index.search("foo")).not.to.have.members(data);
-        // expect(index.search("bar")).not.to.have.members(data);
-        // expect(index.search("foo")).to.have.members(update);
-        // expect(index.search("bar")).to.have.members(update);
+        expect(index.search("foo", {bool: "or"})).not.to.have.members(data);
+        expect(index.search("bar", {bool: "or"})).not.to.have.members(data);
+        expect(index.search("foo", {bool: "or"})).to.have.members(update);
+        expect(index.search("bar", {bool: "or"})).to.have.members(update);
+
         expect(index.search("foo", {field: "data:title"})).not.to.have.members(data);
         expect(index.search("bar", {field: "data:body"})).not.to.have.members(data);
         expect(index.search("foo", {field: "data:title"})).to.have.members(update);
@@ -1440,15 +1453,15 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
         expect(index.search({field: "data:body", query: "title"})).to.have.lengthOf(0);
         expect(index.search({field: "data:title", query: "body"})).to.have.lengthOf(0);
 
-        //TODO: provide logical operator "OR"
-        //expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
-        //expect(index.search({field: ["data:body", "data:title"], query: "tle"})).to.have.members(data);
-        expect(index.search({field: ["data:body"], query: "body"})).to.have.members(data);
-        expect(index.search({field: "data:title", query: "tle"})).to.have.members(data);
+        expect(index.search({field: ["data:title", "data:body"], query: "body", bool: "or"})).to.have.members(data);
+        expect(index.search({field: ["data:body", "data:title"], query: "tle", bool: "or"})).to.have.members(data);
 
-        //TODO: provide logical operator "OR"
-        //expect(index.search({query: "body"})).to.have.members(data);
-        //expect(index.search("tle")).to.have.members(data);
+        expect(index.search({field: ["data:body"], query: "body", bool: "or"})).to.have.members(data);
+        expect(index.search({field: "data:title", query: "tle", bool: "or"})).to.have.members(data);
+
+        expect(index.search({query: "body", bool: "or"})).to.have.members(data);
+        expect(index.search("tle", {bool: "or"})).to.have.members(data);
+
         expect(index.search({query: "body", field: "data:body"})).to.have.members(data);
         expect(index.search("tle", {field: "data:title"})).to.have.members(data);
 
@@ -1459,16 +1472,17 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         })).to.have.members(data);
 
-        //TODO: provide logical operator "OR"
-        // expect(index.search([{
-        //
-        //     field: "data:title",
-        //     query: "body"
-        // },{
-        //     field: "data:body",
-        //     query: "body"
-        //
-        // }])).to.have.members(data);
+        expect(index.search([{
+
+            field: "data:title",
+            query: "body",
+            bool: "or"
+        },{
+            field: "data:body",
+            query: "body",
+            bool: "or"
+
+        }])).to.have.members(data);
 
         expect(index.search("tle", {
 
@@ -1482,22 +1496,23 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
 
         })).to.have.lengthOf(0);
 
-        //TODO: provide logical operator "OR"
-        // expect(index.search("body", [{
-        //
-        //     field: "data:title"
-        // },{
-        //     field: "data:body"
-        //
-        // }])).to.have.members(data);
+        expect(index.search("body", [{
+
+            field: "data:title",
+            bool: "or"
+        },{
+            field: "data:body",
+            bool: "or"
+
+        }])).to.have.members(data);
 
         index.update(update);
 
-        //TODO: provide logical operator "OR"
-        // expect(index.search("foo")).not.to.have.members(data);
-        // expect(index.search("bar")).not.to.have.members(data);
-        // expect(index.search("foo")).to.have.members(update);
-        // expect(index.search("bar")).to.have.members(update);
+        expect(index.search("foo", {bool: "or"})).not.to.have.members(data);
+        expect(index.search("bar", {bool: "or"})).not.to.have.members(data);
+        expect(index.search("foo", {bool: "or"})).to.have.members(update);
+        expect(index.search("bar", {bool: "or"})).to.have.members(update);
+
         expect(index.search("foo", {field: "data:title"})).not.to.have.members(data);
         expect(index.search("bar", {field: "data:body"})).not.to.have.members(data);
         expect(index.search("foo", {field: "data:title"})).to.have.members(update);
@@ -1804,6 +1819,23 @@ if(env !== "light") describe("Export / Import", function(){
 });
 
 // ------------------------------------------------------------------------
+// Presets
+// ------------------------------------------------------------------------
+
+describe("Presets", function(){
+
+    it("Should have been properly initialized", function(){
+
+        expect(FlexSearch.create("memory").length).to.equal(0);
+        expect(FlexSearch.create("speed").length).to.equal(0);
+        expect(FlexSearch.create("match").length).to.equal(0);
+        expect(FlexSearch.create("score").length).to.equal(0);
+        expect(FlexSearch.create("balance").length).to.equal(0);
+        expect(FlexSearch.create("fast").length).to.equal(0);
+    });
+});
+
+// ------------------------------------------------------------------------
 // Feature Tests
 // ------------------------------------------------------------------------
 
@@ -1911,6 +1943,28 @@ if(env !== "light" && env !== "min"){
         });
     });
 }
+
+// ------------------------------------------------------------------------
+// Destroy
+// ------------------------------------------------------------------------
+
+describe("Destroy", function(){
+
+    it("Should have been destroyed properly", function(){
+
+        var index = FlexSearch.create()
+                              .add(0, "foo")
+                              .add(1, "bar");
+
+        expect(index.search("foo")).to.include(0);
+        expect(index.search("bar")).to.include(1);
+
+        index.destroy();
+
+        expect(index.search("foo")).to.have.lengthOf(0);
+        expect(index.search("bar")).to.have.lengthOf(0);
+    });
+});
 
 // ------------------------------------------------------------------------
 // Chaining
