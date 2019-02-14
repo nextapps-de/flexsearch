@@ -2,10 +2,20 @@
 
 if(SUPPORT_LANG_DE) {
 
-    // noinspection ThisExpressionReferencesGlobalObjectJS
     (function(root){
 
-        root["FlexSearch"]["registerLanguage"]("de", /** @const */ {
+        let fs;
+
+        if((typeof exports === "object") && (typeof require !== "undefined")){
+
+            fs = require("../dist/flexsearch.node.js");
+        }
+        else{
+
+            fs = root["FlexSearch"];
+        }
+
+        fs["registerLanguage"]("de", /** @const */ {
 
             /**
              * http://www.ranks.nl/stopwords

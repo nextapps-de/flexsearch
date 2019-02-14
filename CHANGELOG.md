@@ -10,7 +10,7 @@
 
 #### v0.5.1
 
-- Provide customizable scoring resolution
+- Customizable Scoring Resolution
 
 #### v0.5.0
 

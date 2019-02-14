@@ -113,7 +113,7 @@ if(release === "lang"){
 }
 else{
 
-    exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + "' --js='flexsearch.js' --js='lang/**.js' --js='!lang/**.min.js'" + flag_str + " --js_output_file='dist/flexsearch." + (options["RELEASE"] || "custom") + ".js' && exit 0", function(){
+    exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --js='flexsearch.js' --js='lang/**.js' --js='!lang/**.min.js'" + flag_str + " --js_output_file='dist/flexsearch." + (options["RELEASE"] || "custom") + ".js' && exit 0", function(){
 
         var filename = "flexsearch." + (options["RELEASE"] || "custom") + ".js";
 

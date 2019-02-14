@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.5.3
+ * @preserve FlexSearch v0.5.31
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -177,12 +177,17 @@
 
             register_property(this, "index", /** @this {FlexSearch} */ function(){
 
+                if(SUPPORT_DOCUMENTS && this.doc){
+
+                    return this.doc.index[this.doc["keys"][0]]._ids;
+                }
+
                 return this._ids;
             });
 
             register_property(this, "length", /** @this {FlexSearch} */ function(){
 
-                return get_keys(this._ids).length;
+                return get_keys(this.index).length;
             });
         }
 
@@ -298,6 +303,7 @@
             return this;
         }
 
+        /*
         const tag_options = {
 
             "encode": false,
@@ -305,6 +311,7 @@
                 return [doc];
             }
         };
+        */
 
         /**
          * @param {Object<string, number|string|boolean|Object|function(string):string>|string=} options
@@ -781,18 +788,18 @@
             return this;
         };
 
-        function filter_words(words, filter){
+        function filter_words(words, fn_or_map){
 
             const length = words.length;
-            const has_function = is_function(filter);
+            const has_function = is_function(fn_or_map);
             const filtered = [];
 
             for(let i = 0, count = 0; i < length; i++){
 
                 const word = words[i];
 
-                if((has_function && filter(word)) ||
-                  (!has_function && !filter[word])){
+                if((has_function && fn_or_map(word)) ||
+                  (!has_function && !fn_or_map[word])){
 
                     filtered[count++] = word;
                 }
@@ -1149,9 +1156,9 @@
 
                             const tag_split = tag_key.split(":");
 
-                            for(let i = 0; i < tag_split.length; i++){
+                            for(let a = 0; a < tag_split.length; a++){
 
-                                tag_value = (tag_value || doc)[tag_split[i]];
+                                tag_value = (tag_value || doc)[tag_split[a]];
                             }
 
                             tag_value = "@" + tag_value;
@@ -1381,18 +1388,17 @@
             return result;
         }
 
-        function merge_and_sort(query, bool, result, sort, limit, where, cursor){
+        function merge_and_sort(query, bool, result, sort, limit, where, cursor, has_not){
 
-            const doc = this._doc;
-            const suggest = SUPPORT_SUGGESTIONS && this.suggest;
-
-            result = intersect(result, bool, where ? 0 : limit, cursor, suggest);
-            result = enrich_documents(result, doc);
+            result = intersect(result, where ? 0 : limit, cursor, SUPPORT_SUGGESTIONS && this.suggest, bool, has_not);
+            result = enrich_documents(result, this._doc);
 
             if(where){
 
                 result = this.where(where, null, limit, result);
             }
+
+            // TODO: pre-sort when indexing
 
             if(sort){
 
@@ -1453,10 +1459,11 @@
                 limit = 0;
             }
 
+            let result = [];
             let _query = query;
             let threshold;
             let cursor;
-            let result = [];
+            let sort;
 
             if(is_object(query) && (!SUPPORT_DOCUMENTS || !is_array(query))){
 
@@ -1473,6 +1480,7 @@
                 }
 
                 //cursor = this.paging && query["cursor"];
+                sort = SUPPORT_DOCUMENTS && query["sort"];
                 limit = query["limit"];
                 threshold = query["threshold"];
                 query = query["query"];
@@ -1480,18 +1488,15 @@
 
             if(SUPPORT_DOCUMENTS && this.doc){
 
-                //let boost = query["boost"];
-                let where = SUPPORT_WHERE && _query["where"];
-                let bool = _query["bool"];
-                let sort = _query["sort"];
                 const doc_idx = this.doc["index"];
-
-                let queries;
+                const where = SUPPORT_WHERE && _query["where"];
+                const bool_main = _query["bool"] || "or";
                 let field = _query["field"];
+                let bool = bool_main;
+                let queries;
+                let has_not;
 
                 if(field){
-
-                    _query["field"] = null;
 
                     if(!is_array(field)){
 
@@ -1502,28 +1507,26 @@
 
                     queries = _query;
                     field = [];
+                    bool = [];
 
                     for(let i = 0; i < _query.length; i++){
 
                         const current = _query[i];
+                        const current_bool = current["bool"] || bool_main;
 
                         field[i] = current["field"];
+                        bool[i] = current_bool;
 
-                        // TODO: improve array notation (redundancy)
-                        bool = current["bool"];
-                        sort = current["sort"];
-                        where = SUPPORT_WHERE && current["where"];
+                        if(current_bool === "not"){
+
+                            has_not = true;
+                        }
                     }
                 }
                 else{
 
                     field = this.doc["keys"];
                 }
-
-                // if(sort){
-                //
-                //     _query["sort"] = null;
-                // }
 
                 const len = field.length;
 
@@ -1539,7 +1542,7 @@
 
                 if(callback){
 
-                    return callback(merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor));
+                    return callback(merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor, has_not));
                 }
                 else if(SUPPORT_ASYNC && this.async){
 
@@ -1549,13 +1552,13 @@
 
                         Promise.all(/** @type {!Iterable<Promise>} */ (result)).then(function(values){
 
-                            resolve(merge_and_sort.call(self, query, bool, values, sort, limit, where, cursor));
+                            resolve(merge_and_sort.call(self, query, bool, values, sort, limit, where, cursor, has_not));
                         });
                     });
                 }
                 else{
 
-                    return merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor);
+                    return merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor, has_not);
                 }
             }
 
@@ -1754,7 +1757,7 @@
 
             if(!use_contextual || (ctx_map = this._ctx)[ctx_root]){
 
-                let resolution = this.resolution;
+                const resolution = this.resolution;
 
                 // TODO: boost on custom search is actually not possible, move to adding index instead
                 // if(SUPPORT_DOCUMENTS && boost){
@@ -1797,19 +1800,16 @@
                             if(map_found){
 
                                 // not handled by intersection:
-
                                 check[check.length] = (
 
                                     count > 1 ?
 
-                                        // https://jsperf.com/merge-arrays-comparison
                                         map_check.concat.apply([], map_check)
                                     :
                                         map_check[0]
                                 );
 
                                 // handled by intersection:
-
                                 //check[check.length] = map_check;
                             }
                             else if(!SUPPORT_SUGGESTIONS || !this.suggest){
@@ -1835,11 +1835,9 @@
                 if(found){
 
                     // Not handled by intersection:
-
-                    result = intersect(check, false, limit, cursor, /*SUPPORT_DOCUMENTS && this._doc,*/ SUPPORT_SUGGESTIONS && this.suggest);
+                    result = intersect(check, limit, cursor, SUPPORT_SUGGESTIONS && this.suggest);
 
                     // Handled by intersection:
-
                     //result = intersect_3d(check, limit, this.suggest);
                 }
 
@@ -1894,7 +1892,8 @@
 
                     return [doc[key]];
                 }
-                else if(is_string(key)){
+
+                if(is_string(key)){
 
                     if(is_undefined(value)){
 
@@ -1906,7 +1905,7 @@
                         return [doc[value]];
                     }
 
-                    //keys = [key];
+                    keys = [key];
                     keys_len = 1;
                     tree = [key.split(":")];
                     has_value = true;
@@ -2051,6 +2050,8 @@
                     return;
                 }
 
+                // TODO: improve info
+                /*
                 let keys;
                 let length;
 
@@ -2081,19 +2082,21 @@
 
                     bytes += keys[i].length * 2 + 2;
                 }
+                */
 
                 return {
 
                     "id": this.id,
-                    "memory": bytes,
-                    "items": items,
-                    "sequences": words,
-                    "chars": chars,
+                    //"memory": bytes,
+                    "items": this["length"], //items,
+                    //"sequences": words,
+                    //"chars": chars,
                     "cache": this.cache && this.cache.ids ? this.cache.ids.length : false,
                     "matcher": global_matcher.length + (this._matcher ? this._matcher.length : 0),
                     "worker": this.worker,
                     "threshold": this.threshold,
                     "depth": this.depth,
+                    "resolution": this.resolution,
                     "contextual": this.depth && (this.tokenize === "strict")
                 };
             };
@@ -2744,6 +2747,7 @@
          * @returns {Array<?string>}
          */
 
+        /*
         function ngram(value){
 
             const parts = [];
@@ -2831,6 +2835,7 @@
 
             return parts;
         }
+        */
 
         /**
          * @param {!string} string
@@ -2956,31 +2961,7 @@
          * @returns {number}
          */
 
-        function sort_by_length_down(a, b){
-
-            const diff = a.length - b.length;
-
-            return (
-
-                diff < 0 ?
-
-                    1
-                :(
-                    diff ?
-
-                        -1
-                    :
-                        0
-                )
-            );
-        }
-
-        /**
-         * @param {Array<number|string>} a
-         * @param {Array<number|string>} b
-         * @returns {number}
-         */
-
+        /*
         function sort_by_length_up(a, b){
 
             const diff = a.length - b.length;
@@ -2994,6 +2975,32 @@
                     diff ?
 
                         1
+                    :
+                        0
+                )
+            );
+        }
+        */
+
+        /**
+         * @param {Array<number|string>} a
+         * @param {Array<number|string>} b
+         * @returns {number}
+         */
+
+        function sort_by_length_down(a, b){
+
+            const diff = a.length - b.length;
+
+            return (
+
+                diff < 0 ?
+
+                    1
+                :(
+                    diff ?
+
+                        -1
                     :
                         0
                 )
@@ -3046,15 +3053,16 @@
         }
 
         /**
-         * @param {!Array<Array<number|string>>} arrays
-         * @param {string|boolean=} bool
+         * @param {!Array<Array<number|string>>} arrays*
          * @param {number=} limit
          * @param {number=} cursor
          * @param {boolean=} suggest
+         * @param {Array<string>=} bool
+         * @param {boolean=} has_not
          * @returns {Array}
          */
 
-        function intersect(arrays, bool, limit, cursor, /*docs,*/ suggest) {
+        function intersect(arrays, limit, cursor, suggest, bool, has_not) {
 
             let result = [];
             let suggestions;
@@ -3062,47 +3070,110 @@
 
             if(length_z > 1){
 
-                bool = (bool === "or");
-                // const bool_or = (bool === "or");
-                // const bool_and = (bool === "and") || !bool;
-                // const bool_not = (bool === "not");
-
+                // TODO: test strategy
                 // pre-sort arrays
-
-                //TODO: test strategy
                 //arrays.sort(sort_by_length_down);
 
                 const check = create_object();
-                let arr /*= arrays[0]*/;
+
+                let check_not;
+                let arr;
                 let z = -1; // start from 0
-                let length /*= arr.length*/;
-
-                // fill initial map
-
                 let i = 0;
+                let length;
+                let tmp;
+                let init = true;
                 let first_result;
+                let count = 0;
+                let bool_main;
+                let last_index;
+
+                if(SUPPORT_DOCUMENTS){
+
+                    if(has_not){
+
+                        check_not = create_object();
+
+                        while(++z < length_z){
+
+                            const current_bool = bool[z];
+
+                            if(current_bool === "not"){
+
+                                arr = arrays[z];
+                                length = arr.length;
+                                i = 0;
+
+                                while(i < length){
+
+                                    check_not["@" + arr[i++]] = 1;
+                                }
+                            }
+                            else{
+
+                                last_index = z + 1;
+                            }
+                        }
+
+                        if(!last_index){
+
+                            return result;
+                        }
+
+                        z = -1;
+                    }
+                    else{
+
+                        bool_main = is_string(bool) && bool;
+                    }
+                }
 
                 // loop through arrays
 
-                let tmp, init = true, count = 0;
-
                 while(++z < length_z){
 
-                    const is_final_loop = (z === (length_z - 1));
+                    const is_final_loop = (
+
+                        z === (last_index || length_z) - 1
+                    );
+
+                    let bool_current;
+                    let bool_and;
+                    let bool_or;
+
+                    if(SUPPORT_DOCUMENTS){
+
+                        if(!bool_main || !z){
+
+                            bool_current = bool_main || (bool && bool[z]);
+
+                            if(!bool_current || (bool_current === "and")){
+
+                                bool_and = true;
+                            }
+                            else if(bool_current === "or"){
+
+                                bool_or = true;
+                            }
+                            else{
+
+                                continue;
+                            }
+                        }
+                    }
+                    else{
+
+                        bool_and = true;
+                    }
 
                     arr = arrays[z];
                     length = arr.length;
 
                     if(!length){
 
-                        if(!bool && !suggest){
+                        if(bool_and && !suggest){
 
-                            return result;
-                        }
-
-                        if(is_final_loop && !count){
-
-                            return first_result || result;
+                            return arr;
                         }
 
                         continue;
@@ -3110,44 +3181,55 @@
 
                     if(init){
 
-                        if(is_final_loop){
+                        if(first_result){
 
-                            return arr;
+                            const result_length = first_result.length;
+
+                            i = 0;
+
+                            // fill initial map
+
+                            while(i < result_length){
+
+                                check["@" + first_result[i++]] = 1;
+                            }
+
+                            first_result = null;
+                            init = false;
                         }
+                        else{
 
-                        while(i < length) {
+                            first_result = arr;
 
-                            check["@" + arr[i++]] = 1;
+                            continue;
                         }
-
-                        first_result = arr;
-                        init = false;
-
-                        continue;
                     }
 
                     let found = false;
 
-                    suggestions = [];
                     i = 0;
+                    suggestions = [];
 
                     while(i < length){
 
                         tmp = arr[i++];
 
                         const index = "@" + tmp;
+                        const check_val = check[index];
 
-                        if(check[index]){
+                        if(check_val){
 
-                            const check_val = check[index];
+                            if(has_not && check_not[index]){
 
-                            if(bool || (check_val === z) /*|| (bool_not && !check_val)*/){
+                                continue;
+                            }
+
+                            if(bool_or || (check_val === z)){
 
                                 // fill in during last round
 
                                 if(is_final_loop){
 
-                                    //result[count++] = docs ? docs[tmp] : tmp;
                                     result[count++] = tmp;
 
                                     if(limit && (count === limit)){
@@ -3196,6 +3278,30 @@
                     }
                 }
 
+                if(first_result){
+
+                    if(has_not){
+
+                        const result_length = first_result.length;
+
+                        i = 0;
+
+                        while(i < result_length){
+
+                            const id = first_result[i++];
+
+                            if(!check_not["@" + id]){
+
+                                result[count++] = id;
+                            }
+                        }
+                    }
+                    else{
+
+                        result = first_result;
+                    }
+                }
+
                 if(suggest){
 
                     count = result.length;
@@ -3211,7 +3317,6 @@
 
                                 for(i = 0, length = tmp.length; i < length; i++){
 
-                                    //result[count++] = docs ? docs[tmp[i]] : tmp[i];
                                     result[count++] = tmp[i];
 
                                     if(limit && (count === limit)){
@@ -3226,37 +3331,20 @@
             }
             else if(length_z){
 
-                // if(docs){
-                //
-                //     const arr = arrays[0];
-                //     let length = arr.length;
-                //
-                //     if(limit && (limit < length)){
-                //
-                //         length = limit;
-                //     }
-                //
-                //     result = new Array(length);
-                //
-                //     for(let i = 0; i < length; i++){
-                //
-                //         result[i] = docs[arr[i]];
-                //     }
-                // }
-                // else{
+                if(!bool || (bool[0] !== "not")){
 
                     result = arrays[0];
 
-                    if(limit && /*result &&*/ (result.length > limit)){
+                    if(limit && (result.length > limit)){
 
                         // Note: do not modify the original index array!
 
                         result = result.slice(0, limit);
                     }
-                //}
 
-                // Note: handle references to the original index array
-                //return result.slice(0);
+                    // Note: handle references to the original index array
+                    //return result.slice(0);
+                }
             }
 
             return result;

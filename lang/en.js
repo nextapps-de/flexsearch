@@ -1,11 +1,22 @@
-/** @define {boolean} */ const SUPPORT_LANG_EN = true;
+/** @define {boolean} */
+const SUPPORT_LANG_EN = true;
 
 if(SUPPORT_LANG_EN) {
 
-    // noinspection ThisExpressionReferencesGlobalObjectJS
     (function(root){
 
-        root["FlexSearch"]["registerLanguage"]("en", /** @const */ {
+        let fs;
+
+        if((typeof exports === "object") && (typeof require !== "undefined")){
+
+            fs = require("../dist/flexsearch.node.js");
+        }
+        else{
+
+            fs = root["FlexSearch"];
+        }
+
+        fs["registerLanguage"]("en", /** @const */ {
 
             /**
              * http://www.ranks.nl/stopwords
@@ -277,6 +288,5 @@ if(SUPPORT_LANG_EN) {
                 "ic": ""
             }
         });
-
-    })(this);
+    }(this));
 }

@@ -1201,7 +1201,7 @@ var index = new FlexSearch({
 });
 ```
 
-> __Hint:__ This is an alternative for indexing documents which are much more complex: https://github.com/nextapps-de/flexsearch/issues/36
+> __Hint:__ This is an alternative for indexing documents which has nested arrays: <a href="https://github.com/nextapps-de/flexsearch/issues/36">https://github.com/nextapps-de/flexsearch/issues/36</a>
 
 #### Add/Update/Remove Documents to/from the Index
 
@@ -1288,7 +1288,7 @@ var results = index.search({
 Could also be written as:
 
 ```js
-var results = index.search("title", {
+var results = index.search("foobar", {
     field: ["title", "body"],
     bool: "or"
 });
@@ -1299,12 +1299,10 @@ Search different queries on multiple fields:
 ```js
 var results = index.search([{
     field: "title",
-    query: "foo",
-    bool: "and"
+    query: "foo"
 },{
     field: "body",
-    query: "bar",
-    bool: "and"
+    query: "bar"
 }]);
 ```
 
@@ -1503,6 +1501,13 @@ var results = index.search("John", {
     limit: 100,
     sort: "data:title"
 });
+```
+
+> The default sorting order is from lowest to highest.
+
+Explicitly set sorting direction (from highest to lowest):
+```js
+sort: ">data:title"
 ```
 
 Sort by a custom function:
@@ -2280,7 +2285,6 @@ var results = search("movie title", {
 
 Split indexes by categories improves performance significantly.
 
-
 ##### Use numeric IDs
 
 It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
@@ -2434,6 +2438,8 @@ Custom Build:
 npm run build-custom SUPPORT_WORKER=true SUPPORT_ASYNC=true
 ```
 
+> On custom builds each build flag will be set to _false_ by default.
+
 Alternatively you can also use:
 ```bash
 node compile SUPPORT_WORKER=true
@@ -2523,7 +2529,7 @@ node compile SUPPORT_WORKER=true
 
 ## Contribution
 
-I would be glad about any kind of help. Feel free to contribute to this project and also feel free to contact me (https://github.com/ts-thomas) when you have any questions. There are just one simple (and maybe unusual) coding convention: all public accessible identifiers should be singular.
+Feel free to contribute to this project and also feel free to contact me (<a href="https://github.com/ts-thomas">https://github.com/ts-thomas</a>) when you have any questions.
 
 <a href="CHANGELOG.md">Changelog</a>
 

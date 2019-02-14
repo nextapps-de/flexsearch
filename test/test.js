@@ -3,6 +3,7 @@ if(typeof module !== "undefined"){
     var env = process.argv[3] === "test" ? "min" : process.argv[3] === "test/" ? "light" : "";
     var expect = require("chai").expect;
     var FlexSearch = require("../" + (env ? "dist/": "") + "flexsearch" + (env ? "." + env : "") + ".js");
+    require("../lang/en.min.js");
 }
 
 var flexsearch_default;
@@ -1189,6 +1190,7 @@ if(env !== "light") describe("Suggestions", function(){
         expect(index.search("1 3 9 7")).to.have.members([0]);
         expect(index.search("one foobar two")).to.have.members([1, 2]);
         expect(index.search("zero one foobar two foobar")).to.have.members([1, 2]);
+
         //TODO
         //expect(index.search("zero one foobar two foobar")[0]).to.equal(1);
     });
@@ -1228,9 +1230,10 @@ if(env === "" || env === "min") describe("Where/Find", function(){
 
         index.add(data);
 
-        //expect(index.length).to.equal(3);
+        expect(index.length).to.equal(3);
+        expect(index.index).to.have.keys(["@0", "@1", "@2"]);
 
-        //expect(index.find(0)).to.equal(data[0]);
+        expect(index.find(0)).to.equal(data[0]);
         expect(index.find("id", 0)).to.equal(data[0]);
         expect(index.where("id", 0)).to.have.members([data[0]]);
         expect(index.find(function(val){return val.id === 0;})).to.equal(data[0]);
@@ -1343,8 +1346,11 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
         expect(index.search({field: "data:body", query: "body"})).to.have.members(data);
         expect(index.search({field: ["data:title"], query: "title"})).to.have.members(data);
 
-        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.lengthOf(0);
-        expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.lengthOf(0);
+        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.lengthOf(3);
+        expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.lengthOf(3);
+        expect(index.search({field: ["data:title", "data:body"], query: "body"})).to.have.members(data);
+        expect(index.search({field: ["data:body", "data:title"], query: "title"})).to.have.members(data);
+
         expect(index.search({field: ["data:title", "data:body"], query: "body", bool: "and"})).to.have.lengthOf(0);
         expect(index.search({field: ["data:body", "data:title"], query: "title", bool: "and"})).to.have.lengthOf(0);
         expect(index.search({field: ["data:title", "data:body"], query: "body", bool: "or"})).to.have.members(data);
@@ -1354,13 +1360,12 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
         expect(index.search("title", {field: ["data:title"]})).to.have.members(data);
 
         expect(index.search({query: "body", bool: "or"})).to.have.members(data);
-        //expect(index.search("title", {bool: "or"})).to.have.members(data);
+        expect(index.search("title", {bool: "or"})).to.have.members(data);
 
         expect(index.search({
 
             field: "data:title",
-            query: "title",
-            boost: 2
+            query: "title"
 
         })).to.have.members(data);
 
@@ -1757,6 +1762,217 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
     }
 });
 
+if(env !== "light") describe("Operators", function(){
+
+    var data = [{
+        id: 2,
+        title: "Title 3",
+        body: "Body 3",
+        blacklist: "x1"
+    },{
+        id: 1,
+        title: "Title 2",
+        body: "Body 2",
+        blacklist: "x2"
+    },{
+        id: 0,
+        title: "Title 1",
+        body: "Body 1",
+        blacklist: "x3"
+    }];
+
+    var index = new FlexSearch({
+        doc: {
+            id: "id",
+            field: ["title", "body", "blacklist"]
+        }
+    });
+
+    it("Should have been properly applied logic", function(){
+
+        index.add(data);
+
+        expect(index.search([{
+            field: "title",
+            query: "title",
+            bool: "and"
+        },{
+            field: "body",
+            query: "body",
+            bool: "and"
+        },{
+            field: "blacklist",
+            query: "xxx",
+            bool: "not"
+        }])).to.have.length(3);
+
+        expect(index.search([{
+            field: "title",
+            query: "title",
+            bool: "and"
+        },{
+            field: "body",
+            query: "title",
+            bool: "and"
+        },{
+            field: "blacklist",
+            query: "xxx",
+            bool: "not"
+        }])).to.have.length(0);
+
+        expect(index.search([{
+            field: "title",
+            query: "title",
+            bool: "and"
+        },{
+            field: "body",
+            query: "title",
+            bool: "or"
+        },{
+            field: "blacklist",
+            query: "xxx",
+            bool: "not"
+        }])).to.have.length(3);
+
+        expect(index.search([{
+            field: "title",
+            query: "title",
+            bool: "and"
+        },{
+            field: "body",
+            query: "title",
+            bool: "or"
+        }])).to.have.length(3);
+
+        expect(index.search([{
+            field: "title",
+            query: "title",
+            bool: "and"
+        },{
+            field: "body",
+            query: "title",
+            bool: "or"
+        },{
+            field: "blacklist",
+            query: "x1",
+            bool: "not"
+        }])).to.have.length(2);
+
+        expect(index.search([{
+            field: "title",
+            query: "body",
+            bool: "or"
+        },{
+            field: "body",
+            query: "title",
+            bool: "or"
+        },{
+            field: "blacklist",
+            query: "x1",
+            bool: "not"
+        }])).to.have.length(0);
+
+        expect(index.search([{
+            field: "title",
+            query: "body",
+            bool: "or"
+        },{
+            field: "body",
+            query: "body",
+            bool: "and"
+        },{
+            field: "blacklist",
+            query: "x2",
+            bool: "not"
+        }])).to.have.length(2);
+
+        expect(index.search([{
+            field: "blacklist",
+            query: "x2",
+            bool: "not"
+        },{
+            field: "title",
+            query: "body",
+            bool: "or"
+        },{
+            field: "body",
+            query: "body",
+            bool: "and"
+        }])).to.have.length(2);
+
+        expect(index.search([{
+            field: "title",
+            query: "body",
+            bool: "or"
+        },{
+            field: "blacklist",
+            query: "x2",
+            bool: "not"
+        },{
+            field: "body",
+            query: "body",
+            bool: "and"
+        }])).to.have.length(2);
+
+        expect(index.search([{
+            field: "title",
+            query: "title",
+            bool: "and"
+        },{
+            field: "body",
+            query: "body",
+            bool: "and"
+        },{
+            field: "blacklist",
+            query: "x",
+            bool: "not"
+        }])).to.have.length(0);
+    });
+});
+
+describe("Reserved Words", function(){
+
+    it("Should have been exported properly", function(){
+
+        var index = new FlexSearch({
+            encode: false,
+            tokenize: "strict",
+            threshold: 0,
+            depth: 3
+        });
+
+        var array = Object.getOwnPropertyNames({}.__proto__);
+            array = array.concat(Object.getOwnPropertyNames(index));
+
+        array.push("prototype");
+        array.push("constructor");
+        array.push("__proto__");
+
+        if(env !== "min"){
+
+            array.push("concat");
+            array.push("hasOwnProperty");
+            array.push("length");
+        }
+
+        for(var i = 0; i < array.length; i++){
+
+            index.add(array[i], array[i]);
+        }
+
+        for(var i = 0; i < array.length; i++){
+
+            // TODO: this word is reserved and can't be indexed
+            if(array[i] === "_ctx"){
+
+                continue;
+            }
+
+            expect(index.search(array[i])).to.have.members([array[i]]);
+        }
+    });
+});
+
 // ------------------------------------------------------------------------
 // Export / Import
 // ------------------------------------------------------------------------
@@ -1929,12 +2145,13 @@ if(env !== "light" && env !== "min"){
             expect(info).to.have.keys([
 
                 "id",
-                "chars",
+                //"chars",
                 "cache",
                 "items",
                 "matcher",
-                "memory",
-                "sequences",
+                //"memory",
+                //"sequences",
+                "resolution",
                 "worker",
                 "contextual",
                 "depth",
