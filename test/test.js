@@ -3,7 +3,7 @@ if(typeof module !== "undefined"){
     var env = process.argv[3] === "test" ? "min" : process.argv[3] === "test/" ? "light" : "";
     var expect = require("chai").expect;
     var FlexSearch = require("../" + (env ? "dist/": "") + "flexsearch" + (env ? "." + env : "") + ".js");
-    require("../lang/en.min.js");
+    //require("../lang/en.min.js");
 }
 
 var flexsearch_default;
