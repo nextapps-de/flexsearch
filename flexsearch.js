@@ -1,24 +1,27 @@
 /**!
- * @preserve FlexSearch v0.5.31
+ * @preserve FlexSearch v0.6.0
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
  * https://github.com/nextapps-de/flexsearch
  */
 
-/** @define {string} */  const RELEASE = "";
+/** @define {string}  */ const RELEASE = "";
 /** @define {boolean} */ const DEBUG = true;
 /** @define {boolean} */ const PROFILER = false;
 /** @define {boolean} */ const SUPPORT_WORKER = true;
 /** @define {boolean} */ const SUPPORT_ENCODER = true;
 /** @define {boolean} */ const SUPPORT_CACHE = true;
 /** @define {boolean} */ const SUPPORT_ASYNC = true;
-/** @define {boolean} */ const SUPPORT_PRESETS = true;
-/** @define {boolean} */ const SUPPORT_SUGGESTIONS = true;
+/** @define {boolean} */ const SUPPORT_PRESET = true;
+/** @define {boolean} */ const SUPPORT_SUGGESTION = true;
 /** @define {boolean} */ const SUPPORT_SERIALIZE = true;
 /** @define {boolean} */ const SUPPORT_INFO = true;
-/** @define {boolean} */ const SUPPORT_DOCUMENTS = true;
+/** @define {boolean} */ const SUPPORT_DOCUMENT = true;
 /** @define {boolean} */ const SUPPORT_WHERE = true;
+/** @define {boolean} */ const SUPPORT_PAGINATION = true;
+/** @define {boolean} */ const SUPPORT_OPERATOR = true;
+/** @define {boolean} */ const SUPPORT_CALLBACK = true;
 
 // noinspection ThisExpressionReferencesGlobalObjectJS
 (function(){
@@ -36,13 +39,14 @@
 
             encode: "icase",
             tokenize: "forward",
-            suggest: false,
+            // enrich: true,
+            // clone: false,
+            // suggest: false,
             cache: false,
             async: false,
             worker: false,
             rtl: false,
             doc: false,
-            paging: false,
 
             // maximum scoring
             resolution: 9,
@@ -177,17 +181,17 @@
 
             register_property(this, "index", /** @this {FlexSearch} */ function(){
 
-                if(SUPPORT_DOCUMENTS && this.doc){
+                if(SUPPORT_DOCUMENT && this.doc){
 
-                    return this.doc.index[this.doc["keys"][0]]._ids;
+                    return get_keys(this.doc.index[this.doc.keys[0]]._ids);
                 }
 
-                return this._ids;
+                return get_keys(this._ids);
             });
 
             register_property(this, "length", /** @this {FlexSearch} */ function(){
 
-                return get_keys(this.index).length;
+                return this.index.length;
             });
         }
 
@@ -339,7 +343,7 @@
 
             let preset = {};
 
-            if(SUPPORT_PRESETS){
+            if(SUPPORT_PRESET){
 
                 if(is_string(options)){
 
@@ -470,22 +474,11 @@
             /** @private */
             this.depth = (
 
-                is_undefined(custom = options["depth"]) ?
+                (this.tokenize !== "strict") || is_undefined(custom = options["depth"]) ?
 
                     preset.depth ||
                     this.depth ||
                     defaults.depth
-                :
-                    custom
-            );
-
-            /** @private */
-            this.paging = (
-
-                is_undefined(custom = options["paging"]) ?
-
-                    this.paging ||
-                    defaults.paging
                 :
                     custom
             );
@@ -500,19 +493,19 @@
             );
             */
 
-            if(SUPPORT_SUGGESTIONS){
-
-                /** @private */
-                this.suggest = (
-
-                    is_undefined(custom = options["suggest"]) ?
-
-                        this.suggest ||
-                        defaults.suggest
-                    :
-                        custom
-                );
-            }
+            // if(SUPPORT_SUGGESTION){
+            //
+            //     /** @private */
+            //     this.suggest = (
+            //
+            //         is_undefined(custom = options["suggest"]) ?
+            //
+            //             this.suggest ||
+            //             defaults.suggest
+            //         :
+            //             custom
+            //     );
+            // }
 
             custom = is_undefined(custom = options["encode"]) ?
 
@@ -565,7 +558,7 @@
 
             let doc;
 
-            if(SUPPORT_DOCUMENTS) {
+            if(SUPPORT_DOCUMENT) {
 
                 /** @private */
                 this.doc = doc = (
@@ -593,8 +586,8 @@
 
                 options["doc"] = null;
 
-                const index = doc["index"] = {};
-                const keys = doc["keys"] = [];
+                const index = doc.index = {};
+                const keys = doc.keys = [];
 
                 let field = doc["field"];
                 let tag = doc["tag"];
@@ -820,7 +813,7 @@
 
         FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall){
 
-            if(SUPPORT_DOCUMENTS && this.doc && is_object(id)){
+            if(SUPPORT_DOCUMENT && this.doc && is_object(id)){
 
                 return this.handle_docs("add", id, /** @type {Function} */ (content));
             }
@@ -1107,7 +1100,7 @@
             return this;
         };
 
-        if(SUPPORT_DOCUMENTS){
+        if(SUPPORT_DOCUMENT){
 
             /**
              * @param {!string} job
@@ -1134,8 +1127,8 @@
                 }
                 else{
 
-                    const index = this.doc["index"];
-                    const keys = this.doc["keys"];
+                    const index = this.doc.index;
+                    const keys = this.doc.keys;
                     const tags = this.doc["tag"];
                     let tree = this.doc["id"];
                     let id;
@@ -1239,7 +1232,7 @@
 
         FlexSearch.prototype.update = function(id, content, callback){
 
-            if(SUPPORT_DOCUMENTS && this.doc && is_object(id)){
+            if(SUPPORT_DOCUMENT && this.doc && is_object(id)){
 
                 return this.handle_docs("update", id, /** @type {Function} */ (content));
             }
@@ -1274,7 +1267,7 @@
 
         FlexSearch.prototype.remove = function(id, callback, _recall){
 
-            if(SUPPORT_DOCUMENTS && this.doc && is_object(id)){
+            if(SUPPORT_DOCUMENT && this.doc && is_object(id)){
 
                 return this.handle_docs("remove", id, callback);
             }
@@ -1388,14 +1381,26 @@
             return result;
         }
 
-        function merge_and_sort(query, bool, result, sort, limit, where, cursor, has_not){
+        function merge_and_sort(query, bool, result, sort, limit, suggest, where, cursor, has_and, has_not){
 
-            result = intersect(result, where ? 0 : limit, cursor, SUPPORT_SUGGESTIONS && this.suggest, bool, has_not);
-            result = enrich_documents(result, this._doc);
+            result = intersect(result, where ? 0 : limit, cursor, SUPPORT_SUGGESTION && suggest, bool, has_and, has_not);
+
+            let next;
+
+            if(cursor){
+
+                cursor = result.page;
+                next = result.next;
+                result = result.result;
+            }
 
             if(where){
 
                 result = this.where(where, null, limit, result);
+            }
+            else{
+
+                result = enrich_documents(result, this._doc);
             }
 
             // TODO: pre-sort when indexing
@@ -1420,6 +1425,8 @@
                 result.sort(sort);
             }
 
+            result = create_page(cursor, next, result);
+
             if(SUPPORT_CACHE && this.cache){
 
                 this._cache.set(query, result);
@@ -1441,7 +1448,7 @@
 
         FlexSearch.prototype.search = function(query, limit, callback, _recall){
 
-            if(SUPPORT_DOCUMENTS && is_object(limit)){
+            if(SUPPORT_DOCUMENT && is_object(limit)){
 
                 if(is_array(limit)){
 
@@ -1464,14 +1471,17 @@
             let threshold;
             let cursor;
             let sort;
+            let suggest;
+            let enrich;
+            let clone;
 
-            if(is_object(query) && (!SUPPORT_DOCUMENTS || !is_array(query))){
+            if(is_object(query) && (!SUPPORT_DOCUMENT || !is_array(query))){
 
                 // re-assign properties
 
                 if(SUPPORT_ASYNC){
 
-                    callback = query["callback"] || /** @type {?Function} */ (limit);
+                    callback = query["callback"] || (is_function(limit) && /** @type {?Function} */ (limit));
 
                     if(callback) {
 
@@ -1479,22 +1489,26 @@
                     }
                 }
 
-                //cursor = this.paging && query["cursor"];
-                sort = SUPPORT_DOCUMENTS && query["sort"];
+                sort = SUPPORT_DOCUMENT && query["sort"];
+                cursor = query["page"];
                 limit = query["limit"];
                 threshold = query["threshold"];
+                enrich = query["enrich"];
+                clone = query["clone"];
+                suggest = SUPPORT_SUGGESTION && query["suggest"];
                 query = query["query"];
             }
 
-            if(SUPPORT_DOCUMENTS && this.doc){
+            if(SUPPORT_DOCUMENT && this.doc){
 
-                const doc_idx = this.doc["index"];
+                const doc_idx = this.doc.index;
                 const where = SUPPORT_WHERE && _query["where"];
-                const bool_main = _query["bool"] || "or";
+                const bool_main = (SUPPORT_OPERATOR && _query["bool"]) || "or";
                 let field = _query["field"];
                 let bool = bool_main;
                 let queries;
                 let has_not;
+                let has_and;
 
                 if(field){
 
@@ -1509,10 +1523,12 @@
                     field = [];
                     bool = [];
 
+                    // TODO: make some unit tests and check if the fields should be sorted (not > and > or)?
+
                     for(let i = 0; i < _query.length; i++){
 
                         const current = _query[i];
-                        const current_bool = current["bool"] || bool_main;
+                        const current_bool = (SUPPORT_OPERATOR && current["bool"]) || bool_main;
 
                         field[i] = current["field"];
                         bool[i] = current_bool;
@@ -1521,11 +1537,15 @@
 
                             has_not = true;
                         }
+                        else if(current_bool === "and"){
+
+                            has_and = true;
+                        }
                     }
                 }
                 else{
 
-                    field = this.doc["keys"];
+                    field = this.doc.keys;
                 }
 
                 const len = field.length;
@@ -1537,12 +1557,32 @@
                         _query = queries[i];
                     }
 
-                    result[i] = doc_idx[field[i]].search(_query);
+                    if(!is_string(_query)){
+
+                        _query["page"] = null;
+                        _query["limit"] = 0;
+                    }
+
+                    result[i] = doc_idx[field[i]].search(_query, 0);
                 }
 
                 if(callback){
 
-                    return callback(merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor, has_not));
+                    return callback(
+
+                        merge_and_sort.call(this,
+                            query,
+                            bool,
+                            result,
+                            sort,
+                            limit,
+                            suggest,
+                            where,
+                            cursor,
+                            has_and,
+                            has_not
+                        )
+                    );
                 }
                 else if(SUPPORT_ASYNC && this.async){
 
@@ -1552,13 +1592,38 @@
 
                         Promise.all(/** @type {!Iterable<Promise>} */ (result)).then(function(values){
 
-                            resolve(merge_and_sort.call(self, query, bool, values, sort, limit, where, cursor, has_not));
+                            resolve(
+
+                                merge_and_sort.call(self,
+                                    query,
+                                    bool,
+                                    values,
+                                    sort,
+                                    limit,
+                                    suggest,
+                                    where,
+                                    cursor,
+                                    has_and,
+                                    has_not
+                                )
+                            );
                         });
                     });
                 }
                 else{
 
-                    return merge_and_sort.call(this, query, bool, result, sort, limit, where, cursor, has_not);
+                    return merge_and_sort.call(this,
+                        query,
+                        bool,
+                        result,
+                        sort,
+                        limit,
+                        suggest,
+                        where,
+                        cursor,
+                        has_and,
+                        has_not
+                    );
                 }
             }
 
@@ -1686,7 +1751,7 @@
 
                     tokenizer(_query)
                 :(
-                    // NOTE: ngram matches inconsistently, research or remove
+                    // TODO: ngram matches inconsistently, research or remove
                     //SUPPORT_ENCODER && (tokenizer === "ngram") ?
 
                         /** @type {!Array<string>} */
@@ -1760,7 +1825,7 @@
                 const resolution = this.resolution;
 
                 // TODO: boost on custom search is actually not possible, move to adding index instead
-                // if(SUPPORT_DOCUMENTS && boost){
+                // if(SUPPORT_DOCUMENT && boost){
                 //
                 //     threshold = (threshold || 1) / boost;
                 // }
@@ -1812,7 +1877,7 @@
                                 // handled by intersection:
                                 //check[check.length] = map_check;
                             }
-                            else if(!SUPPORT_SUGGESTIONS || !this.suggest){
+                            else if(!SUPPORT_SUGGESTION || !suggest){
 
                                 found = false;
                                 break;
@@ -1830,15 +1895,15 @@
                 found = false;
             }
 
-            if(!SUPPORT_DOCUMENTS || !this.doc){
+            //if(!SUPPORT_DOCUMENT || !this.doc){
 
                 if(found){
 
                     // Not handled by intersection:
-                    result = intersect(check, limit, cursor, SUPPORT_SUGGESTIONS && this.suggest);
+                    result = /** @type {Array} */ (intersect(check, limit, cursor, SUPPORT_SUGGESTION && suggest));
 
                     // Handled by intersection:
-                    //result = intersect_3d(check, limit, this.suggest);
+                    //result = intersect_3d(check, limit, suggest);
                 }
 
                 // store result to cache
@@ -1847,7 +1912,7 @@
 
                     this._cache.set(query, result);
                 }
-            }
+            //}
 
             if(PROFILER){
 
@@ -1857,7 +1922,7 @@
             return result;
         };
 
-        if(SUPPORT_DOCUMENTS && SUPPORT_WHERE){
+        if(SUPPORT_DOCUMENT && SUPPORT_WHERE){
 
             /**
              * @export
@@ -1879,7 +1944,7 @@
 
             FlexSearch.prototype.where = function(key, value, limit, result){
 
-                const doc = result || this._doc;
+                const doc = this._doc;
                 const results = [];
 
                 let count = 0;
@@ -1888,46 +1953,7 @@
                 let has_value;
                 let tree;
 
-                if(typeof key === "number"){
-
-                    return [doc[key]];
-                }
-
-                if(is_string(key)){
-
-                    if(is_undefined(value)){
-
-                        return [doc[key]];
-                    }
-
-                    if(key === "id"){
-
-                        return [doc[value]];
-                    }
-
-                    keys = [key];
-                    keys_len = 1;
-                    tree = [key.split(":")];
-                    has_value = true;
-                }
-                else if(is_function(key)){
-
-                    const ids = result || get_keys(doc);
-                    const length = ids.length;
-
-                    for(let x = 0; x < length; x++){
-
-                        const obj = result ? result[x] : doc[ids[x]];
-
-                        if(key(obj)){
-
-                            results[count++] = obj;
-                        }
-                    }
-
-                    return results;
-                }
-                else{
+                if(is_object(key)){
 
                     limit || (limit = value);
                     keys = get_keys(key);
@@ -1965,11 +1991,6 @@
                                 break;
                             }
                         }
-
-                        // for(let i = 0; i < result.length; i++){
-                        //
-                        //     result[i] = this._doc[result[i]];
-                        // }
                     }
 
                     tree = new Array(keys_len);
@@ -1979,13 +2000,47 @@
                         tree[i] = keys[i].split(":");
                     }
                 }
+                else if(is_function(key)){
+
+                    const ids = result || get_keys(doc);
+                    const length = ids.length;
+
+                    for(let x = 0; x < length; x++){
+
+                        const obj = doc[ids[x]];
+
+                        if(key(obj)){
+
+                            results[count++] = obj;
+                        }
+                    }
+
+                    return results;
+                }
+                else{
+
+                    if(is_undefined(value)){
+
+                        return [doc[key]];
+                    }
+
+                    if(key === "id"){
+
+                        return [doc[value]];
+                    }
+
+                    keys = [key];
+                    keys_len = 1;
+                    tree = [key.split(":")];
+                    has_value = true;
+                }
 
                 const ids = result || get_keys(doc); // this._ids;
                 const length = ids.length;
 
                 for(let x = 0; x < length; x++){
 
-                    const obj = result ? result[x] : doc[ids[x]];
+                    const obj = doc[ids[x]];
                     let found = true;
 
                     for(let i = 0; i < keys_len; i++){
@@ -2127,9 +2182,9 @@
             this._ctx =
             this._ids = null;
 
-            if(SUPPORT_DOCUMENTS && this.doc){
+            if(SUPPORT_DOCUMENT && this.doc){
 
-                const keys = this.doc["keys"];
+                const keys = this.doc.keys;
 
                 for(let i = 0; i < keys.length; i++){
 
@@ -2152,9 +2207,9 @@
 
             FlexSearch.prototype.export = function(){
 
-                if(SUPPORT_DOCUMENTS && this.doc){
+                if(SUPPORT_DOCUMENT && this.doc){
 
-                    const keys = this.doc["keys"];
+                    const keys = this.doc.keys;
                     const length = keys.length;
                     const payload = new Array(length + 1);
 
@@ -2166,7 +2221,7 @@
 
                         payload[i] = [
 
-                            idx._map, idx._ctx, idx._ids
+                            idx._map, idx._ctx, get_keys(idx._ids)
                         ];
                     }
 
@@ -2179,7 +2234,7 @@
 
                     this._map,
                     this._ctx,
-                    this._ids
+                    get_keys(this._ids)
                 ]);
             };
 
@@ -2191,10 +2246,18 @@
 
                 payload = JSON.parse(payload);
 
-                if(SUPPORT_DOCUMENTS && this.doc){
+                const ids = create_object();
 
-                    const keys = this.doc["keys"];
+                if(SUPPORT_DOCUMENT && this.doc){
+
+                    const keys = this.doc.keys;
                     const length = keys.length;
+                    const current = payload[0][2];
+
+                    for(let i = 0; i < current.length; i++){
+
+                        ids[current[i]] = 1;
+                    }
 
                     for(let i = 0; i < length; i++){
 
@@ -2202,7 +2265,7 @@
 
                         idx._map = payload[i][0];
                         idx._ctx = payload[i][1];
-                        idx._ids = payload[i][2];
+                        idx._ids = ids;
                         idx._doc = payload[length];
                     }
 
@@ -2210,10 +2273,16 @@
                 }
                 else{
 
+                    const current = payload[2];
+
+                    for(let i = 0; i < current.length; i++){
+
+                        ids[current[i]] = 1;
+                    }
+
                     this._map = payload[0];
                     this._ctx = payload[1];
-                    this._ids = payload[2];
-                    //this._doc = payload[3];
+                    this._ids = ids;
                 }
             };
         }
@@ -2505,6 +2574,7 @@
                     this.count[key] = -1;
                     this.cache[key] = value;
 
+                    // TODO: remove extra call
                     // shift up counter +1
 
                     this.get(key);
@@ -3052,21 +3122,51 @@
             );
         }
 
+        function create_page(cursor, page, result){
+
+            return cursor ? {
+
+                "page": cursor,
+                "next": page ? "" + page : null,
+                "result": result
+
+            } : result;
+        }
+
         /**
+         * This is the main hot spot.
+         * Any possible performance improvements should be applied here.
+         * TODO: Do not return the original array as reference!
+         * TODO: Make use of performance benefits of a cursor when no "and" operator was used
+         *
          * @param {!Array<Array<number|string>>} arrays*
          * @param {number=} limit
-         * @param {number=} cursor
+         * @param {string|boolean=} cursor
          * @param {boolean=} suggest
          * @param {Array<string>=} bool
+         * @param {boolean=} has_and
          * @param {boolean=} has_not
-         * @returns {Array}
+         * @returns {Array|Object}
          */
 
-        function intersect(arrays, limit, cursor, suggest, bool, has_not) {
+        function intersect(arrays, limit, cursor, suggest, bool, has_and, has_not) {
 
+            let page;
             let result = [];
-            let suggestions;
+            let pointer;
             const length_z = arrays.length;
+
+            if(cursor === true){
+
+                cursor = "0";
+                pointer = "";
+            }
+            else{
+
+                pointer = cursor && cursor.split(":");
+            }
+
+            // use complex handler when length > 1
 
             if(length_z > 1){
 
@@ -3076,6 +3176,7 @@
 
                 const check = create_object();
 
+                let suggestions = [];
                 let check_not;
                 let arr;
                 let z = -1; // start from 0
@@ -3088,7 +3189,25 @@
                 let bool_main;
                 let last_index;
 
-                if(SUPPORT_DOCUMENTS){
+                let pointer_suggest;
+
+                if(pointer){
+
+                    if(pointer.length === 2){
+
+                        pointer_suggest = pointer;
+                        pointer = false;
+                    }
+                    else{
+
+                        pointer = parseInt(pointer[0], 10);
+                    }
+                }
+
+                if(SUPPORT_DOCUMENT && SUPPORT_OPERATOR){
+
+                    // there are two possible strategies: 1. pre-fill (actually), 2. filter during last round
+                    // TODO: compare both strategies
 
                     if(has_not){
 
@@ -3111,13 +3230,19 @@
                             }
                             else{
 
+                                // this additional loop provides a proofed last result
+                                // TODO: could be handled before intersection, or use sorted fields
+
                                 last_index = z + 1;
                             }
                         }
 
+                        // there was no field with "and" / "or"
+                        // TODO: this could also checked before intersection
+
                         if(!last_index){
 
-                            return result;
+                            return create_page(cursor, page, result);
                         }
 
                         z = -1;
@@ -3141,7 +3266,7 @@
                     let bool_and;
                     let bool_or;
 
-                    if(SUPPORT_DOCUMENTS){
+                    if(SUPPORT_DOCUMENT && SUPPORT_OPERATOR){
 
                         if(!bool_main || !z){
 
@@ -3157,6 +3282,8 @@
                             }
                             else{
 
+                                // already done, go next
+
                                 continue;
                             }
                         }
@@ -3171,15 +3298,19 @@
 
                     if(!length){
 
+                        // return empty on specific conditions
+
                         if(bool_and && !suggest){
 
-                            return arr;
+                            return create_page(cursor, page, arr);
                         }
 
                         continue;
                     }
 
                     if(init){
+
+                        // pre-fill first just right before an additional result
 
                         if(first_result){
 
@@ -3199,6 +3330,8 @@
                         }
                         else{
 
+                            // hold first result and wait for additional result
+
                             first_result = arr;
 
                             continue;
@@ -3208,14 +3341,14 @@
                     let found = false;
 
                     i = 0;
-                    suggestions = [];
+                    //suggestions = [];
 
                     while(i < length){
 
                         tmp = arr[i++];
 
                         const index = "@" + tmp;
-                        const check_val = check[index];
+                        const check_val = bool_or ? z : check[index];
 
                         if(check_val){
 
@@ -3224,36 +3357,31 @@
                                 continue;
                             }
 
-                            if(bool_or || (check_val === z)){
+                            if(check_val === z){
 
                                 // fill in during last round
 
                                 if(is_final_loop){
 
-                                    result[count++] = tmp;
+                                    // sadly the pointer could just applied here at the earliest
+                                    // that's why pagination cannot reduce complexity actually
+                                    // should only happened when at least one "and" bool was set
+                                    // TODO: check bool and provide complexity reduction
 
-                                    if(limit && (count === limit)){
+                                    if(!pointer || (--pointer < count)){
 
-                                        // if(cursor){
-                                        //
-                                        //     return {
-                                        //
-                                        //         "current": cursor,
-                                        //         "prev": null,
-                                        //         "next": z + ":" + i,
-                                        //         "result": result
-                                        //     };
-                                        // }
+                                        result[count++] = tmp;
 
-                                        return result;
+                                        if(limit && (count === limit)){
+
+                                            return create_page(cursor, count, result);
+                                        }
                                     }
                                 }
                                 else{
 
                                     check[index] = z + 1;
                                 }
-
-                                // apply count status
 
                                 found = true;
                             }
@@ -3272,19 +3400,30 @@
                         }
                     }
 
-                    if(!found && !suggest){
+                    // nothing found, break the main loop
+
+                    if(bool_and && !found && !suggest){
 
                         break;
                     }
                 }
 
+                // a first result was hold
+
                 if(first_result){
+
+                    const result_length = first_result.length;
 
                     if(has_not){
 
-                        const result_length = first_result.length;
+                        if(pointer){
 
-                        i = 0;
+                            i = parseInt(pointer, 10);
+                        }
+                        else{
+
+                            i = 0;
+                        }
 
                         while(i < result_length){
 
@@ -3292,7 +3431,15 @@
 
                             if(!check_not["@" + id]){
 
-                                result[count++] = id;
+                                if(!pointer || (--pointer < count)){
+
+                                    result[count++] = id;
+
+                                    if(limit && (count === limit)){
+
+                                        return create_page(cursor, i, result);
+                                    }
+                                }
                             }
                         }
                     }
@@ -3305,23 +3452,35 @@
                 if(suggest){
 
                     count = result.length;
-                    z = suggestions.length;
 
-                    if(z && (!limit || (count < limit))){
+                    if(pointer_suggest){
 
-                        while(z--){
+                        z = parseInt(pointer_suggest[0], 10) + 1;
+                        i = parseInt(pointer_suggest[1], 10);
+                    }
+                    else{
 
-                            tmp = suggestions[z];
+                        z = suggestions.length;
+                        i = 0;
+                    }
 
-                            if(tmp){
+                    while(z--){
 
-                                for(i = 0, length = tmp.length; i < length; i++){
+                        tmp = suggestions[z];
 
-                                    result[count++] = tmp[i];
+                        if(tmp){
+
+                            for(length = tmp.length; i < length; i++){
+
+                                const id = tmp[i];
+
+                                if(!has_not || !check_not["@" + id]){
+
+                                    result[count++] = id;
 
                                     if(limit && (count === limit)){
 
-                                        return result;
+                                        return create_page(cursor, z + ":" + i, result);
                                     }
                                 }
                             }
@@ -3331,23 +3490,31 @@
             }
             else if(length_z){
 
-                if(!bool || (bool[0] !== "not")){
+                if(!bool || (SUPPORT_OPERATOR && (bool[0] !== "not"))){
 
                     result = arrays[0];
 
-                    if(limit && (result.length > limit)){
-
-                        // Note: do not modify the original index array!
-
-                        result = result.slice(0, limit);
-                    }
-
-                    // Note: handle references to the original index array
-                    //return result.slice(0);
+                    // TODO: handle references to the original index array
+                    // return result.slice(0);
                 }
             }
 
-            return result;
+            if(limit){
+
+                const start = cursor ? parseInt(cursor, 10) : 0;
+                      page = start + limit;
+
+                if(page < result.length){
+
+                    result = result.slice(start, page);
+                }
+                else if(start){
+
+                    result = result.slice(start);
+                }
+            }
+
+            return create_page(cursor, page, result);
         }
 
         /**
@@ -3767,15 +3934,18 @@
                                         "var RELEASE = '" + RELEASE + "';" +
                                         "var DEBUG = " + (DEBUG ? "true" : "false") + ";" +
                                         "var PROFILER = " + (PROFILER ? "true" : "false") + ";" +
-                                        "var SUPPORT_PRESETS = " + (SUPPORT_PRESETS ? "true" : "false") + ";" +
-                                        "var SUPPORT_SUGGESTIONS = " + (SUPPORT_SUGGESTIONS ? "true" : "false") + ";" +
+                                        "var SUPPORT_PRESET = " + (SUPPORT_PRESET ? "true" : "false") + ";" +
+                                        "var SUPPORT_SUGGESTION = " + (SUPPORT_SUGGESTION ? "true" : "false") + ";" +
                                         "var SUPPORT_ENCODER = " + (SUPPORT_ENCODER ? "true" : "false") + ";" +
                                         "var SUPPORT_CACHE = " + (SUPPORT_CACHE ? "true" : "false") + ";" +
                                         "var SUPPORT_ASYNC = " + (SUPPORT_ASYNC ? "true" : "false") + ";" +
                                         "var SUPPORT_SERIALIZE = " + (SUPPORT_SERIALIZE ? "true" : "false") + ";" +
                                         "var SUPPORT_INFO = " + (SUPPORT_INFO ? "true" : "false") + ";" +
-                                        "var SUPPORT_DOCUMENTS = " + (SUPPORT_DOCUMENTS ? "true" : "false") + ";" +
+                                        "var SUPPORT_DOCUMENT = " + (SUPPORT_DOCUMENT ? "true" : "false") + ";" +
                                         "var SUPPORT_WHERE = " + (SUPPORT_WHERE ? "true" : "false") + ";" +
+                                        "var SUPPORT_WHERE = " + (SUPPORT_PAGINATION ? "true" : "false") + ";" +
+                                        "var SUPPORT_WHERE = " + (SUPPORT_OPERATOR ? "true" : "false") + ";" +
+                                        "var SUPPORT_WHERE = " + (SUPPORT_CALLBACK ? "true" : "false") + ";" +
                                         "var SUPPORT_WORKER = true;"
 
                                     ) + "(" + _worker.toString() + ")()"

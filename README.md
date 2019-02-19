@@ -96,7 +96,7 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            <a href="#webworker">Web-Worker Sharding</a> (not available in Node.js)
+            <a href="#webworker">Web-Workers</a> (not available in Node.js)
         </td>
         <td>✔</td>
         <td>-</td>
@@ -123,6 +123,15 @@ All Features:
     <tr></tr>
     <tr>
         <td>
+            <a href="#operators">Logical Operators</a>
+        </td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
             <a href="#where">Where / Find</a> / <a href="#tags">Tags</a>
         </td>
         <td>✔</td>
@@ -132,7 +141,7 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            Partial Matching
+            <a href="#tokenizer">Partial Matching</a>
         </td>
         <td>✔</td>
         <td>✔</td>
@@ -141,16 +150,7 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            Multi-Phrase Search
-        </td>
-        <td>✔</td>
-        <td>✔</td>
-        <td>✔</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            Relevance-based Scoring
+            Relevance Scoring
         </td>
         <td>✔</td>
         <td>✔</td>
@@ -168,7 +168,16 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            Suggestions (Results)
+            <a href="#pagination">Pagination</a>
+        </td>
+        <td>✔</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#suggestions">Suggestions</a>
         </td>
         <td>✔</td>
         <td>-</td>
@@ -597,6 +606,8 @@ Index methods:
 - <a href="#index.encode">Index.__encode__(string)</a>
 - <a href="#index.export">Index.__export__()</a>
 - <a href="#index.import">Index.__import__(string)</a>
+- <a href="#index.length">Index.__length__()</a>
+- <a href="#index.index">Index.__index__()</a>
 
 ## Usage
 
@@ -740,13 +751,56 @@ index.search("John", {
 });
 ```
 
+<a name="pagination"></a>
+#### Pagination
+
+FlexSearch is providing a cursor-based pagination which has the ability to inject into the most-inner process. This enables a lot of possible performance improvements.
+
+> The cursor implementation may be changed often. Just take the cursor as it is and do not expect any specific value or format.
+
+To enable pagination you have to pass a ___page___ field within the custom search object (optionally also a ___limit___ as maximum items per page).
+
+Get the first page of results:
+```js
+var response = index.search("John Doe", {
+
+    limit: 5,
+    page: true
+});
+```
+
+Always when passing a ___page___ within custom search the ___response___ have this format:
+```json
+{
+    "page": "xxx:xxx",
+    "next": "xxx:xxx",
+    "result": []
+}
+```
+
+- ___page___ is the pointer to the current page
+- ___next___ is the pointer to the next page or ___null___ when no pages are left
+- ___result___ yields the searching results
+
+Get the second (next) page of results:
+```js
+index.search("John Doe", {
+
+    limit: 10,
+    page: response.next
+});
+```
+
+The limit can be modified for each query.
+
+<a name="suggestions"></a>
 #### Suggestions
 
 Get also suggestions for a query:
 
 ```js
 index.search({
-    
+
     query: "John Doe",
     suggest: true
 });
@@ -808,6 +862,28 @@ index.init({
 ```
 
 > Re-initialization will also destroy the old index.
+
+<a name="index.length"></a>
+#### Get Length
+
+Get the length of an index:
+
+```js
+var length = index.length;
+```
+
+<a name="index.index"></a>
+#### Get Register
+
+Get the index (register) of an instance:
+
+```js
+var index = index.index;
+```
+
+The register has the format _"@" + id_.
+
+> Important: Do not modify manually, just use it as read-only.
 
 <a name="flexsearch.addmatcher"></a>
 #### Add custom matcher
@@ -1275,7 +1351,7 @@ var results = index.search("foobar", {
 
 Search the same query on multiple fields:
 
-> Using ___bool___ as a logical operator when searching through multiple fields. The default operator when not set is ___"and"___. It is planned to extend the concept of logical operators to make combinations of ___and___ / ___or___ / ___not___.
+> Using ___bool___ as a logical operator when searching through multiple fields. The default operator when not set is ___"or"___.
 
 ```js
 var results = index.search({
@@ -1321,6 +1397,30 @@ var results = index.search([{
 }]);
 ```
 -->
+
+<a name="operators"></a>
+## Logical Operators
+
+There are 3 different operators (and, or, not). Just pass the field ___bool___ in custom search:
+```js
+var results = index.search([{
+    field: "title",
+    query: "foobar",
+    bool: "and"
+},{
+    field: "body",
+    query: "content",
+    bool: "or"
+},{
+    field: "blacklist",
+    query: "xxx",
+    bool: "not"
+}]);
+```
+
+- ___"and"___ indicates to be __required__ in the result
+- ___"or"___ indicates to be __optional__ in the result
+- ___"not"___ indicates to be __prohibited__ in the result
 
 <a name="where"></a>
 ## Find / Where
@@ -2466,12 +2566,12 @@ node compile SUPPORT_WORKER=true
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_ENCODER (built-in encoders)</td>
+        <td>SUPPORT_ENCODER</td>
         <td>true, false</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_DOCUMENTS</td>
+        <td>SUPPORT_DOCUMENT</td>
         <td>true, false</td>
     </tr>
     <tr></tr>
@@ -2496,7 +2596,12 @@ node compile SUPPORT_WORKER=true
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_PRESETS</td>
+        <td>SUPPORT_PRESET</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_INFO</td>
         <td>true, false</td>
     </tr>
     <tr></tr>
@@ -2504,8 +2609,28 @@ node compile SUPPORT_WORKER=true
         <td>SUPPORT_SERIALIZE</td>
         <td>true, false</td>
     </tr>
+    <tr></tr>
     <tr>
-        <td><br><b>Language Flags </b>(includes stemmer and filter)</td>
+        <td>SUPPORT_SUGGESTION</td>
+        <td>true, false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_PAGINATION</td>
+        <td>true, false</td>
+    </tr>
+     <tr></tr>
+     <tr>
+         <td>SUPPORT_OPERATOR</td>
+         <td>true, false</td>
+     </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_CALLBACK</td>
+        <td>true, false</td>
+    </tr>
+    <tr>
+        <td><br><b>Language Packs</b></td>
         <td></td>
     </tr>
     <tr>

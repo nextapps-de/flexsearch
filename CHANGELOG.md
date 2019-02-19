@@ -1,5 +1,9 @@
 # Changelog
 
+#### v0.6.0
+
+- Pagination
+
 #### v0.5.3
 
 - Logical Operator
