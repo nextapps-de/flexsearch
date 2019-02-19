@@ -1383,7 +1383,16 @@
 
         function merge_and_sort(query, bool, result, sort, limit, suggest, where, cursor, has_and, has_not){
 
-            result = intersect(result, where ? 0 : limit, cursor, SUPPORT_SUGGESTION && suggest, bool, has_and, has_not);
+            result = intersect(
+
+                result,
+                where ? 0 : limit,
+                SUPPORT_PAGINATION && cursor,
+                SUPPORT_SUGGESTION && suggest,
+                bool,
+                has_and,
+                has_not
+            );
 
             let next;
 
@@ -1490,7 +1499,7 @@
                 }
 
                 sort = SUPPORT_DOCUMENT && query["sort"];
-                cursor = query["page"];
+                cursor = SUPPORT_PAGINATION && query["page"];
                 limit = query["limit"];
                 threshold = query["threshold"];
                 enrich = query["enrich"];
@@ -1557,7 +1566,7 @@
                         _query = queries[i];
                     }
 
-                    if(!is_string(_query)){
+                    if(cursor && !is_string(_query)){
 
                         _query["page"] = null;
                         _query["limit"] = 0;

@@ -870,7 +870,6 @@ describe("Encoding", function(){
     });
 });
 
-
 // ------------------------------------------------------------------------
 // CJK Word Break
 // ------------------------------------------------------------------------
@@ -894,6 +893,28 @@ describe("CJK Word Break", function(){
         index.add(1, "一个单词");
 
         expect(index.search("单词")).to.include(1);
+    });
+});
+
+// ------------------------------------------------------------------------
+// Cyrillic Word Break
+// ------------------------------------------------------------------------
+
+describe("Cyrillic Word Break", function(){
+
+    it("Should have been tokenized properly", function(){
+
+        var index = FlexSearch.create({
+            encode: false,
+            tokenize: function(str){
+                return str.replace(/[\x00-\x7F]/g, "").split("");
+            }
+        });
+
+        index.add(0, "Фообар");
+
+        expect(index.search("Фообар")).to.include(0);
+        expect(index.search("бар")).to.include(0);
     });
 });
 

@@ -754,7 +754,7 @@ index.search("John", {
 <a name="pagination"></a>
 #### Pagination
 
-FlexSearch is providing a cursor-based pagination which has the ability to inject into the most-inner process. This enables a lot of possible performance improvements.
+FlexSearch is providing a cursor-based pagination which has the ability to inject into the most-inner process. This enables the possibility of many performance improvements.
 
 > The cursor implementation may be changed often. Just take the cursor as it is and do not expect any specific value or format.
 
@@ -1830,7 +1830,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
             false<br>
             {number}
         </td>
-        <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance.</td>
+        <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance. Depth is the maximum number of words/tokens away a term to be considered as relevant.</td>
     </tr>
     <tr></tr>
     <tr>
@@ -1879,6 +1879,16 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
         <td>Enables Right-To-Left encoding.</td>
     </tr>
 </table>
+
+## Depth, Threshold, Resolution?
+
+Whereas __depth is the minimum relevance for the context-based index__, __threshold is the minimum relevance for the lexical index__. Threshold is an enhanced variation of a conventional scoring calculation, it uses document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
+
+Resolution on the other hand specify the max scoring value. The final score value is an integer value, so resolution affect how many segments the score may have. When the resolution is 1, then there exist just one scoring level for all matched terms. To get more differentiated results you need to raise the resolution.
+
+> The difference of both (_resolution_ - _threshold_) affects the performance on higher values.
+
+The combination of resolution and threshold gives you a good controlling of your matches as well as performance, e.g. when the resolution is 25 and the threshold is 22, then the result only contains matches which are super relevant. The goal should always be just have items in result which are really needed. On top, that also improves performance a lot.
 
 <a name="tokenizer"></a>
 ## Tokenizer
