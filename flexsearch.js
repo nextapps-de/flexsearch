@@ -271,7 +271,7 @@
             return global_encoder[name](value);
         };
 
-        function worker_handler(id, query, result, limit, where, cursor, suggest){
+        function worker_handler(id, query, result, limit){
 
             if(this._task_completed !== this.worker){
 
@@ -1481,8 +1481,6 @@
             let cursor;
             let sort;
             let suggest;
-            let enrich;
-            let clone;
 
             if(is_object(query) && (!SUPPORT_DOCUMENT || !is_array(query))){
 
@@ -1502,8 +1500,6 @@
                 cursor = SUPPORT_PAGINATION && query["page"];
                 limit = query["limit"];
                 threshold = query["threshold"];
-                enrich = query["enrich"];
-                clone = query["clone"];
                 suggest = SUPPORT_SUGGESTION && query["suggest"];
                 query = query["query"];
             }
