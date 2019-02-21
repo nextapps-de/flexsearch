@@ -271,7 +271,7 @@
             return global_encoder[name](value);
         };
 
-        function worker_handler(id, query, result, limit){
+        function worker_handler(id, query, result, limit, where, cursor, suggest){
 
             if(this._task_completed !== this.worker){
 
