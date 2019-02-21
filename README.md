@@ -230,7 +230,7 @@ Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/
     </tr>
     <tr>
         <td>1</td>
-        <td>FlexSearch <a href="#notes">***</a></td>
+        <td>FlexSearch <a href="#notes">*</a></td>
         <td>0.3.6</td>
         <td><b>363757</b></td>
         <td><b>182603</b></td>
@@ -310,6 +310,7 @@ Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/
     </tr>
 </table>
 
+<!--
 ##### Memory Test: "Gulliver's Travels"
 
 <table>
@@ -393,14 +394,18 @@ Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/
         <td>53.0 kb</td>
     </tr>
 </table>
+-->
 
 <a name="notes" id="notes"></a>
+_* The preset "fast" was used for this test_ <br>
+<!--
 _* Index Size: The size of memory the index requires_<br>
 _** Memory Allocation: The amount of memory which was additionally allocated during a row of 10 queries_<br>
 _*** The preset "fast" was used for this test_ <br>
 _**** The preset "memory" was used for this test_ 
+-->
 
-Library Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+Run Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
 
 <a name="contextual"></a>
 ## Contextual Search
@@ -1763,6 +1768,17 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
+        <td align="top">split<br><br></td>
+        <td vertical="top" vertical-align="top">
+            RegExp<br>
+            string
+        </td>
+        <td vertical-align="top">
+            The rule to split words when using non-custom tokenizer (<a href="#tokenizer">built-ins</a> e.g. "forward"). Use a string/char or use a regular expression (default: <code>/\W+/</code>).<br>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
         <td align="top">encode<br><br><br><br><br><br><br></td>
         <td>
             false<br>
@@ -1775,26 +1791,6 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
         </td>
         <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
     </tr>
-    <!--
-    <tr></tr>
-    <tr>
-        <td align="top">boolean<br><br></td>
-        <td>
-            "and"<br>
-            "or"
-        </td>
-        <td>The applied boolean model when comparing multiple words. <b>Note:</b> When using "or" the first word is also compared with "and". Example: a query with 3 words, results has either: matched word 1 & 2 and matched word 1 & 3.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td align="top">multi<br><br></td>
-        <td>
-            true<br>
-            false
-        </td>
-        <td>Enable multi word processing.</td>
-    </tr>
-    -->
     <tr></tr>
     <tr>
         <td align="top">cache<br><br><br></td>
@@ -1882,7 +1878,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
 
 ## Depth, Threshold, Resolution?
 
-Whereas __depth is the minimum relevance for the context-based index__, __threshold is the minimum relevance for the lexical index__. Threshold is an enhanced variation of a conventional scoring calculation, it uses document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
+Whereas __depth is the minimum relevance for the context-based index__, __threshold is the minimum relevance for the lexical index__. The threshold score is an enhanced variation of a conventional scoring calculation, it uses on document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
 
 Resolution on the other hand specify the max scoring value. The final score value is an integer value, so resolution affect how many segments the score may have. When the resolution is 1, then there exist just one scoring level for all matched terms. To get more differentiated results you need to raise the resolution.
 

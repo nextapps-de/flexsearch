@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.6.0
+ * @preserve FlexSearch v0.6.1
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -32,13 +32,14 @@
 
         /**
          * @const
-         * @enum {boolean|string|number}
+         * @enum {boolean|string|number|RegExp}
          */
 
         const defaults = {
 
             encode: "icase",
             tokenize: "forward",
+            split: /\W+/,
             // enrich: true,
             // clone: false,
             // suggest: false,
@@ -127,18 +128,11 @@
 
         let id_counter = 0;
 
-        /**
-         * NOTE: This could make issues on some languages (chinese, korean, thai)
-         * TODO: extract all language-specific stuff from the core
-         * @const  {RegExp}
-         */
-
-        const regex_split = /\W+/; //regex("\\W+"); // regex("[\\s/-_]");
         const filter = {};
         const stemmer = {};
 
         /**
-         * NOTE: Actually not really required when using bare objects: Object.create(null)
+         * NOTE: Actually not really required when using bare objects via: Object.create(null)
          * @const {Object<string|number, number>}
          */
 
@@ -412,6 +406,14 @@
                 preset.tokenize ||
                 this.tokenize ||
                 defaults.tokenize
+            );
+
+            /** @private */
+            this.split = (
+
+                options["split"] ||
+                this.split ||
+                defaults.split
             );
 
             /** @private */
@@ -924,7 +926,7 @@
                             //(ngram(/** @type {!string} */(content)))
                         //:
                             /** @type {string} */
-                            (content).split(regex_split)
+                            (content).split(this.split)
                     )
                 );
 
@@ -1185,6 +1187,8 @@
                         tag[tag.length] = doc; // tag[tag.length] = id;
                     }
 
+                    this._doc[id] = doc;
+
                     for(let i = 0, len = tree.length; i < len; i++){
 
                         const branch = tree[i];
@@ -1194,8 +1198,6 @@
 
                             content = (content || doc)[branch[x]];
                         }
-
-                        this._doc[id] = doc;
 
                         const self = index[keys[i]];
 
@@ -1763,7 +1765,7 @@
                         //(ngram(_query))
                     //:
                         /** @type {string} */
-                        (_query).split(regex_split)
+                        (_query).split(this.split)
                 )
             );
 
@@ -3220,9 +3222,7 @@
 
                         while(++z < length_z){
 
-                            const current_bool = bool[z];
-
-                            if(current_bool === "not"){
+                            if(bool[z] === "not"){
 
                                 arr = arrays[z];
                                 length = arr.length;
@@ -3245,7 +3245,7 @@
                         // there was no field with "and" / "or"
                         // TODO: this could also checked before intersection
 
-                        if(!last_index){
+                        if(is_undefined(last_index)){
 
                             return create_page(cursor, page, result);
                         }
@@ -3258,6 +3258,9 @@
                     }
                 }
 
+                let bool_and;
+                let bool_or;
+
                 // loop through arrays
 
                 while(++z < length_z){
@@ -3267,23 +3270,21 @@
                         z === (last_index || length_z) - 1
                     );
 
-                    let bool_current;
-                    let bool_and;
-                    let bool_or;
-
                     if(SUPPORT_DOCUMENT && SUPPORT_OPERATOR){
 
                         if(!bool_main || !z){
 
-                            bool_current = bool_main || (bool && bool[z]);
+                            const bool_current = bool_main || (bool && bool[z]);
 
                             if(!bool_current || (bool_current === "and")){
 
-                                bool_and = true;
+                                bool_and = has_and = true;
+                                bool_or = false;
                             }
                             else if(bool_current === "or"){
 
                                 bool_or = true;
+                                bool_and = false;
                             }
                             else{
 
@@ -3295,7 +3296,7 @@
                     }
                     else{
 
-                        bool_and = true;
+                        bool_and = has_and = true;
                     }
 
                     arr = arrays[z];
@@ -3327,7 +3328,20 @@
 
                             while(i < result_length){
 
-                                check["@" + first_result[i++]] = 1;
+                                const id = first_result[i++];
+                                const index = "@" + id;
+
+                                // there is no and, add items
+
+                                if(!has_not || !check_not[index]){
+
+                                    check[index] = 1;
+
+                                    if(!has_and){
+
+                                        result[count++] = id;
+                                    }
+                                }
                             }
 
                             first_result = null;
@@ -3353,11 +3367,16 @@
                         tmp = arr[i++];
 
                         const index = "@" + tmp;
-                        const check_val = bool_or ? z : check[index];
+                        const check_val = has_and ? check[index] : z;
 
                         if(check_val){
 
                             if(has_not && check_not[index]){
+
+                                continue;
+                            }
+
+                            if(!has_and && check[index]){
 
                                 continue;
                             }
@@ -3370,7 +3389,7 @@
 
                                     // sadly the pointer could just applied here at the earliest
                                     // that's why pagination cannot reduce complexity actually
-                                    // should only happened when at least one "and" bool was set
+                                    // should only happened when at least one bool "and" was set
                                     // TODO: check bool and provide complexity reduction
 
                                     if(!pointer || (--pointer < count)){

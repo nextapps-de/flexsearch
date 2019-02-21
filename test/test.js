@@ -1906,6 +1906,24 @@ if(env !== "light") describe("Pagination", function(){
     });
 });
 
+describe("Custom Split", function(){
+
+    it("Should have been split properly", function(){
+
+        var index = FlexSearch.create({
+            encode: false,
+            split: /\s+/,
+            tokenize: "reverse"
+        });
+
+        index.add(0, "Фообар");
+
+        expect(index.search("Фообар")).to.include(0);
+        expect(index.search("бар")).to.include(0);
+        expect(index.search("Фоо")).to.include(0);
+    });
+});
+
 describe("Github Issues", function(){
 
     if(env !== "light") it("#48", function(){
@@ -1940,6 +1958,30 @@ describe("Github Issues", function(){
 
         expect(fs.search("howdy", { bool: "or" })).to.have.members([doc[1]]);
         expect(fs.search("howdy -", { bool: "or" })).to.have.members([doc[1]]);
+    });
+
+    if(env !== "light") it("#54", function(){
+
+        var docs = [{
+            id: 1,
+            title: "Roaming Inquiry",
+            content: "Some content"
+        }, {
+            id: 2,
+            title: "New Service",
+            content: "This is not roaming-inquiry"
+        }];
+
+        var index = new FlexSearch({
+            doc: {
+                id: "id",
+                field: ["title", "content"]
+            }
+        });
+
+        index.add(docs);
+
+        expect(index.search("roaming")).to.have.members([docs[0], docs[1]]);
     });
 });
 
@@ -1985,7 +2027,7 @@ if(env !== "light") describe("Operators", function(){
             field: "blacklist",
             query: "xxx",
             bool: "not"
-        }])).to.have.length(3);
+        }])).to.have.members(data);
 
         expect(index.search([{
             field: "title",
@@ -2013,7 +2055,7 @@ if(env !== "light") describe("Operators", function(){
             field: "blacklist",
             query: "xxx",
             bool: "not"
-        }])).to.have.length(3);
+        }])).to.have.members(data);
 
         expect(index.search([{
             field: "title",
@@ -2023,7 +2065,7 @@ if(env !== "light") describe("Operators", function(){
             field: "body",
             query: "title",
             bool: "or"
-        }])).to.have.length(3);
+        }])).to.have.members(data);
 
         expect(index.search([{
             field: "title",
@@ -2037,7 +2079,7 @@ if(env !== "light") describe("Operators", function(){
             field: "blacklist",
             query: "x1",
             bool: "not"
-        }])).to.have.length(2);
+        }])).to.have.members([data[1], data[2]]);
 
         expect(index.search([{
             field: "title",
@@ -2065,7 +2107,7 @@ if(env !== "light") describe("Operators", function(){
             field: "body",
             query: "body",
             bool: "or"
-        }])).to.have.length(2);
+        }])).to.have.members([data[1], data[2]]);
 
         expect(index.search([{
             field: "title",
@@ -2079,7 +2121,7 @@ if(env !== "light") describe("Operators", function(){
             field: "blacklist",
             query: "x2",
             bool: "not"
-        }])).to.have.length(2);
+        }])).to.have.members([data[0], data[2]]);
 
         expect(index.search([{
             field: "blacklist",
@@ -2093,7 +2135,7 @@ if(env !== "light") describe("Operators", function(){
             field: "body",
             query: "body",
             bool: "and"
-        }])).to.have.length(2);
+        }])).to.have.members([data[0], data[2]]);
 
         expect(index.search([{
             field: "title",
@@ -2107,7 +2149,7 @@ if(env !== "light") describe("Operators", function(){
             field: "body",
             query: "body",
             bool: "and"
-        }])).to.have.length(2);
+        }])).to.have.members([data[0], data[2]]);
 
         expect(index.search([{
             field: "title",
