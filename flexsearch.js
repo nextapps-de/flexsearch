@@ -3967,9 +3967,9 @@
                                         "var SUPPORT_INFO = " + (SUPPORT_INFO ? "true" : "false") + ";" +
                                         "var SUPPORT_DOCUMENT = " + (SUPPORT_DOCUMENT ? "true" : "false") + ";" +
                                         "var SUPPORT_WHERE = " + (SUPPORT_WHERE ? "true" : "false") + ";" +
-                                        "var SUPPORT_WHERE = " + (SUPPORT_PAGINATION ? "true" : "false") + ";" +
-                                        "var SUPPORT_WHERE = " + (SUPPORT_OPERATOR ? "true" : "false") + ";" +
-                                        "var SUPPORT_WHERE = " + (SUPPORT_CALLBACK ? "true" : "false") + ";" +
+                                        "var SUPPORT_PAGINATION = " + (SUPPORT_PAGINATION ? "true" : "false") + ";" +
+                                        "var SUPPORT_OPERATOR = " + (SUPPORT_OPERATOR ? "true" : "false") + ";" +
+                                        "var SUPPORT_CALLBACK = " + (SUPPORT_CALLBACK ? "true" : "false") + ";" +
                                         "var SUPPORT_WORKER = true;"
 
                                     ) + "(" + _worker.toString() + ")()"

@@ -29,9 +29,11 @@
             <th>jssearch</th>
             <th>jsii</th>
             <th>bm25</th>
+            <th>fuzzysearch</th>
         </tr>
         <tr id="test-1">
             <td style="width: 200px"></td>
+            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -53,9 +55,11 @@
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
+            <td>wait ...</td>
         </tr>
         <tr id="test-3">
             <td></td>
+            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -77,9 +81,11 @@
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
+            <td>wait ...</td>
         </tr>
         <tr id="test-5">
             <td></td>
+            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -101,9 +107,11 @@
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
+            <td>wait ...</td>
         </tr>
         <tr id="test-7">
             <td></td>
+            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -125,9 +133,11 @@
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
+            <td>wait ...</td>
         </tr>
         <tr id="test-9">
             <td></td>
+            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -149,9 +159,11 @@
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
+            <td>wait ...</td>
         </tr>
         <tr id="test-11">
             <td></td>
+            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -173,6 +185,7 @@
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
+            <td>wait ...</td>
         </tr>
         <tr>
             <td colspan="10">
@@ -182,6 +195,7 @@
         </tr>
         <tr id="test-13">
             <td style="width: 200px"></td>
+            <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
             <td>wait ...</td>
@@ -210,7 +224,8 @@
 <script src="https://cdn.jsdelivr.net/npm/js-search@1.3.7/dist/umd/js-search.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/BitSet.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/JSii.js"></script>
-<script src="https://gist.githack.com/vlad-x/a25e0c5c1eeb6bf6aa38/raw/02d1a1703e4a99a7c733c85097f583579f6af4e2/bm25.js"></script>
+<script src="https://gistcdn.githack.com/vlad-x/a25e0c5c1eeb6bf6aa38/raw/02d1a1703e4a99a7c733c85097f583579f6af4e2/bm25.js"></script>
+<script src="https://rawcdn.githack.com/jeancroy/FuzzySearch/cbcdd8307d70a209b1cbf17a535158d5c21840d7/dist/FuzzySearch.min.js"></script>
 <script src="../data/gulliver.js"></script>
 <script>
 
@@ -254,6 +269,7 @@
         var jssearch;
         var jsii;
         var bm25;
+        var fuzzysearch;
 
         // -----------------------------------------------------------
 
@@ -274,14 +290,7 @@
 
         // -----------------------------------------------------------
 
-        flexsearch = new FlexSearch({
-            encode: 'extra',
-            tokenize: 'strict',
-            threshold: 0,
-            resolution: 9,
-            depth: 3,
-            suggest: true
-        });
+        flexsearch = new FlexSearch("score");
 
         console.time('flexsearch');
 
@@ -401,6 +410,12 @@
 
         // -----------------------------------------------------------
 
+        console.time('fuzzysearch');
+        fuzzysearch = new FuzzySearch({source:data.slice(0)});
+        console.timeEnd('fuzzysearch');
+
+        // -----------------------------------------------------------
+
         do_test('test-1', 'without breach of modesty', [493]);
         do_test('test-2', 'went softly stream', [446]);
         do_test('test-3', 'princes of the ambition', [72, 408]);
@@ -463,6 +478,14 @@
 
                     case 9:
                         results = bm25.search(query).map(function(val){return val.id});
+                        break;
+
+                    case 10:
+                        results = fuzzysearch.search(query).map(function(val){
+                            for(var i = 0; i < data.length; i++){
+                                if(val === data[i]) return i;
+                            }
+                        });
                         break;
                 }
 

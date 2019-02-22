@@ -31,7 +31,8 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 <script src="https://cdn.jsdelivr.net/npm/js-search@1.4.2/dist/umd/js-search.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/BitSet.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/JSii.js"></script>
-<script src="https://gist.githack.com/vlad-x/a25e0c5c1eeb6bf6aa38/raw/02d1a1703e4a99a7c733c85097f583579f6af4e2/bm25.js"></script>
+<script src="https://gistcdn.githack.com/vlad-x/a25e0c5c1eeb6bf6aa38/raw/02d1a1703e4a99a7c733c85097f583579f6af4e2/bm25.js"></script>
+<script src="https://rawcdn.githack.com/jeancroy/FuzzySearch/cbcdd8307d70a209b1cbf17a535158d5c21840d7/dist/FuzzySearch.min.js"></script>
 <script src="../data/gulliver.js"></script>
 <script>
 
@@ -49,6 +50,7 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
         var jssearch;
         var jsii;
         var bm25;
+        var fuzzysearch;
 
         var tests = {
 
@@ -329,6 +331,20 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
                     return bm25.search(query);
                 },
                 loops: 95
+            },
+
+            fuzzysearch: {
+
+                init: function(){
+
+                    fuzzysearch = new FuzzySearch({source:text_data.slice(0)});
+                },
+                add: function(index, content){},
+                query: function(query){
+
+                    return fuzzysearch.search(query);
+                },
+                loops: 4
             }
         };
 
@@ -369,9 +385,9 @@ Test rules: 1. no cache allowed, 2. no async allowed, 3. should return at least 
 
             test.init();
 
-            if(is_mobile && (test.loops > 1)){
+            if(is_mobile){
 
-                test.loops = (test.loops / 5) >> 0;
+                test.loops = Math.max((test.loops / 5) >> 0, 1);
             }
 
             for(var i = 0; i < text_data.length; i++){
