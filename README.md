@@ -13,8 +13,8 @@
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
-When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
-Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. Keep in mind that updating __existing__ items or removing items from the index has a significant cost. When existing items of your index needs to be updated/removed continuously then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
+It is time for a quantum leap in full-text searching algorithms. When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
+Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a high-performance <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 100,000 times faster than Apache Lucene.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 FlexSearch Server is available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
@@ -416,9 +416,10 @@ FlexSearch introduce a new scoring mechanism called __Contextual Search__ which 
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.<!--Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?-->
 In this way contextual search also <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
 
+<!--
 > "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithms today. They don't provide neither: a meaningful relevance of a term nor the importance of it! Like many pseudo-intelligent algorithms this is also just an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
-
 #### Model of context-based scoring
+-->
 
 <p align="center">
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg">
@@ -535,6 +536,8 @@ The complexity for one single term is always 1.
     </tr>
     -->
 </table>
+
+Keep in mind that updating __existing__ items or removing items from the index has a significant cost. When existing items of your index needs to be updated/removed continuously then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
 
 <a name="installation"></a>
 ## Installation
