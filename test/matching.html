@@ -276,8 +276,7 @@
         bulksearch = new BulkSearch({
             type: 'short', // this type specifies the maximum bitlength of assigned IDs!
             encode: 'extra',
-            multi: true,
-            suggest:true
+            multi: true
         });
 
         console.time('bulksearch');
@@ -295,8 +294,7 @@
             tokenize: 'strict',
             threshold: 0,
             resolution: 9,
-            depth: 3,
-            suggest: true
+            depth: 3
         });
 
         console.time('flexsearch');
@@ -452,11 +450,11 @@
                 switch(i){
 
                     case 1:
-                        results = flexsearch.search(query);
+                        results = flexsearch.search(query, {suggest: true});
                         break;
 
                     case 2:
-                        results = bulksearch.search(query);
+                        results = bulksearch.search(query, {suggest: true});
                         break;
 
                     case 3:

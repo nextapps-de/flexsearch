@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -32,15 +32,24 @@
     "build-custom": "node compile RELEASE=custom DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESET=false SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_DOCUMENT=false SUPPORT_OPERATOR=false SUPPORT_WHERE=false SUPPORT_PAGINATION=false SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
     "build-es5": "node compile RELEASE=es5 DEBUG=true PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false LANGUAGE_OUT=ECMASCRIPT5_STRICT",
     "build-node": "node compile RELEASE=node DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
+    "build-pre": "node compile RELEASE=pre DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false FORMATTING=PRETTY_PRINT",
     "build-lang": "node compile RELEASE=lang",
-    "build-all": "npm run build && npm run build-light && npm run build-compact && npm run build-es5 && npm run build-node",
-    "test-production": "nyc --reporter=html --reporter=text mocha --timeout=3000 test --exit",
-    "test-light": "nyc --reporter=html --reporter=text mocha --timeout=3000 test/ --exit",
-    "test-develop": "nyc --reporter=html --reporter=text mocha --timeout=3000 --exit",
+    "build-all": "npm run build && npm run build-light && npm run build-compact && npm run build-es5 && npm run build-node && npm run build-pre",
+    "test-production": "mocha --timeout=3000 test --exit",
+    "test-light": "mocha --timeout=3000 test/ --exit",
+    "test-develop": "mocha --timeout=3000 --exit",
     "test-browser": "mocha-phantomjs test/index.html",
-    "test": "npm run test-develop && npm run test-production && npm run test-light && npm run test-browser",
-    "update": "node_modules/.bin/updtr --to non-breaking",
-    "coverage": "nyc report --reporter=lcov --reporter=text-lcov | coveralls"
+    "test-coverage": "nyc --reporter=html --reporter=text mocha --timeout=3000 mocha test/test.js",
+    "test": "npm run test-develop && npm run test-production && npm run test-light && npm run test-browser && npm run test-coverage",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "update": "node_modules/.bin/updtr --to non-breaking"
+  },
+  "nyc": {
+    "per-file": true,
+    "all": true,
+    "include": [
+      "dist/flexsearch.pre.js"
+    ]
   },
   "files": [
     "flexsearch.js",
@@ -57,12 +66,12 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "codacy-coverage": "^3.4.0",
-    "coveralls": "^3.0.2",
-    "google-closure-compiler": "^20190215.0.0-nightly",
-    "mocha": "^6.0.0",
+    "coveralls": "^3.0.3",
+    "google-closure-compiler": "^20190219.0.0-nightly",
+    "mocha": "^6.0.1",
     "mocha-lcov-reporter": "^1.3.0",
     "mocha-phantomjs": "^4.1.0",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "phantomjs-prebuilt": "^2.1.16",
     "updtr": "^3.0.0"
   }
