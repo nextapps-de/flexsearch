@@ -45,19 +45,19 @@ Get Latest (Stable Release):
     <tr>
         <td>flexsearch.min.js</td>
         <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.min.js</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/8a4c8f849d8f78deed08e2d78c7400c27297deb6/dist/flexsearch.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/8a4c8f849d8f78deed08e2d78c7400c27297deb6/dist/flexsearch.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.js</td>
         <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.light.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.light.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.light.js</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/8a4c8f849d8f78deed08e2d78c7400c27297deb6/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/8a4c8f849d8f78deed08e2d78c7400c27297deb6/dist/flexsearch.light.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.js</td>
         <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.compact.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.compact.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.compact.js</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/8a4c8f849d8f78deed08e2d78c7400c27297deb6/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/8a4c8f849d8f78deed08e2d78c7400c27297deb6/dist/flexsearch.compact.js</a></td>
     </tr>
     <tr></tr>
     <tr>
