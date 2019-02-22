@@ -1,4 +1,4 @@
-var env = "";
+var env = global.env;
 
 if(typeof module !== "undefined"){
 
@@ -60,7 +60,6 @@ describe("Index Multi-Field Documents (ES6)", function(){
 
             async: true,
             doc: {
-
                 id: "id",
                 field: [
                     "data:title",
@@ -71,8 +70,11 @@ describe("Index Multi-Field Documents (ES6)", function(){
 
         await index.add(data);
 
-        expect(index.doc.index["data:title"].length).to.equal(3);
-        expect(index.doc.index["data:body"].length).to.equal(3);
+        if(env === ""){
+
+            expect(index.doc.index["data:title"].length).to.equal(3);
+            expect(index.doc.index["data:body"].length).to.equal(3);
+        }
 
         expect(await index.search({field: "data:body", query: "body"})).to.have.members(data);
         expect(await index.search({field: "data:title", query: "title"})).to.have.members(data);
@@ -106,8 +108,11 @@ describe("Index Multi-Field Documents (ES6)", function(){
 
         await index.remove(update);
 
-        expect(await index.doc.index["data:title"].length).to.equal(0);
-        expect(await index.doc.index["data:body"].length).to.equal(0);
+        if(env === ""){
+
+            expect(await index.doc.index["data:title"].length).to.equal(0);
+            expect(await index.doc.index["data:body"].length).to.equal(0);
+        }
     });
 
     it("Should have been indexed properly (Worker)", async function(){
@@ -128,8 +133,11 @@ describe("Index Multi-Field Documents (ES6)", function(){
 
         await index.add(data);
 
-        expect(index.doc.index["data:title"].length).to.equal(3);
-        expect(index.doc.index["data:body"].length).to.equal(3);
+        if(env === ""){
+
+            expect(index.doc.index["data:title"].length).to.equal(3);
+            expect(index.doc.index["data:body"].length).to.equal(3);
+        }
 
         expect(await index.search({field: "data:body", query: "body"})).to.have.members(data);
         expect(await index.search({field: "data:title", query: "title"})).to.have.members(data);
@@ -163,7 +171,10 @@ describe("Index Multi-Field Documents (ES6)", function(){
 
         await index.remove(update);
 
-        expect(await index.doc.index["data:title"].length).to.equal(0);
-        expect(await index.doc.index["data:body"].length).to.equal(0);
+        if(env === ""){
+
+            expect(await index.doc.index["data:title"].length).to.equal(0);
+            expect(await index.doc.index["data:body"].length).to.equal(0);
+        }
     });
 });

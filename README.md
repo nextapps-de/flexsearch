@@ -13,8 +13,8 @@
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
-It is time for a quantum leap in full-text searching algorithms. When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
-Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a high-performance <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 100,000 times faster than Apache Lucene.
+When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
+Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 100,000 times faster than other libraries.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
 
 FlexSearch Server is available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.

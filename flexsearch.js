@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.6.1
+ * @preserve FlexSearch v0.6.2
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -191,12 +191,13 @@
 
         /**
          * @param {Object<string, number|string|boolean|Object|function(string):string>=} options
+         * @param {Object<string, number|string|boolean>=} settings
          * @export
          */
 
-        FlexSearch.create = function(options){
+        FlexSearch.create = function(options, settings){
 
-            return new FlexSearch(options);
+            return new FlexSearch(options, settings);
         };
 
         /**
@@ -495,20 +496,6 @@
             );
             */
 
-            // if(SUPPORT_SUGGESTION){
-            //
-            //     /** @private */
-            //     this.suggest = (
-            //
-            //         is_undefined(custom = options["suggest"]) ?
-            //
-            //             this.suggest ||
-            //             defaults.suggest
-            //         :
-            //             custom
-            //     );
-            // }
-
             custom = is_undefined(custom = options["encode"]) ?
 
                 preset.encode ||
@@ -532,7 +519,9 @@
                 );
             }
 
-            if((custom = options["filter"])) {
+            let lang = options["lang"];
+
+            if((custom = lang || options["filter"])) {
 
                 if(is_string(custom)){
 
@@ -548,7 +537,7 @@
                 this.filter = custom;
             }
 
-            if((custom = options["stemmer"])) {
+            if((custom = lang || options["stemmer"])) {
 
                 /** @private */
                 this.stemmer = init_stemmer(
@@ -860,7 +849,7 @@
 
                 if(!_recall){
 
-                    if(SUPPORT_ASYNC && this.async && (typeof importScripts !== "function")){
+                    if(SUPPORT_ASYNC && this.async && (!SUPPORT_WORKER || (typeof importScripts !== "function"))){
 
                         let self = this;
 
@@ -1171,7 +1160,8 @@
 
                             if(z === length - 1){
 
-                                return index[keys[z]].remove(id, callback);
+                                index[keys[z]].remove(id, callback);
+                                return this;
                             }
                             else{
 
@@ -1214,7 +1204,7 @@
 
                         if(i === len - 1){
 
-                            return fn.call(self, id, content, callback);
+                            fn.call(self, id, content, callback);
                         }
                         else{
 
@@ -1222,6 +1212,8 @@
                         }
                     }
                 }
+
+                return this;
             };
         }
 
@@ -1474,7 +1466,16 @@
                 }
 
                 query = /** @type {Object} */ (limit);
-                limit = 0;
+                limit = 1000;
+            }
+            else if(limit && is_function(limit)){
+
+                callback = /** @type {?Function} */ (limit);
+                limit = 1000;
+            }
+            else{
+
+                limit || (limit === 0 ) || (limit = 1000);
             }
 
             let result = [];
@@ -1490,11 +1491,14 @@
 
                 if(SUPPORT_ASYNC){
 
-                    callback = query["callback"] || (is_function(limit) && /** @type {?Function} */ (limit));
+                    if(!callback){
 
-                    if(callback) {
+                        callback = query["callback"];
 
-                        _query["callback"] = null;
+                        if(callback){
+
+                            _query["callback"] = null;
+                        }
                     }
                 }
 
@@ -1636,16 +1640,6 @@
 
             threshold || (threshold = this.threshold || 0);
 
-            if(is_function(limit)){
-
-                callback = limit;
-                limit = 1000;
-            }
-            else {
-
-                limit || (limit === 0 ) || (limit = 1000);
-            }
-
             if(SUPPORT_WORKER && this.worker){
 
                 this._current_callback = callback;
@@ -1781,14 +1775,13 @@
 
             let ctx_root;
             let use_contextual;
+            let a = 0;
 
             if(length > 1){
 
-                if(this.depth){
+                if(this.depth && (this.tokenize === "strict")){
 
                     use_contextual = true;
-                    ctx_root = words[0]; // TODO: iterate roots
-                    check_words[ctx_root] = 1;
                 }
                 else{
 
@@ -1827,7 +1820,7 @@
 
             let ctx_map;
 
-            if(!use_contextual || (ctx_map = this._ctx)[ctx_root]){
+            if(!use_contextual || (ctx_map = this._ctx)){
 
                 const resolution = this.resolution;
 
@@ -1837,11 +1830,40 @@
                 //     threshold = (threshold || 1) / boost;
                 // }
 
-                for(let a = (use_contextual ? 1 : 0); a < length; a++){
+                for(; a < length; a++){
 
-                    const value = words[a];
+                    let value = words[a];
 
                     if(value){
+
+                        if(use_contextual){
+
+                            if(!ctx_root){
+
+                                if(ctx_map[value]){
+
+                                    ctx_root = value;
+                                    check_words[value] = 1;
+                                }
+                                else if(!suggest){
+
+                                    return result;
+                                }
+                            }
+
+                            if(suggest && (a === length - 1) && !check.length){
+
+                                // fall back to single-term-strategy
+
+                                use_contextual = false;
+                                value = ctx_root || value;
+                                check_words[value] = 0;
+                            }
+                            else if(!ctx_root){
+
+                                continue;
+                            }
+                        }
 
                         if(!check_words[value]){
 
@@ -1871,7 +1893,10 @@
 
                             if(map_found){
 
+                                ctx_root = value;
+
                                 // not handled by intersection:
+
                                 check[check.length] = (
 
                                     count > 1 ?
@@ -1882,7 +1907,7 @@
                                 );
 
                                 // handled by intersection:
-                                //check[check.length] = map_check;
+                                // check[check.length] = map_check;
                             }
                             else if(!SUPPORT_SUGGESTION || !suggest){
 
@@ -1892,8 +1917,6 @@
 
                             check_words[value] = 1;
                         }
-
-                        ctx_root = value;
                     }
                 }
             }
@@ -1902,24 +1925,21 @@
                 found = false;
             }
 
-            //if(!SUPPORT_DOCUMENT || !this.doc){
+            if(found){
 
-                if(found){
+                // Not handled by intersection:
+                result = /** @type {Array} */ (intersect(check, limit, cursor, SUPPORT_SUGGESTION && suggest));
 
-                    // Not handled by intersection:
-                    result = /** @type {Array} */ (intersect(check, limit, cursor, SUPPORT_SUGGESTION && suggest));
+                // Handled by intersection:
+                //result = intersect_3d(check, limit, suggest);
+            }
 
-                    // Handled by intersection:
-                    //result = intersect_3d(check, limit, suggest);
-                }
+            // store result to cache
 
-                // store result to cache
+            if(SUPPORT_CACHE && this.cache){
 
-                if(SUPPORT_CACHE && this.cache){
-
-                    this._cache.set(query, result);
-                }
-            //}
+                this._cache.set(query, result);
+            }
 
             if(PROFILER){
 
@@ -1959,6 +1979,7 @@
                 let keys_len;
                 let has_value;
                 let tree;
+                let tag_results;
 
                 if(is_object(key)){
 
@@ -1983,12 +2004,12 @@
 
                             if(!is_undefined(current_where)){
 
-                                result = this._tag[current_tag]["@" + current_where];
+                                tag_results = this._tag[current_tag]["@" + current_where];
                                 //result = result.slice(0, limit && (limit < result.length) ? limit : result.length);
 
                                 if(--keys_len === 0){
 
-                                    return result;
+                                    return tag_results;
                                 }
 
                                 keys.splice(keys.indexOf(current_tag), 1);
@@ -2042,12 +2063,12 @@
                     has_value = true;
                 }
 
-                const ids = result || get_keys(doc); // this._ids;
+                const ids = tag_results || result || get_keys(doc); // this._ids;
                 const length = ids.length;
 
                 for(let x = 0; x < length; x++){
 
-                    const obj = doc[ids[x]];
+                    const obj = tag_results ? ids[x] : doc[ids[x]];
                     let found = true;
 
                     for(let i = 0; i < keys_len; i++){
@@ -2214,11 +2235,14 @@
 
             FlexSearch.prototype.export = function(){
 
+                let payload;
+
                 if(SUPPORT_DOCUMENT && this.doc){
 
                     const keys = this.doc.keys;
                     const length = keys.length;
-                    const payload = new Array(length + 1);
+
+                    payload = new Array(length + 1);
 
                     let i = 0;
 
@@ -2233,16 +2257,18 @@
                     }
 
                     payload[i] = this._doc;
+                }
+                else{
 
-                    return JSON.stringify(payload);
+                    payload = [
+
+                        this._map,
+                        this._ctx,
+                        get_keys(this._ids)
+                    ]
                 }
 
-                return JSON.stringify([
-
-                    this._map,
-                    this._ctx,
-                    get_keys(this._ids)
-                ]);
+                return JSON.stringify(payload);
             };
 
             /**
@@ -3161,7 +3187,6 @@
             let page;
             let result = [];
             let pointer;
-            const length_z = arrays.length;
 
             if(cursor === true){
 
@@ -3172,6 +3197,8 @@
 
                 pointer = cursor && cursor.split(":");
             }
+
+            const length_z = arrays.length;
 
             // use complex handler when length > 1
 
@@ -3186,7 +3213,7 @@
                 let suggestions = [];
                 let check_not;
                 let arr;
-                let z = -1; // start from 0
+                let z = 0;
                 let i = 0;
                 let length;
                 let tmp;
@@ -3197,6 +3224,7 @@
                 let last_index;
 
                 let pointer_suggest;
+                let pointer_count;
 
                 if(pointer){
 
@@ -3207,7 +3235,7 @@
                     }
                     else{
 
-                        pointer = parseInt(pointer[0], 10);
+                        pointer = pointer_count = parseInt(pointer[0], 10);
                     }
                 }
 
@@ -3220,17 +3248,16 @@
 
                         check_not = create_object();
 
-                        while(++z < length_z){
+                        for(; z < length_z; z++){
 
                             if(bool[z] === "not"){
 
                                 arr = arrays[z];
                                 length = arr.length;
-                                i = 0;
 
-                                while(i < length){
+                                for(i = 0; i < length; i++){
 
-                                    check_not["@" + arr[i++]] = 1;
+                                    check_not["@" + arr[i]] = 1;
                                 }
                             }
                             else{
@@ -3250,7 +3277,7 @@
                             return create_page(cursor, page, result);
                         }
 
-                        z = -1;
+                        z = 0;
                     }
                     else{
 
@@ -3263,7 +3290,7 @@
 
                 // loop through arrays
 
-                while(++z < length_z){
+                for(; z < length_z; z++){
 
                     const is_final_loop = (
 
@@ -3322,13 +3349,11 @@
 
                             const result_length = first_result.length;
 
-                            i = 0;
-
                             // fill initial map
 
-                            while(i < result_length){
+                            for(i = 0; i < result_length; i++){
 
-                                const id = first_result[i++];
+                                const id = first_result[i];
                                 const index = "@" + id;
 
                                 // there is no and, add items
@@ -3359,17 +3384,14 @@
 
                     let found = false;
 
-                    i = 0;
-                    //suggestions = [];
+                    for(i = 0; i < length; i++){
 
-                    while(i < length){
-
-                        tmp = arr[i++];
+                        tmp = arr[i];
 
                         const index = "@" + tmp;
-                        const check_val = has_and ? check[index] : z;
+                        const check_val = has_and ? check[index] || 0 : z;
 
-                        if(check_val){
+                        if(check_val || suggest){
 
                             if(has_not && check_not[index]){
 
@@ -3392,13 +3414,13 @@
                                     // should only happened when at least one bool "and" was set
                                     // TODO: check bool and provide complexity reduction
 
-                                    if(!pointer || (--pointer < count)){
+                                    if(!pointer_count || (--pointer_count < count)){
 
                                         result[count++] = tmp;
 
                                         if(limit && (count === limit)){
 
-                                            return create_page(cursor, count, result);
+                                            return create_page(cursor, count + (pointer || 0), result);
                                         }
                                     }
                                 }
@@ -3449,21 +3471,19 @@
                             i = 0;
                         }
 
-                        while(i < result_length){
+                        for(; i < result_length; i++){
 
-                            const id = first_result[i++];
+                            const id = first_result[i];
 
                             if(!check_not["@" + id]){
 
-                                if(!pointer || (--pointer < count)){
+                                result[count++] = id;
 
-                                    result[count++] = id;
-
-                                    if(limit && (count === limit)){
-
-                                        return create_page(cursor, i, result);
-                                    }
-                                }
+                                // TODO: is actually not covered
+                                // if(limit && (count === limit)){
+                                //
+                                //     return create_page(cursor, (i + 1), result);
+                                // }
                             }
                         }
                     }
@@ -3480,7 +3500,7 @@
                     if(pointer_suggest){
 
                         z = parseInt(pointer_suggest[0], 10) + 1;
-                        i = parseInt(pointer_suggest[1], 10);
+                        i = parseInt(pointer_suggest[1], 10) + 1;
                     }
                     else{
 
@@ -3488,7 +3508,7 @@
                         i = 0;
                     }
 
-                    while(z--){
+                    for(; z--;){
 
                         tmp = suggestions[z];
 
@@ -3520,6 +3540,11 @@
 
                     result = arrays[0];
 
+                    if(pointer){
+
+                        pointer = parseInt(pointer[0], 10);
+                    }
+
                     // TODO: handle references to the original index array
                     // return result.slice(0);
                 }
@@ -3527,16 +3552,28 @@
 
             if(limit){
 
-                const start = cursor ? parseInt(cursor, 10) : 0;
+                const length = result.length;
+
+                if(pointer && (pointer > length)){
+
+                    pointer = 0;
+                }
+
+                const start = pointer || 0;
                       page = start + limit;
 
-                if(page < result.length){
+                if(page < length){
 
                     result = result.slice(start, page);
                 }
-                else if(start){
+                else {
 
-                    result = result.slice(start);
+                    page = 0;
+
+                    if(start){
+
+                        result = result.slice(start);
+                    }
                 }
             }
 
@@ -4013,8 +4050,6 @@
      */
 
     function provide(name, factory, root){
-
-        /* istanbul ignore next */
 
         let prop;
 
