@@ -80,8 +80,8 @@ All Features:
         <td>
             <a href="#presets">Presets</a>
         </td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -89,8 +89,8 @@ All Features:
         <td>
             <a href="#async_search">Async Search</a>
         </td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -98,7 +98,7 @@ All Features:
         <td>
             <a href="#webworker">Web-Workers</a> (not available in Node.js)
         </td>
-        <td>✔</td>
+        <td>✓</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -107,17 +107,17 @@ All Features:
         <td>
             <a href="#contextual">Contextual Indexes</a>
         </td>
-        <td>✔</td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             <a href="#docs">Index Documents (Field-Search)</a>
         </td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -125,8 +125,8 @@ All Features:
         <td>
             <a href="#operators">Logical Operators</a>
         </td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -134,7 +134,7 @@ All Features:
         <td>
             <a href="#where">Where / Find</a> / <a href="#tags">Tags</a>
         </td>
-        <td>✔</td>
+        <td>✓</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -143,25 +143,25 @@ All Features:
         <td>
             <a href="#tokenizer">Partial Matching</a>
         </td>
-        <td>✔</td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             Relevance Scoring
         </td>
-        <td>✔</td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr></tr>
     <tr>
         <td>
             <a href="#cache">Auto-Balanced Cache by Popularity</a>
         </td>
-        <td>✔</td>
+        <td>✓</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -170,7 +170,7 @@ All Features:
         <td>
             <a href="#pagination">Pagination</a>
         </td>
-        <td>✔</td>
+        <td>✓</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -179,7 +179,7 @@ All Features:
         <td>
             <a href="#suggestions">Suggestions</a>
         </td>
-        <td>✔</td>
+        <td>✓</td>
         <td>-</td>
         <td>-</td>
     </tr>
@@ -188,8 +188,8 @@ All Features:
         <td>
             <a href="#phonetic">Phonetic Matching</a>
         </td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -197,9 +197,9 @@ All Features:
         <td>
             Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter
         </td>
-        <td>✔</td>
-        <td>✔</td>
-        <td>✔</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>File Size (gzip)</td>
@@ -221,12 +221,12 @@ Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Rank</td>
-        <td align="left">Library Name</td>
-        <td align="left">Library Version</td>
-        <td align="left">Single Phrase (op/s)</td>
-        <td align="left">Multi Phrase (op/s)</td>
-        <td align="left">Not Found (op/s)</td>
+        <td>Rank</td>
+        <td>Library Name</td>
+        <td>Library Version</td>
+        <td>Single Phrase (op/s)</td>
+        <td>Multi Phrase (op/s)</td>
+        <td>Not Found (op/s)</td>
     </tr>
     <tr>
         <td>1</td>
@@ -316,11 +316,11 @@ Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Rank</td>
-        <td align="left">Library Name</td>
-        <td align="left">Library Version</td>
-        <td align="left">Index Size <a href="#notes">*</a></td>
-        <td align="left">Memory Allocation <a href="#notes">**</a></td>
+        <td>Rank</td>
+        <td>Library Name</td>
+        <td>Library Version</td>
+        <td>Index Size <a href="#notes">*</a></td>
+        <td>Memory Allocation <a href="#notes">**</a></td>
     </tr>
     <tr>
         <td>1</td>
@@ -432,22 +432,22 @@ The index consists of an in-memory pre-scored dictionary as its base. The bigges
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Type</td>
-        <td align="left">Complexity</td>
+        <td>Type</td>
+        <td>Complexity</td>
     </tr>
     <tr>
-        <td align="left">Each single term query:</td>
-        <td align="left"><i>1</i></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td align="left">Lexical Pre-Scored Dictionary (Solo):</td>
-        <td align="left"><i>TERM_COUNT * TERM_MATCHES</i></td>
+        <td>Each single term query:</td>
+        <td><i>1</i></td>
     </tr>
     <tr></tr>
     <tr>
-        <td align="left">Lexical Pre-Scored Dictionary + Context-based Map:</td>
-        <td align="left"><i>TERM_MATCHES / TERM_COUNT</i></td>
+        <td>Lexical Pre-Scored Dictionary (Solo):</td>
+        <td><i>TERM_COUNT * TERM_MATCHES</i></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>Lexical Pre-Scored Dictionary + Context-based Map:</td>
+        <td><i>TERM_MATCHES / TERM_COUNT</i></td>
     </tr>
 </table>
 
@@ -458,9 +458,9 @@ The complexity for one single term is always 1.
 <table>
     <tr></tr>
     <tr>
-        <td align="left"></td>
-        <td align="left"><b>BulkSearch</b></td>
-        <td align="left"><b>FlexSearch</b></td>
+        <td></td>
+        <td><b>BulkSearch</b></td>
+        <td><b>FlexSearch</b></td>
     </tr>
     <tr>
         <td>Access</td>
@@ -761,6 +761,8 @@ index.search("John", {
     // ....
 });
 ```
+
+<a href="#options-search">See all available custom search options.</a>
 
 <a name="pagination"></a>
 #### Pagination
@@ -1409,6 +1411,8 @@ var results = index.search([{
 ```
 -->
 
+<a href="#options-field-search">See all available field-search options.</a>
+
 <a name="operators"></a>
 ## Logical Operators
 
@@ -1616,10 +1620,12 @@ var results = index.search("John", {
 
 > The default sorting order is from lowest to highest.
 
+<!--
 Explicitly set sorting direction (from highest to lowest):
 ```js
 sort: ">data:title"
 ```
+-->
 
 Sort by a custom function:
 ```js
@@ -1681,7 +1687,7 @@ Create index and just set a limit of cache entries:
 var index = new FlexSearch({
 
     profile: "score",
-    cache: 10000
+    cache: 1000
 });
 ```
 
@@ -1690,7 +1696,7 @@ var index = new FlexSearch({
 > When just using "true" the cache is unbounded and perform actually 2-3 times faster (because the balancer do not have to run).
 
 <a name="webworker"></a>
-## WebWorker Sharding (Browser only)
+## Web-Worker (Browser only)
 
 Worker get its own dedicated memory and also run in their own dedicated thread without blocking the UI while processing. Especially for larger indexes, web worker improves speed and available memory a lot. FlexSearch index was tested with a 250 Mb text file including 10 Million words. <!--The indexing was done silently in background by multiple parallel running workers in about 7 minutes. The final index reserves ~ 8.2 Mb memory/space. The search result took ~ 0.25 ms.-->
 
@@ -1734,18 +1740,20 @@ index.search("John Doe").then(function(results){
 <a name="options"></a>
 ## Options
 
-FlexSearch ist highly customizable. Make use of the the <a href="#presets">right options</a> can really improve your results as well as memory economy or query time.
+FlexSearch ist highly customizable. Make use of the the right options can really improve your results as well as memory economy and query time.
 
+<a name="options-index"></a>
+### Initialize Index
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Option</td>
-        <td align="left">Values</td>
-        <td align="left">Description</td>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
     </tr>
     <tr>
-        <td align="top">profile<br><br><br><br><br><br></td>
-        <td vertical="top" vertical-align="top">
+        <td>profile<br><br><br><br><br><br></td>
+        <td>
             "memory"<br>
             "speed"<br>
             "match"<br>
@@ -1759,8 +1767,8 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">tokenize<br><br><br><br><br><!--<br>--></td>
-        <td vertical="top" vertical-align="top">
+        <td>tokenize<br><br><br><br><br><!--<br>--></td>
+        <td>
             "strict"<br>
             "forward"<br>
             "reverse"<br>
@@ -1774,8 +1782,8 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">split<br><br></td>
-        <td vertical="top" vertical-align="top">
+        <td>split<br><br></td>
+        <td>
             RegExp<br>
             string
         </td>
@@ -1785,7 +1793,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">encode<br><br><br><br><br><br><br></td>
+        <td>encode<br><br><br><br><br><br><br></td>
         <td>
             false<br>
             "icase"<br>
@@ -1799,7 +1807,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">cache<br><br><br></td>
+        <td>cache<br><br><br></td>
         <td>
             false<br>
             true<br>
@@ -1809,7 +1817,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">async<br><br></td>
+        <td>async<br><br></td>
         <td>
             true<br>
             false
@@ -1818,7 +1826,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">worker<br><br></td>
+        <td>worker<br><br></td>
         <td>
             false<br>
             {number}
@@ -1827,7 +1835,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">depth<br><br></td>
+        <td>depth<br><br></td>
         <td>
             false<br>
             {number}
@@ -1836,7 +1844,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">threshold<br><br></td>
+        <td>threshold<br><br></td>
         <td>
             false<br>
             {number}
@@ -1845,7 +1853,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">resolution</td>
+        <td>resolution</td>
         <td>
             {number}
         </td>
@@ -1853,7 +1861,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">stemmer<br><br><br></td>
+        <td>stemmer<br><br><br></td>
         <td>
             false<br>
             {string}<br>
@@ -1863,7 +1871,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">filter<br><br><br></td>
+        <td>filter<br><br><br></td>
         <td>
             false<br>
             {string}<br>
@@ -1873,7 +1881,7 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
     <tr></tr>
     <tr>
-        <td align="top">rtl<br><br></td>
+        <td>rtl<br><br></td>
         <td>
             true<br>
             false
@@ -1882,13 +1890,115 @@ FlexSearch ist highly customizable. Make use of the the <a href="#presets">right
     </tr>
 </table>
 
+<a name="options-search"></a>
+### Custom Search
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>limit</td>
+        <td>number</td>
+        <td>Sets the limit of results.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>suggest</td>
+        <td>true, false</td>
+        <td>Enables <a href="#suggestions">suggestions</a> in results.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>where</td>
+        <td>object</td>
+        <td>Use a <a href="#where">where-clause</a> for non-indexed fields.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>field</td>
+        <td>string, Array&lt;string&gt;</td>
+        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>bool</td>
+        <td>"and", "or"</td>
+        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>page</td>
+        <td>true, false, cursor</td>
+        <td>Enables <a href="#pagination">paginated results</a>.</td>
+    </tr>
+</table>
+
+You can also override these following <a href="#options-index">index settings</a> via custom search (v0.7.0):
+
+- encode
+- split
+- tokenize
+- threshold
+- cache
+- async
+
+Custom-Search options will override index options.
+
+<a name="options-field-search"></a>
+### Field-Search (v0.7.0)
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>limit</td>
+        <td>number</td>
+        <td>Sets the limit of results per field.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>suggest</td>
+        <td>true, false</td>
+        <td>Enables <a href="#suggestions">suggestions</a> in results per field.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>bool</td>
+        <td>"and", "or", "not"</td>
+        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>boost</td>
+        <td>number</td>
+        <td>Enables boosting fields.</td>
+    </tr>
+</table>
+
+You can also override these following <a href="#options-index">index settings</a> per field via custom field-search:
+
+- encode
+- split
+- tokenize
+- threshold
+
+Field-Search options will override custom-search options and index options.
+
 ## Depth, Threshold, Resolution?
 
-Whereas __depth is the minimum relevance for the context-based index__, __threshold is the minimum relevance for the lexical index__. The threshold score is an enhanced variation of a conventional scoring calculation, it uses on document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
+Whereas __depth__ is the minimum relevance for the __contextual index__, __threshold__ is the minimum relevance for the __lexical index__. The threshold score is an enhanced variation of a conventional scoring calculation, it uses on document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
 
 Resolution on the other hand specify the max scoring value. The final score value is an integer value, so resolution affect how many segments the score may have. When the resolution is 1, then there exist just one scoring level for all matched terms. To get more differentiated results you need to raise the resolution.
 
-> The difference of both (_resolution_ - _threshold_) affects the performance on higher values.
+> The difference of both affects the performance on higher values (complexity = _resolution_ - _threshold_).
 
 The combination of resolution and threshold gives you a good controlling of your matches as well as performance, e.g. when the resolution is 25 and the threshold is 22, then the result only contains matches which are super relevant. The goal should always be just have items in result which are really needed. On top, that also improves performance a lot.
 
@@ -1900,10 +2010,10 @@ Tokenizer effects the required memory also as query time and flexibility of part
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Option</td>
-        <td align="left">Description</td>
-        <td align="left">Example</td>
-        <td align="left">Memory Factor (n = length of word)</td>
+        <td>Option</td>
+        <td>Description</td>
+        <td>Example</td>
+        <td>Memory Factor (n = length of word)</td>
     </tr>
     <tr>
         <td><b>"strict"</b></td>
@@ -1951,10 +2061,10 @@ Encoding effects the required memory also as query time and phonetic matches. Tr
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Option</td>
-        <td align="left">Description</td>
-        <td align="left">False-Positives</td>
-        <td align="left">Compression</td>
+        <td>Option</td>
+        <td>Description</td>
+        <td>False-Positives</td>
+        <td>Compression</td>
     </tr>
     <tr>
         <td><b>false</b></td>
@@ -2007,11 +2117,11 @@ Encoding effects the required memory also as query time and phonetic matches. Tr
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Query</td>
-        <td align="left">icase</td>
-        <td align="left">simple</td>
-        <td align="left">advanced</td>
-        <td align="left">extra</td>
+        <td>Query</td>
+        <td>icase</td>
+        <td>simple</td>
+        <td>advanced</td>
+        <td>extra</td>
     </tr>
     <tr>
         <td>björn</td>
@@ -2117,8 +2227,8 @@ The required memory for the index depends on several options:
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Encoding</td>
-        <td align="left">Memory usage of every ~ 100,000 indexed word</td>
+        <td>Encoding</td>
+        <td>Memory usage of every ~ 100,000 indexed word</td>
     </tr>
     <tr>
         <td>false</td>
@@ -2145,8 +2255,8 @@ The required memory for the index depends on several options:
         <td>90 kb</td>
     </tr>
     <tr>
-        <td align="left">Mode</td>
-        <td align="left">Multiplied with: (n = average length of indexed words)</td>
+        <td>Mode</td>
+        <td>Multiplied with: (n = average length of indexed words)</td>
     </tr>
     <tr>
         <td>"strict"</td>
@@ -2175,8 +2285,8 @@ The required memory for the index depends on several options:
         <td>* n * (n - 1)</td>
     </tr>
     <tr>
-        <td align="left">Contextual Index</td>
-        <td align="left">Multiply the sum above with:</td>
+        <td>Contextual Index</td>
+        <td>Multiply the sum above with:</td>
     </tr>
     <tr>
         <td></td>
@@ -2564,8 +2674,8 @@ node compile SUPPORT_WORKER=true
 <table>
     <tr></tr>
     <tr>
-        <td align="left">Flag</td>
-        <td align="left">Values</td>
+        <td>Flag</td>
+        <td>Values</td>
     </tr>
     <tr>
         <td>DEBUG</td>
