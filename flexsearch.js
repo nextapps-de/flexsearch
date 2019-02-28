@@ -1883,7 +1883,7 @@
 
                                 for(let z = 0; z < (resolution - threshold); z++){
 
-                                    if((map_value = map[z][value])){
+                                    if((map_value = (map[z] && map[z][value]))){
 
                                         map_check[count++] = map_value;
                                         map_found = true;
