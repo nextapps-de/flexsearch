@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.6.2
+ * @preserve FlexSearch v0.6.21
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -556,7 +556,7 @@
 
                     (custom = options["doc"]) ?
 
-                        custom
+                        clone_object(custom)
                     :
                         this.doc || defaults.doc
                 );
@@ -622,7 +622,6 @@
 
                         //TODO: delegate tag indexes to intersection
                         //field_custom[tag[i]] = tag_options;
-
                         this._tag[tag[i]] = create_object();
                     }
 
@@ -771,6 +770,34 @@
 
             return this;
         };
+
+        function clone_object(obj){
+
+            const clone = create_object();
+
+            for(const key in obj){
+
+                if(obj.hasOwnProperty(key)){
+
+                    const value = obj[key];
+
+                    if(is_array(value)){
+
+                        clone[key] = value.slice(0);
+                    }
+                    else if(is_object(value)){
+
+                        clone[key] = clone_object(value);
+                    }
+                    else{
+
+                        clone[key] = value;
+                    }
+                }
+            }
+
+            return clone;
+        }
 
         function filter_words(words, fn_or_map){
 
