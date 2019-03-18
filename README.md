@@ -2005,7 +2005,7 @@ The combination of resolution and threshold gives you a good controlling of your
 <a name="tokenizer"></a>
 ## Tokenizer
 
-Tokenizer effects the required memory also as query time and flexibility of partial matches. Try to choose the most upper of these tokenizer which fits your needs:
+Tokenizer affects the required memory also as query time and flexibility of partial matches. Try to choose the most upper of these tokenizer which fits your needs:
 
 <table>
     <tr></tr>
@@ -2056,7 +2056,7 @@ Tokenizer effects the required memory also as query time and flexibility of part
 <a name="phonetic"></a>
 ## Encoders
 
-Encoding effects the required memory also as query time and phonetic matches. Try to choose the most upper of these encoders which fits your needs, or pass in a <a href="#flexsearch.encoder">custom encoder</a>:
+Encoding affects the required memory also as query time and phonetic matches. Try to choose the most upper of these encoders which fits your needs, or pass in a <a href="#flexsearch.encoder">custom encoder</a>:
 
 <table>
     <tr></tr>
