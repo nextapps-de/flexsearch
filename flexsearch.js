@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.6.21
+ * @preserve FlexSearch v0.6.22
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -879,11 +879,6 @@
                     if(SUPPORT_ASYNC && this.async && (!SUPPORT_WORKER || (typeof importScripts !== "function"))){
 
                         let self = this;
-
-                        /**
-                         * @param fn
-                         * @constructor
-                         */
 
                         const promise = new Promise(function(resolve){
 
@@ -2408,7 +2403,7 @@
                       regex_u = regex("[ùúûüű]"),
                       regex_y = regex("[ýŷÿ]"),
                       regex_n = regex("ñ"),
-                      regex_c = regex("ç"),
+                      regex_c = regex("[çc]"),
                       regex_s = regex("ß"),
                       regex_and = regex(" & ");
 
@@ -2422,7 +2417,7 @@
                     regex_u, "u",
                     regex_y, "y",
                     regex_n, "n",
-                    regex_c, "c",
+                    regex_c, "k",
                     regex_s, "s",
                     regex_and, " and ",
                     regex_space, " ",
@@ -2458,7 +2453,7 @@
                       regex_ck = regex("ck"),
                       regex_cc = regex("cc"),
                       regex_sh = regex("sh"),
-                      //regex_th = regex("th"),
+                      regex_th = regex("th"),
                       regex_dt = regex("dt"),
                       regex_ph = regex("ph"),
                       regex_pf = regex("pf"),
@@ -2480,7 +2475,7 @@
                       regex_sh, "s",
                       regex_ck, "k",
                       regex_cc, "k",
-                      //regex_th, "t",
+                      regex_th, "t",
                       regex_dt, "t",
                       regex_ph, "f",
                       regex_pf, "f",

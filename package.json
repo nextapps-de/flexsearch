@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.6.21",
+  "version": "0.6.22",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -67,7 +67,7 @@
     "chai": "^4.2.0",
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.0.3",
-    "google-closure-compiler": "^20190301.0.0",
+    "google-closure-compiler": "^20190321.0.0-nightly",
     "mocha": "^6.0.1",
     "mocha-lcov-reporter": "^1.3.0",
     "mocha-phantomjs": "^4.1.0",
