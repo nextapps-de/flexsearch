@@ -5,6 +5,8 @@ declare module "flexsearch" {
     readonly index: string;
     readonly length: number;
 
+    init();
+    init(options: CreateOptions);
     add(id: number, o: T);
     search(query: string, options: number | SearchOptions, callback: (results: SearchResults<T>) => void): void;
     search(query: string, options?: number | SearchOptions): Promise<SearchResults<T>>;
@@ -74,7 +76,7 @@ declare module "flexsearch" {
   type Cursor = string;
 
   export default class FlexSearch {
-    static create(options?: Options): Index;
+    static create(options?: CreateOptions): Index;
     static registerMatcher(matcher: Matcher);
     static registerEncoder(name: string, encoder: EncoderFn);
     static registerLanguage(lang: string, options: { stemmer?: Stemmer; filter?: string[] });
