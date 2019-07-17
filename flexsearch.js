@@ -833,7 +833,7 @@
 
             if(SUPPORT_DOCUMENT && this.doc && is_object(id)){
 
-                return this.handle_docs("add", id, /** @type {Function} */ (content));
+                return this.handle_docs("add", id, callback);
             }
 
             if(content && is_string(content) && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
@@ -1250,7 +1250,7 @@
 
             if(SUPPORT_DOCUMENT && this.doc && is_object(id)){
 
-                return this.handle_docs("update", id, /** @type {Function} */ (content));
+                return this.handle_docs("update", id, callback);
             }
 
             const index = "@" + id;
