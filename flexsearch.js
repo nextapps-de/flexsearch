@@ -412,9 +412,17 @@
             /** @private */
             this.split = (
 
-                options["split"] ||
-                this.split ||
-                defaults.split
+                is_undefined(custom = options["split"]) ?
+
+                    this.split ||
+                    defaults.split
+                :(
+                    is_string(custom) ?
+
+                        regex(custom)
+                    :
+                        custom
+                )
             );
 
             /** @private */
@@ -723,24 +731,27 @@
                 profile_start("encode");
             }
 
-            if(value && global_matcher.length){
+            if(value){
 
-                value = replace(value, global_matcher);
-            }
+                if(global_matcher.length){
 
-            if(value && this._matcher.length){
+                    value = replace(value, global_matcher);
+                }
 
-                value = replace(value, this._matcher);
-            }
+                if(this._matcher.length){
 
-            if(value && this.encoder){
+                    value = replace(value, this._matcher);
+                }
 
-                value = this.encoder(value);
-            }
+                if(this.encoder){
 
-            if(value && this.stemmer){
+                    value = this.encoder(value);
+                }
 
-                value = replace(value, this.stemmer);
+                if(this.stemmer){
+
+                    value = replace(value, this.stemmer);
+                }
             }
 
             if(PROFILER){
@@ -2375,56 +2386,6 @@
             };
         }
 
-        function serialize(payload){
-
-            if(is_array(payload)){
-
-                const length = payload.length;
-
-                if(length){
-
-                    if(is_array(payload[0]) || is_object(payload[0])){
-
-                        let result = "[";
-
-                        for(let i = 0; i < length; i++){
-
-                            const value = payload[i];
-
-                            result += serialize(value) + (i < length - 1 ? "," : "");
-                        }
-
-                        return result + "]";
-                    }
-                }
-            }
-            else if(is_object(payload)){
-
-                const keys = get_keys(payload);
-                const length = keys.length;
-
-                if(length){
-
-                    let result = "{";
-
-                    for(let i = 0; i < length; i++){
-
-                        const key = keys[i];
-                        const value = payload[key];
-
-                        result += "\"" + key + "\":" + serialize(value) + (i < length - 1 ? "," : "");
-                    }
-
-                    return result + "}";
-                }
-            }
-
-            return JSON.stringify(payload);
-        }
-
-        // TODO
-        function unserialize(){}
-
         /** @const */
 
         const global_encoder_balance = (function(){
@@ -2949,101 +2910,6 @@
                 }
             }
         }
-
-        /**
-         * @param {!string} value
-         * @returns {Array<?string>}
-         */
-
-        /*
-        function ngram(value){
-
-            const parts = [];
-
-            if(!value){
-
-                return parts;
-            }
-
-            let count_vowels = 0,
-                count_literal = 0,
-                count_parts = 0;
-
-            let tmp = "";
-            const length = value.length;
-
-            for(let i = 0; i < length; i++){
-
-                const char = value[i];
-                const char_is_whitespace = (char === " ");
-
-                if(!char_is_whitespace){
-
-                    if((char === "a") ||
-                       (char === "e") ||
-                       (char === "i") ||
-                       (char === "o") ||
-                       (char === "u") ||
-                       (char === "y")){
-
-                        count_vowels++;
-                    }
-                    else{
-
-                        count_literal++;
-                    }
-
-                    tmp += char;
-                }
-
-                // dynamic n-gram sequences
-
-                if(char_is_whitespace || (
-
-                    (count_vowels > (length > 7 ? 1 : 0)) &&
-                    (count_literal > 1)
-
-                ) || (
-
-                    (count_vowels > 1) &&
-                    (count_literal > (length > 7 ? 1 : 0))
-
-                ) || (i === length - 1)){
-
-                    if(tmp){
-
-                        if(char_is_whitespace){
-
-                            count_parts++;
-                        }
-                        else{
-
-                            if(parts[count_parts] && (tmp.length > 2)){
-
-                                count_parts++;
-                            }
-
-                            if(parts[count_parts]){
-
-                                parts[count_parts] += tmp;
-                            }
-                            else{
-
-                                parts[count_parts] = tmp;
-                            }
-                        }
-
-                        tmp = "";
-                    }
-
-                    count_vowels = 0;
-                    count_literal = 0;
-                }
-            }
-
-            return parts;
-        }
-        */
 
         /**
          * @param {!string} string
@@ -3780,62 +3646,6 @@
                     // Note: do not touch original array!
 
                     result = result.slice(0, limit);
-                }
-            }
-
-            return result;
-        }
-        */
-
-        /**
-         * Fastest intersect method for 2 sorted arrays so far
-         * @param {!Array<number|string>} a
-         * @param {!Array<number|string>} b
-         * @param {number=} limit
-         * @returns {Array}
-         */
-
-        /*
-        function intersect_sorted(a, b, limit){
-
-            const result = [];
-
-            const length_a = a.length,
-                length_b = b.length;
-
-            if(length_a && length_b){
-
-                const x = 0, y = 0, count = 0;
-
-                const current_a = 0,
-                    current_b = 0;
-
-                while(true){
-
-                    if((current_a || (current_a = a[x])) ===
-                       (current_b || (current_b = b[y]))){
-
-                        result[count++] = current_a;
-
-                        current_a = current_b = 0;
-                        x++;
-                        y++;
-                    }
-                    else if(current_a < current_b){
-
-                        current_a = 0;
-                        x++;
-                    }
-                    else{
-
-                        current_b = 0;
-                        y++;
-                    }
-
-                    if((x === length_a) || (y === length_b)){
-
-                        break;
-                    }
                 }
             }
 
