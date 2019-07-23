@@ -2255,7 +2255,7 @@
              * @export
              */
 
-            FlexSearch.prototype.export = function(){
+            FlexSearch.prototype.export = function(serialize = true){
 
                 let payload;
 
@@ -2290,16 +2290,22 @@
                     ];
                 }
 
-                return JSON.stringify(payload);
+                if(serialize) {
+                    payload = JSON.stringify(payload);
+                }
+
+                return payload;
             };
 
             /**
              * @export
              */
 
-            FlexSearch.prototype.import = function(payload){
+            FlexSearch.prototype.import = function(payload, serialized = true){
 
-                payload = JSON.parse(payload);
+                if(serialized) {
+                    payload = JSON.parse(payload);
+                }
 
                 const ids = create_object();
 
