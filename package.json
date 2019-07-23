@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.6.22",
+  "version": "0.6.24",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -42,7 +42,7 @@
     "test-coverage": "nyc --reporter=html --reporter=text mocha --timeout=3000 mocha test/test.js",
     "test": "npm run test-develop && npm run test-production && npm run test-light && npm run test-browser && npm run test-coverage",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "update": "node_modules/.bin/updtr --to non-breaking"
+    "update": "npm install chai@latest && npm install codacy-coverage@latest && npm install coveralls@latest && npm install nyc@latest && npm install google-closure-compiler@nightly && npm install mocha@latest && npm install mocha-lcov-reporter@latest && npm install mocha-phantomjs@latest && npm install phantomjs-prebuilt@latest"
   },
   "nyc": {
     "per-file": true,
@@ -56,6 +56,7 @@
     "dist/",
     "lang/",
     "test/",
+    "index.d.ts",
     "compile.js",
     "README.md",
     "CHANGELOG.md",
@@ -66,13 +67,12 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "codacy-coverage": "^3.4.0",
-    "coveralls": "^3.0.3",
-    "google-closure-compiler": "^20190709.0.0",
-    "mocha": "^6.0.1",
+    "coveralls": "^3.0.5",
+    "google-closure-compiler": "^20190723.0.0-nightly",
+    "mocha": "^6.2.0",
     "mocha-lcov-reporter": "^1.3.0",
     "mocha-phantomjs": "^4.1.0",
-    "nyc": "^14.0.0",
-    "phantomjs-prebuilt": "^2.1.16",
-    "updtr": "^3.0.0"
+    "nyc": "^14.1.1",
+    "phantomjs-prebuilt": "^2.1.16"
   }
 }

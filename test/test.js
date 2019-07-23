@@ -2678,17 +2678,32 @@ if(env !== "light") describe("Export / Import", function(){
     it("Should have been exported properly (documents)", function(){
 
         var index = new FlexSearch({
-            tokenize: "reverse",
+            encode: "icase",
+            tokenize: "strict",
+            threshold: 1,
+            resolution: 3,
+            depth: 1,
             doc: {
                 id: "id",
-                field: "title"
+                field: ["title", "content"]
             }
         });
 
-        index.add({id: 0, title: "foo"});
-        index.add({id: 1, title: "bar"});
-        index.add({id: 2, title: "foobar"});
+        var docs = [{
+            id: 1,
+            title: "Title 2",
+            content: "foobar"
+        },{
+            id: 0,
+            title: "Title 1",
+            content: "foo"
+        },{
+            id: 2,
+            title: "Title 3",
+            content: "bar"
+        }];
 
+        index.add(docs);
         data = index.export();
 
         if(env === ""){
@@ -2700,6 +2715,11 @@ if(env !== "light") describe("Export / Import", function(){
                     index.doc.index["title"]._ctx,
                     Object.keys(index.doc.index["title"]._ids)
                 ],
+                [
+                    index.doc.index["content"]._map,
+                    index.doc.index["content"]._ctx,
+                    Object.keys(index.doc.index["content"]._ids)
+                ],
                 index._doc
             ]));
         }
@@ -2708,10 +2728,14 @@ if(env !== "light") describe("Export / Import", function(){
     it("Should have been imported properly (documents)", function(){
 
         var index = new FlexSearch({
-            tokenize: "reverse",
+            encode: "icase",
+            tokenize: "strict",
+            threshold: 1,
+            resolution: 3,
+            depth: 1,
             doc: {
                 id: "id",
-                field: "title"
+                field: ["title", "content"]
             }
         });
 
@@ -2720,12 +2744,13 @@ if(env !== "light") describe("Export / Import", function(){
         if(env === ""){
 
             expect(index.doc.index["title"].length).to.equal(3);
+            expect(index.doc.index["content"].length).to.equal(3);
         }
 
-        expect(index.search("foo")).to.have.lengthOf(2);
-        expect(index.search("bar")).to.have.lengthOf(2);
+        expect(index.search("foo")).to.have.lengthOf(1);
+        expect(index.search("bar")).to.have.lengthOf(1);
         expect(index.search("foobar")).to.have.lengthOf(1);
-        expect(index.search("foobar")[0].id).to.equal(2);
+        expect(index.search("foobar")[0].id).to.equal(1);
     });
 });
 

@@ -80,8 +80,9 @@ var parameter = (function(opt){
 
     compilation_level: compilation_level || "ADVANCED_OPTIMIZATIONS", //"WHITESPACE"
     use_types_for_optimization: true,
-    new_type_inf: true,
+    //new_type_inf: true,
     jscomp_warning: "newCheckTypes",
+    jscomp_error: "newCheckTypesExtraChecks",
     //jscomp_error: "strictCheckTypes",
     generate_exports: true,
     export_local_property_definitions: true,
@@ -94,7 +95,9 @@ var parameter = (function(opt){
     emit_use_strict: options["RELEASE"] !== "lang",
     output_manifest: "log/manifest.log",
     output_module_dependencies: "log/module_dependencies.log",
-    property_renaming_report: "log/renaming_report.log"
+    property_renaming_report: "log/renaming_report.log",
+    strict_mode_input: true,
+    assume_function_wrapper: true
     //formatting: formatting || "DEFAULT" //"PRETTY_PRINT"
 });
 

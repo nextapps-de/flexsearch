@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.6.22
+ * @preserve FlexSearch v0.6.24
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -1674,10 +1674,7 @@
 
                         "search": true,
                         "limit": limit,
-                        "cursor": cursor,
-                        "threshold": threshold,
-                        //"where": where,
-                        "content": query
+                        "content": _query
                     });
                 }
 
@@ -2252,33 +2249,44 @@
 
             /**
              * TODO: also export settings?
+             * @param {Object<string, boolean>=} config
              * @export
              */
 
-            FlexSearch.prototype.export = function(serialize = true){
+            FlexSearch.prototype.export = function(config){
+
+                const serialize = !config || is_undefined(config["serialize"]) || config["serialize"];
 
                 let payload;
 
                 if(SUPPORT_DOCUMENT && this.doc){
 
-                    const keys = this.doc.keys;
-                    const length = keys.length;
+                    const export_doc = !config || is_undefined(config["doc"]) || config["doc"];
+                    const export_index = !config || is_undefined(config["index"]) || config["index"];
 
-                    payload = new Array(length + 1);
+                    payload = [];
 
                     let i = 0;
 
-                    for(; i < keys.length; i++){
+                    if(export_index){
 
-                        const idx = this.doc.index[keys[i]];
+                        const keys = this.doc.keys;
 
-                        payload[i] = [
+                        for(; i < keys.length; i++){
 
-                            idx._map, idx._ctx, get_keys(idx._ids)
-                        ];
+                            const idx = this.doc.index[keys[i]];
+
+                            payload[i] = [
+
+                                idx._map, idx._ctx, get_keys(idx._ids)
+                            ];
+                        }
                     }
 
-                    payload[i] = this._doc;
+                    if(export_doc){
+
+                        payload[i] = this._doc;
+                    }
                 }
                 else{
 
@@ -2290,7 +2298,8 @@
                     ];
                 }
 
-                if(serialize) {
+                if(serialize){
+
                     payload = JSON.stringify(payload);
                 }
 
@@ -2301,9 +2310,12 @@
              * @export
              */
 
-            FlexSearch.prototype.import = function(payload, serialized = true){
+            FlexSearch.prototype.import = function(payload, config){
 
-                if(serialized) {
+                const serialize = !config || is_undefined(config["serialize"]) || config["serialize"];
+
+                if(serialize){
+
                     payload = JSON.parse(payload);
                 }
 
@@ -2311,26 +2323,41 @@
 
                 if(SUPPORT_DOCUMENT && this.doc){
 
-                    const keys = this.doc.keys;
-                    const length = keys.length;
-                    const current = payload[0][2];
+                    const import_doc = !config || is_undefined(config["doc"]) || config["doc"];
+                    const import_index = !config || is_undefined(config["index"]) || config["index"];
 
-                    for(let i = 0; i < current.length; i++){
+                    let i = 0;
 
-                        ids[current[i]] = 1;
+                    if(import_index){
+
+                        const keys = this.doc.keys;
+                        const length = keys.length;
+                        const current = payload[0][2];
+
+                        for(; i < current.length; i++){
+
+                            ids[current[i]] = 1;
+                        }
+
+                        for(i = 0; i < length; i++){
+
+                            const idx = this.doc.index[keys[i]];
+
+                            idx._map = payload[i][0];
+                            idx._ctx = payload[i][1];
+                            idx._ids = ids;
+
+                            // if(import_doc){
+                            //
+                            //     idx._doc = payload[length];
+                            // }
+                        }
                     }
 
-                    for(let i = 0; i < length; i++){
+                    if(import_doc){
 
-                        const idx = this.doc.index[keys[i]];
-
-                        idx._map = payload[i][0];
-                        idx._ctx = payload[i][1];
-                        idx._ids = ids;
-                        idx._doc = payload[length];
+                        this._doc = is_object(import_doc) ? import_doc : payload[i];
                     }
-
-                    this._doc = payload[length];
                 }
                 else{
 
@@ -2347,6 +2374,56 @@
                 }
             };
         }
+
+        function serialize(payload){
+
+            if(is_array(payload)){
+
+                const length = payload.length;
+
+                if(length){
+
+                    if(is_array(payload[0]) || is_object(payload[0])){
+
+                        let result = "[";
+
+                        for(let i = 0; i < length; i++){
+
+                            const value = payload[i];
+
+                            result += serialize(value) + (i < length - 1 ? "," : "");
+                        }
+
+                        return result + "]";
+                    }
+                }
+            }
+            else if(is_object(payload)){
+
+                const keys = get_keys(payload);
+                const length = keys.length;
+
+                if(length){
+
+                    let result = "{";
+
+                    for(let i = 0; i < length; i++){
+
+                        const key = keys[i];
+                        const value = payload[key];
+
+                        result += "\"" + key + "\":" + serialize(value) + (i < length - 1 ? "," : "");
+                    }
+
+                    return result + "}";
+                }
+            }
+
+            return JSON.stringify(payload);
+        }
+
+        // TODO
+        function unserialize(){}
 
         /** @const */
 
@@ -3587,7 +3664,7 @@
                     pointer = 0;
                 }
 
-                const start = pointer || 0;
+                const start = /** @type number */ (pointer) || 0;
                       page = start + limit;
 
                 if(page < length){

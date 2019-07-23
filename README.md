@@ -2560,6 +2560,48 @@ feeds_2018.import(localStorage.getItem("feeds_2018"));
 feeds_2019.import(localStorage.getItem("feeds_2019"));
 ```
 
+#### Disable Serialization
+
+Pass a config flag to control serialization:
+
+```js
+var data = index.export({serialize: false});
+```
+
+Use the same config accordingly when importing data:
+
+```js
+index.import(data, {serialize: false});
+```
+
+#### Separate Exports (Documents)
+
+Pass a config flag to separate index and documents from the export:
+
+```js
+var idx = index.export({index: true, doc: false});
+```
+
+```js
+var docs = index.export({index: false, doc: true});
+```
+
+Use the same config accordingly when importing data:
+
+```js
+index.import(idx, {index: true, doc: false});
+```
+
+```js
+index.import(docs, {index: false, doc: true});
+```
+
+You can also pass documents as external data, assume `data` is an array of documents:
+
+```js
+index.import(idx, {index: true, doc: data});
+```
+
 <a name="debug"></a>
 ## Debug
 
