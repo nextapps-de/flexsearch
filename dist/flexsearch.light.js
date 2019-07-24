@@ -1,5 +1,5 @@
 /*
- FlexSearch v0.6.24
+ FlexSearch v0.6.30
  Copyright 2019 Nextapps GmbH
  Author: Thomas Wilkerling
  Released under the Apache 2.0 Licence

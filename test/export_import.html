@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test: Export / Import</title>
+    <script src="../flexsearch.js"></script>
+</head>
+<body>
+<script>
+
+    var config = {
+        encode: "icase",
+        tokenize: "strict",
+        threshold: 1,
+        resolution: 3,
+        depth: 1,
+        doc: {
+            id: "id",
+            field: "title",
+            store: "body:content"
+        }
+    };
+
+    var index = new FlexSearch(config);
+
+    var docs = [{
+        id: 1,
+        title: "Title 2",
+        body: {content: "foobar"}
+    },{
+        id: 0,
+        title: "Title 1",
+        body: {content: "foo"}
+    },{
+        id: 2,
+        title: "Title 3",
+        body: {content: "bar"}
+    }];
+
+    index.add(docs);
+
+    console.log(index.search("title"));
+
+    var idx = index.export({
+        doc: false,
+        index: true,
+        serialize: false
+    });
+
+    var doc = index.export({
+        doc: true,
+        index: false,
+        serialize: false
+    });
+
+    index = new FlexSearch(config);
+
+    index.import(idx, {
+        doc: false,
+        index: true,
+        serialize: false
+    });
+
+    index.import(doc, {
+        doc: true,
+        index: false,
+        serialize: false
+    });
+
+    console.log(index.search("title"));
+
+    index = new FlexSearch(config);
+
+    index.import(idx, {
+        doc: docs,
+        index: true,
+        serialize: false
+    });
+
+    console.log(index.search("title"));
+</script>
+</body>
+</html>

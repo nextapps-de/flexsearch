@@ -1,5 +1,5 @@
 /**!
- * @preserve FlexSearch v0.6.24
+ * @preserve FlexSearch v0.6.30
  * Copyright 2019 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Released under the Apache 2.0 Licence
@@ -579,7 +579,7 @@
             /** @private */
             this._ids = create_object();
 
-            if(doc){
+            if(SUPPORT_DOCUMENT && doc){
 
                 this._doc = create_object();
 
@@ -590,10 +590,34 @@
 
                 let field = doc["field"];
                 let tag = doc["tag"];
+                let store = doc["store"];
 
                 if(!is_array(doc["id"])){
 
                     doc["id"] = doc["id"].split(":");
+                }
+
+                if(store){
+
+                    let store_custom = create_object();
+
+                    if(is_string(store)){
+
+                        store_custom[store] = 1;
+                    }
+                    else if(is_array(store)){
+
+                        for(let i = 0; i < store.length; i++){
+
+                            store_custom[store[i]] = 1;
+                        }
+                    }
+                    else if(is_object(store)){
+
+                        store_custom = store;
+                    }
+
+                    doc["store"] = store_custom;
                 }
 
                 if(SUPPORT_WHERE && tag){
@@ -673,7 +697,7 @@
                         // TODO: move fields to main index to provide pagination
 
                         index[ref] = new FlexSearch(options);
-                        index[ref]._doc = this._doc;
+                        //index[ref]._doc = this._doc;
 
                         // if(SUPPORT_WHERE && tag){
                         //
@@ -682,6 +706,8 @@
                         // }
                     }
                 }
+
+                options["doc"] = custom;
             }
 
             /**
@@ -1137,16 +1163,16 @@
 
                 if(is_array(doc)){
 
-                    for(let i = 0, len = doc.length; i < len; i++){
+                    let len = doc.length;
 
-                        if(i === len - 1){
+                    if(len--){
 
-                            return this.handle_docs(job, doc[i], callback);
-                        }
-                        else{
+                        for(let i = 0; i < len; i++){
 
                             this.handle_docs(job, doc[i]);
                         }
+
+                        return this.handle_docs(job, doc[len], callback);
                     }
                 }
                 else{
@@ -1154,28 +1180,58 @@
                     const index = this.doc.index;
                     const keys = this.doc.keys;
                     const tags = this.doc["tag"];
-                    let tree = this.doc["id"];
-                    let id;
+                    const store = this.doc["store"];
+
+                    let tree;
                     let tag;
-                    let tag_key;
-                    let tag_value;
+
+                    // ---------------------------------------------------------------
+
+                    tree = this.doc["id"];
+
+                    let id = doc;
 
                     for(let i = 0; i < tree.length; i++){
 
-                        id = (id || doc)[tree[i]];
+                        id = id[tree[i]];
                     }
 
+                    // ---------------------------------------------------------------
+
+                    if(job === "remove"){
+
+                        delete this._doc[id];
+
+                        let length = keys.length;
+
+                        if(length--){
+
+                            for(let z = 0; z < length; z++){
+
+                                index[keys[z]].remove(id);
+                            }
+
+                            return index[keys[length]].remove(id, callback);
+                        }
+                    }
+
+                    // ---------------------------------------------------------------
+
                     if(tags){
+
+                        let tag_key;
+                        let tag_value;
 
                         for(let i = 0; i < tags.length; i++){
 
                             tag_key = tags[i];
+                            tag_value = doc;
 
                             const tag_split = tag_key.split(":");
 
                             for(let a = 0; a < tag_split.length; a++){
 
-                                tag_value = (tag_value || doc)[tag_split[a]];
+                                tag_value = tag_value[tag_split[a]];
                             }
 
                             tag_value = "@" + tag_value;
@@ -1185,41 +1241,18 @@
                         tag = tag[tag_value] || (tag[tag_value] = []);
                     }
 
-                    if(job === "remove"){
-
-                        delete this._doc[id];
-
-                        for(let z = 0, length = keys.length; z < length; z++){
-
-                            if(z === length - 1){
-
-                                index[keys[z]].remove(id, callback);
-                                return this;
-                            }
-                            else{
-
-                                index[keys[z]].remove(id);
-                            }
-                        }
-                    }
+                    // ---------------------------------------------------------------
 
                     tree = this.doc["field"];
-
-                    if(tag){
-
-                        tag[tag.length] = doc; // tag[tag.length] = id;
-                    }
-
-                    this._doc[id] = doc;
 
                     for(let i = 0, len = tree.length; i < len; i++){
 
                         const branch = tree[i];
-                        let content;
+                        let content = doc;
 
                         for(let x = 0; x < branch.length; x++){
 
-                            content = (content || doc)[branch[x]];
+                            content = content[branch[x]];
                         }
 
                         const self = index[keys[i]];
@@ -1244,6 +1277,46 @@
                             fn.call(self, id, content);
                         }
                     }
+
+                    // ---------------------------------------------------------------
+
+                    if(store){
+
+                        const store_keys = get_keys(store);
+                        let store_doc = create_object();
+
+                        for(let i = 0; i < store_keys.length; i++){
+
+                            let store_key = store_keys[i];
+
+                            if(store[store_key]){
+
+                                const store_split = store_key.split(":");
+
+                                let store_value;
+                                let store_doc_value;
+
+                                for(let a = 0; a < store_split.length; a++){
+
+                                    const store_split_key = store_split[a];
+
+                                    store_value = (store_value || doc)[store_split_key];
+                                    store_doc_value = (store_doc_value || store_doc)[store_split_key] = store_value;
+                                }
+                            }
+                        }
+
+                        doc = store_doc;
+                    }
+
+                    // ---------------------------------------------------------------
+
+                    if(tag){
+
+                        tag[tag.length] = doc; // tag[tag.length] = id;
+                    }
+
+                    this._doc[id] = doc;
                 }
 
                 return this;
@@ -2353,15 +2426,15 @@
                         for(i = 0; i < length; i++){
 
                             const idx = this.doc.index[keys[i]];
+                            const item = payload[i];
 
-                            idx._map = payload[i][0];
-                            idx._ctx = payload[i][1];
-                            idx._ids = ids;
+                            if(item){
 
-                            // if(import_doc){
-                            //
-                            //     idx._doc = payload[length];
-                            // }
+                                idx._map = item[0];
+                                idx._ctx = item[1];
+                                idx._ids = ids;
+                                // idx._doc = payload[length];
+                            }
                         }
                     }
 

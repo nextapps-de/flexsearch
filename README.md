@@ -1182,7 +1182,7 @@ Returns information e.g.:
 <a name="docs"></a>
 ## Index Documents (Field-Search)
 
-#### The Document Descriptor
+### The Document Descriptor
 
 Assume the document is an array of data like:
 
@@ -1252,7 +1252,7 @@ var index = new FlexSearch({
 });
 ```
 
-#### Complex Objects
+### Complex Objects
 
 Assume the document array looks more complex (has nested branches etc.), e.g.:
 
@@ -1292,7 +1292,7 @@ var index = new FlexSearch({
 
 > __Hint:__ This is an alternative for indexing documents which has nested arrays: <a href="https://github.com/nextapps-de/flexsearch/issues/36">https://github.com/nextapps-de/flexsearch/issues/36</a>
 
-#### Add/Update/Remove Documents to/from the Index
+### Add/Update/Remove Documents to/from the Index
 
 Just pass the document array (or a single object) to the index:
 
@@ -1326,7 +1326,7 @@ When the id is known, you can also simply remove by (faster):
 index.remove(id);
 ```
 
-#### Field-Search
+### Field-Search
 
 The search gives you several options when using documents.
 
@@ -1412,6 +1412,36 @@ var results = index.search([{
 -->
 
 <a href="#options-field-search">See all available field-search options.</a>
+
+### Configure Store
+
+You can define independently which fields should be indexed and which fields should be stored. This way you can index fields which should not be included in the search result.
+
+> When the `store` attribute was set, you have to include all fields which should be stored explicitly (acts like a whitelist).
+
+> When the `store` attribute was not set, the original document is stored as a fallback.
+
+```js
+var index = new FlexSearch({
+    doc: {
+        id: "id",
+        field: "body:content", // index
+        store: "title"         // store
+    }
+});
+```
+
+Also multiple fields:
+
+```js
+var index = new FlexSearch({
+    doc: {
+        id: "id",
+        field: ["title" , "body:content"],
+        store: ["title" , "body:content"]
+    }
+});
+```
 
 <a name="operators"></a>
 ## Logical Operators
@@ -2560,7 +2590,7 @@ feeds_2018.import(localStorage.getItem("feeds_2018"));
 feeds_2019.import(localStorage.getItem("feeds_2019"));
 ```
 
-#### Disable Serialization
+### Disable Serialization
 
 Pass a config flag to control serialization:
 
@@ -2574,7 +2604,7 @@ Use the same config accordingly when importing data:
 index.import(data, {serialize: false});
 ```
 
-#### Separate Exports (Documents)
+### Separate Exports (Documents)
 
 Pass a config flag to separate index and documents from the export:
 
