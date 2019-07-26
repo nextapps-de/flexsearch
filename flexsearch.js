@@ -1584,6 +1584,25 @@
                 limit || (limit === 0 ) || (limit = 1000);
             }
 
+            if(SUPPORT_WORKER && this.worker){
+
+                this._current_callback = callback;
+                this._task_completed = 0;
+                this._task_result = [];
+
+                for(let i = 0; i < this.worker; i++){
+
+                    this._worker[i].postMessage({
+
+                        "search": true,
+                        "limit": limit,
+                        "content": query
+                    });
+                }
+
+                return;
+            }
+
             let result = [];
             let _query = query;
             let threshold;
@@ -1745,25 +1764,6 @@
             }
 
             threshold || (threshold = this.threshold || 0);
-
-            if(SUPPORT_WORKER && this.worker){
-
-                this._current_callback = callback;
-                this._task_completed = 0;
-                this._task_result = [];
-
-                for(let i = 0; i < this.worker; i++){
-
-                    this._worker[i].postMessage({
-
-                        "search": true,
-                        "limit": limit,
-                        "content": _query
-                    });
-                }
-
-                return;
-            }
 
             if(!_recall){
 

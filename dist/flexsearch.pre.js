@@ -567,7 +567,7 @@
             f = f.split(":");
             let u, q;
             for (l = 0; l < f.length; l++) {
-              h = f[l], q = (q || b)[h], u = (u || a)[h] = q;
+              h = f[l], u = (u || b)[h], q = (q || a)[h] = u;
             }
           }
         }
