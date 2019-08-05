@@ -68,7 +68,7 @@
     "chai": "^4.2.0",
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.0.5",
-    "google-closure-compiler": "^20190723.0.0-nightly",
+    "google-closure-compiler": "^20190729.0.0",
     "mocha": "^6.2.0",
     "mocha-lcov-reporter": "^1.3.0",
     "mocha-phantomjs": "^4.1.0",
