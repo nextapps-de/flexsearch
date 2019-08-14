@@ -9,7 +9,7 @@ declare module "flexsearch" {
     init(options: CreateOptions);
     info();
     add(o: T);
-    add(id: number, o: T);
+    add(id: number, o: string);
 
     // Result without pagination -> T[]
     search(query: string, options: number | SearchOptions, callback: (results: T[]) => void): void;
@@ -52,6 +52,11 @@ declare module "flexsearch" {
     result: T[]
   }
 
+  interface Document {
+      id: string;
+      field: any;
+  }
+
 
   export type CreateOptions = {
     profile?: IndexProfile;
@@ -67,6 +72,7 @@ declare module "flexsearch" {
     stemmer?: Stemmer | string | false;
     filter?: FilterFn | string | false;
     rtl?: boolean;
+    doc?: Document;
   };
 
 //   limit	number	Sets the limit of results.
