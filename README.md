@@ -10,6 +10,29 @@
     <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 </p>
 
+<h2></h2>
+
+#### Announcement v0.7.0
+
+The next few days the release of the new version will be available in the branch "0.7.0" for one month (or more when needed) before it goes to the master branch. It would be really helpful when you can test the integration of the upcoming version in your existing projects during this time and give me back some feedback.
+
+These are the basic changes:
+- sources transformed to native ES6 modules
+- added middleware layer to support plugins
+- support for hooks/trigger
+- complete separation of language specific logic (that was the biggest issue)
+- new language handler (language packs)
+- new core consists of a "Document Model" and an "Index Model" (that is the biggest improvement)
+- implementation of "tags" rewritten
+- production ready native ES6 modules (within "dist/module/")
+- new bundler, better customization
+- improved performance
+- smaller filesize
+- dropped the compact version
+- WebWorker isn't available but will come back at next
+
+In the meanwhile take a look on my new project <a href="https://github.com/nextapps-de/mikado">Mikado</a> which is the webs fastest template library for building user interfaces. I would love to see if you could support it.
+
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
