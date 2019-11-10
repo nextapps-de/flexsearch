@@ -3,16 +3,33 @@
 <head>
     <meta charset="utf-8">
     <title>Tests</title>
-    <link rel="stylesheet" media="all" href="../node_modules/mocha/mocha.css">
+    <link rel="stylesheet" media="all" href="node_modules/mocha/mocha.css">
+    <style>
+        body{
+            background-color: #151515;
+            filter: invert(1);
+        }
+    </style>
 </head>
 <body>
     <div id="mocha"><p><a href=".">Index</a></p></div>
     <div id="messages"></div>
     <div id="fixtures"></div>
-    <script src="../node_modules/mocha/mocha.js"></script>
-    <script src="../node_modules/chai/chai.js"></script>
+    <script>
+        var param = window.location.search.substr(1);
+        if(param === "coverage"){
+            document.write('<script type="text/javascript" src="dist/dist/flexsearch.pre.js"><\/script>');
+        }
+        else if(param === "es5" || param === "light" || param === "min"){
+            document.write('<script type="text/javascript" src="../dist/flexsearch.' + param + '.js"><\/script>');
+        }
+        else{
+            document.write('<script type="text/javascript" src="dist/flexsearch.pre.js"><\/script>');
+        }
+    </script>
+    <script src="node_modules/mocha/mocha.js"></script>
+    <script src="node_modules/chai/chai.js"></script>
     <!--<script src="../node_modules/mocha-phantomjs-core/browser-shim.js"></script>-->
-    <script src="../dist/flexsearch.es5.js"></script>
     <script>
         window.initMochaPhantomJS && initMochaPhantomJS();
         mocha.ui('bdd');

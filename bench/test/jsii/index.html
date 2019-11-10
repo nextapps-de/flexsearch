@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark</title>
+</head>
+<body>
+<h2>Benchmark: jsii</h2><hr/>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/BitSet.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/JSii.js"></script>
+<script type="module">
+
+    import { suite } from "./../../bench.js";
+
+    let lib;
+
+    suite["jsii"] = {
+
+        init: function(){
+
+            lib = new JSii();
+        },
+        add: function(data){
+
+            const payload = [];
+
+            for(let i = 0; i < data.length; i++){
+                payload[i] = {id: i, text: data[i]};
+            }
+
+            lib.feedDocs(payload);
+        },
+        query: function(query){
+
+            return lib.search(query).docs;
+        }
+    };
+
+</script>
+</body>
+</html>

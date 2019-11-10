@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "server": "node server.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "web-servo": "^0.5.1"
+  }
+}

@@ -6,7 +6,6 @@ perf
 node_modules
 server
 !*.keep
-src
 tmp
 log
 issue

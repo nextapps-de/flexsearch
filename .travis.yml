@@ -1,3 +1,3 @@
 language: node_js
 node_js: stable
-after_success: npm run coverage
+after_success: cd test && npm run coverage
