@@ -1,0 +1,106 @@
+<html lang="en">
+<head>
+    <title>Benchmark of Web Templating Engines (Non-Keyed)</title>
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: 300;
+            line-height: 26px;
+            font-size: 100%;
+            background-color: #222;
+            color: #bbb;
+        }
+        h1{
+            padding-top: 10px;
+        }
+        input, select{
+            padding: 5px 10px;
+        }
+        #benchmarks td{
+            text-align: right;
+        }
+        #benchmarks td:first-of-type{
+            text-align: left;
+        }
+        body.modes #benchmarks th:nth-last-child(1),
+        body.modes #benchmarks td:nth-last-child(1),
+        body.modes #benchmarks th:nth-last-child(2),
+        body.modes #benchmarks td:nth-last-child(2){
+            display:none;
+        }
+    </style>
+</head>
+<body>
+<h1>Benchmark of Full-Text-Search Libraries (Stress Test)</h1>
+<table>
+    <tr>
+        <td>
+            <input type="button" id="start" click="start" value="Start">
+        </td>
+        <td>&emsp;</td>
+        <td>
+            Mode:
+            <select id="mode" change="mode">
+                <option value>Simple</option>
+                <option disabled>Advanced</option>
+            </select>
+        </td>
+        <td>&emsp;</td>
+        <td>
+            Duration:
+            <select id="duration">
+                <option value="0.1">100 ms</option>
+                <option value="0.5">500 ms</option>
+                <option value="1">1 sec</option>
+                <option value="3">3 sec</option>
+                <option value="5" selected>5 sec</option>
+                <option value="10">10 sec</option>
+                <option value="30">30 sec</option>
+            </select>
+        </td>
+        <td>&emsp;</td>
+        <td>
+            Repeat:
+            <select id="repeat">
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </td>
+        <td>&emsp;</td>
+        <td>
+            <input type="checkbox" id="keep" checked> keep best run
+        </td>
+    </tr>
+</table>
+<hr>
+<table id="benchmarks" cellpadding="5" cellspacing="5">
+    <thead>
+    <tr>
+        <th>Library</th>
+        <th>Size</th>
+        <th>Memory</th>
+        <th>Query (Single Term)</th>
+        <th>Query (Multi Term)</th>
+        <th>Query (Not Found)</th>
+        <th>Index</th>
+        <th>Score</th>
+    </tr>
+    </thead>
+    <tbody id="result"></tbody>
+</table>
+<br>
+To measure memory you have to run in Chrome browser.<br><br>
+<b>Single Tests:</b>
+<ul id="lib"></ul>
+<iframe id="iframe" hidden></iframe>
+<script src="dist/mikado.min.js"></script>
+<script src="tpl/row.js"></script>
+<script src="tpl/lib.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
