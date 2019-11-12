@@ -1,88 +1,102 @@
-// https://www.rosettacode.org/wiki/Soundex
+import FlexSearch from "../../flexsearch.js";
 
-import { regex, replace } from "../../common.js";
+export const rtl = false;
+export const tokenize = "strict";
+export default {
+    encode: encode,
+    rtl: rtl,
+    tokenize: tokenize
+}
 
-const regex_whitespace = regex("[\\W_]+"),
-    regex_strip = regex("[^A-Z0-9 ]");
+const regex_whitespace = /[\W_]+/g;
+const regex_strip = /[^a-z ]/g;
 
 const pairs = [
     regex_whitespace, " ",
     regex_strip, ""
 ];
 
-export default function(str){
+/**
+ * @this FlexSearch
+ */
 
-    if(!str){
+export function encode(str){
 
-        return str;
-    }
+    str = this.pipeline(
 
-    str = replace(str.toUpperCase(), pairs);
+        /* string: */ str.toLowerCase(),
+        /* normalize: */ pairs,
+        /* split: */ false,
+        /* collapse: */ false
+    );
 
-    if(!str){
+    const result = [];
 
-        return str;
-    }
+    if(str){
 
-    const words = str.split(" ");
+        const words = str.split(" ");
+        const length = words.length;
 
-    for(let x = 0; x < words.length; x++){
+        for(let x = 0, count = 0; x < length; x++){
 
-        if((str = words[x])){
+            if((str = words[x]) && (!this.filter || !this.filter[str])){
 
-            let code = str[0];
-            let previous = getCode(code);
+                let code = str[0];
+                let previous = getCode(code);
 
-            for(let i = 1; i < str.length; i++){
+                for(let i = 1; i < str.length; i++){
 
-                const current = getCode(str[i]);
+                    const current = getCode(str[i]);
 
-                if(current !== previous){
+                    if(current !== previous){
 
-                    code += current;
-                    previous = current;
+                        code += current;
+                        previous = current;
 
-                    if(code.length === 4){
+                        if(code.length === 4){
 
-                        break;
+                            break;
+                        }
                     }
                 }
-            }
 
-            words[x] = (code + "0000").substring(0, 4);
+                result[count++] = (code + "0000").substring(0, 4);
+            }
         }
     }
 
-    return words;
+    return result;
 }
+
+// https://www.rosettacode.org/wiki/Soundex
 
 function getCode(char){
 
     switch(char){
 
-        case 'B':
-        case 'F':
-        case 'P':
-        case 'V':
+        case 'b':
+        case 'f':
+        case 'p':
+        case 'v':
             return 1;
-        case 'C':
-        case 'G':
-        case 'J':
-        case 'K':
-        case 'Q':
-        case 'S':
-        case 'X':
-        case 'Z':
+        case 'c':
+        case 'g':
+        case 'j':
+        case 'k':
+        case 'q':
+        case 's':
+        case 'x':
+        case 'z':
             return 2;
-        case 'D':
-        case 'T':
+        case 'd':
+        case 't':
             return 3;
-        case 'L':
+        case 'l':
             return 4;
-        case 'M':
-        case 'N':
+        case 'm':
+        case 'n':
             return 5;
-        case 'R':
+        case 'r':
             return 6;
     }
 

@@ -1,5 +1,13 @@
+import FlexSearch from "../../flexsearch.js";
 import { regex, replace, collapse } from "../../common.js";
-import encoder_simple from "./simple.js";
+import { encode as encode_simple } from "./simple.js";
+
+export const rtl = false;
+export const tokenize = "";
+export default {
+    encode: encode,
+    rtl: rtl
+}
 
 // Phonetic Normalization
 
@@ -43,30 +51,30 @@ const pairs = [
     regex_uo, "u"
 ];
 
-export default function(string, _skip_post_processing){
+export function encode(str, _skip_postprocessing){
 
-    if(!string){
+    if(str){
 
-        return string;
-    }
+        str = encode_simple(str, /** @type {FlexSearch} */ (this)).join(" ");
 
-    // perform simple encoding
-    string = encoder_simple(string);
+        if(str.length > 2){
 
-    // normalize special pairs
-    if(string.length > 2){
+            str = replace(str, pairs);
+        }
 
-        string = replace(string, pairs);
-    }
+        if(!_skip_postprocessing){
 
-    if(!_skip_post_processing){
+            if(str.length > 1){
 
-        // delete all repeating chars
-        if(string.length > 1){
+                str = collapse(str);
+            }
 
-            string = collapse(string);
+            if(str){
+
+                str = str.split(" ");
+            }
         }
     }
 
-    return string;
+    return str;
 }

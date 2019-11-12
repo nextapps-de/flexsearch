@@ -1,4 +1,4 @@
-if(USE_POLYFILL){
+if(POLYFILL){
 
     Object.assign || (Object.assign = function(){
 

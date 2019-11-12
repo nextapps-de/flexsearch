@@ -12,7 +12,7 @@
 
 <h2></h2>
 
-### Preview v0.7.0
+### Preview v0.7.0-rev2
 
 A preview of the new version is available in the branch "0.7.0" for one month (or more when needed) before it goes to the master branch. It would be really helpful when you can test the integration of the upcoming version in your existing projects during this time and give me some feedback.
 
@@ -31,6 +31,13 @@ There are actually some big issue with migrating the feature branches, so I will
 - [x] complete separation of language specific logic (that was the biggest issue)
 - [x] new language handler
 - [x] language packs consists of a charset model (encoder, split) and a language model (stemmer, stopwords)
+
+##### Release Group A / B (rev2)
+- [x] support super-customizable encoder pipelines by inversion of control
+- [x] provide a customizable generic pipeline as default
+- [x] all advanced encoders gets a huge performance boost
+- [x] combine regexp (matcher, stemmer) greatly improves performance
+- [x] support high performance soundex encoding (latin:soundex)
 
 ##### Release Group C (unreleased)
 - [ ] new core consists of a "Document Model" and an "Index Model" (that is the biggest improvement)

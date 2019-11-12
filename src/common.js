@@ -1,3 +1,5 @@
+import FlexSearch from "./flexsearch.js";
+
 /**
  * @param {*} val
  * @returns {boolean}
@@ -60,7 +62,7 @@ export function get_keys(obj){
 
 /**
  * https://jsperf.com/comparison-object-index-type
- * @param {number} count
+ * @param {!number} count
  * @returns {Object|Array<Object>}
  */
 
@@ -83,25 +85,23 @@ export function create_object(){
 
 /**
  * @param {!string} str
- * @param {RegExp|Array} regexp
+ * @param {Array} regexp
  * @returns {string}
  */
 
-export function replace(str, regexp/*, replacement*/){
+export function replace(str, regexp){
 
-    //if(is_undefined(replacement)){
-
-    for(let i = 0, len = /** @type {Array} */ (regexp).length; i < len; i += 2){
+    for(let i = 0, len = regexp.length; i < len; i += 2){
 
         str = str.replace(regexp[i], regexp[i + 1]);
+
+        if(!str){
+
+            break;
+        }
     }
 
     return str;
-    // }
-    // else{
-    //
-    //     return str.replace(/** @type {!RegExp} */ (regex), replacement || "");
-    // }
 }
 
 /**
@@ -134,6 +134,112 @@ export function collapse(string){
 
     return final;
 }
+
+// TODO using fast-swap
+export function filter(words, map){
+
+    const length = words.length;
+    const filtered = [];
+
+    for(let i = 0, count = 0; i < length; i++){
+
+        const word = words[i];
+
+        if(word && !map[word]){
+
+            filtered[count++] = word;
+        }
+    }
+
+    return filtered;
+}
+
+/**
+ * @param {!string} str
+ * @param {boolean|Array<string|RegExp>=} normalize
+ * @param {boolean|string|RegExp=} split
+ * @param {boolean=} _collapse
+ * @returns {string|Array<string>}
+ */
+
+FlexSearch.prototype.pipeline = function(str, normalize, split, _collapse){
+
+    if(str){
+
+        if(normalize && str){
+
+            str = replace(str, /** @type {Array<string|RegExp>} */ (normalize));
+        }
+
+        if(str && this.matcher){
+
+            str = replace(str, this.matcher);
+        }
+
+        if(this.stemmer && str.length > 1){
+
+            str = replace(str, this.stemmer);
+        }
+
+        if(_collapse && str.length > 1){
+
+            str = collapse(str);
+        }
+
+        if(str){
+
+            if(split || (split === "")){
+
+                const words = str.split(/** @type {string|RegExp} */ (split));
+
+                return this.filter ? filter(words, this.filter) : words;
+            }
+        }
+    }
+
+    return str;
+};
+
+// export function pipeline(str, normalize, matcher, stemmer, split, _filter, _collapse){
+//
+//     if(str){
+//
+//         if(normalize && str){
+//
+//             str = replace(str, normalize);
+//         }
+//
+//         if(matcher && str){
+//
+//             str = replace(str, matcher);
+//         }
+//
+//         if(stemmer && str.length > 1){
+//
+//             str = replace(str, stemmer);
+//         }
+//
+//         if(_collapse && str.length > 1){
+//
+//             str = collapse(str);
+//         }
+//
+//         if(str){
+//
+//             if(split !== false){
+//
+//                 str = str.split(split);
+//
+//                 if(_filter){
+//
+//                     str = filter(str, _filter);
+//                 }
+//             }
+//         }
+//     }
+//
+//     return str;
+// }
 
 // const chars = {a:1, e:1, i:1, o:1, u:1, y:1};
 //

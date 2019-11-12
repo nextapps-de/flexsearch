@@ -9,8 +9,10 @@
 var RELEASE = "browser";
 var DEBUG = true;
 var PROFILER = false;
+var POLYFILL = true;
 var SUPPORT_WORKER = true;
 var SUPPORT_ENCODER = true;
+var SUPPORT_LANG = true;
 var SUPPORT_CACHE = true;
 var SUPPORT_ASYNC = true;
 var SUPPORT_PRESET = true;
@@ -22,8 +24,7 @@ var SUPPORT_WHERE = true;
 var SUPPORT_PAGINATION = true;
 var SUPPORT_OPERATOR = true;
 var SUPPORT_CALLBACK = true;
-var USE_POLYFILL = true;
-if (USE_POLYFILL) {
+if (POLYFILL) {
   Object.assign || (Object.assign = function() {
     var args = arguments;
     var size = args.length;
@@ -91,6 +92,9 @@ function create_object$$module$src$common() {
 function replace$$module$src$common(str, regexp) {
   for (var i = 0, len = regexp.length; i < len; i += 2) {
     str = str.replace(regexp[i], regexp[i + 1]);
+    if (!str) {
+      break;
+    }
   }
   return str;
 }
@@ -107,10 +111,45 @@ function collapse$$module$src$common(string) {
   }
   return final;
 }
+function filter$$module$src$common(words, map) {
+  var length = words.length;
+  var filtered = [];
+  for (var i = 0, count = 0; i < length; i++) {
+    var word = words[i];
+    if (word && !map[word]) {
+      filtered[count++] = word;
+    }
+  }
+  return filtered;
+}
+FlexSearch$$module$src$flexsearch.prototype.pipeline = function(str, normalize, split, _collapse) {
+  if (str) {
+    if (normalize && str) {
+      str = replace$$module$src$common(str, normalize);
+    }
+    if (str && this.matcher) {
+      str = replace$$module$src$common(str, this.matcher);
+    }
+    if (this.stemmer && str.length > 1) {
+      str = replace$$module$src$common(str, this.stemmer);
+    }
+    if (_collapse && str.length > 1) {
+      str = collapse$$module$src$common(str);
+    }
+    if (str) {
+      if (split || split === "") {
+        var words = str.split(split);
+        return this.filter ? filter$$module$src$common(words, this.filter) : words;
+      }
+    }
+  }
+  return str;
+};
 var module$src$common = {};
 module$src$common.collapse = collapse$$module$src$common;
 module$src$common.create_object = create_object$$module$src$common;
 module$src$common.create_object_array = create_object_array$$module$src$common;
+module$src$common.filter = filter$$module$src$common;
 module$src$common.get_keys = get_keys$$module$src$common;
 module$src$common.is_array = is_array$$module$src$common;
 module$src$common.is_function = is_function$$module$src$common;
@@ -444,124 +483,22 @@ var $jscompDefaultExport$$module$src$presets = {"memory":{encode:SUPPORT_ENCODER
 threshold:0, resolution:3, depth:3}, "fast":{encode:"icase", tokenize:"strict", threshold:8, resolution:9, depth:1}};
 var module$src$presets = {};
 module$src$presets.default = $jscompDefaultExport$$module$src$presets;
-var regex_whitespace$$module$src$lang$latin$simple = regex$$module$src$common("[\\W_]+");
-var regex_strip$$module$src$lang$latin$simple = regex$$module$src$common("[^a-z0-9 ]");
-var regex_a$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]");
-var regex_e$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e8\u00e9\u00ea\u00eb]");
-var regex_i$$module$src$lang$latin$simple = regex$$module$src$common("[\u00ec\u00ed\u00ee\u00ef]");
-var regex_o$$module$src$lang$latin$simple = regex$$module$src$common("[\u00f2\u00f3\u00f4\u00f5\u00f6\u0151]");
-var regex_u$$module$src$lang$latin$simple = regex$$module$src$common("[\u00f9\u00fa\u00fb\u00fc\u0171]");
-var regex_y$$module$src$lang$latin$simple = regex$$module$src$common("[\u00fd\u0177\u00ff]");
-var regex_n$$module$src$lang$latin$simple = regex$$module$src$common("\u00f1");
-var regex_c$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e7c]");
-var regex_s$$module$src$lang$latin$simple = regex$$module$src$common("\u00df");
-var regex_and$$module$src$lang$latin$simple = regex$$module$src$common(" & ");
-var regex_pairs_simple$$module$src$lang$latin$simple = [regex_a$$module$src$lang$latin$simple, "a", regex_e$$module$src$lang$latin$simple, "e", regex_i$$module$src$lang$latin$simple, "i", regex_o$$module$src$lang$latin$simple, "o", regex_u$$module$src$lang$latin$simple, "u", regex_y$$module$src$lang$latin$simple, "y", regex_n$$module$src$lang$latin$simple, "n", regex_c$$module$src$lang$latin$simple, "k", regex_s$$module$src$lang$latin$simple, "s", regex_and$$module$src$lang$latin$simple, " and ", 
-regex_whitespace$$module$src$lang$latin$simple, " ", regex_strip$$module$src$lang$latin$simple, ""];
-var $jscompDefaultExport$$module$src$lang$latin$simple = function(str) {
-  if (!str) {
-    return str;
-  }
-  return replace$$module$src$common(str.toLowerCase(), regex_pairs_simple$$module$src$lang$latin$simple);
-};
-var module$src$lang$latin$simple = {};
-module$src$lang$latin$simple.default = $jscompDefaultExport$$module$src$lang$latin$simple;
-var regex_ae$$module$src$lang$latin$advanced = regex$$module$src$common("ae");
-var regex_ai$$module$src$lang$latin$advanced = regex$$module$src$common("ai");
-var regex_ay$$module$src$lang$latin$advanced = regex$$module$src$common("ay");
-var regex_ey$$module$src$lang$latin$advanced = regex$$module$src$common("ey");
-var regex_oe$$module$src$lang$latin$advanced = regex$$module$src$common("oe");
-var regex_ue$$module$src$lang$latin$advanced = regex$$module$src$common("ue");
-var regex_ie$$module$src$lang$latin$advanced = regex$$module$src$common("ie");
-var regex_sz$$module$src$lang$latin$advanced = regex$$module$src$common("sz");
-var regex_zs$$module$src$lang$latin$advanced = regex$$module$src$common("zs");
-var regex_ck$$module$src$lang$latin$advanced = regex$$module$src$common("ck");
-var regex_cc$$module$src$lang$latin$advanced = regex$$module$src$common("cc");
-var regex_sh$$module$src$lang$latin$advanced = regex$$module$src$common("sh");
-var regex_th$$module$src$lang$latin$advanced = regex$$module$src$common("th");
-var regex_dt$$module$src$lang$latin$advanced = regex$$module$src$common("dt");
-var regex_ph$$module$src$lang$latin$advanced = regex$$module$src$common("ph");
-var regex_pf$$module$src$lang$latin$advanced = regex$$module$src$common("pf");
-var regex_ou$$module$src$lang$latin$advanced = regex$$module$src$common("ou");
-var regex_uo$$module$src$lang$latin$advanced = regex$$module$src$common("uo");
-var pairs$$module$src$lang$latin$advanced = [regex_ae$$module$src$lang$latin$advanced, "a", regex_ai$$module$src$lang$latin$advanced, "ei", regex_ay$$module$src$lang$latin$advanced, "ei", regex_ey$$module$src$lang$latin$advanced, "ei", regex_oe$$module$src$lang$latin$advanced, "o", regex_ue$$module$src$lang$latin$advanced, "u", regex_ie$$module$src$lang$latin$advanced, "i", regex_sz$$module$src$lang$latin$advanced, "s", regex_zs$$module$src$lang$latin$advanced, "s", regex_sh$$module$src$lang$latin$advanced, 
-"s", regex_ck$$module$src$lang$latin$advanced, "k", regex_cc$$module$src$lang$latin$advanced, "k", regex_th$$module$src$lang$latin$advanced, "t", regex_dt$$module$src$lang$latin$advanced, "t", regex_ph$$module$src$lang$latin$advanced, "f", regex_pf$$module$src$lang$latin$advanced, "f", regex_ou$$module$src$lang$latin$advanced, "o", regex_uo$$module$src$lang$latin$advanced, "u"];
-var $jscompDefaultExport$$module$src$lang$latin$advanced = function(string, _skip_post_processing) {
-  if (!string) {
-    return string;
-  }
-  string = $jscompDefaultExport$$module$src$lang$latin$simple(string);
-  if (string.length > 2) {
-    string = replace$$module$src$common(string, pairs$$module$src$lang$latin$advanced);
-  }
-  if (!_skip_post_processing) {
-    if (string.length > 1) {
-      string = collapse$$module$src$common(string);
-    }
-  }
-  return string;
-};
-var module$src$lang$latin$advanced = {};
-module$src$lang$latin$advanced.default = $jscompDefaultExport$$module$src$lang$latin$advanced;
-var regex_whitespace$$module$src$lang$latin$balance = regex$$module$src$common("[\\W_]+");
-var regex_strip$$module$src$lang$latin$balance = regex$$module$src$common("[^a-z0-9 ]");
-var pairs$$module$src$lang$latin$balance = [regex_whitespace$$module$src$lang$latin$balance, " ", regex_strip$$module$src$lang$latin$balance, ""];
-var $jscompDefaultExport$$module$src$lang$latin$balance = function(str) {
-  if (!str) {
-    return str;
-  }
-  return collapse$$module$src$common(replace$$module$src$common(str.toLowerCase(), pairs$$module$src$lang$latin$balance));
-};
-var module$src$lang$latin$balance = {};
-module$src$lang$latin$balance.default = $jscompDefaultExport$$module$src$lang$latin$balance;
-var soundex_b$$module$src$lang$latin$extra = regex$$module$src$common("p");
-var soundex_s$$module$src$lang$latin$extra = regex$$module$src$common("z");
-var soundex_k$$module$src$lang$latin$extra = regex$$module$src$common("[cgq]");
-var soundex_m$$module$src$lang$latin$extra = regex$$module$src$common("n");
-var soundex_t$$module$src$lang$latin$extra = regex$$module$src$common("d");
-var soundex_f$$module$src$lang$latin$extra = regex$$module$src$common("[vw]");
-var regex_vowel$$module$src$lang$latin$extra = regex$$module$src$common("[aeiouy]");
-var regex_pairs_extra$$module$src$lang$latin$extra = [soundex_b$$module$src$lang$latin$extra, "b", soundex_s$$module$src$lang$latin$extra, "s", soundex_k$$module$src$lang$latin$extra, "k", soundex_m$$module$src$lang$latin$extra, "m", soundex_t$$module$src$lang$latin$extra, "t", soundex_f$$module$src$lang$latin$extra, "f", regex_vowel$$module$src$lang$latin$extra, ""];
-var $jscompDefaultExport$$module$src$lang$latin$extra = function(str) {
-  if (!str) {
-    return str;
-  }
-  str = $jscompDefaultExport$$module$src$lang$latin$advanced(str, true);
-  if (str.length > 1) {
-    str = str.split(" ");
-    for (var i = 0; i < str.length; i++) {
-      var current = str[i];
-      if (current.length > 1) {
-        str[i] = current[0] + replace$$module$src$common(current.substring(1), regex_pairs_extra$$module$src$lang$latin$extra);
-      }
-    }
-    str = str.join(" ");
-    str = collapse$$module$src$common(str);
-  }
-  return str;
-};
-var module$src$lang$latin$extra = {};
-module$src$lang$latin$extra.default = $jscompDefaultExport$$module$src$lang$latin$extra;
-function encode$$module$src$lang$latin$index(str) {
-  return str.toLowerCase();
+var rtl$$module$src$lang$latin$default = false;
+var tokenize$$module$src$lang$latin$default = "";
+var $jscompDefaultExport$$module$src$lang$latin$default = {encode:encode$$module$src$lang$latin$default, rtl:rtl$$module$src$lang$latin$default};
+var split$$module$src$lang$latin$default = /[\W_]+/;
+function encode$$module$src$lang$latin$default(str) {
+  return this.pipeline(str.toLowerCase(), false, split$$module$src$lang$latin$default, false);
 }
-var split$$module$src$lang$latin$index = /[\W_]+/;
-var rtl$$module$src$lang$latin$index = false;
-var advanced$$module$src$lang$latin$index = $jscompDefaultExport$$module$src$lang$latin$advanced;
-var balance$$module$src$lang$latin$index = $jscompDefaultExport$$module$src$lang$latin$balance;
-var extra$$module$src$lang$latin$index = $jscompDefaultExport$$module$src$lang$latin$extra;
-var simple$$module$src$lang$latin$index = $jscompDefaultExport$$module$src$lang$latin$simple;
-var module$src$lang$latin$index = {};
-module$src$lang$latin$index.advanced = advanced$$module$src$lang$latin$index;
-module$src$lang$latin$index.balance = balance$$module$src$lang$latin$index;
-module$src$lang$latin$index.encode = encode$$module$src$lang$latin$index;
-module$src$lang$latin$index.extra = extra$$module$src$lang$latin$index;
-module$src$lang$latin$index.rtl = rtl$$module$src$lang$latin$index;
-module$src$lang$latin$index.simple = simple$$module$src$lang$latin$index;
-module$src$lang$latin$index.split = split$$module$src$lang$latin$index;
-var defaults$$module$src$flexsearch = {encode:encode$$module$src$lang$latin$index, tokenize:"strict", split:split$$module$src$lang$latin$index, cache:false, async:false, worker:false, rtl:false, doc:false, resolution:9, threshold:0, depth:0};
+var module$src$lang$latin$default = {};
+module$src$lang$latin$default.default = $jscompDefaultExport$$module$src$lang$latin$default;
+module$src$lang$latin$default.encode = encode$$module$src$lang$latin$default;
+module$src$lang$latin$default.rtl = rtl$$module$src$lang$latin$default;
+module$src$lang$latin$default.tokenize = tokenize$$module$src$lang$latin$default;
+var defaults$$module$src$flexsearch = {"encode":encode$$module$src$lang$latin$default, "tokenize":"strict", "cache":false, "async":false, "worker":false, "rtl":false, "doc":false, "resolution":9, "threshold":0, "depth":0};
 var id_counter$$module$src$flexsearch = 0;
 var global_lang$$module$src$flexsearch = {};
+var global_charset$$module$src$flexsearch = {};
 function FlexSearch$$module$src$flexsearch(options) {
   if (!(this instanceof FlexSearch$$module$src$flexsearch)) {
     return new FlexSearch$$module$src$flexsearch(options);
@@ -576,22 +513,15 @@ function FlexSearch$$module$src$flexsearch(options) {
     return this.index.length;
   });
 }
-FlexSearch$$module$src$flexsearch["registerCharset"] = function(name, encoder, split, rtl) {
-  var lang = global_lang$$module$src$flexsearch[name] || (global_lang$$module$src$flexsearch[name] = {});
-  lang.encoder = encoder;
-  lang.split = split;
-  lang.rtl = rtl;
+FlexSearch$$module$src$flexsearch["registerCharset"] = function(name, charset) {
+  global_charset$$module$src$flexsearch[name] = charset;
   return FlexSearch$$module$src$flexsearch;
 };
-FlexSearch$$module$src$flexsearch["registerLanguage"] = function(name, filter, stemmer, matcher) {
-  var lang = global_lang$$module$src$flexsearch[name] || (global_lang$$module$src$flexsearch[name] = {});
-  lang.filter = filter;
-  lang.stemmer = stemmer;
-  lang.matcher = matcher;
+FlexSearch$$module$src$flexsearch["registerLanguage"] = function(name, lang) {
+  global_charset$$module$src$flexsearch[name] = lang;
   return FlexSearch$$module$src$flexsearch;
 };
 FlexSearch$$module$src$flexsearch.prototype.init = function(options) {
-  this.matcher = [];
   var custom;
   var doc;
   if (SUPPORT_PRESET) {
@@ -609,7 +539,7 @@ FlexSearch$$module$src$flexsearch.prototype.init = function(options) {
       }
     }
   }
-  if (!this.encoder) {
+  if (!this.encode) {
     if (options) {
       options = Object.assign({}, defaults$$module$src$flexsearch, options);
     } else {
@@ -634,22 +564,21 @@ FlexSearch$$module$src$flexsearch.prototype.init = function(options) {
       }
       this.worker = custom;
     }
-    var charset = options["charset"];
-    var lang = options["lang"];
-    this.tokenizer = options["tokenize"];
-    this.split = is_string$$module$src$common(custom = charset || options["split"]) ? global_lang$$module$src$flexsearch[custom] ? global_lang$$module$src$flexsearch[custom].split : regex$$module$src$common(custom) : custom;
-    this.rtl = is_string$$module$src$common(custom = charset || options["rtl"]) ? global_lang$$module$src$flexsearch[custom].rtl : custom;
     if (SUPPORT_ASYNC) {
       this.async = options["async"];
-      this._timer = 0;
+      this.timer = 0;
     }
+    var charset = options["charset"];
+    var lang = options["lang"];
+    this.tokenizer = (is_string$$module$src$common(charset) ? global_charset$$module$src$flexsearch[charset].tokenize : charset && charset.tokenize) || options["tokenize"];
+    this.rtl = is_string$$module$src$common(custom = options["rtl"] || charset) ? global_charset$$module$src$flexsearch[custom].rtl : charset && charset.rtl || custom;
     this.threshold = options["threshold"];
     this.resolution = (custom = options["resolution"]) <= this.threshold ? this.threshold + 1 : custom;
     this.depth = this.tokenizer === "strict" && options["depth"] || 0;
-    this.encoder = is_string$$module$src$common(custom = charset || options["encode"]) ? global_lang$$module$src$flexsearch[custom.indexOf(":") === -1 ? custom + ":default" : custom].encode : custom;
-    this.matcher = (custom = lang || options["matcher"]) && init_matcher$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].matcher : custom);
-    this.filter = (custom = lang || options["filter"]) && init_filter$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].filter : custom);
-    this.stemmer = (custom = lang || options["stemmer"]) && init_stemmer$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].stemmer : custom);
+    this.encode = is_string$$module$src$common(custom = options["encode"] || charset) ? global_charset$$module$src$flexsearch[custom.indexOf(":") === -1 ? custom + ":default" : custom].encode : charset && charset.encode || custom;
+    this.matcher = (custom = options["matcher"] || lang) && init_stemmer_or_matcher$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].matcher : lang && lang.matcher || custom, false);
+    this.filter = (custom = options["filter"] || lang) && init_filter$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].filter : lang && lang.filter || custom);
+    this.stemmer = (custom = options["stemmer"] || lang) && init_stemmer_or_matcher$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].stemmer : lang && lang.stemmer || custom, true);
     if (SUPPORT_DOCUMENT) {
       this.doc = doc = (custom = options["doc"]) && clone_object$$module$src$flexsearch(custom);
       if (doc) {
@@ -761,17 +690,6 @@ function clone_object$$module$src$flexsearch(obj) {
   }
   return clone;
 }
-function init_matcher$$module$src$flexsearch(custom) {
-  var keys = get_keys$$module$src$common(custom);
-  var length = keys.length;
-  var matcher = new Array(length * 2);
-  for (var i = 0, count = 0; i < length; i++) {
-    var key = keys[i];
-    matcher[count++] = regex$$module$src$common(key);
-    matcher[count++] = custom[key];
-  }
-  return matcher;
-}
 FlexSearch$$module$src$flexsearch.prototype.add = function(id, content, callback, _skip_update, _recall) {
   if (SUPPORT_DOCUMENT && this.doc && is_object$$module$src$common(id)) {
     return this.handle_docs("add", id, content);
@@ -808,7 +726,7 @@ FlexSearch$$module$src$flexsearch.prototype.add = function(id, content, callback
     if (!content.length) {
       return this;
     }
-    var words = this.tokenize(content);
+    var words = content;
     var dupes = create_object$$module$src$common();
     dupes["_ctx"] = create_object$$module$src$common();
     var word_length = words.length;
@@ -1199,7 +1117,7 @@ FlexSearch$$module$src$flexsearch.prototype.search = function(query, limit, call
   if (!_query.length) {
     return result;
   }
-  var words = this.tokenize(_query);
+  var words = _query;
   var length = words.length;
   var found = true;
   var check = [];
@@ -1343,55 +1261,31 @@ function remove_index$$module$src$flexsearch(map, id) {
     }
   }
 }
-FlexSearch$$module$src$flexsearch.prototype.encode = function(value) {
-  if (value && this.encoder) {
-    value = this.encoder(value);
-  }
-  if (value && this.matcher.length) {
-    value = replace$$module$src$common(value, this.matcher);
-  }
-  if (value && this.stemmer) {
-    value = replace$$module$src$common(value, this.stemmer);
-  }
-  return value;
-};
-FlexSearch$$module$src$flexsearch.prototype.tokenize = function(content) {
-  var words = is_array$$module$src$common(content) ? content : is_function$$module$src$common(this.tokenizer) ? this.tokenizer(content) : content.split(this.split);
-  if (this.filter) {
-    words = filter_words$$module$src$flexsearch(words, this.filter);
-  }
-  return words;
-};
-function filter_words$$module$src$flexsearch(words, fn_or_map) {
-  var length = words.length;
-  var has_function = is_function$$module$src$common(fn_or_map);
-  var filtered = [];
-  for (var i = 0, count = 0; i < length; i++) {
-    var word = words[i];
-    if (word) {
-      if (has_function && fn_or_map(word) || !has_function && !fn_or_map[word]) {
-        filtered[count++] = word;
-      }
-    }
-  }
-  return filtered;
-}
 function init_filter$$module$src$flexsearch(words) {
   var final = create_object$$module$src$common();
-  for (var i = 0; i < words.length; i++) {
-    var word = words[i];
-    final[word] = 1;
+  for (var i = 0, length = words.length; i < length; i++) {
+    final[words[i]] = 1;
   }
   return final;
 }
-function init_stemmer$$module$src$flexsearch(stem) {
-  var keys = Object.keys(stem);
+function init_stemmer_or_matcher$$module$src$flexsearch(obj, is_stemmer) {
+  var keys = get_keys$$module$src$common(obj);
   var length = keys.length;
-  var final = new Array(length * 2);
-  for (var i = 0, count = 0; i < length; i++) {
+  var final = [];
+  var removal = "";
+  var count = 0;
+  for (var i = 0, tmp = undefined; i < length; i++) {
     var key = keys[i];
-    final[count++] = regex$$module$src$common(key + "(?!\\b)" + key + "(\\b)");
-    final[count++] = stem[key];
+    if (tmp = obj[key]) {
+      final[count++] = regex$$module$src$common(is_stemmer ? "(?!\\b)" + key + "(\\b)" : key);
+      final[count++] = tmp;
+    } else {
+      removal += (removal ? "|" : "") + key;
+    }
+  }
+  if (removal) {
+    final[count++] = regex$$module$src$common(is_stemmer ? "(?!\\b)(" + removal + ")(\\b)" : "(" + removal + ")");
+    final[count] = "";
   }
   return final;
 }
@@ -1628,6 +1522,275 @@ function intersect$$module$src$flexsearch(arrays, limit, cursor, suggest, bool, 
 }
 var module$src$flexsearch = {};
 module$src$flexsearch.default = FlexSearch$$module$src$flexsearch;
+module$src$flexsearch.global_charset = global_charset$$module$src$flexsearch;
+module$src$flexsearch.global_lang = global_lang$$module$src$flexsearch;
+var rtl$$module$src$lang$latin$simple = false;
+var tokenize$$module$src$lang$latin$simple = "";
+var $jscompDefaultExport$$module$src$lang$latin$simple = {encode:encode$$module$src$lang$latin$simple, rtl:rtl$$module$src$lang$latin$simple};
+var regex_whitespace$$module$src$lang$latin$simple = regex$$module$src$common("[\\W_]+");
+var regex_strip$$module$src$lang$latin$simple = regex$$module$src$common("[^a-z0-9 ]");
+var regex_a$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]");
+var regex_e$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e8\u00e9\u00ea\u00eb]");
+var regex_i$$module$src$lang$latin$simple = regex$$module$src$common("[\u00ec\u00ed\u00ee\u00ef]");
+var regex_o$$module$src$lang$latin$simple = regex$$module$src$common("[\u00f2\u00f3\u00f4\u00f5\u00f6\u0151]");
+var regex_u$$module$src$lang$latin$simple = regex$$module$src$common("[\u00f9\u00fa\u00fb\u00fc\u0171]");
+var regex_y$$module$src$lang$latin$simple = regex$$module$src$common("[\u00fd\u0177\u00ff]");
+var regex_n$$module$src$lang$latin$simple = regex$$module$src$common("\u00f1");
+var regex_c$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e7c]");
+var regex_s$$module$src$lang$latin$simple = regex$$module$src$common("\u00df");
+var regex_and$$module$src$lang$latin$simple = regex$$module$src$common(" & ");
+var pairs$$module$src$lang$latin$simple = [regex_a$$module$src$lang$latin$simple, "a", regex_e$$module$src$lang$latin$simple, "e", regex_i$$module$src$lang$latin$simple, "i", regex_o$$module$src$lang$latin$simple, "o", regex_u$$module$src$lang$latin$simple, "u", regex_y$$module$src$lang$latin$simple, "y", regex_n$$module$src$lang$latin$simple, "n", regex_c$$module$src$lang$latin$simple, "k", regex_s$$module$src$lang$latin$simple, "s", regex_and$$module$src$lang$latin$simple, " and ", regex_whitespace$$module$src$lang$latin$simple, 
+" ", regex_strip$$module$src$lang$latin$simple, ""];
+function encode$$module$src$lang$latin$simple(str, self) {
+  self || (self = this);
+  return self.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$simple, " ", false);
+}
+var module$src$lang$latin$simple = {};
+module$src$lang$latin$simple.default = $jscompDefaultExport$$module$src$lang$latin$simple;
+module$src$lang$latin$simple.encode = encode$$module$src$lang$latin$simple;
+module$src$lang$latin$simple.rtl = rtl$$module$src$lang$latin$simple;
+module$src$lang$latin$simple.tokenize = tokenize$$module$src$lang$latin$simple;
+var rtl$$module$src$lang$latin$advanced = false;
+var tokenize$$module$src$lang$latin$advanced = "";
+var $jscompDefaultExport$$module$src$lang$latin$advanced = {encode:encode$$module$src$lang$latin$advanced, rtl:rtl$$module$src$lang$latin$advanced};
+var regex_ae$$module$src$lang$latin$advanced = regex$$module$src$common("ae");
+var regex_ai$$module$src$lang$latin$advanced = regex$$module$src$common("ai");
+var regex_ay$$module$src$lang$latin$advanced = regex$$module$src$common("ay");
+var regex_ey$$module$src$lang$latin$advanced = regex$$module$src$common("ey");
+var regex_oe$$module$src$lang$latin$advanced = regex$$module$src$common("oe");
+var regex_ue$$module$src$lang$latin$advanced = regex$$module$src$common("ue");
+var regex_ie$$module$src$lang$latin$advanced = regex$$module$src$common("ie");
+var regex_sz$$module$src$lang$latin$advanced = regex$$module$src$common("sz");
+var regex_zs$$module$src$lang$latin$advanced = regex$$module$src$common("zs");
+var regex_ck$$module$src$lang$latin$advanced = regex$$module$src$common("ck");
+var regex_cc$$module$src$lang$latin$advanced = regex$$module$src$common("cc");
+var regex_sh$$module$src$lang$latin$advanced = regex$$module$src$common("sh");
+var regex_th$$module$src$lang$latin$advanced = regex$$module$src$common("th");
+var regex_dt$$module$src$lang$latin$advanced = regex$$module$src$common("dt");
+var regex_ph$$module$src$lang$latin$advanced = regex$$module$src$common("ph");
+var regex_pf$$module$src$lang$latin$advanced = regex$$module$src$common("pf");
+var regex_ou$$module$src$lang$latin$advanced = regex$$module$src$common("ou");
+var regex_uo$$module$src$lang$latin$advanced = regex$$module$src$common("uo");
+var pairs$$module$src$lang$latin$advanced = [regex_ae$$module$src$lang$latin$advanced, "a", regex_ai$$module$src$lang$latin$advanced, "ei", regex_ay$$module$src$lang$latin$advanced, "ei", regex_ey$$module$src$lang$latin$advanced, "ei", regex_oe$$module$src$lang$latin$advanced, "o", regex_ue$$module$src$lang$latin$advanced, "u", regex_ie$$module$src$lang$latin$advanced, "i", regex_sz$$module$src$lang$latin$advanced, "s", regex_zs$$module$src$lang$latin$advanced, "s", regex_sh$$module$src$lang$latin$advanced, 
+"s", regex_ck$$module$src$lang$latin$advanced, "k", regex_cc$$module$src$lang$latin$advanced, "k", regex_th$$module$src$lang$latin$advanced, "t", regex_dt$$module$src$lang$latin$advanced, "t", regex_ph$$module$src$lang$latin$advanced, "f", regex_pf$$module$src$lang$latin$advanced, "f", regex_ou$$module$src$lang$latin$advanced, "o", regex_uo$$module$src$lang$latin$advanced, "u"];
+function encode$$module$src$lang$latin$advanced(str, _skip_postprocessing) {
+  if (str) {
+    str = encode$$module$src$lang$latin$simple(str, this).join(" ");
+    if (str.length > 2) {
+      str = replace$$module$src$common(str, pairs$$module$src$lang$latin$advanced);
+    }
+    if (!_skip_postprocessing) {
+      if (str.length > 1) {
+        str = collapse$$module$src$common(str);
+      }
+      if (str) {
+        str = str.split(" ");
+      }
+    }
+  }
+  return str;
+}
+var module$src$lang$latin$advanced = {};
+module$src$lang$latin$advanced.default = $jscompDefaultExport$$module$src$lang$latin$advanced;
+module$src$lang$latin$advanced.encode = encode$$module$src$lang$latin$advanced;
+module$src$lang$latin$advanced.rtl = rtl$$module$src$lang$latin$advanced;
+module$src$lang$latin$advanced.tokenize = tokenize$$module$src$lang$latin$advanced;
+var rtl$$module$src$lang$latin$balance = false;
+var tokenize$$module$src$lang$latin$balance = "";
+var $jscompDefaultExport$$module$src$lang$latin$balance = {encode:encode$$module$src$lang$latin$balance, rtl:rtl$$module$src$lang$latin$balance};
+var regex_whitespace$$module$src$lang$latin$balance = /[\W_]+/g;
+var regex_strip$$module$src$lang$latin$balance = /[^a-z0-9 ]/g;
+var pairs$$module$src$lang$latin$balance = [regex_whitespace$$module$src$lang$latin$balance, " ", regex_strip$$module$src$lang$latin$balance, ""];
+function encode$$module$src$lang$latin$balance(str) {
+  return this.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$balance, " ", false);
+}
+var module$src$lang$latin$balance = {};
+module$src$lang$latin$balance.default = $jscompDefaultExport$$module$src$lang$latin$balance;
+module$src$lang$latin$balance.encode = encode$$module$src$lang$latin$balance;
+module$src$lang$latin$balance.rtl = rtl$$module$src$lang$latin$balance;
+module$src$lang$latin$balance.tokenize = tokenize$$module$src$lang$latin$balance;
+var rtl$$module$src$lang$latin$extra = false;
+var tokenize$$module$src$lang$latin$extra = "";
+var $jscompDefaultExport$$module$src$lang$latin$extra = {encode:encode$$module$src$lang$latin$extra, rtl:rtl$$module$src$lang$latin$extra};
+var prefix$$module$src$lang$latin$extra = "(?!\\b)";
+var soundex_b$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$module$src$lang$latin$extra + "p");
+var soundex_s$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$module$src$lang$latin$extra + "z");
+var soundex_k$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$module$src$lang$latin$extra + "[cgq]");
+var soundex_m$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$module$src$lang$latin$extra + "n");
+var soundex_t$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$module$src$lang$latin$extra + "d");
+var soundex_f$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$module$src$lang$latin$extra + "[vw]");
+var regex_vowel$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$module$src$lang$latin$extra + "[aeiouy]");
+var pairs$$module$src$lang$latin$extra = [soundex_b$$module$src$lang$latin$extra, "b", soundex_s$$module$src$lang$latin$extra, "s", soundex_k$$module$src$lang$latin$extra, "k", soundex_m$$module$src$lang$latin$extra, "m", soundex_t$$module$src$lang$latin$extra, "t", soundex_f$$module$src$lang$latin$extra, "f", regex_vowel$$module$src$lang$latin$extra, ""];
+function encode$$module$src$lang$latin$extra(str) {
+  if (str) {
+    str = encode$$module$src$lang$latin$advanced(str, true);
+    if (str.length > 1) {
+      str = replace$$module$src$common(str, pairs$$module$src$lang$latin$extra);
+    }
+    if (str.length > 1) {
+      str = collapse$$module$src$common(str);
+    }
+    if (str) {
+      str = str.split(" ");
+    }
+  }
+  return str;
+}
+var module$src$lang$latin$extra = {};
+module$src$lang$latin$extra.default = $jscompDefaultExport$$module$src$lang$latin$extra;
+module$src$lang$latin$extra.encode = encode$$module$src$lang$latin$extra;
+module$src$lang$latin$extra.rtl = rtl$$module$src$lang$latin$extra;
+module$src$lang$latin$extra.tokenize = tokenize$$module$src$lang$latin$extra;
+var rtl$$module$src$lang$latin$soundex = false;
+var tokenize$$module$src$lang$latin$soundex = "strict";
+var $jscompDefaultExport$$module$src$lang$latin$soundex = {encode:encode$$module$src$lang$latin$soundex, rtl:rtl$$module$src$lang$latin$soundex, tokenize:tokenize$$module$src$lang$latin$soundex};
+var regex_whitespace$$module$src$lang$latin$soundex = /[\W_]+/g;
+var regex_strip$$module$src$lang$latin$soundex = /[^a-z ]/g;
+var pairs$$module$src$lang$latin$soundex = [regex_whitespace$$module$src$lang$latin$soundex, " ", regex_strip$$module$src$lang$latin$soundex, ""];
+function encode$$module$src$lang$latin$soundex(str) {
+  str = this.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$soundex, false, false);
+  var result = [];
+  if (str) {
+    var words = str.split(" ");
+    var length = words.length;
+    for (var x = 0, count = 0; x < length; x++) {
+      if ((str = words[x]) && (!this.filter || !this.filter[str])) {
+        var code = str[0];
+        var previous = getCode$$module$src$lang$latin$soundex(code);
+        for (var i = 1; i < str.length; i++) {
+          var current = getCode$$module$src$lang$latin$soundex(str[i]);
+          if (current !== previous) {
+            code += current;
+            previous = current;
+            if (code.length === 4) {
+              break;
+            }
+          }
+        }
+        result[count++] = (code + "0000").substring(0, 4);
+      }
+    }
+  }
+  return result;
+}
+function getCode$$module$src$lang$latin$soundex(char) {
+  switch(char) {
+    case "b":
+    case "f":
+    case "p":
+    case "v":
+      return 1;
+    case "c":
+    case "g":
+    case "j":
+    case "k":
+    case "q":
+    case "s":
+    case "x":
+    case "z":
+      return 2;
+    case "d":
+    case "t":
+      return 3;
+    case "l":
+      return 4;
+    case "m":
+    case "n":
+      return 5;
+    case "r":
+      return 6;
+  }
+  return "";
+}
+var module$src$lang$latin$soundex = {};
+module$src$lang$latin$soundex.default = $jscompDefaultExport$$module$src$lang$latin$soundex;
+module$src$lang$latin$soundex.encode = encode$$module$src$lang$latin$soundex;
+module$src$lang$latin$soundex.rtl = rtl$$module$src$lang$latin$soundex;
+module$src$lang$latin$soundex.tokenize = tokenize$$module$src$lang$latin$soundex;
+var rtl$$module$src$lang$arabic$default = true;
+var tokenize$$module$src$lang$arabic$default = "";
+var $jscompDefaultExport$$module$src$lang$arabic$default = {encode:encode$$module$src$lang$arabic$default, rtl:rtl$$module$src$lang$arabic$default};
+var split$$module$src$lang$arabic$default = /[\W_]+/;
+function encode$$module$src$lang$arabic$default(str) {
+  return this.pipeline(str, false, split$$module$src$lang$arabic$default, false);
+}
+var module$src$lang$arabic$default = {};
+module$src$lang$arabic$default.default = $jscompDefaultExport$$module$src$lang$arabic$default;
+module$src$lang$arabic$default.encode = encode$$module$src$lang$arabic$default;
+module$src$lang$arabic$default.rtl = rtl$$module$src$lang$arabic$default;
+module$src$lang$arabic$default.tokenize = tokenize$$module$src$lang$arabic$default;
+var rtl$$module$src$lang$cjk$default = false;
+var tokenize$$module$src$lang$cjk$default = "strict";
+var $jscompDefaultExport$$module$src$lang$cjk$default = {encode:encode$$module$src$lang$cjk$default, rtl:rtl$$module$src$lang$cjk$default, tokenize:tokenize$$module$src$lang$cjk$default};
+var regex$$module$src$lang$cjk$default = /[\x00-\x7F]/g;
+function encode$$module$src$lang$cjk$default(str) {
+  return this.pipeline(str.replace(regex$$module$src$lang$cjk$default, ""), false, "", false);
+}
+var module$src$lang$cjk$default = {};
+module$src$lang$cjk$default.default = $jscompDefaultExport$$module$src$lang$cjk$default;
+module$src$lang$cjk$default.encode = encode$$module$src$lang$cjk$default;
+module$src$lang$cjk$default.rtl = rtl$$module$src$lang$cjk$default;
+module$src$lang$cjk$default.tokenize = tokenize$$module$src$lang$cjk$default;
+var rtl$$module$src$lang$cyrillic$default = false;
+var tokenize$$module$src$lang$cyrillic$default = "";
+var $jscompDefaultExport$$module$src$lang$cyrillic$default = {encode:encode$$module$src$lang$cyrillic$default, rtl:rtl$$module$src$lang$cyrillic$default};
+var split$$module$src$lang$cyrillic$default = /[\W_]+/;
+function encode$$module$src$lang$cyrillic$default(str) {
+  return this.pipeline(str, false, split$$module$src$lang$cyrillic$default, false);
+}
+var module$src$lang$cyrillic$default = {};
+module$src$lang$cyrillic$default.default = $jscompDefaultExport$$module$src$lang$cyrillic$default;
+module$src$lang$cyrillic$default.encode = encode$$module$src$lang$cyrillic$default;
+module$src$lang$cyrillic$default.rtl = rtl$$module$src$lang$cyrillic$default;
+module$src$lang$cyrillic$default.tokenize = tokenize$$module$src$lang$cyrillic$default;
+var filter$$module$src$lang$de = ["aber", "als", "am", "an", "auch", "auf", "aus", "bei", "bin", "bis", "bist", "da", "dadurch", "daher", "darum", "das", "da\u00df", "dass", "dein", "deine", "dem", "den", "der", "des", "dessen", "deshalb", "die", "dies", "dieser", "dieses", "doch", "dort", "du", "durch", "ein", "eine", "einem", "einen", "einer", "eines", "er", "es", "euer", "eure", "f\u00fcr", "hatte", "hatten", "hattest", "hattet", "hier", "hinter", "ich", "ihr", "ihre", "im", "in", "ist", "ja", 
+"jede", "jedem", "jeden", "jeder", "jedes", "jener", "jenes", "jetzt", "kann", "kannst", "k\u00f6nnen", "k\u00f6nnt", "machen", "mein", "meine", "mit", "mu\u00df", "mu\u00dft", "musst", "m\u00fcssen", "m\u00fc\u00dft", "nach", "nachdem", "nein", "nicht", "nun", "oder", "seid", "sein", "seine", "sich", "sie", "sind", "soll", "sollen", "sollst", "sollt", "sonst", "soweit", "sowie", "und", "unser", "unsere", "unter", "vom", "von", "vor", "wann", "warum", "was", "weiter", "weitere", "wenn", "wer", "werde", 
+"werden", "werdet", "weshalb", "wie", "wieder", "wieso", "wir", "wird", "wirst", "wo", "woher", "wohin", "zu", "zum", "zur", "\u00fcber"];
+var stemmer$$module$src$lang$de = {"niss":"", "isch":"", "lich":"", "heit":"", "keit":"", "ell":"", "bar":"", "end":"", "ung":"", "est":"", "ern":"", "em":"", "er":"", "en":"", "es":"", "st":"", "ig":"", "ik":"", "e":"", "s":""};
+var matcher$$module$src$lang$de = {};
+var $jscompDefaultExport$$module$src$lang$de = {filter:filter$$module$src$lang$de, stemmer:stemmer$$module$src$lang$de, matcher:matcher$$module$src$lang$de};
+var module$src$lang$de = {};
+module$src$lang$de.default = $jscompDefaultExport$$module$src$lang$de;
+module$src$lang$de.filter = filter$$module$src$lang$de;
+module$src$lang$de.matcher = matcher$$module$src$lang$de;
+module$src$lang$de.stemmer = stemmer$$module$src$lang$de;
+var filter$$module$src$lang$en = ["a", "about", "above", "after", "again", "against", "all", "also", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "both", "but", "by", "can", "cannot", "can't", "come", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "dont", "down", "during", "each", "even", "few", "first", "for", "from", "further", "get", "go", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", 
+"hed", "her", "here", "here's", "hers", "herself", "hes", "him", "himself", "his", "how", "how's", "i", "id", "if", "ill", "im", "in", "into", "is", "isn't", "it", "it's", "itself", "i've", "just", "know", "let's", "like", "make", "me", "more", "most", "mustn't", "my", "myself", "new", "no", "nor", "not", "now", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "our's", "ourselves", "out", "over", "own", "same", "say", "see", "shan't", "she", "she'd", "shell", "shes", "should", "shouldn't", 
+"so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "time", "to", "too", "until", "up", "us", "very", "want", "was", "wasn't", "way", "we", "wed", "well", "were", "weren't", "we've", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "whom", "who's", "why", "why's", "will", "with", "won't", "would", "wouldn't", 
+"you", "you'd", "you'll", "your", "you're", "your's", "yourself", "yourselves", "you've"];
+var stemmer$$module$src$lang$en = {"ational":"ate", "iveness":"ive", "fulness":"ful", "ousness":"ous", "ization":"ize", "tional":"tion", "biliti":"ble", "icate":"ic", "ative":"", "alize":"al", "iciti":"ic", "entli":"ent", "ousli":"ous", "alism":"al", "ation":"ate", "aliti":"al", "iviti":"ive", "ement":"", "enci":"ence", "anci":"ance", "izer":"ize", "alli":"al", "ator":"ate", "logi":"log", "ical":"ic", "ance":"", "ence":"", "ness":"", "able":"", "ible":"", "ment":"", "eli":"e", "bli":"ble", "ful":"", 
+"ant":"", "ent":"", "ism":"", "ate":"", "iti":"", "ous":"", "ive":"", "ize":"", "al":"", "ou":"", "er":"", "ic":""};
+var matcher$$module$src$lang$en = {};
+var $jscompDefaultExport$$module$src$lang$en = {filter:filter$$module$src$lang$en, stemmer:stemmer$$module$src$lang$en, matcher:matcher$$module$src$lang$en};
+var module$src$lang$en = {};
+module$src$lang$en.default = $jscompDefaultExport$$module$src$lang$en;
+module$src$lang$en.filter = filter$$module$src$lang$en;
+module$src$lang$en.matcher = matcher$$module$src$lang$en;
+module$src$lang$en.stemmer = stemmer$$module$src$lang$en;
+var filter$$module$src$lang$at = ["aber", "als", "am", "an", "auch", "auf", "aus", "bei", "bin", "bis", "bist", "da", "dadurch", "daher", "darum", "das", "da\u00df", "dass", "dein", "deine", "dem", "den", "der", "des", "dessen", "deshalb", "die", "dies", "dieser", "dieses", "doch", "dort", "du", "durch", "ein", "eine", "einem", "einen", "einer", "eines", "er", "es", "euer", "eure", "f\u00fcr", "hatte", "hatten", "hattest", "hattet", "hier", "hinter", "ich", "ihr", "ihre", "im", "in", "ist", "ja", 
+"jede", "jedem", "jeden", "jeder", "jedes", "jener", "jenes", "jetzt", "kann", "kannst", "k\u00f6nnen", "k\u00f6nnt", "machen", "mein", "meine", "mit", "mu\u00df", "mu\u00dft", "musst", "m\u00fcssen", "m\u00fc\u00dft", "nach", "nachdem", "nein", "nicht", "nun", "oder", "seid", "sein", "seine", "sich", "sie", "sind", "soll", "sollen", "sollst", "sollt", "sonst", "soweit", "sowie", "und", "unser", "unsere", "unter", "vom", "von", "vor", "wann", "warum", "was", "weiter", "weitere", "wenn", "wer", "werde", 
+"werden", "werdet", "weshalb", "wie", "wieder", "wieso", "wir", "wird", "wirst", "wo", "woher", "wohin", "zu", "zum", "zur", "\u00fcber"];
+var stemmer$$module$src$lang$at = {"niss":"", "isch":"", "lich":"", "heit":"", "keit":"", "end":"", "ung":"", "est":"", "ern":"", "em":"", "er":"", "en":"", "es":"", "st":"", "ig":"", "ik":"", "e":"", "s":""};
+var matcher$$module$src$lang$at = {};
+var $jscompDefaultExport$$module$src$lang$at = {filter:filter$$module$src$lang$at, stemmer:stemmer$$module$src$lang$at, matcher:matcher$$module$src$lang$at};
+var module$src$lang$at = {};
+module$src$lang$at.default = $jscompDefaultExport$$module$src$lang$at;
+module$src$lang$at.filter = filter$$module$src$lang$at;
+module$src$lang$at.matcher = matcher$$module$src$lang$at;
+module$src$lang$at.stemmer = stemmer$$module$src$lang$at;
+var filter$$module$src$lang$us = ["a", "about", "above", "after", "again", "against", "all", "also", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "both", "but", "by", "can", "cannot", "can't", "come", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "dont", "down", "during", "each", "even", "few", "first", "for", "from", "further", "get", "go", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", 
+"hed", "her", "here", "here's", "hers", "herself", "hes", "him", "himself", "his", "how", "how's", "i", "id", "if", "ill", "im", "in", "into", "is", "isn't", "it", "it's", "itself", "i've", "just", "know", "let's", "like", "make", "me", "more", "most", "mustn't", "my", "myself", "new", "no", "nor", "not", "now", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "our's", "ourselves", "out", "over", "own", "same", "say", "see", "shan't", "she", "she'd", "shell", "shes", "should", "shouldn't", 
+"so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "time", "to", "too", "until", "up", "us", "very", "want", "was", "wasn't", "way", "we", "wed", "well", "were", "weren't", "we've", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "whom", "who's", "why", "why's", "will", "with", "won't", "would", "wouldn't", 
+"you", "you'd", "you'll", "your", "you're", "your's", "yourself", "yourselves", "you've"];
+var stemmer$$module$src$lang$us = {"ational":"ate", "iveness":"ive", "fulness":"ful", "ousness":"ous", "ization":"ize", "tional":"tion", "biliti":"ble", "icate":"ic", "ative":"", "alize":"al", "iciti":"ic", "entli":"ent", "ousli":"ous", "alism":"al", "ation":"ate", "aliti":"al", "iviti":"ive", "ement":"", "enci":"ence", "anci":"ance", "izer":"ize", "alli":"al", "ator":"ate", "logi":"log", "ical":"ic", "ance":"", "ence":"", "ness":"", "able":"", "ible":"", "ment":"", "eli":"e", "bli":"ble", "ful":"", 
+"ant":"", "ent":"", "ism":"", "ate":"", "iti":"", "ous":"", "ive":"", "ize":"", "al":"", "ou":"", "er":"", "ic":""};
+var matcher$$module$src$lang$us = {};
+var $jscompDefaultExport$$module$src$lang$us = {filter:filter$$module$src$lang$us, stemmer:stemmer$$module$src$lang$us, matcher:matcher$$module$src$lang$us};
+var module$src$lang$us = {};
+module$src$lang$us.default = $jscompDefaultExport$$module$src$lang$us;
+module$src$lang$us.filter = filter$$module$src$lang$us;
+module$src$lang$us.matcher = matcher$$module$src$lang$us;
+module$src$lang$us.stemmer = stemmer$$module$src$lang$us;
 FlexSearch$$module$src$flexsearch.prototype.init;
 FlexSearch$$module$src$flexsearch.prototype.search;
 FlexSearch$$module$src$flexsearch.prototype.add;
@@ -1640,11 +1803,46 @@ FlexSearch$$module$src$flexsearch.prototype.clear;
 FlexSearch$$module$src$flexsearch.prototype.destroy;
 FlexSearch$$module$src$flexsearch.prototype.export;
 FlexSearch$$module$src$flexsearch.prototype.import;
-FlexSearch$$module$src$flexsearch.prototype.encode;
-FlexSearch$$module$src$flexsearch.prototype.addMatcher;
 Promise.prototype.then;
 var module$src$export = {};
-if (SUPPORT_ENCODER) {
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "latin" || SUPPORT_ENCODER.indexOf("latin:advanced") !== -1)) {
+  global_charset$$module$src$flexsearch["latin:advanced"] = $jscompDefaultExport$$module$src$lang$latin$advanced;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "latin" || SUPPORT_ENCODER.indexOf("latin:balance") !== -1)) {
+  global_charset$$module$src$flexsearch["latin:balance"] = $jscompDefaultExport$$module$src$lang$latin$balance;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "latin" || SUPPORT_ENCODER.indexOf("latin:default") !== -1)) {
+  global_charset$$module$src$flexsearch["latin:default"] = $jscompDefaultExport$$module$src$lang$latin$default;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "latin" || SUPPORT_ENCODER.indexOf("latin:extra") !== -1)) {
+  global_charset$$module$src$flexsearch["latin:extra"] = $jscompDefaultExport$$module$src$lang$latin$extra;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "latin" || SUPPORT_ENCODER.indexOf("latin:simple") !== -1)) {
+  global_charset$$module$src$flexsearch["latin:simple"] = $jscompDefaultExport$$module$src$lang$latin$simple;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "latin" || SUPPORT_ENCODER.indexOf("latin:soundex") !== -1)) {
+  global_charset$$module$src$flexsearch["latin:soundex"] = $jscompDefaultExport$$module$src$lang$latin$soundex;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "arabic" || SUPPORT_ENCODER.indexOf("arabic:default") !== -1)) {
+  global_charset$$module$src$flexsearch["arabic:default"] = $jscompDefaultExport$$module$src$lang$arabic$default;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "cjk" || SUPPORT_ENCODER.indexOf("cjk:default") !== -1)) {
+  global_charset$$module$src$flexsearch["cjk:default"] = $jscompDefaultExport$$module$src$lang$cjk$default;
+}
+if (SUPPORT_ENCODER === true || SUPPORT_ENCODER && (SUPPORT_ENCODER === "cyrillic" || SUPPORT_ENCODER.indexOf("cyrillic:default") !== -1)) {
+  global_charset$$module$src$flexsearch["cyrillic:default"] = $jscompDefaultExport$$module$src$lang$cyrillic$default;
+}
+if (SUPPORT_LANG === true || SUPPORT_LANG && SUPPORT_LANG.indexOf("de") !== -1) {
+  global_lang$$module$src$flexsearch["de"] = $jscompDefaultExport$$module$src$lang$de;
+}
+if (SUPPORT_LANG === true || SUPPORT_LANG && SUPPORT_LANG.indexOf("en") !== -1) {
+  global_lang$$module$src$flexsearch["en"] = $jscompDefaultExport$$module$src$lang$en;
+}
+if (SUPPORT_LANG === true || SUPPORT_LANG && SUPPORT_LANG.indexOf("at") !== -1) {
+  global_lang$$module$src$flexsearch["at"] = $jscompDefaultExport$$module$src$lang$at;
+}
+if (SUPPORT_LANG === true || SUPPORT_LANG && SUPPORT_LANG.indexOf("us") !== -1) {
+  global_lang$$module$src$flexsearch["us"] = $jscompDefaultExport$$module$src$lang$us;
 }
 (function() {
   var name = "FlexSearch";
