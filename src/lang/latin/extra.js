@@ -1,17 +1,25 @@
 import { regex, replace, collapse } from "../../common.js";
-import encoder_advanced from "./advanced.js";
+import { encode as encode_advanced } from "./advanced.js";
+
+export const rtl = false;
+export const tokenize = "";
+export default {
+    encode: encode,
+    rtl: rtl
+}
 
 // Soundex Normalization
 
-const soundex_b = regex("p"),
-    soundex_s = regex("z"),
-    soundex_k = regex("[cgq]"),
-    soundex_m = regex("n"),
-    soundex_t = regex("d"),
-    soundex_f = regex("[vw]"),
-    regex_vowel = regex("[aeiouy]");
+const prefix = "(?!\\b)";
+const soundex_b = regex(prefix + "p"),
+    soundex_s = regex(prefix + "z"),
+    soundex_k = regex(prefix + "[cgq]"),
+    soundex_m = regex(prefix + "n"),
+    soundex_t = regex(prefix + "d"),
+    soundex_f = regex(prefix + "[vw]"),
+    regex_vowel = regex(prefix + "[aeiouy]");
 
-const regex_pairs_extra = [
+const pairs = [
 
     soundex_b, "b",
     soundex_s, "s",
@@ -22,32 +30,26 @@ const regex_pairs_extra = [
     regex_vowel, ""
 ];
 
-export default function(str){
+export function encode(str){
 
-    if(!str){
+    if(str){
 
-        return str;
-    }
+        str = encode_advanced(str, /* skip post-processing: */ true);
 
-    str = encoder_advanced(str, /* skip post processing? */ true);
+        if(str.length > 1){
 
-    if(str.length > 1){
-
-        str = str.split(" ");
-
-        for(let i = 0; i < str.length; i++){
-
-            const current = str[i];
-
-            if(current.length > 1){
-
-                // keep first char
-                str[i] = current[0] + replace(current.substring(1), regex_pairs_extra);
-            }
+            str = replace(str, pairs);
         }
 
-        str = str.join(" ");
-        str = collapse(str);
+        if(str.length > 1){
+
+            str = collapse(str);
+        }
+
+        if(str){
+
+            str = str.split(" ");
+        }
     }
 
     return str;

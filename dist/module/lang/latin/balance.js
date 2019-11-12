@@ -1,1 +1,1 @@
-import{regex,replace,collapse}from"../../common.js";const regex_whitespace=regex("[\\W_]+"),regex_strip=regex("[^a-z0-9 ]"),pairs=[regex_whitespace," ",regex_strip,""];export default function(a){return a?collapse(replace(a.toLowerCase(),pairs)):a}
+import FlexSearch from"../../flexsearch.js";export const rtl=!1;export const tokenize="";export default{encode:encode,rtl:!1};const regex_whitespace=/[\W_]+/g,regex_strip=/[^a-z0-9 ]/g,pairs=[regex_whitespace," ",regex_strip,""];export function encode(a){return this.pipeline(a.toLowerCase(),pairs," ",!1)}

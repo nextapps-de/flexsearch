@@ -267,3 +267,10 @@ export const stemmer = {
 };
 
 export const matcher = {};
+
+export default {
+
+    filter: filter,
+    stemmer: stemmer,
+    matcher: matcher
+}

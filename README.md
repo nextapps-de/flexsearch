@@ -13,6 +13,7 @@
 <h2></h2>
 
 ### FlexSearch v0.7.0 (Beta)
+=======
 
 Beta is now available. Please test the new version and post back issues and suggestions. The Beta will pushed to the master branch in 2 weeks.
 

@@ -1,1 +1,0 @@
-import FlexSearch from"./flexsearch.js";import"./export.js";!0,function(){const a=this||window;let b;(b=a.define)&&b.amd?b([],function(){return FlexSearch}):"object"==typeof a.exports?a.module.exports=FlexSearch:a.FlexSearch=FlexSearch}();

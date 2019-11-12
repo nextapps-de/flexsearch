@@ -1,4 +1,12 @@
-import { regex, replace } from "../../common.js";
+import FlexSearch from "../../flexsearch.js";
+import { regex } from "../../common.js";
+
+export const rtl = false;
+export const tokenize = "";
+export default {
+    encode: encode,
+    rtl: rtl
+}
 
 // Charset Normalization
 
@@ -15,7 +23,7 @@ const regex_whitespace = regex("[\\W_]+"),
     regex_s = regex("ß"),
     regex_and = regex(" & ");
 
-const regex_pairs_simple = [
+const pairs = [
 
     regex_a, "a",
     regex_e, "e",
@@ -31,12 +39,20 @@ const regex_pairs_simple = [
     regex_strip, ""
 ];
 
-export default function(str){
+/**
+ * @param {string} str
+ * @param {FlexSearch} self
+ */
 
-    if(!str){
+export function encode(str, self){
 
-        return str;
-    }
+    self || (self = this);
 
-    return replace(str.toLowerCase(), regex_pairs_simple);
+    return self.pipeline(
+
+        /* string: */ str.toLowerCase(),
+        /* normalize: */ pairs,
+        /* split: */ " ",
+        /* collapse: */ false
+    );
 }

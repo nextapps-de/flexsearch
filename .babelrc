@@ -3,7 +3,8 @@
     ["conditional-compile", {
       "define": {
         "DEBUG": false,
-        "PROFILER": true,
+        "PROFILER": false,
+        "POLYFILL": true,
         "SUPPORT_WORKER": true,
         "SUPPORT_ENCODER": true,
         "SUPPORT_CACHE": true,
@@ -17,7 +18,7 @@
         "SUPPORT_PAGINATION": true,
         "SUPPORT_OPERATOR": true,
         "SUPPORT_CALLBACK": true,
-        "USE_POLYFILL": true
+        "SUPPORT_LANG": false
       }
     }],
     "babel-plugin-minify-constant-folding",
@@ -38,6 +39,7 @@
   ],
   "ignore": [
     "config.js",
+    "bundle.js",
     "export.js"
   ],
   "minified": true,

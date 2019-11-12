@@ -14,7 +14,7 @@ import Cache from "./cache.js";
 import Worker from "./worker.js";
 import presets from "./presets.js";
 //import { profile_start, profile_end } from "./profiler.js";
-import { encode as default_encoder, split as default_split } from "./lang/latin/index.js";
+import { encode as default_encoder } from "./lang/latin/default.js"; // , split as default_split
 import { addWorker } from "./worker.js";
 import {
     is_undefined,
@@ -25,7 +25,7 @@ import {
     get_keys,
     create_object,
     create_object_array,
-    replace,
+    //replace,
     regex
 } from "./common.js";
 
@@ -37,35 +37,31 @@ import {
 
 const defaults = {
 
-    encode: default_encoder,
-    tokenize: "strict",
-    split: default_split,
+    "encode": default_encoder,
+    "tokenize": "strict",
+    // split: default_split,
     // enrich: true,
     // clone: false,
     // suggest: false,
-    cache: false,
-    async: false,
-    worker: false,
-    rtl: false,
-    doc: false,
+    "cache": false,
+    "async": false,
+    "worker": false,
+    "rtl": false,
+    "doc": false,
 
     // maximum scoring
-    resolution: 9,
+    "resolution": 9,
 
     // minimum scoring
-    threshold: 0,
+    "threshold": 0,
 
     // contextual depth
-    depth: 0
+    "depth": 0
 };
 
 let id_counter = 0;
-const global_lang = {};
-// const global_rtl = {};
-// const global_filter = {};
-// const global_stemmer = {};
-// const global_encoder = {};
-// const global_split = {};
+export const global_lang = {};
+export const global_charset = {};
 
 /**
  * NOTE: Actually not really required when using bare objects via: Object.create(null)
@@ -141,34 +137,24 @@ export default function FlexSearch(options){
 
 /**
  * @param {!string} name
- * @param {function(string):string} encoder
- * @param {string|RegExp} split
- * @param {boolean} rtl
+ * @param {Object} charset
  */
 
-FlexSearch["registerCharset"] = function(name, encoder, split, rtl){
+FlexSearch["registerCharset"] = function(name, charset){
 
-    const lang = global_lang[name] || (global_lang[name] = {});
-    lang.encoder = encoder;
-    lang.split = split;
-    lang.rtl = rtl;
+    global_charset[name] = charset;
 
     return FlexSearch;
 };
 
 /**
  * @param {!string} name
- * @param {Array<string>} filter
- * @param {Object<string, string>} stemmer
- * @param {Object<string, Array<string>|string>} matcher
+ * @param {Object} lang
  */
 
-FlexSearch["registerLanguage"] = function(name, filter, stemmer, matcher){
+FlexSearch["registerLanguage"] = function(name, lang){
 
-    const lang = global_lang[name] || (global_lang[name] = {});
-    lang.filter = filter;
-    lang.stemmer = stemmer;
-    lang.matcher = matcher;
+    global_charset[name] = lang;
 
     return FlexSearch;
 };
@@ -205,7 +191,6 @@ FlexSearch.prototype.init = function(options){
      * @private
      */
 
-    this.matcher = [];
     let custom;
     let doc;
 
@@ -234,7 +219,7 @@ FlexSearch.prototype.init = function(options){
         }
     }
 
-    if(!this.encoder){
+    if(!this.encode){
 
         if(options){
 
@@ -287,48 +272,44 @@ FlexSearch.prototype.init = function(options){
             this.worker = custom;
         }
 
-        const charset = options["charset"];
-        const lang = options["lang"];
-
-        /** @private */
-        this.tokenizer = options["tokenize"];
-        /** @private */
-        this.split = is_string(custom = charset || options["split"]) ? (global_lang[custom] ? global_lang[custom].split : regex(custom)) : custom;
-        /** @private */
-        this.rtl = is_string(custom = charset || options["rtl"]) ? global_lang[custom].rtl : custom;
         if(SUPPORT_ASYNC){
             /** @private */
             this.async = options["async"];
             /** @private */
-            this._timer = 0;
+            this.timer = 0;
         }
+
+        const charset = options["charset"];
+        const lang = options["lang"];
+
+        /** @private */
+        this.tokenizer = (is_string(charset) ? global_charset[charset].tokenize : charset && charset.tokenize) || options["tokenize"];
+        /** @private */
+        //this.split = is_string(custom = options["split"] || charset) ? (global_charset[custom] ? global_charset[custom].split : regex(custom)) : global_charset.split || custom;
+        /** @private */
+        this.rtl = is_string(custom = options["rtl"] || charset) ? global_charset[custom].rtl : charset && charset.rtl || custom;
         /** @private */
         this.threshold = options["threshold"];
         /** @private */
         this.resolution = ((custom = options["resolution"]) <= this.threshold ? this.threshold + 1 : custom);
         /** @private */
         this.depth = ((this.tokenizer === "strict") && options["depth"]) || 0;
-        /** @private */
-        this.encoder = is_string(custom = charset || options["encode"]) ? global_lang[custom.indexOf(":") === -1 ? custom + ":default" : custom].encode : custom; //is_function(custom = options["encode"]) ? custom : (FlexSearch.Encoder[custom] /*&& global_encoder[custom].bind(global_encoder)*/);
+        /** @export */
+        this.encode = is_string(custom = options["encode"] || charset) ? global_charset[custom.indexOf(":") === -1 ? custom + ":default" : custom].encode : charset && charset.encode || custom; //is_function(custom = options["encode"]) ? custom : (FlexSearch.Encoder[custom] /*&& global_encoder[custom].bind(global_encoder)*/);
 
-        this.matcher = (custom = lang || options["matcher"]) && init_matcher(
+        this.matcher = (custom = options["matcher"] || lang) && init_stemmer_or_matcher(
 
-            is_string(custom) ? global_lang[custom].matcher : custom
-            //this.encoder
+            is_string(custom) ? global_lang[custom].matcher : lang && lang.matcher || custom, false
         );
 
-        /** @private */
-        this.filter = (custom = lang || options["filter"]) && init_filter(
+        this.filter = (custom = options["filter"] || lang) && init_filter(
 
-            is_string(custom) ? global_lang[custom].filter : custom
-            //this.encoder
+            is_string(custom) ? global_lang[custom].filter : lang && lang.filter || custom
         );
 
-        /** @private */
-        this.stemmer = (custom = lang || options["stemmer"]) && init_stemmer(
+        this.stemmer = (custom = options["stemmer"] || lang) && init_stemmer_or_matcher(
 
-            is_string(custom) ? global_lang[custom].stemmer : custom
-            //this.encoder
+            is_string(custom) ? global_lang[custom].stemmer : lang && lang.stemmer || custom, true
         );
 
         // TODO: provide boost
@@ -526,27 +507,6 @@ function clone_object(obj){
 }
 
 /**
- * @param {!Object<string, string>} custom
- */
-
-function init_matcher(custom){
-
-    const keys = get_keys(custom);
-    const length = keys.length;
-    const matcher = new Array(length * 2);
-
-    for(let i = 0, count = 0; i < length; i++){
-
-        const key = keys[i];
-
-        matcher[count++] = regex(key);
-        matcher[count++] = custom[key];
-    }
-
-    return matcher;
-}
-
-/**
  * @param {number|string} id
  * @param {string|Function} content
  * @param {Function=} callback
@@ -649,7 +609,7 @@ FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall
             return this;
         }
 
-        const words = this.tokenize(content);
+        const words = content; //this.tokenize(content);
         const dupes = create_object();
               dupes["_ctx"] = create_object();
 
@@ -1498,7 +1458,7 @@ FlexSearch.prototype.search = function(query, limit, callback, _recall){
         return result;
     }
 
-    const words = this.tokenize(_query);
+    const words = _query; //this.tokenize(_query);
     const length = words.length;
     let found = true;
     const check = [];
@@ -1885,138 +1845,142 @@ function remove_index(map, id){
     }
 }
 
-/**
- * @param {string} value
- * @returns {string}
- */
+// FlexSearch.prototype.encode = function(value){
+//
+//     // if(PROFILER){
+//     //
+//     //     profile_start("encode");
+//     // }
+//
+//     // if(value && this.normalize){
+//     //
+//     //     value = this.normalize(value);
+//     // }
+//     //
+//     // if(value && this.matcher){
+//     //
+//     //     value = replace(value, this.matcher);
+//     // }
+//     //
+//     // if(value && this.stemmer){
+//     //
+//     //     value = replace(value, this.stemmer);
+//     // }
+//
+//     if(value && this.encoder){
+//
+//         value = this.encoder(value);
+//     }
+//
+//     // if(value && this.split){
+//     //
+//     //     value = value.split(this.split);
+//     // }
+//     //
+//     // if(this.filter){
+//     //
+//     //     value = filter_words(value, this.filter);
+//     // }
+//
+//     // if(PROFILER){
+//     //
+//     //     profile_end("encode");
+//     // }
+//
+//     return value;
+// };
 
-FlexSearch.prototype.encode = function(value){
-
-    // if(PROFILER){
-    //
-    //     profile_start("encode");
-    // }
-
-    if(value && this.encoder){
-
-        value = this.encoder(value);
-    }
-
-    if(value && this.matcher.length){
-
-        value = replace(value, this.matcher);
-    }
-
-    if(value && this.stemmer){
-
-        value = replace(value, this.stemmer);
-    }
-
-    // if(PROFILER){
-    //
-    //     profile_end("encode");
-    // }
-
-    return value;
-};
-
-/**
- * @param {string} content
- * @returns {Array<string>}
- */
-
-FlexSearch.prototype.tokenize = function(content){
-
-    let words = (
-
-        is_array(content) ?
-
-            content
-        :(
-            is_function(this.tokenizer) ?
-
-                this.tokenizer(content)
-            :(
-                //SUPPORT_ENCODER && (tokenizer === "ngram") ?
-
-                /** @type {!Array<string>} */
-                //(ngram(/** @type {!string} */(content)))
-                //:
-                /** @type {!string} */
-                (content).split(this.split)
-            )
-        )
-    );
-
-    if(this.filter){
-
-        words = filter_words(words, this.filter);
-    }
-
-    return words;
-};
+// FlexSearch.prototype.tokenize = function(content){
+//
+//     let words = (
+//
+//         this.split ?
+//
+//             content.split(this.split)
+//         :
+//             content
+//     );
+//
+//     if(this.filter){
+//
+//         words = filter_words(words, this.filter);
+//     }
+//
+//     return words;
+// };
 
 // TODO using fast-swap
-function filter_words(words, fn_or_map){
-
-    const length = words.length;
-    const has_function = is_function(fn_or_map);
-    const filtered = [];
-
-    for(let i = 0, count = 0; i < length; i++){
-
-        const word = words[i];
-
-        if(word){
-
-            if((has_function && fn_or_map(word)) ||
-              (!has_function && !fn_or_map[word])){
-
-                filtered[count++] = word;
-            }
-        }
-    }
-
-    return filtered;
-}
+// function filter_words(words, fn_or_map){
+//
+//     const length = words.length;
+//     const filtered = [];
+//
+//     for(let i = 0, count = 0; i < length; i++){
+//
+//         const word = words[i];
+//
+//         if(word){
+//
+//             if(!fn_or_map[word]){
+//
+//                 filtered[count++] = word;
+//             }
+//         }
+//     }
+//
+//     return filtered;
+// }
 
 /**
  * @param {Array<string>} words
  * @returns {Object<string, string>}
  */
 
-function init_filter(words){ // , encoder
+function init_filter(words){
 
     const final = create_object();
 
-    for(let i = 0; i < words.length; i++){
+    for(let i = 0, length = words.length; i < length; i++){
 
-        const word = /*encoder ? encoder(words[i]) :*/ words[i];
-
-        final[word] = 1; // String.fromCharCode((65000 - words.length) + i); // mask filtered words?
+        final[words[i]] = 1;
     }
 
     return final;
 }
 
 /**
- * @param {!Object<string, string>} stem
+ * @param {!Object<string, string>} obj
+ * @param {boolean} is_stemmer
  * @returns {Array}
  */
 
-function init_stemmer(stem){ // , encoder
+function init_stemmer_or_matcher(obj, is_stemmer){
 
-    const keys = Object.keys(stem);
+    const keys = get_keys(obj);
     const length = keys.length;
-    const final = new Array(length * 2);
+    const final = [];
 
-    for(let i = 0, count = 0; i < length; i++){
+    let removal = "", count = 0;
+
+    for(let i = 0, tmp; i < length; i++){
 
         const key = keys[i];
-        //const tmp = encoder ? encoder(key) : key;
 
-        final[count++] = regex(key + "(?!\\b)" + key + "(\\b)"); //regex(key + "($|\\W)"); //regex("(?=.{" + tmp.length + ",})" + tmp + "$"),
-        final[count++] = stem[key]; // encoder(stem[key])
+        if((tmp = obj[key])){
+
+            final[count++] = regex(is_stemmer ? "(?!\\b)" + key + "(\\b)" : key);
+            final[count++] = tmp;
+        }
+        else{
+
+            removal += (removal ? "|" : "") + key;
+        }
+    }
+
+    if(removal){
+
+        final[count++] = regex(is_stemmer ? "(?!\\b)(" + removal + ")(\\b)" : "(" + removal + ")");
+        final[count] = "";
     }
 
     return final;

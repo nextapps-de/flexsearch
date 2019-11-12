@@ -8,10 +8,16 @@ const DEBUG = true;
 const PROFILER = false;
 
 /** @define {boolean} */
-const SUPPORT_WORKER = true;
+const POLYFILL = true;
 
 /** @define {boolean} */
+const SUPPORT_WORKER = true;
+
+/** @define {boolean|string} */
 const SUPPORT_ENCODER = true;
+
+/** @define {boolean|string} */
+const SUPPORT_LANG = true;
 
 /** @define {boolean} */
 const SUPPORT_CACHE = true;
@@ -45,11 +51,3 @@ const SUPPORT_OPERATOR = true;
 
 /** @define {boolean} */
 const SUPPORT_CALLBACK = true;
-
-/** @define {boolean} */
-const USE_POLYFILL = true;
-
-// /** @define {boolean} */
-// const SUPPORT_LANG_DE = true;
-// /** @define {boolean} */
-// const SUPPORT_LANG_EN = true;

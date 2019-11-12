@@ -1,1 +1,0 @@
-export function encode(a){return a.toLowerCase()}export const split=/[\W_]+/;
