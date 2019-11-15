@@ -3451,7 +3451,7 @@
 
                                 // fill in during last round
 
-                                if(is_final_loop){
+                                if(is_final_loop || bool_or){
 
                                     // sadly the pointer could just applied here at the earliest
                                     // that's why pagination cannot reduce complexity actually
