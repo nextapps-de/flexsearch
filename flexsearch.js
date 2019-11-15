@@ -1699,7 +1699,16 @@
                         _query["limit"] = 0;
                     }
 
-                    result[i] = doc_idx[field[i]].search(_query, 0);
+                    for (let j =0; j < field[i].length; j++) {
+
+                        if (result && result[i] && result[i].length) {
+
+                            result[i].push(doc_idx[field[i][j]].search(_query, 0));
+                        } else {
+                            
+                            result[i] = doc_idx[field[i][j]].search(_query, 0);
+                        }
+                    }
                 }
 
                 if(callback){
