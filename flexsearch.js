@@ -1639,67 +1639,33 @@
 
                 const doc_idx = this.doc.index;
                 const where = SUPPORT_WHERE && _query["where"];
-                const bool_main = (SUPPORT_OPERATOR && _query["bool"]) || "or";
-                let field = _query["field"];
-                let bool = bool_main;
+                const bool_main = "or";
                 let queries;
                 let has_not;
                 let has_and;
+                const bool = []
 
-                if(field){
-
-                    if(!is_array(field)){
-
-                        field = [field];
-                    }
+                if(is_array(_query)){
+                    queries = _query
                 }
-                else if(is_array(_query)){
+                else {
+                  queries = [_query]
+                }
 
-                    queries = _query;
-                    field = [];
-                    bool = [];
+                let c = 0
+                for(let q = 0; q < queries.length; q++){
+                    for(let i = 0; i < queries[q].field.length; i++){
 
-                    // TODO: make some unit tests and check if the fields should be sorted (not > and > or)?
+                        bool[c] = (SUPPORT_OPERATOR && queries[q].bool) || bool_main;
 
-                    for(let i = 0; i < _query.length; i++){
+                        if(cursor && !is_string(queries[q])){
 
-                        const current = _query[i];
-                        const current_bool = (SUPPORT_OPERATOR && current["bool"]) || bool_main;
-
-                        field[i] = current["field"];
-                        bool[i] = current_bool;
-
-                        if(current_bool === "not"){
-
-                            has_not = true;
+                            queries[q]["page"] = null;
+                            queries[q]["limit"] = 0;
                         }
-                        else if(current_bool === "and"){
 
-                            has_and = true;
-                        }
+                        result[c++] = doc_idx[queries[q].field[i]].search(queries[q], 0);
                     }
-                }
-                else{
-
-                    field = this.doc.keys;
-                }
-
-                const len = field.length;
-
-                for(let i = 0; i < len; i++){
-
-                    if(queries){
-
-                        _query = queries[i];
-                    }
-
-                    if(cursor && !is_string(_query)){
-
-                        _query["page"] = null;
-                        _query["limit"] = 0;
-                    }
-
-                    result[i] = doc_idx[field[i]].search(_query, 0);
                 }
 
                 if(callback){
