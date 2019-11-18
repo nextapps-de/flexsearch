@@ -292,7 +292,7 @@
   function B() {
     return Object.create(null);
   }
-  const J = {encode:"icase", c:"forward", split:/\W+/, cache:!1, async:!1, D:!1, v:!1, a:!1, b:9, threshold:0, depth:0}, ha = {memory:{encode:"extra", c:"strict", threshold:0, b:1}, speed:{encode:"icase", c:"strict", threshold:1, b:3, depth:2}, match:{encode:"extra", c:"full", threshold:1, b:3}, score:{encode:"extra", c:"strict", threshold:1, b:9, depth:4}, balance:{encode:"balance", c:"strict", threshold:0, b:3, depth:3}, fast:{encode:"icase", c:"strict", threshold:8, b:9, depth:1}}, X = [];
+  const J = {encode:"icase", c:"forward", split:/\W+/, cache:!1, async:!1, C:!1, v:!1, a:!1, b:9, threshold:0, depth:0}, ha = {memory:{encode:"extra", c:"strict", threshold:0, b:1}, speed:{encode:"icase", c:"strict", threshold:1, b:3, depth:2}, match:{encode:"extra", c:"full", threshold:1, b:3}, score:{encode:"extra", c:"strict", threshold:1, b:9, depth:4}, balance:{encode:"balance", c:"strict", threshold:0, b:3, depth:3}, fast:{encode:"icase", c:"strict", threshold:8, b:9, depth:1}}, X = [];
   let ka = 0;
   const ia = {}, ja = {};
   w.create = function(a, b) {
@@ -406,7 +406,7 @@
         for (d = 0; d < g.length; d++) {
           this.w[g[d]] = B();
         }
-        this.C = g;
+        this.B = g;
         d = f;
       }
       if (d) {
@@ -655,8 +655,8 @@
       E(f) ? n = f : n = [f];
       var m = 0;
       for (var q = 0; q < n.length; q++) {
-        for (var u = 0; u < n[q].B.length; u++) {
-          t[m] = n[q].F || "or", h && !I(f) && (f.page = null, f.limit = 0), g[m++] = p[n[q].B[u]].search(n[q], 0);
+        for (var u = 0; u < n[q].field.length; u++) {
+          t[m] = n[q].D || "or", h && !I(f) && (f.page = null, f.limit = 0), g[m++] = p[n[q].field[u]].search(n[q], 0);
         }
       }
       if (c) {
@@ -790,7 +790,7 @@
       if (1 === n && "id" === p[0]) {
         return [e[a.id]];
       }
-      if ((k = this.C) && !d) {
+      if ((k = this.B) && !d) {
         for (var m = 0; m < k.length; m++) {
           var q = k[m], u = a[q];
           if (!C(u)) {
@@ -856,7 +856,7 @@
     return g;
   };
   w.prototype.info = function() {
-    return {id:this.id, items:this.length, cache:this.cache && this.cache.l ? this.cache.l.length : !1, matcher:X.length + (this.m ? this.m.length : 0), worker:this.D, threshold:this.threshold, depth:this.depth, resolution:this.b, contextual:this.depth && "strict" === this.c};
+    return {id:this.id, items:this.length, cache:this.cache && this.cache.l ? this.cache.l.length : !1, matcher:X.length + (this.m ? this.m.length : 0), worker:this.C, threshold:this.threshold, depth:this.depth, resolution:this.b, contextual:this.depth && "strict" === this.c};
   };
   w.prototype.clear = function() {
     return this.destroy().init();

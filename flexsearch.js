@@ -1654,7 +1654,7 @@
 
                 let c = 0
                 for(let q = 0; q < queries.length; q++){
-                    for(let i = 0; i < queries[q].field.length; i++){
+                    for(let i = 0; i < queries[q]['field'].length; i++){
 
                         bool[c] = (SUPPORT_OPERATOR && queries[q].bool) || bool_main;
 
@@ -1664,7 +1664,7 @@
                             _query["limit"] = 0;
                         }
 
-                        result[c++] = doc_idx[queries[q].field[i]].search(queries[q], 0);
+                        result[c++] = doc_idx[queries[q]['field'][i]].search(queries[q], 0);
                     }
                 }
 
