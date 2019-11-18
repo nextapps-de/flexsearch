@@ -2,7 +2,7 @@
   "name": "flexsearch",
   "version": "0.6.32",
   "description": "Next-Generation full text search library with zero dependencies.",
-  "homepage": "https://github.com/nextapps-de/flexsearch/",
+  "homepage": "https://github.com/brooke-stephens-cbc/flexsearch/",
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
   "license": "Apache-2.0",
@@ -14,7 +14,7 @@
     "fuzzy search"
   ],
   "bugs": {
-    "url": "https://github.com/nextapps-de/flexsearch/issues",
+    "url": "https://github.com/brooke-stephens-cbc/flexsearch/issues",
     "email": "info@nextapps.de"
   },
   "main": "dist/flexsearch.node.js",
@@ -23,7 +23,7 @@
   "bin": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/nextapps-de/flexsearch.git"
+    "url": "https://github.com/brooke-stephens-cbc/flexsearch.git"
   },
   "scripts": {
     "build": "node compile RELEASE=min DEBUG=false PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true SUPPORT_LANG_DE=false SUPPORT_LANG_EN=false",
