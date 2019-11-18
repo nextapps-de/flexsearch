@@ -1658,10 +1658,10 @@
 
                         bool[c] = (SUPPORT_OPERATOR && queries[q].bool) || bool_main;
 
-                        if(cursor && !is_string(queries[q])){
+                        if(cursor && !is_string(_query)){
 
-                            queries[q]["page"] = null;
-                            queries[q]["limit"] = 0;
+                            _query["page"] = null;
+                            _query["limit"] = 0;
                         }
 
                         result[c++] = doc_idx[queries[q].field[i]].search(queries[q], 0);
