@@ -9,16 +9,19 @@
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
 <!--
-<script src="../../node_modules/flexsearch/src/config.js"></script>
-<script type="module" src="../../node_modules/flexsearch/src/bundle.js"></script>
+<script src="src/config.js"></script>
+<script type="module" src="src/bundle.js"></script>
 -->
+
 <script src="../../dist/flexsearch.light.js"></script>
+
 <script type="module">
 
     import { suite } from "./../../bench.js";
+    //import { text_data } from "./../../data/gulliver.js";
     //import FlexSearch from "../../node_modules/flexsearch/src/bundle.js";
 
-    let lib;
+    let lib, split = /[^a-z]+/;
 
     suite["flexsearch"] = {
 
@@ -26,15 +29,20 @@
 
             lib = new FlexSearch({
 
-                //encode: "icase",
+                encode: str => str.toLowerCase().split(split),
                 tokenize: "strict",
                 threshold: 8,
-                resolution: 9
+                resolution: 9,
+                depth: 1
             });
+
+            //window.test = lib;
+            //window.data = text_data;
         },
         add: function(data){
 
             for(let i = 0, len = data.length; i < len; i++){
+
                 lib.add(i, data[i]);
             }
         },

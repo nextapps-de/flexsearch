@@ -1968,7 +1968,7 @@ function init_stemmer_or_matcher(obj, is_stemmer){
 
         if((tmp = obj[key])){
 
-            final[count++] = regex(is_stemmer ? "(?!\\b)" + key + "(\\b)" : key);
+            final[count++] = regex(is_stemmer ? "(?!\\b)" + key + "(\\b|_)" : key);
             final[count++] = tmp;
         }
         else{
@@ -1979,7 +1979,7 @@ function init_stemmer_or_matcher(obj, is_stemmer){
 
     if(removal){
 
-        final[count++] = regex(is_stemmer ? "(?!\\b)(" + removal + ")(\\b)" : "(" + removal + ")");
+        final[count++] = regex(is_stemmer ? "(?!\\b)(" + removal + ")(\\b|_)" : "(" + removal + ")");
         final[count] = "";
     }
 

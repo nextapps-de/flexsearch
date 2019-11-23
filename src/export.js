@@ -25,7 +25,7 @@ FlexSearch.prototype.export;
 /** @export */
 FlexSearch.prototype.import;
 /** @export */
-//FlexSearch.prototype.encode;
+//FlexSearch.encode;
 /** @export */
 //FlexSearch.prototype.addMatcher;
 

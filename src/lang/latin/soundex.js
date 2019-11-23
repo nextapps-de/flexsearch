@@ -8,13 +8,13 @@ export default {
     tokenize: tokenize
 }
 
-const regex_whitespace = /[\W_]+/g;
-const regex_strip = /[^a-z ]/g;
+//const regex_whitespace = /[\W_]+/g;
+const regex_strip = /[^a-z]+/;
 
-const pairs = [
-    regex_whitespace, " ",
-    regex_strip, ""
-];
+// const pairs = [
+//     regex_whitespace, " ",
+//     regex_strip, ""
+// ];
 
 /**
  * @this FlexSearch
@@ -25,7 +25,7 @@ export function encode(str){
     str = this.pipeline(
 
         /* string: */ str.toLowerCase(),
-        /* normalize: */ pairs,
+        /* normalize: */ false,
         /* split: */ false,
         /* collapse: */ false
     );
@@ -34,12 +34,12 @@ export function encode(str){
 
     if(str){
 
-        const words = str.split(" ");
+        const words = str.split(regex_strip);
         const length = words.length;
 
         for(let x = 0, count = 0; x < length; x++){
 
-            if((str = words[x]) && (!this.filter || !this.filter[str])){
+            if((str = words[x]) && (str.length > 2) && (!this.filter || !this.filter[str])){
 
                 let code = str[0];
                 let previous = getCode(code);

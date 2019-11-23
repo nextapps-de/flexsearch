@@ -486,9 +486,9 @@ module$src$presets.default = $jscompDefaultExport$$module$src$presets;
 var rtl$$module$src$lang$latin$default = false;
 var tokenize$$module$src$lang$latin$default = "";
 var $jscompDefaultExport$$module$src$lang$latin$default = {encode:encode$$module$src$lang$latin$default, rtl:rtl$$module$src$lang$latin$default};
-var split$$module$src$lang$latin$default = /[\W_]+/;
+var regex_whitespace$$module$src$lang$latin$default = /[\W_]+/;
 function encode$$module$src$lang$latin$default(str) {
-  return this.pipeline(str.toLowerCase(), false, split$$module$src$lang$latin$default, false);
+  return this.pipeline(str.toLowerCase(), false, regex_whitespace$$module$src$lang$latin$default, false);
 }
 var module$src$lang$latin$default = {};
 module$src$lang$latin$default.default = $jscompDefaultExport$$module$src$lang$latin$default;
@@ -1277,14 +1277,14 @@ function init_stemmer_or_matcher$$module$src$flexsearch(obj, is_stemmer) {
   for (var i = 0, tmp = undefined; i < length; i++) {
     var key = keys[i];
     if (tmp = obj[key]) {
-      final[count++] = regex$$module$src$common(is_stemmer ? "(?!\\b)" + key + "(\\b)" : key);
+      final[count++] = regex$$module$src$common(is_stemmer ? "(?!\\b)" + key + "(\\b|_)" : key);
       final[count++] = tmp;
     } else {
       removal += (removal ? "|" : "") + key;
     }
   }
   if (removal) {
-    final[count++] = regex$$module$src$common(is_stemmer ? "(?!\\b)(" + removal + ")(\\b)" : "(" + removal + ")");
+    final[count++] = regex$$module$src$common(is_stemmer ? "(?!\\b)(" + removal + ")(\\b|_)" : "(" + removal + ")");
     final[count] = "";
   }
   return final;
@@ -1527,8 +1527,7 @@ module$src$flexsearch.global_lang = global_lang$$module$src$flexsearch;
 var rtl$$module$src$lang$latin$simple = false;
 var tokenize$$module$src$lang$latin$simple = "";
 var $jscompDefaultExport$$module$src$lang$latin$simple = {encode:encode$$module$src$lang$latin$simple, rtl:rtl$$module$src$lang$latin$simple};
-var regex_whitespace$$module$src$lang$latin$simple = regex$$module$src$common("[\\W_]+");
-var regex_strip$$module$src$lang$latin$simple = regex$$module$src$common("[^a-z0-9 ]");
+var regex_whitespace$$module$src$lang$latin$simple = /[\W_]+/;
 var regex_a$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]");
 var regex_e$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e8\u00e9\u00ea\u00eb]");
 var regex_i$$module$src$lang$latin$simple = regex$$module$src$common("[\u00ec\u00ed\u00ee\u00ef]");
@@ -1539,11 +1538,10 @@ var regex_n$$module$src$lang$latin$simple = regex$$module$src$common("\u00f1");
 var regex_c$$module$src$lang$latin$simple = regex$$module$src$common("[\u00e7c]");
 var regex_s$$module$src$lang$latin$simple = regex$$module$src$common("\u00df");
 var regex_and$$module$src$lang$latin$simple = regex$$module$src$common(" & ");
-var pairs$$module$src$lang$latin$simple = [regex_a$$module$src$lang$latin$simple, "a", regex_e$$module$src$lang$latin$simple, "e", regex_i$$module$src$lang$latin$simple, "i", regex_o$$module$src$lang$latin$simple, "o", regex_u$$module$src$lang$latin$simple, "u", regex_y$$module$src$lang$latin$simple, "y", regex_n$$module$src$lang$latin$simple, "n", regex_c$$module$src$lang$latin$simple, "k", regex_s$$module$src$lang$latin$simple, "s", regex_and$$module$src$lang$latin$simple, " and ", regex_whitespace$$module$src$lang$latin$simple, 
-" ", regex_strip$$module$src$lang$latin$simple, ""];
+var pairs$$module$src$lang$latin$simple = [regex_a$$module$src$lang$latin$simple, "a", regex_e$$module$src$lang$latin$simple, "e", regex_i$$module$src$lang$latin$simple, "i", regex_o$$module$src$lang$latin$simple, "o", regex_u$$module$src$lang$latin$simple, "u", regex_y$$module$src$lang$latin$simple, "y", regex_n$$module$src$lang$latin$simple, "n", regex_c$$module$src$lang$latin$simple, "k", regex_s$$module$src$lang$latin$simple, "s", regex_and$$module$src$lang$latin$simple, " and "];
 function encode$$module$src$lang$latin$simple(str, self) {
   self || (self = this);
-  return self.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$simple, " ", false);
+  return self.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$simple, regex_whitespace$$module$src$lang$latin$simple, false);
 }
 var module$src$lang$latin$simple = {};
 module$src$lang$latin$simple.default = $jscompDefaultExport$$module$src$lang$latin$simple;
@@ -1598,11 +1596,9 @@ module$src$lang$latin$advanced.tokenize = tokenize$$module$src$lang$latin$advanc
 var rtl$$module$src$lang$latin$balance = false;
 var tokenize$$module$src$lang$latin$balance = "";
 var $jscompDefaultExport$$module$src$lang$latin$balance = {encode:encode$$module$src$lang$latin$balance, rtl:rtl$$module$src$lang$latin$balance};
-var regex_whitespace$$module$src$lang$latin$balance = /[\W_]+/g;
-var regex_strip$$module$src$lang$latin$balance = /[^a-z0-9 ]/g;
-var pairs$$module$src$lang$latin$balance = [regex_whitespace$$module$src$lang$latin$balance, " ", regex_strip$$module$src$lang$latin$balance, ""];
+var regex_whitespace$$module$src$lang$latin$balance = /[\W_]+/;
 function encode$$module$src$lang$latin$balance(str) {
-  return this.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$balance, " ", false);
+  return this.pipeline(str.toLowerCase(), false, regex_whitespace$$module$src$lang$latin$balance, false);
 }
 var module$src$lang$latin$balance = {};
 module$src$lang$latin$balance.default = $jscompDefaultExport$$module$src$lang$latin$balance;
@@ -1644,17 +1640,15 @@ module$src$lang$latin$extra.tokenize = tokenize$$module$src$lang$latin$extra;
 var rtl$$module$src$lang$latin$soundex = false;
 var tokenize$$module$src$lang$latin$soundex = "strict";
 var $jscompDefaultExport$$module$src$lang$latin$soundex = {encode:encode$$module$src$lang$latin$soundex, rtl:rtl$$module$src$lang$latin$soundex, tokenize:tokenize$$module$src$lang$latin$soundex};
-var regex_whitespace$$module$src$lang$latin$soundex = /[\W_]+/g;
-var regex_strip$$module$src$lang$latin$soundex = /[^a-z ]/g;
-var pairs$$module$src$lang$latin$soundex = [regex_whitespace$$module$src$lang$latin$soundex, " ", regex_strip$$module$src$lang$latin$soundex, ""];
+var regex_strip$$module$src$lang$latin$soundex = /[^a-z]+/;
 function encode$$module$src$lang$latin$soundex(str) {
-  str = this.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$soundex, false, false);
+  str = this.pipeline(str.toLowerCase(), false, false, false);
   var result = [];
   if (str) {
-    var words = str.split(" ");
+    var words = str.split(regex_strip$$module$src$lang$latin$soundex);
     var length = words.length;
     for (var x = 0, count = 0; x < length; x++) {
-      if ((str = words[x]) && (!this.filter || !this.filter[str])) {
+      if ((str = words[x]) && str.length > 2 && (!this.filter || !this.filter[str])) {
         var code = str[0];
         var previous = getCode$$module$src$lang$latin$soundex(code);
         for (var i = 1; i < str.length; i++) {

@@ -793,9 +793,9 @@ function X(a, b) {
 function ja(a, b) {
   for (var c = Object.keys(a), e = c.length, d = [], h = "", f = 0, g = 0, k; g < e; g++) {
     var l = c[g];
-    (k = a[l]) ? (d[f++] = L(b ? "(?!\\b)" + l + "(\\b)" : l), d[f++] = k) : h += (h ? "|" : "") + l;
+    (k = a[l]) ? (d[f++] = L(b ? "(?!\\b)" + l + "(\\b|_)" : l), d[f++] = k) : h += (h ? "|" : "") + l;
   }
-  h && (d[f++] = L(b ? "(?!\\b)(" + h + ")(\\b)" : "(" + h + ")"), d[f] = "");
+  h && (d[f++] = L(b ? "(?!\\b)(" + h + ")(\\b|_)" : "(" + h + ")"), d[f] = "");
   return d;
 }
 function oa(a, b) {
@@ -946,35 +946,34 @@ function la(a, b, c, e, d, h, f) {
   }
   return Z(c, K, g);
 }
-;var qa = {encode:pa, rtl:!1}, ra = L("[\\W_]+"), sa = L("[^a-z0-9 ]"), ta = L("[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]"), ua = L("[\u00e8\u00e9\u00ea\u00eb]"), va = L("[\u00ec\u00ed\u00ee\u00ef]"), wa = L("[\u00f2\u00f3\u00f4\u00f5\u00f6\u0151]"), xa = L("[\u00f9\u00fa\u00fb\u00fc\u0171]"), ya = L("[\u00fd\u0177\u00ff]"), za = L("\u00f1"), Aa = L("[\u00e7c]"), Ba = L("\u00df"), Ca = L(" & "), Da = [ta, "a", ua, "e", va, "i", wa, "o", xa, "u", ya, "y", za, "n", Aa, "k", Ba, "s", Ca, " and ", ra, " ", 
-sa, ""];
+;var qa = {encode:pa, rtl:!1}, ra = /[\W_]+/, sa = L("[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]"), ta = L("[\u00e8\u00e9\u00ea\u00eb]"), ua = L("[\u00ec\u00ed\u00ee\u00ef]"), va = L("[\u00f2\u00f3\u00f4\u00f5\u00f6\u0151]"), wa = L("[\u00f9\u00fa\u00fb\u00fc\u0171]"), xa = L("[\u00fd\u0177\u00ff]"), ya = L("\u00f1"), za = L("[\u00e7c]"), Aa = L("\u00df"), Ba = L(" & "), Ca = [sa, "a", ta, "e", ua, "i", va, "o", wa, "u", xa, "y", ya, "n", za, "k", Aa, "s", Ba, " and "];
 function pa(a, b) {
   b || (b = this);
-  return b.pipeline(a.toLowerCase(), Da, " ", !1);
+  return b.pipeline(a.toLowerCase(), Ca, ra, !1);
 }
-;var Fa = {encode:Ea, rtl:!1}, Ga = L("ae"), Ha = L("ai"), Ia = L("ay"), Ja = L("ey"), Ka = L("oe"), La = L("ue"), Ma = L("ie"), Na = L("sz"), Oa = L("zs"), Pa = L("ck"), Qa = L("cc"), Ra = L("sh"), Sa = L("th"), Ta = L("dt"), Ua = L("ph"), Va = L("pf"), Wa = L("ou"), Xa = L("uo"), Ya = [Ga, "a", Ha, "ei", Ia, "ei", Ja, "ei", Ka, "o", La, "u", Ma, "i", Na, "s", Oa, "s", Ra, "s", Pa, "k", Qa, "k", Sa, "t", Ta, "t", Ua, "f", Va, "f", Wa, "o", Xa, "u"];
-function Ea(a, b) {
-  a && (a = pa(a, this).join(" "), 2 < a.length && (a = G(a, Ya)), b || (1 < a.length && (a = M(a)), a && (a = a.split(" "))));
+;var Ea = {encode:Da, rtl:!1}, Fa = L("ae"), Ga = L("ai"), Ha = L("ay"), Ia = L("ey"), Ja = L("oe"), Ka = L("ue"), La = L("ie"), Ma = L("sz"), Na = L("zs"), Oa = L("ck"), Pa = L("cc"), Qa = L("sh"), Ra = L("th"), Sa = L("dt"), Ta = L("ph"), Ua = L("pf"), Va = L("ou"), Wa = L("uo"), Xa = [Fa, "a", Ga, "ei", Ha, "ei", Ia, "ei", Ja, "o", Ka, "u", La, "i", Ma, "s", Na, "s", Qa, "s", Oa, "k", Pa, "k", Ra, "t", Sa, "t", Ta, "f", Ua, "f", Va, "o", Wa, "u"];
+function Da(a, b) {
+  a && (a = pa(a, this).join(" "), 2 < a.length && (a = G(a, Xa)), b || (1 < a.length && (a = M(a)), a && (a = a.split(" "))));
   return a;
 }
-;var $a = {encode:Za, rtl:!1}, ab = [/[\W_]+/g, " ", /[^a-z0-9 ]/g, ""];
-function Za(a) {
-  return this.pipeline(a.toLowerCase(), ab, " ", !1);
+;var Za = {encode:Ya, rtl:!1}, $a = /[\W_]+/;
+function Ya(a) {
+  return this.pipeline(a.toLowerCase(), !1, $a, !1);
 }
-;var cb = {encode:bb, rtl:!1}, db = L("(?!\\b)p"), eb = L("(?!\\b)z"), fb = L("(?!\\b)[cgq]"), gb = L("(?!\\b)n"), hb = L("(?!\\b)d"), ib = L("(?!\\b)[vw]"), jb = L("(?!\\b)[aeiouy]"), kb = [db, "b", eb, "s", fb, "k", gb, "m", hb, "t", ib, "f", jb, ""];
-function bb(a) {
-  a && (a = Ea(a, !0), 1 < a.length && (a = G(a, kb)), 1 < a.length && (a = M(a)), a && (a = a.split(" ")));
+;var bb = {encode:ab, rtl:!1}, cb = L("(?!\\b)p"), db = L("(?!\\b)z"), eb = L("(?!\\b)[cgq]"), fb = L("(?!\\b)n"), gb = L("(?!\\b)d"), hb = L("(?!\\b)[vw]"), ib = L("(?!\\b)[aeiouy]"), jb = [cb, "b", db, "s", eb, "k", fb, "m", gb, "t", hb, "f", ib, ""];
+function ab(a) {
+  a && (a = Da(a, !0), 1 < a.length && (a = G(a, jb)), 1 < a.length && (a = M(a)), a && (a = a.split(" ")));
   return a;
 }
-;var mb = {encode:lb, rtl:!1, tokenize:"strict"}, nb = [/[\W_]+/g, " ", /[^a-z ]/g, ""];
-function lb(a) {
-  a = this.pipeline(a.toLowerCase(), nb, !1, !1);
+;var lb = {encode:kb, rtl:!1, tokenize:"strict"}, mb = /[^a-z]+/;
+function kb(a) {
+  a = this.pipeline(a.toLowerCase(), !1, !1, !1);
   var b = [];
   if (a) {
-    for (var c = a.split(" "), e = c.length, d = 0, h = 0; d < e; d++) {
-      if ((a = c[d]) && (!this.filter || !this.filter[a])) {
-        for (var f = a[0], g = ob(f), k = 1; k < a.length; k++) {
-          var l = ob(a[k]);
+    for (var c = a.split(mb), e = c.length, d = 0, h = 0; d < e; d++) {
+      if ((a = c[d]) && 2 < a.length && (!this.filter || !this.filter[a])) {
+        for (var f = a[0], g = nb(f), k = 1; k < a.length; k++) {
+          var l = nb(a[k]);
           if (l !== g && (f += l, g = l, 4 === f.length)) {
             break;
           }
@@ -985,7 +984,7 @@ function lb(a) {
   }
   return b;
 }
-function ob(a) {
+function nb(a) {
   switch(a) {
     case "b":
     case "f":
@@ -1014,27 +1013,27 @@ function ob(a) {
   }
   return "";
 }
-;var qb = {encode:pb, rtl:!0}, rb = /[\W_]+/;
-function pb(a) {
-  return this.pipeline(a, !1, rb, !1);
+;var pb = {encode:ob, rtl:!0}, qb = /[\W_]+/;
+function ob(a) {
+  return this.pipeline(a, !1, qb, !1);
 }
-;var tb = {encode:sb, rtl:!1, tokenize:"strict"}, ub = /[\x00-\x7F]/g;
-function sb(a) {
-  return this.pipeline(a.replace(ub, ""), !1, "", !1);
+;var sb = {encode:rb, rtl:!1, tokenize:"strict"}, tb = /[\x00-\x7F]/g;
+function rb(a) {
+  return this.pipeline(a.replace(tb, ""), !1, "", !1);
 }
-;var wb = {encode:vb, rtl:!1}, xb = /[\W_]+/;
-function vb(a) {
-  return this.pipeline(a, !1, xb, !1);
+;var vb = {encode:ub, rtl:!1}, wb = /[\W_]+/;
+function ub(a) {
+  return this.pipeline(a, !1, wb, !1);
 }
-;V["latin:advanced"] = Fa;
-V["latin:balance"] = $a;
+;V["latin:advanced"] = Ea;
+V["latin:balance"] = Za;
 V["latin:default"] = da;
-V["latin:extra"] = cb;
+V["latin:extra"] = bb;
 V["latin:simple"] = qa;
-V["latin:soundex"] = mb;
-V["arabic:default"] = qb;
-V["cjk:default"] = tb;
-V["cyrillic:default"] = wb;
+V["latin:soundex"] = lb;
+V["arabic:default"] = pb;
+V["cjk:default"] = sb;
+V["cyrillic:default"] = vb;
 U.de = {filter:"aber als am an auch auf aus bei bin bis bist da dadurch daher darum das da\u00df dass dein deine dem den der des dessen deshalb die dies dieser dieses doch dort du durch ein eine einem einen einer eines er es euer eure f\u00fcr hatte hatten hattest hattet hier hinter ich ihr ihre im in ist ja jede jedem jeden jeder jedes jener jenes jetzt kann kannst k\u00f6nnen k\u00f6nnt machen mein meine mit mu\u00df mu\u00dft musst m\u00fcssen m\u00fc\u00dft nach nachdem nein nicht nun oder seid sein seine sich sie sind soll sollen sollst sollt sonst soweit sowie und unser unsere unter vom von vor wann warum was weiter weitere wenn wer werde werden werdet weshalb wie wieder wieso wir wird wirst wo woher wohin zu zum zur \u00fcber".split(" "), 
 stemmer:{niss:"", isch:"", lich:"", heit:"", keit:"", ell:"", bar:"", end:"", ung:"", est:"", ern:"", em:"", er:"", en:"", es:"", st:"", ig:"", ik:"", e:"", s:""}, matcher:{}};
 U.en = {filter:"a about above after again against all also am an and any are aren't as at be because been before being below both but by can cannot can't come could couldn't did didn't do does doesn't doing dont down during each even few first for from further get go had hadn't has hasn't have haven't having he hed her here here's hers herself hes him himself his how how's i id if ill im in into is isn't it it's itself i've just know let's like make me more most mustn't my myself new no nor not now of off on once only or other ought our our's ourselves out over own same say see shan't she she'd shell shes should shouldn't so some such than that that's the their theirs them themselves then there there's these they they'd they'll they're they've this those through time to too until up us very want was wasn't way we wed well were weren't we've what what's when when's where where's which while who whom who's why why's will with won't would wouldn't you you'd you'll your you're your's yourself yourselves you've".split(" "), 

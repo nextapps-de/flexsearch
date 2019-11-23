@@ -10,8 +10,8 @@ export default {
 
 // Charset Normalization
 
-const regex_whitespace = regex("[\\W_]+"),
-    regex_strip = regex("[^a-z0-9 ]"),
+const regex_whitespace = /[\W_]+/,
+    //regex_strip = regex("[^a-z0-9 ]"),
     regex_a = regex("[àáâãäå]"),
     regex_e = regex("[èéêë]"),
     regex_i = regex("[ìíîï]"),
@@ -34,9 +34,9 @@ const pairs = [
     regex_n, "n",
     regex_c, "k",
     regex_s, "s",
-    regex_and, " and ",
-    regex_whitespace, " ",
-    regex_strip, ""
+    regex_and, " and "
+    //regex_whitespace, " "
+    //regex_strip, ""
 ];
 
 /**
@@ -52,7 +52,7 @@ export function encode(str, self){
 
         /* string: */ str.toLowerCase(),
         /* normalize: */ pairs,
-        /* split: */ " ",
+        /* split: */ regex_whitespace,
         /* collapse: */ false
     );
 }

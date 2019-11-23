@@ -7,13 +7,13 @@ export default {
     rtl: rtl
 }
 
-const regex_whitespace = /[\W_]+/g;
-const regex_strip = /[^a-z0-9 ]/g;
+const regex_whitespace = /[\W_]+/;
+//const regex_strip = /[^a-z0-9 ]/g;
 
-const pairs = [
-    regex_whitespace, " ",
-    regex_strip, ""
-];
+// const pairs = [
+//     regex_whitespace, " ",
+//     regex_strip, ""
+// ];
 
 /**
  * @this FlexSearch
@@ -24,8 +24,8 @@ export function encode(str){
     return this.pipeline(
 
         /* string: */ str.toLowerCase(),
-        /* normalize: */ pairs,
-        /* split: */ " ",
+        /* normalize: */ false,
+        /* split: */ regex_whitespace,
         /* collapse: */ false
     );
 }
