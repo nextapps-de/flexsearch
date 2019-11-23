@@ -8,7 +8,7 @@
 <h2>Benchmark: flexsearch-ctx-0.7.0</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
-<script src="../../dist/flexsearch.min.js"></script>
+<script src="../../dist/flexsearch.light.js"></script>
 <script type="module">
 
     import { suite } from "./../../bench.js";
@@ -24,6 +24,7 @@
         add: function(data){
 
             for(let i = 0, len = data.length; i < len; i++){
+
                 lib.add(i, data[i]);
             }
         },

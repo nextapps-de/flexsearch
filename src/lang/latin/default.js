@@ -7,7 +7,7 @@ export default {
     rtl: rtl
 }
 
-const split = /[\W_]+/;
+const regex_whitespace = /[\W_]+/;
 
 /**
  * @this FlexSearch
@@ -19,7 +19,7 @@ export function encode(str){
 
         /* string: */ str.toLowerCase(),
         /* normalize: */ false,
-        /* split: */ split,
+        /* split: */ regex_whitespace,
         /* collapse: */ false
     );
 }

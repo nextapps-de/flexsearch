@@ -5,19 +5,22 @@
     <title>Benchmark</title>
 </head>
 <body>
-<h2>Benchmark: flexsearch-ctx-0.7.0</h2><hr/>
+<h2>Benchmark: flexsearch-0.6.3</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
-<script src="../../dist/flexsearch.light.js"></script>
-<!--<script src="module/config.js"></script>-->
+<!--
+<script src="../../node_modules/flexsearch/src/config.js"></script>
+<script type="module" src="../../node_modules/flexsearch/src/bundle.js"></script>
+-->
+<script src="flexsearch.light.js"></script>
 <script type="module">
 
     import { suite } from "./../../bench.js";
-    //import FlexSearch from "./module/flexsearch.js";
+    //import FlexSearch from "../../node_modules/flexsearch/src/bundle.js";
 
     let lib;
 
-    suite["flexsearch-ctx"] = {
+    suite["flexsearch"] = {
 
         init: function(){
 
@@ -25,14 +28,17 @@
 
                 //encode: "icase",
                 tokenize: "strict",
-                threshold: 8,
-                resolution: 9,
+                threshold: 99999,
+                resolution: 99999,
                 depth: 1
             });
+
+            window.test = lib;
         },
         add: function(data){
 
             for(let i = 0, len = data.length; i < len; i++){
+
                 lib.add(i, data[i]);
             }
         },

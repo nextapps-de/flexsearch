@@ -8,18 +8,19 @@
     const list = Mikado(document.getElementById("lib"), "lib", options);
 
     const modes = window.location.hash.indexOf("modes") !== -1;
+    const encode = window.location.hash.indexOf("encode") !== -1;
     let keep;
     let repeat;
     let index = -1;
 
-    let lib = shuffle(modes ? [
+    let lib = shuffle(modes || encode ? [
 
         "flexsearch-balance", "flexsearch-default", "flexsearch-fast",
         "flexsearch-match", "flexsearch-memory", "flexsearch-score",
         "flexsearch-speed"
     ]:[
         "bm25", "bulksearch", "elasticlunr",
-        "flexsearch", "flexsearch-ctx", "fuse",
+        "flexsearch", "flexsearch-0.6.3", "fuse",
         "fuzzysearch", "js-search", "jsii",
         "lunr", "wade"
     ]);
@@ -49,8 +50,10 @@
 
     }).listen("click").listen("change");
 
-    const test = [
+    const test = encode ? [
 
+        "size", "memory", "encode"
+    ]:[
         "size", "memory",
         "add", "query-single",
         "query-multi", "not-found"
@@ -64,7 +67,7 @@
         "bulksearch": 1,
         "elasticlunr": 1,
         "flexsearch": 1,
-        "flexsearch-ctx": 1,
+        "flexsearch-0.6.3": 1,
         "fuse": 1,
         "fuzzysearch": 1,
         "js-search": 1,
@@ -72,13 +75,13 @@
         "lunr": 1,
         "wade": 1,
 
-        "flexsearch-balance": 2.8,
-        "flexsearch-default": 2.8,
-        "flexsearch-fast": 2.8,
-        "flexsearch-match": 2.8,
-        "flexsearch-memory": 2.8,
-        "flexsearch-score": 7.1,
-        "flexsearch-speed": 7.1,
+        "flexsearch-balance": 3.0,
+        "flexsearch-default": 3.0,
+        "flexsearch-fast": 3.0,
+        "flexsearch-match": 3.0,
+        "flexsearch-memory": 3.0,
+        "flexsearch-score": 3.0,
+        "flexsearch-speed": 3.0
     };
 
     for(let x = 0; x < lib.length; x++){
@@ -110,7 +113,7 @@
         const tmp = Object.assign({}, current[index]);
         tmp[test[2]] = "run...";
         mikado.update(mikado.node(index), tmp);
-        iframe.src = "test/" + lib[index].toLowerCase() + "/" + ("?duration=" + duration);
+        iframe.src = "test/" + lib[index].toLowerCase() + "/" + "?duration=" + duration + (encode ? "&encode=true" : "");
     }
 
     function get_score(){
