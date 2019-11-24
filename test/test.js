@@ -37,43 +37,43 @@ describe("Initialize", function(){
         flexsearch_sync = new FlexSearch({
 
             tokenize: "forward",
-            encode: false,
+            //encode: false,
             async: false,
             worker: false
         });
 
-        flexsearch_async = FlexSearch.create({
+        flexsearch_async = FlexSearch({
 
             tokenize: "forward",
-            encode: false,
+            //encode: false,
             async: true,
             worker: false
         });
 
         flexsearch_icase = new FlexSearch({
 
-            encode: "icase",
+            charset: "latin:default",
             async: false,
             worker: false
         });
 
-        flexsearch_simple = FlexSearch.create({
+        flexsearch_simple = FlexSearch({
 
-            encode: "simple",
+            charset: "latin:simple",
             async: false,
             worker: false
         });
 
         flexsearch_advanced = new FlexSearch({
 
-            encode: "advanced",
+            charset: "latin:advanced",
             async: false,
             worker: false
         });
 
-        flexsearch_extra = FlexSearch.create({
+        flexsearch_extra = FlexSearch({
 
-            encode: "extra",
+            charset: "latin:extra",
             async: false,
             worker: false
         });
@@ -87,7 +87,7 @@ describe("Initialize", function(){
 
         flexsearch_strict = new FlexSearch({
 
-            encode: "icase",
+            charset: "latin",
             tokenize: "strict",
             async: false,
             worker: false
@@ -95,7 +95,7 @@ describe("Initialize", function(){
 
         flexsearch_forward = new FlexSearch({
 
-            encode: "icase",
+            charset: "latin",
             tokenize: "forward",
             async: false,
             worker: false
@@ -103,7 +103,7 @@ describe("Initialize", function(){
 
         flexsearch_reverse = new FlexSearch({
 
-            encode: "icase",
+            charset: "latin",
             tokenize: "reverse",
             resolution: 10,
             async: false,
@@ -112,7 +112,7 @@ describe("Initialize", function(){
 
         flexsearch_full = new FlexSearch({
 
-            encode: "icase",
+            charset: "latin",
             tokenize: "full",
             async: false,
             worker: false
@@ -120,7 +120,7 @@ describe("Initialize", function(){
 
         flexsearch_ngram = new FlexSearch({
 
-            encode: "advanced",
+            charset: "latin:advanced",
             tokenize: "ngram",
             async: false,
             worker: false
@@ -128,7 +128,7 @@ describe("Initialize", function(){
 
         flexsearch_cache = new FlexSearch({
 
-            encode: "icase",
+            charset: "latin",
             tokenize: "reverse",
             cache: 2
         });
@@ -181,8 +181,8 @@ describe("Initialize", function(){
 
         if(env !== "light"){
 
-            expect(flexsearch_default.async).to.equal(false);
-            expect(flexsearch_sync.async).to.equal(false);
+            expect(flexsearch_default.async).to.not.equal(true);
+            expect(flexsearch_sync.async).to.not.equal(true);
             expect(flexsearch_async.async).to.equal(true);
         }
 
@@ -212,7 +212,7 @@ describe("Add (Sync)", function(){
         flexsearch_sync.add(2, "bar");
         flexsearch_sync.add(1, "foobar");
 
-        expect(flexsearch_sync.index).to.have.members(["@0", "@1", "@2"]);
+        expect(flexsearch_sync.index).to.have.members(["0", "1", "2"]);
         expect(flexsearch_sync.length).to.equal(3);
     });
 
@@ -443,7 +443,7 @@ if(env !== "light"){
             setTimeout(function(){
 
                 expect(flexsearch_async.length).to.equal(3);
-                expect(flexsearch_async.index).to.have.members(["@0", "@1", "@2"]);
+                expect(flexsearch_async.index).to.have.members(["0", "1", "2"]);
 
                 done();
 
@@ -465,7 +465,7 @@ if(env !== "light"){
             setTimeout(function(){
 
                 expect(flexsearch_async.length).to.equal(3);
-                expect(flexsearch_async.index).to.have.members(["@0", "@1", "@2"]);
+                expect(flexsearch_async.index).to.have.members(["0", "1", "2"]);
 
                 done();
 
@@ -688,7 +688,7 @@ if(env !== "light"){
 
                 flexsearch_worker = new FlexSearch({
 
-                    encode: "icase",
+                    charset: "latin:default",
                     tokenize: "reverse",
                     async: false,
                     worker: 4
@@ -704,7 +704,7 @@ if(env !== "light"){
                 setTimeout(function(){
 
                     expect(flexsearch_worker.length).to.equal(3);
-                    expect(flexsearch_worker.index).to.have.members(["@0", "@1", "@2"]);
+                    expect(flexsearch_worker.index).to.have.members(["0", "1", "2"]);
 
                     flexsearch_worker.search("foo", function(result){
 
@@ -733,7 +733,7 @@ if(env !== "light"){
                 setTimeout(function(){
 
                     expect(flexsearch_worker.length).to.equal(3);
-                    expect(flexsearch_worker.index).to.have.members(["@0", "@1", "@2"]);
+                    expect(flexsearch_worker.index).to.have.members(["0", "1", "2"]);
 
                     done();
 
@@ -908,53 +908,50 @@ describe("Encoding", function(){
 
     it("Should have been encoded properly: iCase", function(){
 
-        expect(flexsearch_icase.encode("Björn-Phillipp Mayer")).to.equal(flexsearch_icase.encode("björn-phillipp mayer"));
+        expect(flexsearch_icase.encode("Björn-Phillipp Mayer")).to.eql(flexsearch_icase.encode("björn-phillipp mayer"));
     });
 
     if(env !== "light"){
 
         it("Should have been encoded properly: Simple", function(){
 
-            expect(flexsearch_simple.encode("Björn-Phillipp Mayer")).to.equal(flexsearch_simple.encode("bjorn/phillipp mayer"));
+            expect(flexsearch_simple.encode("Björn-Phillipp Mayer")).to.eql(flexsearch_simple.encode("bjorn/phillipp mayer"));
         });
 
         it("Should have been encoded properly: Advanced", function(){
 
-            expect(flexsearch_advanced.encode("Björn-Phillipp Mayer")).to.equal(flexsearch_advanced.encode("bjoern filip mair"));
+            expect(flexsearch_advanced.encode("Björn-Phillipp Mayer")).to.eql(flexsearch_advanced.encode("bjoern filip mair"));
         });
 
         it("Should have been encoded properly: Extra", function(){
 
-            expect(flexsearch_extra.encode("Björn-Phillipp Mayer")).to.equal(flexsearch_extra.encode("bjorm filib mayr"));
+            expect(flexsearch_extra.encode("Björn-Phillipp Mayer")).to.eql(flexsearch_extra.encode("bjorm filib mayr"));
         });
     }
 
     it("Should have been encoded properly: Custom Encoder", function(){
 
-        expect(flexsearch_custom.encode("Björn-Phillipp Mayer")).to.equal("-[BJÖRN-PHILLIPP MAYER]-");
+        expect(flexsearch_custom.encode("Björn-Phillipp Mayer")).to.eql("-[BJÖRN-PHILLIPP MAYER]-");
     });
 
-    it("Should have been encoded properly: Custom Encoder", function(){
-
-        FlexSearch.registerEncoder("custom", test_encoder);
-
-        expect(FlexSearch.encode("custom", "Björn-Phillipp Mayer")).to.equal(flexsearch_custom.encode("Björn-Phillipp Mayer"));
-    });
+    // it("Should have been encoded properly: Custom Encoder", function(){
+    //
+    //     FlexSearch.registerEncoder("custom", test_encoder);
+    //
+    //     expect(FlexSearch.encode("custom", "Björn-Phillipp Mayer")).to.eql(flexsearch_custom.encode("Björn-Phillipp Mayer"));
+    // });
 });
 
 // ------------------------------------------------------------------------
-// CJK Word Break
+// Word Break
 // ------------------------------------------------------------------------
 
 describe("CJK Word Break", function(){
 
     it("Should have been tokenized properly", function(){
 
-        var index = FlexSearch.create({
-            encode: false,
-            tokenize: function(str){
-                return str.replace(/[\x00-\x7F]/g, "").split("");
-            }
+        var index = FlexSearch({
+            charset: "cjk"
         });
 
         index.add(0, "서울시가 잠이 든 시간에 아무 말, 미뤄, 미뤄");
@@ -968,25 +965,33 @@ describe("CJK Word Break", function(){
     });
 });
 
-// ------------------------------------------------------------------------
-// Cyrillic Word Break
-// ------------------------------------------------------------------------
-
 describe("Cyrillic Word Break", function(){
 
     it("Should have been tokenized properly", function(){
 
-        var index = FlexSearch.create({
-            encode: false,
-            tokenize: function(str){
-                return str.replace(/[\x00-\x7F]/g, "").split("");
-            }
+        var index = FlexSearch({
+            charset: "cyrillic",
+            tokenize: "reverse"
         });
 
         index.add(0, "Фообар");
 
         expect(index.search("Фообар")).to.include(0);
         expect(index.search("бар")).to.include(0);
+    });
+});
+
+describe("Arabic Word Break", function(){
+
+    it("Should have been tokenized properly", function(){
+
+        var index = FlexSearch({
+            charset: "arabic"
+        });
+
+        index.add(0, "لكن لا بد أن أوضح لك أن كل");
+
+        expect(index.search("بد أن")).to.include(0);
     });
 });
 
@@ -1000,7 +1005,6 @@ describe("RTL Support", function(){
 
         var index = new FlexSearch({
 
-            encode: "icase",
             tokenize: "reverse",
             rtl: true
         });
@@ -1025,7 +1029,6 @@ describe("Context", function(){
 
         var flexsearch_depth = new FlexSearch({
 
-            encode: "icase",
             tokenize: "strict",
             depth: 2,
             async: false,
@@ -1125,7 +1128,6 @@ describe("Filter", function(){
     it("Should have been filtered properly", function(){
 
         var index = new FlexSearch({
-            encode: "icase",
             tokenize: "strict",
             filter: ["in", "the"]
         });
@@ -1138,23 +1140,23 @@ describe("Filter", function(){
         expect(index.search("in the")).to.have.length(0);
     });
 
-    it("Should have been filtered properly (custom function)", function(){
-
-        var index = new FlexSearch({
-            encode: "icase",
-            tokenize: "strict",
-            filter: function(word){
-                return word.length > 3;
-            }
-        });
-
-        index.add(0, "Today in the morning.");
-
-        expect(index.length).to.equal(1);
-        expect(index.search("today in the morning.")).to.include(0);
-        expect(index.search("today morning")).to.include(0);
-        expect(index.search("in the")).to.have.length(0);
-    });
+    // it("Should have been filtered properly (custom function)", function(){
+    //
+    //     var index = new FlexSearch({
+    //
+    //         tokenize: "strict",
+    //         filter: function(word){
+    //             return word.length > 3;
+    //         }
+    //     });
+    //
+    //     index.add(0, "Today in the morning.");
+    //
+    //     expect(index.length).to.equal(1);
+    //     expect(index.search("today in the morning.")).to.include(0);
+    //     expect(index.search("today morning")).to.include(0);
+    //     expect(index.search("in the")).to.have.length(0);
+    // });
 });
 
 describe("Stemmer", function(){
@@ -1162,7 +1164,6 @@ describe("Stemmer", function(){
     it("Should have been stemmed properly", function(){
 
         var index = new FlexSearch({
-            encode: "icase",
             tokenize: "reverse",
             stemmer: {
                 "ization": "ize",
@@ -1186,7 +1187,6 @@ describe("Stemmer", function(){
         };
 
         var index = new FlexSearch({
-            encode: "icase",
             tokenize: "strict",
             stemmer: function(word){
                 return stems[word] || word;
@@ -1207,19 +1207,13 @@ describe("Custom Language", function(){
 
     it("Should have been applied properly", function(){
 
-        FlexSearch.registerLanguage("custom", {
+        var index = new FlexSearch({
+            tokenize: "reverse",
             filter: ["a", "an"],
             stemmer: {
                 "ization": "ize",
                 "tional": "tion"
             }
-        });
-
-        var index = new FlexSearch({
-            encode: "icase",
-            tokenize: "reverse",
-            filter: "custom",
-            stemmer: "custom"
         });
 
         index.add(0, "Just a multinational colonization.");
@@ -1230,8 +1224,15 @@ describe("Custom Language", function(){
         expect(index.search("multinational colonization")).to.include(0);
         expect(index.search("tional tion")).to.have.length(0);
 
+        FlexSearch.registerLanguage("custom", {
+            filter: ["a", "an"],
+            stemmer: {
+                "ization": "ize",
+                "tional": "tion"
+            }
+        });
+
         index = new FlexSearch({
-            encode: "icase",
             tokenize: "reverse",
             lang: "custom"
         });
@@ -1255,7 +1256,7 @@ describe("Relevance", function(){
     it("Should have been sorted by relevance properly", function(){
 
         var index = new FlexSearch({
-            encode: "advanced",
+            charset: "latin:advanced",
             tokenize: "strict"
         });
 
@@ -1269,7 +1270,7 @@ describe("Relevance", function(){
         expect(index.search("four one")).to.have.members([1, 2]);
 
         index = new FlexSearch({
-            encode: "advanced",
+            charset: "latin:advanced",
             tokenize: "strict",
             threshold: 5,
             depth: 3
@@ -1285,7 +1286,7 @@ describe("Relevance", function(){
         expect(index.search("four one")).to.have.members([1, 2]);
 
         index = new FlexSearch({
-            encode: "extra",
+            charset: "latin:extra",
             tokenize: "strict",
             threshold: 5,
             depth: 3
@@ -1314,7 +1315,7 @@ if(env !== "light") describe("Suggestions", function(){
     it("Should have been suggested properly by relevance", function(){
 
         var index = new FlexSearch({
-            encode: "advanced",
+            charset: "latin:advanced",
             tokenize: "strict"
         });
 
@@ -1335,7 +1336,7 @@ if(env !== "light") describe("Suggestions", function(){
     it("Should have been suggested properly by context", function(){
 
         var index = new FlexSearch({
-            encode: "advanced",
+            charset: "latin:advanced",
             tokenize: "strict",
             depth: 3
         });
@@ -1381,14 +1382,14 @@ if((env === "") || (env === "min") || (env === "pre")) describe("Where/Find", fu
         var index = new FlexSearch({
             doc: {
                 id: "id",
-                field: ["title"]
+                field: "title"
             }
         });
 
         index.add(data);
 
         expect(index.length).to.equal(3);
-        expect(index.index).to.have.members(["@0", "@1", "@2"]);
+        expect(index.index).to.have.members(["0", "1", "2"]);
 
         expect(index.find(0)).to.equal(data[0]);
         expect(index.find("id", 0)).to.equal(data[0]);
@@ -1436,7 +1437,7 @@ if((env === "") || (env === "min") || (env === "pre")) describe("Where/Find", fu
         index.add(data);
 
         expect(index.length).to.equal(3);
-        expect(index.index).to.have.members(["@0", "@1", "@2"]);
+        expect(index.index).to.have.members(["0", "1", "2"]);
 
         expect(index.where({cat: "1"})).to.have.members([data[0], data[2]]);
         expect(index.where("cat", "1")).to.have.members([data[0], data[2]]);
@@ -1490,7 +1491,7 @@ if((env === "") || (env === "min") || (env === "pre")) describe("Where/Find", fu
         index.add(data);
 
         expect(index.length).to.equal(3);
-        expect(index.index).to.have.members(["@0", "@1", "@2"]);
+        expect(index.index).to.have.members(["0", "1", "2"]);
 
         expect(index.where({cat: "1"})).to.have.members([data[0], data[2]]);
 
@@ -1729,11 +1730,11 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
                 id: "id",
                 field: {
                     "data:title": {
-                        encode: "advanced",
+                        charset: "latin:advanced",
                         tokenize: "reverse"
                     },
                     "data:body": {
-                        encode: "icase",
+                        charset: "latin:default",
                         tokenize: "strict"
                     }
                 }
@@ -2047,9 +2048,9 @@ if(env !== "light") describe("Index Multi-Field Documents", function(){
             sort: "data:title"
         });
 
-        expect(results[0]).to.equal(data[2]);
-        expect(results[1]).to.equal(data[1]);
-        expect(results[2]).to.equal(data[0]);
+        expect(results[0]).to.eql(data[2]);
+        expect(results[1]).to.eql(data[1]);
+        expect(results[2]).to.eql(data[0]);
     });
 
     it("Should have been sorted suggested and paged", function(){
@@ -2138,7 +2139,7 @@ if(env !== "light") describe("Pagination", function(){
 
         index.add(0, "test").add(1, "test").add(2, "test").add(3, "test").add(4, "test");
 
-        expect(index.index).to.have.members(["@0", "@1", "@2", "@3", "@4"]);
+        expect(index.index).to.have.members(["0", "1", "2", "3", "4"]);
         expect(index.search("test")).to.have.lengthOf(5);
         expect(index.search("test", 2)).to.have.lengthOf(2);
 
@@ -2182,7 +2183,7 @@ if(env !== "light") describe("Pagination", function(){
 
         index.add(0, "foo bar").add(1, "foo bar").add(2, "foo bar test").add(3, "foo bar").add(4, "foo bar");
 
-        expect(index.index).to.have.members(["@0", "@1", "@2", "@3", "@4"]);
+        expect(index.index).to.have.members(["0", "1", "2", "3", "4"]);
         expect(index.search("foo")).to.have.lengthOf(5);
         expect(index.search("foo", 2)).to.have.lengthOf(2);
 
@@ -2271,8 +2272,8 @@ if(env !== "light") describe("Pagination", function(){
 
         if(env === ""){
 
-            expect(index.doc.index["title"].index).to.have.members(["@0", "@1", "@2", "@3", "@4"]);
-            expect(index.doc.index["body"].index).to.have.members(["@0", "@1", "@2", "@3", "@4"]);
+            expect(index.doc.index["title"].index).to.have.members(["0", "1", "2", "3", "4"]);
+            expect(index.doc.index["body"].index).to.have.members(["0", "1", "2", "3", "4"]);
         }
 
         expect(index.search("title")).to.have.lengthOf(5);
@@ -2313,30 +2314,30 @@ if(env !== "light") describe("Pagination", function(){
     });
 });
 
-describe("Custom Split", function(){
-
-    it("Should have been split properly", function(){
-
-        var index = FlexSearch.create({
-            encode: false,
-            split: /\s+/,
-            tokenize: "reverse"
-        });
-
-        index.add(0, "Фообар");
-
-        expect(index.search("Фообар")).to.include(0);
-        expect(index.search("бар")).to.include(0);
-        expect(index.search("Фоо")).to.include(0);
-    });
-});
+// describe("Custom Split", function(){
+//
+//     it("Should have been split properly", function(){
+//
+//         var index = FlexSearch({
+//             encode: false,
+//             split: /\s+/,
+//             tokenize: "reverse"
+//         });
+//
+//         index.add(0, "Фообар");
+//
+//         expect(index.search("Фообар")).to.include(0);
+//         expect(index.search("бар")).to.include(0);
+//         expect(index.search("Фоо")).to.include(0);
+//     });
+// });
 
 describe("Github Issues", function(){
 
     if(env !== "light") it("#48", function(){
 
         const fs = new FlexSearch({
-            encode: "extra",
+            charset: "latin:extra",
             tokenize: "full",
             threshold: 1,
             depth: 4,
@@ -2412,6 +2413,7 @@ if(env !== "light") describe("Operators", function(){
     }];
 
     var index = new FlexSearch({
+        tokenize: "forward",
         doc: {
             id: "id",
             field: ["title", "body", "blacklist"]
@@ -2593,7 +2595,7 @@ describe("Reserved Words", function(){
     it("Should have been indexed properly", function(){
 
         var index = new FlexSearch({
-            encode: false,
+            encode: function(str){ return [str]; },
             tokenize: "strict",
             threshold: 0,
             depth: 3
@@ -2678,7 +2680,7 @@ if(env !== "light") describe("Export / Import", function(){
     it("Should have been exported properly (documents)", function(){
 
         var index = new FlexSearch({
-            encode: "icase",
+
             tokenize: "strict",
             threshold: 1,
             resolution: 3,
@@ -2728,7 +2730,7 @@ if(env !== "light") describe("Export / Import", function(){
     it("Should have been imported properly (documents)", function(){
 
         var index = new FlexSearch({
-            encode: "icase",
+
             tokenize: "strict",
             threshold: 1,
             resolution: 3,
@@ -2762,21 +2764,21 @@ describe("Presets", function(){
 
     it("Should have been properly initialized", function(){
 
-        expect(FlexSearch.create("memory").length).to.equal(0);
-        expect(FlexSearch.create("speed").length).to.equal(0);
-        expect(FlexSearch.create("match").length).to.equal(0);
-        expect(FlexSearch.create("score").length).to.equal(0);
-        expect(FlexSearch.create("balance").length).to.equal(0);
-        expect(FlexSearch.create("fast").length).to.equal(0);
+        expect(FlexSearch("memory").length).to.equal(0);
+        expect(FlexSearch("speed").length).to.equal(0);
+        expect(FlexSearch("match").length).to.equal(0);
+        expect(FlexSearch("score").length).to.equal(0);
+        expect(FlexSearch("balance").length).to.equal(0);
+        expect(FlexSearch("fast").length).to.equal(0);
     });
 
     it("Should have been properly extended", function(){
 
-        var index = FlexSearch.create("fast");
+        var index = FlexSearch("fast");
         index.add(0, "foobar");
         expect(index.search("bar")).to.have.lengthOf(0);
 
-        index = FlexSearch.create("fast", {id: "test", tokenize: "reverse"});
+        index = FlexSearch({preset: "speed", id: "test", tokenize: "reverse"});
         expect(index.id).to.equal("test");
         index.add(0, "foobar");
         expect(index.search("bar")).to.have.lengthOf(1);
@@ -2792,35 +2794,24 @@ describe("Add Matchers", function(){
 
     it("Should have been added properly", function(){
 
-        FlexSearch.registerMatcher({
-
-            "1": "a",
-            "2": "b",
-            "3": "c",
-            "[456]": "d"
-        });
-
         flexsearch_forward.init({
 
-            encode: false
-
-        }).init({
-
-            encode: "not-found",
+            tokenize: "forward",
             matcher: {
 
-                "7": "e"
+                "1": "a",
+                "2": "b",
+                "3": "c",
+                "7": "e",
+                "8": "f",
+                "[456]": "d"
             }
-
-        }).addMatcher({
-
-            "8": "f"
 
         }).add(0, "12345678");
 
         expect(flexsearch_forward.search("12345678")).to.include(0);
         expect(flexsearch_forward.search("abcd")).to.include(0);
-        expect(flexsearch_forward.encode("12345678")).to.equal("abcdddef");
+        expect(flexsearch_forward.encode("12345678")).to.eql(["abcdddef"]);
     });
 });
 
@@ -2902,7 +2893,7 @@ describe("Destroy", function(){
 
     it("Should have been destroyed properly", function(){
 
-        var index = FlexSearch.create()
+        var index = FlexSearch()
                               .add(0, "foo")
                               .add(1, "bar");
 
@@ -2919,7 +2910,7 @@ describe("Destroy", function(){
 
         var data = [{id: 0, title: "foo"}, {id: 1, title: "bar"}];
 
-        var index = FlexSearch.create({doc: {id: "id", field: "title"}})
+        var index = FlexSearch({doc: {id: "id", field: "title"}})
                               .add(data)
                               .add(data);
 
@@ -2941,14 +2932,13 @@ describe("Chaining", function(){
 
     it("Should have been chained properly", function(){
 
-        var index = FlexSearch.create({tokenize: "forward", encode: "icase"})
-                              .addMatcher({"â": "a"})
+        var index = FlexSearch({tokenize: "forward", matcher: {"â": "a"}})
                               .add(0, "foo")
                               .add(1, "bar");
 
         expect(index.search("foo")).to.include(0);
         expect(index.search("bar")).to.include(1);
-        expect(index.encode("bâr")).to.equal("bar");
+        expect(index.encode("bâr")).to.eql(["bar"]);
 
         index.remove(0).update(1, "foo").add(2, "foobâr");
 

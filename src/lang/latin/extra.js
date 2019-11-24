@@ -1,3 +1,4 @@
+import FlexSearch from "../../flexsearch.js";
 import { regex, replace, collapse } from "../../common.js";
 import { encode as encode_advanced } from "./advanced.js";
 
@@ -34,7 +35,7 @@ export function encode(str){
 
     if(str){
 
-        str = encode_advanced(str, /* skip post-processing: */ true);
+        str = encode_advanced(str, /** @type {FlexSearch} */ (this), /* skip post-processing: */ true);
 
         if(str.length > 1){
 
