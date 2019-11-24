@@ -479,8 +479,7 @@ if (SUPPORT_WORKER) {
 var module$src$worker = {};
 module$src$worker.addWorker = addWorker$$module$src$worker;
 module$src$worker.default = init$$module$src$worker;
-var $jscompDefaultExport$$module$src$presets = {"memory":{encode:SUPPORT_ENCODER ? "extra" : "icase", tokenize:"strict", threshold:0, resolution:1}, "speed":{encode:"icase", tokenize:"strict", threshold:1, resolution:3, depth:2}, "match":{encode:SUPPORT_ENCODER ? "extra" : "icase", tokenize:"full", threshold:1, resolution:3}, "score":{encode:SUPPORT_ENCODER ? "extra" : "icase", tokenize:"strict", threshold:1, resolution:9, depth:4}, "balance":{encode:SUPPORT_ENCODER ? "balance" : "icase", tokenize:"strict", 
-threshold:0, resolution:3, depth:3}, "fast":{encode:"icase", tokenize:"strict", threshold:8, resolution:9, depth:1}};
+var $jscompDefaultExport$$module$src$presets = {"memory":{charset:"latin:extra", threshold:0, resolution:1}, "speed":{threshold:1, resolution:3, depth:2}, "match":{charset:"latin:extra", tokenize:"full", threshold:1, resolution:3}, "score":{charset:"latin:extra", threshold:1, resolution:9, depth:4}, "balance":{charset:"latin:balance", threshold:0, resolution:3, depth:3}, "fast":{threshold:8, resolution:9, depth:1}};
 var module$src$presets = {};
 module$src$presets.default = $jscompDefaultExport$$module$src$presets;
 var rtl$$module$src$lang$latin$default = false;
@@ -495,7 +494,6 @@ module$src$lang$latin$default.default = $jscompDefaultExport$$module$src$lang$la
 module$src$lang$latin$default.encode = encode$$module$src$lang$latin$default;
 module$src$lang$latin$default.rtl = rtl$$module$src$lang$latin$default;
 module$src$lang$latin$default.tokenize = tokenize$$module$src$lang$latin$default;
-var defaults$$module$src$flexsearch = {"encode":encode$$module$src$lang$latin$default, "tokenize":"strict", "cache":false, "async":false, "worker":false, "rtl":false, "doc":false, "resolution":9, "threshold":0, "depth":0};
 var id_counter$$module$src$flexsearch = 0;
 var global_lang$$module$src$flexsearch = {};
 var global_charset$$module$src$flexsearch = {};
@@ -507,10 +505,13 @@ function FlexSearch$$module$src$flexsearch(options) {
   this.id = id || id === 0 ? id : id_counter$$module$src$flexsearch++;
   this.init(options);
   register_property$$module$src$flexsearch(this, "index", function() {
+    if (SUPPORT_DOCUMENT && this.doc) {
+      return get_keys$$module$src$common(this.doc.index[this.doc.keys[0]]._ids);
+    }
     return get_keys$$module$src$common(this._ids);
   });
   register_property$$module$src$flexsearch(this, "length", function() {
-    return this.index.length;
+    return this["index"].length;
   });
 }
 FlexSearch$$module$src$flexsearch["registerCharset"] = function(name, charset) {
@@ -518,13 +519,13 @@ FlexSearch$$module$src$flexsearch["registerCharset"] = function(name, charset) {
   return FlexSearch$$module$src$flexsearch;
 };
 FlexSearch$$module$src$flexsearch["registerLanguage"] = function(name, lang) {
-  global_charset$$module$src$flexsearch[name] = lang;
+  global_lang$$module$src$flexsearch[name] = lang;
   return FlexSearch$$module$src$flexsearch;
 };
 FlexSearch$$module$src$flexsearch.prototype.init = function(options) {
   var custom;
   var doc;
-  if (SUPPORT_PRESET) {
+  if (SUPPORT_PRESET && options) {
     if (is_string$$module$src$common(options)) {
       if (DEBUG && !$jscompDefaultExport$$module$src$presets[options]) {
         console.warn("Preset not found: " + options);
@@ -539,56 +540,60 @@ FlexSearch$$module$src$flexsearch.prototype.init = function(options) {
       }
     }
   }
-  if (!this.encode) {
-    if (options) {
-      options = Object.assign({}, defaults$$module$src$flexsearch, options);
+  options || (options = {});
+  if (SUPPORT_WORKER && (custom = options["worker"])) {
+    if (typeof init$$module$src$worker === "undefined") {
+      options["worker"] = false;
+      this._worker = null;
     } else {
-      options = defaults$$module$src$flexsearch;
-    }
-  }
-  if (options) {
-    if (SUPPORT_WORKER && (custom = options["worker"])) {
-      if (typeof init$$module$src$worker === "undefined") {
-        options["worker"] = false;
-        this._worker = null;
-      } else {
-        var threads = parseInt(custom, 10) || 4;
-        this._current_task = -1;
-        this._task_completed = 0;
-        this._task_result = [];
-        this._current_callback = null;
-        this._worker = new Array(threads);
-        for (var i = 0; i < threads; i++) {
-          this._worker[i] = addWorker$$module$src$worker(this.id, i, options, this.worker_handler);
-        }
-      }
-      this.worker = custom;
-    }
-    if (SUPPORT_ASYNC) {
-      this.async = options["async"];
-      this.timer = 0;
-    }
-    var charset = options["charset"];
-    var lang = options["lang"];
-    this.tokenizer = (is_string$$module$src$common(charset) ? global_charset$$module$src$flexsearch[charset].tokenize : charset && charset.tokenize) || options["tokenize"];
-    this.rtl = is_string$$module$src$common(custom = options["rtl"] || charset) ? global_charset$$module$src$flexsearch[custom].rtl : charset && charset.rtl || custom;
-    this.threshold = options["threshold"];
-    this.resolution = (custom = options["resolution"]) <= this.threshold ? this.threshold + 1 : custom;
-    this.depth = this.tokenizer === "strict" && options["depth"] || 0;
-    this.encode = is_string$$module$src$common(custom = options["encode"] || charset) ? global_charset$$module$src$flexsearch[custom.indexOf(":") === -1 ? custom + ":default" : custom].encode : charset && charset.encode || custom;
-    this.matcher = (custom = options["matcher"] || lang) && init_stemmer_or_matcher$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].matcher : lang && lang.matcher || custom, false);
-    this.filter = (custom = options["filter"] || lang) && init_filter$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].filter : lang && lang.filter || custom);
-    this.stemmer = (custom = options["stemmer"] || lang) && init_stemmer_or_matcher$$module$src$flexsearch(is_string$$module$src$common(custom) ? global_lang$$module$src$flexsearch[custom].stemmer : lang && lang.stemmer || custom, true);
-    if (SUPPORT_DOCUMENT) {
-      this.doc = doc = (custom = options["doc"]) && clone_object$$module$src$flexsearch(custom);
-      if (doc) {
-        options["doc"] = null;
+      var threads = parseInt(custom, 10) || 4;
+      this._current_task = -1;
+      this._task_completed = 0;
+      this._task_result = [];
+      this._current_callback = null;
+      this._worker = new Array(threads);
+      for (var i = 0; i < threads; i++) {
+        this._worker[i] = addWorker$$module$src$worker(this.id, i, options, this.worker_handler);
       }
     }
+    this.worker = custom;
   }
-  this._map = create_object_array$$module$src$common(this.resolution - (this.threshold || 0));
+  if (SUPPORT_ASYNC) {
+    this.async = options["async"];
+    this.timer = 0;
+  }
+  var charset = options["charset"];
+  var lang = options["lang"];
+  if (is_string$$module$src$common(charset)) {
+    if (charset.indexOf(":") === -1) {
+      charset += ":default";
+    }
+    charset = global_charset$$module$src$flexsearch[charset];
+  }
+  if (is_string$$module$src$common(lang)) {
+    lang = global_lang$$module$src$flexsearch[lang];
+  }
+  this.tokenizer = custom = charset && charset.tokenize || options["tokenize"] || "strict";
+  this.depth = custom === "strict" && options["depth"] || 0;
+  this.rtl = charset && charset.rtl || options["rtl"] || false;
+  this.resolution = options["resolution"] || 9;
+  this.threshold = custom = options["threshold"] || 0;
+  if (this.resolution <= custom) {
+    this.resolution = custom + 1;
+  }
+  this.encode = options["encode"] || charset && charset.encode || encode$$module$src$lang$latin$default;
+  this.matcher = (custom = options["matcher"] || lang && lang.matcher) && init_stemmer_or_matcher$$module$src$flexsearch(custom, false);
+  this.stemmer = (custom = options["stemmer"] || lang && lang.stemmer) && init_stemmer_or_matcher$$module$src$flexsearch(custom, true);
+  this.filter = (custom = options["filter"] || lang && lang.filter) && init_filter$$module$src$flexsearch(custom);
+  if (SUPPORT_DOCUMENT) {
+    this.doc = doc = (custom = options["doc"]) && clone_object$$module$src$flexsearch(custom);
+    if (doc) {
+      options["doc"] = null;
+    }
+  }
+  this._map = create_object_array$$module$src$common(this.resolution - this.threshold);
   this._ctx = create_object$$module$src$common();
-  this._ids = {};
+  this._ids = create_object$$module$src$common();
   if (SUPPORT_DOCUMENT && doc) {
     this._doc = create_object$$module$src$common();
     var index = doc.index = {};
@@ -666,9 +671,9 @@ FlexSearch$$module$src$flexsearch.prototype.init = function(options) {
       }
     }
   }
-  if (SUPPORT_CACHE && (custom = options["cache"])) {
+  if (SUPPORT_CACHE) {
     this._cache_status = true;
-    this._cache = new CacheClass$$module$src$cache(custom);
+    this._cache = (custom = options["cache"]) && new CacheClass$$module$src$cache(custom);
   }
   return this;
 };
@@ -695,8 +700,7 @@ FlexSearch$$module$src$flexsearch.prototype.add = function(id, content, callback
     return this.handle_docs("add", id, content);
   }
   if (content && is_string$$module$src$common(content) && (id || id === 0)) {
-    var index = id;
-    if (this._ids[index] && !_skip_update) {
+    if (this._ids[id] && !_skip_update) {
       return this.update(id, content);
     }
     if (!_recall) {
@@ -735,9 +739,11 @@ FlexSearch$$module$src$flexsearch.prototype.add = function(id, content, callback
     var resolution = this.resolution;
     var map = this._map;
     var rtl = this.rtl;
+    var has_content;
     for (var i = 0; i < word_length; i++) {
       var value = words[i];
       if (value) {
+        has_content = 1;
         var length = value.length;
         var context_score = (rtl ? i + 1 : word_length - i) / word_length;
         var token = "";
@@ -787,7 +793,9 @@ FlexSearch$$module$src$flexsearch.prototype.add = function(id, content, callback
         }
       }
     }
-    this._ids[index] = 1;
+    if (has_content) {
+      this._ids[id] = 1;
+    }
     if (SUPPORT_CACHE) {
       this._cache_status = false;
     }
@@ -798,11 +806,10 @@ if (SUPPORT_DOCUMENT) {
   FlexSearch$$module$src$flexsearch.prototype.handle_docs = function(job, doc, callback) {
     if (is_array$$module$src$common(doc)) {
       var len = doc.length;
-      if (len--) {
+      if (len) {
         for (var i = 0; i < len; i++) {
-          this.handle_docs(job, doc[i]);
+          this.handle_docs(job, doc[i], i === len - 1 && callback);
         }
-        return this.handle_docs(job, doc[len], callback);
       }
     } else {
       var index = this.doc.index;
@@ -818,65 +825,65 @@ if (SUPPORT_DOCUMENT) {
       }
       if (job === "remove") {
         delete this._doc[id];
-        var length = keys.length;
-        if (length--) {
-          for (var z = 0; z < length; z++) {
-            index[keys[z]].remove(id);
+        var len$17 = keys.length;
+        if (len$17) {
+          for (var i$18 = 0; i$18 < len$17; i$18++) {
+            index[keys[i$18]].remove(id, i$18 === len$17 - 1 && callback);
           }
-          return index[keys[length]].remove(id, callback);
         }
-      }
-      if (tags) {
-        var tag_key;
-        var tag_value;
-        for (var i$17 = 0; i$17 < tags.length; i$17++) {
-          tag_key = tags[i$17];
-          tag_value = doc;
-          var tag_split = tag_key.split(":");
-          for (var a = 0; a < tag_split.length; a++) {
-            tag_value = tag_value[tag_split[a]];
+      } else {
+        if (tags) {
+          var tag_key;
+          var tag_value;
+          for (var i$19 = 0; i$19 < tags.length; i$19++) {
+            tag_key = tags[i$19];
+            tag_value = doc;
+            var tag_split = tag_key.split(":");
+            for (var a = 0; a < tag_split.length; a++) {
+              tag_value = tag_value[tag_split[a]];
+            }
+            tag_value = "@" + tag_value;
           }
-          tag_value = "@" + tag_value;
+          tag = this._tag[tag_key];
+          tag = tag[tag_value] || (tag[tag_value] = []);
         }
-        tag = this._tag[tag_key];
-        tag = tag[tag_value] || (tag[tag_value] = []);
-      }
-      tree = this.doc["field"];
-      for (var i$18 = 0, len$19 = tree.length; i$18 < len$19; i$18++) {
-        var branch = tree[i$18];
-        var content = doc;
-        for (var x = 0; x < branch.length; x++) {
-          content = content[branch[x]];
+        tree = this.doc["field"];
+        for (var i$20 = 0, len$21 = tree.length; i$20 < len$21; i$20++) {
+          var branch = tree[i$20];
+          var content = doc;
+          for (var x = 0; x < branch.length; x++) {
+            content = content[branch[x]];
+          }
+          var self$22 = index[keys[i$20]];
+          if (job === "add") {
+            self$22.add(id, content, i$20 === len$21 - 1 && callback);
+          } else {
+            self$22.update(id, content, i$20 === len$21 - 1 && callback);
+          }
         }
-        var self$20 = index[keys[i$18]];
-        if (job === "add") {
-          self$20.add(id, content, i$18 === len$19 - 1 && callback);
-        } else {
-          self$20.update(id, content, i$18 === len$19 - 1 && callback);
-        }
-      }
-      if (store) {
-        var store_keys = get_keys$$module$src$common(store);
-        var store_doc = create_object$$module$src$common();
-        for (var i$21 = 0; i$21 < store_keys.length; i$21++) {
-          var store_key = store_keys[i$21];
-          if (store[store_key]) {
-            var store_split = store_key.split(":");
-            var store_value = undefined;
-            var store_doc_value = undefined;
-            for (var a$22 = 0; a$22 < store_split.length; a$22++) {
-              var store_split_key = store_split[a$22];
-              store_value = (store_value || doc)[store_split_key];
-              store_doc_value = (store_doc_value || store_doc)[store_split_key] = store_value;
+        if (store) {
+          var store_keys = get_keys$$module$src$common(store);
+          var store_doc = create_object$$module$src$common();
+          for (var i$23 = 0; i$23 < store_keys.length; i$23++) {
+            var store_key = store_keys[i$23];
+            if (store[store_key]) {
+              var store_split = store_key.split(":");
+              var store_value = undefined;
+              var store_doc_value = undefined;
+              for (var a$24 = 0; a$24 < store_split.length; a$24++) {
+                var store_split_key = store_split[a$24];
+                store_value = (store_value || doc)[store_split_key];
+                store_doc_value = (store_doc_value || store_doc)[store_split_key] = store_value;
+              }
             }
           }
+          doc = store_doc;
         }
-        doc = store_doc;
+        if (tag) {
+          tag[tag.length] = doc;
+        }
+        this._doc[id] = doc;
       }
-      if (tag) {
-        tag[tag.length] = doc;
-      }
-      this._doc[id] = doc;
     }
     return this;
   };
@@ -885,8 +892,7 @@ FlexSearch$$module$src$flexsearch.prototype.update = function(id, content, callb
   if (SUPPORT_DOCUMENT && this.doc && is_object$$module$src$common(id)) {
     return this.handle_docs("update", id, content);
   }
-  var index = id;
-  if (this._ids[index] && is_string$$module$src$common(content)) {
+  if (this._ids[id] && is_string$$module$src$common(content)) {
     this.remove(id);
     this.add(id, content, callback, true);
   }
@@ -900,11 +906,11 @@ FlexSearch$$module$src$flexsearch.prototype.remove = function(id, callback, _rec
   if (this._ids[index]) {
     if (!_recall) {
       if (SUPPORT_ASYNC && this.async && typeof importScripts !== "function") {
-        var self$23 = this;
+        var self$25 = this;
         var promise = new Promise(function(resolve) {
           setTimeout(function() {
-            self$23.remove(id, null, true);
-            self$23 = null;
+            self$25.remove(id, null, true);
+            self$25 = null;
             resolve();
           });
         });
@@ -962,7 +968,6 @@ FlexSearch$$module$src$flexsearch.prototype.merge_and_sort = function(query, boo
       if (field_to_sort$$module$src$flexsearch.length > 1) {
         sort = sort_by_deep_field_up$$module$src$flexsearch;
       } else {
-        field_to_sort$$module$src$flexsearch = field_to_sort$$module$src$flexsearch[0];
         sort = sort_by_field_up$$module$src$flexsearch;
       }
     }
@@ -1033,11 +1038,11 @@ FlexSearch$$module$src$flexsearch.prototype.search = function(query, limit, call
         queries = _query;
         field = [];
         bool = [];
-        for (var i$24 = 0; i$24 < _query.length; i$24++) {
-          var current = _query[i$24];
+        for (var i$26 = 0; i$26 < _query.length; i$26++) {
+          var current = _query[i$26];
           var current_bool = SUPPORT_OPERATOR && current["bool"] || bool_main;
-          field[i$24] = current["field"];
-          bool[i$24] = current_bool;
+          field[i$26] = current["field"];
+          bool[i$26] = current_bool;
           if (current_bool === "not") {
             has_not = true;
           } else {
@@ -1051,24 +1056,24 @@ FlexSearch$$module$src$flexsearch.prototype.search = function(query, limit, call
       }
     }
     var len = field.length;
-    for (var i$25 = 0; i$25 < len; i$25++) {
+    for (var i$27 = 0; i$27 < len; i$27++) {
       if (queries) {
-        _query = queries[i$25];
+        _query = queries[i$27];
       }
       if (cursor && !is_string$$module$src$common(_query)) {
         _query["page"] = null;
         _query["limit"] = 0;
       }
-      result[i$25] = doc_idx[field[i$25]].search(_query, 0);
+      result[i$27] = doc_idx[field[i$27]].search(_query, 0);
     }
     if (callback) {
       return callback(this.merge_and_sort(query, bool, result, sort, limit, suggest, where, cursor, has_and, has_not));
     } else {
       if (SUPPORT_ASYNC && this.async) {
-        var self$26 = this;
+        var self$28 = this;
         return new Promise(function(resolve) {
           Promise.all(result).then(function(values) {
-            resolve(self$26.merge_and_sort(query, bool, values, sort, limit, suggest, where, cursor, has_and, has_not));
+            resolve(self$28.merge_and_sort(query, bool, values, sort, limit, suggest, where, cursor, has_and, has_not));
           });
         });
       } else {
@@ -1079,11 +1084,11 @@ FlexSearch$$module$src$flexsearch.prototype.search = function(query, limit, call
   threshold || (threshold = this.threshold || 0);
   if (!_recall) {
     if (SUPPORT_ASYNC && this.async && typeof importScripts !== "function") {
-      var self$27 = this;
+      var self$29 = this;
       var promise = new Promise(function(resolve) {
         setTimeout(function() {
-          resolve(self$27.search(_query, limit, null, true));
-          self$27 = null;
+          resolve(self$29.search(_query, limit, null, true));
+          self$29 = null;
         });
       });
       if (callback) {
@@ -1262,11 +1267,11 @@ function remove_index$$module$src$flexsearch(map, id) {
   }
 }
 function init_filter$$module$src$flexsearch(words) {
-  var final = create_object$$module$src$common();
+  var filter = create_object$$module$src$common();
   for (var i = 0, length = words.length; i < length; i++) {
-    final[words[i]] = 1;
+    filter[words[i]] = 1;
   }
-  return final;
+  return filter;
 }
 function init_stemmer_or_matcher$$module$src$flexsearch(obj, is_stemmer) {
   var keys = get_keys$$module$src$common(obj);
@@ -1293,7 +1298,9 @@ function sort_by_length_down$$module$src$flexsearch(a, b) {
   return b.length - a.length;
 }
 function sort_by_field_up$$module$src$flexsearch(a, b) {
-  return a[field_to_sort$$module$src$flexsearch] - b[field_to_sort$$module$src$flexsearch];
+  a = a[field_to_sort$$module$src$flexsearch];
+  b = b[field_to_sort$$module$src$flexsearch];
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 function sort_by_deep_field_up$$module$src$flexsearch(a, b) {
   var field_len = field_to_sort$$module$src$flexsearch.length;
@@ -1301,7 +1308,7 @@ function sort_by_deep_field_up$$module$src$flexsearch(a, b) {
     a = a[field_to_sort$$module$src$flexsearch[i]];
     b = b[field_to_sort$$module$src$flexsearch[i]];
   }
-  return a - b;
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 function create_page$$module$src$flexsearch(cursor, page, result) {
   return cursor ? {"page":cursor, "next":page ? "" + page : null, "result":result} : result;
@@ -1416,13 +1423,13 @@ function intersect$$module$src$flexsearch(arrays, limit, cursor, suggest, bool, 
       var found = false;
       for (i = 0; i < length; i++) {
         tmp = arr[i];
-        var index$28 = "@" + tmp;
-        var check_val = has_and ? check[index$28] || 0 : z;
+        var index$30 = "@" + tmp;
+        var check_val = has_and ? check[index$30] || 0 : z;
         if (check_val || suggest) {
-          if (has_not && check_not[index$28]) {
+          if (has_not && check_not[index$30]) {
             continue;
           }
-          if (!has_and && check[index$28]) {
+          if (!has_and && check[index$30]) {
             continue;
           }
           if (check_val === z) {
@@ -1434,7 +1441,7 @@ function intersect$$module$src$flexsearch(arrays, limit, cursor, suggest, bool, 
                 }
               }
             } else {
-              check[index$28] = z + 1;
+              check[index$30] = z + 1;
             }
             found = true;
           } else {
@@ -1450,17 +1457,17 @@ function intersect$$module$src$flexsearch(arrays, limit, cursor, suggest, bool, 
       }
     }
     if (first_result) {
-      var result_length$29 = first_result.length;
+      var result_length$31 = first_result.length;
       if (has_not) {
         if (pointer) {
           i = parseInt(pointer, 10);
         } else {
           i = 0;
         }
-        for (; i < result_length$29; i++) {
-          var id$30 = first_result[i];
-          if (!check_not["@" + id$30]) {
-            result[count++] = id$30;
+        for (; i < result_length$31; i++) {
+          var id$32 = first_result[i];
+          if (!check_not["@" + id$32]) {
+            result[count++] = id$32;
           }
         }
       } else {
@@ -1480,9 +1487,9 @@ function intersect$$module$src$flexsearch(arrays, limit, cursor, suggest, bool, 
         tmp = suggestions[z];
         if (tmp) {
           for (length = tmp.length; i < length; i++) {
-            var id$31 = tmp[i];
-            if (!has_not || !check_not["@" + id$31]) {
-              result[count++] = id$31;
+            var id$33 = tmp[i];
+            if (!has_not || !check_not["@" + id$33]) {
+              result[count++] = id$33;
               if (limit && count === limit) {
                 return create_page$$module$src$flexsearch(cursor, z + ":" + i, result);
               }
@@ -1503,13 +1510,13 @@ function intersect$$module$src$flexsearch(arrays, limit, cursor, suggest, bool, 
     }
   }
   if (limit) {
-    var length$32 = result.length;
-    if (pointer && pointer > length$32) {
+    var length$34 = result.length;
+    if (pointer && pointer > length$34) {
       pointer = 0;
     }
     var start = pointer || 0;
     page = start + limit;
-    if (page < length$32) {
+    if (page < length$34) {
       result = result.slice(start, page);
     } else {
       page = 0;
@@ -1540,8 +1547,7 @@ var regex_s$$module$src$lang$latin$simple = regex$$module$src$common("\u00df");
 var regex_and$$module$src$lang$latin$simple = regex$$module$src$common(" & ");
 var pairs$$module$src$lang$latin$simple = [regex_a$$module$src$lang$latin$simple, "a", regex_e$$module$src$lang$latin$simple, "e", regex_i$$module$src$lang$latin$simple, "i", regex_o$$module$src$lang$latin$simple, "o", regex_u$$module$src$lang$latin$simple, "u", regex_y$$module$src$lang$latin$simple, "y", regex_n$$module$src$lang$latin$simple, "n", regex_c$$module$src$lang$latin$simple, "k", regex_s$$module$src$lang$latin$simple, "s", regex_and$$module$src$lang$latin$simple, " and "];
 function encode$$module$src$lang$latin$simple(str, self) {
-  self || (self = this);
-  return self.pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$simple, regex_whitespace$$module$src$lang$latin$simple, false);
+  return (self || this).pipeline(str.toLowerCase(), pairs$$module$src$lang$latin$simple, regex_whitespace$$module$src$lang$latin$simple, false);
 }
 var module$src$lang$latin$simple = {};
 module$src$lang$latin$simple.default = $jscompDefaultExport$$module$src$lang$latin$simple;
@@ -1571,9 +1577,9 @@ var regex_ou$$module$src$lang$latin$advanced = regex$$module$src$common("ou");
 var regex_uo$$module$src$lang$latin$advanced = regex$$module$src$common("uo");
 var pairs$$module$src$lang$latin$advanced = [regex_ae$$module$src$lang$latin$advanced, "a", regex_ai$$module$src$lang$latin$advanced, "ei", regex_ay$$module$src$lang$latin$advanced, "ei", regex_ey$$module$src$lang$latin$advanced, "ei", regex_oe$$module$src$lang$latin$advanced, "o", regex_ue$$module$src$lang$latin$advanced, "u", regex_ie$$module$src$lang$latin$advanced, "i", regex_sz$$module$src$lang$latin$advanced, "s", regex_zs$$module$src$lang$latin$advanced, "s", regex_sh$$module$src$lang$latin$advanced, 
 "s", regex_ck$$module$src$lang$latin$advanced, "k", regex_cc$$module$src$lang$latin$advanced, "k", regex_th$$module$src$lang$latin$advanced, "t", regex_dt$$module$src$lang$latin$advanced, "t", regex_ph$$module$src$lang$latin$advanced, "f", regex_pf$$module$src$lang$latin$advanced, "f", regex_ou$$module$src$lang$latin$advanced, "o", regex_uo$$module$src$lang$latin$advanced, "u"];
-function encode$$module$src$lang$latin$advanced(str, _skip_postprocessing) {
+function encode$$module$src$lang$latin$advanced(str, self, _skip_postprocessing) {
   if (str) {
-    str = encode$$module$src$lang$latin$simple(str, this).join(" ");
+    str = encode$$module$src$lang$latin$simple(str, self || this).join(" ");
     if (str.length > 2) {
       str = replace$$module$src$common(str, pairs$$module$src$lang$latin$advanced);
     }
@@ -1619,7 +1625,7 @@ var regex_vowel$$module$src$lang$latin$extra = regex$$module$src$common(prefix$$
 var pairs$$module$src$lang$latin$extra = [soundex_b$$module$src$lang$latin$extra, "b", soundex_s$$module$src$lang$latin$extra, "s", soundex_k$$module$src$lang$latin$extra, "k", soundex_m$$module$src$lang$latin$extra, "m", soundex_t$$module$src$lang$latin$extra, "t", soundex_f$$module$src$lang$latin$extra, "f", regex_vowel$$module$src$lang$latin$extra, ""];
 function encode$$module$src$lang$latin$extra(str) {
   if (str) {
-    str = encode$$module$src$lang$latin$advanced(str, true);
+    str = encode$$module$src$lang$latin$advanced(str, this, true);
     if (str.length > 1) {
       str = replace$$module$src$common(str, pairs$$module$src$lang$latin$extra);
     }
@@ -1704,9 +1710,9 @@ module$src$lang$latin$soundex.tokenize = tokenize$$module$src$lang$latin$soundex
 var rtl$$module$src$lang$arabic$default = true;
 var tokenize$$module$src$lang$arabic$default = "";
 var $jscompDefaultExport$$module$src$lang$arabic$default = {encode:encode$$module$src$lang$arabic$default, rtl:rtl$$module$src$lang$arabic$default};
-var split$$module$src$lang$arabic$default = /[\W_]+/;
+var regex$$module$src$lang$arabic$default = /[\x00-\x7F]+/g;
 function encode$$module$src$lang$arabic$default(str) {
-  return this.pipeline(str, false, split$$module$src$lang$arabic$default, false);
+  return this.pipeline(str.replace(regex$$module$src$lang$arabic$default, " "), false, " ", false);
 }
 var module$src$lang$arabic$default = {};
 module$src$lang$arabic$default.default = $jscompDefaultExport$$module$src$lang$arabic$default;
@@ -1716,7 +1722,7 @@ module$src$lang$arabic$default.tokenize = tokenize$$module$src$lang$arabic$defau
 var rtl$$module$src$lang$cjk$default = false;
 var tokenize$$module$src$lang$cjk$default = "strict";
 var $jscompDefaultExport$$module$src$lang$cjk$default = {encode:encode$$module$src$lang$cjk$default, rtl:rtl$$module$src$lang$cjk$default, tokenize:tokenize$$module$src$lang$cjk$default};
-var regex$$module$src$lang$cjk$default = /[\x00-\x7F]/g;
+var regex$$module$src$lang$cjk$default = /[\x00-\x7F]+/g;
 function encode$$module$src$lang$cjk$default(str) {
   return this.pipeline(str.replace(regex$$module$src$lang$cjk$default, ""), false, "", false);
 }
@@ -1728,9 +1734,9 @@ module$src$lang$cjk$default.tokenize = tokenize$$module$src$lang$cjk$default;
 var rtl$$module$src$lang$cyrillic$default = false;
 var tokenize$$module$src$lang$cyrillic$default = "";
 var $jscompDefaultExport$$module$src$lang$cyrillic$default = {encode:encode$$module$src$lang$cyrillic$default, rtl:rtl$$module$src$lang$cyrillic$default};
-var split$$module$src$lang$cyrillic$default = /[\W_]+/;
+var regex$$module$src$lang$cyrillic$default = /[\x00-\x7F]+/g;
 function encode$$module$src$lang$cyrillic$default(str) {
-  return this.pipeline(str, false, split$$module$src$lang$cyrillic$default, false);
+  return this.pipeline(str.replace(regex$$module$src$lang$cyrillic$default, " "), false, " ", false);
 }
 var module$src$lang$cyrillic$default = {};
 module$src$lang$cyrillic$default.default = $jscompDefaultExport$$module$src$lang$cyrillic$default;

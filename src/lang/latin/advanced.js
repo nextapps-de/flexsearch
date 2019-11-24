@@ -51,11 +51,11 @@ const pairs = [
     regex_uo, "u"
 ];
 
-export function encode(str, _skip_postprocessing){
+export function encode(str, self, _skip_postprocessing){
 
     if(str){
 
-        str = encode_simple(str, /** @type {FlexSearch} */ (this)).join(" ");
+        str = encode_simple(str, /** @type {FlexSearch} */ (self || this)).join(" ");
 
         if(str.length > 2){
 

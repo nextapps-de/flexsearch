@@ -29,39 +29,39 @@ import {
     regex
 } from "./common.js";
 
+let id_counter = 0;
+export const global_lang = {};
+export const global_charset = {};
+
 /**
  * TODO: inlining them
  * @const
  * @enum {boolean|string|number|RegExp|Function}
  */
 
-const defaults = {
-
-    "encode": default_encoder,
-    "tokenize": "strict",
-    // split: default_split,
-    // enrich: true,
-    // clone: false,
-    // suggest: false,
-    "cache": false,
-    "async": false,
-    "worker": false,
-    "rtl": false,
-    "doc": false,
-
-    // maximum scoring
-    "resolution": 9,
-
-    // minimum scoring
-    "threshold": 0,
-
-    // contextual depth
-    "depth": 0
-};
-
-let id_counter = 0;
-export const global_lang = {};
-export const global_charset = {};
+// const defaults = {
+//
+//     "encode": default_encoder,
+//     "tokenize": "strict",
+//     // split: default_split,
+//     // enrich: true,
+//     // clone: false,
+//     // suggest: false,
+//     "cache": false,
+//     "async": false,
+//     "worker": false,
+//     "rtl": false,
+//     "doc": false,
+//
+//     // maximum scoring
+//     "resolution": 9,
+//
+//     // minimum scoring
+//     "threshold": 0,
+//
+//     // contextual depth
+//     "depth": 0
+// };
 
 /**
  * NOTE: Actually not really required when using bare objects via: Object.create(null)
@@ -104,17 +104,17 @@ export default function FlexSearch(options){
 
     register_property(this, "index", /** @this {FlexSearch} */ function(){
 
-        // if(SUPPORT_DOCUMENT && this.doc){
-        //
-        //     return get_keys(this.doc.index[this.doc.keys[0]]._ids);
-        // }
+        if(SUPPORT_DOCUMENT && this.doc){
+
+            return get_keys(this.doc.index[this.doc.keys[0]]._ids);
+        }
 
         return get_keys(this._ids);
     });
 
     register_property(this, "length", /** @this {FlexSearch} */ function(){
 
-        return this.index.length;
+        return this["index"].length;
     });
 }
 
@@ -154,7 +154,7 @@ FlexSearch["registerCharset"] = function(name, charset){
 
 FlexSearch["registerLanguage"] = function(name, lang){
 
-    global_charset[name] = lang;
+    global_lang[name] = lang;
 
     return FlexSearch;
 };
@@ -194,7 +194,7 @@ FlexSearch.prototype.init = function(options){
     let custom;
     let doc;
 
-    if(SUPPORT_PRESET){
+    if(SUPPORT_PRESET && options){
 
         if(is_string(options)){
 
@@ -205,33 +205,38 @@ FlexSearch.prototype.init = function(options){
 
             options = presets[options];
         }
-        else{
+        else if((custom = options["preset"])){
 
-            if((custom = options["preset"])){
+            if(DEBUG && !presets[custom]){
 
-                if(DEBUG && !presets[custom]){
-
-                    console.warn("Preset not found: " + custom);
-                }
-
-                options = Object.assign({}, presets[custom], /** @type {Object} */ (options));
+                console.warn("Preset not found: " + custom);
             }
+
+            options = Object.assign({}, presets[custom], /** @type {Object} */ (options));
         }
     }
 
-    if(!this.encode){
+    options || (options = {});
 
-        if(options){
+    // TODO reset state and rebuild index
 
-            options = Object.assign({}, defaults, /** @type {Object} */ (options));
-        }
-        else{
+    // if(this.encode){
+    //
+    // }
 
-            options = defaults;
-        }
-    }
+    // if(!this.encode){
+    //
+    //     if(options){
+    //
+    //         options = Object.assign({}, defaults, /** @type {Object} */ (options));
+    //     }
+    //     else{
+    //
+    //         options = defaults;
+    //     }
+    // }
 
-    if(options){
+    //if(options){
 
         // initialize worker
 
@@ -273,44 +278,50 @@ FlexSearch.prototype.init = function(options){
         }
 
         if(SUPPORT_ASYNC){
+
             /** @private */
             this.async = options["async"];
             /** @private */
             this.timer = 0;
         }
 
-        const charset = options["charset"];
-        const lang = options["lang"];
+        let charset = options["charset"];
+        let lang = options["lang"];
+
+        if(is_string(charset)){
+
+            if(charset.indexOf(":") === -1){
+
+                charset += ":default";
+            }
+
+            charset = global_charset[charset];
+        }
+
+        if(is_string(lang)){
+
+            lang = global_lang[lang];
+        }
 
         /** @private */
-        this.tokenizer = (is_string(charset) ? global_charset[charset].tokenize : charset && charset.tokenize) || options["tokenize"];
+        this.tokenizer = custom = (charset && charset.tokenize) || options["tokenize"] || "strict";
         /** @private */
-        //this.split = is_string(custom = options["split"] || charset) ? (global_charset[custom] ? global_charset[custom].split : regex(custom)) : global_charset.split || custom;
+        this.depth = ((custom === "strict") && options["depth"]) || 0;
         /** @private */
-        this.rtl = is_string(custom = options["rtl"] || charset) ? global_charset[custom].rtl : charset && charset.rtl || custom;
+        this.rtl = (charset && charset.rtl) || options["rtl"] || false;
         /** @private */
-        this.threshold = options["threshold"];
+        this.resolution = options["resolution"] || 9;
         /** @private */
-        this.resolution = ((custom = options["resolution"]) <= this.threshold ? this.threshold + 1 : custom);
-        /** @private */
-        this.depth = ((this.tokenizer === "strict") && options["depth"]) || 0;
+        this.threshold = custom = options["threshold"] || 0;
+        if(this.resolution <= custom) this.resolution = custom + 1;
         /** @export */
-        this.encode = is_string(custom = options["encode"] || charset) ? global_charset[custom.indexOf(":") === -1 ? custom + ":default" : custom].encode : charset && charset.encode || custom; //is_function(custom = options["encode"]) ? custom : (FlexSearch.Encoder[custom] /*&& global_encoder[custom].bind(global_encoder)*/);
-
-        this.matcher = (custom = options["matcher"] || lang) && init_stemmer_or_matcher(
-
-            is_string(custom) ? global_lang[custom].matcher : lang && lang.matcher || custom, false
-        );
-
-        this.filter = (custom = options["filter"] || lang) && init_filter(
-
-            is_string(custom) ? global_lang[custom].filter : lang && lang.filter || custom
-        );
-
-        this.stemmer = (custom = options["stemmer"] || lang) && init_stemmer_or_matcher(
-
-            is_string(custom) ? global_lang[custom].stemmer : lang && lang.stemmer || custom, true
-        );
+        this.encode = options["encode"] || (charset && charset.encode) || default_encoder;
+        /** @private */
+        this.matcher = (custom = options["matcher"] || (lang && lang.matcher)) && init_stemmer_or_matcher(custom, false);
+        /** @private */
+        this.stemmer = (custom = options["stemmer"] || (lang && lang.stemmer)) && init_stemmer_or_matcher(custom, true);
+        /** @private */
+        this.filter = (custom = options["filter"] || (lang && lang.filter)) && init_filter(custom);
 
         // TODO: provide boost
         /** @private */
@@ -326,16 +337,16 @@ FlexSearch.prototype.init = function(options){
                 options["doc"] = null;
             }
         }
-    }
+    //}
 
     // initialize primary index
 
     /** @private */
-    this._map = create_object_array(this.resolution - (this.threshold || 0));
+    this._map = create_object_array(this.resolution - this.threshold);
     /** @private */
     this._ctx = create_object();
     /** @private */
-    this._ids = {};
+    this._ids = create_object();
 
     if(SUPPORT_DOCUMENT && doc){
 
@@ -466,13 +477,13 @@ FlexSearch.prototype.init = function(options){
         //options["doc"] = custom;
     }
 
-    if(SUPPORT_CACHE && (custom = options["cache"])) {
+    if(SUPPORT_CACHE) {
 
         /** @private */
         this._cache_status = true;
 
         /** @private */
-        this._cache = new Cache(custom);
+        this._cache = (custom = options["cache"]) && new Cache(custom);
     }
 
     return this;
@@ -524,11 +535,13 @@ FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall
 
     if(content && is_string(content) && ((id /*&& !index_blacklist[id]*/) || (id === 0))){
 
+        //id = "" + id;
+
         // TODO: do not mix ids as string "1" and as number 1
 
-        const index = id;
+        //const index = "" + id;
 
-        if(this._ids[index] && !_skip_update){
+        if(this._ids[id] && !_skip_update){
 
             return this.update(id, content);
         }
@@ -547,7 +560,7 @@ FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall
         //         "content": content
         //     });
         //
-        //     this._ids[index] = "" + this._current_task;
+        //     this._ids[id] = "" + this._current_task;
         //
         //     // TODO: provide worker auto-balancing instead of rotation
         //     //this._ids_count[this._current_task]++;
@@ -620,6 +633,8 @@ FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall
         const map = this._map;
         const rtl = this.rtl;
 
+        let has_content;
+
         // tokenize
 
         for(let i = 0; i < word_length; i++){
@@ -628,6 +643,8 @@ FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall
             const value = words[i];
 
             if(value){
+
+                has_content = 1;
 
                 const length = value.length;
                 const context_score = (rtl ? i + 1 : word_length - i) / word_length;
@@ -759,9 +776,12 @@ FlexSearch.prototype.add = function(id, content, callback, _skip_update, _recall
             }
         }
 
-        // update status
+        if(has_content){
 
-        this._ids[index] = 1;
+            // update status
+
+            this._ids[id] = 1;
+        }
 
         if(SUPPORT_CACHE){
 
@@ -782,7 +802,7 @@ if(SUPPORT_DOCUMENT){
     /**
      * @param {!string} job
      * @param doc
-     * @param {Function=} callback
+     * @param {Function|boolean=} callback
      * @returns {*}
      */
 
@@ -792,14 +812,14 @@ if(SUPPORT_DOCUMENT){
 
             let len = doc.length;
 
-            if(len--){
+            if(len){
 
                 for(let i = 0; i < len; i++){
 
-                    this.handle_docs(job, doc[i]);
+                    this.handle_docs(job, doc[i], (i === len - 1) && callback);
                 }
 
-                return this.handle_docs(job, doc[len], callback);
+                //return this.handle_docs(job, doc[len], callback);
             }
         }
         else{
@@ -829,110 +849,113 @@ if(SUPPORT_DOCUMENT){
 
                 delete this._doc[id];
 
-                let length = keys.length;
+                let len = keys.length;
 
-                if(length--){
+                if(len){
 
-                    for(let z = 0; z < length; z++){
+                    for(let i = 0; i < len; i++){
 
-                        index[keys[z]].remove(id);
+                        index[keys[i]].remove(id, (i === len - 1) && callback);
                     }
 
-                    return index[keys[length]].remove(id, callback);
+                    //return index[keys[len]].remove(id, callback);
                 }
             }
 
             // ---------------------------------------------------------------
 
-            if(tags){
+            else{
 
-                let tag_key;
-                let tag_value;
+                if(tags){
 
-                for(let i = 0; i < tags.length; i++){
+                    let tag_key;
+                    let tag_value;
 
-                    tag_key = tags[i];
-                    tag_value = doc;
+                    for(let i = 0; i < tags.length; i++){
 
-                    const tag_split = tag_key.split(":");
+                        tag_key = tags[i];
+                        tag_value = doc;
 
-                    for(let a = 0; a < tag_split.length; a++){
+                        const tag_split = tag_key.split(":");
 
-                        tag_value = tag_value[tag_split[a]];
+                        for(let a = 0; a < tag_split.length; a++){
+
+                            tag_value = tag_value[tag_split[a]];
+                        }
+
+                        tag_value = "@" + tag_value;
                     }
 
-                    tag_value = "@" + tag_value;
+                    tag = this._tag[tag_key];
+                    tag = tag[tag_value] || (tag[tag_value] = []);
                 }
 
-                tag = this._tag[tag_key];
-                tag = tag[tag_value] || (tag[tag_value] = []);
-            }
+                // ---------------------------------------------------------------
 
-            // ---------------------------------------------------------------
+                tree = this.doc["field"];
 
-            tree = this.doc["field"];
+                for(let i = 0, len = tree.length; i < len; i++){
 
-            for(let i = 0, len = tree.length; i < len; i++){
+                    const branch = tree[i];
+                    let content = doc;
 
-                const branch = tree[i];
-                let content = doc;
+                    for(let x = 0; x < branch.length; x++){
 
-                for(let x = 0; x < branch.length; x++){
+                        content = content[branch[x]];
+                    }
 
-                    content = content[branch[x]];
+                    const self = index[keys[i]];
+
+                    if(job === "add"){
+
+                        self.add(id, content, (i === (len - 1)) && callback);
+                    }
+                    else{
+
+                        self.update(id, content, (i === (len - 1)) && callback);
+                    }
                 }
 
-                const self = index[keys[i]];
+                // ---------------------------------------------------------------
 
-                if(job === "add"){
+                if(store){
 
-                   self.add(id, content, (i === (len - 1)) && callback);
-                }
-                else{
+                    const store_keys = get_keys(store);
+                    let store_doc = create_object();
 
-                    self.update(id, content, (i === (len - 1)) && callback);
-                }
-            }
+                    for(let i = 0; i < store_keys.length; i++){
 
-            // ---------------------------------------------------------------
+                        let store_key = store_keys[i];
 
-            if(store){
+                        if(store[store_key]){
 
-                const store_keys = get_keys(store);
-                let store_doc = create_object();
+                            const store_split = store_key.split(":");
 
-                for(let i = 0; i < store_keys.length; i++){
+                            let store_value;
+                            let store_doc_value;
 
-                    let store_key = store_keys[i];
+                            for(let a = 0; a < store_split.length; a++){
 
-                    if(store[store_key]){
+                                const store_split_key = store_split[a];
 
-                        const store_split = store_key.split(":");
-
-                        let store_value;
-                        let store_doc_value;
-
-                        for(let a = 0; a < store_split.length; a++){
-
-                            const store_split_key = store_split[a];
-
-                            store_value = (store_value || doc)[store_split_key];
-                            store_doc_value = (store_doc_value || store_doc)[store_split_key] = store_value;
+                                store_value = (store_value || doc)[store_split_key];
+                                store_doc_value = (store_doc_value || store_doc)[store_split_key] = store_value;
+                            }
                         }
                     }
+
+                    doc = store_doc;
                 }
 
-                doc = store_doc;
+                // ---------------------------------------------------------------
+
+                if(tag){
+
+                    tag[tag.length] = doc; // tag[tag.length] = id;
+                }
+
+                this._doc[id] = doc;
             }
-
-            // ---------------------------------------------------------------
-
-            if(tag){
-
-                tag[tag.length] = doc; // tag[tag.length] = id;
-            }
-
-            this._doc[id] = doc;
         }
 
         return this;
@@ -952,9 +975,7 @@ FlexSearch.prototype.update = function(id, content, callback){
         return this.handle_docs("update", id, /** @type {Function} */ (content));
     }
 
-    const index = id;
-
-    if(this._ids[index] && is_string(content)){
+    if(this._ids[id] && is_string(content)){
 
         // if(PROFILER){
         //
@@ -1123,10 +1144,11 @@ FlexSearch.prototype.merge_and_sort = function(query, bool, result, sort, limit,
     }
     else{
 
+        // TODO apply during last round of intersection
         result = enrich_documents(result, this._doc);
     }
 
-    // TODO: pre-sort when indexing
+    // custom sort replaces the default sort by relevance
 
     if(sort){
 
@@ -1140,7 +1162,7 @@ FlexSearch.prototype.merge_and_sort = function(query, bool, result, sort, limit,
             }
             else{
 
-                field_to_sort = field_to_sort[0];
+                //field_to_sort = field_to_sort[0];
                 sort = sort_by_field_up;
             }
         }
@@ -1938,14 +1960,14 @@ function remove_index(map, id){
 
 function init_filter(words){
 
-    const final = create_object();
+    const filter = create_object();
 
     for(let i = 0, length = words.length; i < length; i++){
 
-        final[words[i]] = 1;
+        filter[words[i]] = 1;
     }
 
-    return final;
+    return filter;
 }
 
 /**
@@ -2000,7 +2022,10 @@ function sort_by_length_down(a, b){
 
 function sort_by_field_up(a, b){
 
-    return a[field_to_sort] - b[field_to_sort];
+    a = a[field_to_sort];
+    b = b[field_to_sort];
+
+    return a < b ? - 1 : (a > b ? 1 : 0);
 }
 
 function sort_by_deep_field_up(a, b){
@@ -2013,7 +2038,7 @@ function sort_by_deep_field_up(a, b){
         b = b[field_to_sort[i]];
     }
 
-    return a - b;
+    return a < b ? - 1 : (a > b ? 1 : 0);
 }
 
 function create_page(cursor, page, result){

@@ -7,7 +7,7 @@ export default {
     rtl: rtl
 }
 
-const split = /[\W_]+/;
+const regex = /[\x00-\x7F]+/g;
 
 /**
  * @this FlexSearch
@@ -17,9 +17,9 @@ export function encode(str){
 
     return this.pipeline(
 
-        /* string: */ str,
+        /* string: */ str.replace(regex, " "),
         /* normalize: */ false,
-        /* split: */ split,
+        /* split: */ " ",
         /* collapse: */ false
     );
 }

@@ -41,14 +41,11 @@ const pairs = [
 
 /**
  * @param {string} str
- * @param {FlexSearch} self
  */
 
 export function encode(str, self){
 
-    self || (self = this);
-
-    return self.pipeline(
+    return /** @type {FlexSearch} */ (self || this).pipeline(
 
         /* string: */ str.toLowerCase(),
         /* normalize: */ pairs,

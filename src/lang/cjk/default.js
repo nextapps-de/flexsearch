@@ -8,7 +8,7 @@ export default {
     tokenize: tokenize
 }
 
-const regex = /[\x00-\x7F]/g;
+const regex = /[\x00-\x7F]+/g;
 
 /**
  * @this FlexSearch
