@@ -1703,7 +1703,7 @@
 
                         if (result && result[i] && result[i].length) {
 
-                            result[i].push(doc_idx[field[i][j]].search(_query, 0));
+                            result[i].concat(doc_idx[field[i][j]].search(_query, 0));
                         } else {
                             
                             result[i] = doc_idx[field[i][j]].search(_query, 0);
