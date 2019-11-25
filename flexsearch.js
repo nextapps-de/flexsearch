@@ -1700,14 +1700,8 @@
                     }
 
                     for (let j =0; j < field[i].length; j++) {
-
-                        if (result && result[i] && result[i].length) {
-
-                            result[i].concat(doc_idx[field[i][j]].search(_query, 0));
-                        } else {
-                            
-                            result[i] = doc_idx[field[i][j]].search(_query, 0);
-                        }
+                        const searchResult = doc_idx[field[i][j]].search(_query, 0);
+                        result[i] = result[i] ? result[i].concat(searchResult) : searchResult;
                     }
                 }
 
