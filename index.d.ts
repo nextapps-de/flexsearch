@@ -5,11 +5,11 @@ declare module "flexsearch" {
     readonly index: string;
     readonly length: number;
 
-    init();
-    init(options: CreateOptions);
-    info();
-    add(o: T);
-    add(id: number, o: string);
+    init(): Index<T>;
+    init(options: CreateOptions): Index<T>;
+    info(): IndexInfo;
+    add(o: T): Index<T>;
+    add(id: number, o: string): Index<T>;
 
     // Result without pagination -> T[]
     search(query: string, options: number | SearchOptions, callback: (results: T[]) => void): void;
@@ -24,17 +24,17 @@ declare module "flexsearch" {
     search(options: SearchOptions & {query: string, page?: boolean | Cursor}): Promise<SearchResults<T>>;
 
 
-    update(id: number, o: T);
-    remove(id: number);
-    clear();
-    destroy();
-    addMatcher(matcher: Matcher);
+    update(id: number, o: T): Index<T>;
+    remove(id: number): Index<T>;
+    clear(): Index<T>;
+    destroy(): Index<T>;
+    addMatcher(matcher: Matcher): Index<T>;
 
     where(whereFn: (o: T) => boolean): T[];
-    where(whereObj: {[key: string]: string});
+    where(whereObj: {[key: string]: string}): T[];
     encode(str: string): string;
     export(): string;
-    import(exported: string);
+    import(exported: string): void;
   }
 
   interface SearchOptions {
@@ -57,6 +57,17 @@ declare module "flexsearch" {
       field: any;
   }
 
+  export interface IndexInfo {
+      id: string,
+      items: number, //items,
+      cache: boolean,
+      matcher: number,
+      worker: boolean,
+      threshold: number,
+      depth: number,
+      resolution: number,
+      contextual: boolean
+  }
 
   export type CreateOptions = {
     profile?: IndexProfile;
@@ -94,10 +105,10 @@ declare module "flexsearch" {
 
   export default class FlexSearch {
     static create<T>(options?: CreateOptions): Index<T>;
-    static registerMatcher(matcher: Matcher);
-    static registerEncoder(name: string, encoder: EncoderFn);
-    static registerLanguage(lang: string, options: { stemmer?: Stemmer; filter?: string[] });
-    static encode(name: string, str: string);
+    static registerMatcher<T>(matcher: Matcher): Index<T>;
+    static registerEncoder<T>(name: string, encoder: EncoderFn): Index<T>;
+    static registerLanguage<T>(lang: string, options: { stemmer?: Stemmer; filter?: string[] }): Index<T>;
+    static encode(name: string, str: string): string;
   }
 }
 
