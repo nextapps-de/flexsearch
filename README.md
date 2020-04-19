@@ -667,8 +667,8 @@ Index methods:
 - <a href="#where">Index.__where__()</a>
 - <a href="#index.addmatcher">Index.__addMatcher__({_KEY: VALUE_})</a>
 - <a href="#index.encode">Index.__encode__(string)</a>
-- <a href="#index.export">Index.__export__()</a>
-- <a href="#index.import">Index.__import__(string)</a>
+- <a href="#exportimport-index">Index.__export__()</a>
+- <a href="#exportimport-index">Index.__import__(string)</a>
 
 Index properties:
 - <a href="#index.id">Index.__id__</a>
