@@ -9,7 +9,7 @@ declare module "flexsearch" {
     init(options: CreateOptions);
     info();
     add(o: T);
-    add(id: number, o: string);
+    add(id: number | string, o: string);
 
     // Result without pagination -> T[]
     search(query: string, options: number | SearchOptions, callback: (results: T[]) => void): void;
