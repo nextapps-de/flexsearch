@@ -64,9 +64,9 @@ In the meanwhile take a look on my new project <a href="https://github.com/nexta
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
-When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
+When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching.
 Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 1,000,000 times faster compared to other libraries.
-FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads. 
+FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
 
 FlexSearch Server is available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
 
@@ -264,10 +264,10 @@ All Features:
     </tr>
 </table>
 
-> It is also pretty simple to make <a href="#builds">Custom Builds</a> 
+> It is also pretty simple to make <a href="#builds">Custom Builds</a>
 
 <a name="compare" id="compare"></a>
-## Benchmark Ranking 
+## Benchmark Ranking
 
 Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
 
@@ -457,7 +457,7 @@ _* The preset "fast" was used for this test_ <br>
 _* Index Size: The size of memory the index requires_<br>
 _** Memory Allocation: The amount of memory which was additionally allocated during a row of 10 queries_<br>
 _*** The preset "fast" was used for this test_ <br>
-_**** The preset "memory" was used for this test_ 
+_**** The preset "memory" was used for this test_
 -->
 
 Run Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
@@ -756,7 +756,7 @@ Perform queries asynchronously:
 
 ```js
 index.search("John", function(result){
-    
+
     // array of results
 });
 ```
@@ -769,7 +769,7 @@ Perform queries asynchronously (Promise-based):
 
 ```js
 index.search("John").then(function(result){
-    
+
     // array of results
 });
 ```
@@ -780,7 +780,7 @@ Alternatively ES6:
 async function search(query){
 
     const result = await index.search(query);
-    
+
     // ...
 }
 ```
@@ -810,9 +810,9 @@ index.search("John", {
     limit: 1000,
     threshold: 5,
     depth: 3
-    
+
 }, function(results){
-    
+
     // ....
 });
 ```
@@ -987,9 +987,9 @@ Assign a custom encoder by passing a function during index creation/initializati
 var index = new FlexSearch({
 
     encode: function(str){
-    
+
         // do something with str ...
-        
+
         return str;
     }
 });
@@ -1030,12 +1030,12 @@ var encoded = FlexSearch.encode("whitespace", "sample text");
 
 ```js
 FlexSearch.registerEncoder('mixed', function(str){
-  
+
     str = this.encode("icase", str); // built-in
     str = this.encode("whitespace", str); // custom
-    
+
      // do something additional with str ...
-    
+
     return str;
 });
 ```
@@ -1070,15 +1070,15 @@ Assign a private custom stemmer or filter during creation/initialization:
 var index = new FlexSearch({
 
     stemmer: {
-        
+
         // object {key: replacement}
         "ational": "ate",
         "tional": "tion",
         "enci": "ence",
         "ing": ""
     },
-    filter: [ 
-        
+    filter: [
+
         // array blacklist
         "in",
         "into",
@@ -1090,28 +1090,14 @@ var index = new FlexSearch({
 });
 ```
 
-Using a custom stemmer, e.g.:
-```js
-var index = new FlexSearch({
-
-    stemmer: function(value){
-
-        // apply some replacements
-        // ...
-        
-        return value;
-    }
-});
-```
-
 Using a custom filter, e.g.:
 ```js
 var index = new FlexSearch({
 
     filter: function(value){
-        
+
         // just add values with length > 1 to the index
-        
+
         return value.length > 1;
     }
 });
@@ -1143,8 +1129,8 @@ Or use some pre-defined stemmer or filter of your preferred languages:
 Now you can assign built-in stemmer during creation/initialization:
 ```js
 var index_en = new FlexSearch({
-    stemmer: "en", 
-    filter: "en" 
+    stemmer: "en",
+    filter: "en"
 });
 
 var index_de = new FlexSearch({
@@ -1177,7 +1163,7 @@ Just set the field "rtl" to _true_ and use a compatible tokenizer:
 ```js
 var index = FlexSearch.create({
     encode: "icase",
-    tokenize: "reverse", 
+    tokenize: "reverse",
     rtl: true
 });
 ```
@@ -1230,7 +1216,7 @@ Returns information e.g.:
     "worker": false,
     "threshold": 7,
     "depth": 3,
-    "contextual": true                                 
+    "contextual": true
 }
 ```
 
@@ -1559,7 +1545,7 @@ index.find(function(item){
 Get just the first result:
 ```js
 index.find({
-    cat: "comedy", 
+    cat: "comedy",
     year: "2018"
 });
 ```
@@ -1608,7 +1594,7 @@ Using search and also apply a where-clause:
 ```js
 index.search("foo", {
     field: [
-        "title", 
+        "title",
         "body"
     ],
     where: {
@@ -1677,7 +1663,7 @@ Search documents and also apply a where-clause:
 ```js
 index.search("foo", {
     field: [
-        "title", 
+        "title",
         "content"
     ],
     where: {
@@ -2537,7 +2523,7 @@ function add(id, cat, content){
 }
 
 function search(cat, query){
-    return index[cat] ? 
+    return index[cat] ?
         index[cat].search(query) : [];
 }
 ```
