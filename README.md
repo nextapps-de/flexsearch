@@ -2480,12 +2480,12 @@ Compare these presets:
 Methods to retrieve results sorted from fastest to slowest:
 
 1. `index.find(id) -> doc`
-2. `index.where({field: string}) -> Arrary<doc>` with a tag on the same field
-3. `index.search(query) -> Arrary<id>` when just adding _id_ and _content_ to the index (no documents)
-4. `index.search(query) -> Arrary<doc>` when using documents
-5. `index.search(query, { where }) -> Arrary<doc>` when using documents and a where clause
-6. `index.where({field: [string, string]}) -> Arrary<doc>` when a tag was set to one of two fields
-7. `index.where({field: string}) -> Arrary<doc>` when no tag was set to this field
+2. `index.where({field: string}) -> Array<doc>` with a tag on the same field
+3. `index.search(query) -> Array<id>` when just adding _id_ and _content_ to the index (no documents)
+4. `index.search(query) -> Array<doc>` when using documents
+5. `index.search(query, { where }) -> Array<doc>` when using documents and a where clause
+6. `index.where({field: [string, string]}) -> Array<doc>` when a tag was set to one of two fields
+7. `index.where({field: string}) -> Array<doc>` when no tag was set to this field
 
 Methods to change index from fastest to slowest:
 
