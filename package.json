@@ -18,6 +18,7 @@
     "email": "info@nextapps.de"
   },
   "main": "dist/flexsearch.node.js",
+  "types": "index.d.ts",
   "browser": "dist/flexsearch.min.js",
   "preferGlobal": false,
   "bin": {},
