@@ -92,9 +92,9 @@ declare module "flexsearch" {
 
   export default class FlexSearch {
     static create<T>(options?: CreateOptions): Index<T>;
-    static registerMatcher(matcher: Matcher): Index<T>;
-    static registerEncoder(name: string, encoder: EncoderFn): Index<T>;
-    static registerLanguage(lang: string, options: { stemmer?: Stemmer; filter?: string[] }): Index<T>;
+    static registerMatcher<T>(matcher: Matcher): Index<T>;
+    static registerEncoder<T>(name: string, encoder: EncoderFn): Index<T>;
+    static registerLanguage<T>(lang: string, options: { stemmer?: Stemmer; filter?: string[] }): Index<T>;
     static encode(name: string, str: string): string;
   }
 }
