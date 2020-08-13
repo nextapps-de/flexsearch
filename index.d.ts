@@ -13,9 +13,9 @@ declare module "flexsearch" {
 
     // Result without pagination -> T[]
     search(query: string, options: number | SearchOptions, callback: (results: T[]) => void): void;
-    search(query: string, options?: number | SearchOptions): Promise<T[]>;
+    search(query: string, options?: number | SearchOptions): T[];
     search(options: SearchOptions & {query: string}, callback: (results: T[]) => void): void;
-    search(options: SearchOptions & {query: string}): Promise<T[]>;
+    search(options: SearchOptions & {query: string}): T[];
 
     // Result with pagination -> SearchResults<T>
     search(query: string, options: number | SearchOptions & { page?: boolean | Cursor}, callback: (results: SearchResults<T>) => void): void;
