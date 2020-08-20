@@ -1825,7 +1825,7 @@ index.search("John Doe").then(function(results){
 <a name="options"></a>
 ## Options
 
-FlexSearch ist highly customizable. Make use of the the right options can really improve your results as well as memory economy and query time.
+FlexSearch is highly customizable. Make use of the the right options can really improve your results as well as memory economy and query time.
 
 <a name="options-index"></a>
 ### Initialize Index
