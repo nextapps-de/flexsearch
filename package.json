@@ -19,6 +19,7 @@
   },
   "main": "dist/flexsearch.node.js",
   "browser": "dist/flexsearch.min.js",
+  "types": "index.d.ts",
   "preferGlobal": false,
   "bin": {},
   "repository": {
@@ -75,6 +76,5 @@
     "mocha-phantomjs": "^4.1.0",
     "nyc": "^14.1.1",
     "phantomjs-prebuilt": "^2.1.16"
-  },
-  "types": "index.d.ts"
+  }
 }
