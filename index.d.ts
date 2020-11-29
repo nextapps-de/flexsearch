@@ -24,8 +24,8 @@ declare module "flexsearch" {
     search(options: SearchOptions & {query: string, page?: boolean | Cursor}): Promise<SearchResults<T>>;
 
 
-    update(id: number, o: T);
-    remove(id: number);
+    update(id: number | string, o: T);
+    remove(id: number | string);
     clear();
     destroy();
     addMatcher(matcher: Matcher);
