@@ -3461,6 +3461,7 @@
                                     if(!pointer_count || (--pointer_count < count)){
 
                                         result[count++] = tmp;
+                                        check[index] = z + 1; // add the entry to the existing results in case of multiple queries with an or clause
 
                                         if(limit && (count === limit)){
 
