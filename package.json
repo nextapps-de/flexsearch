@@ -19,6 +19,7 @@
   },
   "main": "dist/flexsearch.node.js",
   "browser": "dist/flexsearch.min.js",
+  "types": "index.d.ts",
   "preferGlobal": false,
   "bin": {},
   "repository": {
@@ -42,7 +43,8 @@
     "test-coverage": "nyc --reporter=html --reporter=text mocha --timeout=3000 test/test.js",
     "test": "npm run test-develop && npm run test-production && npm run test-light && npm run test-browser && npm run test-coverage",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "update": "npm install chai@latest && npm install codacy-coverage@latest && npm install coveralls@latest && npm install nyc@latest && npm install google-closure-compiler@nightly && npm install mocha@latest && npm install mocha-lcov-reporter@latest && npm install mocha-phantomjs@latest && npm install phantomjs-prebuilt@latest"
+    "update": "npm install chai@latest && npm install codacy-coverage@latest && npm install coveralls@latest && npm install nyc@latest && npm install google-closure-compiler@nightly && npm install mocha@latest && npm install mocha-lcov-reporter@latest && npm install mocha-phantomjs@latest && npm install phantomjs-prebuilt@latest",
+    "typecheck": "npx tsc --noEmit --strict index.d.ts"
   },
   "nyc": {
     "per-file": true,
