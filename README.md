@@ -13,7 +13,6 @@
 <h2></h2>
 
 ### FlexSearch v0.7.0 (Beta)
-=======
 
 Beta is now available. Please test the new version and post back issues and suggestions. The Beta will pushed to the master branch in 2 weeks.
 
@@ -29,13 +28,15 @@ Source Code v0.7.0-beta available here:<br>
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
-When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching.
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
+
+When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
+
 Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 1,000,000 times faster compared to other libraries.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
 
-FlexSearch Server is available here: <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
-
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
+FlexSearch Server is available here: 
+<a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
 
 Supported Platforms:
 - Browser
