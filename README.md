@@ -15,7 +15,7 @@
 ### FlexSearch v0.7.0 (Update)
 
 The current state:<br>
-<a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/README.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/README.md</a>
+<a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/README.md</a>
 
 Read the documentation of new language encoding features:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md</a>
