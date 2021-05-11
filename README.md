@@ -12,54 +12,13 @@
 
 <h2></h2>
 
-### Preview v0.7.0-rev2
+### FlexSearch v0.7.0 (Update)
 
-A preview of the new version is available in the branch "0.7.0" for one month (or more when needed) before it goes to the master branch. It would be really helpful when you can test the integration of the upcoming version in your existing projects during this time and give me some feedback.
+The current state:
+<a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/README.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/README.md</a>
 
-There are actually some big issue with migrating the feature branches, so I will release them one by one grouped by its dependencies:
-
-##### Release Group A (released)
-- [x] sources transformed to native ES6 modules
-- [x] production ready native ES6 modules (within "dist/module/")
-- [x] new bundler, better customization
-- [x] improved benchmark suite
-- [x] improved performance
-- [x] smaller filesize
-- [x] WebWorker isn't available (will come back in Group D)
-
-##### Release Group B (released)
-- [x] complete separation of language specific logic (that was the biggest issue)
-- [x] new language handler
-- [x] language packs consists of a charset model (encoder, split) and a language model (stemmer, stopwords)
-
-##### Release Group A / B (rev2)
-- [x] support super-customizable encoder pipelines by inversion of control
-- [x] provide a customizable generic pipeline as default
-- [x] all advanced encoders gets a huge performance boost
-- [x] combine regexp (matcher, stemmer) greatly improves performance
-- [x] support high performance soundex encoding (latin:soundex)
-
-##### Release Group C (unreleased)
-- [ ] new core consists of a "Document Model" and an "Index Model" (that is the biggest improvement)
-- [ ] implementation of "tags" rewritten
-- [ ] "where"-clause was removed (fully replaced by tags)
-- [ ] support of nested arrays in documents
-
-##### Release Group D (unreleased)
-- [ ] added middleware layer to support plugins
-- [ ] support for hooks/trigger
-- [ ] add support for WebWorker
-
-<a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md">Read the documentation of all new features</a>
-
-Install the new version:
-```cmd
-npm install nextapps-de/flexsearch#0.7.0
-```
-
-<!--
-In the meanwhile take a look on my new project <a href="https://github.com/nextapps-de/mikado">Mikado</a> which is the webs fastest template library for building user interfaces. I would love to see if you could support it.
--->
+Read the documentation of new language encoding features:
+<a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md</a>
 
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
