@@ -106,9 +106,9 @@ let parameter = (function(opt){
     compilation_level: compilation_level || (release === "pre" ? "SIMPLE" : (release === "debug" ? "WHITESPACE" : "ADVANCED_OPTIMIZATIONS")), //"SIMPLE"
     use_types_for_optimization: true,
     //new_type_inf: true,
-    jscomp_warning: "newCheckTypes",
+    //jscomp_warning: "newCheckTypes",
     //jscomp_error: "strictCheckTypes",
-    jscomp_error: "newCheckTypesExtraChecks",
+    //jscomp_error: "newCheckTypesExtraChecks",
     generate_exports: true,
     export_local_property_definitions: true,
     language_in: "ECMASCRIPT6_STRICT",
@@ -119,19 +119,19 @@ let parameter = (function(opt){
     emit_use_strict: true,
 
     output_manifest: "log/manifest.log",
-    output_module_dependencies: "log/module_dependencies.log",
+    //output_module_dependencies: "log/module_dependencies.log",
     property_renaming_report: "log/property_renaming.log",
     create_source_map: "log/source_map.log",
     variable_renaming_report: "log/variable_renaming.log",
     strict_mode_input: true,
     assume_function_wrapper: true,
 
-    transform_amd_modules: true,
+    //transform_amd_modules: true,
     process_common_js_modules: true,
     module_resolution: "BROWSER",
     //dependency_mode: "SORT_ONLY",
     //js_module_root: "./",
-    entry_point: "./src/bundle.js",
+    entry_point: "./src/webpack.js",
     //manage_closure_dependencies: true,
     dependency_mode: "PRUNE_LEGACY",
     rewrite_polyfills: use_polyfill || false,
@@ -216,10 +216,16 @@ else{
 
     var filename = "dist/flexsearch." + (release || "custom") + ".js";
 
-    exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --js='src/**.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
+    exec((/^win/.test(process.platform) ?
+
+        "\"node_modules/google-closure-compiler-windows/compiler.exe\""
+    :
+        "java -jar node_modules/google-closure-compiler-java/compiler.jar"
+
+    ) + parameter + " --js='src/**.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
 
         let build = fs.readFileSync(filename);
-        let preserve = fs.readFileSync("src/flexsearch.js", "utf8");
+        let preserve = fs.readFileSync("src/index.js", "utf8");
 
         const package_json = require("../package.json");
 

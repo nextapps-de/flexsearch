@@ -1,5 +1,4 @@
-import FlexSearch from "../../flexsearch.js";
-import { regex, replace, collapse } from "../../common.js";
+import { regex, replace, collapse } from "../../lang.js";
 import { encode as encode_simple } from "./simple.js";
 
 export const rtl = false;
@@ -55,7 +54,7 @@ export function encode(str, self, _skip_postprocessing){
 
     if(str){
 
-        str = encode_simple(str, /** @type {FlexSearch} */ (self || this)).join(" ");
+        str = encode_simple(str, /** @type {Document} */ (self || this)).join(" ");
 
         if(str.length > 2){
 

@@ -1,4 +1,4 @@
-import FlexSearch from "../../flexsearch.js";
+import Index from "../../index.js";
 
 export const rtl = false;
 export const tokenize = "";
@@ -16,7 +16,7 @@ const regex_whitespace = /[\W_]+/;
 // ];
 
 /**
- * @this FlexSearch
+ * @this Index
  */
 
 export function encode(str){

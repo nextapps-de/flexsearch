@@ -1,1 +1,0 @@
-export default{memory:{charset:"latin:extra",threshold:0,resolution:1},speed:{threshold:1,resolution:3,depth:2},match:{charset:"latin:extra",tokenize:"full",threshold:1,resolution:3},score:{charset:"latin:extra",threshold:1,resolution:9,depth:4},balance:{charset:"latin:balance",threshold:0,resolution:3,depth:3},fast:{threshold:8,resolution:9,depth:1}};

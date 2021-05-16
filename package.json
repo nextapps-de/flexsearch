@@ -21,7 +21,6 @@
   "browser": "dist/flexsearch.min.js",
   "types": "index.d.ts",
   "preferGlobal": false,
-  "bin": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/nextapps-de/flexsearch.git"
@@ -53,7 +52,6 @@
     "LICENSE"
   ],
   "readme": "README.md",
-  "dependencies": {},
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-conditional-compile": "0.0.5",
@@ -72,6 +70,6 @@
     "babel-plugin-transform-property-literals": "^6.9.4",
     "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
-    "google-closure-compiler": "^20191027.0.0"
+    "google-closure-compiler": "^20210505.0.0"
   }
 }

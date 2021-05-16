@@ -1,5 +1,5 @@
-import FlexSearch from "../../flexsearch.js";
-import { regex } from "../../common.js";
+import Index from "../../index.js";
+import { regex } from "../../lang.js";
 
 export const rtl = false;
 export const tokenize = "";
@@ -45,7 +45,7 @@ const pairs = [
 
 export function encode(str, self){
 
-    return /** @type {FlexSearch} */ (self || this).pipeline(
+    return /** @type {Index} */ (self || this).pipeline(
 
         /* string: */ str.toLowerCase(),
         /* normalize: */ pairs,
