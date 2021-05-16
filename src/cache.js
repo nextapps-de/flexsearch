@@ -1,66 +1,128 @@
-import { is_undefined, create_object } from "./common.js";
+import Index from "./index.js";
+import Document from "./index.js";
+import { create_object } from "./common.js";
 
 /**
  * @param {boolean|number=} limit
  * @constructor
  */
 
-export default function CacheClass(limit){
-
-    this.clear();
+function CacheClass(limit){
 
     /** @private */
     this.limit = (limit !== true) && limit;
-}
-
-CacheClass.prototype.clear = function(){
 
     /** @private */
     this.cache = create_object();
+
     /** @private */
-    this.count = create_object();
-    /** @private */
-    this.index = create_object();
-    /** @private */
-    this.ids = [];
-};
+    this.queue = [];
+
+    //this.clear();
+}
+
+export default CacheClass;
+
+/**
+ * @param {!string} query
+ * @param {number|Object=} limit
+ * @param {Object=} options
+ * @returns {Array<number|string>}
+ */
+
+export function searchCache(query, limit, options){
+
+    if(typeof query === "object"){
+
+        query = query["query"];
+    }
+
+    let cache = /** @type {Document|Index} */ (this).cache.get(query);
+
+    if(!cache){
+
+        cache = /** @type {Document|Index} */ (this).search(query, limit, options);
+        /** @type {Document|Index} */ (this).cache.set(query, cache);
+    }
+
+    return cache;
+}
+
+// CacheClass.prototype.clear = function(){
+//
+//     /** @private */
+//     this.cache = create_object();
+//
+//     /** @private */
+//     this.queue = [];
+// };
 
 CacheClass.prototype.set = function(key, value){
 
-    if(this.limit && is_undefined(this.cache[key])){
+    if(!this.cache[key]){
 
-        let length = this.ids.length;
+        // it is just a shame that native function array.shift() performs so bad
+
+        // const length = this.queue.length;
+        //
+        // this.queue[length] = key;
+        //
+        // if(length === this.limit){
+        //
+        //     delete this.cache[this.queue.shift()];
+        // }
+
+        // the same bad performance
+
+        // this.queue.unshift(key);
+        //
+        // if(this.queue.length === this.limit){
+        //
+        //     this.queue.pop();
+        // }
+
+        // fast implementation variant
+
+        // let length = this.queue.length;
+        //
+        // if(length === this.limit){
+        //
+        //     length--;
+        //
+        //     delete this.cache[this.queue[0]];
+        //
+        //     for(let x = 0; x < length; x++){
+        //
+        //         this.queue[x] = this.queue[x + 1];
+        //     }
+        // }
+        //
+        // this.queue[length] = key;
+
+        // current fastest implementation variant
+        // theoretically that should not perform better compared to the example above
+
+        let length = this.queue.length;
 
         if(length === this.limit){
 
-            length--;
+            delete this.cache[this.queue[length - 1]];
+        }
+        else{
 
-            const last_id = this.ids[length];
-
-            delete this.cache[last_id];
-            delete this.count[last_id];
-            delete this.index[last_id];
+            length++;
         }
 
-        this.ids[length] = key;
-        this.index[key] = length;
-        this.count[key] = -1;
-        this.cache[key] = value;
+        for(let x = length - 1; x > 0; x--){
 
-        // TODO: remove extra call
-        // shift up counter +1
+            this.queue[x] = this.queue[x - 1];
+        }
 
-        this.get(key);
+        this.queue[0] = key;
     }
-    else{
 
-        this.cache[key] = value;
-    }
+    this.cache[key] = value;
 };
-
-/**
- * Note: It is better to have the complexity when fetching the cache:
- */
 
 CacheClass.prototype.get = function(key){
 
@@ -68,44 +130,40 @@ CacheClass.prototype.get = function(key){
 
     if(this.limit && cache){
 
-        const count = ++this.count[key];
-        const index = this.index;
-        let current_index = index[key];
+        // probably the indexOf() method performs faster when matched content is on front (left-to-right)
+        // using lastIndexOf() does not help, it performs almost slower
 
-        if(current_index > 0){
+        const pos = this.queue.indexOf(key);
 
-            const ids = this.ids;
-            const old_index = current_index;
+        // if(pos < this.queue.length - 1){
+        //
+        //     const tmp = this.queue[pos];
+        //     this.queue[pos] = this.queue[pos + 1];
+        //     this.queue[pos + 1] = tmp;
+        // }
 
-            // forward pointer
-            while(this.count[ids[--current_index]] <= count){
+        if(pos){
 
-                if(current_index === -1){
-
-                    break;
-                }
-            }
-
-            // move pointer back
-            current_index++;
-
-            if(current_index !== old_index){
-
-                // copy values from predecessors
-                for(let i = old_index; i > current_index; i--) {
-
-                    const tmp = ids[i - 1];
-
-                    ids[i] = tmp;
-                    index[tmp] = i;
-                }
-
-                // push new value on top
-                ids[current_index] = key;
-                index[key] = current_index;
-            }
+            const tmp = this.queue[pos - 1];
+            this.queue[pos - 1] = this.queue[pos];
+            this.queue[pos] = tmp;
         }
     }
 
     return cache;
+};
+
+CacheClass.prototype.del = function(id){
+
+    for(let i = 0, item, key; i < this.queue.length; i++){
+
+        key = this.queue[i];
+        item = this.cache[key];
+
+        if(item.indexOf(id) !== -1){
+
+            this.queue.splice(i--, 1);
+            delete this.cache[key];
+        }
+    }
 };

@@ -1,4 +1,4 @@
-import FlexSearch from "../../flexsearch.js";
+import Document from "../../flexsearch.js";
 
 export const rtl = false;
 export const tokenize = "strict";
@@ -11,7 +11,7 @@ export default {
 const regex = /[\x00-\x7F]+/g;
 
 /**
- * @this FlexSearch
+ * @this Document
  */
 
 export function encode(str){

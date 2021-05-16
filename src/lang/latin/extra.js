@@ -1,5 +1,4 @@
-import FlexSearch from "../../flexsearch.js";
-import { regex, replace, collapse } from "../../common.js";
+import { regex, replace, collapse } from "../../lang.js";
 import { encode as encode_advanced } from "./advanced.js";
 
 export const rtl = false;
@@ -35,7 +34,7 @@ export function encode(str){
 
     if(str){
 
-        str = encode_advanced(str, /** @type {FlexSearch} */ (this), /* skip post-processing: */ true);
+        str = encode_advanced(str, /** @type {Document} */ (this), /* skip post-processing: */ true);
 
         if(str.length > 1){
 

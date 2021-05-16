@@ -1,3 +1,7 @@
+import { POLYFILL, SUPPORT_ASYNC } from "./config.js";
+
+export let promise = Promise;
+
 if(POLYFILL){
 
     Object.assign || (Object.assign = function(){
@@ -36,23 +40,20 @@ if(POLYFILL){
     //     return values;
     // });
 
-    if(SUPPORT_ASYNC){
+    if(SUPPORT_ASYNC && !promise){
 
-        window["requestAnimationFrame"] || (window["requestAnimationFrame"] = window.setTimeout);
-        window["cancelAnimationFrame"] || (window["cancelAnimationFrame"] = window.clearTimeout);
+        /**
+         * @param {Function} fn
+         * @constructor
+         */
 
-        window["Promise"] || (window["Promise"] = function(){
+        function SimplePromise(fn){
 
-            /**
-             * @param {Function} fn
-             * @constructor
-             */
+            this.callback = null;
 
-            function Promise(fn){
+            let self = this;
 
-                this.callback = null;
-
-                const self = this;
+            //setTimeout(function(){
 
                 fn(function(val){
 
@@ -60,20 +61,21 @@ if(POLYFILL){
 
                         self.callback(val);
                         self.callback = null;
+                        self = null;
                     }
                 });
-            }
+            //});
+        }
 
-            /**
-             * @param {Function} callback
-             */
+        /**
+         * @param {Function} callback
+         */
 
-            Promise.prototype.then = function(callback){
+        SimplePromise.prototype.then = function(callback){
 
-                this.callback = callback;
-            };
+            this.callback = callback;
+        };
 
-            return Promise;
-        }());
+        promise = SimplePromise;
     }
 }
