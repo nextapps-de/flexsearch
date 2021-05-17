@@ -6,11 +6,12 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { SUPPORT_ASYNC, SUPPORT_CACHE } from "./config.js";
-import { create_object } from "./common.js";
+import { SUPPORT_ASYNC, SUPPORT_CACHE, SUPPORT_STORE, SUPPORT_TAGS } from "./config.js";
 import Index from "./index.js";
-import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./async.js";
 import Cache, { searchCache } from "./cache.js";
+import { create_object } from "./common.js";
+import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./async.js";
+import { intersect, intersect_union } from "./intersect.js";
 
 /**
  * @param {Object=} options
@@ -29,13 +30,24 @@ function Document(options){
 
     options || (options = {});
 
-    this.register = create_object();
-    this.store = (opt = options["store"]) && create_object();
-    this.storetree = opt && (opt !== true) && [];
-    this.markup = [];
-    this.key = ((opt = options["key"]) && parse_tree(opt, this.markup)) || "id";
     this.tree = [];
     this.field = [];
+    this.marker = [];
+    this.register = create_object();
+    this.key = ((opt = options["key"]) && parse_tree(opt, this.marker)) || "id";
+    this.fastupdate = parse_option(options["fastupdate"], true);
+
+    if(SUPPORT_STORE){
+
+        this.store = (opt = options["store"]) && create_object();
+        this.storetree = opt && (opt !== true) && [];
+    }
+
+    if(SUPPORT_TAGS){
+
+        this.tag = ((opt = options["tag"]) && parse_tree(opt, this.marker));
+        this.tagindex = opt && create_object();
+    }
 
     if(SUPPORT_CACHE){
 
@@ -48,6 +60,11 @@ function Document(options){
 }
 
 export default Document;
+
+function parse_option(value, default_value){
+
+    return typeof value !== "undefined" ? value : default_value;
+}
 
 /**
  * @this Document
@@ -84,11 +101,11 @@ function parse_descriptor(options){
         }
 
         index[key] = new Index(item, this.register);
-        this.tree[i] = parse_tree(key, this.markup);
+        this.tree[i] = parse_tree(key, this.marker);
         this.field[i] = key;
     }
 
-    if(this.storetree){
+    if(SUPPORT_STORE && this.storetree){
 
         let store = options["store"];
 
@@ -99,14 +116,14 @@ function parse_descriptor(options){
 
         for(let i = 0; i < store.length; i++){
 
-            this.storetree[i] = parse_tree(store[i], this.markup);
+            this.storetree[i] = parse_tree(store[i], this.marker);
         }
     }
 
     return index;
 }
 
-function parse_tree(key, markup){
+function parse_tree(key, marker){
 
     const tree = key.split(":");
     let count = 0;
@@ -121,7 +138,7 @@ function parse_tree(key, markup){
 
             if(key){
 
-                markup[count] = true;
+                marker[count] = true;
             }
         }
 
@@ -139,7 +156,7 @@ function parse_tree(key, markup){
     return count > 1 ? tree : tree[0];
 }
 
-function get_id(obj, tree){
+function parse_simple(obj, tree){
 
     if(typeof tree === "string"){
 
@@ -190,7 +207,7 @@ function store_value(obj, store, tree, pos, key){
     }
 }
 
-function add_index(obj, tree, markup, pos, index, id, key, _append){
+function add_index(obj, tree, marker, pos, index, id, key, _append){
 
     obj = obj[key];
 
@@ -202,7 +219,7 @@ function add_index(obj, tree, markup, pos, index, id, key, _append){
 
         if(obj.constructor === Array){
 
-            if(markup[pos]){
+            if(marker[pos]){
 
                 for(let i = 0; i < obj.length; i++){
 
@@ -224,14 +241,14 @@ function add_index(obj, tree, markup, pos, index, id, key, _append){
             for(let i = 0; i < obj.length; i++){
 
                 // do not increase index, an array is not a field
-                add_index(obj, tree, markup, pos, index, id, i, _append);
+                add_index(obj, tree, marker, pos, index, id, i, _append);
             }
         }
         else{
 
             key = tree[++pos];
 
-            add_index(obj, tree, markup, pos, index, id, key, _append);
+            add_index(obj, tree, marker, pos, index, id, key, _append);
         }
     }
 }
@@ -249,7 +266,7 @@ Document.prototype.add = function(id, content, _append){
     if(typeof id === "object"){
 
         content = id;
-        id = get_id(content, this.key);
+        id = parse_simple(content, this.key);
     }
 
     if(content && (id || (id === 0))){
@@ -269,10 +286,45 @@ Document.prototype.add = function(id, content, _append){
                 tree = [tree];
             }
 
-            add_index(content, tree, this.markup, 0, this.index[field], id, tree[0], _append);
+            add_index(content, tree, this.marker, 0, this.index[field], id, tree[0], _append);
         }
 
-        if(this.store){
+        if(SUPPORT_TAGS && this.tag){
+
+            let tag = parse_simple(content, this.tag);
+            let dupes = create_object();
+
+            if(typeof tag === "string"){
+
+                tag = [tag];
+            }
+
+            for(let i = 0, key, arr; i < tag.length; i++){
+
+                key = tag[i];
+
+                if(!dupes[key]){
+
+                    dupes[key] = 1;
+                    arr = this.tagindex[key] || (this.tagindex[key] = []);
+
+                    if(!_append || (arr.indexOf(id) === -1)){
+
+                        arr[arr.length] = id;
+
+                        // add a reference to the register for fast updates
+
+                        if(this.fastupdate){
+
+                            const tmp = this.register[id] || (this.register[id] = []);
+                            tmp[tmp.length] = arr;
+                        }
+                    }
+                }
+            }
+        }
+
+        if(SUPPORT_STORE && this.store){
 
             let store;
 
@@ -297,6 +349,7 @@ Document.prototype.add = function(id, content, _append){
 
             this.store[id] = store || content;
         }
+
     }
 
     return this;
@@ -326,7 +379,33 @@ Document.prototype.remove = function(id){
             this.index[this.field[i]].remove(id, true);
         }
 
-        if(this.store){
+        if(SUPPORT_TAGS && this.tag){
+
+            // when fastupdate was enabled the id will be already cleanup by the index
+
+            if(!this.fastupdate){
+
+                for(let key in this.tagindex){
+
+                    const tag = this.tagindex[key];
+                    const pos = tag.indexOf(id);
+
+                    if(pos !== -1){
+
+                        if(tag.length > 1){
+
+                            tag.splice(pos, 1);
+                        }
+                        else{
+
+                            delete this.tagindex[key];
+                        }
+                    }
+                }
+            }
+        }
+
+        if(SUPPORT_STORE && this.store){
 
             delete this.store[id];
         }
@@ -351,75 +430,145 @@ Document.prototype.search = function(query, limit, options){
 
     let result = [];
     let pluck, enrich;
-    let field, field_options, bool, count = 0;
+    let field, field_options, tag, bool, count = 0;
 
     if(options){
 
         pluck = options["pluck"];
         field = pluck || options["field"];
-        enrich = options["enrich"];
+        tag = SUPPORT_TAGS && options["tag"];
+        enrich = SUPPORT_STORE && this.store && options["enrich"];
         bool = options["bool"] === "and";
         limit = options["limit"];
-    }
 
-    if(field){
+        if(field){
 
-        if(typeof field === "string"){
+            if(typeof field === "string"){
 
-            field = [field];
+                field = [field];
+            }
+            else if(field.constructor !== Array){
+
+                field_options = field;
+                field = Object.keys(field);
+            }
         }
-        else if(field.constructor !== Array){
 
-            field_options = field;
-            field = Object.keys(field);
+        if(tag){
+
+            if(typeof tag === "string"){
+
+                tag = [tag];
+            }
+
+            // when tags is used and no query was set,
+            // then just return the tag indexes
+
+            if(!query){
+
+                for(let i = 0, res; i < tag.length; i++){
+
+                    res = get_tag.call(this, tag[i], limit || 100, enrich);
+
+                    if(res){
+
+                        result[result.length] = res;
+                        count++;
+                    }
+                }
+
+                return count ? result : [];
+            }
         }
     }
-    else{
 
-        field = this.field;
-    }
+    field || (field = this.field);
+    bool = bool && ((field.length > 1) || (tag && (tag.length > 1)));
 
-    bool = bool && (field.length > 1);
+    let found_tag = [];
 
-    for(let i = 0, res, key, item; i < field.length; i++){
+    // TODO solve this in one loop below
+
+    for(let i = 0, res, key, item, len; i < field.length; i++){
 
         key = field[i];
 
-        if(field_options){
+        // if(field_options){
+        //
+        //     item = field_options[key];
+        //
+        //     // inherit options also when search? it is just for laziness, Object.assign() has a cost
+        //     //item = typeof item === "object" ? Object.assign({}, options, item) : options;
+        // }
+        // else{
+        //
+        //     item = options;
+        // }
 
-            item = field_options[key];
+        res = this.index[key].search(query, limit, field_options ? field_options[key] : options);
+        len = res.length;
 
-            // inherit options?
-            //item = typeof item === "object" ? Object.assign({}, options, item) : options;
+        if(tag && len){
+
+            const field_tag = found_tag[i] = [];
+            const arr = [];
+            let count = 0;
+
+            if(bool){
+
+                // prepare for intersection
+
+                arr[0] = [res];
+            }
+
+            for(let y = 0, key, res; y < tag.length; y++){
+
+                key = tag[y];
+                res = this.tagindex[key];
+                len = res && res.length;
+
+                if(len){
+
+                    arr[arr.length] = bool ? [res] : res;
+                    field_tag[count++] = key;
+                }
+            }
+
+            if(count){
+
+                if(bool){
+
+                    res = intersect(arr, limit || 100);
+                }
+                else{
+
+                    res = intersect_union(res, arr);
+                }
+
+                len = res.length;
+            }
         }
-        else{
 
-            item = options;
+        if(len){
+
+            result[count++] = res;
         }
+        else if(bool){
 
-        res = this.index[key].search(query, limit, item);
-
-        if(bool){
-
-            if(!res.length){
-
-                // fast path optimization
+            //if(!len){
 
                 return [];
-            }
+            //}
 
             // add a pseudo relevance index for the intersection
             // used when squash the results on boolean "and"
             //res = [res];
         }
-
-        count += res.length;
-        result[i] = res;
     }
 
     if(!count){
 
-        // fast path optimization
+        // fast path "not found"
 
         return [];
     }
@@ -450,9 +599,12 @@ Document.prototype.search = function(query, limit, options){
         key = field[i];
         res = result[i];
 
-        if(enrich && this.store){
+        if(res.length){
 
-            res = apply_enrich.call(this, res);
+            if(enrich){
+
+                res = apply_enrich.call(this, res);
+            }
         }
 
         if(pluck){
@@ -460,15 +612,49 @@ Document.prototype.search = function(query, limit, options){
             return res;
         }
 
-        result[i] = {
+        result[i] = res = {
 
             "field": key,
             "result": res
         };
+
+        if(tag){
+
+            res["tag"] = found_tag[i];
+        }
     }
 
     return result;
 };
+
+/**
+ * @this Document
+ */
+
+function get_tag(key, limit, enrich){
+
+    let res = this.tagindex[key];
+    let len = res && res.length;
+
+    if(len){
+
+        if(len > limit){
+
+            res = res.slice(0, limit);
+        }
+
+        if(enrich){
+
+            res = apply_enrich.call(this, res);
+        }
+
+        return {
+
+            "tag": key,
+            "result": res
+        };
+    }
+}
 
 /**
  * @this Document
@@ -492,21 +678,24 @@ function apply_enrich(res){
     return arr;
 }
 
-Document.prototype.get = function(id){
-
-    return this.store[id];
-};
-
-Document.prototype.set = function(id, data){
-
-    this.store[id] = data;
-    return this;
-};
-
 Document.prototype.contain = function(id){
 
     return !!this.register[id];
 };
+
+if(SUPPORT_STORE){
+
+    Document.prototype.get = function(id){
+
+        return this.store[id];
+    };
+
+    Document.prototype.set = function(id, data){
+
+        this.store[id] = data;
+        return this;
+    };
+}
 
 if(SUPPORT_CACHE){
 

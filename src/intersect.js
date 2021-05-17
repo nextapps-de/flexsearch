@@ -7,7 +7,7 @@ import { create_object, concat } from "./common.js";
  * @returns {Array}
  */
 
-export default function(arrays, limit, suggest) {
+export function intersect(arrays, limit, suggest) {
 
     const length = arrays.length;
     let result = [];
@@ -128,6 +128,45 @@ export default function(arrays, limit, suggest) {
 
                     result = result.concat(res);
                     count += len;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+/**
+ * @param mandatory
+ * @param arrays
+ * @returns {Array}
+ */
+
+export function intersect_union(mandatory, arrays) {
+
+    const check = create_object();
+    const union = create_object();
+    const result = [];
+
+    for(let x = 0; x < mandatory.length; x++){
+
+        check[mandatory[x]] = 1;
+    }
+
+    for(let x = 0, arr; x <  arrays.length; x++){
+
+        arr = arrays[x];
+
+        for(let y = 0, id; y < arr.length; y++){
+
+            id = arr[y];
+
+            if(check[id]){
+
+                if(!union[id]){
+
+                    union[id] = 1;
+                    result[result.length] = id;
                 }
             }
         }

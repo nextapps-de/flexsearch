@@ -6,15 +6,15 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { SUPPORT_PRESET, SUPPORT_CACHE, SUPPORT_ASYNC, SUPPORT_WORKER } from "./config.js";
+import { SUPPORT_PRESET, SUPPORT_CACHE, SUPPORT_ASYNC, SUPPORT_WORKER, SUPPORT_SUGGESTION } from "./config.js";
 import { encode as default_encoder } from "./lang/latin/default.js";
 import { create_object, create_object_array, concat, sort_by_length_down } from "./common.js";
 import { pipeline, init_stemmer_or_matcher, init_filter } from "./lang.js";
 import { global_lang, global_charset } from "./global.js";
 import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./async.js";
+import { intersect } from "./intersect.js";
 import Cache, { searchCache } from "./cache.js";
 import apply_preset from "./presets.js";
-import intersect from "./intersect.js";
 
 /**
  * @param {Object=} options
@@ -349,16 +349,8 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
 
             if(this.fastupdate){
 
-                const tmp = this.register[id];
-
-                if(tmp){
-
-                    tmp[tmp.length] = arr;
-                }
-                else{
-
-                    this.register[id] = [arr];
-                }
+                const tmp =  this.register[id] || (this.register[id] = []);
+                tmp[tmp.length] = arr;
             }
         }
     }
@@ -392,7 +384,7 @@ Index.prototype.search = function(query, limit, options){
         limit = options["limit"];
         threshold = parse_option(options["threshold"], threshold);
         context = options["context"];
-        suggest = options["suggest"];
+        suggest = SUPPORT_SUGGESTION && options["suggest"];
     }
 
     if(query){
@@ -569,18 +561,6 @@ Index.prototype.add_result = function(result, suggest, resolution, limit, just_o
     if(!this.optimize){
 
         arr = get_array(arr, term, keyword, this.bidirectional);
-
-        // if(keyword){
-        //
-        //     const swap = this.bidirectional && (term > keyword);
-        //
-        //     arr = arr[swap ? term : keyword];
-        //     arr = arr && arr[swap ? keyword : term];
-        // }
-        // else{
-        //
-        //     arr = arr[term];
-        // }
     }
 
     if(arr){
@@ -595,18 +575,6 @@ Index.prototype.add_result = function(result, suggest, resolution, limit, just_o
             if(this.optimize){
 
                 tmp = get_array(tmp, term, keyword, this.bidirectional);
-
-                // if(keyword){
-                //
-                //     const swap = this.bidirectional && (term > keyword);
-                //
-                //     tmp = tmp[swap ? term : keyword];
-                //     tmp = tmp && tmp[swap ? keyword : term];
-                // }
-                // else{
-                //
-                //     tmp = tmp[term];
-                // }
             }
 
             if(tmp){
@@ -682,7 +650,7 @@ Index.prototype.remove = function(id, _skip_deletion){
 
         if(this.fastupdate){
 
-            // fast updates performs really fast but did not cleanup the key entries
+            // fast updates performs really fast but did not fully cleanup the key entries
 
             for(let i = 0, tmp; i < refs.length; i++){
 
