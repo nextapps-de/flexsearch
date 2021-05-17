@@ -20,6 +20,9 @@ The current state:<br>
 Read the documentation of new language encoding features:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md</a>
 
+Source Code v0.7.0-pre-alpha available here:<br>
+<a href="https://github.com/nextapps-de/flexsearch/tree/0.7.0/src">https://github.com/nextapps-de/flexsearch/tree/0.7.0/src</a>
+
 <h1></h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
