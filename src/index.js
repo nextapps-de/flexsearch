@@ -6,7 +6,14 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { SUPPORT_PRESET, SUPPORT_CACHE, SUPPORT_ASYNC, SUPPORT_WORKER, SUPPORT_SUGGESTION } from "./config.js";
+import {
+    SUPPORT_PRESET,
+    SUPPORT_CACHE,
+    SUPPORT_ASYNC,
+    SUPPORT_WORKER,
+    SUPPORT_SUGGESTION,
+    SUPPORT_SERIALIZE
+} from "./config.js";
 import { encode as default_encoder } from "./lang/latin/default.js";
 import { create_object, create_object_array, concat, sort_by_length_down } from "./common.js";
 import { pipeline, init_stemmer_or_matcher, init_filter } from "./lang.js";
@@ -15,6 +22,7 @@ import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./
 import { intersect } from "./intersect.js";
 import Cache, { searchCache } from "./cache.js";
 import apply_preset from "./presets.js";
+import { exportIndex, importIndex } from "./serialize.js";
 
 /**
  * @param {Object=} options
@@ -377,11 +385,12 @@ Index.prototype.search = function(query, limit, options){
 
     let result = [];
     let length;
-    let threshold = this.threshold, context, suggest;
+    let threshold = this.threshold, context, suggest, offset = 0;
 
     if(options){
 
         limit = options["limit"];
+        offset = options["offset"] || 0;
         threshold = parse_option(options["threshold"], threshold);
         context = options["context"];
         suggest = SUPPORT_SUGGESTION && options["suggest"];
@@ -512,12 +521,14 @@ Index.prototype.search = function(query, limit, options){
                     result = concat(result);
                 }
 
+                // TODO apply offset
+
                 return result.length > limit ? result.slice(0, limit) : result;
             }
         }
     }
 
-    return intersect(result, limit, suggest);
+    return intersect(result, limit, offset, suggest);
 };
 
 function get_array(arr, term, keyword, bidirectional){
@@ -579,6 +590,8 @@ Index.prototype.add_result = function(result, suggest, resolution, limit, just_o
 
             if(tmp){
 
+                // TODO apply offset
+
                 // keep score (sparse array):
                 //word_arr[x] = arr;
 
@@ -602,6 +615,8 @@ Index.prototype.add_result = function(result, suggest, resolution, limit, just_o
         if(count){
 
             if(just_one_loop){
+
+                // TODO apply offset
 
                 // fast path optimization
 
@@ -765,4 +780,10 @@ if(SUPPORT_ASYNC){
     Index.prototype.searchAsync = searchAsync;
     Index.prototype.updateAsync = updateAsync;
     Index.prototype.removeAsync = removeAsync;
+}
+
+if(SUPPORT_SERIALIZE){
+
+    Index.prototype.export = exportIndex;
+    Index.prototype.import = importIndex;
 }
