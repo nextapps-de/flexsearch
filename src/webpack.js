@@ -1,4 +1,4 @@
-import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE } from "./config.js";
+import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE } from "./config.js";
 import Document from "./document.js";
 import Index from "./index.js";
 import { registerCharset, registerLanguage } from "./global.js";
@@ -38,6 +38,15 @@ if(SUPPORT_ASYNC){
 /** @export */ Index.prototype.searchAsync;
 /** @export */ Index.prototype.updateAsync;
 /** @export */ Index.prototype.removeAsync;
+}
+
+if(SUPPORT_SERIALIZE){
+
+/** @export */ Index.prototype.export;
+/** @export */ Index.prototype.import;
+
+/** @export */ Document.prototype.export;
+/** @export */ Document.prototype.import;
 }
 
 window["FlexSearch"] = {

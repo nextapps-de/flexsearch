@@ -3,31 +3,15 @@ import { create_object, concat } from "./common.js";
 /**
  * @param arrays
  * @param limit
+ * @param offset
  * @param {boolean|Array=} suggest
  * @returns {Array}
  */
 
-export function intersect(arrays, limit, suggest) {
+export function intersect(arrays, limit, offset, suggest) {
 
     const length = arrays.length;
     let result = [];
-
-    // if(!length){
-    //
-    //     return result;
-    // }
-    //
-    // if(length === 1){
-    //
-    //     const tmp = arrays[0];
-    //
-    //     if(tmp.length === 1){
-    //
-    //         return tmp[0];
-    //     }
-    //
-    //     return concat(tmp);
-    // }
 
     // arrays.sort(function(a, b){
     //
@@ -78,13 +62,20 @@ export function intersect(arrays, limit, suggest) {
 
                         if(x === (length - 1)){
 
-                            result[count++] = id;
+                            if(offset){
 
-                            if(count === limit){
+                                offset--;
+                            }
+                            else{
 
-                                // fast path "end reached"
+                                result[count++] = id;
 
-                                return result;
+                                if(count === limit){
+
+                                    // fast path "end reached"
+
+                                    return result;
+                                }
                             }
                         }
                         else{
@@ -117,6 +108,8 @@ export function intersect(arrays, limit, suggest) {
 
             res = suggest[i];
             len = res && res.length;
+
+            // TODO apply offset
 
             if(len){
 

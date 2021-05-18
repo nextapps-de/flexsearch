@@ -6,12 +6,13 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { SUPPORT_ASYNC, SUPPORT_CACHE, SUPPORT_STORE, SUPPORT_TAGS } from "./config.js";
+import { SUPPORT_ASYNC, SUPPORT_CACHE, SUPPORT_SERIALIZE, SUPPORT_STORE, SUPPORT_TAGS } from "./config.js";
 import Index from "./index.js";
 import Cache, { searchCache } from "./cache.js";
 import { create_object } from "./common.js";
 import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./async.js";
 import { intersect, intersect_union } from "./intersect.js";
+import { exportDocument, importDocument } from "./serialize.js";
 
 /**
  * @param {Object=} options
@@ -55,7 +56,6 @@ function Document(options){
         options["cache"] = false;
     }
 
-    /** @private */
     this.index = parse_descriptor.call(this, options);
 }
 
@@ -73,7 +73,7 @@ function parse_option(value, default_value){
 function parse_descriptor(options){
 
     const index = create_object();
-    let field = options["doc"]; // options["document"]
+    let field = options["doc"];
     let field_options;
 
     if(typeof field === "string"){
@@ -377,11 +377,20 @@ Document.prototype.remove = function(id){
         for(let i = 0; i < this.field.length; i++){
 
             this.index[this.field[i]].remove(id, true);
+
+            if(this.fastupdate){
+
+                // when fastupdate was enabled all ids will
+                // be already cleanup after the first loop
+
+                break;
+            }
         }
 
         if(SUPPORT_TAGS && this.tag){
 
-            // when fastupdate was enabled the id will be already cleanup by the index
+            // when fastupdate was enabled the id will
+            // be already cleanup by the index
 
             if(!this.fastupdate){
 
@@ -428,9 +437,9 @@ Document.prototype.search = function(query, limit, options){
         options = limit;
     }
 
-    let result = [];
+    let result = [], result_field = [];
     let pluck, enrich;
-    let field, field_options, tag, bool, count = 0;
+    let field, field_options, tag, bool, offset, count = 0;
 
     if(options){
 
@@ -440,6 +449,7 @@ Document.prototype.search = function(query, limit, options){
         enrich = SUPPORT_STORE && this.store && options["enrich"];
         bool = options["bool"] === "and";
         limit = options["limit"];
+        offset = options["offset"];
 
         if(field){
 
@@ -468,7 +478,7 @@ Document.prototype.search = function(query, limit, options){
 
                 for(let i = 0, res; i < tag.length; i++){
 
-                    res = get_tag.call(this, tag[i], limit || 100, enrich);
+                    res = get_tag.call(this, tag[i], limit || 100, offset || 0, enrich);
 
                     if(res){
 
@@ -485,32 +495,19 @@ Document.prototype.search = function(query, limit, options){
     field || (field = this.field);
     bool = bool && ((field.length > 1) || (tag && (tag.length > 1)));
 
-    let found_tag = [];
-
     // TODO solve this in one loop below
 
-    for(let i = 0, res, key, item, len; i < field.length; i++){
+    for(let i = 0, res, key, len; i < field.length; i++){
 
         key = field[i];
 
-        // if(field_options){
-        //
-        //     item = field_options[key];
-        //
-        //     // inherit options also when search? it is just for laziness, Object.assign() has a cost
-        //     //item = typeof item === "object" ? Object.assign({}, options, item) : options;
-        // }
-        // else{
-        //
-        //     item = options;
-        // }
+        // inherit options also when search? it is just for laziness, Object.assign() has a cost
 
         res = this.index[key].search(query, limit, field_options ? field_options[key] : options);
         len = res.length;
 
         if(tag && len){
 
-            const field_tag = found_tag[i] = [];
             const arr = [];
             let count = 0;
 
@@ -529,8 +526,8 @@ Document.prototype.search = function(query, limit, options){
 
                 if(len){
 
+                    count++;
                     arr[arr.length] = bool ? [res] : res;
-                    field_tag[count++] = key;
                 }
             }
 
@@ -538,7 +535,7 @@ Document.prototype.search = function(query, limit, options){
 
                 if(bool){
 
-                    res = intersect(arr, limit || 100);
+                    res = intersect(arr, limit || 100, offset || 0);
                 }
                 else{
 
@@ -551,18 +548,12 @@ Document.prototype.search = function(query, limit, options){
 
         if(len){
 
+            result_field[count] = key;
             result[count++] = res;
         }
         else if(bool){
 
-            //if(!len){
-
-                return [];
-            //}
-
-            // add a pseudo relevance index for the intersection
-            // used when squash the results on boolean "and"
-            //res = [res];
+            return [];
         }
     }
 
@@ -573,20 +564,6 @@ Document.prototype.search = function(query, limit, options){
         return [];
     }
 
-    // squash the results on boolean "and"?
-
-    // if(bool){
-    //
-    //     limit || (limit = 100);
-    //
-    //     if(enrich && this.store){
-    //
-    //         return apply_enrich.call(this, intersect(result, limit));
-    //     }
-    //
-    //     return intersect(result, limit);
-    // }
-
     if(pluck && (!enrich || !this.store)){
 
         // fast path optimization
@@ -594,9 +571,8 @@ Document.prototype.search = function(query, limit, options){
         return result[0];
     }
 
-    for(let i = 0, res, key; i < field.length; i++){
+    for(let i = 0, res; i < result_field.length; i++){
 
-        key = field[i];
         res = result[i];
 
         if(res.length){
@@ -612,16 +588,11 @@ Document.prototype.search = function(query, limit, options){
             return res;
         }
 
-        result[i] = res = {
+        result[i] = {
 
-            "field": key,
+            "field": result_field[i],
             "result": res
         };
-
-        if(tag){
-
-            res["tag"] = found_tag[i];
-        }
     }
 
     return result;
@@ -631,16 +602,16 @@ Document.prototype.search = function(query, limit, options){
  * @this Document
  */
 
-function get_tag(key, limit, enrich){
+function get_tag(key, limit, offset, enrich){
 
     let res = this.tagindex[key];
-    let len = res && res.length;
+    let len = res && (res.length - offset);
 
-    if(len){
+    if(len && (len > 0)){
 
-        if(len > limit){
+        if((len > limit) || offset){
 
-            res = res.slice(0, limit);
+            res = res.slice(offset, offset + limit);
         }
 
         if(enrich){
@@ -709,4 +680,10 @@ if(SUPPORT_ASYNC){
     Document.prototype.searchAsync = searchAsync;
     Document.prototype.updateAsync = updateAsync;
     Document.prototype.removeAsync = removeAsync;
+}
+
+if(SUPPORT_SERIALIZE){
+
+    Document.prototype.export = exportDocument;
+    Document.prototype.import = importDocument;
 }
