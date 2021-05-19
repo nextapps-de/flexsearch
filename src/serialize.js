@@ -1,6 +1,6 @@
 import Index from "./index.js";
 import Document from "./document.js";
-import { create_object } from "./common.js";
+import { create_object, is_string } from "./common.js";
 
 function async(callback, self, key, index_doc, index, data){
 
@@ -99,7 +99,7 @@ export function importIndex(key, data){
         return;
     }
 
-    if(typeof data === "string"){
+    if(is_string(data)){
 
         data = JSON.parse(data);
     }
@@ -202,7 +202,7 @@ export function importDocument(key, data){
         return;
     }
 
-    if(typeof data === "string"){
+    if(is_string(data)){
 
         data = JSON.parse(data);
     }

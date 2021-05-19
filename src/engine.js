@@ -12,7 +12,8 @@ function Engine(index){
 
     if(DEBUG){
 
-        if(this.constructor === Engine){
+        //if(this.constructor === Engine){
+        if(this instanceof Engine){
 
             throw new Error("Can't instantiate abstract class!");
         }

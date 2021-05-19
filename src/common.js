@@ -1,4 +1,7 @@
-//import FlexSearch from "./flexsearch.js";
+export function parse_option(value, default_value){
+
+    return typeof value !== "undefined" ? value : default_value;
+}
 
 /**
  * @param {!Object} obj
@@ -52,4 +55,24 @@ export function concat(arrays){
 export function sort_by_length_down(a, b){
 
     return b.length - a.length;
+}
+
+export function is_array(val){
+
+    return val.constructor === Array;
+}
+
+export function is_string(val){
+
+    return typeof val === "string";
+}
+
+export function is_object(val){
+
+    return typeof val === "object";
+}
+
+export function is_function(val){
+
+    return typeof val === "function";
 }
