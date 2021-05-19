@@ -6,13 +6,24 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { SUPPORT_ASYNC, SUPPORT_CACHE, SUPPORT_SERIALIZE, SUPPORT_STORE, SUPPORT_TAGS } from "./config.js";
+import {
+
+    SUPPORT_ASYNC,
+    SUPPORT_CACHE,
+    SUPPORT_SERIALIZE,
+    SUPPORT_STORE,
+    SUPPORT_TAGS,
+    SUPPORT_WORKER
+
+} from "./config.js";
+
 import Index from "./index.js";
 import Cache, { searchCache } from "./cache.js";
 import { create_object } from "./common.js";
-import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./async.js";
+import apply_async from "./async.js";
 import { intersect, intersect_union } from "./intersect.js";
 import { exportDocument, importDocument } from "./serialize.js";
+import WorkerAdapter from "./adapter.js";
 
 /**
  * @param {Object=} options
@@ -54,6 +65,16 @@ function Document(options){
 
         this.cache = (opt = options["cache"]) && new Cache(opt);
         options["cache"] = false;
+    }
+
+    if(SUPPORT_WORKER){
+
+        this.worker = options["worker"];
+    }
+
+    if(SUPPORT_ASYNC){
+
+        this.async = false;
     }
 
     this.index = parse_descriptor.call(this, options);
@@ -100,7 +121,15 @@ function parse_descriptor(options){
             item = options;
         }
 
-        index[key] = new Index(item, this.register);
+        if(this.worker){
+
+            index[key] = new WorkerAdapter(item);
+        }
+        else{
+
+            index[key] = new Index(item, this.register);
+        }
+
         this.tree[i] = parse_tree(key, this.marker);
         this.field[i] = key;
     }
@@ -425,7 +454,7 @@ Document.prototype.remove = function(id){
     return this;
 };
 
-Document.prototype.search = function(query, limit, options){
+Document.prototype.search = async function(query, limit, options){
 
     if(typeof query === "object"){
 
@@ -495,15 +524,38 @@ Document.prototype.search = function(query, limit, options){
     field || (field = this.field);
     bool = bool && ((field.length > 1) || (tag && (tag.length > 1)));
 
+    let async_res = [];
+
+    // use Promise.all to get a change of processing requests in parallel
+
+    if(this.worker || this.async){
+
+        for(let i = 0, key; i < field.length; i++){
+
+            key = field[i];
+            async_res[i] = this.index[key][this.async ? "searchAsync" : "search"](query, limit, field_options ? field_options[key] : options);
+        }
+
+        async_res = await Promise.all(async_res);
+    }
+
     // TODO solve this in one loop below
 
     for(let i = 0, res, key, len; i < field.length; i++){
 
         key = field[i];
 
-        // inherit options also when search? it is just for laziness, Object.assign() has a cost
+        if(this.worker || this.async){
 
-        res = this.index[key].search(query, limit, field_options ? field_options[key] : options);
+            res = async_res[i];
+        }
+        else{
+
+            // inherit options also when search? it is just for laziness, Object.assign() has a cost
+
+            res = this.index[key].search(query, limit, field_options ? field_options[key] : options);
+        }
+
         len = res.length;
 
         if(tag && len){
@@ -675,11 +727,7 @@ if(SUPPORT_CACHE){
 
 if(SUPPORT_ASYNC){
 
-    Document.prototype.addAsync = addAsync;
-    Document.prototype.appendAsync = appendAsync;
-    Document.prototype.searchAsync = searchAsync;
-    Document.prototype.updateAsync = updateAsync;
-    Document.prototype.removeAsync = removeAsync;
+    apply_async(Document.prototype);
 }
 
 if(SUPPORT_SERIALIZE){

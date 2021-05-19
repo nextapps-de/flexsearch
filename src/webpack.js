@@ -55,4 +55,4 @@ window["FlexSearch"] = {
     "Document": SUPPORT_DOCUMENT ? Document : null,
     "registerCharset": registerCharset,
     "registerLanguage": registerLanguage
-}
+};

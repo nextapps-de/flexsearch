@@ -51,20 +51,17 @@ if(POLYFILL){
 
             this.callback = null;
 
-            let self = this;
+            const self = this;
 
-            //setTimeout(function(){
+            fn(function(val){
 
-                fn(function(val){
+                if(self.callback){
 
-                    if(self.callback){
-
-                        self.callback(val);
-                        self.callback = null;
-                        self = null;
-                    }
-                });
-            //});
+                    self.callback(val);
+                    // self.callback = null;
+                    // self = null;
+                }
+            });
         }
 
         /**

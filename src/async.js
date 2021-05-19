@@ -2,106 +2,49 @@ import Index from "./index.js";
 import Document from "./document.js";
 import { promise as Promise } from "./polyfill.js";
 
-/**
- * @param {Function=} callback
- */
+export default function(prototype){
 
-export function addAsync(id, content, callback){
-
-    return caller.call(
-        /** @type {Document|Index} */ (this),
-        /** @type {Document|Index} */ (this).add,
-        arguments
-    );
+    register(prototype, "add");
+    register(prototype, "append");
+    register(prototype, "search");
+    register(prototype, "update");
+    register(prototype, "remove");
 }
 
-/**
- * @param {Function=} callback
- */
+function register(prototype, key){
 
-export function appendAsync(id, content, callback){
+    prototype[key + "Async"] = function(){
 
-    return caller.call(
-        /** @type {Document|Index} */ (this),
-        /** @type {Document|Index} */ (this).append,
-        arguments
-    );
-}
+        const self = this;
+        const args = /*[].slice.call*/(arguments);
+        const arg = args[args.length - 1];
+        let callback;
 
-/**
- * @param {!string} query
- * @param {number|Object|Function=} options
- * @param {Function=} callback
- */
+        if(typeof arg === "function"){
 
-export function searchAsync(query, options, callback){
-
-    return caller.call(
-        /** @type {Document|Index} */ (this),
-        /** @type {Document|Index} */ (this).search,
-        arguments
-    );
-}
-
-/**
- * @param {Function=} callback
- */
-
-export function updateAsync(id, content, callback){
-
-    return caller.call(
-        /** @type {Document|Index} */ (this),
-        /** @type {Document|Index} */ (this).update,
-        arguments
-    );
-}
-
-/**
- * @param {Function=} callback
- */
-
-export function removeAsync(id, callback){
-
-    return caller.call(
-        /** @type {Document|Index} */ (this),
-        /** @type {Document|Index} */ (this).remove,
-        arguments
-    );
-}
-
-function caller(method, args){
-
-    let callback;
-
-    for(let i = 0; i < args.length; i++){
-
-        if(typeof args[i] === "function"){
-
-            callback = args[i];
-            delete args[i];
-            break;
+            callback = arg;
+            delete args[args.length - 1];
         }
-    }
 
-    const self = /** @type {Document|Index} */ (this);
+        const promise = new Promise(function(resolve){
 
-    const promise = new Promise(function(resolve){
+            setTimeout(function(){
 
-        // Promises are bullshit, they will block the main thread
-
-        setTimeout(function(){
-
-            resolve(method.apply(self, args));
+                const fn = self[key];
+                fn.async = true;
+                resolve(fn.apply(self, args));
+                fn.async = false;
+            });
         });
-    });
 
-    if(callback){
+        if(callback){
 
-        promise.then(callback);
-        return this;
-    }
-    else{
+            promise.then(callback);
+            return this;
+        }
+        else{
 
-        return promise;
-    }
+            return promise;
+        }
+    };
 }
