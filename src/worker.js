@@ -8,43 +8,46 @@ onmessage = function(event) {
 
     switch(data["task"]){
 
-        case "register":
+        case "create":
 
             const options = data["options"] || {};
 
             options["cache"] = false;
-            // options["async"] = false;
-            // options["worker"] = false;
-
             id = data["id"];
+
+            if(typeof options["encode"] === "string"){
+
+                options["encode"] = Function(options["encode"]);
+            }
+
             index = new Index(options);
-            break;
-
-        case "search":
-
-            const results = index.search(data["query"], data);
-
-            postMessage({ id, results });
             break;
 
         case "add":
 
-            index.add(data["id"], data["content"]);
+            index.add.apply(index, data["args"]);
+            break;
+
+        case "append":
+
+            index.append.apply(index, data["args"]);
+            break;
+
+        case "search":
+
+            const results = index.search.apply(index, data["args"]);
+            //postMessage({ id: id, results: results });
+            postMessage(results);
             break;
 
         case "update":
 
-            index.update(data["id"], data["content"]);
+            index.update.apply(index, data["args"]);
             break;
 
         case "remove":
 
-            index.remove(data["id"]);
+            index.remove.apply(index, data["args"]);
             break;
-
-        // case "clear":
-        //
-        //     index.clear();
-        //     break;
     }
 };

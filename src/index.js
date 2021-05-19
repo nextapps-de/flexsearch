@@ -7,18 +7,20 @@
  */
 
 import {
+
     SUPPORT_PRESET,
     SUPPORT_CACHE,
     SUPPORT_ASYNC,
-    SUPPORT_WORKER,
     SUPPORT_SUGGESTION,
     SUPPORT_SERIALIZE
+
 } from "./config.js";
+
 import { encode as default_encoder } from "./lang/latin/default.js";
 import { create_object, create_object_array, concat, sort_by_length_down } from "./common.js";
 import { pipeline, init_stemmer_or_matcher, init_filter } from "./lang.js";
 import { global_lang, global_charset } from "./global.js";
-import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./async.js";
+import apply_async from "./async.js";
 import { intersect } from "./intersect.js";
 import Cache, { searchCache } from "./cache.js";
 import apply_preset from "./presets.js";
@@ -115,18 +117,6 @@ function Index(options, _register){
     if(SUPPORT_CACHE){
 
         this.cache = (tmp = options["cache"]) && new Cache(tmp);
-    }
-
-    if(SUPPORT_WORKER){
-
-        /** @private */
-        this.worker = (tmp = options["worker"]) && new Worker("worker.js", { type: "module" });
-
-        if(tmp){
-
-            this.worker.onmessage = function(e){ console.log(e.data) };
-            this.worker.postMessage({ task: "register", options: options });
-        }
     }
 }
 
@@ -775,11 +765,7 @@ if(SUPPORT_CACHE){
 
 if(SUPPORT_ASYNC){
 
-    Index.prototype.addAsync = addAsync;
-    Index.prototype.appendAsync = appendAsync;
-    Index.prototype.searchAsync = searchAsync;
-    Index.prototype.updateAsync = updateAsync;
-    Index.prototype.removeAsync = removeAsync;
+    apply_async(Index.prototype);
 }
 
 if(SUPPORT_SERIALIZE){

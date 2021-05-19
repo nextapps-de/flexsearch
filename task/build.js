@@ -59,7 +59,7 @@ var options = (function(argv){
 
                 if(index !== "RELEASE"){
 
-                    flag_str += " --define='" + index + "=" + val + "'";
+                    //flag_str += " --define='" + index + "=" + val + "'";
                 }
 
                 arr[index] = val;
@@ -111,8 +111,8 @@ let parameter = (function(opt){
     //jscomp_error: "newCheckTypesExtraChecks",
     generate_exports: true,
     export_local_property_definitions: true,
-    language_in: "ECMASCRIPT6_STRICT",
-    language_out: language_out || "ECMASCRIPT5_STRICT",
+    language_in: "ECMASCRIPT_2017",
+    language_out: language_out || "ECMASCRIPT6_STRICT",
     process_closure_primitives: true,
     summary_detail_level: 3,
     warning_level: "VERBOSE",

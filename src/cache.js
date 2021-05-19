@@ -27,6 +27,7 @@ export default CacheClass;
  * @param {!string} query
  * @param {number|Object=} limit
  * @param {Object=} options
+ * @this {Document|Index}
  * @returns {Array<number|string>}
  */
 
@@ -37,12 +38,12 @@ export function searchCache(query, limit, options){
         query = query["query"];
     }
 
-    let cache = /** @type {Document|Index} */ (this).cache.get(query);
+    let cache = this.cache.get(query);
 
     if(!cache){
 
-        cache = /** @type {Document|Index} */ (this).search(query, limit, options);
-        /** @type {Document|Index} */ (this).cache.set(query, cache);
+        cache = this.search(query, limit, options);
+        this.cache.set(query, cache);
     }
 
     return cache;

@@ -39,6 +39,3 @@ export const SUPPORT_SERIALIZE = true;
 
 /** @define {boolean} */
 export const SUPPORT_DOCUMENT = true;
-
-/** @define {boolean} */
-export const SUPPORT_PAGINATION = true;
