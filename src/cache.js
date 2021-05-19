@@ -1,6 +1,6 @@
 import Index from "./index.js";
 import Document from "./index.js";
-import { create_object } from "./common.js";
+import { create_object, is_object } from "./common.js";
 
 /**
  * @param {boolean|number=} limit
@@ -24,7 +24,7 @@ function CacheClass(limit){
 export default CacheClass;
 
 /**
- * @param {!string} query
+ * @param {string|Object} query
  * @param {number|Object=} limit
  * @param {Object=} options
  * @this {Document|Index}
@@ -33,7 +33,7 @@ export default CacheClass;
 
 export function searchCache(query, limit, options){
 
-    if(typeof query === "object"){
+    if(is_object(query)){
 
         query = query["query"];
     }

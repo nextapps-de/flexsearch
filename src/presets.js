@@ -1,4 +1,5 @@
 import { DEBUG } from "./config.js";
+import { is_string } from "./common.js";
 
 /**
  * @enum {Object}
@@ -67,7 +68,7 @@ const presets = {
 
 export default function apply_preset(options){
 
-    if(typeof options === "string"){
+    if(is_string(options)){
 
         if(DEBUG && !presets[options]){
 

@@ -17,7 +17,7 @@ import {
 } from "./config.js";
 
 import { encode as default_encoder } from "./lang/latin/default.js";
-import { create_object, create_object_array, concat, sort_by_length_down } from "./common.js";
+import { create_object, create_object_array, concat, sort_by_length_down, is_array, is_string, is_object, parse_option } from "./common.js";
 import { pipeline, init_stemmer_or_matcher, init_filter } from "./lang.js";
 import { global_lang, global_charset } from "./global.js";
 import apply_async from "./async.js";
@@ -52,7 +52,7 @@ function Index(options, _register){
         charset = options["charset"];
         lang = options["lang"];
 
-        if(typeof charset === "string"){
+        if(is_string(charset)){
 
             if(charset.indexOf(":") === -1){
 
@@ -62,7 +62,7 @@ function Index(options, _register){
             charset = global_charset[charset];
         }
 
-        if(typeof lang === "string"){
+        if(is_string(lang)){
 
             lang = global_lang[lang];
         }
@@ -121,11 +121,6 @@ function Index(options, _register){
 }
 
 export default Index;
-
-function parse_option(value, default_value){
-
-    return typeof value !== "undefined" ? value : default_value;
-}
 
 Index.prototype.pipeline = pipeline;
 
@@ -355,7 +350,7 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
 }
 
 /**
- * @param {!string|Object} query
+ * @param {string|Object} query
  * @param {number|Object=} limit
  * @param {Object=} options
  * @returns {Array<number|string>}
@@ -363,14 +358,14 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
 
 Index.prototype.search = function(query, limit, options){
 
-    if(typeof query === "object"){
+    if(is_object(query)){
 
-        options = query;
+        options = /** @type {Object} */ (query);
         query = options["query"];
     }
-    else if(typeof limit === "object"){
+    else if(is_object(limit)){
 
-        options = limit;
+        options = /** @type {Object} */ (limit);
     }
 
     let result = [];
@@ -697,7 +692,7 @@ function remove_index(map, id, res, optimize, resolution){
 
     let count = 0;
 
-    if(map.constructor === Array){
+    if(is_array(map)){
 
         // the first array is the score array in both strategies
 
@@ -763,13 +758,13 @@ if(SUPPORT_CACHE){
     Index.prototype.searchCache = searchCache;
 }
 
-if(SUPPORT_ASYNC){
-
-    apply_async(Index.prototype);
-}
-
 if(SUPPORT_SERIALIZE){
 
     Index.prototype.export = exportIndex;
     Index.prototype.import = importIndex;
+}
+
+if(SUPPORT_ASYNC){
+
+    apply_async(Index.prototype);
 }

@@ -1,6 +1,7 @@
 import Index from "./index.js";
 import Document from "./document.js";
 import { promise as Promise } from "./polyfill.js";
+import { is_function, is_object } from "./common.js";
 
 export default function(prototype){
 
@@ -20,7 +21,7 @@ function register(prototype, key){
         const arg = args[args.length - 1];
         let callback;
 
-        if(typeof arg === "function"){
+        if(is_function(arg)){
 
             callback = arg;
             delete args[args.length - 1];

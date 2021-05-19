@@ -1,4 +1,5 @@
 import { promise as Promise } from "./polyfill.js";
+import { is_function, is_object } from "./common.js";
 
 let counter = 0;
 
@@ -10,13 +11,13 @@ let counter = 0;
 
 function WorkerAdapter(id, options){
 
-    if(typeof id === "object"){
+    if(is_object(id)){
 
-        options = id;
+        options = /** @type {Object} */ (id);
         id = 0;
     }
 
-    if(typeof options["encode"] === "function"){
+    if(is_function(options["encode"])){
 
         options["encode"] = options["encode"].toString();
     }
@@ -48,7 +49,7 @@ function register(key){
         const arg = args[args.length - 1];
         let callback;
 
-        if(typeof arg === "function"){
+        if(is_function(arg)){
 
             callback = arg;
             args.splice(args.length - 1, 1);

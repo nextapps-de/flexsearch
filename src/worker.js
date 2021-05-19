@@ -1,23 +1,26 @@
 import Index from "./index.js";
+import { is_string, is_object } from "./common.js";
 
 let index, id;
 
 onmessage = function(event) {
 
     const data = event.data;
+    const args = data["args"];
 
     switch(data["task"]){
 
         case "create":
 
             const options = data["options"] || {};
+            const encode = options["encode"];
 
             options["cache"] = false;
             id = data["id"];
 
-            if(typeof options["encode"] === "string"){
+            if(is_string(encode)){
 
-                options["encode"] = Function(options["encode"]);
+                options["encode"] = new Function("return " + encode)();
             }
 
             index = new Index(options);
@@ -25,29 +28,29 @@ onmessage = function(event) {
 
         case "add":
 
-            index.add.apply(index, data["args"]);
+            index.add.apply(index, args);
             break;
 
         case "append":
 
-            index.append.apply(index, data["args"]);
+            index.append.apply(index, args);
             break;
 
         case "search":
 
-            const results = index.search.apply(index, data["args"]);
+            const results = index.search.apply(index, args);
             //postMessage({ id: id, results: results });
             postMessage(results);
             break;
 
         case "update":
 
-            index.update.apply(index, data["args"]);
+            index.update.apply(index, args);
             break;
 
         case "remove":
 
-            index.remove.apply(index, data["args"]);
+            index.remove.apply(index, args);
             break;
     }
 };

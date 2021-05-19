@@ -19,7 +19,7 @@ import {
 
 import Index from "./index.js";
 import Cache, { searchCache } from "./cache.js";
-import { create_object } from "./common.js";
+import { create_object, is_array, is_string, is_object, parse_option } from "./common.js";
 import apply_async from "./async.js";
 import { intersect, intersect_union } from "./intersect.js";
 import { exportDocument, importDocument } from "./serialize.js";
@@ -82,11 +82,6 @@ function Document(options){
 
 export default Document;
 
-function parse_option(value, default_value){
-
-    return typeof value !== "undefined" ? value : default_value;
-}
-
 /**
  * @this Document
  */
@@ -97,38 +92,37 @@ function parse_descriptor(options){
     let field = options["doc"];
     let field_options;
 
-    if(typeof field === "string"){
+    if(is_string(field)){
 
         field = [field];
     }
-    else if(field.constructor !== Array){
+    else if(!is_array(field)){
 
         field_options = field;
         field = Object.keys(field);
     }
 
-    for(let i = 0, key, item; i < field.length; i++){
+    for(let i = 0, key, opt; i < field.length; i++){
 
         key = field[i];
 
-        if(field_options){
+        if(!is_string(key)){
 
-            item = field_options[key];
-            item = typeof item === "object" ? Object.assign({}, options, item) : options;
+            opt = key;
+            key = key["field"];
         }
-        else{
+        else if(field_options){
 
-            item = options;
+            opt = field_options[key];
         }
 
-        if(this.worker){
+        opt = is_object(opt) ? Object.assign({}, options, opt) : options;
 
-            index[key] = new WorkerAdapter(item);
-        }
-        else{
+        index[key] = this.worker ?
 
-            index[key] = new Index(item, this.register);
-        }
+            new WorkerAdapter(opt)
+        :
+            new Index(opt, this.register);
 
         this.tree[i] = parse_tree(key, this.marker);
         this.field[i] = key;
@@ -138,7 +132,7 @@ function parse_descriptor(options){
 
         let store = options["store"];
 
-        if(typeof store === "string"){
+        if(is_string(store)){
 
             store = [store];
         }
@@ -187,7 +181,7 @@ function parse_tree(key, marker){
 
 function parse_simple(obj, tree){
 
-    if(typeof tree === "string"){
+    if(is_string(tree)){
 
         obj = obj[tree];
     }
@@ -216,7 +210,7 @@ function store_value(obj, store, tree, pos, key){
     }
     else if(obj){
 
-        if(obj.constructor === Array){
+        if(is_array(obj)){
 
             store = store[key] = new Array(obj.length);
 
@@ -246,7 +240,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
 
         // handle target value
 
-        if(obj.constructor === Array){
+        if(is_array(obj)){
 
             if(marker[pos]){
 
@@ -265,7 +259,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
     }
     else if(obj){
 
-        if(obj.constructor === Array){
+        if(is_array(obj)){
 
             for(let i = 0; i < obj.length; i++){
 
@@ -292,7 +286,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
 
 Document.prototype.add = function(id, content, _append){
 
-    if(typeof id === "object"){
+    if(is_object(id)){
 
         content = id;
         id = parse_simple(content, this.key);
@@ -310,7 +304,7 @@ Document.prototype.add = function(id, content, _append){
             field = this.field[i];
             tree = this.tree[i];
 
-            if(typeof tree === "string"){
+            if(is_string(tree)){
 
                 tree = [tree];
             }
@@ -323,7 +317,7 @@ Document.prototype.add = function(id, content, _append){
             let tag = parse_simple(content, this.tag);
             let dupes = create_object();
 
-            if(typeof tag === "string"){
+            if(is_string(tag)){
 
                 tag = [tag];
             }
@@ -365,7 +359,7 @@ Document.prototype.add = function(id, content, _append){
 
                     tree = this.storetree[i];
 
-                    if(typeof tree === "string"){
+                    if(is_string(tree)){
 
                         store[tree] = content[tree];
                     }
@@ -396,7 +390,7 @@ Document.prototype.update = function(id, content){
 
 Document.prototype.remove = function(id){
 
-    if(typeof id === "object"){
+    if(is_object(id)){
 
         id = id[this.key];
     }
@@ -407,7 +401,9 @@ Document.prototype.remove = function(id){
 
             this.index[this.field[i]].remove(id, true);
 
-            if(this.fastupdate){
+            // workers does not share the register
+
+            if(this.fastupdate && !this.worker){
 
                 // when fastupdate was enabled all ids will
                 // be already cleanup after the first loop
@@ -421,7 +417,7 @@ Document.prototype.remove = function(id){
             // when fastupdate was enabled the id will
             // be already cleanup by the index
 
-            if(!this.fastupdate){
+            if(!this.fastupdate || this.worker){
 
                 for(let key in this.tagindex){
 
@@ -456,14 +452,15 @@ Document.prototype.remove = function(id){
 
 Document.prototype.search = async function(query, limit, options){
 
-    if(typeof query === "object"){
+    if(is_object(query)){
 
         options = query;
         query = options["query"];
     }
-    else if(typeof limit === "object"){
+    else if(is_object(limit)){
 
         options = limit;
+        limit = 0;
     }
 
     let result = [], result_field = [];
@@ -472,51 +469,64 @@ Document.prototype.search = async function(query, limit, options){
 
     if(options){
 
-        pluck = options["pluck"];
-        field = pluck || options["field"];
-        tag = SUPPORT_TAGS && options["tag"];
-        enrich = SUPPORT_STORE && this.store && options["enrich"];
-        bool = options["bool"] === "and";
-        limit = options["limit"];
-        offset = options["offset"];
+        if(is_array(options)){
 
-        if(field){
-
-            if(typeof field === "string"){
-
-                field = [field];
-            }
-            else if(field.constructor !== Array){
-
-                field_options = field;
-                field = Object.keys(field);
-            }
+            field = options;
+            options = null;
         }
+        // else if(is_string(options)){
+        //
+        //     field = [options];
+        //     options = null;
+        // }
+        else{
 
-        if(tag){
+            pluck = options["pluck"];
+            field = pluck || options["field"] || options["doc"];
+            tag = SUPPORT_TAGS && options["tag"];
+            enrich = SUPPORT_STORE && this.store && options["enrich"];
+            bool = options["bool"] === "and";
+            limit = options["limit"] || 100;
+            offset = options["offset"] || 0;
 
-            if(typeof tag === "string"){
+            if(field){
 
-                tag = [tag];
+                if(is_string(field)){
+
+                    field = [field];
+                }
+                else if(!is_array(field)){
+
+                    field_options = field;
+                    field = Object.keys(field);
+                }
             }
 
-            // when tags is used and no query was set,
-            // then just return the tag indexes
+            if(tag){
 
-            if(!query){
+                if(is_string(tag)){
 
-                for(let i = 0, res; i < tag.length; i++){
-
-                    res = get_tag.call(this, tag[i], limit || 100, offset || 0, enrich);
-
-                    if(res){
-
-                        result[result.length] = res;
-                        count++;
-                    }
+                    tag = [tag];
                 }
 
-                return count ? result : [];
+                // when tags is used and no query was set,
+                // then just return the tag indexes
+
+                if(!query){
+
+                    for(let i = 0, res; i < tag.length; i++){
+
+                        res = get_tag.call(this, tag[i], limit, offset, enrich);
+
+                        if(res){
+
+                            result[result.length] = res;
+                            count++;
+                        }
+                    }
+
+                    return count ? result : [];
+                }
             }
         }
     }
@@ -532,8 +542,21 @@ Document.prototype.search = async function(query, limit, options){
 
         for(let i = 0, key; i < field.length; i++){
 
+            let opt;
+
             key = field[i];
-            async_res[i] = this.index[key][this.async ? "searchAsync" : "search"](query, limit, field_options ? field_options[key] : options);
+
+            if(!is_string(key)){
+
+                opt = key;
+                key = key["field"];
+            }
+            else if(field_options){
+
+                opt = field_options[key];
+            }
+
+            async_res[i] = this.index[key].searchAsync(query, limit, opt || options);
         }
 
         async_res = await Promise.all(async_res);
@@ -543,7 +566,19 @@ Document.prototype.search = async function(query, limit, options){
 
     for(let i = 0, res, key, len; i < field.length; i++){
 
+        let opt;
+
         key = field[i];
+
+        if(!is_string(key)){
+
+            opt = key;
+            key = key["field"];
+        }
+        else if(field_options){
+
+            opt = field_options[key];
+        }
 
         if(this.worker || this.async){
 
@@ -553,7 +588,7 @@ Document.prototype.search = async function(query, limit, options){
 
             // inherit options also when search? it is just for laziness, Object.assign() has a cost
 
-            res = this.index[key].search(query, limit, field_options ? field_options[key] : options);
+            res = this.index[key].search(query, limit, opt || options);
         }
 
         len = res.length;
@@ -725,13 +760,13 @@ if(SUPPORT_CACHE){
     Document.prototype.searchCache = searchCache;
 }
 
-if(SUPPORT_ASYNC){
-
-    apply_async(Document.prototype);
-}
-
 if(SUPPORT_SERIALIZE){
 
     Document.prototype.export = exportDocument;
     Document.prototype.import = importDocument;
+}
+
+if(SUPPORT_ASYNC){
+
+    apply_async(Document.prototype);
 }
