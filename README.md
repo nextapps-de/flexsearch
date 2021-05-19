@@ -12,15 +12,17 @@
 
 <h2></h2>
 
-### FlexSearch v0.7.0 (Update)
+### FlexSearch v0.7.0 (Beta)
 
-The current state:<br>
+Beta is now available. Please test the new version and post back issues and suggestions. The Beta will pushed to the master branch in 2 weeks.
+
+Read the documentation of new features and changes:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md</a>
 
 Read the documentation of new language encoding features:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md</a>
 
-Source Code v0.7.0-pre-alpha available here:<br>
+Source Code v0.7.0-beta available here:<br>
 <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.0/src">https://github.com/nextapps-de/flexsearch/tree/0.7.0/src</a>
 
 <h1></h1>
