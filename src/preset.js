@@ -6,7 +6,7 @@ import { is_string } from "./common.js";
  * @const
  */
 
-const presets = {
+const preset = {
 
     "memory": {
         charset: "latin:extra",
@@ -70,12 +70,12 @@ export default function apply_preset(options){
 
     if(is_string(options)){
 
-        if(DEBUG && !presets[options]){
+        if(DEBUG && !preset[options]){
 
             console.warn("Preset not found: " + options);
         }
 
-        options = presets[options];
+        options = preset[options];
     }
     else{
 
@@ -83,12 +83,12 @@ export default function apply_preset(options){
 
         if(preset){
 
-            if(DEBUG && !presets[preset]){
+            if(DEBUG && !preset[preset]){
 
                 console.warn("Preset not found: " + preset);
             }
 
-            options = Object.assign({}, presets[preset], /** @type {Object} */ (options));
+            options = Object.assign({}, preset[preset], /** @type {Object} */ (options));
         }
     }
 

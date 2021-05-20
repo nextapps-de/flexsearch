@@ -1,5 +1,3 @@
-import { addAsync, appendAsync, removeAsync, searchAsync, updateAsync } from "./async.js";
-import Document from "./document";
 import { DEBUG, SUPPORT_ASYNC, SUPPORT_CACHE } from "./config";
 import { searchCache } from "./cache";
 

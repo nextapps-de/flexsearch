@@ -1,5 +1,4 @@
-import Index from "./index.js";
-import Document from "./index.js";
+import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_object } from "./common.js";
 
 /**
@@ -27,7 +26,7 @@ export default CacheClass;
  * @param {string|Object} query
  * @param {number|Object=} limit
  * @param {Object=} options
- * @this {Document|Index}
+ * @this {IndexInterface}
  * @returns {Array<number|string>}
  */
 

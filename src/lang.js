@@ -1,4 +1,4 @@
-import Index from "./index.js";
+import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object } from "./common.js";
 
 /**
@@ -7,7 +7,7 @@ import { create_object } from "./common.js";
  * @param {boolean|string|RegExp=} split
  * @param {boolean=} _collapse
  * @returns {string|Array<string>}
- * @this Index
+ * @this IndexInterface
  */
 
 export function pipeline(str, normalize, split, _collapse){

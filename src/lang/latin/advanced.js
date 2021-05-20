@@ -54,7 +54,7 @@ export function encode(str, self, _skip_postprocessing){
 
     if(str){
 
-        str = encode_simple(str, /** @type {Document} */ (self || this)).join(" ");
+        str = encode_simple(str, self || this).join(" ");
 
         if(str.length > 2){
 

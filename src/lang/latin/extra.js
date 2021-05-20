@@ -34,7 +34,7 @@ export function encode(str){
 
     if(str){
 
-        str = encode_advanced(str, /** @type {Document} */ (this), /* skip post-processing: */ true);
+        str = encode_advanced(str, this, /* skip post-processing: */ true);
 
         if(str.length > 1){
 

@@ -18,6 +18,7 @@ import {
 } from "./config.js";
 
 import Index from "./index.js";
+import { DocumentInterface } from "./type.js";
 import Cache, { searchCache } from "./cache.js";
 import { create_object, is_array, is_string, is_object, parse_option } from "./common.js";
 import apply_async from "./async.js";
@@ -26,9 +27,10 @@ import { exportDocument, importDocument } from "./serialize.js";
 import WorkerAdapter from "./adapter.js";
 
 /**
+ * @constructor
+ * @implements DocumentInterface
  * @param {Object=} options
  * @return {Document}
- * @constructor
  */
 
 function Document(options){

@@ -1,5 +1,4 @@
-import Index from "./index.js";
-import Document from "./document.js";
+import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_string } from "./common.js";
 
 function async(callback, self, key, index_doc, index, data){
@@ -25,7 +24,7 @@ function async(callback, self, key, index_doc, index, data){
 }
 
 /**
- * @this Index
+ * @this IndexInterface
  */
 
 export function exportIndex(callback, self, field, index_doc, index){
@@ -89,7 +88,7 @@ export function exportIndex(callback, self, field, index_doc, index){
 }
 
 /**
- * @this Index
+ * @this IndexInterface
  */
 
 export function importIndex(key, data){
@@ -132,7 +131,7 @@ export function importIndex(key, data){
 }
 
 /**
- * @this Document
+ * @this DocumentInterface
  */
 
 export function exportDocument(callback, self, field, index_doc, index){
@@ -192,7 +191,7 @@ export function exportDocument(callback, self, field, index_doc, index){
 }
 
 /**
- * @this Document
+ * @this DocumentInterface
  */
 
 export function importDocument(key, data){
