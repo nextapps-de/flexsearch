@@ -1,5 +1,3 @@
-import Index from "./index.js";
-import Document from "./document.js";
 import { promise as Promise } from "./polyfill.js";
 import { is_function, is_object } from "./common.js";
 
