@@ -1,6 +1,7 @@
 import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE } from "./config.js";
 import Document from "./document.js";
 import Index from "./index.js";
+import WorkerAdapter from "./adapter.js";
 import { registerCharset, registerLanguage } from "./global.js";
 
 /** @export */ Document.prototype.add;
@@ -44,15 +45,35 @@ if(SUPPORT_SERIALIZE){
 
 /** @export */ Index.prototype.export;
 /** @export */ Index.prototype.import;
-
 /** @export */ Document.prototype.export;
 /** @export */ Document.prototype.import;
 }
 
-window["FlexSearch"] = {
+const root = self || window;
+
+const FlexSearch = {
 
     "Index": Index,
     "Document": SUPPORT_DOCUMENT ? Document : null,
+    "WorkerAdapter": WorkerAdapter,
     "registerCharset": registerCharset,
     "registerLanguage": registerLanguage
 };
+
+let tmp;
+
+if((tmp = root["define"]) && tmp["amd"]){
+
+    tmp([], function(){
+
+        return FlexSearch;
+    });
+}
+else if(root["exports"]){
+
+    root["exports"] = FlexSearch;
+}
+else{
+
+    root["FlexSearch"] = FlexSearch;
+}

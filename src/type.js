@@ -50,5 +50,7 @@ IndexInterface.prototype.remove;
 export function DocumentInterface(){
 
     this.field = null;
+
+    /** @type IndexInterface */
     this.index = null;
 }

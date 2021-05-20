@@ -17,7 +17,7 @@
     "url": "https://github.com/nextapps-de/flexsearch/issues",
     "email": "info@nextapps.de"
   },
-  "main": "dist/flexsearch.node.js",
+  "main": "dist/flexsearch.min.js",
   "browser": "dist/flexsearch.min.js",
   "types": "index.d.ts",
   "preferGlobal": false,

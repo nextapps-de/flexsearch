@@ -136,8 +136,8 @@ let parameter = (function(opt){
     dependency_mode: "PRUNE_LEGACY",
     rewrite_polyfills: use_polyfill || false,
 
-    isolation_mode: "IIFE"
-    //output_wrapper: "(function(){%output%}());"
+    // isolation_mode: "IIFE",
+    output_wrapper: "(function(self){%output%}(module));"
 
     //formatting: "PRETTY_PRINT"
 });

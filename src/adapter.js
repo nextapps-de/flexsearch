@@ -17,7 +17,7 @@ function WorkerAdapter(id, options){
         id = 0;
     }
 
-    if(is_function(options["encode"])){
+    if(options && is_function(options["encode"])){
 
         options["encode"] = options["encode"].toString();
     }

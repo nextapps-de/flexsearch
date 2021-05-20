@@ -452,7 +452,7 @@ Document.prototype.remove = function(id){
     return this;
 };
 
-Document.prototype.search = async function(query, limit, options){
+Document.prototype.search = function(query, limit, options, resolve){
 
     if(is_object(query)){
 
@@ -536,11 +536,11 @@ Document.prototype.search = async function(query, limit, options){
     field || (field = this.field);
     bool = bool && ((field.length > 1) || (tag && (tag.length > 1)));
 
-    let async_res = [];
-
     // use Promise.all to get a change of processing requests in parallel
 
-    if(this.worker || this.async){
+    if(!resolve && (this.worker || this.async)){
+
+        resolve = [];
 
         for(let i = 0, key; i < field.length; i++){
 
@@ -558,10 +558,17 @@ Document.prototype.search = async function(query, limit, options){
                 opt = field_options[key];
             }
 
-            async_res[i] = this.index[key].searchAsync(query, limit, opt || options);
+            resolve[i] = this.index[key].searchAsync(query, limit, opt || options);
         }
 
-        async_res = await Promise.all(async_res);
+        const self = this;
+
+        // anyone knows a better workaround of optionally having async promises?
+
+        return Promise.all(resolve).then(function(resolve){
+
+            self.search(query, limit, options, resolve);
+        });
     }
 
     // TODO solve this in one loop below
@@ -582,9 +589,9 @@ Document.prototype.search = async function(query, limit, options){
             opt = field_options[key];
         }
 
-        if(this.worker || this.async){
+        if(resolve){
 
-            res = async_res[i];
+            res = resolve[i];
         }
         else{
 
