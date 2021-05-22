@@ -319,8 +319,8 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
 
         if(keyword){
 
-            dupes[value] || (dupes[value] = create_object());
-            dupes[value][keyword] = 1;
+            dupes = dupes[value] || (dupes[value] = create_object());
+            dupes[keyword] = 1;
 
             arr = arr[keyword] || (arr[keyword] = create_object());
         }
@@ -453,7 +453,7 @@ Index.prototype.search = function(query, limit, options){
 
         if(depth){
 
-            arr = this.add_result(result, suggest, resolution_ctx, limit, length === 2, term, keyword);
+            arr = this.add_result(result, suggest, resolution_ctx, limit, offset, length === 2, term, keyword);
 
             // when suggestion enabled just forward keyword if term was found
             // as long as the result is empty forward the pointer also
@@ -465,7 +465,7 @@ Index.prototype.search = function(query, limit, options){
         }
         else{
 
-            arr = this.add_result(result, suggest, resolution, limit, length === 1, term);
+            arr = this.add_result(result, suggest, resolution, limit, offset, length === 1, term);
         }
 
         if(arr){
@@ -497,26 +497,134 @@ Index.prototype.search = function(query, limit, options){
 
                 // fast path optimization
 
-                result = result[0];
-
-                if(result.length === 1){
-
-                    result = result[0];
-                }
-                else{
-
-                    result = concat(result);
-                }
-
-                // TODO apply offset
-
-                return result.length > limit ? result.slice(0, limit) : result;
+                return single_result(result[0], limit, offset);
             }
         }
     }
 
     return intersect(result, limit, offset, suggest);
 };
+
+/**
+ * Returns an array when the result is done (to stop the process immediately),
+ * returns false when suggestions is enabled and no result was found,
+ * or returns nothing when a set was pushed successfully to the results
+ *
+ * @private
+ * @param {Array} result
+ * @param {Array} suggest
+ * @param {number} resolution
+ * @param {number} limit
+ * @param {number} offset
+ * @param {boolean} single_term
+ * @param {string} term
+ * @param {string=} keyword
+ * @return {Array<Array<string|number>>|boolean|undefined}
+ */
+
+Index.prototype.add_result = function(result, suggest, resolution, limit, offset, single_term, term, keyword){
+
+    let word_arr = [];
+    let arr = keyword ? this.ctx : this.map;
+
+    if(!this.optimize){
+
+        arr = get_array(arr, term, keyword, this.bidirectional);
+    }
+
+    if(arr){
+
+        let count = 0;
+        const arr_len = Math.min(arr.length, resolution);
+
+        for(let x = 0, size = 0, tmp, len; x < arr_len; x++){
+
+            tmp = arr[x];
+
+            if(this.optimize){
+
+                tmp = get_array(tmp, term, keyword, this.bidirectional);
+            }
+
+            if(tmp && single_term){
+
+                len = tmp.length;
+
+                if(len <= offset){
+
+                    offset -= len;
+                    tmp = null;
+                }
+                else{
+
+                    if(offset){
+
+                        tmp = tmp.slice(offset);
+                        offset = 0;
+                    }
+                }
+            }
+
+            if(tmp){
+
+                // keep score (sparse array):
+                //word_arr[x] = tmp;
+
+                // simplified score order:
+                word_arr[count++] = tmp;
+
+                if(single_term){
+
+                    size += tmp.length;
+
+                    if(size >= limit){
+
+                        // fast path optimization
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(count){
+
+            if(single_term){
+
+                // fast path optimization
+                // offset was already applied at this point
+
+                return single_result(word_arr, limit, 0);
+            }
+
+            result[result.length] = word_arr;
+            return;
+        }
+    }
+
+    // return an empty array will stop the loop,
+    // to prevent stop when using suggestions return a false value
+
+    return !suggest && word_arr;
+};
+
+function single_result(result, limit, offset){
+
+    if(result.length === 1){
+
+        result = result[0];
+    }
+    else{
+
+        result = concat(result);
+    }
+
+    return offset || (result.length > limit) ?
+
+        result.slice(offset, offset + limit)
+    :
+        result;
+}
 
 function get_array(arr, term, keyword, bidirectional){
 
@@ -534,101 +642,6 @@ function get_array(arr, term, keyword, bidirectional){
 
     return arr;
 }
-
-/**
- * Returns an array when the result is done (to stop the process immediately),
- * returns false when suggestions is enabled and no result was found,
- * or returns nothing when a set was pushed successfully to the results
- *
- * @private
- * @param {Array} result
- * @param {Array} suggest
- * @param {number} resolution
- * @param {number} limit
- * @param {boolean} just_one_loop
- * @param {string} term
- * @param {string=} keyword
- * @return {Array<Array<string|number>>|boolean|undefined}
- */
-
-Index.prototype.add_result = function(result, suggest, resolution, limit, just_one_loop, term, keyword){
-
-    let word_arr = [];
-    let arr = keyword ? this.ctx : this.map;
-
-    if(!this.optimize){
-
-        arr = get_array(arr, term, keyword, this.bidirectional);
-    }
-
-    if(arr){
-
-        let count = 0;
-        const arr_len = Math.min(arr.length, resolution);
-
-        for(let x = 0, size = 0, tmp; x < arr_len; x++){
-
-            tmp = arr[x];
-
-            if(this.optimize){
-
-                tmp = get_array(tmp, term, keyword, this.bidirectional);
-            }
-
-            if(tmp){
-
-                // TODO apply offset
-
-                // keep score (sparse array):
-                //word_arr[x] = arr;
-
-                // simplified score order:
-                word_arr[count++] = tmp;
-
-                if(just_one_loop){
-
-                    size += tmp.length;
-
-                    if(size >= limit){
-
-                        // fast path optimization
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        if(count){
-
-            if(just_one_loop){
-
-                // TODO apply offset
-
-                // fast path optimization
-
-                if(count === 1){
-
-                    word_arr = word_arr[0];
-                }
-                else{
-
-                    word_arr = concat(word_arr);
-                }
-
-                return word_arr.length > limit ? word_arr.slice(0, limit) : word_arr;
-            }
-
-            result[result.length] = word_arr;
-            return;
-        }
-    }
-
-    // return an empty array will stop the loop,
-    // to prevent stop when using suggestions return a false value
-
-    return !suggest && word_arr;
-};
 
 Index.prototype.contain = function(id){
 

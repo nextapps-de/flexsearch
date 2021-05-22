@@ -1,29 +1,44 @@
-import Index from "./index.js";
-import { is_string, is_object } from "./common.js";
+import Index from "../index.js";
 
-let index, id;
+export default function handler(event) {
 
-onmessage = function(event) {
-
-    const data = event.data;
+    /** @type Index */
+    const index = self["_index"];
+    const data = event["data"];
     const args = data["args"];
 
     switch(data["task"]){
 
-        case "create":
+        case "init":
 
             const options = data["options"] || {};
+            const factory = data["factory"];
             const encode = options["encode"];
 
             options["cache"] = false;
-            id = data["id"];
+            //root["_id"] = data["id"];
 
-            if(is_string(encode)){
+            if(typeof encode === "string"){
 
                 options["encode"] = new Function("return " + encode)();
             }
 
-            index = new Index(options);
+            if(factory){
+
+                // export the FlexSearch global payload to "self"
+                new Function("return " + factory)()(self);
+
+                /** @type Index */
+                self["_index"] = self["FlexSearch"]["Index"](options);
+
+                // destroy the exported payload
+                delete self["FlexSearch"];
+            }
+            else{
+
+                self["_index"] = new Index(options);
+            }
+
             break;
 
         case "add":

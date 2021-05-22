@@ -20,11 +20,11 @@ import {
 import Index from "./index.js";
 import { DocumentInterface } from "./type.js";
 import Cache, { searchCache } from "./cache.js";
-import { create_object, is_array, is_string, is_object, parse_option } from "./common.js";
+import { create_object, is_array, is_string, is_object, parse_option, get_keys } from "./common.js";
 import apply_async from "./async.js";
 import { intersect, intersect_union } from "./intersect.js";
 import { exportDocument, importDocument } from "./serialize.js";
-import WorkerAdapter from "./adapter.js";
+import WorkerIndex from "./worker/index.js";
 
 /**
  * @constructor
@@ -53,8 +53,9 @@ function Document(options){
 
     if(SUPPORT_STORE){
 
-        this.store = (opt = options["store"]) && create_object();
-        this.storetree = opt && (opt !== true) && [];
+        this.extern = !!(opt = options["extern"]);
+        this.storetree = !this.extern && (opt = options["store"]) && (opt !== true) && [];
+        this.store = opt && (this.extern ? opt : create_object());
     }
 
     if(SUPPORT_TAGS){
@@ -66,6 +67,9 @@ function Document(options){
     if(SUPPORT_CACHE){
 
         this.cache = (opt = options["cache"]) && new Cache(opt);
+
+        // do not apply cache again for the indexes
+
         options["cache"] = false;
     }
 
@@ -75,6 +79,8 @@ function Document(options){
     }
 
     if(SUPPORT_ASYNC){
+
+        // this switch is used by recall of promise callbacks
 
         this.async = false;
     }
@@ -101,7 +107,7 @@ function parse_descriptor(options){
     else if(!is_array(field)){
 
         field_options = field;
-        field = Object.keys(field);
+        field = get_keys(field);
     }
 
     for(let i = 0, key, opt; i < field.length; i++){
@@ -120,11 +126,20 @@ function parse_descriptor(options){
 
         opt = is_object(opt) ? Object.assign({}, options, opt) : options;
 
-        index[key] = this.worker ?
+        if(this.worker){
 
-            new WorkerAdapter(opt)
-        :
-            new Index(opt, this.register);
+            index[key] = new WorkerIndex(opt);
+
+            if(!index[key].worker){
+
+                this.worker = false;
+            }
+        }
+
+        if(!this.worker){
+
+            index[key] = new Index(opt, this.register);
+        }
 
         this.tree[i] = parse_tree(key, this.marker);
         this.field[i] = key;
@@ -349,7 +364,7 @@ Document.prototype.add = function(id, content, _append){
             }
         }
 
-        if(SUPPORT_STORE && this.store){
+        if(SUPPORT_STORE && this.store && !this.extern){
 
             let store;
 
@@ -374,7 +389,6 @@ Document.prototype.add = function(id, content, _append){
 
             this.store[id] = store || content;
         }
-
     }
 
     return this;
@@ -441,7 +455,7 @@ Document.prototype.remove = function(id){
             }
         }
 
-        if(SUPPORT_STORE && this.store){
+        if(SUPPORT_STORE && this.store && !this.extern){
 
             delete this.store[id];
         }
@@ -452,16 +466,24 @@ Document.prototype.remove = function(id){
     return this;
 };
 
-Document.prototype.search = function(query, limit, options, resolve){
+/**
+ * @param {!string|Object} query
+ * @param {number|Object=} limit
+ * @param {Object=} options
+ * @param {Array<Array>=} _resolve For internal use only.
+ * @returns {Promise|Array}
+ */
+
+Document.prototype.search = function(query, limit, options, _resolve){
 
     if(is_object(query)){
 
-        options = query;
+        options = /** @type {Object} */ (query);
         query = options["query"];
     }
     else if(is_object(limit)){
 
-        options = limit;
+        options = /** @type {Object} */ (limit);
         limit = 0;
     }
 
@@ -500,7 +522,7 @@ Document.prototype.search = function(query, limit, options, resolve){
                 else if(!is_array(field)){
 
                     field_options = field;
-                    field = Object.keys(field);
+                    field = get_keys(field);
                 }
             }
 
@@ -536,40 +558,7 @@ Document.prototype.search = function(query, limit, options, resolve){
     field || (field = this.field);
     bool = bool && ((field.length > 1) || (tag && (tag.length > 1)));
 
-    // use Promise.all to get a change of processing requests in parallel
-
-    if(!resolve && (this.worker || this.async)){
-
-        resolve = [];
-
-        for(let i = 0, key; i < field.length; i++){
-
-            let opt;
-
-            key = field[i];
-
-            if(!is_string(key)){
-
-                opt = key;
-                key = key["field"];
-            }
-            else if(field_options){
-
-                opt = field_options[key];
-            }
-
-            resolve[i] = this.index[key].searchAsync(query, limit, opt || options);
-        }
-
-        const self = this;
-
-        // anyone knows a better workaround of optionally having async promises?
-
-        return Promise.all(resolve).then(function(resolve){
-
-            self.search(query, limit, options, resolve);
-        });
-    }
+    const promises = !_resolve && (this.worker || this.async) && [];
 
     // TODO solve this in one loop below
 
@@ -589,9 +578,17 @@ Document.prototype.search = function(query, limit, options, resolve){
             opt = field_options[key];
         }
 
-        if(resolve){
+        if(promises){
 
-            res = resolve[i];
+            promises[i] = this.index[key].searchAsync(query, limit, opt || options);
+
+            // just collect and continue
+
+            continue;
+        }
+        else if(_resolve){
+
+            res = _resolve[i];
         }
         else{
 
@@ -651,6 +648,23 @@ Document.prototype.search = function(query, limit, options, resolve){
 
             return [];
         }
+    }
+
+    if(promises){
+
+        const self = this;
+
+        // anyone knows a better workaround of optionally having async promises?
+        // the promise.all() needs to be wrapped into additional promise,
+        // otherwise the recursive callback wouldn't run before return
+
+        return new Promise(function(resolve){
+
+            Promise.all(promises).then(function(result){
+
+                resolve(self.search(query, limit, options, result));
+            });
+        });
     }
 
     if(!count){

@@ -4,16 +4,6 @@ export function parse_option(value, default_value){
 }
 
 /**
- * @param {!Object} obj
- * @returns {Array<string>}
- */
-
-export function get_keys(obj){
-
-    return Object.keys(obj);
-}
-
-/**
  * @param {!number} count
  * @returns {Array<Object>}
  */
@@ -40,6 +30,16 @@ export function create_arrays(count){
     }
 
     return array;
+}
+
+/**
+ * @param {!Object} obj
+ * @returns {Array<string>}
+ */
+
+export function get_keys(obj){
+
+    return Object.keys(obj);
 }
 
 export function create_object(){

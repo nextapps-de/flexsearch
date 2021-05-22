@@ -137,7 +137,7 @@ let parameter = (function(opt){
     rewrite_polyfills: use_polyfill || false,
 
     // isolation_mode: "IIFE",
-    output_wrapper: "(function(self){%output%}(module));"
+    output_wrapper: "(function(self){%output%}(this));"
 
     //formatting: "PRETTY_PRINT"
 });
@@ -231,6 +231,8 @@ else{
 
         preserve = preserve.replace("* FlexSearch.js", "* FlexSearch.js v" + package_json.version + (light_version ? " (Light)" : es5_version ? " (ES5)" : ""));
         build = preserve.substring(0, preserve.indexOf('*/') + 2) + "\n" + build;
+
+        build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
 
         if(release === "pre"){
 

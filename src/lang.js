@@ -1,5 +1,5 @@
 import { IndexInterface, DocumentInterface } from "./type.js";
-import { create_object } from "./common.js";
+import { create_object, get_keys } from "./common.js";
 
 /**
  * @param {!string} str
@@ -161,7 +161,7 @@ export function init_filter(words){
 
 export function init_stemmer_or_matcher(obj, is_stemmer){
 
-    const keys = Object.keys(obj);
+    const keys = get_keys(obj);
     const length = keys.length;
     const final = [];
 

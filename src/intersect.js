@@ -18,7 +18,7 @@ export function intersect(arrays, limit, offset, suggest) {
     //     return a.length - b.length;
     // });
 
-    let check = create_object();
+    let check;
     let count = 0;
 
     if(suggest){
@@ -26,16 +26,16 @@ export function intersect(arrays, limit, offset, suggest) {
         suggest = [];
     }
 
-    // terms
-    for(let x = 0; x < length; x++){
+    // terms in reversed order!
+    for(let x = length - 1; x >= 0; x--){
 
         const word_arr = arrays[x];
         const word_arr_len = word_arr.length;
         const new_check = create_object();
 
-        let found = !x;
+        let found = !check;
 
-        // relevance
+        // but relevance in forward order
         for(let y = 0; y < word_arr_len; y++){
 
             //const arr = [].concat.apply([], word_arr);
@@ -44,23 +44,18 @@ export function intersect(arrays, limit, offset, suggest) {
 
             if(arr_len){
 
-                if(suggest){
-
-                    suggest[y] = [];
-                }
-
                 // ids
                 for(let z = 0, count_suggest = 0, id; z < arr_len; z++){
 
                     id = arr[z];
 
-                    if(!x){
+                    if(!check){
 
                         new_check[id] = 1;
                     }
                     else if(check[id]){
 
-                        if(x === (length - 1)){
+                        if(!x){
 
                             if(offset){
 
@@ -82,7 +77,9 @@ export function intersect(arrays, limit, offset, suggest) {
 
                             if(suggest && (count_suggest < limit)){
 
-                                suggest[y][count_suggest++] = id;
+                                const tmp = suggest[y] || (suggest[y] = []);
+
+                                tmp[count_suggest++] = id;
                             }
 
                             new_check[id] = 1;
@@ -109,18 +106,30 @@ export function intersect(arrays, limit, offset, suggest) {
             res = suggest[i];
             len = res && res.length;
 
-            // TODO apply offset
+            if(len && offset){
+
+                if(len <= offset){
+
+                    offset -= len;
+                    len = 0;
+                }
+                else{
+
+                    len -= offset;
+                }
+            }
 
             if(len){
 
                 if(count + len >= limit){
 
-                    return result.concat(res.slice(0, limit - count));
+                    return result.concat(res.slice(offset, limit - count + offset));
                 }
                 else{
 
-                    result = result.concat(res);
+                    result = result.concat(offset ? res.slice(offset) : res);
                     count += len;
+                    offset = 0;
                 }
             }
         }
