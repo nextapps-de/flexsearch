@@ -1,8 +1,5 @@
-/** @define {string}  */
-export const RELEASE = "browser";
-
 /** @define {boolean} */
-export const DEBUG = false;
+export const DEBUG = true;
 
 /** @define {boolean} */
 export const POLYFILL = true;

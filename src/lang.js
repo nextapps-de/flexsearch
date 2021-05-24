@@ -1,4 +1,4 @@
-import { IndexInterface, DocumentInterface } from "./type.js";
+import { IndexInterface } from "./type.js";
 import { create_object, get_keys } from "./common.js";
 
 /**
@@ -14,35 +14,44 @@ export function pipeline(str, normalize, split, _collapse){
 
     if(str){
 
-        if(normalize && str){
+        if(normalize){
 
             str = replace(str, /** @type {Array<string|RegExp>} */ (normalize));
         }
 
-        if(str && this.matcher){
+        if(this.matcher){
 
             str = replace(str, this.matcher);
         }
 
-        if(this.stemmer && str.length > 1){
+        if(this.stemmer && (str.length > 1)){
 
             str = replace(str, this.stemmer);
         }
 
-        if(_collapse && str.length > 1){
+        if(_collapse && (str.length > 1)){
 
             str = collapse(str);
         }
 
-        if(str){
+        if(split || (split === "")){
 
-            if(split || (split === "")){
+            const words = str.split(/** @type {string|RegExp} */ (split));
 
-                const words = str.split(/** @type {string|RegExp} */ (split));
-
-                return this.filter ? filter(words, this.filter) : words;
-            }
+            return this.filter ? filter(words, this.filter) : words;
         }
+    }
+
+    return str;
+}
+
+const regex_normalize = /[\u0300-\u036f]/g;
+
+export function normalize(str){
+
+    if(str.normalize){
+
+        str = str.normalize("NFD").replace(regex_normalize, "");
     }
 
     return str;

@@ -1,11 +1,12 @@
-import Index from "../../index.js";
-import { regex } from "../../lang.js";
+import { IndexInterface } from "../../type.js";
+import { normalize, regex } from "../../lang.js";
 
 export const rtl = false;
 export const tokenize = "";
 export default {
     encode: encode,
-    rtl: rtl
+    rtl: rtl,
+    tokenize: tokenize
 }
 
 // Charset Normalization
@@ -41,14 +42,15 @@ const pairs = [
 
 /**
  * @param {string} str
+ * @this IndexInterface
  */
 
-export function encode(str, self){
+export function encode(str){
 
-    return /** @type {Index} */ (self || this).pipeline(
+    return this.pipeline(
 
-        /* string: */ str.toLowerCase(),
-        /* normalize: */ pairs,
+        /* string: */ normalize(str).toLowerCase(),
+        /* normalize: */ !str.normalize && pairs,
         /* split: */ regex_whitespace,
         /* collapse: */ false
     );

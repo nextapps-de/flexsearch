@@ -1,3 +1,5 @@
+import { IndexInterface } from "../../type.js";
+
 export const rtl = false;
 export const tokenize = "";
 export default {
@@ -6,6 +8,10 @@ export default {
 }
 
 const regex = /[\x00-\x7F]+/g;
+
+/**
+ * @this IndexInterface
+ */
 
 export function encode(str){
 

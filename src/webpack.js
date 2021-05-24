@@ -1,8 +1,12 @@
-import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE, SUPPORT_WORKER } from "./config.js";
+import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE, SUPPORT_WORKER, SUPPORT_ENCODER } from "./config.js";
 import Document from "./document.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker/index.js";
 import { registerCharset, registerLanguage } from "./global.js";
+import charset_simple from "./lang/latin/simple.js"
+import charset_balance from "./lang/latin/balance.js"
+import charset_advanced from "./lang/latin/advanced.js"
+import charset_extra from "./lang/latin/extra.js"
 
 /** @export */ Document.prototype.add;
 /** @export */ Document.prototype.append;
@@ -47,6 +51,14 @@ if(SUPPORT_SERIALIZE){
 /** @export */ Index.prototype.import;
 /** @export */ Document.prototype.export;
 /** @export */ Document.prototype.import;
+}
+
+if(SUPPORT_ENCODER){
+
+    registerCharset("latin:simple", charset_simple);
+    registerCharset("latin:balance", charset_balance);
+    registerCharset("latin:advanced", charset_advanced);
+    registerCharset("latin:extra", charset_extra);
 }
 
 const root = self;

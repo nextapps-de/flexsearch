@@ -5,7 +5,20 @@
 export function IndexInterface(){
 
     this.cache = null;
+    this.matcher = null;
+    this.stemmer = null;
+    this.filter = null;
 }
+
+/**
+ * @param {!string} str
+ * @param {boolean|Array<string|RegExp>=} normalize
+ * @param {boolean|string|RegExp=} split
+ * @param {boolean=} collapse
+ * @returns {string|Array<string>}
+ */
+
+IndexInterface.prototype.pipeline;
 
 /**
  * @param {!number|string} id

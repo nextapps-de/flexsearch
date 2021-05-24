@@ -18,7 +18,7 @@ var supported_lang = [
 
 var supported_charset = {
 
-    'latin': ["default", "advanced", "balance", "extra", "simple", "soundex"],
+    'latin': ["default", "advanced", "balance", "extra", "simple"],
     'cjk': ["default"],
     'cyrillic': ["default"],
     'arabic': ["default"],
@@ -85,6 +85,18 @@ var release = options["RELEASE"];
 // const es5_version = (release === "es5") || (process.argv[2] === "--es5");
 // const module_version = (release === "module") || (process.argv[2] === "--module");
 
+if(release){
+
+    let filename
+
+    if(!fs.existsSync(filename = "src/config/" + release + "/config.js")){
+
+        filename = "src/config/bundle/config.js";
+    }
+
+    fs.writeFileSync("tmp/config.js", fs.readFileSync(filename));
+}
+
 if(release === "es5"){
 
     release = "ES5";
@@ -126,7 +138,7 @@ let parameter = (function(opt){
     process_closure_primitives: true,
     summary_detail_level: 3,
     warning_level: "VERBOSE",
-    emit_use_strict: true,
+    emit_use_strict: true, // release !== "lang",
 
     output_manifest: "log/manifest.log",
     //output_module_dependencies: "log/module_dependencies.log",
@@ -147,7 +159,7 @@ let parameter = (function(opt){
     rewrite_polyfills: use_polyfill || false,
 
     // isolation_mode: "IIFE",
-    output_wrapper: "(function(self){%output%}(this));"
+    output_wrapper: /*release === "lang" ? "%output%" :*/ "(function(self){%output%}(this));"
 
     //formatting: "PRETTY_PRINT"
 });
@@ -181,7 +193,8 @@ if(release === "lang"){
 
                 fs.writeFileSync("tmp/" + lang + ".js", `
                     import lang from "../src/lang/${lang}.js";
-                    window["FlexSearch"]["registerLanguage"]("${lang}", lang);
+                    /*try{if(module)self=module}catch(e){}*/
+                    self["FlexSearch"]["registerLanguage"]("${lang}", lang);
                 `);
 
                 exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --entry_point='tmp/" + lang + ".js' --js='tmp/" + lang + ".js' --js='src/**.js'" + flag_str + " --js_output_file='dist/lang/" + lang + ".min.js' && exit 0", function(){
@@ -203,7 +216,8 @@ if(release === "lang"){
 
                     fs.writeFileSync("tmp/" + charset + "_" + variant + ".js", `
                         import charset from "../src/lang/${charset}/${variant}.js";
-                        window["FlexSearch"]["registerCharset"]("${charset}:${variant}", charset);
+                        /*try{if(module)self=module}catch(e){}*/
+                        self["FlexSearch"]["registerCharset"]("${charset}:${variant}", charset);
                     `);
 
                     exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --entry_point='tmp/" + charset + "_" + variant + ".js' --js='tmp/" + charset + "_" + variant + ".js' --js='src/**.js'" + flag_str + " --js_output_file='dist/lang/" + charset + "/" + variant + ".min.js' && exit 0", function(){
