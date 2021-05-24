@@ -1,5 +1,5 @@
 import { promise as Promise } from "../polyfill.js";
-import { is_function, is_object } from "../common.js";
+import { is_function, is_object, is_string } from "../common.js";
 import handler from "./handler.js";
 
 let counter = 0;
@@ -19,20 +19,19 @@ function WorkerIndex(id, options){
         options = /** @type {Object} */ (id);
         //id = 0;
     }
-    else{
 
-        if(options){
+    if(options){
 
-            if(is_function(opt = options["encode"])){
+        if(is_function(opt = options["encode"])){
 
-                options["encode"] = opt.toString();
-            }
-        }
-        else{
-
-            options = {};
+            options["encode"] = opt.toString();
         }
     }
+    else{
+
+        options = {};
+    }
+
 
     // the factory is the outer wrapper from the build
     // we use "self" as a trap for node.js
@@ -46,7 +45,7 @@ function WorkerIndex(id, options){
 
     const is_node_js = self["exports"];
 
-    this.worker = create(factory, is_node_js);
+    this.worker = create(factory, is_node_js, options["worker"]);
 
     if(!this.worker){
 
@@ -99,14 +98,14 @@ function register(key){
 
                 self.worker.postMessage({ "task": key, /*id: this.id,*/ "args": args });
 
-                if(key === "search"){
+                //if(key === "search"){
 
                     self.resolver = resolve;
-                }
-                else{
-
-                    resolve();
-                }
+                // }
+                // else{
+                //
+                //     resolve();
+                // }
             });
         });
 
@@ -122,7 +121,7 @@ function register(key){
     };
 }
 
-function create(factory, is_node_js){
+function create(factory, is_node_js, worker_path){
 
     let worker
 
@@ -131,7 +130,7 @@ function create(factory, is_node_js){
         worker = is_node_js ?
 
             eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")')
-        :
+        :(
             factory ?
 
                 new Worker(URL.createObjectURL(
@@ -143,7 +142,8 @@ function create(factory, is_node_js){
                     ], { "type": "text/javascript" })
                 ))
             :
-                new Worker("worker.js", { type: "module" });
+                new Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" })
+        );
     }
     catch(e){}
 

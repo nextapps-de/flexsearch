@@ -32,8 +32,9 @@ function register(prototype, key){
             setTimeout(function(){
 
                 self.async = true;
-                resolve(self[key].apply(self, args));
+                const res = self[key].apply(self, args);
                 self.async = false;
+                resolve(res);
             });
         });
 

@@ -263,7 +263,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
 
                 for(let i = 0; i < obj.length; i++){
 
-                    index.add(id, obj[i], true);
+                    index.add(id, obj[i], true, true);
                 }
 
                 return;
@@ -272,7 +272,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
             obj = obj.join(" ");
         }
 
-        index.add(id, obj, _append);
+        index.add(id, obj, _append, true);
     }
     else if(obj){
 
@@ -408,21 +408,22 @@ Document.prototype.remove = function(id){
 
     if(is_object(id)){
 
-        id = id[this.key];
+        id = parse_simple(id, this.key);
     }
 
     if(this.register[id]){
 
+        const fastupdate = this.fastupdate && !this.worker;
+
         for(let i = 0; i < this.field.length; i++){
 
-            this.index[this.field[i]].remove(id, true);
+            this.index[this.field[i]].remove(id, fastupdate);
 
             // workers does not share the register
 
-            if(this.fastupdate && !this.worker){
+            if(fastupdate){
 
-                // when fastupdate was enabled all ids will
-                // be already cleanup after the first loop
+                // when fastupdate was enabled all ids are removed
 
                 break;
             }
@@ -430,10 +431,9 @@ Document.prototype.remove = function(id){
 
         if(SUPPORT_TAGS && this.tag){
 
-            // when fastupdate was enabled the id will
-            // be already cleanup by the index
+            // when fastupdate was enabled all ids are already removed
 
-            if(!this.fastupdate || this.worker){
+            if(!fastupdate){
 
                 for(let key in this.tagindex){
 

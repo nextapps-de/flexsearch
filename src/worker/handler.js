@@ -1,6 +1,6 @@
 import Index from "../index.js";
 
-export default function handler(event) {
+export default function(event) {
 
     /** @type Index */
     const index = self["_index"];
@@ -41,14 +41,14 @@ export default function handler(event) {
 
             break;
 
-        case "search":
-
-            const message = index.search.apply(index, args);
-            postMessage(message);
-            break;
-
         default:
 
-            index[task].apply(index, args);
+            const message = index[task].apply(index, args);
+            postMessage(task === "search" ? message : null);
+
+            // if(task === "search"){
+            //
+            //     postMessage(message);
+            // }
     }
 };

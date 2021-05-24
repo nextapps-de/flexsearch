@@ -26,14 +26,9 @@ parentPort.on("message", function(data){
             index = new Index(options);
             break;
 
-        case "search":
-
-            const message = index.search.apply(index, args);
-            parentPort.postMessage(message);
-            break;
-
         default:
 
-            index[task].apply(index, args);
+            const message = index[task].apply(index, args);
+            parentPort.postMessage(task === "search" ? message : null);
     }
 });

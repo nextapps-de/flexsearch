@@ -143,11 +143,12 @@ Index.prototype.append = function(id, content){
  * @param {!number|string} id
  * @param {!string} content
  * @param {boolean=} _append
+ * @param {boolean=} _skip_update
  */
 
-Index.prototype.add = function(id, content, _append){
+Index.prototype.add = function(id, content, _append, _skip_update){
 
-    if(this.register[id] && !_append){
+    if(!_skip_update && !_append && this.register[id]){
 
         return this.update(id, content);
     }
