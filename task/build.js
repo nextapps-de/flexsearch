@@ -55,12 +55,16 @@ var options = (function(argv){
 
                 compilation_level = val;
             }
+            else if(index === "POLYFILL"){
+
+                use_polyfill = val === "true";
+            }
             else{
 
-                if(index !== "RELEASE"){
-
-                    //flag_str += " --define='" + index + "=" + val + "'";
-                }
+                // if(index !== "RELEASE"){
+                //
+                //     flag_str += " --define='" + index + "=" + val + "'";
+                // }
 
                 arr[index] = val;
             }
@@ -76,9 +80,15 @@ var options = (function(argv){
 })(process.argv);
 
 var release = options["RELEASE"];
-const light_version = (release === "light") || (process.argv[2] === "--light");
-const es5_version = (release === "es5") || (process.argv[2] === "--es5");
-const module_version = (release === "module") || (process.argv[2] === "--module");
+
+// const light_version = (release === "light") || (process.argv[2] === "--light");
+// const es5_version = (release === "es5") || (process.argv[2] === "--es5");
+// const module_version = (release === "module") || (process.argv[2] === "--module");
+
+if(release === "es5"){
+
+    release = "ES5";
+}
 
 let parameter = (function(opt){
 
@@ -103,7 +113,7 @@ let parameter = (function(opt){
     return parameter;
 })({
 
-    compilation_level: compilation_level || (release === "pre" ? "SIMPLE" : (release === "debug" ? "WHITESPACE" : "ADVANCED_OPTIMIZATIONS")), //"SIMPLE"
+    compilation_level: compilation_level || "ADVANCED_OPTIMIZATIONS", //"SIMPLE"
     use_types_for_optimization: true,
     //new_type_inf: true,
     //jscomp_warning: "newCheckTypes",
@@ -131,9 +141,9 @@ let parameter = (function(opt){
     module_resolution: "BROWSER",
     //dependency_mode: "SORT_ONLY",
     //js_module_root: "./",
-    entry_point: "./src/webpack.js",
+    entry_point: "./tmp/webpack.js",
     //manage_closure_dependencies: true,
-    dependency_mode: "PRUNE_LEGACY",
+    dependency_mode: "PRUNE", // PRUNE_LEGACY
     rewrite_polyfills: use_polyfill || false,
 
     // isolation_mode: "IIFE",
@@ -142,15 +152,15 @@ let parameter = (function(opt){
     //formatting: "PRETTY_PRINT"
 });
 
-if(release === "pre" || release === "debug"){
+// if(release === "pre" || release === "debug"){
+//
+//     parameter += ' --formatting=PRETTY_PRINT';
+// }
 
-    parameter += ' --formatting=PRETTY_PRINT';
-}
-
-if(release === "demo"){
-
-    options['RELEASE'] = "custom";
-}
+// if(release === "demo"){
+//
+//     options['RELEASE'] = "custom";
+// }
 
 const custom = (!release || (release === "custom"));
 
@@ -222,17 +232,20 @@ else{
     :
         "java -jar node_modules/google-closure-compiler-java/compiler.jar"
 
-    ) + parameter + " --js='src/**.js' --js='!src/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
+    ) + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
 
         let build = fs.readFileSync(filename);
         let preserve = fs.readFileSync("src/index.js", "utf8");
 
         const package_json = require("../package.json");
 
-        preserve = preserve.replace("* FlexSearch.js", "* FlexSearch.js v" + package_json.version + (light_version ? " (Light)" : es5_version ? " (ES5)" : ""));
+        preserve = preserve.replace("* FlexSearch.js", "* FlexSearch.js v" + package_json.version + (release ? " (" + (release.charAt(0).toUpperCase() + release.substring(1)) + ")" : ""));
         build = preserve.substring(0, preserve.indexOf('*/') + 2) + "\n" + build;
 
-        build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
+        if(release === "bundle"){
+
+            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
+        }
 
         if(release === "pre"){
 

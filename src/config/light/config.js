@@ -1,6 +1,3 @@
-/** @define {string}  */
-export const RELEASE = "browser";
-
 /** @define {boolean} */
 export const DEBUG = false;
 

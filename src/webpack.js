@@ -1,4 +1,4 @@
-import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE } from "./config.js";
+import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE, SUPPORT_WORKER } from "./config.js";
 import Document from "./document.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker/index.js";
@@ -56,7 +56,7 @@ const FlexSearch = {
 
     "Index": Index,
     "Document": SUPPORT_DOCUMENT ? Document : null,
-    "Worker": WorkerIndex,
+    "Worker": SUPPORT_WORKER ? WorkerIndex : null,
     "registerCharset": registerCharset,
     "registerLanguage": registerLanguage
 };

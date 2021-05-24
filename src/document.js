@@ -126,7 +126,7 @@ function parse_descriptor(options){
 
         opt = is_object(opt) ? Object.assign({}, options, opt) : options;
 
-        if(this.worker){
+        if(SUPPORT_WORKER && this.worker){
 
             index[key] = new WorkerIndex(opt);
 

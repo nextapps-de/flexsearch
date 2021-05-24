@@ -17,36 +17,36 @@
     "url": "https://github.com/nextapps-de/flexsearch/issues",
     "email": "info@nextapps.de"
   },
-  "main": "dist/flexsearch.min.js",
-  "browser": "dist/flexsearch.min.js",
-  "types": "index.d.ts",
+  "main": "dist/flexsearch.bundle.js",
+  "browser": "dist/flexsearch.bundle.js",
   "preferGlobal": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/nextapps-de/flexsearch.git"
   },
   "scripts": {
-    "build": "node task/build RELEASE=min DEBUG=false PROFILER=false POLYFILL=true SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_LANG=false SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true",
-    "build:debug": "node task/build RELEASE=debug DEBUG=true PROFILER=false POLYFILL=true SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_LANG=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true",
-    "build:compact": "node task/build RELEASE=compact DEBUG=false PROFILER=false POLYFILL=true SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_LANG=false SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=false SUPPORT_PAGINATION=false",
-    "build:light": "node task/build RELEASE=light DEBUG=false PROFILER=false POLYFILL=true SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_LANG=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESET=false SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_DOCUMENT=false SUPPORT_OPERATOR=false SUPPORT_WHERE=false SUPPORT_PAGINATION=false",
-    "build:custom": "node task/build RELEASE=custom DEBUG=false PROFILER=false POLYFILL=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_LANG=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_PRESET=false SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_INFO=false SUPPORT_DOCUMENT=false SUPPORT_OPERATOR=false SUPPORT_WHERE=false SUPPORT_PAGINATION=false",
-    "build:es5": "node task/build RELEASE=es5 DEBUG=true PROFILER=false POLYFILL=true SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_LANG=false SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true LANGUAGE_OUT=ECMASCRIPT5_STRICT",
-    "build:node": "node task/build RELEASE=node DEBUG=false PROFILER=false POLYFILL=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_LANG=false SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true",
-    "build:pre": "node task/build RELEASE=pre DEBUG=false PROFILER=false POLYFILL=true SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_LANG=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_PRESET=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_INFO=true SUPPORT_DOCUMENT=true SUPPORT_OPERATOR=true SUPPORT_WHERE=true SUPPORT_PAGINATION=true FORMATTING=PRETTY_PRINT",
+    "copy": "npm run clean && cpx \"src/**\" tmp/",
+    "clean": "if exist tmp rmdir tmp /s /q && mkdir tmp",
+    "build": "npm run copy && npm run build:bundle",
+    "build:bundle": "cpx src/config/bundle/config.js tmp/ && node task/build RELEASE=bundle",
+    "build:debug": "cpx src/config/debug/config.js tmp/ && node task/build RELEASE=debug COMPILATION_LEVEL=SIMPLE FORMATTING=PRETTY_PRINT",
+    "build:compact": "cpx src/config/compact/config.js tmp/ && node task/build RELEASE=compact",
+    "build:light": "cpx src/config/light/config.js tmp/ && node task/build RELEASE=light",
+    "build:custom": "cpx src/config/custom/config.js tmp/ && node task/build RELEASE=custom",
+    "build:es5": "cpx src/config/bundle/config.js tmp/ && node task/build RELEASE=es5 LANGUAGE_OUT=ECMASCRIPT5_STRICT POLYFILL=true",
+    "build:pre": "cpx src/config/bundle/config.js tmp/ && node task/build RELEASE=pre COMPILATION_LEVEL=WHITESPACE FORMATTING=PRETTY_PRINT",
     "build:lang": "node task/build RELEASE=lang POLYFILL=false",
     "build:module": "babel src -d dist/module && exit 0",
-    "build:all": "npm run build && npm run build:light && npm run build:compact && npm run build:es5 && npm run build:node && npm run build:pre && npm run build:debug && npm run build:lang && npm run build:module",
+    "build:all": "npm run build && npm run build:light && npm run build:compact && npm run build:es5 && npm run build:pre && npm run build:debug",
     "test": "npm run build:pre && cd test && npm install && npm run test",
     "update": "npm install google-closure-compiler@nightly"
   },
   "files": [
-    "flexsearch.js",
     "dist/**",
     "src/**",
+    "task/**",
     "test/",
     "index.d.ts",
-    "compile.js",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -70,6 +70,7 @@
     "babel-plugin-transform-property-literals": "^6.9.4",
     "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
+    "cpx": "^1.5.0",
     "google-closure-compiler": "^20210505.0.0"
   }
 }
