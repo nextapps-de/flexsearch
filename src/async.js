@@ -1,5 +1,6 @@
+import { IndexInterface, DocumentInterface } from "./type.js";
 import { promise as Promise } from "./polyfill.js";
-import { is_function, is_object } from "./common.js";
+import { is_function, is_object, is_string } from "./common.js";
 
 export default function(prototype){
 
@@ -14,6 +15,7 @@ function register(prototype, key){
 
     prototype[key + "Async"] = function(){
 
+        /** @type {IndexInterface|DocumentInterface} */
         const self = this;
         const args = /*[].slice.call*/(arguments);
         const arg = args[args.length - 1];
@@ -29,10 +31,9 @@ function register(prototype, key){
 
             setTimeout(function(){
 
-                const fn = self[key];
-                fn.async = true;
-                resolve(fn.apply(self, args));
-                fn.async = false;
+                self.async = true;
+                resolve(self[key].apply(self, args));
+                self.async = false;
             });
         });
 

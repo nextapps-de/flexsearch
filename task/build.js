@@ -127,7 +127,7 @@ let parameter = (function(opt){
     assume_function_wrapper: true,
 
     //transform_amd_modules: true,
-    process_common_js_modules: true,
+    process_common_js_modules: false,
     module_resolution: "BROWSER",
     //dependency_mode: "SORT_ONLY",
     //js_module_root: "./",
@@ -222,7 +222,7 @@ else{
     :
         "java -jar node_modules/google-closure-compiler-java/compiler.jar"
 
-    ) + parameter + " --js='src/**.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
+    ) + parameter + " --js='src/**.js' --js='!src/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
 
         let build = fs.readFileSync(filename);
         let preserve = fs.readFileSync("src/index.js", "utf8");

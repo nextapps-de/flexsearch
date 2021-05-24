@@ -6,8 +6,9 @@ export default function handler(event) {
     const index = self["_index"];
     const data = event["data"];
     const args = data["args"];
+    const task = data["task"];
 
-    switch(data["task"]){
+    switch(task){
 
         case "init":
 
@@ -16,20 +17,19 @@ export default function handler(event) {
             const encode = options["encode"];
 
             options["cache"] = false;
-            //root["_id"] = data["id"];
 
-            if(typeof encode === "string"){
+            if(encode && (encode.indexOf("function") === 0)){
 
-                options["encode"] = new Function("return " + encode)();
+                options["encode"] = Function("return " + encode)();
             }
 
             if(factory){
 
                 // export the FlexSearch global payload to "self"
-                new Function("return " + factory)()(self);
+                Function("return " + factory)()(self);
 
                 /** @type Index */
-                self["_index"] = self["FlexSearch"]["Index"](options);
+                self["_index"] = new self["FlexSearch"]["Index"](options);
 
                 // destroy the exported payload
                 delete self["FlexSearch"];
@@ -41,31 +41,14 @@ export default function handler(event) {
 
             break;
 
-        case "add":
-
-            index.add.apply(index, args);
-            break;
-
-        case "append":
-
-            index.append.apply(index, args);
-            break;
-
         case "search":
 
-            const results = index.search.apply(index, args);
-            //postMessage({ id: id, results: results });
-            postMessage(results);
+            const message = index.search.apply(index, args);
+            postMessage(message);
             break;
 
-        case "update":
+        default:
 
-            index.update.apply(index, args);
-            break;
-
-        case "remove":
-
-            index.remove.apply(index, args);
-            break;
+            index[task].apply(index, args);
     }
 };

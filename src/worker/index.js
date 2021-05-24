@@ -17,7 +17,7 @@ function WorkerIndex(id, options){
     if(is_object(id)){
 
         options = /** @type {Object} */ (id);
-        id = 0;
+        //id = 0;
     }
     else{
 
@@ -44,18 +44,28 @@ function WorkerIndex(id, options){
         factory = factory.toString();
     }
 
-    const _self = this;
+    const is_node_js = self["exports"];
 
-    this.id = id || counter++;
-    this.resolver = null;
-    this.worker = create(factory);
+    this.worker = create(factory, is_node_js);
 
     if(!this.worker){
 
         return;
     }
 
-    this.worker.onmessage = function(e){ _self.resolver(e["data"]/*["results"]*/) };
+    //this.id = id || counter++;
+    this.resolver = null;
+    const _self = this;
+
+    if(is_node_js){
+
+        this.worker["on"]("message", function(msg){ _self.resolver(msg/*["results"]*/) });
+    }
+    else{
+
+        this.worker.onmessage = function(e){ _self.resolver(e["data"]/*["results"]*/) };
+    }
+
     this.worker.postMessage({ "task": "init", "factory": factory, /*id: this.id,*/ "options": options });
 }
 
@@ -85,16 +95,19 @@ function register(key){
 
         const promise = new Promise(function(resolve){
 
-            self.worker.postMessage({ "task": key, /*id: this.id,*/ "args": args });
+            setTimeout(function(){
 
-            if(key === "search"){
+                self.worker.postMessage({ "task": key, /*id: this.id,*/ "args": args });
 
-                self.resolver = resolve;
-            }
-            else{
+                if(key === "search"){
 
-                resolve();
-            }
+                    self.resolver = resolve;
+                }
+                else{
+
+                    resolve();
+                }
+            });
         });
 
         if(callback){
@@ -109,24 +122,28 @@ function register(key){
     };
 }
 
-function create(factory){
+function create(factory, is_node_js){
 
     let worker
 
     try{
 
-        worker = factory ?
+        worker = is_node_js ?
 
-            new Worker(URL.createObjectURL(
-
-                new Blob([
-
-                    "onmessage=" + handler.toString()
-
-                ], { "type": "text/javascript" })
-            ))
+            eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")')
         :
-            new Worker("worker.js", { type: "module" });
+            factory ?
+
+                new Worker(URL.createObjectURL(
+
+                    new Blob([
+
+                        "onmessage=" + handler.toString()
+
+                    ], { "type": "text/javascript" })
+                ))
+            :
+                new Worker("worker.js", { type: "module" });
     }
     catch(e){}
 
