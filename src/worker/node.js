@@ -8,6 +8,7 @@ parentPort.on("message", function(data){
     /** @type Index */
     const args = data["args"];
     const task = data["task"];
+    const id = data["id"];
 
     switch(task){
 
@@ -29,6 +30,6 @@ parentPort.on("message", function(data){
         default:
 
             const message = index[task].apply(index, args);
-            parentPort.postMessage(task === "search" ? message : null);
+            parentPort.postMessage(task === "search" ? { "id": id, "msg": message } : { "id": id });
     }
 });

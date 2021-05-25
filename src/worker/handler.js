@@ -1,10 +1,11 @@
 import Index from "../index.js";
 
-export default function(event) {
+export default function(data) {
+
+    data = data["data"];
 
     /** @type Index */
     const index = self["_index"];
-    const data = event["data"];
     const args = data["args"];
     const task = data["task"];
 
@@ -43,8 +44,9 @@ export default function(event) {
 
         default:
 
+            const id = data["id"];
             const message = index[task].apply(index, args);
-            postMessage(task === "search" ? message : null);
+            postMessage(task === "search" ? { "id": id, "msg": message } : { "id": id });
 
             // if(task === "search"){
             //

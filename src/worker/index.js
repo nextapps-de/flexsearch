@@ -1,24 +1,17 @@
 import { promise as Promise } from "../polyfill.js";
-import { is_function, is_object, is_string } from "../common.js";
+import { create_object, is_function, is_object, is_string } from "../common.js";
 import handler from "./handler.js";
 
 let counter = 0;
 
 /**
- * @param {number|string|Object} id
  * @param {Object=} options
  * @constructor
  */
 
-function WorkerIndex(id, options){
+function WorkerIndex(options){
 
     let opt;
-
-    if(is_object(id)){
-
-        options = /** @type {Object} */ (id);
-        //id = 0;
-    }
 
     if(options){
 
@@ -44,28 +37,41 @@ function WorkerIndex(id, options){
     }
 
     const is_node_js = self["exports"];
+    const _self = this;
 
     this.worker = create(factory, is_node_js, options["worker"]);
+    this.resolver = create_object();
 
     if(!this.worker){
 
         return;
     }
 
-    //this.id = id || counter++;
-    this.resolver = null;
-    const _self = this;
-
     if(is_node_js){
 
-        this.worker["on"]("message", function(msg){ _self.resolver(msg/*["results"]*/) });
+        this.worker["on"]("message", function(msg){
+
+            _self.resolver[msg["id"]](msg["msg"]) ;
+            delete _self.resolver[msg["id"]];
+        });
     }
     else{
 
-        this.worker.onmessage = function(e){ _self.resolver(e["data"]/*["results"]*/) };
+        this.worker.onmessage = function(msg){
+
+            msg = msg["data"];
+            _self.resolver[msg["id"]](msg["msg"]);
+            delete _self.resolver[msg["id"]];
+        };
     }
 
-    this.worker.postMessage({ "task": "init", "factory": factory, /*id: this.id,*/ "options": options });
+    this.worker.postMessage({
+
+        "task": "init",
+        //"id": ++counter,
+        "factory": factory,
+        "options": options
+    });
 }
 
 export default WorkerIndex;
@@ -96,11 +102,17 @@ function register(key){
 
             setTimeout(function(){
 
-                self.worker.postMessage({ "task": key, /*id: this.id,*/ "args": args });
+                self.resolver[++counter] = resolve;
+                self.worker.postMessage({
 
-                //if(key === "search"){
+                    "task": key,
+                    "id": counter,
+                    "args": args
+                });
 
-                    self.resolver = resolve;
+                // if(key === "search"){
+                //
+                //     self.resolve = resolve;
                 // }
                 // else{
                 //
