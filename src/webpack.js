@@ -3,6 +3,7 @@ import Document from "./document.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker/index.js";
 import { registerCharset, registerLanguage } from "./global.js";
+import charset_default from "./lang/latin/default.js"
 import charset_simple from "./lang/latin/simple.js"
 import charset_balance from "./lang/latin/balance.js"
 import charset_advanced from "./lang/latin/advanced.js"
@@ -55,6 +56,7 @@ if(SUPPORT_SERIALIZE){
 
 if(SUPPORT_ENCODER){
 
+    registerCharset("latin:default", charset_default);
     registerCharset("latin:simple", charset_simple);
     registerCharset("latin:balance", charset_balance);
     registerCharset("latin:advanced", charset_advanced);

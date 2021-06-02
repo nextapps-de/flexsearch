@@ -27,7 +27,7 @@ import Cache, { searchCache } from "./cache.js";
 import apply_preset from "./preset.js";
 import { exportIndex, importIndex } from "./serialize.js";
 
-registerCharset("latin:default", default_encoder);
+//registerCharset("latin:default", default_encoder);
 
 /**
  * @constructor
@@ -82,10 +82,10 @@ function Index(options, _register){
     this.encode = options["encode"] || (charset && charset.encode) || default_encoder;
     this.register = _register || create_object();
     this.resolution = resolution = options["resolution"] || 9;
-    this.tokenizer = tmp = (charset && charset.tokenize) || options["tokenize"] || "strict";
+    this.tokenize = tmp = (charset && charset.tokenize) || options["tokenize"] || "strict";
     this.depth = (tmp === "strict") && context["depth"];
     this.bidirectional = parse_option(context["bidirectional"], true);
-    this.optimize = optimize = options["optimize"] === "memory";
+    this.optimize = optimize = parse_option(options["optimize"], true);
     this.fastupdate = parse_option(options["fastupdate"], true);
     this.minlength = options["minlength"] || 1;
 
@@ -146,6 +146,8 @@ Index.prototype.add = function(id, content, _append, _skip_update){
             // check context dupes to skip all contextual redundancy in the whole document
             const dupes_ctx = create_object();
 
+            // TODO: stretch the partial score to its full resolution
+
             for(let i = 0; i < length; i++){
 
                 let term = content[this.rtl ? length - 1 - i : i];
@@ -154,125 +156,142 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                 // skip dupes will break the context chain
                 if(term && (term_length >= this.minlength) && (depth || !dupes[term])){
 
-                    const score = Math.min((resolution / length * i) | 0, i);
+                    const score = length < resolution ? i : (resolution / length * i) | 0;
+                    let token = "";
 
-                    //if(score < resolution){
+                    switch(this.tokenize){
 
-                        let token = "";
+                        case "full":
 
-                        switch(this.tokenizer){
+                            if(term_length > 3){
 
-                            case "full":
+                                for(let x = 0; x < term_length; x++){
 
-                                if(term_length > 3){
+                                    for(let y = term_length; y > x; y--){
 
-                                    for(let x = 0; x < term_length; x++){
+                                        if((y - x) >= this.minlength){
 
-                                        const partial_score = x ? Math.min((score / 2 + resolution / term_length * x / 2) | 0, score + x) : score;
+                                            const partial_score = (length + term_length) < resolution ? i + x : (resolution / (length + term_length) * (i + x)) | 0;
 
-                                        //if(partial_score < resolution){
+                                            // console.log("resolution", resolution);
+                                            // console.log("length", length);
+                                            // console.log("term_length", term_length);
+                                            // console.log("i", i);
+                                            // console.log((length + term_length) < resolution ? i + x : resolution / (length + term_length) * (i + x));
 
-                                            for(let y = term_length; y > x; y--){
-
-                                                token = term.substring(x, y);
-
-                                                if(token.length >= this.minlength){
-
-                                                    this.push_index(dupes, token, partial_score, id, _append);
-                                                }
-                                            }
-                                        //}
-                                    }
-
-                                    break;
-                                }
-
-                                // fallthrough to next case when term length < 4
-
-                            case "reverse":
-
-                                // skip last round (this token exist already in "forward")
-
-                                if(term_length > 2){
-
-                                    for(let a = term_length - 1; a > 0; a--){
-
-                                        token = term[a] + token;
-
-                                        if(token.length >= this.minlength){
-
-                                            this.push_index(dupes, token, score, id, _append);
-                                        }
-                                    }
-
-                                    token = "";
-                                }
-
-                                // fallthrough to next case to apply forward also
-
-                            case "forward":
-
-                                if(term_length > 1){
-
-                                    for(let a = 0; a < term_length; a++){
-
-                                        token += term[a];
-
-                                        if(token.length >= this.minlength){
-
-                                            this.push_index(dupes, token, score, id, _append);
+                                            token = term.substring(x, y);
+                                            this.push_index(dupes, token, partial_score, id, _append);
                                         }
                                     }
                                 }
 
                                 break;
+                            }
 
-                            //case "strict":
-                            default:
+                        // fallthrough to next case when term length < 4
 
-                                this.push_index(dupes, term, score, id, _append);
+                        case "reverse":
 
-                                if(depth){
+                            // skip last round (this token exist already in "forward")
 
-                                    if((length > 1) && (i < (length - 1))){
+                            if(term_length > 2){
 
-                                        const resolution = this.resolution_ctx;
-                                        // check inner dupes to skip repeating words in the current context
-                                        const dupes_inner = create_object();
-                                        const keyword = term;
-                                        let size = Math.min(depth + 1, length - i);
+                                for(let x = term_length - 1; x > 0; x--){
 
-                                        dupes_inner[keyword] = 1;
+                                    token = term[x] + token;
 
-                                        for(let x = 1; x < size; x++){
+                                    if(token.length >= this.minlength){
 
-                                            term = content[this.rtl ? length - 1 - i - x : i + x];
+                                        const partial_score = (length + term_length) < resolution ? i + x : (resolution / (length + term_length) * (i + x)) | 0;
 
-                                            if(term && (term.length >= this.minlength) && !dupes_inner[term]){
+                                        // console.log("token", token);
+                                        // console.log("resolution", resolution);
+                                        // console.log("length", length);
+                                        // console.log("term_length", term_length);
+                                        // console.log("i", i);
+                                        // console.log((length + term_length) < resolution ? i + x : (resolution / (length + term_length) * (i + x)));
 
-                                                dupes_inner[term] = 1;
+                                        this.push_index(dupes, token, partial_score, id, _append);
+                                    }
+                                }
 
-                                                const context_score = 0;
+                                token = "";
+                            }
 
-                                                // const context_score = Math.min(((resolution - size /*+ 1*/) / length * i + x) | 0, i + (x - 1));
-                                                //
-                                                // // TODO: this check is not required when calculated properly
-                                                // if((context_score >= 0) && (context_score < resolution)){
+                        // fallthrough to next case to apply forward also
 
-                                                    const swap = this.bidirectional && (term > keyword);
+                        case "forward":
 
-                                                    this.push_index(dupes_ctx, swap ? keyword : term, context_score, id, _append, swap ? term : keyword);
-                                                //}
-                                            }
-                                            else{
+                            if(term_length > 1){
 
-                                                size = Math.min(size + 1, length - i);
-                                            }
+                                for(let x = 0; x < term_length; x++){
+
+                                    token += term[x];
+
+                                    if(token.length >= this.minlength){
+
+                                        // console.log("token", token);
+                                        // console.log("resolution", resolution);
+                                        // console.log("length", length);
+                                        // console.log("term_length", term_length);
+                                        // console.log("i", i);
+                                        // console.log(score);
+
+                                        this.push_index(dupes, token, score, id, _append);
+                                    }
+                                }
+                            }
+
+                            break;
+
+                        //case "strict":
+                        default:
+
+                            // console.log("term", term);
+                            // console.log("resolution", resolution);
+                            // console.log("length", length);
+                            // console.log("i", i);
+                            // console.log(score);
+
+                            this.push_index(dupes, term, score, id, _append);
+
+                            if(depth){
+
+                                if((length > 1) && (i < (length - 1))){
+
+                                    const resolution = this.resolution_ctx;
+                                    // check inner dupes to skip repeating words in the current context
+                                    const dupes_inner = create_object();
+                                    const keyword = term;
+                                    const size = Math.min(depth + 1, length - i);
+
+                                    dupes_inner[keyword] = 1;
+
+                                    for(let x = 1; x < size; x++){
+
+                                        term = content[this.rtl ? length - 1 - i - x : i + x];
+
+                                        if(term && (term.length >= this.minlength) && !dupes_inner[term]){
+
+                                            dupes_inner[term] = 1;
+
+                                            const context_score = (size + length) < resolution ? i + (x - 1) : ((resolution / (size + length) * (i + x)) | 0);
+
+                                            // console.log("term", term);
+                                            // console.log("resolution", resolution);
+                                            // console.log("size", size);
+                                            // console.log("length", length);
+                                            // console.log("i", i);
+                                            // console.log("x", x);
+                                            // console.log(resolution / (size + length) * (i + x));
+
+                                            const swap = this.bidirectional && (term > keyword);
+                                            this.push_index(dupes_ctx, swap ? keyword : term, context_score, id, _append, swap ? term : keyword);
                                         }
                                     }
                                 }
-                        }
-                    //}
+                            }
+                    }
                 }
             }
 
