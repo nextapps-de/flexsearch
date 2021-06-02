@@ -76,22 +76,12 @@ function Index(options, _register){
         options = {};
     }
 
-    let resolution, threshold, optimize, context = options["context"] || {};
+    let resolution, optimize, context = options["context"] || {};
 
     /** @export */
     this.encode = options["encode"] || (charset && charset.encode) || default_encoder;
     this.register = _register || create_object();
-
-    resolution = options["resolution"] || 9;
-    threshold = options["threshold"] || 0;
-
-    if(threshold >= resolution){
-
-        threshold = resolution - 1;
-    }
-
-    this.resolution = resolution;
-    this.threshold = threshold;
+    this.resolution = resolution = options["resolution"] || 9;
     this.tokenizer = tmp = (charset && charset.tokenize) || options["tokenize"] || "strict";
     this.depth = (tmp === "strict") && context["depth"];
     this.bidirectional = parse_option(context["bidirectional"], true);
@@ -101,19 +91,9 @@ function Index(options, _register){
 
     // when not using the memory strategy the score array should not pre-allocated to its full length
 
-    this.map = optimize ? create_object_array(resolution - threshold) : create_object();
-
-    resolution = context["resolution"] || resolution;
-    threshold = context["threshold"] || threshold;
-
-    if(threshold >= resolution){
-
-        threshold = resolution - 1;
-    }
-
-    this.resolution_ctx = resolution;
-    this.threshold_ctx = threshold;
-    this.ctx = optimize ? create_object_array(resolution - threshold) : create_object();
+    this.map = optimize ? create_object_array(resolution) : create_object();
+    this.resolution_ctx = resolution = context["resolution"] || 1;
+    this.ctx = optimize ? create_object_array(resolution) : create_object();
     this.rtl = (charset && charset.rtl) || options["rtl"];
     this.matcher = (tmp = options["matcher"] || (lang && lang.matcher)) && init_stemmer_or_matcher(tmp, false);
     this.stemmer = (tmp = options["stemmer"] || (lang && lang.stemmer)) && init_stemmer_or_matcher(tmp, true);
@@ -161,7 +141,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
         if(length){
 
             const depth = this.depth;
-            const resolution = this.resolution - this.threshold;
+            const resolution = this.resolution;
             const dupes = create_object();
             // check context dupes to skip all contextual redundancy in the whole document
             const dupes_ctx = create_object();
@@ -174,9 +154,9 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                 // skip dupes will break the context chain
                 if(term && (term_length >= this.minlength) && (depth || !dupes[term])){
 
-                    const score = Math.min((this.resolution / length * i) | 0, i);
+                    const score = Math.min((resolution / length * i) | 0, i);
 
-                    if(score < resolution){
+                    //if(score < resolution){
 
                         let token = "";
 
@@ -188,9 +168,9 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                                     for(let x = 0; x < term_length; x++){
 
-                                        const partial_score = x ? Math.min((score / 2 + this.resolution / term_length * x / 2) | 0, score + x) : score;
+                                        const partial_score = x ? Math.min((score / 2 + resolution / term_length * x / 2) | 0, score + x) : score;
 
-                                        if(partial_score < resolution){
+                                        //if(partial_score < resolution){
 
                                             for(let y = term_length; y > x; y--){
 
@@ -201,7 +181,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                                     this.push_index(dupes, token, partial_score, id, _append);
                                                 }
                                             }
-                                        }
+                                        //}
                                     }
 
                                     break;
@@ -256,7 +236,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                                     if((length > 1) && (i < (length - 1))){
 
-                                        const resolution = this.resolution_ctx - this.threshold_ctx;
+                                        const resolution = this.resolution_ctx;
                                         // check inner dupes to skip repeating words in the current context
                                         const dupes_inner = create_object();
                                         const keyword = term;
@@ -272,14 +252,17 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                                                 dupes_inner[term] = 1;
 
-                                                const context_score = Math.min(((this.resolution_ctx - size /*+ 1*/) / length * i + x) | 0, i + (x - 1));
+                                                const context_score = 0;
 
-                                                if(context_score < resolution){
+                                                // const context_score = Math.min(((resolution - size /*+ 1*/) / length * i + x) | 0, i + (x - 1));
+                                                //
+                                                // // TODO: this check is not required when calculated properly
+                                                // if((context_score >= 0) && (context_score < resolution)){
 
                                                     const swap = this.bidirectional && (term > keyword);
 
                                                     this.push_index(dupes_ctx, swap ? keyword : term, context_score, id, _append, swap ? term : keyword);
-                                                }
+                                                //}
                                             }
                                             else{
 
@@ -289,7 +272,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                     }
                                 }
                         }
-                    }
+                    //}
                 }
             }
 
@@ -376,13 +359,12 @@ Index.prototype.search = function(query, limit, options){
 
     let result = [];
     let length;
-    let threshold = this.threshold, context, suggest, offset = 0;
+    let context, suggest, offset = 0;
 
     if(options){
 
         limit = options["limit"];
         offset = options["offset"] || 0;
-        threshold = parse_option(options["threshold"], threshold);
         context = options["context"];
         suggest = SUPPORT_SUGGESTION && options["suggest"];
     }
@@ -433,8 +415,6 @@ Index.prototype.search = function(query, limit, options){
 
     limit || (limit = 100);
 
-    const resolution = this.resolution - threshold;
-    const resolution_ctx = this.resolution_ctx - threshold;
     let depth = this.depth && (length > 1) && (context !== false);
     let index = 0, keyword;
 
@@ -457,7 +437,7 @@ Index.prototype.search = function(query, limit, options){
 
         if(depth){
 
-            arr = this.add_result(result, suggest, resolution_ctx, limit, offset, length === 2, term, keyword);
+            arr = this.add_result(result, suggest, limit, offset, length === 2, term, keyword);
 
             // when suggestion enabled just forward keyword if term was found
             // as long as the result is empty forward the pointer also
@@ -469,7 +449,7 @@ Index.prototype.search = function(query, limit, options){
         }
         else{
 
-            arr = this.add_result(result, suggest, resolution, limit, offset, length === 1, term);
+            arr = this.add_result(result, suggest, limit, offset, length === 1, term);
         }
 
         if(arr){
@@ -517,7 +497,6 @@ Index.prototype.search = function(query, limit, options){
  * @private
  * @param {Array} result
  * @param {Array} suggest
- * @param {number} resolution
  * @param {number} limit
  * @param {number} offset
  * @param {boolean} single_term
@@ -526,7 +505,7 @@ Index.prototype.search = function(query, limit, options){
  * @return {Array<Array<string|number>>|boolean|undefined}
  */
 
-Index.prototype.add_result = function(result, suggest, resolution, limit, offset, single_term, term, keyword){
+Index.prototype.add_result = function(result, suggest, limit, offset, single_term, term, keyword){
 
     let word_arr = [];
     let arr = keyword ? this.ctx : this.map;
@@ -539,53 +518,57 @@ Index.prototype.add_result = function(result, suggest, resolution, limit, offset
     if(arr){
 
         let count = 0;
-        const arr_len = Math.min(arr.length, resolution);
+        const arr_len = Math.min(arr.length, keyword ? this.resolution_ctx : this.resolution);
 
+        // relevance:
         for(let x = 0, size = 0, tmp, len; x < arr_len; x++){
 
             tmp = arr[x];
 
-            if(this.optimize){
-
-                tmp = get_array(tmp, term, keyword, this.bidirectional);
-            }
-
-            if(tmp && single_term){
-
-                len = tmp.length;
-
-                if(len <= offset){
-
-                    offset -= len;
-                    tmp = null;
-                }
-                else{
-
-                    if(offset){
-
-                        tmp = tmp.slice(offset);
-                        offset = 0;
-                    }
-                }
-            }
-
             if(tmp){
 
-                // keep score (sparse array):
-                //word_arr[x] = tmp;
+                if(this.optimize){
 
-                // simplified score order:
-                word_arr[count++] = tmp;
+                    tmp = get_array(tmp, term, keyword, this.bidirectional);
+                }
 
-                if(single_term){
+                if(offset){
 
-                    size += tmp.length;
+                    if(tmp && single_term){
 
-                    if(size >= limit){
+                        len = tmp.length;
 
-                        // fast path optimization
+                        if(len <= offset){
 
-                        break;
+                            offset -= len;
+                            tmp = null;
+                        }
+                        else{
+
+                            tmp = tmp.slice(offset);
+                            offset = 0;
+                        }
+                    }
+                }
+
+                if(tmp){
+
+                    // keep score (sparse array):
+                    //word_arr[x] = tmp;
+
+                    // simplified score order:
+                    word_arr[count++] = tmp;
+
+                    if(single_term){
+
+                        size += tmp.length;
+
+                        if(size >= limit){
+
+                            // fast path optimization
+
+                            break;
+                        }
                     }
                 }
             }
@@ -679,11 +662,11 @@ Index.prototype.remove = function(id, _skip_deletion){
         }
         else{
 
-            remove_index(this.map, id, this.resolution - this.threshold, this.optimize);
+            remove_index(this.map, id, this.resolution, this.optimize);
 
             if(this.depth){
 
-                remove_index(this.ctx, id, this.resolution_ctx - this.threshold_ctx, this.optimize);
+                remove_index(this.ctx, id, this.resolution_ctx, this.optimize);
             }
         }
 

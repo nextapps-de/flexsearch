@@ -52,9 +52,8 @@ function Document(options){
 
     if(SUPPORT_STORE){
 
-        this.extern = !!(opt = document["extern"]);
-        this.storetree = !this.extern && (opt = document["store"]) && (opt !== true) && [];
-        this.store = opt && (this.extern ? opt : create_object());
+        this.storetree = (opt = document["store"]) && (opt !== true) && [];
+        this.store = opt && create_object();
     }
 
     if(SUPPORT_TAGS){
@@ -84,6 +83,7 @@ function Document(options){
         this.async = false;
     }
 
+    /** @export */
     this.index = parse_descriptor.call(this, options, document);
 }
 
@@ -97,17 +97,11 @@ function parse_descriptor(options, document){
 
     const index = create_object();
     let field = document["index"] || document["field"] || document;
-    //let field_options;
 
     if(is_string(field)){
 
         field = [field];
     }
-    // else if(!is_array(field)){
-    //
-    //     field_options = field;
-    //     field = get_keys(field);
-    // }
 
     for(let i = 0, key, opt; i < field.length; i++){
 
@@ -118,10 +112,6 @@ function parse_descriptor(options, document){
             opt = key;
             key = key["field"];
         }
-        // else if(field_options){
-        //
-        //     opt = field_options[key];
-        // }
 
         opt = is_object(opt) ? Object.assign({}, options, opt) : options;
 
@@ -363,7 +353,7 @@ Document.prototype.add = function(id, content, _append){
             }
         }
 
-        if(SUPPORT_STORE && this.store && !this.extern){
+        if(SUPPORT_STORE && this.store){
 
             let store;
 
@@ -454,7 +444,7 @@ Document.prototype.remove = function(id){
             }
         }
 
-        if(SUPPORT_STORE && this.store && !this.extern){
+        if(SUPPORT_STORE && this.store){
 
             delete this.store[id];
         }
@@ -488,7 +478,7 @@ Document.prototype.search = function(query, limit, options, _resolve){
 
     let result = [], result_field = [];
     let pluck, enrich;
-    let field, field_options, tag, bool, offset, count = 0;
+    let field, tag, bool, offset, count = 0;
 
     if(options){
 
@@ -497,11 +487,6 @@ Document.prototype.search = function(query, limit, options, _resolve){
             field = options;
             options = null;
         }
-        // else if(is_string(options)){
-        //
-        //     field = [options];
-        //     options = null;
-        // }
         else{
 
             pluck = options["pluck"];
@@ -539,22 +524,14 @@ Document.prototype.search = function(query, limit, options, _resolve){
                 }
             }
 
-            //if(field){
+            if(is_string(field)){
 
-                if(is_string(field)){
+                field = [field];
+            }
+            else if(!is_array(field)){
 
-                    field = [field];
-                }
-                else if(!is_array(field)){
-
-                    field = null;
-                }
-                // else if(!is_array(field)){
-                //
-                //     field_options = field;
-                //     field = get_keys(field);
-                // }
-            //}
+                field = null;
+            }
         }
     }
 
@@ -576,10 +553,6 @@ Document.prototype.search = function(query, limit, options, _resolve){
             opt = key;
             key = key["field"];
         }
-        // else if(field_options){
-        //
-        //     opt = field_options[key];
-        // }
 
         if(promises){
 

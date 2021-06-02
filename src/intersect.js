@@ -1,6 +1,7 @@
 import { create_object, concat } from "./common.js";
 
 /**
+ * Implementation based on Array.indexOf()
  * @param arrays
  * @param limit
  * @param offset
@@ -12,124 +13,177 @@ export function intersect(arrays, limit, offset, suggest) {
 
     const length = arrays.length;
     let result = [];
-
-    // arrays.sort(function(a, b){
-    //
-    //     return a.length - b.length;
-    // });
-
     let check;
-    let count = 0;
+
+    // determine shortest array and collect results
+    // from the sparse relevance arrays
+
+    let smallest_size;
+    let smallest_arr;
+    let smallest_index;
+
+    for(let x = 0; x < length; x++){
+
+        const arr = arrays[x];
+        const len = arr.length;
+
+        let size = 0;
+
+        for(let y = 0, tmp; y < len; y++){
+
+            tmp = arr[y];
+
+            if(tmp){
+
+                size += tmp.length;
+            }
+        }
+
+        if(!smallest_size || (size < smallest_size)){
+
+            smallest_size = size;
+            smallest_arr = arr;
+            smallest_index = x;
+        }
+    }
+
+    smallest_arr = smallest_arr.length === 1 ?
+
+        smallest_arr[0]
+    :
+        concat(smallest_arr);
 
     if(suggest){
 
-        suggest = [];
+        suggest = [smallest_arr];
+        check = create_object();
     }
 
-    // terms in reversed order!
+    let size = 0;
+    let steps = 0;
+
+    // TODO: the first word should be processed in the last round?
+
+    // process terms in reversed order often results in better performance
+    // the outer loop must be the words array,
+    // using the smallest array here disables the "fast fail" optimization
+
     for(let x = length - 1; x >= 0; x--){
 
-        const word_arr = arrays[x];
-        const word_arr_len = word_arr.length;
-        const new_check = create_object();
+        if(x !== smallest_index){
 
-        let found = !check;
+            steps++;
 
-        // but relevance in forward order
-        for(let y = 0; y < word_arr_len; y++){
+            const word_arr = arrays[x];
+            const word_arr_len = word_arr.length;
+            const new_arr = [];
 
-            //const arr = [].concat.apply([], word_arr);
-            const arr = word_arr[y];
-            const arr_len = arr.length;
+            let count = 0;
 
-            if(arr_len){
+            for(let z = 0, id; z < smallest_arr.length; z++){
 
-                // ids
-                for(let z = 0, count_suggest = 0, id; z < arr_len; z++){
+                id = smallest_arr[z];
 
-                    id = arr[z];
+                let found;
 
-                    if(!check){
+                // process relevance in forward order (direction is
+                // important for the "fill" during the last round)
 
-                        new_check[id] = 1;
-                    }
-                    else if(check[id]){
+                for(let y = 0; y < word_arr_len; y++){
 
-                        if(!x){
+                    const arr = word_arr[y];
 
-                            if(offset){
+                    if(arr.length){
 
-                                offset--;
-                            }
-                            else{
+                        found = arr.indexOf(id) !== -1;
 
-                                result[count++] = id;
+                        if(found){
 
-                                if(count === limit){
+                            // check if in last round
 
-                                    // fast path "end reached"
+                            if(steps === length - 1){
 
-                                    return result;
+                                if(offset){
+
+                                    offset--;
+                                }
+                                else{
+
+                                    result[size++] = id;
+
+                                    if(size === limit){
+
+                                        // fast path "end reached"
+
+                                        return result;
+                                    }
+                                }
+
+                                if(suggest){
+
+                                    check[id] = 1;
                                 }
                             }
+
+                            break;
                         }
-                        else{
-
-                            if(suggest && (count_suggest < limit)){
-
-                                const tmp = suggest[y] || (suggest[y] = []);
-
-                                tmp[count_suggest++] = id;
-                            }
-
-                            new_check[id] = 1;
-                        }
-
-                        found = true;
                     }
                 }
+
+                if(found){
+
+                    new_arr[count++] = id;
+                }
             }
+
+            if(suggest){
+
+                suggest[steps] = new_arr;
+            }
+            else if(!count){
+
+                return [];
+            }
+
+            smallest_arr = new_arr;
         }
-
-        if(!found && !suggest){
-
-            return [];
-        }
-
-        check = new_check;
     }
 
     if(suggest){
 
-        for(let i = suggest.length - 1, res, len; i >= 0; i--){
+        // has to iterate in reverse direction
 
-            res = suggest[i];
-            len = res && res.length;
+        for(let x = suggest.length - 1, arr, len; x >= 0; x--){
 
-            if(len && offset){
-
-                if(len <= offset){
-
-                    offset -= len;
-                    len = 0;
-                }
-                else{
-
-                    len -= offset;
-                }
-            }
+            arr = suggest[x];
+            len = arr && arr.length;
 
             if(len){
 
-                if(count + len >= limit){
+                for(let y = 0, id; y < len; y++){
 
-                    return result.concat(res.slice(offset, limit - count + offset));
-                }
-                else{
+                    id = arr[y];
 
-                    result = result.concat(offset ? res.slice(offset) : res);
-                    count += len;
-                    offset = 0;
+                    if(!check[id]){
+
+                        check[id] = 1;
+
+                        if(offset){
+
+                            offset--;
+                        }
+                        else{
+
+                            result[size++] = id;
+
+                            if(size === limit){
+
+                                // fast path "end reached"
+
+                                return result;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -137,6 +191,145 @@ export function intersect(arrays, limit, offset, suggest) {
 
     return result;
 }
+
+/**
+ * Implementation based on Object[key]
+ * @param arrays
+ * @param limit
+ * @param offset
+ * @param {boolean|Array=} suggest
+ * @returns {Array}
+ */
+
+// export function intersect(arrays, limit, offset, suggest) {
+//
+//     const length = arrays.length;
+//     let result = [];
+//
+//     // arrays.sort(function(a, b){
+//     //
+//     //     return a.length - b.length;
+//     // });
+//
+//     let check;
+//     let count = 0;
+//
+//     if(suggest){
+//
+//         suggest = [];
+//     }
+//
+//     // terms in reversed order!
+//     for(let x = length - 1; x >= 0; x--){
+//
+//         const word_arr = arrays[x];
+//         const word_arr_len = word_arr.length;
+//         const new_check = create_object();
+//
+//         let found = !check;
+//
+//         // relevance in forward order
+//         for(let y = 0, count_suggest = 0; y < word_arr_len; y++){
+//
+//             //const arr = [].concat.apply([], word_arr);
+//             const arr = word_arr[y];
+//             const arr_len = arr.length;
+//
+//             if(arr_len){
+//
+//                 // ids
+//                 for(let z = 0, id; z < arr_len; z++){
+//
+//                     id = arr[z];
+//
+//                     if(!check){
+//
+//                         new_check[id] = 1;
+//                     }
+//                     else if(check[id]){
+//
+//                         if(!x){
+//
+//                             if(offset){
+//
+//                                 offset--;
+//                             }
+//                             else{
+//
+//                                 result[count++] = id;
+//
+//                                 if(count === limit){
+//
+//                                     // fast path "end reached"
+//
+//                                     return result;
+//                                 }
+//                             }
+//                         }
+//                         else{
+//
+//                             if(suggest && (count_suggest < limit)){
+//
+//                                 const tmp = suggest[y] || (suggest[y] = []);
+//                                 tmp[tmp.length] = id;
+//                                 count_suggest++;
+//                             }
+//
+//                             new_check[id] = 1;
+//                         }
+//
+//                         found = true;
+//                     }
+//                 }
+//             }
+//         }
+//
+//         if(!found && !suggest){
+//
+//             return [];
+//         }
+//
+//         check = new_check;
+//     }
+//
+//     if(suggest){
+//
+//         for(let i = suggest.length - 1, res, len; i >= 0; i--){
+//
+//             res = suggest[i];
+//             len = res && res.length;
+//
+//             if(len && offset){
+//
+//                 if(len <= offset){
+//
+//                     offset -= len;
+//                     len = 0;
+//                 }
+//                 else{
+//
+//                     len -= offset;
+//                 }
+//             }
+//
+//             if(len){
+//
+//                 if(count + len >= limit){
+//
+//                     return result.concat(res.slice(offset, limit - count + offset));
+//                 }
+//                 else{
+//
+//                     result = result.concat(offset ? res.slice(offset) : res);
+//                     count += len;
+//                     offset = 0;
+//                 }
+//             }
+//         }
+//     }
+//
+//     return result;
+// }
 
 /**
  * @param mandatory
