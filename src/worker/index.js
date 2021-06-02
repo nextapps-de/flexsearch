@@ -2,7 +2,7 @@
 import { create_object, is_function, is_object, is_string } from "../common.js";
 import handler from "./handler.js";
 
-let counter = 0;
+let pid = 0;
 
 /**
  * @param {Object=} options
@@ -68,7 +68,6 @@ function WorkerIndex(options){
     this.worker.postMessage({
 
         "task": "init",
-        //"id": ++counter,
         "factory": factory,
         "options": options
     });
@@ -102,22 +101,13 @@ function register(key){
 
             setTimeout(function(){
 
-                self.resolver[++counter] = resolve;
+                self.resolver[++pid] = resolve;
                 self.worker.postMessage({
 
                     "task": key,
-                    "id": counter,
+                    "id": pid,
                     "args": args
                 });
-
-                // if(key === "search"){
-                //
-                //     self.resolve = resolve;
-                // }
-                // else{
-                //
-                //     resolve();
-                // }
             });
         });
 

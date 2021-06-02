@@ -47,10 +47,5 @@ export default function(data) {
             const id = data["id"];
             const message = index[task].apply(index, args);
             postMessage(task === "search" ? { "id": id, "msg": message } : { "id": id });
-
-            // if(task === "search"){
-            //
-            //     postMessage(message);
-            // }
     }
 };

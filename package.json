@@ -31,7 +31,7 @@
     "copy": "npm run clean && cpx \"src/**\" tmp/",
     "clean": "if exist tmp rmdir tmp /s /q && mkdir tmp",
     "build": "npm run copy && npm run build:bundle",
-    "build:bundle": "node task/build RELEASE=bundle",
+    "build:bundle": "node task/build RELEASE=bundle && cpx \"src/worker/node.js\" dist/node/",
     "build:debug": "node task/build RELEASE=debug COMPILATION_LEVEL=SIMPLE FORMATTING=PRETTY_PRINT",
     "build:compact": "node task/build RELEASE=compact",
     "build:light": "node task/build RELEASE=light",
