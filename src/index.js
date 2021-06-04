@@ -141,10 +141,8 @@ Index.prototype.add = function(id, content, _append, _skip_update){
             const depth = this.depth;
             const resolution = this.resolution;
             const dupes = create_object();
-            // check context dupes to skip all contextual redundancy in the whole document
+            // check context dupes to skip all contextual redundancy along a document
             const dupes_ctx = create_object();
-
-            // TODO: stretch the partial score to its full resolution
 
             for(let i = 0; i < length; i++){
 
@@ -152,9 +150,10 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                 let term_length = term.length;
 
                 // skip dupes will break the context chain
+
                 if(term && (term_length >= this.minlength) && (depth || !dupes[term])){
 
-                    const score = length < resolution ? i : (resolution / length * i) | 0;
+                    const score = get_score(resolution, length, i);
                     let token = "";
 
                     switch(this.tokenize){
@@ -169,14 +168,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                                         if((y - x) >= this.minlength){
 
-                                            const partial_score = (length + term_length) < resolution ? i + x : (resolution / (length + term_length) * (i + x)) | 0;
-
-                                            // console.log("resolution", resolution);
-                                            // console.log("length", length);
-                                            // console.log("term_length", term_length);
-                                            // console.log("i", i);
-                                            // console.log((length + term_length) < resolution ? i + x : resolution / (length + term_length) * (i + x));
-
+                                            const partial_score = get_score(resolution, length, i, term_length, x);
                                             token = term.substring(x, y);
                                             this.push_index(dupes, token, partial_score, id, _append);
                                         }
@@ -186,7 +178,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                 break;
                             }
 
-                        // fallthrough to next case when term length < 4
+                            // fallthrough to next case when term length < 4
 
                         case "reverse":
 
@@ -200,15 +192,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                                     if(token.length >= this.minlength){
 
-                                        const partial_score = (length + term_length) < resolution ? i + x : (resolution / (length + term_length) * (i + x)) | 0;
-
-                                        // console.log("token", token);
-                                        // console.log("resolution", resolution);
-                                        // console.log("length", length);
-                                        // console.log("term_length", term_length);
-                                        // console.log("i", i);
-                                        // console.log((length + term_length) < resolution ? i + x : (resolution / (length + term_length) * (i + x)));
-
+                                        const partial_score = get_score(resolution, length, i, term_length, x);
                                         this.push_index(dupes, token, partial_score, id, _append);
                                     }
                                 }
@@ -216,7 +200,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                 token = "";
                             }
 
-                        // fallthrough to next case to apply forward also
+                            // fallthrough to next case to apply forward also
 
                         case "forward":
 
@@ -228,13 +212,6 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                                     if(token.length >= this.minlength){
 
-                                        // console.log("token", token);
-                                        // console.log("resolution", resolution);
-                                        // console.log("length", length);
-                                        // console.log("term_length", term_length);
-                                        // console.log("i", i);
-                                        // console.log(score);
-
                                         this.push_index(dupes, token, score, id, _append);
                                     }
                                 }
@@ -244,12 +221,6 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                         //case "strict":
                         default:
-
-                            // console.log("term", term);
-                            // console.log("resolution", resolution);
-                            // console.log("length", length);
-                            // console.log("i", i);
-                            // console.log(score);
 
                             this.push_index(dupes, term, score, id, _append);
 
@@ -273,16 +244,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                                             dupes_inner[term] = 1;
 
-                                            const context_score = (size + length) < resolution ? i + (x - 1) : ((resolution / (size + length) * (i + x)) | 0);
-
-                                            // console.log("term", term);
-                                            // console.log("resolution", resolution);
-                                            // console.log("size", size);
-                                            // console.log("length", length);
-                                            // console.log("i", i);
-                                            // console.log("x", x);
-                                            // console.log(resolution / (size + length) * (i + x));
-
+                                            const context_score = get_score(resolution + ((length / 2) > resolution ? 0 : 1), length, i, size - 1, x - 1);
                                             const swap = this.bidirectional && (term > keyword);
                                             this.push_index(dupes_ctx, swap ? keyword : term, context_score, id, _append, swap ? term : keyword);
                                         }
@@ -299,6 +261,46 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
     return this;
 };
+
+/**
+ * @param {number} resolution
+ * @param {number} length
+ * @param {number} i
+ * @param {number=} term_length
+ * @param {number=} x
+ * @returns {number}
+ */
+
+function get_score(resolution, length, i, term_length, x){
+
+    // console.log("resolution", resolution);
+    // console.log("length", length);
+    // console.log("term_length", term_length);
+    // console.log("i", i);
+    // console.log("x", x);
+    // console.log((resolution - 1) / (length + (term_length || 0)) * (i + (x || 0)) + 1);
+
+    // the first resolution slot is reserved for the best match,
+    // when a query matches the first word(s).
+
+    // also to stretch score to the whole range of resolution, the
+    // calculation is shift by one and cut the floating point.
+    // this needs the resolution "1" to be handled additionally.
+
+    // do not stretch the resolution more than the term length will
+    // improve performance and memory, also it improves scoring in
+    // most cases between a short document and a long document
+
+    return i && (resolution > 1) ? (
+
+        (length + (term_length || 0)) <= resolution ?
+
+            i + (x || 0)
+        :
+            ((resolution - 1) / (length + (term_length || 0)) * (i + (x || 0)) + 1) | 0
+    ):
+        0;
+}
 
 /**
  * @private
@@ -404,7 +406,7 @@ Index.prototype.search = function(query, limit, options){
 
                 if(term && (term.length >= this.minlength) && !dupes[term]){
 
-                    // the fast path just could applied when not in memory-optimized mode
+                    // this fast path just could applied when not in memory-optimized mode
 
                     if(!this.optimize && !suggest && !this.map[term]){
 
@@ -452,9 +454,16 @@ Index.prototype.search = function(query, limit, options){
 
         term = query[index];
 
+        // console.log(keyword);
+        // console.log(term);
+        // console.log("");
+
         if(depth){
 
             arr = this.add_result(result, suggest, limit, offset, length === 2, term, keyword);
+
+            // console.log(arr);
+            // console.log(result);
 
             // when suggestion enabled just forward keyword if term was found
             // as long as the result is empty forward the pointer also

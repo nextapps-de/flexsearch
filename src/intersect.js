@@ -1,7 +1,203 @@
 import { create_object, concat } from "./common.js";
 
 /**
- * Implementation based on Array.indexOf()
+ * Implementation based on Array.indexOf() provides better performance,
+ * but it needs at least one word in the query which is less frequent.
+ * Also on large indexes it does not scale well performance-wise.
+ * This strategy also lacks of suggestion capabilities (matching & sorting).
+ *
+ * @param arrays
+ * @param limit
+ * @param offset
+ * @param {boolean|Array=} suggest
+ * @returns {Array}
+ */
+
+// export function intersect(arrays, limit, offset, suggest) {
+//
+//     const length = arrays.length;
+//     let result = [];
+//     let check;
+//
+//     // determine shortest array and collect results
+//     // from the sparse relevance arrays
+//
+//     let smallest_size;
+//     let smallest_arr;
+//     let smallest_index;
+//
+//     for(let x = 0; x < length; x++){
+//
+//         const arr = arrays[x];
+//         const len = arr.length;
+//
+//         let size = 0;
+//
+//         for(let y = 0, tmp; y < len; y++){
+//
+//             tmp = arr[y];
+//
+//             if(tmp){
+//
+//                 size += tmp.length;
+//             }
+//         }
+//
+//         if(!smallest_size || (size < smallest_size)){
+//
+//             smallest_size = size;
+//             smallest_arr = arr;
+//             smallest_index = x;
+//         }
+//     }
+//
+//     smallest_arr = smallest_arr.length === 1 ?
+//
+//         smallest_arr[0]
+//     :
+//         concat(smallest_arr);
+//
+//     if(suggest){
+//
+//         suggest = [smallest_arr];
+//         check = create_object();
+//     }
+//
+//     let size = 0;
+//     let steps = 0;
+//
+//     // process terms in reversed order often results in better performance.
+//     // the outer loop must be the words array, using the
+//     // smallest array here disables the "fast fail" optimization.
+//
+//     for(let x = length - 1; x >= 0; x--){
+//
+//         if(x !== smallest_index){
+//
+//             steps++;
+//
+//             const word_arr = arrays[x];
+//             const word_arr_len = word_arr.length;
+//             const new_arr = [];
+//
+//             let count = 0;
+//
+//             for(let z = 0, id; z < smallest_arr.length; z++){
+//
+//                 id = smallest_arr[z];
+//
+//                 let found;
+//
+//                 // process relevance in forward order (direction is
+//                 // important for adding IDs during the last round)
+//
+//                 for(let y = 0; y < word_arr_len; y++){
+//
+//                     const arr = word_arr[y];
+//
+//                     if(arr.length){
+//
+//                         found = arr.indexOf(id) !== -1;
+//
+//                         if(found){
+//
+//                             // check if in last round
+//
+//                             if(steps === length - 1){
+//
+//                                 if(offset){
+//
+//                                     offset--;
+//                                 }
+//                                 else{
+//
+//                                     result[size++] = id;
+//
+//                                     if(size === limit){
+//
+//                                         // fast path "end reached"
+//
+//                                         return result;
+//                                     }
+//                                 }
+//
+//                                 if(suggest){
+//
+//                                     check[id] = 1;
+//                                 }
+//                             }
+//
+//                             break;
+//                         }
+//                     }
+//                 }
+//
+//                 if(found){
+//
+//                     new_arr[count++] = id;
+//                 }
+//             }
+//
+//             if(suggest){
+//
+//                 suggest[steps] = new_arr;
+//             }
+//             else if(!count){
+//
+//                 return [];
+//             }
+//
+//             smallest_arr = new_arr;
+//         }
+//     }
+//
+//     if(suggest){
+//
+//         // needs to iterate in reverse direction
+//
+//         for(let x = suggest.length - 1, arr, len; x >= 0; x--){
+//
+//             arr = suggest[x];
+//             len = arr && arr.length;
+//
+//             if(len){
+//
+//                 for(let y = 0, id; y < len; y++){
+//
+//                     id = arr[y];
+//
+//                     if(!check[id]){
+//
+//                         check[id] = 1;
+//
+//                         if(offset){
+//
+//                             offset--;
+//                         }
+//                         else{
+//
+//                             result[size++] = id;
+//
+//                             if(size === limit){
+//
+//                                 // fast path "end reached"
+//
+//                                 return result;
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//
+//     return result;
+// }
+
+/**
+ * Implementation based on Object[key] provides better suggestions
+ * capabilities and has less performance scaling issues on large indexes.
+ *
  * @param arrays
  * @param limit
  * @param offset
@@ -14,94 +210,48 @@ export function intersect(arrays, limit, offset, suggest) {
     const length = arrays.length;
     let result = [];
     let check;
-
-    // determine shortest array and collect results
-    // from the sparse relevance arrays
-
-    let smallest_size;
-    let smallest_arr;
-    let smallest_index;
-
-    for(let x = 0; x < length; x++){
-
-        const arr = arrays[x];
-        const len = arr.length;
-
-        let size = 0;
-
-        for(let y = 0, tmp; y < len; y++){
-
-            tmp = arr[y];
-
-            if(tmp){
-
-                size += tmp.length;
-            }
-        }
-
-        if(!smallest_size || (size < smallest_size)){
-
-            smallest_size = size;
-            smallest_arr = arr;
-            smallest_index = x;
-        }
-    }
-
-    smallest_arr = smallest_arr.length === 1 ?
-
-        smallest_arr[0]
-    :
-        concat(smallest_arr);
+    let check_suggest;
+    let size = 0;
 
     if(suggest){
 
-        suggest = [smallest_arr];
-        check = create_object();
+        suggest = [];
     }
 
-    let size = 0;
-    let steps = 0;
-
-    // TODO: the first word should be processed in the last round?
-
-    // process terms in reversed order often results in better performance
-    // the outer loop must be the words array,
-    // using the smallest array here disables the "fast fail" optimization
+    // process terms in reversed order often has advantage for the fast path "end reached".
+    // also a reversed order prioritize the order of words from a query.
 
     for(let x = length - 1; x >= 0; x--){
 
-        if(x !== smallest_index){
+        const word_arr = arrays[x];
+        const word_arr_len = word_arr.length;
+        const check_new = create_object();
 
-            steps++;
+        let found = !check;
 
-            const word_arr = arrays[x];
-            const word_arr_len = word_arr.length;
-            const new_arr = [];
+        // process relevance in forward order (direction is
+        // important for adding IDs during the last round)
 
-            let count = 0;
+        for(let y = 0; y < word_arr_len; y++){
 
-            for(let z = 0, id; z < smallest_arr.length; z++){
+            const arr = word_arr[y];
+            const arr_len = arr.length;
 
-                id = smallest_arr[z];
+            if(arr_len){
 
-                let found;
+                // loop through IDs
 
-                // process relevance in forward order (direction is
-                // important for the "fill" during the last round)
+                for(let z = 0, check_idx, id; z < arr_len; z++){
 
-                for(let y = 0; y < word_arr_len; y++){
+                    id = arr[z];
 
-                    const arr = word_arr[y];
+                    if(check){
 
-                    if(arr.length){
-
-                        found = arr.indexOf(id) !== -1;
-
-                        if(found){
+                        if(check[id]){
 
                             // check if in last round
 
-                            if(steps === length - 1){
+                            if(!x){
 
                                 if(offset){
 
@@ -118,55 +268,69 @@ export function intersect(arrays, limit, offset, suggest) {
                                         return result;
                                     }
                                 }
-
-                                if(suggest){
-
-                                    check[id] = 1;
-                                }
                             }
 
-                            break;
+                            if(x || suggest){
+
+                                check_new[id] = 1;
+                            }
+
+                            found = true;
+                        }
+
+                        if(suggest){
+
+                            check_suggest[id] = (check_idx = check_suggest[id]) ? check_idx++ : check_idx = 1;
+
+                            // do not adding IDs which are already included in the result (saves one loop)
+
+                            if(check_idx < word_arr_len){
+
+                                const tmp = suggest[check_idx - 1] || (suggest[check_idx - 1] = []);
+                                tmp[tmp.length] = id;
+                            }
                         }
                     }
+                    else{
+
+                        // pre-fill in first round
+
+                        check_new[id] = 1;
+                    }
                 }
-
-                if(found){
-
-                    new_arr[count++] = id;
-                }
             }
-
-            if(suggest){
-
-                suggest[steps] = new_arr;
-            }
-            else if(!count){
-
-                return [];
-            }
-
-            smallest_arr = new_arr;
         }
+
+        if(suggest){
+
+            // re-use the first pre-filled check for suggestions
+
+            check || (check_suggest = check_new);
+        }
+        else if(!found){
+
+            return [];
+        }
+
+        check = check_new;
     }
 
     if(suggest){
 
-        // has to iterate in reverse direction
+        // needs to iterate in reverse direction
 
         for(let x = suggest.length - 1, arr, len; x >= 0; x--){
 
             arr = suggest[x];
-            len = arr && arr.length;
+            len = /*arr &&*/ arr.length;
 
-            if(len){
+            //if(len){
 
                 for(let y = 0, id; y < len; y++){
 
                     id = arr[y];
 
                     if(!check[id]){
-
-                        check[id] = 1;
 
                         if(offset){
 
@@ -183,153 +347,16 @@ export function intersect(arrays, limit, offset, suggest) {
                                 return result;
                             }
                         }
+
+                        check[id] = 1;
                     }
                 }
-            }
+            //}
         }
     }
 
     return result;
 }
-
-/**
- * Implementation based on Object[key]
- * @param arrays
- * @param limit
- * @param offset
- * @param {boolean|Array=} suggest
- * @returns {Array}
- */
-
-// export function intersect(arrays, limit, offset, suggest) {
-//
-//     const length = arrays.length;
-//     let result = [];
-//
-//     // arrays.sort(function(a, b){
-//     //
-//     //     return a.length - b.length;
-//     // });
-//
-//     let check;
-//     let count = 0;
-//
-//     if(suggest){
-//
-//         suggest = [];
-//     }
-//
-//     // terms in reversed order!
-//     for(let x = length - 1; x >= 0; x--){
-//
-//         const word_arr = arrays[x];
-//         const word_arr_len = word_arr.length;
-//         const new_check = create_object();
-//
-//         let found = !check;
-//
-//         // relevance in forward order
-//         for(let y = 0, count_suggest = 0; y < word_arr_len; y++){
-//
-//             //const arr = [].concat.apply([], word_arr);
-//             const arr = word_arr[y];
-//             const arr_len = arr.length;
-//
-//             if(arr_len){
-//
-//                 // ids
-//                 for(let z = 0, id; z < arr_len; z++){
-//
-//                     id = arr[z];
-//
-//                     if(!check){
-//
-//                         new_check[id] = 1;
-//                     }
-//                     else if(check[id]){
-//
-//                         if(!x){
-//
-//                             if(offset){
-//
-//                                 offset--;
-//                             }
-//                             else{
-//
-//                                 result[count++] = id;
-//
-//                                 if(count === limit){
-//
-//                                     // fast path "end reached"
-//
-//                                     return result;
-//                                 }
-//                             }
-//                         }
-//                         else{
-//
-//                             if(suggest && (count_suggest < limit)){
-//
-//                                 const tmp = suggest[y] || (suggest[y] = []);
-//                                 tmp[tmp.length] = id;
-//                                 count_suggest++;
-//                             }
-//
-//                             new_check[id] = 1;
-//                         }
-//
-//                         found = true;
-//                     }
-//                 }
-//             }
-//         }
-//
-//         if(!found && !suggest){
-//
-//             return [];
-//         }
-//
-//         check = new_check;
-//     }
-//
-//     if(suggest){
-//
-//         for(let i = suggest.length - 1, res, len; i >= 0; i--){
-//
-//             res = suggest[i];
-//             len = res && res.length;
-//
-//             if(len && offset){
-//
-//                 if(len <= offset){
-//
-//                     offset -= len;
-//                     len = 0;
-//                 }
-//                 else{
-//
-//                     len -= offset;
-//                 }
-//             }
-//
-//             if(len){
-//
-//                 if(count + len >= limit){
-//
-//                     return result.concat(res.slice(offset, limit - count + offset));
-//                 }
-//                 else{
-//
-//                     result = result.concat(offset ? res.slice(offset) : res);
-//                     count += len;
-//                     offset = 0;
-//                 }
-//             }
-//         }
-//     }
-//
-//     return result;
-// }
 
 /**
  * @param mandatory
