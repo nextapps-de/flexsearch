@@ -1,9 +1,9 @@
 <h1 align="center">
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.0/doc/flexsearch-logo-glass.svg" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
+    <p></p>
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
     <p></p>
 </h1>
 
-<h2></h2>
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
 <a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
 <a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master&v=0"></a>
