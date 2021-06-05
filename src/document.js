@@ -248,15 +248,19 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
 
         if(is_array(obj)){
 
+            // append array contents so each entry gets a new scoring context
+
             if(marker[pos]){
 
                 for(let i = 0; i < obj.length; i++){
 
-                    index.add(id, obj[i], /* append: */ true, /* skip_update: */ true);
+                    index.add(id, obj[i], /* append: */ true, /* skip update: */ true);
                 }
 
                 return;
             }
+
+            // or join array contents and use one scoring context
 
             obj = obj.join(" ");
         }
@@ -270,6 +274,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
             for(let i = 0; i < obj.length; i++){
 
                 // do not increase index, an array is not a field
+
                 add_index(obj, tree, marker, pos, index, id, i, _append);
             }
         }
@@ -300,7 +305,7 @@ Document.prototype.add = function(id, content, _append){
 
     if(content && (id || (id === 0))){
 
-        if(this.register[id]){
+        if(!_append && this.register[id]){
 
             return this.update(id, content);
         }
@@ -353,7 +358,9 @@ Document.prototype.add = function(id, content, _append){
             }
         }
 
-        if(SUPPORT_STORE && this.store){
+        // TODO: how to handle store when appending contents?
+
+        if(SUPPORT_STORE && this.store && (!_append || !this.store[id])){
 
             let store;
 
@@ -402,15 +409,13 @@ Document.prototype.remove = function(id){
 
     if(this.register[id]){
 
-        const fastupdate = this.fastupdate && !this.worker;
-
         for(let i = 0; i < this.field.length; i++){
-
-            this.index[this.field[i]].remove(id, fastupdate);
 
             // workers does not share the register
 
-            if(fastupdate){
+            this.index[this.field[i]].remove(id, !this.worker);
+
+            if(this.fastupdate){
 
                 // when fastupdate was enabled all ids are removed
 
@@ -422,7 +427,7 @@ Document.prototype.remove = function(id){
 
             // when fastupdate was enabled all ids are already removed
 
-            if(!fastupdate){
+            if(!this.fastupdate){
 
                 for(let key in this.tagindex){
 
@@ -527,10 +532,6 @@ Document.prototype.search = function(query, limit, options, _resolve){
             if(is_string(field)){
 
                 field = [field];
-            }
-            else if(!is_array(field)){
-
-                field = null;
             }
         }
     }

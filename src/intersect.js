@@ -280,13 +280,14 @@ export function intersect(arrays, limit, offset, suggest) {
 
                         if(suggest){
 
-                            check_suggest[id] = (check_idx = check_suggest[id]) ? check_idx++ : check_idx = 1;
+                            check_suggest[id] = (check_idx = check_suggest[id]) ? ++check_idx : check_idx = 1;
 
                             // do not adding IDs which are already included in the result (saves one loop)
+                            // the first intersection match has the check index 2, so shift by -2
 
-                            if(check_idx < word_arr_len){
+                            if(check_idx < length){
 
-                                const tmp = suggest[check_idx - 1] || (suggest[check_idx - 1] = []);
+                                const tmp = suggest[check_idx - 2] || (suggest[check_idx - 2] = []);
                                 tmp[tmp.length] = id;
                             }
                         }
@@ -322,36 +323,33 @@ export function intersect(arrays, limit, offset, suggest) {
         for(let x = suggest.length - 1, arr, len; x >= 0; x--){
 
             arr = suggest[x];
-            len = /*arr &&*/ arr.length;
+            len = arr.length;
 
-            //if(len){
+            for(let y = 0, id; y < len; y++){
 
-                for(let y = 0, id; y < len; y++){
+                id = arr[y];
 
-                    id = arr[y];
+                if(!check[id]){
 
-                    if(!check[id]){
+                    if(offset){
 
-                        if(offset){
-
-                            offset--;
-                        }
-                        else{
-
-                            result[size++] = id;
-
-                            if(size === limit){
-
-                                // fast path "end reached"
-
-                                return result;
-                            }
-                        }
-
-                        check[id] = 1;
+                        offset--;
                     }
+                    else{
+
+                        result[size++] = id;
+
+                        if(size === limit){
+
+                            // fast path "end reached"
+
+                            return result;
+                        }
+                    }
+
+                    check[id] = 1;
                 }
-            //}
+            }
         }
     }
 

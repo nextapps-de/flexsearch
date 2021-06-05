@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.7.0-beta",
+  "version": "0.7.0",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -39,17 +39,15 @@
     "build:es5": "node task/build RELEASE=es5 LANGUAGE_OUT=ECMASCRIPT5_STRICT POLYFILL=true",
     "build:pre": "node task/build RELEASE=pre COMPILATION_LEVEL=WHITESPACE FORMATTING=PRETTY_PRINT",
     "build:lang": "node task/build RELEASE=lang",
-    "build:module": "babel src -d dist/module && exit 0",
-    "build:all": "npm run build && npm run build:light && npm run build:compact && npm run build:es5 && npm run build:debug",
-    "test": "npm run build:pre && cd test && npm install && npm run test",
-    "update": "npm install google-closure-compiler@nightly"
+    "build:module": "npx babel src -d dist/module && exit 0",
+    "build:all": "npm run build && npm run build:light && npm run build:compact && npm run build:es5 && npm run build:debug && npm run build:module",
+    "test": "cd test && npm install && npm run test",
+    "server": "node task/server"
   },
   "files": [
     "dist/**",
     "src/**",
     "task/**",
-    "test/",
-    "index.d.ts",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -57,7 +55,6 @@
   "readme": "README.md",
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-plugin-conditional-compile": "0.0.5",
     "babel-plugin-minify-constant-folding": "^0.5.0",
     "babel-plugin-minify-dead-code-elimination": "^0.5.1",
     "babel-plugin-minify-flip-comparisons": "^0.4.3",
@@ -74,6 +71,7 @@
     "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
     "cpx": "^1.5.0",
-    "google-closure-compiler": "^20210505.0.0"
+    "google-closure-compiler": "^20210604.0.0-nightly",
+    "web-servo": "^0.5.1"
   }
 }

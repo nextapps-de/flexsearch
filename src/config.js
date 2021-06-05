@@ -1,5 +1,5 @@
 /** @define {boolean} */
-export const DEBUG = true;
+export const DEBUG = false;
 
 /** @define {boolean} */
 export const POLYFILL = true;
@@ -9,9 +9,6 @@ export const SUPPORT_WORKER = true;
 
 /** @define {boolean|string} */
 export const SUPPORT_ENCODER = true;
-
-/** @define {boolean|string} */
-export const SUPPORT_LANG = true;
 
 /** @define {boolean} */
 export const SUPPORT_CACHE = true;

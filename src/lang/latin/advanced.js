@@ -50,6 +50,11 @@ const pairs = [
     regex_pf, "f",
     // regex_ou, "o",
     // regex_uo, "u"
+
+    // regex("(?![aeiouy])h(?![aeiouy])"), "",
+    // regex("(?!^[aeiouy])h(?!^[aeiouy])"), ""
+    regex("(?![aeo])h(?![aeo])"), "",
+    regex("(?!^[aeo])h(?!^[aeo])"), ""
 ];
 
 /**

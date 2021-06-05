@@ -9,6 +9,8 @@
 
     const modes = window.location.hash.indexOf("modes") !== -1;
     const encode = window.location.hash.indexOf("encode") !== -1;
+    const update = window.location.hash.indexOf("update") !== -1;
+
     let keep;
     let repeat;
     let index = -1;
@@ -19,10 +21,10 @@
         "flexsearch-match", "flexsearch-memory", "flexsearch-score",
         "flexsearch-speed"
     ]:[
+        /*"flexsearch-0.6.2",*/ "flexsearch-0.6.3", "flexsearch-0.7.0",
         "bm25", "bulksearch", "elasticlunr",
-        "flexsearch", "flexsearch-0.6.3", "fuse",
         "fuzzysearch", "js-search", "jsii",
-        "lunr", "wade"
+        "fuse", "lunr", "wade"
     ]);
 
     list.render(lib);
@@ -52,44 +54,52 @@
 
     const test = encode ? [
 
-        "size", "memory", "encode"
+        "size", "memory",
+        "encode"
+
+    ]: update ? [
+
+        "size", "memory",
+        "add", "update", "remove",
     ]:[
         "size", "memory",
-        "add", "query-single",
-        "query-multi", "not-found"
+        //"add",
+        "query-single", "query-multi", "query-long", "query-dupes", "not-found"
     ];
 
     const current = new Array(lib.length);
 
-    let size = {
-
-        "bm25": 1,
-        "bulksearch": 1,
-        "elasticlunr": 1,
-        "flexsearch": 1,
-        "flexsearch-0.6.3": 1,
-        "fuse": 1,
-        "fuzzysearch": 1,
-        "js-search": 1,
-        "jsii": 1,
-        "lunr": 1,
-        "wade": 1,
-
-        "flexsearch-balance": 3.0,
-        "flexsearch-default": 3.0,
-        "flexsearch-fast": 3.0,
-        "flexsearch-match": 3.0,
-        "flexsearch-memory": 3.0,
-        "flexsearch-score": 3.0,
-        "flexsearch-speed": 3.0
-    };
+    // let size = {
+    //
+    //     "bm25": 1,
+    //     "bulksearch": 1,
+    //     "elasticlunr": 1,
+    //     "fuse": 1,
+    //     "fuzzysearch": 1,
+    //     "js-search": 1,
+    //     "jsii": 1,
+    //     "lunr": 1,
+    //     "wade": 1,
+    //
+    //     "flexsearch-0.6.2": 1,
+    //     "flexsearch-0.6.3": 1,
+    //     "flexsearch-0.7.0": 1,
+    //
+    //     "flexsearch-balance": 1,
+    //     "flexsearch-default": 1,
+    //     "flexsearch-fast": 1,
+    //     "flexsearch-match": 1,
+    //     "flexsearch-memory": 1,
+    //     "flexsearch-score": 1,
+    //     "flexsearch-speed": 1
+    // };
 
     for(let x = 0; x < lib.length; x++){
 
         current[x] = {
 
             "name": lib[x],
-            "size": size[lib[x]],
+            "size": 1, //size[lib[x]],
             "memory": 0,
             "score": "",
             "index": ""

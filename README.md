@@ -1,20 +1,15 @@
-<p align="center">
-    <br>
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch.svg" alt="Search Library" width="50%">
-    <br><br>
-    <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
-    <a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
-    <a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master&v=0"></a>
-    <a target="_blank" href="https://www.codacy.com/app/ts-thomas/FlexSearch?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nextapps-de/flexsearch&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/a896e010f6b4429aa7bc9a89550320a7"/></a>
-    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>
-    <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
-</p>
+<h1 align="center">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.0/doc/flexsearch-logo-glass.svg" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
+    <p></p>
+</h1>
 
 <h2></h2>
+<a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
+<a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
+<a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master&v=0"></a>
+<a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 
-### FlexSearch v0.7.0 (Beta)
-
-Beta is now available. Please test the new version and post back issues and suggestions. The Beta will pushed to the master branch in 2 weeks.
+### FlexSearch v0.7.0
 
 Read the documentation of new features and changes:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md</a>
@@ -436,11 +431,6 @@ Run Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/t
 FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.<!--Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?-->
 In this way contextual search also <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
-
-<!--
-> "TF-IDF and all kinds of variations (like BM25) is a big mistake in searching algorithms today. They don't provide neither: a meaningful relevance of a term nor the importance of it! Like many pseudo-intelligent algorithms this is also just an example of mathematical stupidity." — Thomas Wilkerling, _Contextual-based Scoring_, 2018
-#### Model of context-based scoring
--->
 
 <p align="center">
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg">

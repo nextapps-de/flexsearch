@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/lunr@2.3.5/lunr.min.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
@@ -21,16 +21,24 @@
         add: function(data){
 
             lib = lunr(function(){
+
                 this.ref("id");
                 this.field("content");
+
                 for(let i = 0; i < data.length; i++){
-                    this.add({id: i, content: data[i]});
+
+                    this.add({
+
+                        id: i,
+                        content: data[i]
+                    });
                 }
             });
         },
         query: function(query){
 
             return lib.query(function(q) {
+
                 q.term(query, { wildcard: lunr.Query.wildcard.LEADING })
             });
         }

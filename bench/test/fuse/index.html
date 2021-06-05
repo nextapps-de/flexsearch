@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/gh/krisk/Fuse@3.3.0/dist/fuse.min.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
@@ -24,10 +24,12 @@
             const payload = new Array(length);
 
             for(let i = 0; i < length; i++){
+
                 payload[i] = {id: i, content: data[i]};
             }
 
             lib = new Fuse(payload, {
+
                 keys: ["content"],
                 id: "id",
                 shouldSort: true,

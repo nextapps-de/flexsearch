@@ -1,0 +1,1 @@
+import{IndexInterface}from"../../type.js";import{normalize}from"../../lang.js";export const rtl=!1;export const tokenize="";export default{encode:encode,rtl:!1,tokenize:""};const regex_whitespace=/[\W_]+/;export function encode(a){return this.pipeline(normalize(a).toLowerCase(),!1,regex_whitespace,!1)}

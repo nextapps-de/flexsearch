@@ -1,8 +1,9 @@
-import { text_data } from "./data/gulliver.js"; // , text_queries, text_queries_multi
+import { text_data } from "../demo/data/gulliver.js";
 
 export let suite = {};
 export const test = {};
 const result = document.getElementById("result").appendChild(document.createTextNode("running..."));
+const match = window.location.hash.indexOf("match") !== -1;
 export const queue = [];
 let lib;
 
@@ -19,12 +20,6 @@ const params = (function(){
     return obj;
 }());
 
-// const text_queries_notfound = [
-//
-//     "undefined1 undefined2 undefined3",
-//     "undefined"
-// ];
-
 let runs;
 let duration;
 
@@ -37,6 +32,66 @@ else{
 
     duration = parseFloat(params["duration"] || "5") * 1000;
 }
+
+if(match){
+
+    text_data.push('zero one two three four five six seven eight nine ten');
+    text_data.push('four two zero one three ten five seven eight six nine');
+    text_data.push('zero one two three four five six seven eight nine ten');
+}
+
+// queue.push({
+//     name: "add",
+//     init: null,
+//     test: null,
+//     start: null,
+//     prepare: null,
+//     fn: function(){
+//         lib.init();
+//         lib.add(text_data);
+//     },
+//     end: null,
+//     complete: null,
+//     count: text_data.length
+// });
+//
+// queue.push({
+//     name: "update",
+//     init: null,
+//     test: null,
+//     start: function(){
+//         lib.init();
+//         lib.add(text_data);
+//     },
+//     prepare: null,
+//     fn: function(){
+//         lib.add(text_data);
+//     },
+//     end: null,
+//     complete: null,
+//     count: text_data.length
+// });
+//
+// let index;
+//
+// queue.push({
+//     name: "remove",
+//     init: null,
+//     test: null,
+//     start: function(){
+//         lib.init();
+//         lib.add(text_data);
+//         index = 0;
+//     },
+//     prepare: null,
+//     fn: function(){
+//         lib.remove(index++);
+//     },
+//     end: null,
+//     complete: null,
+//     cycle: text_data.length,
+//     count: 1
+// });
 
 queue.push({
     name: "query-single",
@@ -57,7 +112,8 @@ queue.push({
         lib.query("houyhnhnms");
     },
     end: null,
-    complete: null
+    complete: null,
+    count: 10
 });
 
 queue.push({
@@ -74,7 +130,39 @@ queue.push({
         lib.query("lord high chancellor");
     },
     end: null,
-    complete: null
+    complete: null,
+    count: 5
+});
+
+queue.push({
+    name: "query-long",
+    init: null,
+    test: null,
+    start: null,
+    prepare: null,
+    fn: function(){
+        lib.query("there were six spanish pieces of four pistoles");
+        lib.query("glumdalclitch and i attended the king and queen in a progress");
+        lib.query("only in this island of luggnagg the appetite for living was not so eager");
+    },
+    end: null,
+    complete: null,
+    count: 3
+});
+
+queue.push({
+    name: "query-dupes",
+    init: null,
+    test: null,
+    start: null,
+    prepare: null,
+    fn: function(){
+        lib.query("gulliver gulliver gulliver");
+        lib.query("italians homunceletino italians homunceletino");
+    },
+    end: null,
+    complete: null,
+    count: 2
 });
 
 queue.push({
@@ -84,11 +172,13 @@ queue.push({
     start: null,
     prepare: null,
     fn: function(){
-        lib.query("undefined1 undefined2 undefined3");
         lib.query("undefined");
+        lib.query("undefineda undefinedb undefinedc");
+        lib.query("lord high undefined");
     },
     end: null,
-    complete: null
+    complete: null,
+    count: 3
 });
 
 // #####################################################################################
@@ -102,7 +192,7 @@ window.onload = function(){
         lib.init();
         lib.add(text_data);
 
-        setTimeout(perform, 200);
+        setTimeout(match ? perform_match : perform, 200);
     }
 };
 
@@ -143,11 +233,11 @@ function perform(){
 
     const test = queue[current];
 
-    if(current === 0) check_test(test) || msg("Main test failed");
+    if(current === 0) check_test(test) || msg("Main test failed!");
 
     let elapsed = 0, memory = 0;
     let status = true;
-    let loops = 0, cycle = 1, now = 0;
+    let loops = 0, cycle = 1, now = 0, max_cycle = test.cycle, inner_count = test.count;
 
     if(status){
 
@@ -170,12 +260,30 @@ function perform(){
 
             if(test.end) test.end(loops);
 
+            // console.log(test.name);
+            // console.log("duration", duration);
+            // console.log("elapsed", elapsed);
+            // console.log("cycle", cycle);
+            // console.log("loops", loops);
+
             cycle *= duration / (elapsed || 1);
+            //cycle = loops / (elapsed || 1) * (duration - elapsed);
+
+            // if(cycle < 0){
+            //
+            //     break;
+            // }
+
+            if(max_cycle && (cycle > max_cycle)){
+
+                cycle = max_cycle;
+            }
         }
 
         if(test.complete) test.complete();
     }
 
+    loops *= inner_count || 1;
     current++;
 
     if(window === window.top){
@@ -184,7 +292,7 @@ function perform(){
     }
     else{
 
-        window.top.postMessage(test.name + "," + (status ? Math.ceil(1000 / elapsed * loops) : 0) + "," + (status ? Math.ceil(memory / loops) : 0), location.protocol + "//" + location.hostname) //"https://nextapps-de.github.io" "https://raw.githack.com"
+        window.top.postMessage(test.name + "," + (status ? Math.ceil(1000 / elapsed * loops) : 0) + "," + (status ? Math.ceil(memory / loops) : 0), location.protocol + "//" + location.hostname); //"https://nextapps-de.github.io" "https://raw.githack.com"
     }
 
     if(current < queue.length){
@@ -195,4 +303,25 @@ function perform(){
 
         current = 0;
     }
+}
+
+function perform_match(){
+
+    const test = queue[current];
+    const query = decodeURI(params["query"]);
+
+    check_test(test) || msg("Main test failed!");
+
+    const res = lib.query(query);
+
+    if(window === window.top){
+
+        result.nodeValue = JSON.stringify(res);
+    }
+    else{
+
+        window.top.postMessage(JSON.stringify(res), location.protocol + "//" + location.hostname);
+    }
+
+
 }

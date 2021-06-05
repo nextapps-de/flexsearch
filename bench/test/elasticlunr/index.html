@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/gh/weixsong/elasticlunr.js@0.9.6/example/elasticlunr.min.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
@@ -20,6 +20,7 @@
         init: function(){
 
             lib = elasticlunr(function(){
+
                 this.addField("content");
                 this.setRef("id");
             });
@@ -27,6 +28,14 @@
         add: function(data){
 
             for(let i = 0, len = data.length; i < len; i++){
+
+                lib.addDoc({ id: i, content: data[i] });
+            }
+        },
+        update: function(data){
+
+            for(let i = 0, len = data.length; i < len; i++){
+
                 lib.addDoc({ id: i, content: data[i] });
             }
         },

@@ -126,23 +126,24 @@ Index.prototype.append = function(id, content){
 
 Index.prototype.add = function(id, content, _append, _skip_update){
 
-    if(!_skip_update && !_append && this.register[id]){
-
-        return this.update(id, content);
-    }
-
     if(content && (id || (id === 0))){
+
+        if(!_skip_update && !_append && this.register[id]){
+
+            return this.update(id, content);
+        }
 
         content = this.encode(content);
         const length = content.length;
 
         if(length){
 
+            // check context dupes to skip all contextual redundancy along a document
+
+            const dupes_ctx = create_object();
+            const dupes = create_object();
             const depth = this.depth;
             const resolution = this.resolution;
-            const dupes = create_object();
-            // check context dupes to skip all contextual redundancy along a document
-            const dupes_ctx = create_object();
 
             for(let i = 0; i < length; i++){
 
@@ -215,22 +216,27 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                         this.push_index(dupes, token, score, id, _append);
                                     }
                                 }
+
+                                break;
                             }
 
-                            break;
+                            // fallthrough to next case when token has a length of 1
 
-                        //case "strict":
                         default:
+                        // case "strict":
 
                             this.push_index(dupes, term, score, id, _append);
+
+                            // context is just supported by tokenizer "strict"
 
                             if(depth){
 
                                 if((length > 1) && (i < (length - 1))){
 
-                                    const resolution = this.resolution_ctx;
                                     // check inner dupes to skip repeating words in the current context
+
                                     const dupes_inner = create_object();
+                                    const resolution = this.resolution_ctx;
                                     const keyword = term;
                                     const size = Math.min(depth + 1, length - i);
 
@@ -642,6 +648,10 @@ function single_result(result, limit, offset){
 function get_array(arr, term, keyword, bidirectional){
 
     if(keyword){
+
+        // the frequency of the starting letter is slightly less
+        // on the last half of the alphabet (m-z) in almost every latin language,
+        // so we sort downwards (https://en.wikipedia.org/wiki/Letter_frequency)
 
         const swap = bidirectional && (term > keyword);
 

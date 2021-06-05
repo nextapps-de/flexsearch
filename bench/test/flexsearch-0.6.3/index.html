@@ -8,32 +8,27 @@
 <h2>Benchmark: flexsearch-0.6.3</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
-<!--
-<script src="../../node_modules/flexsearch/src/config.js"></script>
-<script type="module" src="../../node_modules/flexsearch/src/bundle.js"></script>
--->
-<script src="flexsearch.light.js"></script>
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/0.6.32/dist/flexsearch.light.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
-    //import FlexSearch from "../../node_modules/flexsearch/src/bundle.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
-    suite["flexsearch"] = {
+    suite["flexsearch-0.6.3"] = {
 
         init: function(){
 
             lib = new FlexSearch({
 
-                //encode: "icase",
+                encode: "icase",
                 tokenize: "strict",
-                threshold: 99999,
-                resolution: 99999,
+                resolution: 9,
+                threshold: 8,
                 depth: 1
             });
 
-            window.test = lib;
+            window["lib"] = lib;
         },
         add: function(data){
 
@@ -41,6 +36,17 @@
 
                 lib.add(i, data[i]);
             }
+        },
+        update: function(id){
+
+            for(let i = 0, len = data.length; i < len; i++){
+
+                lib.add(i, data[i]);
+            }
+        },
+        remove: function(id){
+
+            lib.remove(id);
         },
         query: function(query){
 

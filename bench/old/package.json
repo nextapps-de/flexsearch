@@ -3,7 +3,9 @@
   "scripts": {
     "server": "node server.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "google-closure-compiler": "^20210505.0.0"
+  },
   "devDependencies": {
     "web-servo": "^0.5.1"
   }

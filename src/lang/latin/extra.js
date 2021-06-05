@@ -19,7 +19,8 @@ const //soundex_b = regex(prefix + "p"),
     // soundex_m = regex(prefix + "n"),
     // soundex_t = regex(prefix + "d"),
     // soundex_f = regex(prefix + "[vw]"),
-    regex_vowel = regex(prefix + "[aeiouy]");
+    //regex_vowel = regex(prefix + "[aeiouy]");
+    regex_vowel = regex(prefix + "[aeo]");
 
 const pairs = [
 
@@ -29,6 +30,8 @@ const pairs = [
     // soundex_m, "m",
     // soundex_t, "t",
     // soundex_f, "f",
+    // regex("(?![aeiouy])h(?![aeiouy])"), "",
+    // regex("(?!^[aeiouy])h(?!^[aeiouy])"), "",
     regex_vowel, ""
 ];
 

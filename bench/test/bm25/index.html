@@ -11,7 +11,7 @@
 <script src="https://gistcdn.githack.com/vlad-x/a25e0c5c1eeb6bf6aa38/raw/02d1a1703e4a99a7c733c85097f583579f6af4e2/bm25.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
@@ -24,10 +24,24 @@
         add: function(data){
 
             for(let i = 0; i < data.length; i++){
+
                 lib.addDocument({id: i, body: data[i]});
             }
 
             lib.updateIdf();
+        },
+        update: function(id){
+
+            for(let i = 0; i < data.length; i++){
+
+                lib.addDocument({id: i, body: data[i]});
+            }
+
+            lib.updateIdf();
+        },
+        remove: function(id){
+
+            // not implemented
         },
         query: function(query){
 

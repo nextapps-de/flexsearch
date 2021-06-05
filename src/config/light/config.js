@@ -10,9 +10,6 @@ export const SUPPORT_WORKER = false;
 /** @define {boolean|string} */
 export const SUPPORT_ENCODER = false;
 
-/** @define {boolean|string} */
-export const SUPPORT_LANG = false;
-
 /** @define {boolean} */
 export const SUPPORT_CACHE = false;
 

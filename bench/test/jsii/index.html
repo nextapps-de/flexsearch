@@ -12,7 +12,7 @@
 <script src="https://cdn.jsdelivr.net/gh/karussell/jsii@master/web/js/src/JSii.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
@@ -27,7 +27,12 @@
             const payload = [];
 
             for(let i = 0; i < data.length; i++){
-                payload[i] = {id: i, text: data[i]};
+
+                payload[i] = {
+
+                    id: i,
+                    text: data[i]
+                };
             }
 
             lib.feedDocs(payload);

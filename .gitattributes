@@ -1,0 +1,6 @@
+src/css/winbox.css -linguist-detectable
+index.html -linguist-detectable
+bench/** -linguist-detectable
+dist/** -linguist-detectable
+doc/** -linguist-detectable
+task/** -linguist-detectable

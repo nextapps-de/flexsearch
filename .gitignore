@@ -1,11 +1,13 @@
 .idea
 .nyc_output
 .db
+!*.keep
 coverage
 perf
 node_modules
 server
-!*.keep
 tmp
 log
 issue
+data
+node

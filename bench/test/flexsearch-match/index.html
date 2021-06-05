@@ -11,7 +11,7 @@
 <script src="../../dist/flexsearch.min.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
@@ -24,6 +24,7 @@
         add: function(data){
 
             for(let i = 0, len = data.length; i < len; i++){
+
                 lib.add(i, data[i]);
             }
         },

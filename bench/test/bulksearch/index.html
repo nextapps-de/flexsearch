@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/gh/nextapps-de/bulksearch@master/bulksearch.light.js"></script>
 <script type="module">
 
-    import { suite } from "./../../bench.js";
+    import { suite } from "../../bench.js";
 
     let lib;
 
@@ -20,6 +20,7 @@
         init: function(){
 
             lib = new BulkSearch({
+
                 type: "short",
                 encode: "icase",
                 multi: false,
@@ -31,7 +32,15 @@
         add: function(data){
 
             for(let i = 0, len = data.length; i < len; i++){
+
                 lib.add(i, data[i]);
+            }
+        },
+        update: function(data){
+
+            for(let i = 0, len = data.length; i < len; i++){
+
+                lib.update(i, data[i]);
             }
         },
         query: function(query){

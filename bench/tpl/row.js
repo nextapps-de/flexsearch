@@ -9,6 +9,9 @@ Mikado.register({
     },
     {
       "t": "td",
+      "a": {
+        "hidden": true
+      },
       "s": [
         "'background-color:' + data.color_size"
       ],
@@ -41,6 +44,24 @@ Mikado.register({
       ],
       "x": [
         "data['query-multi']"
+      ]
+    },
+    {
+      "t": "td",
+      "s": [
+        "'background-color:' + data['color_query-long']"
+      ],
+      "x": [
+        "data['query-long']"
+      ]
+    },
+    {
+      "t": "td",
+      "s": [
+        "'background-color:' + data['color_query-dupes']"
+      ],
+      "x": [
+        "data['query-dupes']"
       ]
     },
     {
