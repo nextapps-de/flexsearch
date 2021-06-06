@@ -1335,7 +1335,7 @@ This will search through all indexed fields:
 var results = index.search("body");
 ```
 
-This will search on a specific field):
+This will search on a specific field:
 
 ```js
 var results = index.search({
