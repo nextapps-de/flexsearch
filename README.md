@@ -3,11 +3,14 @@
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
     <p></p>
 </h1>
+<h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
-<a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>
-<a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master&v=0"></a>
+<!--<a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>-->
+<!--<a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master&v=0"></a>-->
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
+
+<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
 ### FlexSearch v0.7.0
 
@@ -17,39 +20,37 @@ Read the documentation of new features and changes:<br>
 Read the documentation of new language encoding features:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md</a>
 
-Source Code v0.7.0-beta available here:<br>
-<a href="https://github.com/nextapps-de/flexsearch/tree/0.7.0/src">https://github.com/nextapps-de/flexsearch/tree/0.7.0/src</a>
-
 <h1></h1>
-<h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
-
-When it comes to raw search speed <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
+When it comes to raw search speed <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
 
 Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 1,000,000 times faster compared to other libraries.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
 
+<!--
 FlexSearch Server is available here: 
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
+-->
 
 Supported Platforms:
 - Browser
 - Node.js
 
+<!--
 Demos:
 - <a href="https://raw.githack.com/nextapps-de/flexsearch/master/demo/autocomplete.html" target="_blank">Auto-Complete</a>
+-->
 
-Library Comparison:
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">Relevance Scoring</a>
+Library Comparison "Gulliver's Travels":
+- <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark</a>
+- <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">Scoring Benchmark</a>
 - <a href="#consumption">Memory Consumption</a>
 
 Plugins (external):
 - https://github.com/angeloashmore/react-use-flexsearch
 - https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
 
-Get Latest (Stable Release):
+__Get Latest Stable Build (Recommended):__
 
 <table>
     <tr></tr>
@@ -59,36 +60,55 @@ Get Latest (Stable Release):
         <td>CDN</td>
     </tr>
     <tr>
-        <td>flexsearch.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.min.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.min.js</a></td>
+        <td>flexsearch.bundle.js</td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw//0.7.0/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch//0.7.0/dist/flexsearch.bundle.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.light.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.light.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw//0.7.0/dist/flexsearch.light.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch//0.7.0/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch//0.7.0/dist/flexsearch.light.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/master/dist/flexsearch.compact.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.compact.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw//0.7.0/dist/flexsearch.compact.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch//0.7.0/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch//0.7.0/dist/flexsearch.compact.js</a></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>flexsearch.custom.js</td>
-        <td><a href="#builds">Custom Build</a></td>
-        <td></td>
+        <td>flexsearch.es5.js *</td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw//0.7.0/dist/flexsearch.es5.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch//0.7.0/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch//0.7.0/dist/flexsearch.es5.js</a></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>ES6 Modules</td>
+        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.0/dist/module/" target="_blank">Download</a></td>
+        <td>The <i>/dist/module/</i> folder of this Github repository</td>
     </tr>
 </table>
 
-All Features:
+* The bundle "flexsearch.es5.js" includes polyfills for EcmaScript 5 Support.
+
+__Get Latest (NPM):__
+
+```cmd
+npm install flexsearch
+```
+
+__Get Latest Nightly (Do not use for production!):__
+
+Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.0__/dist/" into "/flexsearch/__master__/dist".
+
+__Compare Web-Bundles:__
+
 <table>
     <tr></tr>
     <tr>
         <td>Feature</td>
-        <td>flexsearch.min.js</td>
+        <td>flexsearch.bundle.js</td>
         <td>flexsearch.compact.js</td>
         <td>flexsearch.light.js</td>
     </tr>
@@ -112,7 +132,7 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            <a href="#webworker">Web-Workers</a> (not available in Node.js)
+            <a href="#webworker">Web-Workers</a>
         </td>
         <td>✓</td>
         <td>-</td>
@@ -139,24 +159,6 @@ All Features:
     <tr></tr>
     <tr>
         <td>
-            <a href="#operators">Logical Operators</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#where">Where / Find</a> / <a href="#tags">Tags</a>
-        </td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
             <a href="#tokenizer">Partial Matching</a>
         </td>
         <td>✓</td>
@@ -176,15 +178,6 @@ All Features:
     <tr>
         <td>
             <a href="#cache">Auto-Balanced Cache by Popularity</a>
-        </td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#pagination">Pagination</a>
         </td>
         <td>✓</td>
         <td>-</td>
@@ -219,9 +212,9 @@ All Features:
     </tr>
     <tr>
         <td>File Size (gzip)</td>
-        <td>6.6 kb</td>
-        <td>4.7 kb</td>
-        <td>2.7 kb</td>
+        <td>6.8 kb</td>
+        <td>5.3 kb</td>
+        <td>2.9 kb</td>
     </tr>
 </table>
 
@@ -230,355 +223,184 @@ All Features:
 <a name="compare" id="compare"></a>
 ## Benchmark Ranking
 
-Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
 
 ##### Query Test: "Gulliver's Travels"
+
+Operation per seconds, higher is better, except the test "Memory" on which lower is better.
 
 <table>
     <tr></tr>
     <tr>
         <td>Rank</td>
-        <td>Library Name</td>
-        <td>Library Version</td>
-        <td>Single Phrase (op/s)</td>
-        <td>Multi Phrase (op/s)</td>
-        <td>Not Found (op/s)</td>
+        <td>Library</td>
+        <td>Memory</td>
+        <td>Query (Single Term)</td>
+        <td>Query (Multi Term)</td>
+        <td>Query (Long)</td>
+        <td>Query (Dupes)</td>
+        <td>Query (Not Found)</td>	
     </tr>
     <tr>
         <td>1</td>
         <td>FlexSearch <a href="#notes">*</a></td>
-        <td>0.3.6</td>
-        <td><b>363757</b></td>
-        <td><b>182603</b></td>
-        <td><b>1627219</b></td>
+        <td><b>23</b></td>
+        <td><b>7039844</b></td>
+        <td><b>1429457</b></td>
+        <td><b>113091</b></td>
+        <td><b>1467937</b></td>
+        <td>2895284</td>
     </tr>
     <tr></tr>
     <tr>
         <td>2</td>
-        <td>Wade</td>
-        <td>0.3.3</td>
-        <td><b>899</b></td>
-        <td><b>6098</b></td>
-        <td><b>214286</b></td>
+        <td>JSii</td>
+        <td>27</td>
+        <td>6564</td>
+        <td>158149</td>
+        <td>61290</td>
+        <td>95098</td>
+        <td>534109</td>
     </tr>
     <tr></tr>
     <tr>
         <td>3</td>
-        <td>JS Search</td>
-        <td>1.4.2</td>
-        <td><b>735</b></td>
-        <td><b>8889</b></td>
-        <td><b>800000</b></td>
+        <td>Wade</td>
+        <td>424</td>
+        <td>20471</td>
+        <td>78780</td>
+        <td>16693</td>
+        <td>225824</td>
+        <td>213754</td>
     </tr>
     <tr></tr>
     <tr>
         <td>4</td>
-        <td>JSii</td>
-        <td>1.0</td>
-        <td><b>551</b></td>
-        <td><b>9970</b></td>
-        <td><b>75000</b></td>
+        <td>JS Search</td>
+        <td>193</td>
+        <td>8221</td>
+        <td>64034</td>
+        <td>10377</td>
+        <td>95830</td>
+        <td>167605</td>
     </tr>
     <tr></tr>
     <tr>
         <td>5</td>
-        <td>Lunr.js</td>
-        <td>2.3.5</td>
-        <td><b>355</b></td>
-        <td><b>1051</b></td>
-        <td><b>25000</b></td>
+        <td>Elasticlunr.js</td>
+        <td>646</td>
+        <td>5412</td>
+        <td>7573</td>
+        <td>2865</td>
+        <td>23786</td>
+        <td>13982</td>
     </tr>
     <tr></tr>
     <tr>
         <td>6</td>
-        <td>Elasticlunr.js</td>
-        <td>0.9.6</td>
-        <td><b>327</b></td>
-        <td><b>781</b></td>
-        <td><b>6667</b></td>
+        <td>BulkSearch</td>
+        <td>1021</td>
+        <td>3069</td>
+        <td>3141</td>
+        <td>3333</td>
+        <td>3265</td>
+        <td>21825569</td>
     </tr>
     <tr></tr>
     <tr>
         <td>7</td>
-        <td>BulkSearch</td>
-        <td>0.1.3</td>
-        <td><b>265</b></td>
-        <td><b>535</b></td>
-        <td><b>2778</b></td>
+        <td>bm25</td>
+        <td>15719</td>
+        <td>1429</td>
+        <td>789</td>
+        <td>366</td>
+        <td>884</td>
+        <td>1823</td>
     </tr>
     <tr></tr>
     <tr>
         <td>8</td>
-        <td>bm25</td>
-        <td>0.2</td>
-        <td><b>71</b></td>
-        <td><b>116</b></td>
-        <td><b>2065</b></td>
+        <td>Lunr.js</td>
+        <td>2219</td>
+        <td>255</td>
+        <td>271</td>
+        <td>272</td>
+        <td>266</td>
+        <td>267</td>
     </tr>
     <tr></tr>
     <tr>
         <td>9</td>
         <td>Fuse</td>
-        <td>3.3.0</td>
-        <td><b>0.5</b></td>
-        <td><b>0.4</b></td>
-        <td><b>0.7</b></td>
-    </tr>
-</table>
-
-<!--
-##### Memory Test: "Gulliver's Travels"
-
-<table>
-    <tr></tr>
-    <tr>
-        <td>Rank</td>
-        <td>Library Name</td>
-        <td>Library Version</td>
-        <td>Index Size <a href="#notes">*</a></td>
-        <td>Memory Allocation <a href="#notes">**</a></td>
-    </tr>
-    <tr>
+        <td>7641904</td>
+        <td>6</td>
+        <td>2</td>
         <td>1</td>
-        <td>FlexSearch <a href="#notes">****</a></td>
-        <td>0.3.1</td>
-        <td>1.33 Mb</td>
-        <td>20.31 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
         <td>2</td>
-        <td>Wade</td>
-        <td>0.3.3</td>
-        <td>3.18 Mb</td>
-        <td>68.53 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
         <td>3</td>
-        <td>Fuse</td>
-        <td>3.3.0</td>
-        <td>0.22 Mb</td>
-        <td>156.46 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>4</td>
-        <td>JSii</td>
-        <td>1.0</td>
-        <td>8.9 Mb</td>
-        <td>81.03 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>5</td>
-        <td>bm25</td>
-        <td>0.2</td>
-        <td>6.95 Mb</td>
-        <td>137.88 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>6</td>
-        <td>BulkSearch</td>
-        <td>0.1.3</td>
-        <td>1.53 Mb</td>
-        <td>984.30 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>7</td>
-        <td>Elasticlunr.js</td>
-        <td>0.9.6</td>
-        <td>11.83 Mb</td>
-        <td>68.69 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>8</td>
-        <td>Lunr.js</td>
-        <td>2.3.5</td>
-        <td>16.24 Mb</td>
-        <td>84.73 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>9</td>
-        <td>JS Search</td>
-        <td>1.4.2</td>
-        <td>36.9 Mb</td>
-        <td>53.0 kb</td>
     </tr>
 </table>
--->
 
 <a name="notes" id="notes"></a>
-_* The preset "fast" was used for this test_ <br>
-<!--
-_* Index Size: The size of memory the index requires_<br>
-_** Memory Allocation: The amount of memory which was additionally allocated during a row of 10 queries_<br>
-_*** The preset "fast" was used for this test_ <br>
-_**** The preset "memory" was used for this test_
--->
+_* The preset "performance" was used for this test_ 
 
-Run Comparison: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">Benchmark "Gulliver's Travels"</a>
+Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
 
 <a name="contextual"></a>
 ## Contextual Search
 
 > __Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark.html" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
-The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole (unlimited) distance.<!--Imagine you add a text block of some sentences to an index ID. Assuming the query includes a combination of first and last word from this text block, are they really relevant to each other?-->
-In this way contextual search also <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
+The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document.
+This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
 
 <p align="center">
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=2">
 </p>
 
-<a name="dictionary"></a>
-#### Lexical Pre-Scored Dictionary / Context-based Map
-The index consists of an in-memory pre-scored dictionary as its base. The biggest complexity of these algorithm occurs during the calculation of intersections. As a consequence each additional term in the query has a significant potential to increase complexity. A contextual map comes into play __when the query contains more than 1 term__ and increase effect for each additional term by cutting down the complexity for the intersection calculations. Instead of an increase, the complexity is lowered for each additional term. The contextual index itself is also based on a pre-scored dictionary and follows a memory-friendly strategy.
-
-<table>
-    <tr></tr>
-    <tr>
-        <td>Type</td>
-        <td>Complexity</td>
-    </tr>
-    <tr>
-        <td>Each single term query:</td>
-        <td><i>1</i></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Lexical Pre-Scored Dictionary (Solo):</td>
-        <td><i>TERM_COUNT * TERM_MATCHES</i></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Lexical Pre-Scored Dictionary + Context-based Map:</td>
-        <td><i>TERM_MATCHES / TERM_COUNT</i></td>
-    </tr>
-</table>
-
-The complexity for one single term is always 1.
-
-## Compare BulkSearch vs. FlexSearch
-
-<table>
-    <tr></tr>
-    <tr>
-        <td></td>
-        <td><b>BulkSearch</b></td>
-        <td><b>FlexSearch</b></td>
-    </tr>
-    <tr>
-        <td>Access</td>
-        <td>Read-Write optimized index</td>
-        <td>Read-Memory optimized index</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Memory</td>
-        <td>Large: ~ 1 Mb per 100,000 words</td>
-        <td>Tiny: ~ 100 Kb per 100,000 words</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Index Type</td>
-        <td>Bulk of encoded string data divided into chunks</td>
-        <td><ol><li>Lexical pre-scored dictionary</li><li>Context-based map</li></ol></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Strength</td>
-        <td><ul><li>fast adds</li><li>fast updates</li><li>fast removals</li></ul></td>
-        <td><ul><li>fast queries</li><li>memory-efficient index</li></ul></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Weaks</td>
-        <td><ul><li>less powerful contextual search</li><li>less memory efficient (has to be defragmented from time to time)</li></ul></td>
-        <td><ul><li>updating existing / deleting items from index is slow</li><li>adding items to the index optimized for partial matching (tokenize: "forward" / "reverse" / "full") is slow</li></ul></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Pagination</td>
-        <td>Yes</td>
-        <td>No</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Wildcards</td>
-        <td>Yes</td>
-        <td>No</td>
-    </tr>
-    <tr></tr>
-    <!--
-    <tr>
-        <td>Ranked Searching</td>
-        <td>Yes</td>
-        <td>Yes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Contextual Search</td>
-        <td>Yes</td>
-        <td>Yes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Super-Partial-Matching</td>
-        <td>Yes</td>
-        <td>Yes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Auto-balanced Cache</td>
-        <td>Yes</td>
-        <td>Yes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>WebWorker</td>
-        <td>Yes</td>
-        <td>Yes</td>
-    </tr>
-    -->
-</table>
-
-Keep in mind that updating __existing__ items or removing items from the index has a significant cost. When existing items of your index needs to be updated/removed continuously then <a href="https://github.com/nextapps-de/bulksearch" target="_blank">BulkSearch</a> may be a better choice.
-
 <a name="installation"></a>
-## Installation
+## Load Library
 
-#### HTML / Javascript
+#### ES6 Modules (Browser):
 
-> Use _flexsearch.min.js_ for production and _flexsearch.js_ for development.
+```js
+import Index from "./index.js";
+import Document from "./document.js";
+import WorkerIndex from "./worker/index.js";
+
+const index = new Index(options);
+const document = new Document(options);
+const worker = new WorkerIndex(options);
+```
+
+#### Bundle (Browser)
 
 ```html
 <html>
 <head>
-    <script src="js/flexsearch.min.js"></script>
+    <script src="js/flexsearch.bundle.js"></script>
 </head>
 ...
 ```
 
-Use latest from CDN:
+Or via CDN:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.min.js"></script>
-```
-
-Or a specific version:
-```html
-<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.3.51/dist/flexsearch.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.0/dist/flexsearch.bundle.js"></script>
 ```
 
 AMD:
 
 ```javascript
 var FlexSearch = require("./flexsearch.js");
+```
+
+Load one of the builds from the folder `dist` to your html as a script and use as follows:
+
+```js
+var index = new FlexSearch.Index(options);
+var document = new FlexSearch.Document(options);
+var worker = new FlexSearch.Worker(options);
 ```
 
 #### Node.js
@@ -589,84 +411,561 @@ npm install flexsearch
 
 In your code include as follows:
 
-```javascript
-var FlexSearch = require("flexsearch");
+```js
+const { Index, Document, Worker } = require("flexsearch");
 ```
 
-Or pass in options when requiring:
+### Basic Usage
 
-```javascript
-var index = require("flexsearch").create({/* options */});
+```js
+index.add(id, text);
+index.search(text, limit);
+index.search(text, options);
+index.search(text, limit, options);
+index.search(options);
+```
+
+```js
+document.add(doc);
+document.add(id, doc);
+document.search(text, limit);
+document.search(text, options);
+document.search(text, limit, options);
+document.search(options);
+```
+
+```js
+worker.add(id, text);
+worker.search(text, limit);
+worker.search(text, options);
+worker.search(text, limit, options);
+worker.search(text, limit, options, callback);
+worker.search(options);
 ```
 
 <a name="api"></a>
 ## API Overview
 
 Global methods:
-- <a href="#flexsearch.create">FlexSearch.__create__(\<options\>)</a>
-- <a href="#flexsearch.addmatcher">FlexSearch.__registerMatcher__({_KEY: VALUE_})</a>
-- <a href="#flexsearch.register">FlexSearch.__registerEncoder__(name, encoder)</a>
-- <a href="#flexsearch.language">FlexSearch.__registerLanguage__(lang, {stemmer:{}, filter:[]})</a>
-- <a href="#flexsearch.encode">FlexSearch.__encode__(name, string)</a>
+- <a href="#flexsearch.register">FlexSearch.__registerCharset__(name, charset)</a>
+- <a href="#flexsearch.language">FlexSearch.__registerLanguage__(name, language)</a>
 
-Index methods:
-- <a href="#index.add">Index.__add__(id, string)</a>
-- <a href="#index.search">Index.__search__(string, \<limit\>, \<callback\>)</a>
-- <a href="#index.search">Index.__search__(\<options\>)</a>
-- <a href="#index.update">Index.__update__(id, string)</a>
-- <a href="#index.remove">Index.__remove__(id)</a>
-- <a href="#index.clear">Index.__clear__()</a>
-- <a href="#index.destroy">Index.__destroy__()</a>
-- <a href="#index.init">Index.__init__(\<options\>)</a>
-- <a href="#index.info">Index.__info__()</a>
-- <a href="#where">Index.__find__()</a>
-- <a href="#where">Index.__where__()</a>
-- <a href="#index.addmatcher">Index.__addMatcher__({_KEY: VALUE_})</a>
-- <a href="#index.encode">Index.__encode__(string)</a>
-- <a href="#index.export">Index.__export__()</a>
-- <a href="#index.import">Index.__import__(string)</a>
+Index + WorkerIndex methods:
+- <a href="#index.add">Index.__add__(id, string)</a> *
+- <a href="#index.append">Index.__append__(id, string)</a> *
+- <a href="#index.search">Index.__search__(string, \<limit\>, \<options\>)</a> *
+- <a href="#index.update">Index.__update__(id, string)</a> *
+- <a href="#index.remove">Index.__remove__(id)</a> *
+- <a href="#index.export">Index.__export__(handler)</a>
+- <a href="#index.import">Index.__import__(key, data)</a>
 
-Index properties:
-- <a href="#index.id">Index.__id__</a>
-- <a href="#index.length">Index.__length__</a>
-- <a href="#index.index">Index.__index__</a>
+Document methods:
+- <a href="#document.add">Document.__add__(id, document)</a> *
+- <a href="#document.append">Document.__append__(id, document)</a> *
+- <a href="#document.search">Document.__search__(string, \<limit\>, \<options\>)</a> *
+- <a href="#document.update">Document.__update__(id, document)</a> *
+- <a href="#document.remove">Document.__remove__(id || document)</a> *
+- <a href="#document.export">Document.__export__(handler)</a>
+- <a href="#document.import">Document.__import__(key, data)</a>
+
+* For each of those methods there exist an asynchronous equivalent:
+
+Async Version:
+
+- <a href="#addAsync">.__addAsync__( ... , \<callback\>)</a> *
+- <a href="#appendAsync">.__appendAsync__( ... , \<callback\>)</a> *
+- <a href="#searchAsync">.__searchAsync__( ... , \<callback\>)</a> *
+- <a href="#updateAsync">.__updateAsync__( ... , \<callback\>)</a> *
+- <a href="#removeAsync">.__removeAsync__( ... , \<callback\>)</a> *
+
+<a name="options"></a>
+## Options
+
+FlexSearch is highly customizable. Make use of the the right options can really improve your results as well as memory economy and query time.
+
+<a name="options-index"></a>
+### Index Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>profile<br><br><br><br><br></td>
+        <td>
+            "memory"<br>
+            "performance"<br>
+            "match"<br>
+            "score"<br>
+            "default"
+        </td>
+        <td vertical-align="top">
+            The <a href="#presets">configuration profile</a> as a shortcut or as a base for your custom settings.<br>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tokenize<br><br><br><br><br></td>
+        <td>
+            "strict"<br>
+            "forward"<br>
+            "reverse"<br>
+            "full"<br>
+            function()
+        </td>
+        <td vertical-align="top">
+            The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br><br>Choose one of the <a href="#tokenizer">built-ins</a> or pass a <a href="#flexsearch.tokenizer">custom tokenizer function</a>.<br>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>charset<br><br></td>
+        <td>
+            Charset Payload<br>
+            string (builtin charset)
+        </td>
+        <td vertical-align="top">
+            ...
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>language<br><br></td>
+        <td>
+            Language Payload<br>
+            string (builtin language)
+        </td>
+        <td vertical-align="top">
+            ...
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>encode<br><br><br><br><br><br><br></td>
+        <td>
+            false<br>
+            "default"<br>
+            "simple"<br>
+            "balance"<br>
+            "advanced"<br>
+            "extra"<br>
+            function(str):[words]
+        </td>
+        <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>cache<br><br><br></td>
+        <td>
+            false<br>
+            true<br>
+            {number}
+        </td>
+        <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the <b>cache automatically balance stored entries related to their popularity</b>.<br><br>Note: When just using "true" the cache has no limits and is actually 2-3 times faster (because the balancer do not have to run).</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>resolution</td>
+        <td>
+            {number}
+        </td>
+        <td>Sets the scoring resolution (default: 9).</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>depth<br><br></td>
+        <td>
+            false<br>
+            {number}
+        </td>
+        <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance. Depth is the maximum number of words/tokens away a term to be considered as relevant.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>stemmer<br><br><br></td>
+        <td>
+            false<br>
+            {string}<br>
+            {function}
+        </td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>filter<br><br><br></td>
+        <td>
+            false<br>
+            {string}<br>
+            {function}
+        </td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            Addition Options for Document Indexes:
+        </td>
+    </tr>
+    <tr>
+        <td>worker<br><br></td>
+        <td>
+            false<br>
+            true
+        </td>
+        <td>Enable/Disable and set count of running worker threads.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>document<br><br></td>
+        <td></td>
+        <td vertical-align="top"></td>
+    </tr>
+</table>
+
+<a name="options-document"></a>
+### Document Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>id<br><br></td>
+        <td></td>
+        <td vertical-align="top"></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>index<br><br></td>
+        <td></td>
+        <td vertical-align="top"></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tag<br><br></td>
+        <td></td>
+        <td vertical-align="top"></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>store<br><br></td>
+        <td></td>
+        <td vertical-align="top"></td>
+    </tr>
+</table>
+
+<a name="options-charset"></a>
+### Charset Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>split<br><br></td>
+        <td>
+            RegExp<br>
+            string
+        </td>
+        <td vertical-align="top">
+            The rule to split words when using non-custom tokenizer (<a href="#tokenizer">built-ins</a> e.g. "forward"). Use a string/char or use a regular expression (default: <code>/\W+/</code>).<br>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>rtl<br><br></td>
+        <td>
+            true<br>
+            false
+        </td>
+        <td>Enables Right-To-Left encoding.</td>
+    </tr>
+</table>
+
+<a name="options-language"></a>
+### Language Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>stemmer<br><br><br></td>
+        <td>
+            false<br>
+            {string}<br>
+            {function}
+        </td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>filter<br><br><br></td>
+        <td>
+            false<br>
+            {string}<br>
+            {function}
+        </td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
+    </tr>
+</table>
+
+...
+
+<a name="options-search"></a>
+### Search Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>limit</td>
+        <td>number</td>
+        <td>Sets the limit of results.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>offset</td>
+        <td>number</td>
+        <td>Enables <a href="#pagination">paginated results</a>.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>suggest</td>
+        <td>true, false</td>
+        <td>Enables <a href="#suggestions">suggestions</a> in results.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>index</td>
+        <td>string, Array&lt;string&gt;</td>
+        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tag</td>
+        <td>string, Array&lt;string&gt;</td>
+        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>bool</td>
+        <td>"and", "or"</td>
+        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>enrich</td>
+        <td>true, false</td>
+        <td>Enables <a href="#pagination">paginated results</a>.</td>
+    </tr>
+</table>
+
+You can also override these following <a href="#options-index">index settings</a> via custom search (v0.7.0):
+
+- encode
+- split
+- tokenize
+- threshold
+- cache
+- async
+
+Custom-Search options will override index options.
+
+<a name="options-field-search"></a>
+### Field-Search (v0.7.0)
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>limit</td>
+        <td>number</td>
+        <td>Sets the limit of results per field.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>suggest</td>
+        <td>true, false</td>
+        <td>Enables <a href="#suggestions">suggestions</a> in results per field.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>bool</td>
+        <td>"and", "or"</td>
+        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
+    </tr>
+</table>
+
+You can also override these following <a href="#options-index">index settings</a> per field via custom field-search:
+
+- encode
+- split
+- tokenize
+
+Field-Search options will override custom-search options and index options.
+
+<!--
+## Depth and Resolution?
+
+Whereas __depth__ is the minimum relevance for the __contextual index__, __threshold__ is the minimum relevance for the __lexical index__. The threshold score is an enhanced variation of a conventional scoring calculation, it uses on document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
+
+Resolution on the other hand specify the max scoring value. The final score value is an integer value, so resolution affect how many segments the score may have. When the resolution is 1, then there exist just one scoring level for all matched terms. To get more differentiated results you need to raise the resolution.
+
+> The difference of both affects the performance on higher values (complexity = _resolution_ - _threshold_).
+
+The combination of resolution and threshold gives you a good controlling of your matches as well as performance, e.g. when the resolution is 25 and the threshold is 22, then the result only contains matches which are super relevant. The goal should always be just have items in result which are really needed. On top, that also improves performance a lot.
+-->
+
+<a name="tokenizer"></a>
+## Tokenizer
+
+Tokenizer affects the required memory also as query time and flexibility of partial matches. Try to choose the most upper of these tokenizer which fits your needs:
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Description</td>
+        <td>Example</td>
+        <td>Memory Factor (n = length of word)</td>
+    </tr>
+    <tr>
+        <td><b>"strict"</b></td>
+        <td>index whole words</td>
+        <td><code>foobar</code></td>
+        <td>* 1</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"forward"</b></td>
+        <td>incrementally index words in forward direction</td>
+        <td><code>fo</code>obar<br><code>foob</code>ar<br></td>
+        <td>* n</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"reverse"</b></td>
+        <td>incrementally index words in both directions</td>
+        <td>foob<code>ar</code><br>fo<code>obar</code></td>
+        <td>* 2n - 1</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"full"</b></td>
+        <td>index every possible combination</td>
+        <td>fo<code>oba</code>r<br>f<code>oob</code>ar</td>
+        <td>* n * (n - 1)</td>
+    </tr>
+</table>
+
+<a name="phonetic"></a>
+## Encoders
+
+Encoding affects the required memory also as query time and phonetic matches. Try to choose the most upper of these encoders which fits your needs, or pass in a <a href="#flexsearch.encoder">custom encoder</a>:
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Description</td>
+        <td>False-Positives</td>
+        <td>Compression</td>
+    </tr>
+    <tr>
+        <td><b>false</b></td>
+        <td>Turn off encoding</td>
+        <td>no</td>
+        <td>no</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"default"</b> (default)</td>
+        <td>Case in-sensitive encoding</td>
+        <td>no</td>
+        <td>no</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"simple"</b></td>
+        <td>Phonetic normalizations</td>
+        <td>no</td>
+        <td>~ 7%</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"balance"</b></td>
+        <td>Phonetic normalizations + literal transformations</td>
+        <td>no</td>
+        <td>~ 25%</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"advanced"</b></td>
+        <td>Phonetic normalizations + advanced literal transformations</td>
+        <td>no</td>
+        <td>~ 35%</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>"extra"</b></td>
+        <td>Phonetic normalizations + Soundex transformations</td>
+        <td>yes</td>
+        <td>~ 60%</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>function()</b></td>
+        <td>Pass custom encoding via <i>function(string):[words]</i></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
 
 ## Usage
 
 <a name="flexsearch.create"></a>
 #### Create a new index
 
-> FlexSearch.__create(\<options\>)__
-
 ```js
-var index = new FlexSearch();
-```
-
-alternatively you can also use:
-
-```js
-var index = FlexSearch.create();
+var index = new Index();
 ```
 
 Create a new index and choosing one of the presets:
 
 ```js
-var index = new FlexSearch("speed");
+var index = new Index("speed");
 ```
 
 Create a new index with custom options:
 
 ```js
-var index = new FlexSearch({
+var index = new Index({
 
     // default values:
 
-    encode: "balance",
-    tokenize: "forward",
-    threshold: 0,
-    async: false,
-    worker: false,
-    cache: false
+    charset: "latin:extra",
+    tokenize: "reverse",
+    resolution: 9
 });
 ```
 
@@ -684,6 +983,8 @@ var index = new FlexSearch("memory", {
 
 <a name="index.add"></a>
 #### Add text item to an index
+
+Every content which should be added to the index needs an ID. When your content has no ID, then you need to create one by passing an index or count or something else as an ID (a value from type `number` is highly recommended). Those IDs are unique references to a given content. This is important when you update or adding over content through existing IDs. When referencing is not a concern, you can simply use something simple like `count++`.
 
 > Index.__add(id, string)__
 
@@ -705,41 +1006,92 @@ Limit the result:
 index.search("John", 10);
 ```
 
-<a name="async_search"></a>
-#### Async Search
+#### Check existence of already indexed IDs
 
-Perform queries asynchronously:
-
-```js
-index.search("John", function(result){
-
-    // array of results
-});
-```
-
-> Passing a callback always will perform as asynchronous even if the "async" option was not set.
-
-Perform queries asynchronously (Promise-based):
-
-> Make sure the option "async" is enabled on this instance to receive promises.
+You can check if an ID was already indexed by:
 
 ```js
-index.search("John").then(function(result){
-
-    // array of results
-});
-```
-
-Alternatively ES6:
-
-```js
-async function search(query){
-
-    const result = await index.search(query);
-
-    // ...
+if(index.contain(1)){
+    console.log("ID is already in index");
 }
 ```
+
+<a name="async_search"></a>
+### Async
+
+The "async" options was removed, instead you can call each method in its async version, e.g. `index.addAsync` or `index.searchAsync`.
+
+The advantage is you can now use both variations on the same index, whereas the old version is just performing asynchronous for all methods when the option flag was set.
+
+You can assign callbacks to each async function:
+
+```js
+index.addAsync(id, content, function(){
+    console.log("Task Done");
+});
+```
+
+```js
+index.searchAsync(query, function(result){
+    console.log("Results: ", result);
+});
+```
+
+Or did not pass a callback function and getting back a `Promise` instead:
+
+```js
+index.addAsync(id, content).then(function(){
+    console.log("Task Done");
+});
+```
+
+```js
+index.searchAsync(query).then(function(result){
+    console.log("Results: ", result);
+});
+```
+
+Or use `async` and `await`:
+
+```js
+async function add(){
+    await index.addAsync(id, content);
+    console.log("Task Done");
+}
+```
+
+```js
+async function search(){
+    const results = await index.searchAsync(query);
+    console.log("Results: ", result);
+}
+```
+
+## Append Contents
+
+You can append contents to an existing index like:
+
+```js
+index.append(id, content);
+```
+
+This will not overwrite the old indexed contents as it will do when perform `index.update(id, content)`. Keep in mind that `index.add(id, content)` will also perform "update" under the hood when the id was already being indexed.
+
+Appended contents will have their own context and also their own full `resolution`. Therefore, the relevance isn't being stacked but gets its own context.
+
+Let us take this example:
+
+```js
+index.add(0, "some index");
+index.append(0, "some appended content");
+
+index.add(1, "some text");
+index.append(1, "index appended content");
+```
+
+When you query `index.search("index")` then you will get index id 1 as the first entry in the result, because the context starts from zero for the appended data (isn't stacked to the old context) and here "index" is the first term.
+
+If you didn't want this behavior than just ust `index.add(id, content)` and provide the full length of content.
 
 #### Custom Search
 
@@ -1148,146 +1500,366 @@ index.add(0, "一个单词");
 var results = index.search("单词");
 ```
 
-<a name="index.info"></a>
-### Get info about an index
-
-> This feature is available in _DEBUG_ mode.
-
-```js
-index.info();
-```
-
-Returns information e.g.:
-
-```json
-{
-    "id": 0,
-    "memory": 10000,
-    "items": 500,
-    "sequences": 3000,
-    "matchers": 0,
-    "chars": 3500,
-    "cache": false,
-    "matcher": 0,
-    "worker": false,
-    "threshold": 7,
-    "depth": 3,
-    "contextual": true
-}
-```
-
 <a name="docs"></a>
 ## Index Documents (Field-Search)
 
 ### The Document Descriptor
 
-Assume the document is an array of data like:
+Assuming our document has a data structure like this:
+
+```json
+{ 
+    "id": 0, 
+    "content": "some text"
+}
+```
+
+Old syntax FlexSearch v0.6.3 (___not supported anymore!___):
+
+```js
+const index = new Document({
+    doc: {
+        id: "id",
+        field: ["content"]
+    }
+});
+```
+
+> The document descriptor has slightly changed, there is no `field` branch anymore, instead just apply one level higher, so `key` becomes a main member of options.
+
+For the new syntax the field "doc" was renamed to `document` and the field "field" was renamed to `index`:
+
+```js
+const index = new Document({
+    document: {
+        id: "id",
+        index: ["content"]
+    }
+});
+
+index.add({ 
+    id: 0, 
+    content: "some text"
+});
+```
+
+The field `id` describes where the ID or unique key lives inside your documents. The default key gets the value `id` by default when not passed, so you can shorten the example from above to:
+
+```js
+const index = new Document({
+    document: {
+        index: ["content"]
+    }
+});
+```
+
+The member `index` has a list of fields which you want to be indexed from your documents. When just selecting one field, then you can pass a string. When also using default key `id` then this shortens to just:
+
+```js
+const index = new Document({ document: "content" });
+index.add({ id: 0, content: "some text" });
+```
+
+Assuming you have several fields, you can add multiple fields to the index:
 
 ```js
 var docs = [{
     id: 0,
-    title: "Title",
-    cat: "Category",
-    content: "Body"
+    title: "Title A",
+    content: "Body A"
 },{
     id: 1,
-    title: "Title",
-    cat: "Category",
-    content: "Body"
+    title: "Title B",
+    content: "Body B"
 }];
 ```
 
-Provide a document descriptor ___doc___ when initializing a new index, e.g. related to the example above:
-
 ```js
-var index = new FlexSearch({
-    tokenize: "strict",
-    depth: 3,
-    doc: {
-        id: "id",
-        field: "content"
-    }
+const index = new Document({
+    id: "id",
+    index: ["title", "content"]
 });
 ```
 
-The above example will just index the field "content", to index multiple fields pass an array:
+You can pass custom options for each field:
 
 ```js
-var index = new FlexSearch({
-    doc: {
-        id: "id",
-        field: [
-            "title",
-            "cat",
-            "content"
-        ]
-    }
-});
-```
-
-You are also able to provide custom presets for each field separately:
-
-```js
-var index = new FlexSearch({
-    doc: {
-        id: "id",
-        field: {
-            title: {
-                encode: "extra",
-                tokenize: "reverse",
-                threshold: 7
-            },
-            cat: {
-                encode: false,
-                tokenize: function(val){
-                    return [val];
-                }
-            },
-            content: "memory"
+const index = new Document({
+    id: "id",
+    index: [{
+        field: "title",
+        tokenize: "forward",
+        optimize: true,
+        resolution: 9
+    },{
+        field:  "content",
+        tokenize: "strict",
+        optimize: true,
+        resolution: 5,
+        minlength: 3,
+        context: {
+            depth: 1,
+            resolution: 3
         }
+    }]
+});
+```
+
+Field options gets inherited when also global options was passed, e.g.:
+
+```js
+const index = new Document({
+    tokenize: "strict",
+    optimize: true,
+    resolution: 9,
+    document: {
+        id: "id",
+        index:[{
+            field: "title",
+            tokenize: "forward"
+        },{
+            field: "content",
+            minlength: 3,
+            context: {
+                depth: 1,
+                resolution: 3
+            }
+        }]
     }
 });
 ```
 
-### Complex Objects
+Note: The context options from the field "content" also gets inherited by the corresponding field options, whereas this field options was inherited by the global option.
+
+### Nested Data Fields (Complex Objects)
 
 Assume the document array looks more complex (has nested branches etc.), e.g.:
 
-```js
-var docs = [{
-    data:{
-        id: 0,
-        title: "Foo",
-        body: {
-            content: "Foobar"
-        }
+```json
+{
+  "record": {
+    "id": 0,
+    "title": "some title",
+    "content": {
+      "header": "some text",
+      "footer": "some text"
     }
-},{
-    data:{
-        id: 1,
-        title: "Bar",
-        body: {
-            content: "Foobar"
-        }
-    }
-}];
+  }
+}
 ```
 
 Then use the colon separated notation ___"root:child:child"___ to define hierarchy within the document descriptor:
 
 ```js
-var index = new FlexSearch({
-    doc: {
-        id: "data:id",
-        field: [
-            "data:title",
-            "data:body:content"
+const index = new Document({
+    document: {
+        id: "record:id",
+        index: [
+            "record:title",
+            "record:content:header",
+            "record:content:footer"
+        ]
+    }
+});
+```
+> Just add fields you want to query against. Do not add fields to the index, you just need in the result (but did not query against). For this purpose you can store documents independently of its index (read below).
+
+When you want to query through a field you have to pass the exact key of the field you have defined in the `doc` as a field name (with colon syntax):
+
+```js
+index.search(query, {
+    index: [
+        "record:title",
+        "record:content:header",
+        "record:content:footer"
+    ]
+});
+```
+
+Same as:
+
+```js
+index.search(query, [
+    "record:title",
+    "record:content:header",
+    "record:content:footer"
+]);
+```
+
+Using field-specific options:
+
+```js
+index.search([{
+    field: "record:title",
+    query: "some query",
+    limit: 100,
+    suggest: true
+},{
+    field: "record:title",
+    query: "some other query",
+    limit: 100,
+    suggest: true
+}]);
+```
+
+You can perform a search through the same field with different queries.
+
+> When passing field-specific options you need to provide the full configuration for each field. They get not inherited like the document descriptor.
+
+### Complex Documents
+
+You need to follow 2 rules for your documents:
+
+1. The document cannot start with an Array at the root index. This will introduce sequential data and isn't supported yet. See below for a workaround for such data.
+
+```js
+[ // <-- not allowed as document start!
+  {
+    "id": 0,
+    "title": "title"
+  }
+]
+```
+
+2. The id can't be nested inside an array (also none of the parent fields can't be an array). This will introduce sequential data and isn't supported yet. See below for a workaround for such data.
+
+```js
+{
+  "records": [ // <-- not allowed when ID or tag lives inside!
+    {
+      "id": 0,
+      "title": "title"
+    }
+  ]
+}
+```
+
+Here an example for a supported complex document:
+
+```json
+{
+  "meta": {
+    "tag": "cat",
+    "id": 0
+  },
+  "contents": [
+    {
+      "body": {
+        "title": "some title",
+        "footer": "some text"
+      },
+      "keywords": ["some", "key", "words"]
+    },
+    {
+      "body": {
+        "title": "some title",
+        "footer": "some text"
+      },
+      "keywords": ["some", "key", "words"]
+    }
+  ]
+}
+```
+
+The corresponding document descriptor (when all fields should be indexed) looks like:
+
+```js
+const index = new Document({
+    document: {
+        id: "meta:id",
+        tag: "meta:tag",
+        index: [
+            "contents[]:body:title",
+            "contents[]:body:footer",
+            "contents[]:keywords"
         ]
     }
 });
 ```
 
-> __Hint:__ This is an alternative for indexing documents which has nested arrays: <a href="https://github.com/nextapps-de/flexsearch/issues/36">https://github.com/nextapps-de/flexsearch/issues/36</a>
+Again, when searching you have to use the same colon-separated-string from your field definition.
+
+```js
+index.search(query, { 
+    index: "contents[]:body:title"
+});
+```
+
+### Not Supported Documents (Sequential Data)
+
+This example breaks both rules from above:
+
+```js
+[ // <-- not allowed as document start!
+  {
+    "tag": "cat",
+    "records": [ // <-- not allowed when ID or tag lives inside!
+      {
+        "id": 0,
+        "body": {
+          "title": "some title",
+          "footer": "some text"
+        },
+        "keywords": ["some", "key", "words"]
+      },
+      {
+        "id": 1,
+        "body": {
+          "title": "some title",
+          "footer": "some text"
+        },
+        "keywords": ["some", "key", "words"]
+      }
+    ]
+  }
+]
+```
+
+You need to apply some kind of structure normalization.
+
+A workaround to such a data structure looks like this:
+
+```js
+const index = new Document({
+    document: {
+        id: "record:id",
+        tag: "tag",
+        index: [
+            "record:body:title",
+            "record:body:footer",
+            "record:body:keywords"
+        ]
+    }
+});
+
+function add(sequential_data){
+
+    for(let x = 0, data; x < sequential_data.length; x++){
+
+        data = sequential_data[x];
+
+        for(let y = 0, record; y < data.records.length; y++){
+
+            record = data.records[y];
+
+            index.add({
+                id: record.id,
+                tag: data.tag,
+                record: record
+            });
+        }
+    }  
+}
+
+// now just use add() helper method as usual:
+
+add([{
+    // sequential structured data
+    // take the data example above
+}]);
+```
+
+You can skip the first loop when your document data has just one index as the outer array.
 
 ### Add/Update/Remove Documents to/from the Index
 
@@ -1323,350 +1895,350 @@ When the id is known, you can also simply remove by (faster):
 index.remove(id);
 ```
 
+### Join / Append Arrays
+
+On the complex example above, the field `keywords` is an array but here the markup did not have brackets like `keywords[]`. That will also detect the array but instead of appending each entry to a new context, the array will be joined into on large string and added to the index.
+
+The difference of both kinds of adding array contents is the relevance when searching. When adding each item of an array via `append()` to its own context by using the syntax `field[]`, then the relevance of the last entry concurrent with the first entry. When you left the brackets in the notation, it will join the array to one whitespace-separated string. Here the first entry has the highest relevance, whereas the last entry has the lowest relevance.
+
+So assuming the keyword from the example above are pre-sorted by relevance to its popularity, then you want to keep this order (information of relevance). For this purpose do not add brackets to the notation. Otherwise, it would take the entries in a new scoring context (the old order is getting lost).
+
+Also you can left bracket notation for better performance and smaller memory footprint. Use it when you did not need the granularity of relevance by the entries.
+
 ### Field-Search
 
-The search gives you several options when using documents.
-
-> The colon notation also has to be applied for the searching respectively.
-
-This will search through all indexed fields:
+Search through all fields:
 
 ```js
-var results = index.search("body");
+index.search(query);
 ```
 
-This will search on a specific field:
+Search through a specific field:
 
 ```js
-var results = index.search({
-    field: "title",
-    query: "foobar"
-});
+index.search(query, { index: "title" });
 ```
 
+Search through a given set of fields:
+
 ```js
-var results = index.search({
-    field: "data:body:content",
-    query: "foobar"
-});
+index.search(query, { index: ["title", "content"] });
 ```
 
-This could also be written as:
+Same as:
 
 ```js
-var results = index.search("foobar", {
-    field: "data:body:content",
-});
+index.search(query, ["title", "content"]);
 ```
 
-Search the same query on multiple fields:
-
-> Using ___bool___ as a logical operator when searching through multiple fields. The default operator when not set is ___"or"___.
+Pass custom modifiers and queries to each field:
 
 ```js
-var results = index.search({
-    query: "foobar",
-    field: ["title", "body"],
-    bool: "or"
-});
-```
-
-Could also be written as:
-
-```js
-var results = index.search("foobar", {
-    field: ["title", "body"],
-    bool: "or"
-});
-```
-
-Search different queries on multiple fields:
-
-```js
-var results = index.search([{
-    field: "title",
-    query: "foo"
+index.search([{
+    field: "content",
+    query: "some query",
+    limit: 100,
+    suggest: true
 },{
-    field: "body",
-    query: "bar"
+    field: "content",
+    query: "some other query",
+    limit: 100,
+    suggest: true
 }]);
 ```
 
-<!--
-Boost scoring on specific fields:
-
-```js
-var results = index.search([{
-    field: "title",
-    query: "foo",
-    boost: 2
-},{
-    field: "body",
-    query: "bar",
-    boost: 0.5
-}]);
-```
--->
+You can perform a search through the same field with different queries.
 
 <a href="#options-field-search">See all available field-search options.</a>
 
-### Configure Store
+### New Result Set
+
+One of the few breaking changes which needs migration of your old implementation is the result set. I was thinking a long time about it and came to the conclusion, that this new structure might look weird on the first time, but also comes with some nice new capabilities.
+
+Schema of the result-set:
+
+> `fields[] => { field, result[] => { document }}`
+
+The first index is an array of fields the query was applied to. Each of this field has a record (object) with 2 properties "field" and "result". The "result" is also an array and includes the result for this specific field. The result could be an array of IDs or as enriched with stored document data.
+
+A non-enriched result set now looks like:
+
+```js
+[{
+    field: "title",
+    result: [0, 1, 2]
+},{
+    field: "content",
+    result: [3, 4, 5]
+}]
+```
+
+An enriched result set now looks like:
+
+```js
+[{
+    field: "title",
+    result: [
+        { id: 0, doc: { /* document */ }},
+        { id: 1, doc: { /* document */ }},
+        { id: 2, doc: { /* document */ }}
+    ]
+},{
+    field: "content",
+    result: [
+        { id: 3, doc: { /* document */ }},
+        { id: 4, doc: { /* document */ }},
+        { id: 5, doc: { /* document */ }}
+    ]
+}]
+```
+
+When using `pluck` instead of "field" you can explicitly select just one field and get back a flat representation:
+
+```js
+index.search(query, { pluck: "title", enrich: true });
+```
+
+```js
+[
+    { id: 0, doc: { /* document */ }},
+    { id: 1, doc: { /* document */ }},
+    { id: 2, doc: { /* document */ }}
+]
+```
+
+These change is basically based on "boolean search". Instead of applying your bool logic to a nested object (which almost ends in structured hell), you can apply your logic by yourself on top of the result-set dynamically. This opens hugely capabilities on how you process the results. Therefore, the results from the fields aren't squashed into one result anymore. That keeps some important information, like the name of the field as well as the relevance of each field results which didn't get mixed anymore.
+
+> A field search will apply a query with the boolean "or" logic by default. Each field has its own result to the given query.
+
+There is one situation where the `bool` property is still supported. When you like to switch the default "or" logic from the field search into "and", e.g.:
+
+```js
+index.search(query, { 
+    index: ["title", "content"],
+    bool: "and" 
+});
+```
+
+You will just get results which contains the query in both fields. That's it.
+
+### Tags
+
+Like the `key` for the ID just define the path to the tag:
+
+```js
+const index = new Document({
+    document: { 
+        id: "id",
+        tag: "tag",
+        index: "content"
+    }
+});
+```
+
+```js
+index.add({
+    id: 0,
+    tag: "cat",
+    content: "Some content ..."
+});
+```
+
+Your data also can have multiple tags as an array:
+
+```js
+index.add({
+    id: 1,
+    tag: ["animal", "dog"],
+    content: "Some content ..."
+});
+```
+
+You can perform a tag-specific search by:
+
+```js
+index.search(query, { 
+    index: "content",
+    tag: "animal" 
+});
+```
+
+This just gives you result which was tagged with the given tag.
+
+Use multiple tags when searching:
+
+```js
+index.search(query, { 
+    index: "content",
+    tag: ["cat", "dog"]
+});
+```
+
+This gives you result which are tagged with one of the given tag.
+
+> Multiple tags will apply as the boolean "or" by default. It just needs one of the tags to be existing.
+
+This is another situation where the `bool` property is still supported. When you like to switch the default "or" logic from the tag search into "and", e.g.:
+
+```js
+index.search(query, { 
+    index: "content",
+    tag: ["dog", "animal"],
+    bool: "and"
+});
+```
+
+You will just get results which contains both tags (in this example there is just one records which has the tag "dog" and "animal").
+
+### Tag Search
+
+You can also fetch results from one or more tags when no query was passed:
+
+```js
+index.search({ tag: ["cat", "dog"] });
+```
+
+In this case the result-set looks like:
+
+```js
+[{
+    tag: "cat",
+    result: [ /* all cats */ ]
+},{
+    tag: "dog",
+    result: [ /* all dogs */ ]
+}]
+```
+
+### Limit & Offset
+
+> By default, every query is limited to 100 entries. Unbounded queries leads into issues. You need to set the limit as an option to adjust the size.
+
+You can set the limit and the offset for each query:
+
+```js
+index.search(query, { limit: 20, offset: 100 });
+```
+
+> You cannot pre-count the size of the result-set. That's a limit by the design of FlexSearch. When you really need a count of all results you are able to page through, then just assign a high enough limit and get back all results and apply your paging offset manually (this works also on server-side). FlexSearch is fast enough that this isn't an issue.
+
+## Document Store
+
+Only a document index can have a store. You can use a document index instead of a flat index to get this functionality also when only storing ID-content-pairs.
 
 You can define independently which fields should be indexed and which fields should be stored. This way you can index fields which should not be included in the search result.
+
+> Do not use a store when: 1. an array of IDs as the result is good enough, or 2. you already have the contents/documents stored elsewhere (outside the index).
 
 > When the `store` attribute was set, you have to include all fields which should be stored explicitly (acts like a whitelist).
 
 > When the `store` attribute was not set, the original document is stored as a fallback.
 
+This will add the whole original content to the store:
+
 ```js
-var index = new FlexSearch({
-    doc: {
-        id: "id",
-        field: "body:content", // index
-        store: "title"         // store
+const index = new Document({
+    document: { 
+        index: "content",
+        store: true
     }
 });
+index.add({ id: 0, content: "some text" });
 ```
 
-Also multiple fields:
+### Access documents from internal store
+
+You can get indexed documents from the store:
 
 ```js
-var index = new FlexSearch({
-    doc: {
-        id: "id",
-        field: ["title" , "body:content"],
-        store: ["title" , "body:content"]
-    }
-});
+var data = index.get(1);
 ```
 
-<a name="operators"></a>
-## Logical Operators
+You can update/change store contents directly without changing the index by:
 
-There are 3 different operators (and, or, not). Just pass the field ___bool___ in custom search:
 ```js
-var results = index.search([{
-    field: "title",
-    query: "foobar",
-    bool: "and"
-},{
-    field: "body",
-    query: "content",
-    bool: "or"
-},{
-    field: "blacklist",
-    query: "xxx",
-    bool: "not"
-}]);
+index.set(1, data);
 ```
 
-- ___"and"___ indicates to be __required__ in the result
-- ___"or"___ indicates to be __optional__ in the result
-- ___"not"___ indicates to be __prohibited__ in the result
+To update the store and also update the index then just use `index.update`, `index.add` or `index.append`.
 
-<a name="where"></a>
-## Find / Where
+When you perform a query, weather it is a document index or a flat index, then you will always get back an array of IDs.
 
-When indexing documents, you are also able to get results by specific attributes.
-
-> The colon notation also has to be applied for using "where" and "find" respectively.
-
-#### Find a document by an attribute
+Optionally you can enrich the query results automatically with stored contents by:
 
 ```js
-index.find("cat", "comedy");
+index.search(query, { enrich: true });
 ```
 
-Same as:
+Your results look now like:
+
 ```js
-index.find({"cat": "comedy"});
-```
-
-To get by ID, you can also use short form:
-```js
-index.find(1);
-```
-
-Getting a doc by ID is actually the fastest way to retrieve a result from documents.
-
-Find by a custom function:
-```js
-index.find(function(item){
-    return item.cat === "comedy";
-});
-```
-
-#### Find documents by multiple attributes
-
-Get just the first result:
-```js
-index.find({
-    cat: "comedy",
-    year: "2018"
-});
-```
-
-Get all matched results:
-```js
-index.where({
-    cat: "comedy",
-    year: "2018"
-});
-```
-
-Get all results and set a limit:
-```js
-index.where({
-    cat: "comedy",
-    year: "2018"
- }, 100);
-```
-
-Get all by a custom function:
-```js
-index.where(function(item){
-    return item.cat === "comedy";
-});
-```
-
-#### Combine fuzzy search with a where-clause
-
-Add some content, e.g.:
-```js
-index.add([{
+[{
     id: 0,
-    title: "Foobar",
-    cat: "adventure",
-    content: "Body"
+    doc: { /* content from store */ }
 },{
     id: 1,
-    title: "Title",
-    cat: "comedy",
-    content: "Foobar"
-}]);
+    doc: { /* content from store */ }
+}]
 ```
 
-Using search and also apply a where-clause:
+### Configure Storage (Recommended)
+
+This will add just specific fields from a document to the store (the ID isn't necessary to keep in store):
+
 ```js
-index.search("foo", {
-    field: [
-        "title",
-        "body"
-    ],
-    where: {
-        "cat": "comedy"
-    },
-    limit: 10
-});
-```
-
-<a name="tags"></a>
-## Tags
-
-> __IMPORTANT NOTICE:__ This feature will be removed due to the lack of scaling and redundancy.
-
-Tagging is pretty much the same like adding an additional index to a database column. Whenever you use ___index.where()___ on an indexed/tagged attribute will really improve performance but also at a cost of some additional memory.
-
-> The colon notation also has to be applied for tags respectively.
-
-Add one single tag to the index:
-```js
-var index = new FlexSearch({
-    doc: {
-        id: "id",
-        field: ["title", "content"],
-        tag: "cat"
+const index = new Document({
+    document: {
+        index: "content",
+        store: ["author", "email"]
     }
 });
+
+index.add(id, content);
 ```
 
-Or add multiple tags to the index:
+You can configure independently what should being indexed and what should being stored. It is highly recommended to make use of this whenever you can.
+
+Here a useful example of configuring doc and store:
+
 ```js
-var index = new FlexSearch({
-    doc: {
-        id: "id",
-        field: ["title", "content"],
-        tag: ["cat", "year"]
+const index = new Document({
+    document: { 
+        index: "content",
+        store: ["author", "email"] 
     }
 });
-```
 
-Add some content:
-```js
-index.add([{
+index.add({
     id: 0,
-    title: "Foobar",
-    cat: "adventure",
-    year: "2018",
-    content: "Body"
-},{
-    id: 1,
-    title: "Title",
-    cat: "comedy",
-    year: "2018",
-    content: "Foobar"
-}]);
-```
-
-Find all documents by an attribute:
-```js
-index.where({"cat": "comedy"}, 10);
-```
-
-Since the attribute "cat" was tagged (has its own index) this expression performs really fast. This is actually the fastest way to retrieve multiple results from documents.
-
-Search documents and also apply a where-clause:
-```js
-index.search("foo", {
-    field: [
-        "title",
-        "content"
-    ],
-    where: {
-        "cat": "comedy"
-    },
-    limit: 10
+    author: "Jon Doe",
+    email: "john@mail.com",
+    content: "Some content for the index ..."
 });
 ```
 
-An additional where-clause has a significant cost. Using the same expression without _where_ performs significantly better (depending on the count of matches).
+You can query through the contents and will get back the stored values instead:
 
-<a name="sort"></a>
-## Custom Sort
-
-> The colon notation also has to be applied for a custom sort respectively.
-
-Sort by an attribute:
 ```js
-var results = index.search("John", {
-
-    limit: 100,
-    sort: "data:title"
-});
+index.search("some content", { enrich: true });
 ```
 
-> The default sorting order is from lowest to highest.
+Your results are now looking like:
 
-<!--
-Explicitly set sorting direction (from highest to lowest):
 ```js
-sort: ">data:title"
+[{
+    field: "content",
+    result: [{
+        id: 0,
+        doc: {
+            author: "Jon Doe",
+            email: "john@mail.com",
+        }
+    }]
+}]
 ```
--->
 
-Sort by a custom function:
-```js
-var results = index.search("John", {
-
-    limit: 100,
-    sort: function(a, b){
-        return (
-            a.id < b.id ? -1 : (
-                a.id > b.id ? 1 : 0
-        ));
-    }
-});
-```
+Both field "author" and "email" are not indexed.
 
 <a name="chaining"></a>
 ### Chaining
@@ -1707,434 +2279,258 @@ var index = new FlexSearch({
 It is possible to modify values for _threshold_ and _depth_ during search (see custom search). The restriction is that the _threshold_ can only be raised, on the other hand the _depth_ can only be lowered.
 
 <a name="cache"></a>
-## Enable Auto-Balanced Cache
+### Auto-Balanced Cache (By Popularity)
 
-Create index and just set a limit of cache entries:
+You need to initialize the cache and its limit during the creation of the index:
+
 ```js
-var index = new FlexSearch({
-
-    profile: "score",
-    cache: 1000
-});
+const index = new Index({ cache: 100 });
 ```
+
+```js
+const results = index.searchCache(query);
+```
+
+A common scenario for using a cache is an autocomplete or instant search when typing.
 
 > When passing a number as a limit the cache automatically balance stored entries related to their popularity.
 
 > When just using "true" the cache is unbounded and perform actually 2-3 times faster (because the balancer do not have to run).
 
 <a name="webworker"></a>
-## Web-Worker (Browser only)
+## Worker Parallelism (Browser + Node.js)
 
-Worker get its own dedicated memory and also run in their own dedicated thread without blocking the UI while processing. Especially for larger indexes, web worker improves speed and available memory a lot. FlexSearch index was tested with a 250 Mb text file including 10 Million words. <!--The indexing was done silently in background by multiple parallel running workers in about 7 minutes. The final index reserves ~ 8.2 Mb memory/space. The search result took ~ 0.25 ms.-->
+The whole worker implementation has changed by also keeping Node.js support in mind. The good news is worker will also get supported by Node.js by the library.
 
-> When the index isn't big enough it is faster to use no web worker.
+One important change is how workers divided their tasks and how contents are distributed. One big issue was that in the old model workers cycles for each task (Round Robin). Theoretically that provides an optimal balance of workload and storage. But that breaks the internal architecture of this search library and almost every performance optimization is getting lost.
 
-Create index and just set the count of parallel threads:
+Let us take an example. Assuming you have 4 workers and you will add 4 contents to the index, then each content is delegated to one worker (a perfect balance but index becomes a partial index).
+
+Old syntax FlexSearch v0.6.3 (___not supported anymore!___):
+
 ```js
-var index = new FlexSearch({
+const index = new FlexSearch({ worker: 4 });
+index.add(1, "some")
+     .add(2, "content")
+     .add(3, "to")
+     .add(4, "index");
+```
 
-    encode: "icase",
-    tokenize: "full",
-    async: true,
-    worker: 4
+```
+Worker 1: { 1: "some" }
+Worker 2: { 2: "content" }
+Worker 3: { 3: "to" }
+Worker 4: { 4: "index" }
+```
+
+The issue starts when you query a term. Each of the worker has to resolve the search on its own index and has to delegate back the results to apply the intersection calculation. That's the problem. No one of the workers could solve a search task completely, they have to transmit intermediate results back. Therefore, no optimization path could be applied early, because every worker has to send back the full (non-limited) result first.
+
+The new worker model from v0.7.0 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
+
+```js
+const index = new Document({
+    index: ["tag", "name", "title", "text"],
+    worker: true
+});
+
+index.add({ 
+    id: 1, tag: "cat", name: "Tom", title: "some", text: "some" 
+}).add({
+    id: 2, tag: "dog", name: "Ben", title: "title", text: "content" 
+}).add({ 
+    id: 3, tag: "cat", name: "Max", title: "to", text: "to" 
+}).add({ 
+    id: 4, tag: "dog", name: "Tim", title: "index", text: "index" 
 });
 ```
 
-Adding items to worker index as usual (async enabled):
-
-```js
-index.add(10025, "John Doe");
+```
+Worker 1: { 1: "cat", 2: "dog", 3: "cat", 4: "dog" }
+Worker 2: { 1: "Tom", 2: "Ben", 3: "Max", 4: "Tim" }
+Worker 3: { 1: "some", 2: "title", 3: "to", 4: "index" }
+Worker 4: { 1: "some", 2: "content", 3: "to", 4: "index" }
 ```
 
-Perform search and simply pass in callback like:
+When you perform a field search through all fields then this task is perfectly balanced through all workers, which can solve their subtasks independently.
+
+### WorkerIndex (Adapter)
+
+Above we have seen that documents will create worker automatically for each field. You can also create a WorkerIndex directly (same like using `Index` instead of `Document`).
+
+Use as ES6 module:
 
 ```js
-index.search("John Doe", function(results){
+import WorkerIndex from "./worker/index.js";
+const index = new WorkerIndex(options);
+index.add(1, "some")
+     .add(2, "content")
+     .add(3, "to")
+     .add(4, "index");
+```
 
-    // do something with array of results
+Or when bundled version was used instead:
+
+```js
+var index = new FlexSearch.Worker(options);
+index.add(1, "some")
+     .add(2, "content")
+     .add(3, "to")
+     .add(4, "index");
+```
+
+Such a WorkerIndex works pretty much the same as a created instance of `Index`.
+
+> A WorkerIndex only support the `async` variant of all methods. That means when you call `index.search()` on a WorkerIndex this will perform also in async the same way as `index.searchAsync()` will do.
+
+### Worker Threads (Node.js)
+
+The worker model for Node.js is based on "worker threads" and works exactly the same way:
+
+```js
+const { Document } = require("flexsearch");
+
+const index = new Document({
+    index: ["tag", "name", "title", "text"],
+    worker: true
 });
 ```
 
-Or use promises accordingly:
+Or create a single worker instance for a non-document index:
 
 ```js
-index.search("John Doe").then(function(results){
+const { Worker } = require("flexsearch");
+const index = new Worker({ options });
+```
 
-    // do something with array of results
+### The Worker Async Model (Best Practices)
+
+A worker will always perform as async. On a query method call you always should handle the returned promise (e.g. use `await`) or pass a callback function as the last parameter.
+
+```js
+const index = new Document({
+    index: ["tag", "name", "title", "text"],
+    worker: true
 });
 ```
 
-<a name="options"></a>
-## Options
+All requests and sub-tasks will run in parallel (prioritize "all tasks completed"):
 
-FlexSearch is highly customizable. Make use of the the right options can really improve your results as well as memory economy and query time.
+```js
+index.searchAsync(query, callback);
+index.searchAsync(query, callback);
+index.searchAsync(query, callback);
+```
 
-<a name="options-index"></a>
-### Initialize Index
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-    </tr>
-    <tr>
-        <td>profile<br><br><br><br><br><br></td>
-        <td>
-            "memory"<br>
-            "speed"<br>
-            "match"<br>
-            "score"<br>
-            "balance"<br>
-            "fast"
-        </td>
-        <td vertical-align="top">
-            The <a href="#presets">configuration profile</a>. Choose your preferation.<br>
-        </td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>tokenize<br><br><br><br><br><!--<br>--></td>
-        <td>
-            "strict"<br>
-            "forward"<br>
-            "reverse"<br>
-            <!--"ngram"<br>-->
-            "full"<br>
-            function()
-        </td>
-        <td vertical-align="top">
-            The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br><br>Choose one of the <a href="#tokenizer">built-ins</a> or pass a <a href="#flexsearch.tokenizer">custom tokenizer function</a>.<br>
-        </td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>split<br><br></td>
-        <td>
-            RegExp<br>
-            string
-        </td>
-        <td vertical-align="top">
-            The rule to split words when using non-custom tokenizer (<a href="#tokenizer">built-ins</a> e.g. "forward"). Use a string/char or use a regular expression (default: <code>/\W+/</code>).<br>
-        </td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encode<br><br><br><br><br><br><br></td>
-        <td>
-            false<br>
-            "icase"<br>
-            "simple"<br>
-            "advanced"<br>
-            "extra"<br>
-            "balance"<br>
-            function()
-        </td>
-        <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>cache<br><br><br></td>
-        <td>
-            false<br>
-            true<br>
-            {number}
-        </td>
-        <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the <b>cache automatically balance stored entries related to their popularity</b>.<br><br>Note: When just using "true" the cache has no limits and is actually 2-3 times faster (because the balancer do not have to run).</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>async<br><br></td>
-        <td>
-            true<br>
-            false
-        </td>
-        <td>Enable/Disable asynchronous processing.<br><br>Each job will be queued for non-blocking processing. Recommended when using WebWorkers.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>worker<br><br></td>
-        <td>
-            false<br>
-            {number}
-        </td>
-        <td>Enable/Disable and set count of running worker threads.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>depth<br><br></td>
-        <td>
-            false<br>
-            {number}
-        </td>
-        <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance. Depth is the maximum number of words/tokens away a term to be considered as relevant.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>threshold<br><br></td>
-        <td>
-            false<br>
-            {number}
-        </td>
-        <td>Enable/Disable the threshold of minimum relevance all results should have.<br><br>Note: It is also possible to set a lower threshold for indexing and pass a higher value when calling <i>index.search(options)</i>.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>resolution</td>
-        <td>
-            {number}
-        </td>
-        <td>Sets the scoring resolution (default: 9).</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>stemmer<br><br><br></td>
-        <td>
-            false<br>
-            {string}<br>
-            {function}
-        </td>
-        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>filter<br><br><br></td>
-        <td>
-            false<br>
-            {string}<br>
-            {function}
-        </td>
-        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>rtl<br><br></td>
-        <td>
-            true<br>
-            false
-        </td>
-        <td>Enables Right-To-Left encoding.</td>
-    </tr>
-</table>
+Also (prioritize "all tasks completed"):
 
-<a name="options-search"></a>
-### Custom Search
+```js
+index.searchAsync(query).then(callback);
+index.searchAsync(query).then(callback);
+index.searchAsync(query).then(callback);
+```
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-    </tr>
-    <tr>
-        <td>limit</td>
-        <td>number</td>
-        <td>Sets the limit of results.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>suggest</td>
-        <td>true, false</td>
-        <td>Enables <a href="#suggestions">suggestions</a> in results.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>where</td>
-        <td>object</td>
-        <td>Use a <a href="#where">where-clause</a> for non-indexed fields.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>field</td>
-        <td>string, Array&lt;string&gt;</td>
-        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bool</td>
-        <td>"and", "or"</td>
-        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>page</td>
-        <td>true, false, cursor</td>
-        <td>Enables <a href="#pagination">paginated results</a>.</td>
-    </tr>
-</table>
+Or when you have just one callback when all requests are done, simply use `Promise.all()` which also prioritize "all tasks completed":
 
-You can also override these following <a href="#options-index">index settings</a> via custom search (v0.7.0):
+```js
+Promise.all([
+    
+    index.searchAsync(query).then(callback),
+    index.searchAsync(query).then(callback),
+    index.searchAsync(query).then(callback)
+    
+]).then(callback);
+```
 
-- encode
-- split
-- tokenize
-- threshold
-- cache
-- async
+Inside the callback of `Promise.all()` you will also get an array of results as the first parameter respectively for each query you put into.
 
-Custom-Search options will override index options.
+When using `await` you can prioritize the order (prioritize "first task completed") and solve requests one by one and just process the sub-tasks in parallel:
 
-<a name="options-field-search"></a>
-### Field-Search (v0.7.0)
+```js
+await index.searchAsync(query);
+await index.searchAsync(query);
+await index.searchAsync(query);
+```
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-    </tr>
-    <tr>
-        <td>limit</td>
-        <td>number</td>
-        <td>Sets the limit of results per field.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>suggest</td>
-        <td>true, false</td>
-        <td>Enables <a href="#suggestions">suggestions</a> in results per field.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bool</td>
-        <td>"and", "or", "not"</td>
-        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>boost</td>
-        <td>number</td>
-        <td>Enables boosting fields.</td>
-    </tr>
-</table>
+Same for `index.add()`, `index.append()`, `index.remove()` or `index.update()`. Here there is a special case which isn't disabled by the library, but you need to keep in mind when using Workers.
 
-You can also override these following <a href="#options-index">index settings</a> per field via custom field-search:
+When you call the "synced" version on a worker index:
 
-- encode
-- split
-- tokenize
-- threshold
+```js
+index.add(doc);
+index.add(doc);
+index.add(doc);
+// contents aren't indexed yet,
+// they just queued on the message channel 
+```
 
-Field-Search options will override custom-search options and index options.
+Of course, you can do that but keep in mind that the main thread does not have an additional queue for distributed worker tasks. Running these in a long loop fires content massively to the message channel via `worker.postMessage()` internally. Luckily the browser and Node.js will handle such incoming tasks for you automatically (as long enough free RAM is available). When using the "synced" version on a worker index, the content isn't indexed one line below, because all calls are treated as async by default.
 
-## Depth, Threshold, Resolution?
+> When adding/updating/removing large bulks of content to the index (or high frequency), it is recommended to use the async version along with `async/await` to keep a low memory footprint during long processes.
 
-Whereas __depth__ is the minimum relevance for the __contextual index__, __threshold__ is the minimum relevance for the __lexical index__. The threshold score is an enhanced variation of a conventional scoring calculation, it uses on document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
+<a name="export"></a>
+## Export / Import
 
-Resolution on the other hand specify the max scoring value. The final score value is an integer value, so resolution affect how many segments the score may have. When the resolution is 1, then there exist just one scoring level for all matched terms. To get more differentiated results you need to raise the resolution.
+### Export
 
-> The difference of both affects the performance on higher values (complexity = _resolution_ - _threshold_).
+The export has slightly changed. The export now consist of several smaller parts, instead of just one large bulk. You need to pass a callback function which has 2 arguments "key" and "data". This callback function is called by each part, e.g.:
 
-The combination of resolution and threshold gives you a good controlling of your matches as well as performance, e.g. when the resolution is 25 and the threshold is 22, then the result only contains matches which are super relevant. The goal should always be just have items in result which are really needed. On top, that also improves performance a lot.
+```js
+index.export(function(key, data){ 
+    
+    // you need to store both the key and the data!
+    // e.g. use the key for the filename and save your data
+    
+    localStorage.setItem(key, data);
+});
+```
 
-<a name="tokenizer"></a>
-## Tokenizer
+Exporting data to the localStorage isn't really a good practice, but if size is not a concern than use it if you like. The export primarily exists for the usage in Node.js or to store indexes you want to delegate from a server to the client.
 
-Tokenizer affects the required memory also as query time and flexibility of partial matches. Try to choose the most upper of these tokenizer which fits your needs:
+> The size of the export corresponds to the memory consumption of the library. To reduce export size you have to use a configuration which has less memory footprint (use the table at the bottom to get information about configs and its memory allocation).
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Description</td>
-        <td>Example</td>
-        <td>Memory Factor (n = length of word)</td>
-    </tr>
-    <tr>
-        <td><b>"strict"</b></td>
-        <td>index whole words</td>
-        <td><code>foobar</code></td>
-        <td>* 1</td>
-    </tr>
-    <tr></tr>
-    <!--
-    <tr>
-        <td><b>"ngram"</b> (default)</td>
-        <td>index words partially through phonetic n-grams</td>
-        <td><code>foo</code>bar<br>foo<code>bar</code></td>
-        <td>* n / 3</td>
-    </tr>
-    <tr></tr>
-    -->
-    <tr>
-        <td><b>"forward"</b></td>
-        <td>incrementally index words in forward direction</td>
-        <td><code>fo</code>obar<br><code>foob</code>ar<br></td>
-        <td>* n</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>"reverse"</b></td>
-        <td>incrementally index words in both directions</td>
-        <td>foob<code>ar</code><br>fo<code>obar</code></td>
-        <td>* 2n - 1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>"full"</b></td>
-        <td>index every possible combination</td>
-        <td>fo<code>oba</code>r<br>f<code>oob</code>ar</td>
-        <td>* n * (n - 1)</td>
-    </tr>
-</table>
+When your save routine runs asynchronously you have to return a promise:
 
-<a name="phonetic"></a>
-## Encoders
+```js
+index.export(function(key, data){ 
+    
+    return new Promise(function(resolve){
+        
+        // do the saving as async
 
-Encoding affects the required memory also as query time and phonetic matches. Try to choose the most upper of these encoders which fits your needs, or pass in a <a href="#flexsearch.encoder">custom encoder</a>:
+        resolve();
+    });
+});
+```
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Description</td>
-        <td>False-Positives</td>
-        <td>Compression</td>
-    </tr>
-    <tr>
-        <td><b>false</b></td>
-        <td>Turn off encoding</td>
-        <td>no</td>
-        <td>no</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>"icase"</b> (default)</td>
-        <td>Case in-sensitive encoding</td>
-        <td>no</td>
-        <td>no</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>"simple"</b></td>
-        <td>Phonetic normalizations</td>
-        <td>no</td>
-        <td>~ 7%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>"advanced"</b></td>
-        <td>Phonetic normalizations + Literal transformations</td>
-        <td>no</td>
-        <td>~ 35%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>"extra"</b></td>
-        <td>Phonetic normalizations + Soundex transformations</td>
-        <td>yes</td>
-        <td>~ 60%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>function()</b></td>
-        <td>Pass custom encoding via <i>function(string):string</i></td>
-        <td></td>
-        <td></td>
-    </tr>
-</table>
+> You cannot export the additional table for the "fastupdate" feature. These table exists of references and when stored they fully get serialized and becomes too large. The lib will handle these automatically for you. When importing data, the index automatically disables "fastupdate".
+
+### Import
+
+Before you can import data, you need to create your index first. For document indexes provide the same document descriptor you used when export the data. This configuration isn't stored in the export.
+
+```js
+var index = new Index({ ... });
+```
+
+To import the data just pass a key and data:
+
+```js
+index.import(key, localStorage.getItem(key));
+```
+
+You need to import every key! Otherwise, your index does not work. You need to store the keys from the export and use this keys for the import (the order of the keys can differ).
+
+This is just for demonstration and is not recommended, because you might have other keys in your localStorage which aren't supported as an import:
+
+```js
+var keys = Object.keys(localStorage);
+
+for(let i = 0, key; i < keys.length; i++){
+    
+    key = keys[i];
+    index.import(key, localStorage.getItem(key));
+}
+```
 
 <a name="compare" id="compare"></a>
 #### Encoder Matching Comparison
@@ -2329,10 +2725,18 @@ Adding, removing or updating existing items has a similar complexity. The contex
 The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
 
 <br>
-<img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg">
+<img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg?v=2">
 
 <a name="presets"></a>
 ## Presets
+
+1. `memory` (primary optimize for memory)
+2. `performance` (primary optimize for performance)
+3. `match` (primary optimize for matching)
+4. `score` (primary optimize for scoring)
+5. `default` (the default balanced profile)
+
+These profiles are covering standard use cases. It is recommended to apply custom configuration instead of using profiles to get the best out for your situation. Every profile could be optimized further to its specific task, e.g. extreme performance optimized configuration or extreme memory and so on.
 
 You can pass a preset during creation/initialization. They represents these following settings:
 
@@ -2350,18 +2754,16 @@ __"memory"__: Memory-optimized profile
 {
     encode: "extra",
     tokenize: "strict",
-    threshold: 0,
     resolution: 1
 }
 ```
 
-__"speed"__: Speed-optimized profile
+__"performance"__: Speed-optimized profile
 
 ```js
 {
     encode: "icase",
     tokenize: "strict",
-    threshold: 1,
     resolution: 3,
     depth: 2
 }
@@ -2373,7 +2775,6 @@ __"match"__: Matching-tolerant profile
 {
     encode: "extra",
     tokenize: "full",
-    threshold: 1,
     resolution: 3
 }
 ```
@@ -2384,32 +2785,8 @@ __"score"__: Relevance-optimized profile
 {
     encode: "extra",
     tokenize: "strict",
-    threshold: 1,
     resolution: 9,
     depth: 4
-}
-```
-
-__"balance"__: Most-balanced profile
-
-```js
-{
-    encode: "balance",
-    tokenize: "strict",
-    threshold: 0,
-    resolution: 3,
-    depth: 3
-}
-```
-
-__"fast"__: Absolute fastest profile
-
-```js
-{
-    encode: "icase",
-    threshold: 8,
-    resolution: 9,
-    depth: 1
 }
 ```
 
@@ -2419,38 +2796,13 @@ Compare these presets:
 
 ## Performance Guide
 
-Methods to retrieve results, sorted from fastest to slowest:
-
-1. `index.find(id) -> doc`
-2. `index.where({field: string}) -> Array<doc>` with a tag on the same field
-3. `index.search(query) -> Array<id>` when just adding _id_ and _content_ to the index (no documents)
-4. `index.search(query) -> Array<doc>` when using documents
-5. `index.search(query, { where }) -> Array<doc>` when using documents and a where clause
-6. `index.where({field: [string, string]}) -> Array<doc>` when a tag was set to one of two fields
-7. `index.where({field: string}) -> Array<doc>` when no tag was set to this field
-
-Methods to change index from fastest to slowest:
-
-1. `index.add(id, string)`
-2. `index.add(docs)`
-3. `index.delete(id, string)`
-4. `index.delete(docs)`
-5. `index.update(id, string)`
-6. `index.update(docs)`
-
 Performance Checklist:
 
 - Using just id-content-pairs for the index performs almost faster than using docs
-- An additional where-clause in `index.search()` has a significant cost
 - When adding multiple fields of documents to the index try to set the lowest possible preset for each field separately
-- Make sure the auto-balanced ___cache___ is enabled and has a meaningful value
-- Using `index.where()` to find documents is very slow when not using a tagged field
-- Getting a document by ID via `index.find(id)` is extremely fast
-- Do not enable ___async___ as well as ___worker___ when the index does not claim it
 - Use numeric IDs (the datatype length of IDs influences the memory consumption significantly)
 - Try to enable _contextual index_ by setting the ___depth___ to a minimum meaningful value and tokenizer to ___"strict"___
 - Pass a ___limit___ when searching (lower values performs better)
-- Pass a minimum ___threshold___ when searching (higher values performs better)
 - Try to minify the content size of indexed documents by just adding attributes you really need to get back from results
 
 ## Best Practices
@@ -2496,211 +2848,265 @@ Perform queries:
 var results = search("action", "movie title"); // --> [1]
 ```
 
-<!--
-##### Split Complexity by Tags (Document Indexes)
-
-You can also gets the same effect when using documents in combination with tags and a ___where___ clause, e.g.:
-
-```js
-var movies = new FlexSearch({
-    doc: {
-        id: "id",
-        title: "title"
-    },
-    tag:{
-        cat: "cat"
-    }
-});
-```
-
-Add content to the index:
-
-```js
-add({ id: 1, cat: "action", title: "Movie Title" });
-add({ id: 2, cat: "adventure", title: "Movie Title" });
-add({ id: 3, cat: "comedy", title: "Movie Title" });
-```
-
-Perform queries:
-```js
-var results = search("movie title", {
-    field: "title",
-    where: {
-        cat: "adventure"
-    }
-});
-```
--->
-
 Split indexes by categories improves performance significantly.
 
 ##### Use numeric IDs
 
 It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
 
-<!--
-e.g. instead of this:
-```js
-index.add("fdf12cad-8779-47ab-b614-4dbbd649178b", "content");
-```
+## Memory Allocation
 
-you should probably use this:
-```js
-var index_table = {
-    "fdf12cad-8779-47ab-b614-4dbbd649178b": 0,
-    "48b3041c-a243-4a52-b1ed-225041847366": 1,
-    "7236c8b5-86e1-451a-842f-d9aba9642e4d": 2,
-    // ....
-};
+The book "Gulliver's Travels Swift Jonathan 1726" was fully indexed for the examples below.
 
-index.add(index_table["fdf12cad-8779-47ab-b614-4dbbd649178b"], "content");
-```
-
-It is planned to provide a built-in feature which should replace this workaround.
--->
-
-<a name="export"></a>
-## Export/Import Index
-
-> index.export() returns a serialized dump as a string.
-
-> index.import(string) takes a serialized dump as a string and load it to the index.
-
-Assuming you have one or several indexes:
-```js
-var feeds_2017 = new FlexSearch();
-var feeds_2018 = new FlexSearch();
-var feeds_2019 = new FlexSearch();
-```
-
-Export indexes, e.g. to the local storage:
-```js
-localStorage.setItem("feeds_2017", feeds_2017.export());
-localStorage.setItem("feeds_2018", feeds_2018.export());
-localStorage.setItem("feeds_2019", feeds_2019.export());
-```
-
-Import indexes, e.g. from the local storage:
-```js
-feeds_2017.import(localStorage.getItem("feeds_2017"));
-feeds_2018.import(localStorage.getItem("feeds_2018"));
-feeds_2019.import(localStorage.getItem("feeds_2019"));
-```
-
-### Disable Serialization
-
-Pass a config flag to control serialization:
+The most memory-optimized meaningful setting will allocate just 1.2 Mb for the whole book indexed! This is probably the most tiny memory footprint you will get from a search library.
 
 ```js
-var data = index.export({serialize: false});
+import { encode } from "./lang/latin/extra.js";
+
+index = new Index({
+    encode: encode,
+    tokenize: "strict",
+    optimize: true,
+    resolution: 1,
+    minlength: 3,
+    fastupdate: false,
+    context: false
+});
 ```
 
-Use the same config accordingly when importing data:
+### Compare Impact of Memory Allocation
 
-```js
-index.import(data, {serialize: false});
-```
+by default a lexical index is very small:<br>
+`depth: 0, bidirectional: 0, resolution: 3, minlength: 0` => 2.1 Mb
 
-### Separate Exports (Documents)
+a higher resolution will increase the memory allocation:<br>
+`depth: 0, bidirectional: 0, resolution: 9, minlength: 0` => 2.9 Mb
 
-Pass a config flag to separate index and documents from the export:
+using the contextual index will increase the memory allocation:<br>
+`depth: 1, bidirectional: 0, resolution: 9, minlength: 0` => 12.5 Mb
 
-```js
-var idx = index.export({index: true, doc: false});
-```
+a higher contextual depth will increase the memory allocation:<br>
+`depth: 2, bidirectional: 0, resolution: 9, minlength: 0` => 21.5 Mb
 
-```js
-var docs = index.export({index: false, doc: true});
-```
+a higher minlength will decrease memory allocation:<br>
+`depth: 2, bidirectional: 0, resolution: 9, minlength: 3` => 19.0 Mb
 
-Use the same config accordingly when importing data:
+using bidirectional will decrease memory allocation:<br>
+`depth: 2, bidirectional: 1, resolution: 9, minlength: 3` => 17.9 Mb
 
-```js
-index.import(idx, {index: true, doc: false});
-```
+enable the option "fastupdate" will increase memory allocation:<br>
+`depth: 2, bidirectional: 1, resolution: 9, minlength: 3` => 6.3 Mb
 
-```js
-index.import(docs, {index: false, doc: true});
-```
+### Full Comparison Table
 
-You can also pass documents as external data, assume `data` is an array of documents:
+Every search library is constantly in competition with these 4 properties:
 
-```js
-index.import(idx, {index: true, doc: data});
-```
+1. Memory Allocation
+2. Performance
+3. Matching Capabilities
+4. Relevance Order (Scoring)
 
-<a name="debug"></a>
-## Debug
+FlexSearch provides you many parameters you can use to adjust the optimal balance for your specific use-case.
 
-> Do not use DEBUG in production builds.
-
-If you get issues, you can temporary set the _DEBUG_ flag to _true_ on top of _flexsearch.js_:
-
-```js
-DEBUG = true;
-```
-
-This enables console logging of several processes. Just open the browsers console to make this information visible.
-
-<a name="profile"></a>
-## Profiler Stats
-
-> Do not use PROFILER in production builds.
-
-To collect some performance statistics of your indexes you need to temporary set the _PROFILER_ flag to _true_ on top of _flexsearch.js_:
-
-```js
-PROFILER = true;
-```
-
-This enables profiling of several processes.
-
-An array of all profiles is available on:
-
-```js
-window.stats;
-```
-
-You can also just open the browsers console and enter this line to get stats.
-
-> The index of the array corresponds to the _index.id_.
-
-Get stats from a specific index:
-
-```js
-index.stats;
-```
-
-The returning stats payload is divided into several categories. Each of these category provides its own statistic values.
-
-##### Profiler Stats Properties
 <table>
-    <tr></tr>
     <tr>
-        <td>Property</td>
-        <td>Description</td>
+        <td colspan="5" hidden></td>
     </tr>
     <tr>
-        <td>time</td>
-        <td>The sum of time (ms) the process takes (lower is better)</td>
+        <td>Modifier</td>
+        <td>Memory Impact *</td>
+        <td>Performance Impact **</td>
+        <td>Matching Impact **</td>
+        <td>Scoring Impact **</td>
     </tr>
-    <tr></tr>
     <tr>
-        <td>count</td>
-        <td>How often the process was called</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>ops</td>
-        <td>Average operations per seconds (higher is better)</td>
+        <td>resolution</td>
+        <td>+1 (per level)</td>
+        <td>+1 (per level)</td>
+        <td>0</td>
+        <td>+2 (per level)</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>nano</td>
-        <td>Average cost (ns) per operation/call (lower is better)</td>
+        <td>depth</td>
+        <td>+4 (per level)</td>
+        <td>-1 (per level)</td>
+        <td>-10 + depth</td>
+        <td>+10</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>minlength</td>
+        <td>-2 (per level)</td>
+        <td>+2 (per level)</td>
+        <td>-3 (per level)</td>
+        <td>+2 (per level)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>bidirectional</td>
+        <td>-2</td>
+        <td>0</td>
+        <td>+3</td>
+        <td>-1</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>fastupdate</td>
+        <td>+1</td>
+        <td>+10 (update, remove)</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>optimize: true</td>
+        <td>-7</td>
+        <td>-1</td>
+        <td>0</td>
+        <td>-3</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>encoder: "icase"</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>encoder: "simple"</td>
+        <td>-2</td>
+        <td>-1</td>
+        <td>+2</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>encoder: "advanced"</td>
+        <td>-3</td>
+        <td>-2</td>
+        <td>+4</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>encoder: "extra"</td>
+        <td>-5</td>
+        <td>-5</td>
+        <td>+6</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>encoder: "soundex"</td>
+        <td>-6</td>
+        <td>-2</td>
+        <td>+8</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tokenize: "strict"</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tokenize: "forward"</td>
+        <td>+3</td>
+        <td>-2</td>
+        <td>+5</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tokenize: "reverse"</td>
+        <td>+5</td>
+        <td>-4</td>
+        <td>+7</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tokenize: "full"</td>
+        <td>+8</td>
+        <td>-5</td>
+        <td>+10</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>document index</td>
+        <td>+3 (per field)</td>
+        <td>-1 (per field)</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>document tags</td>
+        <td>+1 (per tag)</td>
+        <td>-1 (per tag)</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>store: true</td>
+        <td>+5 (per document)</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>store: [fields]</td>
+        <td>+1 (per field)</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>cache: true</td>
+        <td>+10</td>
+        <td>+10</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>cache: 100</td>
+        <td>+1</td>
+        <td>+9</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>type of ids: number</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>type of ids: string</td>
+        <td>+3</td>
+        <td>-3</td>
+        <td>0</td>
+        <td>0</td>
     </tr>
 </table>
+* range from -10 to 10, lower is better (-10 => big decrease, 0 => unchanged, +10 => big increase)<br>
+** range from -10 to 10, higher is better
 
+<!--
 <a name="builds"></a>
 ## Custom Builds
 
@@ -2848,6 +3254,7 @@ node compile SUPPORT_WORKER=true
 Feel free to contribute to this project and also feel free to contact me (<a href="https://github.com/ts-thomas">https://github.com/ts-thomas</a>) when you have any questions.
 
 <a href="CHANGELOG.md">Changelog</a>
+-->
 
 ---
 

@@ -11,6 +11,11 @@ let pid = 0;
 
 function WorkerIndex(options){
 
+    if(!(this instanceof WorkerIndex)) {
+
+        return new WorkerIndex(options);
+    }
+
     let opt;
 
     if(options){
@@ -24,7 +29,6 @@ function WorkerIndex(options){
 
         options = {};
     }
-
 
     // the factory is the outer wrapper from the build
     // we use "self" as a trap for node.js

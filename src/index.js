@@ -76,7 +76,6 @@ function Index(options, _register){
 
     let resolution, optimize, context = options["context"] || {};
 
-    /** @export */
     this.encode = options["encode"] || (charset && charset.encode) || default_encoder;
     this.register = _register || create_object();
     this.resolution = resolution = options["resolution"] || 9;

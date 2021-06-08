@@ -728,7 +728,7 @@ function apply_enrich(res){
 
         arr[x] = {
 
-            "key": id,
+            "id": id,
             "doc": this.store[id]
         };
     }

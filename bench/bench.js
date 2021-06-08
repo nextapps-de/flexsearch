@@ -33,12 +33,12 @@ else{
     duration = parseFloat(params["duration"] || "5") * 1000;
 }
 
-if(match){
-
-    text_data.push('zero one two three four five six seven eight nine ten');
-    text_data.push('four two zero one three ten five seven eight six nine');
-    text_data.push('zero one two three four five six seven eight nine ten');
-}
+// if(match){
+//
+//     text_data.push('zero one two three four five six seven eight nine ten');
+//     text_data.push('four two zero one three ten five seven eight six nine');
+//     text_data.push('zero one two three four five six seven eight nine ten');
+// }
 
 // queue.push({
 //     name: "add",

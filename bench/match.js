@@ -10,9 +10,9 @@ const lib = encode ? [
     "flexsearch-speed"
 ]:[
     /*"flexsearch-0.6.2", "flexsearch-0.6.3",*/ "flexsearch-0.7.0-match",
-    "bm25", "bulksearch", "elasticlunr",
+    "bm25", "bulksearch-match", "elasticlunr",
     "fuzzysearch", "js-search", "jsii",
-    "fuse", "lunr", "wade"
+    "fuse-match", "lunr", "wade"
 ];
 
 let promise;
@@ -46,7 +46,7 @@ await do_test("test-9", "composition of minerals gums juices vegetables", [1676,
 await do_test("test-10", "general camberlayhn", [520]);
 await do_test("test-11", "the end defeat", [2209]);
 await do_test("test-12", "fast chief", [1275]);
-await do_test("test-13", "zero one three ten", [2721, 2720, 2722]);
+//await do_test("test-13", "zero one three ten", [2721, 2720, 2722]);
 
 // ---------------------------------------
 
@@ -58,12 +58,12 @@ async function do_test(id, query, ref){
     for(let i = 0, current; i < lib.length; i++){
 
         current = lib[i];
-        headers[i + 1].firstChild.nodeValue = current.replace("-0.7.0-match", "");
+        headers[i + 1].firstChild.nodeValue = current.replace("-0.7.0", "").replace("-match", "");
 
         let results = await new Promise(function(resolve){
 
             promise = resolve;
-            iframe.src = "test/" + (id === "test-13" && current === "flexsearch-0.7.0-match" ? "flexsearch-0.7.0-context" : current) +
+            iframe.src = "test/" + current + //(id === "test-13" && current === "flexsearch-0.7.0-match" ? "flexsearch-0.7.0-context" : current) +
                          "/?query=" + decodeURI(query) + (encode ? "&encode=true" : "") + "#match";
         });
 

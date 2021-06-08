@@ -53,7 +53,7 @@ function F(a, b) {
 function E(a) {
   return new RegExp(a, "g");
 }
-function H(a) {
+function G(a) {
   let b = "", c = "";
   for (let d = 0, e = a.length, f; d < e; d++) {
     (f = a[d]) !== c && (b += c = f);
@@ -118,8 +118,8 @@ function J(a, b) {
               p = !0;
             }
             if (d && (h[A] = (B = h[A]) ? ++B : B = 1, B < e)) {
-              const G = d[B - 2] || (d[B - 2] = []);
-              G[G.length] = A;
+              const H = d[B - 2] || (d[B - 2] = []);
+              H[H.length] = A;
             }
           } else {
             q[A] = 1;
@@ -262,7 +262,7 @@ function pa(a, b, c, d, e, f) {
   this.cache = (b = a.cache) && new K(b);
 }
 L.prototype.pipeline = function(a, b, c, d) {
-  if (a && (b && (a = F(a, b)), this.matcher && (a = F(a, this.matcher)), this.stemmer && 1 < a.length && (a = F(a, this.stemmer)), d && 1 < a.length && (a = H(a)), c || "" === c)) {
+  if (a && (b && (a = F(a, b)), this.matcher && (a = F(a, this.matcher)), this.stemmer && 1 < a.length && (a = F(a, this.stemmer)), d && 1 < a.length && (a = G(a)), c || "" === c)) {
     a = a.split(c);
     if (this.filter) {
       b = this.filter;
@@ -549,6 +549,9 @@ function sa(a) {
 }
 ;let ta = 0;
 function O(a) {
+  if (!(this instanceof O)) {
+    return new O(a);
+  }
   var b;
   a ? D(b = a.encode) && (a.encode = b.toString()) : a = {};
   (b = (self || window)._factory) && (b = b.toString());
@@ -785,14 +788,14 @@ R.prototype.search = function(a, b, c, d) {
       C = (t = d ? d[l] : this.index[y].search(a, b, B || c)) && t.length;
       if (m && C) {
         const A = [];
-        let G = 0;
+        let H = 0;
         n && (A[0] = [t]);
         for (let W = 0, na, P; W < m.length; W++) {
           if (na = m[W], C = (P = this.tagindex[na]) && P.length) {
-            G++, A[A.length] = n ? [P] : P;
+            H++, A[A.length] = n ? [P] : P;
           }
         }
-        G && (t = n ? ka(A, b || 100, u || 0) : la(t, A), C = t.length);
+        H && (t = n ? ka(A, b || 100, u || 0) : la(t, A), C = t.length);
       }
       if (C) {
         f[q] = y, e[q++] = t;
@@ -840,7 +843,7 @@ function va(a, b, c, d) {
 function wa(a) {
   const b = Array(a.length);
   for (let c = 0, d; c < a.length; c++) {
-    d = a[c], b[c] = {key:d, doc:this.store[d]};
+    d = a[c], b[c] = {id:d, doc:this.store[d]};
   }
   return b;
 }
@@ -936,13 +939,13 @@ function La(a) {
 ;var Qa = {encode:Pa, rtl:!1, tokenize:""};
 const Ra = E("ae"), Sa = E("oe"), Ta = E("sh"), Ua = E("th"), Va = E("ph"), Wa = E("pf"), Xa = [Ra, "a", Sa, "o", Ta, "s", Ua, "t", Va, "f", Wa, "f", E("(?![aeo])h(?![aeo])"), "", E("(?!^[aeo])h(?!^[aeo])"), ""];
 function Pa(a, b) {
-  a && (a = La.call(this, a).join(" "), 2 < a.length && (a = F(a, Xa)), b || (1 < a.length && (a = H(a)), a && (a = a.split(" "))));
+  a && (a = La.call(this, a).join(" "), 2 < a.length && (a = F(a, Xa)), b || (1 < a.length && (a = G(a)), a && (a = a.split(" "))));
   return a;
 }
 ;var Za = {encode:Ya, rtl:!1, tokenize:""};
 const $a = E("(?!\\b)[aeo]");
 function Ya(a) {
-  a && (a = Pa.call(this, a, !0), 1 < a.length && (a = a.replace($a, "")), 1 < a.length && (a = H(a)), a && (a = a.split(" ")));
+  a && (a = Pa.call(this, a, !0), 1 < a.length && (a = a.replace($a, "")), 1 < a.length && (a = G(a)), a && (a = a.split(" ")));
   return a;
 }
 ;I["latin:default"] = fa;
