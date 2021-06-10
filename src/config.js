@@ -17,9 +17,6 @@ export const SUPPORT_CACHE = true;
 export const SUPPORT_ASYNC = true;
 
 /** @define {boolean} */
-export const SUPPORT_PRESET = true;
-
-/** @define {boolean} */
 export const SUPPORT_STORE = true;
 
 /** @define {boolean} */

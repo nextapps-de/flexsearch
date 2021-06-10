@@ -1,18 +1,22 @@
 <h1 align="center">
     <p></p>
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg?v2" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
     <p></p>
 </h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
 
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
+<a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 <!--<a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>-->
 <!--<a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master&v=0"></a>-->
-<a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 
-<a href="#installation">Installation Guide</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Custom Builds</a> &ensp;&bull;&ensp; <a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">Flexsearch Server</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
+<a href="#installation">Basic Start</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Document Indexes</a> &ensp;&bull;&ensp; <a>Using Worker</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
 ### FlexSearch v0.7.0
+
+The new version is finally available. FlexSearch 0.7.0 was developed as a modern rebuild from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years of production use.
+
+This new version has a good compatibility with the old generation, but it might require some migrations steps in your code.
 
 Read the documentation of new features and changes:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md</a>
@@ -46,14 +50,14 @@ Library Comparison "Gulliver's Travels":
 - <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">Scoring Benchmark</a>
 - <a href="#consumption">Memory Consumption</a>
 
-Plugins (external):
+Plugins (extern projects):
 - https://github.com/angeloashmore/react-use-flexsearch
 - https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
 
 __Get Latest Stable Build (Recommended):__
 
 <table>
-    <tr></tr>
+    <tr><td colspan="3"></td></tr>
     <tr>
         <td>Build</td>
         <td>File</td>
@@ -104,8 +108,10 @@ Just exchange the version number from the URLs above with "master", e.g.: "/flex
 
 __Compare Web-Bundles:__
 
+> The Node.js package includes all features from `flexsearch.bundle.js`.
+
 <table>
-    <tr></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Feature</td>
         <td>flexsearch.bundle.js</td>
@@ -159,6 +165,15 @@ __Compare Web-Bundles:__
     <tr></tr>
     <tr>
         <td>
+            <a href="#store">Document Store</a>
+        </td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
             <a href="#tokenizer">Partial Matching</a>
         </td>
         <td>✓</td>
@@ -186,10 +201,19 @@ __Compare Web-Bundles:__
     <tr></tr>
     <tr>
         <td>
-            <a href="#suggestions">Suggestions</a>
+            <a href="#tags">Tags</a>
         </td>
         <td>✓</td>
         <td>-</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <a href="#suggestions">Suggestions</a>
+        </td>
+        <td>✓</td>
+        <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>
@@ -203,12 +227,17 @@ __Compare Web-Bundles:__
     </tr>
     <tr></tr>
     <tr>
-        <td>
-            Customizable: Matcher, Encoder, Tokenizer, Stemmer, Filter
-        </td>
+        <td>Customizable Charset/Language (Matcher, Encoder, Tokenizer, Stemmer, Filter, Split, RTL)</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><a href="#export">Export / Import</a></td>
+        <td>✓</td>
+        <td>-</td>
+        <td>-</td>
     </tr>
     <tr>
         <td>File Size (gzip)</td>
@@ -218,19 +247,15 @@ __Compare Web-Bundles:__
     </tr>
 </table>
 
-> It is also pretty simple to make <a href="#builds">Custom Builds</a>
-
 <a name="compare" id="compare"></a>
-## Benchmark Ranking
+## Performance Benchmark (Ranking)
 
-Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
-
-##### Query Test: "Gulliver's Travels"
+Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
 
 Operation per seconds, higher is better, except the test "Memory" on which lower is better.
 
 <table>
-    <tr></tr>
+    <tr><td colspan="8"></td></tr>
     <tr>
         <td>Rank</td>
         <td>Library</td>
@@ -243,7 +268,7 @@ Operation per seconds, higher is better, except the test "Memory" on which lower
     </tr>
     <tr>
         <td>1</td>
-        <td>FlexSearch <a href="#notes">*</a></td>
+        <td>FlexSearch</td>
         <td><b>23</b></td>
         <td><b>7039844</b></td>
         <td><b>1429457</b></td>
@@ -304,11 +329,22 @@ Operation per seconds, higher is better, except the test "Memory" on which lower
         <td>3141</td>
         <td>3333</td>
         <td>3265</td>
-        <td>21825569</td>
+        <td><b>21825569</b></td>
     </tr>
     <tr></tr>
     <tr>
         <td>7</td>
+        <td>MiniSearch</td>
+        <td>24348</td>
+        <td>4406</td>
+        <td>10945</td>
+        <td>72</td>
+        <td>39989</td>
+        <td>17624</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>8</td>
         <td>bm25</td>
         <td>15719</td>
         <td>1429</td>
@@ -319,7 +355,7 @@ Operation per seconds, higher is better, except the test "Memory" on which lower
     </tr>
     <tr></tr>
     <tr>
-        <td>8</td>
+        <td>9</td>
         <td>Lunr.js</td>
         <td>2219</td>
         <td>255</td>
@@ -330,7 +366,18 @@ Operation per seconds, higher is better, except the test "Memory" on which lower
     </tr>
     <tr></tr>
     <tr>
-        <td>9</td>
+        <td>10</td>
+        <td>FuzzySearch</td>
+        <td>157373</td>
+        <td>53</td>
+        <td>38</td>
+        <td>15</td>
+        <td>32</td>
+        <td>43</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>11</td>
         <td>Fuse</td>
         <td>7641904</td>
         <td>6</td>
@@ -341,28 +388,23 @@ Operation per seconds, higher is better, except the test "Memory" on which lower
     </tr>
 </table>
 
-<a name="notes" id="notes"></a>
-_* The preset "performance" was used for this test_ 
-
-Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
-
 <a name="contextual"></a>
 ## Contextual Search
 
-> __Note:__ This feature is actually not enabled by default. Read <a href="#contextual_enable">here</a> how to enable.
+> __Note:__ This feature is disabled by default because of its extended memory usage. Read <a href="#contextual_enable">here</a> get more information about.
 
 FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document.
 This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
 
 <p align="center">
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=2">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4">
 </p>
 
 <a name="installation"></a>
 ## Load Library
 
-#### ES6 Modules (Browser):
+### ES6 Modules (Browser):
 
 ```js
 import Index from "./index.js";
@@ -374,7 +416,7 @@ const document = new Document(options);
 const worker = new WorkerIndex(options);
 ```
 
-#### Bundle (Browser)
+### Bundle (Browser)
 
 ```html
 <html>
@@ -403,7 +445,7 @@ var document = new FlexSearch.Document(options);
 var worker = new FlexSearch.Worker(options);
 ```
 
-#### Node.js
+### Node.js
 
 ```npm
 npm install flexsearch
@@ -415,7 +457,7 @@ In your code include as follows:
 const { Index, Document, Worker } = require("flexsearch");
 ```
 
-### Basic Usage
+## Basic Usage
 
 ```js
 index.add(id, text);
@@ -443,58 +485,65 @@ worker.search(text, limit, options, callback);
 worker.search(options);
 ```
 
+The `worker` inherits from type `Index` and does not inherit from type `Document`. Therefore, a WorkerIndex basically works like a standard FlexSearch Index. Worker-Support in documents needs to be enabled by just passing the appropriate option during creation `{ worker: true }`.
+
 <a name="api"></a>
 ## API Overview
 
 Global methods:
+
 - <a href="#flexsearch.register">FlexSearch.__registerCharset__(name, charset)</a>
 - <a href="#flexsearch.language">FlexSearch.__registerLanguage__(name, language)</a>
 
 Index + WorkerIndex methods:
+
 - <a href="#index.add">Index.__add__(id, string)</a> *
 - <a href="#index.append">Index.__append__(id, string)</a> *
 - <a href="#index.search">Index.__search__(string, \<limit\>, \<options\>)</a> *
 - <a href="#index.update">Index.__update__(id, string)</a> *
 - <a href="#index.remove">Index.__remove__(id)</a> *
-- <a href="#index.export">Index.__export__(handler)</a>
-- <a href="#index.import">Index.__import__(key, data)</a>
+- _async_ <a href="#index.export">Index.__export__(handler)</a>
+- _async_ <a href="#index.import">Index.__import__(key, data)</a>
 
 Document methods:
+
 - <a href="#document.add">Document.__add__(id, document)</a> *
 - <a href="#document.append">Document.__append__(id, document)</a> *
 - <a href="#document.search">Document.__search__(string, \<limit\>, \<options\>)</a> *
 - <a href="#document.update">Document.__update__(id, document)</a> *
 - <a href="#document.remove">Document.__remove__(id || document)</a> *
-- <a href="#document.export">Document.__export__(handler)</a>
-- <a href="#document.import">Document.__import__(key, data)</a>
+- _async_ <a href="#document.export">Document.__export__(handler)</a>
+- _async_ <a href="#document.import">Document.__import__(key, data)</a>
 
 * For each of those methods there exist an asynchronous equivalent:
 
 Async Version:
 
-- <a href="#addAsync">.__addAsync__( ... , \<callback\>)</a> *
-- <a href="#appendAsync">.__appendAsync__( ... , \<callback\>)</a> *
-- <a href="#searchAsync">.__searchAsync__( ... , \<callback\>)</a> *
-- <a href="#updateAsync">.__updateAsync__( ... , \<callback\>)</a> *
-- <a href="#removeAsync">.__removeAsync__( ... , \<callback\>)</a> *
+- _async_ <a href="#addAsync">.__addAsync__( ... , \<callback\>)</a>
+- _async_ <a href="#appendAsync">.__appendAsync__( ... , \<callback\>)</a>
+- _async_ <a href="#searchAsync">.__searchAsync__( ... , \<callback\>)</a>
+- _async_ <a href="#updateAsync">.__updateAsync__( ... , \<callback\>)</a>
+- _async_ <a href="#removeAsync">.__removeAsync__( ... , \<callback\>)</a>
+
+Methods `export` and also `import` are always async as well as every method you call on a Worker-based Index.
 
 <a name="options"></a>
 ## Options
 
-FlexSearch is highly customizable. Make use of the the right options can really improve your results as well as memory economy and query time.
+FlexSearch is highly customizable. Make use of the right options can really improve your results as well as memory economy and query time.
 
 <a name="options-index"></a>
 ### Index Options
 
 <table>
-    <tr></tr>
+    <tr><td colspan="3"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
         <td>Description</td>
     </tr>
     <tr>
-        <td>profile<br><br><br><br><br></td>
+        <td>preset<br><br><br><br><br></td>
         <td>
             "memory"<br>
             "performance"<br>
@@ -522,13 +571,43 @@ FlexSearch is highly customizable. Make use of the the right options can really 
     </tr>
     <tr></tr>
     <tr>
+        <td>cache<br><br><br></td>
+        <td>
+            Boolean<br>
+            Number
+        </td>
+        <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the <b>cache automatically balance stored entries related to their popularity</b>.<br><br>Note: When just using "true" the cache has no limits and growth unbounded.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>resolution</td>
+        <td>
+            Number
+        </td>
+        <td>Sets the scoring resolution (default: 9).</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>context<br><br></td>
+        <td>
+            Boolean<br>
+            Context Options
+        </td>
+        <td>Enable/Disable <a href="#contextual">contextual indexing</a>. When passing "true" as value it will take the default values for the context.</td>
+    </tr>
+        <tr>
+        <td colspan="3">
+            Additional Options for Language Encoding:
+        </td>
+    </tr>
+    <tr>
         <td>charset<br><br></td>
         <td>
             Charset Payload<br>
-            string (builtin charset)
+            String (key)
         </td>
         <td vertical-align="top">
-            ...
+            Provide a custom charset payload or pass one of the keys of built-in charsets.
         </td>
     </tr>
     <tr></tr>
@@ -536,10 +615,10 @@ FlexSearch is highly customizable. Make use of the the right options can really 
         <td>language<br><br></td>
         <td>
             Language Payload<br>
-            string (builtin language)
+            String (key)
         </td>
         <td vertical-align="top">
-            ...
+            Provide a custom language payload or pass one of the keys of built-in languages.
         </td>
     </tr>
     <tr></tr>
@@ -558,21 +637,62 @@ FlexSearch is highly customizable. Make use of the the right options can really 
     </tr>
     <tr></tr>
     <tr>
-        <td>cache<br><br><br></td>
+        <td>stemmer<br><br><br></td>
         <td>
             false<br>
-            true<br>
-            {number}
+            String<br>
+            Function
         </td>
-        <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the <b>cache automatically balance stored entries related to their popularity</b>.<br><br>Note: When just using "true" the cache has no limits and is actually 2-3 times faster (because the balancer do not have to run).</td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
     </tr>
     <tr></tr>
+    <tr>
+        <td>filter<br><br><br></td>
+        <td>
+            false<br>
+            String<br>
+            Function
+        </td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            Additional Options for Document Indexes:
+        </td>
+    </tr>
+    <tr>
+        <td>worker<br></td>
+        <td>
+            Boolean
+        </td>
+        <td>Enable/Disable and set count of running worker threads.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>document<br></td>
+        <td>Document Descriptor</td>
+        <td vertical-align="top">
+            Includes definitions for the document index and storage.
+        </td>
+    </tr>
+</table>
+
+<a name="options-context"></a>
+### Context Options
+
+<table>
+    <tr><td colspan="3"></td></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
     <tr>
         <td>resolution</td>
         <td>
             {number}
         </td>
-        <td>Sets the scoring resolution (default: 9).</td>
+        <td>Sets the scoring resolution for the context (default: 1).</td>
     </tr>
     <tr></tr>
     <tr>
@@ -585,42 +705,12 @@ FlexSearch is highly customizable. Make use of the the right options can really 
     </tr>
     <tr></tr>
     <tr>
-        <td>stemmer<br><br><br></td>
-        <td>
-            false<br>
-            {string}<br>
-            {function}
-        </td>
-        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>filter<br><br><br></td>
-        <td>
-            false<br>
-            {string}<br>
-            {function}
-        </td>
-        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
-    </tr>
-    <tr>
-        <td colspan="3">
-            Addition Options for Document Indexes:
-        </td>
-    </tr>
-    <tr>
-        <td>worker<br><br></td>
+        <td>bidirectional</td>
         <td>
             false<br>
             true
         </td>
-        <td>Enable/Disable and set count of running worker threads.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>document<br><br></td>
-        <td></td>
-        <td vertical-align="top"></td>
+        <td>Sets the scoring resolution (default: 9).</td>
     </tr>
 </table>
 
@@ -628,7 +718,7 @@ FlexSearch is highly customizable. Make use of the the right options can really 
 ### Document Options
 
 <table>
-    <tr></tr>
+    <tr><td colspan="3"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
@@ -636,25 +726,25 @@ FlexSearch is highly customizable. Make use of the the right options can really 
     </tr>
     <tr>
         <td>id<br><br></td>
-        <td></td>
-        <td vertical-align="top"></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>index<br><br></td>
-        <td></td>
+        <td>String</td>
         <td vertical-align="top"></td>
     </tr>
     <tr></tr>
     <tr>
         <td>tag<br><br></td>
-        <td></td>
+        <td>String</td>
+        <td vertical-align="top"></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>index<br><br></td>
+        <td>String<br>Array</td>
         <td vertical-align="top"></td>
     </tr>
     <tr></tr>
     <tr>
         <td>store<br><br></td>
-        <td></td>
+        <td>String<br>Array</td>
         <td vertical-align="top"></td>
     </tr>
 </table>
@@ -663,7 +753,7 @@ FlexSearch is highly customizable. Make use of the the right options can really 
 ### Charset Options
 
 <table>
-    <tr></tr>
+    <tr><td colspan="3"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
@@ -688,13 +778,21 @@ FlexSearch is highly customizable. Make use of the the right options can really 
         </td>
         <td>Enables Right-To-Left encoding.</td>
     </tr>
+    <tr></tr>
+    <tr>
+        <td>encode</td>
+        <td>
+            function(str) => [words]
+        </td>
+        <td>The custom encoding function.</td>
+    </tr>
 </table>
 
 <a name="options-language"></a>
 ### Language Options
 
 <table>
-    <tr></tr>
+    <tr><td colspan="3"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
@@ -704,8 +802,8 @@ FlexSearch is highly customizable. Make use of the the right options can really 
         <td>stemmer<br><br><br></td>
         <td>
             false<br>
-            {string}<br>
-            {function}
+            String<br>
+            Function
         </td>
         <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
     </tr>
@@ -714,20 +812,28 @@ FlexSearch is highly customizable. Make use of the the right options can really 
         <td>filter<br><br><br></td>
         <td>
             false<br>
-            {string}<br>
-            {function}
+            String<br>
+            Function
+        </td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>matcher<br><br><br></td>
+        <td>
+            false<br>
+            String<br>
+            Function
         </td>
         <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
     </tr>
 </table>
 
-...
-
 <a name="options-search"></a>
 ### Search Options
 
 <table>
-    <tr></tr>
+    <tr><td colspan="3"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
@@ -750,6 +856,25 @@ FlexSearch is highly customizable. Make use of the the right options can really 
         <td>true, false</td>
         <td>Enables <a href="#suggestions">suggestions</a> in results.</td>
     </tr>
+</table>
+
+<a name="options-field-search"></a>
+### Document Search Options
+
+* Additionally, to the Index search options above.
+
+<table>
+    <tr><td colspan="3"></td></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>enrich</td>
+        <td>true, false</td>
+        <td>Enables <a href="#pagination">paginated results</a>.</td>
+    </tr>
     <tr></tr>
     <tr>
         <td>index</td>
@@ -758,91 +883,25 @@ FlexSearch is highly customizable. Make use of the the right options can really 
     </tr>
     <tr></tr>
     <tr>
+        <td>bool</td>
+        <td>"and", "or"</td>
+        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
+    </tr>
+    <tr></tr>
+    <tr>
         <td>tag</td>
         <td>string, Array&lt;string&gt;</td>
         <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
     </tr>
-    <tr></tr>
-    <tr>
-        <td>bool</td>
-        <td>"and", "or"</td>
-        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>enrich</td>
-        <td>true, false</td>
-        <td>Enables <a href="#pagination">paginated results</a>.</td>
-    </tr>
 </table>
-
-You can also override these following <a href="#options-index">index settings</a> via custom search (v0.7.0):
-
-- encode
-- split
-- tokenize
-- threshold
-- cache
-- async
-
-Custom-Search options will override index options.
-
-<a name="options-field-search"></a>
-### Field-Search (v0.7.0)
-
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-    </tr>
-    <tr>
-        <td>limit</td>
-        <td>number</td>
-        <td>Sets the limit of results per field.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>suggest</td>
-        <td>true, false</td>
-        <td>Enables <a href="#suggestions">suggestions</a> in results per field.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bool</td>
-        <td>"and", "or"</td>
-        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
-    </tr>
-</table>
-
-You can also override these following <a href="#options-index">index settings</a> per field via custom field-search:
-
-- encode
-- split
-- tokenize
-
-Field-Search options will override custom-search options and index options.
-
-<!--
-## Depth and Resolution?
-
-Whereas __depth__ is the minimum relevance for the __contextual index__, __threshold__ is the minimum relevance for the __lexical index__. The threshold score is an enhanced variation of a conventional scoring calculation, it uses on document distance and partial distance instead of TF-IDF. The final scoring value is based on <a href="#contextual">3 kinds of distance</a>.
-
-Resolution on the other hand specify the max scoring value. The final score value is an integer value, so resolution affect how many segments the score may have. When the resolution is 1, then there exist just one scoring level for all matched terms. To get more differentiated results you need to raise the resolution.
-
-> The difference of both affects the performance on higher values (complexity = _resolution_ - _threshold_).
-
-The combination of resolution and threshold gives you a good controlling of your matches as well as performance, e.g. when the resolution is 25 and the threshold is 22, then the result only contains matches which are super relevant. The goal should always be just have items in result which are really needed. On top, that also improves performance a lot.
--->
 
 <a name="tokenizer"></a>
-## Tokenizer
+## Tokenizer (Prefix Search)
 
 Tokenizer affects the required memory also as query time and flexibility of partial matches. Try to choose the most upper of these tokenizer which fits your needs:
 
 <table>
-    <tr></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Description</td>
@@ -884,7 +943,7 @@ Tokenizer affects the required memory also as query time and flexibility of part
 Encoding affects the required memory also as query time and phonetic matches. Try to choose the most upper of these encoders which fits your needs, or pass in a <a href="#flexsearch.encoder">custom encoder</a>:
 
 <table>
-    <tr></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Description</td>
@@ -2538,7 +2597,7 @@ for(let i = 0, key; i < keys.length; i++){
 > Reference String: __"Björn-Phillipp Mayer"__
 
 <table>
-    <tr></tr>
+    <tr><td colspan="5"></td></tr>
     <tr>
         <td>Query</td>
         <td>icase</td>
@@ -2643,217 +2702,6 @@ for(let i = 0, key; i < keys.length; i++){
 </table>
 
 <a name="memory"></a>
-## Memory Usage
-
-The required memory for the index depends on several options:
-
-<table>
-    <tr></tr>
-    <tr>
-        <td>Encoding</td>
-        <td>Memory usage of every ~ 100,000 indexed word</td>
-    </tr>
-    <tr>
-        <td>false</td>
-        <td>260 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>"icase" (default)</td>
-        <td>210 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>"simple"</td>
-        <td>190 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>"advanced"</td>
-        <td>150 kb</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>"extra"</td>
-        <td>90 kb</td>
-    </tr>
-    <tr>
-        <td>Mode</td>
-        <td>Multiplied with: (n = average length of indexed words)</td>
-    </tr>
-    <tr>
-        <td>"strict"</td>
-        <td>* 1</td>
-    </tr>
-    <!--
-    <tr></tr>
-    <tr>
-        <td>"ngram" (default)</td>
-        <td>* n / 3</td>
-    </tr>
-    -->
-    <tr></tr>
-    <tr>
-        <td>"forward"</td>
-        <td>* n</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>"reverse"</td>
-        <td>* 2n - 1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>"full"</td>
-        <td>* n * (n - 1)</td>
-    </tr>
-    <tr>
-        <td>Contextual Index</td>
-        <td>Multiply the sum above with:</td>
-    </tr>
-    <tr>
-        <td></td>
-        <td>* (depth * 2 + 1)</td>
-    </tr>
-</table>
-
-Adding, removing or updating existing items has a similar complexity. The contextual index grows exponentially, that's why it is actually just supported for the tokenizer ___"strict"___.
-
-<a name="consumption"></a>
-#### Compare Memory Consumption
-
-The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
-
-<br>
-<img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg?v=2">
-
-<a name="presets"></a>
-## Presets
-
-1. `memory` (primary optimize for memory)
-2. `performance` (primary optimize for performance)
-3. `match` (primary optimize for matching)
-4. `score` (primary optimize for scoring)
-5. `default` (the default balanced profile)
-
-These profiles are covering standard use cases. It is recommended to apply custom configuration instead of using profiles to get the best out for your situation. Every profile could be optimized further to its specific task, e.g. extreme performance optimized configuration or extreme memory and so on.
-
-You can pass a preset during creation/initialization. They represents these following settings:
-
-__"default"__: Standard profile
-```js
-{
-    encode: "icase",
-    tokenize: "forward",
-    resolution: 9
-}
-```
-
-__"memory"__: Memory-optimized profile
-```js
-{
-    encode: "extra",
-    tokenize: "strict",
-    resolution: 1
-}
-```
-
-__"performance"__: Speed-optimized profile
-
-```js
-{
-    encode: "icase",
-    tokenize: "strict",
-    resolution: 3,
-    depth: 2
-}
-```
-
-__"match"__: Matching-tolerant profile
-
-```js
-{
-    encode: "extra",
-    tokenize: "full",
-    resolution: 3
-}
-```
-
-__"score"__: Relevance-optimized profile
-
-```js
-{
-    encode: "extra",
-    tokenize: "strict",
-    resolution: 9,
-    depth: 4
-}
-```
-
-Compare these presets:
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
-
-## Performance Guide
-
-Performance Checklist:
-
-- Using just id-content-pairs for the index performs almost faster than using docs
-- When adding multiple fields of documents to the index try to set the lowest possible preset for each field separately
-- Use numeric IDs (the datatype length of IDs influences the memory consumption significantly)
-- Try to enable _contextual index_ by setting the ___depth___ to a minimum meaningful value and tokenizer to ___"strict"___
-- Pass a ___limit___ when searching (lower values performs better)
-- Try to minify the content size of indexed documents by just adding attributes you really need to get back from results
-
-## Best Practices
-
-##### Split Complexity
-
-Whenever you can, try to divide content by categories and add them to its own index, e.g.:
-
-```js
-var action = new FlexSearch();
-var adventure = new FlexSearch();
-var comedy = new FlexSearch();
-```
-
-This way you can also provide different settings for each category. This is actually the fastest way to perform a fuzzy search.
-
-To make this workaround more extendable you can use a short helper:
-
-```js
-var index = {};
-
-function add(id, cat, content){
-    (index[cat] || (
-        index[cat] = new FlexSearch
-    )).add(id, content);
-}
-
-function search(cat, query){
-    return index[cat] ?
-        index[cat].search(query) : [];
-}
-```
-
-Add content to the index:
-```js
-add(1, "action", "Movie Title");
-add(2, "adventure", "Movie Title");
-add(3, "comedy", "Movie Title");
-```
-
-Perform queries:
-```js
-var results = search("action", "movie title"); // --> [1]
-```
-
-Split indexes by categories improves performance significantly.
-
-##### Use numeric IDs
-
-It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
-
 ## Memory Allocation
 
 The book "Gulliver's Travels Swift Jonathan 1726" was fully indexed for the examples below.
@@ -2873,6 +2721,14 @@ index = new Index({
     context: false
 });
 ```
+
+<a name="consumption"></a>
+### Memory Benchmark (Ranking)
+
+The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
+
+<br>
+<img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg?v=2">
 
 ### Compare Impact of Memory Allocation
 
@@ -2909,9 +2765,7 @@ Every search library is constantly in competition with these 4 properties:
 FlexSearch provides you many parameters you can use to adjust the optimal balance for your specific use-case.
 
 <table>
-    <tr>
-        <td colspan="5" hidden></td>
-    </tr>
+    <tr><td colspan="5"></td></tr>
     <tr>
         <td>Modifier</td>
         <td>Memory Impact *</td>
@@ -3106,157 +2960,75 @@ FlexSearch provides you many parameters you can use to adjust the optimal balanc
 * range from -10 to 10, lower is better (-10 => big decrease, 0 => unchanged, +10 => big increase)<br>
 ** range from -10 to 10, higher is better
 
+<a name="presets"></a>
+## Presets
+
+1. `memory` (primary optimize for memory)
+2. `performance` (primary optimize for performance)
+3. `match` (primary optimize for matching)
+4. `score` (primary optimize for scoring)
+5. `default` (the default balanced profile)
+
+These profiles are covering standard use cases. It is recommended to apply custom configuration instead of using profiles to get the best out for your situation. Every profile could be optimized further to its specific task, e.g. extreme performance optimized configuration or extreme memory and so on.
+
+You can pass a preset during creation/initialization of the index. 
+
 <!--
-<a name="builds"></a>
-## Custom Builds
-
-Full Build:
-```bash
-npm run build
-```
-
-Compact Build:
-```bash
-npm run build-compact
-```
-
-Light Build:
-```bash
-npm run build-light
-```
-
-Build Language Packs:
-```bash
-npm run build-lang
-```
-
-Custom Build:
-```bash
-npm run build-custom SUPPORT_WORKER=true SUPPORT_ASYNC=true
-```
-
-> On custom builds each build flag will be set to _false_ by default.
-
-Alternatively you can also use:
-```bash
-node compile SUPPORT_WORKER=true
-```
-
-> The custom build will be saved to flexsearch.custom.xxxxx.js (the "xxxxx" is a hash based on the used build flags).
-
-##### Supported Build Flags
-
-<table>
-    <tr></tr>
-    <tr>
-        <td>Flag</td>
-        <td>Values</td>
-    </tr>
-    <tr>
-        <td>DEBUG</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>PROFILER</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_ENCODER</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_DOCUMENT</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_WHERE</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_WORKER</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_CACHE</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_ASYNC</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_PRESET</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_INFO</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_SERIALIZE</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_SUGGESTION</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_PAGINATION</td>
-        <td>true, false</td>
-    </tr>
-     <tr></tr>
-     <tr>
-         <td>SUPPORT_OPERATOR</td>
-         <td>true, false</td>
-     </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_CALLBACK</td>
-        <td>true, false</td>
-    </tr>
-    <tr>
-        <td><br><b>Language Packs</b></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>SUPPORT_LANG_EN</td>
-        <td>true, false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><a>SUPPORT_LANG_DE</td>
-        <td>true, false</td>
-    </tr>
-    <tr>
-        <td><br><b>Compiler Flags</b></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>LANGUAGE_OUT<br><br><br><br><br><br><br><br></td>
-        <td>ECMASCRIPT3<br>ECMASCRIPT5<br>ECMASCRIPT5_STRICT<br>ECMASCRIPT6<br>ECMASCRIPT6_STRICT<br>ECMASCRIPT_2015<br>ECMASCRIPT_2017<br>STABLE</td>
-    </tr>
-</table>
-
-## Contribution
-
-Feel free to contribute to this project and also feel free to contact me (<a href="https://github.com/ts-thomas">https://github.com/ts-thomas</a>) when you have any questions.
-
-<a href="CHANGELOG.md">Changelog</a>
+Compare these presets:
+- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
+- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
 -->
+
+## Best Practices
+
+##### Use numeric IDs
+
+It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
+
+##### Split Complexity
+
+Whenever you can, try to divide content by categories and add them to its own index, e.g.:
+
+```js
+var action = new FlexSearch();
+var adventure = new FlexSearch();
+var comedy = new FlexSearch();
+```
+
+This way you can also provide different settings for each category. This is actually the fastest way to perform a fuzzy search.
+
+To make this workaround more extendable you can use a short helper:
+
+```js
+var index = {};
+
+function add(id, cat, content){
+    (index[cat] || (
+        index[cat] = new FlexSearch
+    )).add(id, content);
+}
+
+function search(cat, query){
+    return index[cat] ?
+        index[cat].search(query) : [];
+}
+```
+
+Add content to the index:
+```js
+add(1, "action", "Movie Title");
+add(2, "adventure", "Movie Title");
+add(3, "comedy", "Movie Title");
+```
+
+Perform queries:
+```js
+var results = search("action", "movie title"); // --> [1]
+```
+
+Split indexes by categories improves performance significantly.
 
 ---
 
-Copyright 2019 Nextapps GmbH<br>
+Copyright 2018-2021 Nextapps GmbH<br>
 Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">Apache 2.0 License</a><br>

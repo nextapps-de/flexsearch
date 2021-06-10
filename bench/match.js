@@ -1,6 +1,5 @@
-import { text_data as data } from "../demo/data/gulliver.js";
+import { text_data } from "../demo/data/gulliver.js";
 
-const headers = document.getElementsByTagName("th");
 const iframe = document.getElementsByTagName("iframe")[0];
 const encode = false;
 const lib = encode ? [
@@ -12,7 +11,7 @@ const lib = encode ? [
     /*"flexsearch-0.6.2", "flexsearch-0.6.3",*/ "flexsearch-0.7.0-match",
     "bm25", "bulksearch-match", "elasticlunr",
     "fuzzysearch", "js-search", "jsii",
-    "fuse-match", "lunr", "wade"
+    "minisearch-match", "fuse-match", "lunr", "wade"
 ];
 
 let promise;
@@ -28,9 +27,31 @@ window.onmessage = function(event){
     }
 };
 
-window.data = data;
+window.data = text_data;
 
-//iframe.src = "test/" + lib[0].toLowerCase() + "/?query=gulliver" + (encode ? "&encode=true" : "") + "#match";
+const tpl_td = document.createElement("td");
+      tpl_td.appendChild(document.createTextNode(""))
+
+const root_head = document.getElementsByTagName("thead")[0].firstElementChild,
+      root_body = document.getElementsByTagName("tbody")[0];
+
+const tpl_tr = document.createElement("tr");
+
+for(let i = 0; i < lib.length + 1; i++){ // amount of libs + 1 for first row
+
+    tpl_tr.appendChild(tpl_td.cloneNode(true));
+}
+
+for(let i = 0; i < 12; i++){ // amount of tests + 1 for first row
+
+    const tr = tpl_tr.cloneNode(true);
+          tr.id = "test-" + (i + 1);
+
+    root_body.appendChild(tr);
+    root_head.appendChild(tpl_td.cloneNode(true));
+}
+
+const headers = root_head.getElementsByTagName("td");
 
 // -----------------------------------------------------------
 
@@ -46,7 +67,6 @@ await do_test("test-9", "composition of minerals gums juices vegetables", [1676,
 await do_test("test-10", "general camberlayhn", [520]);
 await do_test("test-11", "the end defeat", [2209]);
 await do_test("test-12", "fast chief", [1275]);
-//await do_test("test-13", "zero one three ten", [2721, 2720, 2722]);
 
 // ---------------------------------------
 
@@ -57,33 +77,25 @@ async function do_test(id, query, ref){
 
     for(let i = 0, current; i < lib.length; i++){
 
-        current = lib[i];
-        headers[i + 1].firstChild.nodeValue = current.replace("-0.7.0", "").replace("-match", "");
+        current = lib[i].replace("-0.7.0", "").replace("-match", "");
+        headers[i + 1].firstChild.nodeValue = current;
+
+        const node = nodes[i + 1];
+        const style = node.style;
+
+        node.firstChild.nodeValue = "run ...";
 
         let results = await new Promise(function(resolve){
 
             promise = resolve;
-            iframe.src = "test/" + current + //(id === "test-13" && current === "flexsearch-0.7.0-match" ? "flexsearch-0.7.0-context" : current) +
-                         "/?query=" + decodeURI(query) + (encode ? "&encode=true" : "") + "#match";
+            iframe.src = "test/" + lib[i] + "/?query=" + decodeURI(query) + (encode ? "&encode=true" : "") + "#match";
         });
 
         if(results.length){
 
             switch(current){
 
-                // case "flexsearch":
-                //     break;
-                //
-                // case "bulksearch":
-                //     break;
-                //
-                // case "fuse":
-                //     break;
-
                 case "elasticlunr":
-                    results = results.map(val => val.ref);
-                    break;
-
                 case "lunr":
                     results = results.map(val => val.ref);
                     break;
@@ -93,25 +105,17 @@ async function do_test(id, query, ref){
                     break;
 
                 case "js-search":
-                    results = results.map(val => val.id);
-                    break;
-
+                case "minisearch":
                 case "jsii":
-                    results = results.map(val => val.id);
-                    break;
-
                 case "bm25":
                     results = results.map(val => val.id);
                     break;
 
                 case "fuzzysearch":
-                    results = results.map(val => data.indexOf(val));
+                    results = results.map(val => text_data.indexOf(val));
                     break;
             }
         }
-
-        const node = nodes[lib.indexOf(current) + 1];
-        const style = node.style;
 
         for(let a = 0; a < ref.length; a++){
 

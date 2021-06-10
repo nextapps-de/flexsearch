@@ -13,48 +13,50 @@ const preset = {
         //tokenize: "strict",
         resolution: 3,
         //threshold: 0,
-        minlength: 3,
-        fastupdate: false,
-        optimize: "memory"
+        minlength: 4,
+        fastupdate: false
     },
 
     "performance": {
         //charset: "latin",
         //tokenize: "strict",
-        //resolution: 9,
-        threshold: 8,
+        resolution: 3,
         minlength: 3,
         //fastupdate: true,
+        optimize: false,
+        //fastupdate: true,
         context: {
-            depth: 1,
-            bidirectional: true
+            depth: 2,
+            resolution: 1
+            //bidirectional: false
         }
     },
 
     "match": {
         charset: "latin:extra",
-        tokenize: "full",
-        resolution: 3,
+        tokenize: "reverse",
+        //resolution: 9,
         //threshold: 0
     },
 
     "score": {
         charset: "latin:advanced",
         //tokenize: "strict",
-        //resolution: 9,
-        threshold: 1,
+        resolution: 20,
+        minlength: 3,
         context: {
             depth: 3,
-            bidirectional: true
+            resolution: 9,
+            //bidirectional: true
         }
     },
 
     "default": {
-        //charset: "latin:default",
-        //tokenize: "strict",
-        resolution: 3,
-        threshold: 0,
-        depth: 3
+        // charset: "latin:default",
+        // tokenize: "strict",
+        // resolution: 3,
+        // threshold: 0,
+        // depth: 3
     },
 
     // "fast": {

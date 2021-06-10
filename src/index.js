@@ -1,6 +1,6 @@
 /**!
  * FlexSearch.js
- * Copyright 2019 Nextapps GmbH
+ * Copyright 2018-2021 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Licence: Apache-2.0
  * https://github.com/nextapps-de/flexsearch
@@ -8,7 +8,7 @@
 
 import {
 
-    SUPPORT_PRESET,
+    SUPPORT_ENCODER,
     SUPPORT_CACHE,
     SUPPORT_ASYNC,
     SUPPORT_SUGGESTION,
@@ -46,7 +46,7 @@ function Index(options, _register){
 
     if(options){
 
-        if(SUPPORT_PRESET){
+        if(SUPPORT_ENCODER){
 
             options = apply_preset(options);
         }
