@@ -758,7 +758,7 @@ R.prototype.search = function(a, b, c, d) {
     if (c.constructor === Array) {
       k = c, c = null;
     } else {
-      k = (g = c.pluck) || c.index || c.field || c;
+      k = (g = c.pluck) || c.index || c.field;
       m = c.tag;
       h = this.store && c.enrich;
       n = "and" === c.bool;

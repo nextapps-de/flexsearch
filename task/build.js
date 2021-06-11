@@ -159,7 +159,7 @@ let parameter = (function(opt){
     rewrite_polyfills: use_polyfill || false,
 
     // isolation_mode: "IIFE",
-    output_wrapper: /*release === "lang" ? "%output%" :*/ "(function(self){%output%}(this));"
+    output_wrapper: /*release === "lang" ? "%output%" :*/ "\"(function(self){%output%}(this));\""
 
     //formatting: "PRETTY_PRINT"
 });

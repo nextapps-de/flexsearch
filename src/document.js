@@ -495,7 +495,7 @@ Document.prototype.search = function(query, limit, options, _resolve){
         else{
 
             pluck = options["pluck"];
-            field = pluck || options["index"] || options["field"] || options;
+            field = pluck || options["index"] || options["field"];
             tag = SUPPORT_TAGS && options["tag"];
             enrich = SUPPORT_STORE && this.store && options["enrich"];
             bool = options["bool"] === "and";
