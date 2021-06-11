@@ -14,7 +14,7 @@
 
 ### FlexSearch v0.7.0
 
-The new version is finally available. FlexSearch 0.7.0 was developed as a modern rebuild from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years of production use.
+The new version is finally available. FlexSearch v0.7.0 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
 
 This new version has a good compatibility with the old generation, but it might require some migrations steps in your code.
 
@@ -455,6 +455,10 @@ In your code include as follows:
 
 ```js
 const { Index, Document, Worker } = require("flexsearch");
+
+const index = new Index(options);
+const document = new Document(options);
+const worker = new Worker(options);
 ```
 
 ## Basic Usage
@@ -597,7 +601,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
     </tr>
         <tr>
         <td colspan="3">
-            Additional Options for Language Encoding:
+            Language-specific Options and Encoding:
         </td>
     </tr>
     <tr>
@@ -618,7 +622,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             String (key)
         </td>
         <td vertical-align="top">
-            Provide a custom language payload or pass one of the keys of built-in languages.
+            Provide a custom language payload or pass in language shorthand flag (ISO-3166) of built-in languages.
         </td>
     </tr>
     <tr></tr>
@@ -643,7 +647,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             String<br>
             Function
         </td>
-        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
@@ -653,7 +657,17 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             String<br>
             Function
         </td>
-        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom array.</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>matcher<br><br><br></td>
+        <td>
+            false<br>
+            String<br>
+            Function
+        </td>
+        <td></td>
     </tr>
     <tr>
         <td colspan="3">
@@ -690,7 +704,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
     <tr>
         <td>resolution</td>
         <td>
-            {number}
+            Number
         </td>
         <td>Sets the scoring resolution for the context (default: 1).</td>
     </tr>
@@ -699,7 +713,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td>depth<br><br></td>
         <td>
             false<br>
-            {number}
+            Number
         </td>
         <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance. Depth is the maximum number of words/tokens away a term to be considered as relevant.</td>
     </tr>
@@ -707,8 +721,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
     <tr>
         <td>bidirectional</td>
         <td>
-            false<br>
-            true
+            Boolean
         </td>
         <td>Sets the scoring resolution (default: 9).</td>
     </tr>
@@ -871,27 +884,27 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td>Description</td>
     </tr>
     <tr>
-        <td>enrich</td>
-        <td>true, false</td>
-        <td>Enables <a href="#pagination">paginated results</a>.</td>
-    </tr>
-    <tr></tr>
-    <tr>
         <td>index</td>
         <td>string, Array&lt;string&gt;</td>
         <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>bool</td>
-        <td>"and", "or"</td>
-        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields.</td>
-    </tr>
-    <tr></tr>
-    <tr>
         <td>tag</td>
         <td>string, Array&lt;string&gt;</td>
         <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>enrich</td>
+        <td>Boolean</td>
+        <td>Enrich IDs from the results with the corresponding documents.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>bool</td>
+        <td>"and", "or"</td>
+        <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields or tags.</td>
     </tr>
 </table>
 
@@ -1012,15 +1025,13 @@ var index = new Index();
 Create a new index and choosing one of the presets:
 
 ```js
-var index = new Index("speed");
+var index = new Index("performance");
 ```
 
 Create a new index with custom options:
 
 ```js
 var index = new Index({
-
-    // default values:
 
     charset: "latin:extra",
     tokenize: "reverse",
@@ -1032,9 +1043,8 @@ Create a new index and extend a preset with custom options:
 
 ```js
 var index = new FlexSearch("memory", {
-    encode: "balance",
-    tokenize: "forward",
-    threshold: 0
+    resolution: 5,
+    tokenize: "forward"
 });
 ```
 
@@ -1053,7 +1063,7 @@ index.add(10025, "John Doe");
 <a name="index.search"></a>
 #### Search items
 
-> Index.__search(string | options, \<limit\>, \<callback\>)__
+> Index.__search(string | options, \<limit\>)__
 
 ```js
 index.search("John");
@@ -1076,11 +1086,9 @@ if(index.contain(1)){
 ```
 
 <a name="async_search"></a>
-### Async
+## Async
 
-The "async" options was removed, instead you can call each method in its async version, e.g. `index.addAsync` or `index.searchAsync`.
-
-The advantage is you can now use both variations on the same index, whereas the old version is just performing asynchronous for all methods when the option flag was set.
+You can call each method in its async version, e.g. `index.addAsync` or `index.searchAsync`.
 
 You can assign callbacks to each async function:
 
@@ -1088,23 +1096,19 @@ You can assign callbacks to each async function:
 index.addAsync(id, content, function(){
     console.log("Task Done");
 });
-```
 
-```js
 index.searchAsync(query, function(result){
     console.log("Results: ", result);
 });
 ```
 
-Or did not pass a callback function and getting back a `Promise` instead:
+Or do not pass a callback function and getting back a `Promise` instead:
 
 ```js
 index.addAsync(id, content).then(function(){
     console.log("Task Done");
 });
-```
 
-```js
 index.searchAsync(query).then(function(result){
     console.log("Results: ", result);
 });
@@ -1117,9 +1121,7 @@ async function add(){
     await index.addAsync(id, content);
     console.log("Task Done");
 }
-```
 
-```js
 async function search(){
     const results = await index.searchAsync(query);
     console.log("Results: ", result);
@@ -1152,101 +1154,6 @@ When you query `index.search("index")` then you will get index id 1 as the first
 
 If you didn't want this behavior than just ust `index.add(id, content)` and provide the full length of content.
 
-#### Custom Search
-
-Pass custom options for each query:
-
-```js
-index.search({
-
-    query: "John",
-    limit: 1000,
-    threshold: 5, // >= threshold
-    depth: 3,     // <= depth
-    callback: function(results){
-        // ...
-    }
-});
-```
-
-The same from above could also be written as:
-
-```js
-index.search("John", {
-
-    limit: 1000,
-    threshold: 5,
-    depth: 3
-
-}, function(results){
-
-    // ....
-});
-```
-
-<a href="#options-search">See all available custom search options.</a>
-
-<a name="pagination"></a>
-#### Pagination
-
-FlexSearch is providing a cursor-based pagination which has the ability to inject into the most-inner process. This enables the possibility of many performance improvements.
-
-> The cursor implementation may be changed often. Just take the cursor as it is and do not expect any specific value or format.
-
-To enable pagination you have to pass a ___page___ field within the custom search object (optionally also a ___limit___ as maximum items per page).
-
-Get the first page of results:
-```js
-var response = index.search("John Doe", {
-
-    limit: 5,
-    page: true
-});
-```
-
-Always when passing a ___page___ within custom search the ___response___ have this format:
-```json
-{
-    "page": "xxx:xxx",
-    "next": "xxx:xxx",
-    "result": []
-}
-```
-
-- ___page___ is the pointer to the current page
-- ___next___ is the pointer to the next page or ___null___ when no pages are left
-- ___result___ yields the searching results
-
-Get the second (next) page of results:
-```js
-index.search("John Doe", {
-
-    limit: 10,
-    page: response.next
-});
-```
-
-The limit can be modified for each query.
-
-<a name="suggestions"></a>
-#### Suggestions
-
-Get also suggestions for a query:
-
-```js
-index.search({
-
-    query: "John Doe",
-    suggest: true
-});
-```
-
-When suggestion is enabled all results will be filled up (until limit, default 1000) with similar matches ordered by relevance.
-
-Actually phonetic suggestions are not supported, for that purpose use the encoder and tokenizer which provides similar functionality. Suggestions comes into game when a query has multiple words/phrases. Assume a query contains 3 words. When the index just match 2 of 3 words then normally you will get no results, but with suggestion enabled you will also get results when 2 of 3 words was matched as well 1 of 3 words was matched (depends on the limit), also sorted by relevance.
-
-__Note:__ Is is planned to improve this feature and providing more flexibility.
-
 <a name="index.update"></a>
 #### Update item from an index
 
@@ -1264,153 +1171,11 @@ index.update(10025, "Road Runner");
 ```js
 index.remove(10025);
 ```
-<a name="index.clear"></a>
-#### Reset index
-
-```js
-index.clear();
-```
-
-<a name="index.destroy"></a>
-#### Destroy the index
-
-```js
-index.destroy();
-```
-
-<a name="index.init"></a>
-#### Re-Initialize the index
-
-> Index.__init(\<options\>)__
-
-Initialize (with same options):
-```js
-index.init();
-```
-
-Initialize with new options:
-```js
-index.init({
-
-    /* options */
-});
-```
-
-> Re-initialization will also destroy the old index.
-
-<a name="index.length"></a>
-#### Get Length
-
-Get the length of an index:
-
-```js
-var length = index.length;
-```
-
-<a name="index.index"></a>
-#### Get Register
-
-Get the index (register) of an instance:
-
-```js
-var index = index.index;
-```
-
-The register has the format _"@" + id_.
-
-> Important: Do not modify manually, just use it as read-only.
-
-<a name="flexsearch.addmatcher"></a>
-#### Add custom matcher
-
-> FlexSearch.__registerMatcher({_REGEX: REPLACE_})__
-
-Add global matchers for all instances:
-```js
-FlexSearch.registerMatcher({
-
-    'ä': 'a', // replaces all 'ä' to 'a'
-    'ó': 'o',
-    '[ûúù]': 'u' // replaces multiple
-});
-```
-
-<a name="index.addmatcher"></a>
-Add private matchers for a specific instance:
-```js
-index.addMatcher({
-
-    'ä': 'a', // replaces all 'ä' to 'a'
-    'ó': 'o',
-    '[ûúù]': 'u' // replaces multiple
-});
-```
-
-<a name="flexsearch.encoder"></a>
-#### Add custom encoder
-
-Assign a custom encoder by passing a function during index creation/initialization:
-```js
-var index = new FlexSearch({
-
-    encode: function(str){
-
-        // do something with str ...
-
-        return str;
-    }
-});
-```
-
-> The encoder function gets a string as a parameter and has to return the modified string.
-
-Call a custom encoder directly:
-```js
-var encoded = index.encode("sample text");
-```
-
-<a name="flexsearch.register"></a>
-#### Register a global encoder
-
-> FlexSearch.__registerEncoder(name, encoder)__
-
-Global encoders can be shared/used by all instances.
-
-```js
-FlexSearch.registerEncoder("whitespace", function(str){
-
-    return str.replace(/\s/g, "");
-});
-```
-
-Initialize index and assign a global encoder:
-```js
-var index = new FlexSearch({ encode: "whitespace" });
-```
-
-Call a global encoder directly:
-```js
-var encoded = FlexSearch.encode("whitespace", "sample text");
-```
-
-#### Mix/Extend multiple encoders
-
-```js
-FlexSearch.registerEncoder('mixed', function(str){
-
-    str = this.encode("icase", str); // built-in
-    str = this.encode("whitespace", str); // custom
-
-     // do something additional with str ...
-
-    return str;
-});
-```
 
 <a name="flexsearch.tokenizer"></a>
 #### Add custom tokenizer
 
-> A tokenizer split words into components or chunks.
+> A tokenizer split words/terms into components or partials.
 
 Define a private custom tokenizer during creation/initialization:
 ```js
@@ -1486,7 +1251,7 @@ Or use some pre-defined stemmer or filter of your preferred languages:
 ```html
 <html>
 <head>
-    <script src="js/flexsearch.min.js"></script>
+    <script src="js/flexsearch.bundle.js"></script>
     <script src="js/lang/en.min.js"></script>
     <script src="js/lang/de.min.js"></script>
 </head>
@@ -1495,29 +1260,23 @@ Or use some pre-defined stemmer or filter of your preferred languages:
 
 Now you can assign built-in stemmer during creation/initialization:
 ```js
-var index_en = new FlexSearch({
-    stemmer: "en",
-    filter: "en"
+var index_en = new FlexSearch.Index({
+    language: "en"
 });
 
-var index_de = new FlexSearch({
-    stemmer: "de",
-    filter: [ /* custom */ ]
+var index_de = new FlexSearch.Index({
+    language: "de"
 });
 ```
 
-In Node.js you just have to require the language pack files to make them available:
+In Node.js all built-in language packs files are available:
 
 ```js
-require("flexsearch.js");
-require("lang/en.js");
-require("lang/de.js");
-```
+const { Index } = require("flexsearch");
 
-It is also possible to <a href="#builds">compile language packs into the build</a> as follows:
-
-```bash
-node compile SUPPORT_LANG_EN=true SUPPORT_LANG_DE=true
+var index_en = new Index({
+    language: "en"
+});
 ```
 
 <a name="rtl"></a>
@@ -1528,8 +1287,8 @@ node compile SUPPORT_LANG_EN=true SUPPORT_LANG_DE=true
 Just set the field "rtl" to _true_ and use a compatible tokenizer:
 
 ```js
-var index = FlexSearch.create({
-    encode: "icase",
+var index = new Index({
+    encode: str => str.toLowerCase().split(/[^a-z]+/),
     tokenize: "reverse",
     rtl: true
 });
@@ -1542,10 +1301,7 @@ Set a custom tokenizer which fits your needs, e.g.:
 
 ```js
 var index = FlexSearch.create({
-    encode: false,
-    tokenize: function(str){
-        return str.replace(/[\x00-\x7F]/g, "").split("");
-    }
+    encode: str => str.replace(/[\x00-\x7F]/g, "").split("")
 });
 ```
 
@@ -2012,8 +1768,6 @@ You can perform a search through the same field with different queries.
 
 ### New Result Set
 
-One of the few breaking changes which needs migration of your old implementation is the result set. I was thinking a long time about it and came to the conclusion, that this new structure might look weird on the first time, but also comes with some nice new capabilities.
-
 Schema of the result-set:
 
 > `fields[] => { field, result[] => { document }}`
@@ -2070,7 +1824,7 @@ These change is basically based on "boolean search". Instead of applying your bo
 
 > A field search will apply a query with the boolean "or" logic by default. Each field has its own result to the given query.
 
-There is one situation where the `bool` property is still supported. When you like to switch the default "or" logic from the field search into "and", e.g.:
+There is one situation where the `bool` property is being still supported. When you like to switch the default "or" logic from the field search into "and", e.g.:
 
 ```js
 index.search(query, { 
@@ -2202,6 +1956,7 @@ const index = new Document({
         store: true
     }
 });
+
 index.add({ id: 0, content: "some text" });
 ```
 
@@ -2318,24 +2073,31 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 <a name="contextual_enable"></a>
 ## Enable Contextual Scoring
 
-Create an index and just set the limit of relevance as "depth":
+Create an index and use the default context:
 ```js
 var index = new FlexSearch({
 
-    encode: "icase",
     tokenize: "strict",
-    threshold: 7,
-    depth: 3
+    context: true
+});
+```
+
+Create an index and apply custom options for the context:
+```js
+var index = new FlexSearch({
+
+    tokenize: "strict",
+    context: { 
+        resolution: 5,
+        depth: 3,
+        bidirectional: true
+    }
 });
 ```
 
 > Only the tokenizer "strict" is actually supported by the contextual index.
 
 > The contextual index requires <a href="#memory">additional amount of memory</a> depending on depth.
-
-> Try to use the __lowest depth__ and __highest threshold__ which fits your needs.
-
-It is possible to modify values for _threshold_ and _depth_ during search (see custom search). The restriction is that the _threshold_ can only be raised, on the other hand the _depth_ can only be lowered.
 
 <a name="cache"></a>
 ### Auto-Balanced Cache (By Popularity)
@@ -2359,33 +2121,9 @@ A common scenario for using a cache is an autocomplete or instant search when ty
 <a name="webworker"></a>
 ## Worker Parallelism (Browser + Node.js)
 
-The whole worker implementation has changed by also keeping Node.js support in mind. The good news is worker will also get supported by Node.js by the library.
-
-One important change is how workers divided their tasks and how contents are distributed. One big issue was that in the old model workers cycles for each task (Round Robin). Theoretically that provides an optimal balance of workload and storage. But that breaks the internal architecture of this search library and almost every performance optimization is getting lost.
-
-Let us take an example. Assuming you have 4 workers and you will add 4 contents to the index, then each content is delegated to one worker (a perfect balance but index becomes a partial index).
-
-Old syntax FlexSearch v0.6.3 (___not supported anymore!___):
-
-```js
-const index = new FlexSearch({ worker: 4 });
-index.add(1, "some")
-     .add(2, "content")
-     .add(3, "to")
-     .add(4, "index");
-```
-
-```
-Worker 1: { 1: "some" }
-Worker 2: { 2: "content" }
-Worker 3: { 3: "to" }
-Worker 4: { 4: "index" }
-```
-
-The issue starts when you query a term. Each of the worker has to resolve the search on its own index and has to delegate back the results to apply the intersection calculation. That's the problem. No one of the workers could solve a search task completely, they have to transmit intermediate results back. Therefore, no optimization path could be applied early, because every worker has to send back the full (non-limited) result first.
-
 The new worker model from v0.7.0 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
 
+When using a document index, then just apply the option "worker":
 ```js
 const index = new Document({
     index: ["tag", "name", "title", "text"],
@@ -2410,9 +2148,9 @@ Worker 3: { 1: "some", 2: "title", 3: "to", 4: "index" }
 Worker 4: { 1: "some", 2: "content", 3: "to", 4: "index" }
 ```
 
-When you perform a field search through all fields then this task is perfectly balanced through all workers, which can solve their subtasks independently.
+When you perform a field search through all fields then this task is being balanced perfectly through all workers, which can solve their subtasks independently.
 
-### WorkerIndex (Adapter)
+### Worker Index
 
 Above we have seen that documents will create worker automatically for each field. You can also create a WorkerIndex directly (same like using `Index` instead of `Document`).
 
@@ -2492,11 +2230,9 @@ Or when you have just one callback when all requests are done, simply use `Promi
 
 ```js
 Promise.all([
-    
-    index.searchAsync(query).then(callback),
-    index.searchAsync(query).then(callback),
-    index.searchAsync(query).then(callback)
-    
+    index.searchAsync(query),
+    index.searchAsync(query),
+    index.searchAsync(query)
 ]).then(callback);
 ```
 
@@ -2600,7 +2336,7 @@ for(let i = 0, key; i < keys.length; i++){
     <tr><td colspan="5"></td></tr>
     <tr>
         <td>Query</td>
-        <td>icase</td>
+        <td>default</td>
         <td>simple</td>
         <td>advanced</td>
         <td>extra</td>
