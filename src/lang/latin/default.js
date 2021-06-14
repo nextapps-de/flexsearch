@@ -19,7 +19,7 @@ export function encode(str){
 
     return this.pipeline(
 
-        /* string: */ normalize(str).toLowerCase(),
+        /* string: */ normalize("" + str).toLowerCase(),
         /* normalize: */ false,
         /* split: */ regex_whitespace,
         /* collapse: */ false

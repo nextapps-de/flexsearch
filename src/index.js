@@ -371,14 +371,17 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
 
 Index.prototype.search = function(query, limit, options){
 
-    if(is_object(query)){
+    if(!options){
 
-        options = /** @type {Object} */ (query);
-        query = options["query"];
-    }
-    else if(is_object(limit)){
+        if(!limit && is_object(query)){
 
-        options = /** @type {Object} */ (limit);
+            options = /** @type {Object} */ (query);
+            query = options["query"];
+        }
+        else if(is_object(limit)){
+
+            options = /** @type {Object} */ (limit);
+        }
     }
 
     let result = [];

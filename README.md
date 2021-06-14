@@ -12,17 +12,17 @@
 
 <a href="#installation">Basic Start</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Document Indexes</a> &ensp;&bull;&ensp; <a>Using Worker</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
-### FlexSearch v0.7.0
+### FlexSearch v0.7.1
 
-The new version is finally available. FlexSearch v0.7.0 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
+The new version is finally available. FlexSearch v0.7.1 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
 
 This new version has a good compatibility with the old generation, but it might require some migrations steps in your code.
 
 Read the documentation of new features and changes:<br>
-<a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0.md</a>
+<a href="https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0.md</a>
 
 Read the documentation of new language encoding features:<br>
-<a href="https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/0.7.0/doc/0.7.0-lang.md</a>
+<a href="https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md</a>
 
 <h1></h1>
 
@@ -65,31 +65,31 @@ __Get Latest Stable Build (Recommended):__
     </tr>
     <tr>
         <td>flexsearch.bundle.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.0/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.bundle.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.bundle.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.0/dist/flexsearch.light.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.light.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.light.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.light.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.0/dist/flexsearch.compact.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.compact.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.compact.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.compact.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.es5.js *</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.0/dist/flexsearch.es5.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.0/dist/flexsearch.es5.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.es5.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.es5.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>ES6 Modules</td>
-        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.0/dist/module/" target="_blank">Download</a></td>
+        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.1/dist/module/" target="_blank">Download</a></td>
         <td>The <i>/dist/module/</i> folder of this Github repository</td>
     </tr>
 </table>
@@ -104,7 +104,7 @@ npm install flexsearch
 
 __Get Latest Nightly (Do not use for production!):__
 
-Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.0__/dist/" into "/flexsearch/__master__/dist".
+Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.1__/dist/" into "/flexsearch/__master__/dist".
 
 __Compare Web-Bundles:__
 
@@ -428,7 +428,7 @@ const worker = new WorkerIndex(options);
 
 Or via CDN:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.0/dist/flexsearch.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.1/dist/flexsearch.bundle.js"></script>
 ```
 
 AMD:
@@ -2121,7 +2121,7 @@ A common scenario for using a cache is an autocomplete or instant search when ty
 <a name="webworker"></a>
 ## Worker Parallelism (Browser + Node.js)
 
-The new worker model from v0.7.0 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
+The new worker model from v0.7.1 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
 
 When using a document index, then just apply the option "worker":
 ```js

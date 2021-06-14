@@ -470,15 +470,18 @@ Document.prototype.remove = function(id){
 
 Document.prototype.search = function(query, limit, options, _resolve){
 
-    if(is_object(query)){
+    if(!options){
 
-        options = /** @type {Object} */ (query);
-        query = options["query"];
-    }
-    else if(is_object(limit)){
+        if(!limit && is_object(query)){
 
-        options = /** @type {Object} */ (limit);
-        limit = 0;
+            options = /** @type {Object} */ (query);
+            query = options["query"];
+        }
+        else if(is_object(limit)){
+
+            options = /** @type {Object} */ (limit);
+            limit = 0;
+        }
     }
 
     let result = [], result_field = [];
@@ -495,7 +498,7 @@ Document.prototype.search = function(query, limit, options, _resolve){
         else{
 
             pluck = options["pluck"];
-            field = pluck || options["index"] || options["field"] || options;
+            field = pluck || options["index"] || options["field"] /*|| (is_string(options) && [options])*/;
             tag = SUPPORT_TAGS && options["tag"];
             enrich = SUPPORT_STORE && this.store && options["enrich"];
             bool = options["bool"] === "and";
