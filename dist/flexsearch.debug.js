@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.0 (Debug)
+ * FlexSearch.js v0.7.1 (Debug)
  * Copyright 2018-2021 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Licence: Apache-2.0
@@ -63,7 +63,7 @@ function G(a) {
 ;var fa = {encode:ea, rtl:!1, tokenize:""};
 const ha = /[\W_]+/;
 function ea(a) {
-  return this.pipeline(ca(a).toLowerCase(), !1, ha, !1);
+  return this.pipeline(ca("" + a).toLowerCase(), !1, ha, !1);
 }
 ;const ia = {}, I = {};
 function ja(a) {
@@ -350,7 +350,7 @@ L.prototype.push_index = function(a, b, c, d, e, f) {
   }
 };
 L.prototype.search = function(a, b, c) {
-  z(a) ? (c = a, a = c.query) : z(b) && (c = b);
+  c || (!b && z(a) ? (c = a, a = c.query) : z(b) && (c = b));
   let d = [], e;
   let f, g = 0;
   if (c) {
@@ -752,7 +752,7 @@ R.prototype.remove = function(a) {
   return this;
 };
 R.prototype.search = function(a, b, c, d) {
-  z(a) ? (c = a, a = c.query) : z(b) && (c = b, b = 0);
+  c || (!b && z(a) ? (c = a, a = c.query) : z(b) && (c = b, b = 0));
   let e = [], f = [], g, h, k, m, n, u, q = 0;
   if (c) {
     if (c.constructor === Array) {
@@ -912,6 +912,7 @@ ja(R.prototype);
 var ya = {encode:xa, rtl:!1, tokenize:""};
 const za = /[\W_]+/, Aa = E("[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]"), Ba = E("[\u00e8\u00e9\u00ea\u00eb]"), Ca = E("[\u00ec\u00ed\u00ee\u00ef]"), Da = E("[\u00f2\u00f3\u00f4\u00f5\u00f6\u0151]"), Ea = E("[\u00f9\u00fa\u00fb\u00fc\u0171]"), Fa = E("[\u00fd\u0177\u00ff]"), Ga = E("\u00f1"), Ha = E("[\u00e7c]"), Ia = E("\u00df"), Ja = E(" & "), Ka = [Aa, "a", Ba, "e", Ca, "i", Da, "o", Ea, "u", Fa, "y", Ga, "n", Ha, "k", Ia, "s", Ja, " and "];
 function xa(a) {
+  a = "" + a;
   return this.pipeline(ca(a).toLowerCase(), !a.normalize && Ka, za, !1);
 }
 ;var Ma = {encode:La, rtl:!1, tokenize:"strict"};

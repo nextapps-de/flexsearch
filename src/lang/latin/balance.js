@@ -71,7 +71,7 @@ export function encode(str){
 
     // str = this.pipeline(
     //
-    //     /* string: */ normalize(str).toLowerCase(),
+    //     /* string: */ normalize("" + str).toLowerCase(),
     //     /* normalize: */ false,
     //     /* split: */ false,
     //     /* collapse: */ false

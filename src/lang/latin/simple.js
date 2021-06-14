@@ -47,6 +47,8 @@ const pairs = [
 
 export function encode(str){
 
+    str = "" + str;
+
     return this.pipeline(
 
         /* string: */ normalize(str).toLowerCase(),
