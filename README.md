@@ -12,9 +12,9 @@
 
 <a href="#installation">Basic Start</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Document Indexes</a> &ensp;&bull;&ensp; <a>Using Worker</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
-### FlexSearch v0.7.1
+### FlexSearch v0.7.0
 
-The new version is finally available. FlexSearch v0.7.1 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
+The new version is finally available. FlexSearch v0.7.0 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
 
 This new version has a good compatibility with the old generation, but it might require some migrations steps in your code.
 
@@ -54,7 +54,7 @@ Plugins (extern projects):
 - https://github.com/angeloashmore/react-use-flexsearch
 - https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
 
-__Get Latest Stable Build (Recommended):__
+### Get Latest Stable Build (Recommended)
 
 <table>
     <tr><td colspan="3"></td></tr>
@@ -94,19 +94,19 @@ __Get Latest Stable Build (Recommended):__
     </tr>
 </table>
 
-* The bundle "flexsearch.es5.js" includes polyfills for EcmaScript 5 Support.
+<span>*</span> The bundle "flexsearch.es5.js" includes polyfills for EcmaScript 5 Support.
 
-__Get Latest (NPM):__
+#### Get Latest (NPM)
 
 ```cmd
 npm install flexsearch
 ```
 
-__Get Latest Nightly (Do not use for production!):__
+#### Get Latest Nightly (Do not use for production!)
 
 Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.1__/dist/" into "/flexsearch/__master__/dist".
 
-__Compare Web-Bundles:__
+### Compare Web-Bundles
 
 > The Node.js package includes all features from `flexsearch.bundle.js`.
 
@@ -129,7 +129,7 @@ __Compare Web-Bundles:__
     <tr></tr>
     <tr>
         <td>
-            <a href="#async_search">Async Search</a>
+            <a href="#async">Async Search</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -138,7 +138,7 @@ __Compare Web-Bundles:__
     <tr></tr>
     <tr>
         <td>
-            <a href="#webworker">Web-Workers</a>
+            <a href="#webworker">Workers (Web + Node.js)</a>
         </td>
         <td>✓</td>
         <td>-</td>
@@ -234,7 +234,7 @@ __Compare Web-Bundles:__
     </tr>
     <tr></tr>
     <tr>
-        <td><a href="#export">Export / Import</a></td>
+        <td><a href="#export">Export / Import Indexes</a></td>
         <td>✓</td>
         <td>-</td>
         <td>-</td>
@@ -391,7 +391,7 @@ Operation per seconds, higher is better, except the test "Memory" on which lower
 <a name="contextual"></a>
 ## Contextual Search
 
-> __Note:__ This feature is disabled by default because of its extended memory usage. Read <a href="#contextual_enable">here</a> get more information about.
+> __Note:__ This feature is disabled by default because of its extended memory usage. Read <a href="#contextual_enable">here</a> get more information about and how to enable.
 
 FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document.
@@ -403,6 +403,14 @@ This way contextual search also <a href="https://nextapps-de.github.io/flexsearc
 
 <a name="installation"></a>
 ## Load Library
+
+There are 3 types of indexes:
+
+1. `Index` is a flat high performance index which stores id-content-pairs.
+2. `Worker` / `WorkerIndex` is also a flat index which stores id-content-pairs but runs in background as a dedicated worker thread.
+3. `Document` is multi-field index which can store complex JSON documents (could also exist of worker indexes).
+
+The most of you probably need just one of them according to your scenario.
 
 ### ES6 Modules (Browser):
 
@@ -437,7 +445,7 @@ AMD:
 var FlexSearch = require("./flexsearch.js");
 ```
 
-Load one of the builds from the folder `dist` to your html as a script and use as follows:
+Load one of the builds from the folder <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.1/dist">dist</a> within your html as a script and use as follows:
 
 ```js
 var index = new FlexSearch.Index(options);
@@ -461,10 +469,11 @@ const document = new Document(options);
 const worker = new Worker(options);
 ```
 
-## Basic Usage
+## Basic Usage and Variants
 
 ```js
 index.add(id, text);
+index.search(text);
 index.search(text, limit);
 index.search(text, options);
 index.search(text, limit, options);
@@ -474,6 +483,7 @@ index.search(options);
 ```js
 document.add(doc);
 document.add(id, doc);
+document.search(text);
 document.search(text, limit);
 document.search(text, options);
 document.search(text, limit, options);
@@ -482,6 +492,7 @@ document.search(options);
 
 ```js
 worker.add(id, text);
+worker.search(text);
 worker.search(text, limit);
 worker.search(text, options);
 worker.search(text, limit, options);
@@ -491,6 +502,8 @@ worker.search(options);
 
 The `worker` inherits from type `Index` and does not inherit from type `Document`. Therefore, a WorkerIndex basically works like a standard FlexSearch Index. Worker-Support in documents needs to be enabled by just passing the appropriate option during creation `{ worker: true }`.
 
+> Every method called on a `Worker` index is treated as async. You will get back a `Promise` or you can provide a callback function as the last parameter alternatively.
+
 <a name="api"></a>
 ## API Overview
 
@@ -499,35 +512,50 @@ Global methods:
 - <a href="#flexsearch.register">FlexSearch.__registerCharset__(name, charset)</a>
 - <a href="#flexsearch.language">FlexSearch.__registerLanguage__(name, language)</a>
 
-Index + WorkerIndex methods:
+Index methods:
 
 - <a href="#index.add">Index.__add__(id, string)</a> *
 - <a href="#index.append">Index.__append__(id, string)</a> *
-- <a href="#index.search">Index.__search__(string, \<limit\>, \<options\>)</a> *
 - <a href="#index.update">Index.__update__(id, string)</a> *
 - <a href="#index.remove">Index.__remove__(id)</a> *
+- <a href="#index.search">Index.__search__(string, \<limit\>, \<options\>)</a> *
+- <a href="#index.search">Index.__search__(options)</a> *
 - _async_ <a href="#index.export">Index.__export__(handler)</a>
 - _async_ <a href="#index.import">Index.__import__(key, data)</a>
 
+WorkerIndex methods:
+
+- _async_ <a href="#index.add">Index.__add__(id, string)</a>
+- _async_ <a href="#index.append">Index.__append__(id, string)</a>
+- _async_ <a href="#index.update">Index.__update__(id, string)</a>
+- _async_ <a href="#index.remove">Index.__remove__(id)</a>
+- _async_ <a href="#index.search">Index.__search__(string, \<limit\>, \<options\>)</a>
+- _async_ <a href="#index.search">Index.__search__(options)</a>
+- _async_ <a href="#index.export">~~Index.__export__(handler)~~</a> (WIP)
+- _async_ <a href="#index.import">~~Index.__import__(key, data)~~</a> (WIP)
+
 Document methods:
 
-- <a href="#document.add">Document.__add__(id, document)</a> *
-- <a href="#document.append">Document.__append__(id, document)</a> *
-- <a href="#document.search">Document.__search__(string, \<limit\>, \<options\>)</a> *
-- <a href="#document.update">Document.__update__(id, document)</a> *
+- <a href="#document.add">Document.__add__(\<id\>, document)</a> *
+- <a href="#document.append">Document.__append__(\<id\>, document)</a> *
+- <a href="#document.update">Document.__update__(\<id\>, document)</a> *
 - <a href="#document.remove">Document.__remove__(id || document)</a> *
+- <a href="#document.search">Document.__search__(string, \<limit\>, \<options\>)</a> *
+- <a href="#document.search">Document.__search__(options)</a> *
 - _async_ <a href="#document.export">Document.__export__(handler)</a>
 - _async_ <a href="#document.import">Document.__import__(key, data)</a>
 
-* For each of those methods there exist an asynchronous equivalent:
+<span>*</span> For each of those methods there exist an asynchronous equivalent:
 
 Async Version:
 
 - _async_ <a href="#addAsync">.__addAsync__( ... , \<callback\>)</a>
 - _async_ <a href="#appendAsync">.__appendAsync__( ... , \<callback\>)</a>
-- _async_ <a href="#searchAsync">.__searchAsync__( ... , \<callback\>)</a>
 - _async_ <a href="#updateAsync">.__updateAsync__( ... , \<callback\>)</a>
 - _async_ <a href="#removeAsync">.__removeAsync__( ... , \<callback\>)</a>
+- _async_ <a href="#searchAsync">.__searchAsync__( ... , \<callback\>)</a>
+
+Async methods will return a `Promise`, alternatively you can pass a callback function as the last parameter.
 
 Methods `export` and also `import` are always async as well as every method you call on a Worker-based Index.
 
@@ -540,11 +568,12 @@ FlexSearch is highly customizable. Make use of the right options can really impr
 ### Index Options
 
 <table>
-    <tr><td colspan="3"></td></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
         <td>Description</td>
+        <td>Default</td>
     </tr>
     <tr>
         <td>preset<br><br><br><br><br></td>
@@ -558,6 +587,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td vertical-align="top">
             The <a href="#presets">configuration profile</a> as a shortcut or as a base for your custom settings.<br>
         </td>
+        <td>"default"</td>
     </tr>
     <tr></tr>
     <tr>
@@ -572,6 +602,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td vertical-align="top">
             The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br><br>Choose one of the <a href="#tokenizer">built-ins</a> or pass a <a href="#flexsearch.tokenizer">custom tokenizer function</a>.<br>
         </td>
+        <td>"strict"</td>
     </tr>
     <tr></tr>
     <tr>
@@ -581,6 +612,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Number
         </td>
         <td>Enable/Disable and/or set capacity of cached entries.<br><br>When passing a number as a limit the <b>cache automatically balance stored entries related to their popularity</b>.<br><br>Note: When just using "true" the cache has no limits and growth unbounded.</td>
+        <td>false</td>
     </tr>
     <tr></tr>
     <tr>
@@ -589,6 +621,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Number
         </td>
         <td>Sets the scoring resolution (default: 9).</td>
+        <td>9</td>
     </tr>
     <tr></tr>
     <tr>
@@ -598,9 +631,19 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Context Options
         </td>
         <td>Enable/Disable <a href="#contextual">contextual indexing</a>. When passing "true" as value it will take the default values for the context.</td>
+        <td>false</td>
     </tr>
-        <tr>
-        <td colspan="3">
+    <tr></tr>
+    <tr>
+        <td>optimize<br></td>
+        <td>
+            Boolean
+        </td>
+        <td>When enabled it uses a memory-optimized stack flow for the index.</td>
+        <td>true</td>
+    </tr>
+    <tr>
+        <td colspan="4">
             Language-specific Options and Encoding:
         </td>
     </tr>
@@ -613,6 +656,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td vertical-align="top">
             Provide a custom charset payload or pass one of the keys of built-in charsets.
         </td>
+        <td>"latin"</td>
     </tr>
     <tr></tr>
     <tr>
@@ -624,6 +668,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td vertical-align="top">
             Provide a custom language payload or pass in language shorthand flag (ISO-3166) of built-in languages.
         </td>
+        <td>null</td>
     </tr>
     <tr></tr>
     <tr>
@@ -638,6 +683,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             function(str):[words]
         </td>
         <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
+        <td>"default"</td>
     </tr>
     <tr></tr>
     <tr>
@@ -648,6 +694,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Function
         </td>
         <td></td>
+        <td>false</td>
     </tr>
     <tr></tr>
     <tr>
@@ -658,6 +705,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Function
         </td>
         <td></td>
+        <td>false</td>
     </tr>
     <tr></tr>
     <tr>
@@ -668,9 +716,10 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Function
         </td>
         <td></td>
+        <td>false</td>
     </tr>
     <tr>
-        <td colspan="3">
+        <td colspan="4">
             Additional Options for Document Indexes:
         </td>
     </tr>
@@ -680,6 +729,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Boolean
         </td>
         <td>Enable/Disable and set count of running worker threads.</td>
+        <td>false</td>
     </tr>
     <tr></tr>
     <tr>
@@ -688,6 +738,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td vertical-align="top">
             Includes definitions for the document index and storage.
         </td>
+        <td></td>
     </tr>
 </table>
 
@@ -695,11 +746,12 @@ FlexSearch is highly customizable. Make use of the right options can really impr
 ### Context Options
 
 <table>
-    <tr><td colspan="3"></td></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
         <td>Description</td>
+        <td>Default</td>
     </tr>
     <tr>
         <td>resolution</td>
@@ -707,6 +759,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Number
         </td>
         <td>Sets the scoring resolution for the context (default: 1).</td>
+        <td>1</td>
     </tr>
     <tr></tr>
     <tr>
@@ -716,6 +769,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Number
         </td>
         <td>Enable/Disable <a href="#contextual">contextual indexing</a> and also sets contextual distance of relevance. Depth is the maximum number of words/tokens away a term to be considered as relevant.</td>
+        <td>1</td>
     </tr>
     <tr></tr>
     <tr>
@@ -724,6 +778,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             Boolean
         </td>
         <td>Sets the scoring resolution (default: 9).</td>
+        <td>true</td>
     </tr>
 </table>
 
@@ -731,34 +786,39 @@ FlexSearch is highly customizable. Make use of the right options can really impr
 ### Document Options
 
 <table>
-    <tr><td colspan="3"></td></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
         <td>Description</td>
+        <td>Default</td>
     </tr>
     <tr>
-        <td>id<br><br></td>
+        <td>id<br></td>
         <td>String</td>
         <td vertical-align="top"></td>
+        <td>"id""</td>
     </tr>
     <tr></tr>
     <tr>
         <td>tag<br><br></td>
-        <td>String</td>
+        <td>false<br>String</td>
         <td vertical-align="top"></td>
+        <td>"tag"</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>index<br><br></td>
-        <td>String<br>Array</td>
+        <td>index<br><br><br></td>
+        <td>String<br>Array&lt;String><br>Array&lt;Object></td>
         <td vertical-align="top"></td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>store<br><br></td>
-        <td>String<br>Array</td>
+        <td>store<br><br><br></td>
+        <td>Boolean<br>String<br>Array&lt;String></td>
         <td vertical-align="top"></td>
+        <td>false</td>
     </tr>
 </table>
 
@@ -766,38 +826,42 @@ FlexSearch is highly customizable. Make use of the right options can really impr
 ### Charset Options
 
 <table>
-    <tr><td colspan="3"></td></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
         <td>Description</td>
+        <td>Default</td>
     </tr>
     <tr>
         <td>split<br><br></td>
         <td>
+            false<br>
             RegExp<br>
-            string
+            String
         </td>
         <td vertical-align="top">
             The rule to split words when using non-custom tokenizer (<a href="#tokenizer">built-ins</a> e.g. "forward"). Use a string/char or use a regular expression (default: <code>/\W+/</code>).<br>
         </td>
+        <td><code>/[\W_]+/</code></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>rtl<br><br></td>
+        <td>rtl<br></td>
         <td>
-            true<br>
-            false
+            Boolean
         </td>
         <td>Enables Right-To-Left encoding.</td>
+        <td>false</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>encode</td>
+        <td>encode<br></td>
         <td>
             function(str) => [words]
         </td>
         <td>The custom encoding function.</td>
+        <td>/lang/latin/default.js</td>
     </tr>
 </table>
 
@@ -818,7 +882,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             String<br>
             Function
         </td>
-        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.</td>
+        <td>Disable or pass in language shorthand flag (ISO-3166) or a custom object.
     </tr>
     <tr></tr>
     <tr>
@@ -846,28 +910,32 @@ FlexSearch is highly customizable. Make use of the right options can really impr
 ### Search Options
 
 <table>
-    <tr><td colspan="3"></td></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
         <td>Description</td>
+        <td>Default</td>
     </tr>
     <tr>
         <td>limit</td>
         <td>number</td>
         <td>Sets the limit of results.</td>
+        <td>100</td>
     </tr>
     <tr></tr>
     <tr>
         <td>offset</td>
         <td>number</td>
-        <td>Enables <a href="#pagination">paginated results</a>.</td>
+        <td>Apply offset (skip items).</td>
+        <td>0</td>
     </tr>
     <tr></tr>
     <tr>
         <td>suggest</td>
-        <td>true, false</td>
+        <td>Boolean</td>
         <td>Enables <a href="#suggestions">suggestions</a> in results.</td>
+        <td>false</td>
     </tr>
 </table>
 
@@ -877,34 +945,39 @@ FlexSearch is highly customizable. Make use of the right options can really impr
 * Additionally, to the Index search options above.
 
 <table>
-    <tr><td colspan="3"></td></tr>
+    <tr><td colspan="4"></td></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
         <td>Description</td>
+        <td>Default</td>
     </tr>
     <tr>
         <td>index</td>
-        <td>string, Array&lt;string&gt;</td>
+        <td>String<br>Array&lt;String&gt;<br>Array&lt;Object&gt;</td>
         <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
         <td>tag</td>
-        <td>string, Array&lt;string&gt;</td>
+        <td>String<br>Array&lt;String></td>
         <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+        <td>false</td>
     </tr>
     <tr></tr>
     <tr>
         <td>enrich</td>
         <td>Boolean</td>
         <td>Enrich IDs from the results with the corresponding documents.</td>
+        <td>false</td>
     </tr>
     <tr></tr>
     <tr>
         <td>bool</td>
-        <td>"and", "or"</td>
+        <td>"and"<br>"or"</td>
         <td>Sets the used <a href="#operators">logical operator</a> when searching through multiple fields or tags.</td>
+        <td>"or"</td>
     </tr>
 </table>
 
@@ -967,42 +1040,42 @@ Encoding affects the required memory also as query time and phonetic matches. Tr
         <td><b>false</b></td>
         <td>Turn off encoding</td>
         <td>no</td>
-        <td>no</td>
+        <td>0%</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><b>"default"</b> (default)</td>
+        <td><b>"default"</b></td>
         <td>Case in-sensitive encoding</td>
         <td>no</td>
-        <td>no</td>
+        <td>0%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><b>"simple"</b></td>
-        <td>Phonetic normalizations</td>
+        <td>Case in-sensitive encoding<br>Charset normalizations</td>
         <td>no</td>
-        <td>~ 7%</td>
+        <td>~ 3%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><b>"balance"</b></td>
-        <td>Phonetic normalizations + literal transformations</td>
+        <td>Case in-sensitive encoding<br>Charset normalizations<br>Literal transformations</td>
         <td>no</td>
-        <td>~ 25%</td>
+        <td>~ 30%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><b>"advanced"</b></td>
-        <td>Phonetic normalizations + advanced literal transformations</td>
+        <td>Case in-sensitive encoding<br>Charset normalizations<br>Literal transformations<br>Phonetic normalizations</td>
         <td>no</td>
-        <td>~ 35%</td>
+        <td>~ 40%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><b>"extra"</b></td>
-        <td>Phonetic normalizations + Soundex transformations</td>
+        <td>Case in-sensitive encoding<br>Charset normalizations<br>Literal transformations<br>Phonetic normalizations<br>Soundex transformations</td>
         <td>yes</td>
-        <td>~ 60%</td>
+        <td>~ 65%</td>
     </tr>
     <tr></tr>
     <tr>
@@ -1032,7 +1105,6 @@ Create a new index with custom options:
 
 ```js
 var index = new Index({
-
     charset: "latin:extra",
     tokenize: "reverse",
     resolution: 9
@@ -1042,7 +1114,8 @@ var index = new Index({
 Create a new index and extend a preset with custom options:
 
 ```js
-var index = new FlexSearch("memory", {
+var index = new FlexSearch({
+    preset: "memory",
     resolution: 5,
     tokenize: "forward"
 });
@@ -1058,12 +1131,13 @@ Every content which should be added to the index needs an ID. When your content 
 > Index.__add(id, string)__
 
 ```js
-index.add(10025, "John Doe");
+index.add(0, "John Doe");
 ```
+
 <a name="index.search"></a>
 #### Search items
 
-> Index.__search(string | options, \<limit\>)__
+> Index.__search(string | options, \<limit\>, \<options\>)__
 
 ```js
 index.search("John");
@@ -1152,7 +1226,7 @@ index.append(1, "index appended content");
 
 When you query `index.search("index")` then you will get index id 1 as the first entry in the result, because the context starts from zero for the appended data (isn't stacked to the old context) and here "index" is the first term.
 
-If you didn't want this behavior than just ust `index.add(id, content)` and provide the full length of content.
+If you didn't want this behavior than just use the standard `index.add(id, content)` and provide the full length of content.
 
 <a name="index.update"></a>
 #### Update item from an index
@@ -1160,7 +1234,7 @@ If you didn't want this behavior than just ust `index.add(id, content)` and prov
 > Index.__update(id, string)__
 
 ```js
-index.update(10025, "Road Runner");
+index.update(0, "Max Miller");
 ```
 
 <a name="index.remove"></a>
@@ -1169,7 +1243,7 @@ index.update(10025, "Road Runner");
 > Index.__remove(id)__
 
 ```js
-index.remove(10025);
+index.remove(0);
 ```
 
 <a name="flexsearch.tokenizer"></a>
@@ -1188,7 +1262,7 @@ var index = new FlexSearch({
 });
 ```
 
-> The tokenizer function gets a string as a parameter and has to return an array of strings (parts).
+> The tokenizer function gets a string as a parameter and has to return an array of strings representing a word or term. In some languages every char is a term and also not separated via whitespaces.
 
 <a name="flexsearch.language"></a>
 #### Add language-specific stemmer and/or filter
@@ -1766,7 +1840,7 @@ You can perform a search through the same field with different queries.
 
 <a href="#options-field-search">See all available field-search options.</a>
 
-### New Result Set
+### The Result Set
 
 Schema of the result-set:
 
@@ -1820,7 +1894,7 @@ index.search(query, { pluck: "title", enrich: true });
 ]
 ```
 
-These change is basically based on "boolean search". Instead of applying your bool logic to a nested object (which almost ends in structured hell), you can apply your logic by yourself on top of the result-set dynamically. This opens hugely capabilities on how you process the results. Therefore, the results from the fields aren't squashed into one result anymore. That keeps some important information, like the name of the field as well as the relevance of each field results which didn't get mixed anymore.
+This result set is a replacement of "boolean search". Instead of applying your bool logic to a nested object, you can apply your logic by yourself on top of the result-set dynamically. This opens hugely capabilities on how you process the results. Therefore, the results from the fields aren't squashed into one result anymore. That keeps some important information, like the name of the field as well as the relevance of each field results which didn't get mixed anymore.
 
 > A field search will apply a query with the boolean "or" logic by default. Each field has its own result to the given query.
 
@@ -2121,7 +2195,7 @@ A common scenario for using a cache is an autocomplete or instant search when ty
 <a name="webworker"></a>
 ## Worker Parallelism (Browser + Node.js)
 
-The new worker model from v0.7.1 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
+The new worker model from v0.7.0 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
 
 When using a document index, then just apply the option "worker":
 ```js
@@ -2327,8 +2401,262 @@ for(let i = 0, key; i < keys.length; i++){
 }
 ```
 
+## Languages
+
+Language-specific definitions are being divided into two groups:
+
+1. Charset
+    1. ___encode___, type: `function(string):string[]`
+    2. ___rtl___, type: `boolean`
+2. Language
+    1. ___matcher___, type: `{string: string}`
+    2. ___stemmer___, type: `{string: string}`
+    3. ___filter___, type: `string[]`
+
+The charset contains the encoding logic, the language contains stemmer, stopword filter and matchers. Multiple language definitions can use the same charset encoder. Also this separation let you manage different language definitions for special use cases (e.g. names, cities, dialects/slang, etc.).
+
+To fully describe a custom language __on the fly__ you need to pass:
+
+```js
+const index = FlexSearch({
+    // mandatory:
+    encode: (content) => [words],
+    // optionally:
+    rtl: false,
+    stemmer: {},
+    matcher: {},
+    filter: []
+});
+```
+
+When passing no parameter it uses the `latin:default` schema by default.
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Field</td>
+        <td>Category</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td><b>encode</b></td>
+        <td>charset</td>
+        <td>The encoder function. Has to return an array of separated words (or an empty string).</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>rtl</b></td>
+        <td>charset</td>
+        <td>A boolean property which indicates right-to-left encoding.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>filter</b></td>
+        <td>language</td>
+        <td>Filter are also known as "stopwords", they completely filter out words from being indexed.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>stemmer</b></td>
+        <td>language</td>
+        <td>Stemmer removes word endings and is a kind of "partial normalization". A word ending just matched when the word length is bigger than the matched partial.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>matcher</b></td>
+        <td>language</td>
+        <td>Matcher replaces all occurrences of a given string regardless of its position and is also a kind of "partial normalization".</td>
+    </tr>
+</table>
+
+### 1. Language Packs: ES6 Modules
+
+The most simple way to assign charset/language specific encoding via modules is:
+
+```js
+import charset from "./dist/module/lang/latin/advanced.js";
+import lang from "./dist/module/lang/en.js";
+
+const index = FlexSearch({
+    charset: charset,
+    lang: lang
+});
+```
+
+Just import the __default export__ by each module and assign them accordingly.
+
+The full qualified example from above is:
+
+```js
+import { encode, rtl } from "./dist/module/lang/latin/advanced.js";
+import { stemmer, filter, matcher } from "./dist/module/lang/en.js";
+
+const index = FlexSearch({
+    encode: encode,
+    rtl: rtl,
+    stemmer: stemmer,
+    matcher: matcher,
+    filter: filter
+});
+```
+
+The example above is the standard interface which is at least exported from each charset/language.
+
+You can also define the encoder directly and left all other options:
+
+```js
+import simple from "./dist/module/lang/latin/simple.js";
+
+const index = FlexSearch({
+    encode: simple
+});
+```
+
+#### Available Latin Encoders
+
+1. default
+2. simple
+3. balance
+4. advanced
+5. extra
+
+You can assign a charset by passing the charset during initialization, e.g. `charset: "latin"` for the default charset encoder or `charset: "latin:soundex"` for a encoder variant.
+
+#### Dialect / Slang
+
+Language definitions (especially matchers) also could be used to normalize dialect and slang of a specific language.
+
+### 2. Language Packs: ES5 (Language Packs)
+
+You need to make the charset and/or language definitions available by:
+
+1. All charset definitions are included in the `flexsearch.bundle.js` build by default, but no language-specific definitions are included
+2. You can load packages located in `/dist/lang/` (files refers to languages, folders are charsets)
+3. You can make a custom build
+
+When loading language packs, make sure that the library was loaded before:
+
+```html
+<script src="dist/flexsearch.light.js"></script>
+<script src="dist/lang/latin/default.min.js"></script>
+<script src="dist/lang/en.min.js"></script>
+```
+
+When using the full "bundle" version the built-in latin encoders are already included and you just have to load the language file:
+
+```html
+<script src="dist/flexsearch.bundle.js"></script>
+<script src="dist/lang/en.min.js"></script>
+```
+
+Because you loading packs as external packages (non-ES6-modules) you have to initialize them by shortcuts:
+
+```js
+const index = FlexSearch({
+    charset: "latin:soundex",
+    lang: "en"
+});
+```
+
+> Use the `charset:variant` notation to assign charset and its variants. When just passing the charset without a variant will automatically resolve as `charset:default`.
+
+You can also override existing definitions, e.g.:
+
+```js
+const index = FlexSearch({
+    charset: "latin",
+    lang: "en",
+    matcher: {}
+});
+```
+
+> Passed definitions will __not__ extend default definitions, they will replace them.
+
+When you like to extend a definition just create a new language file and put in all the logic.
+
+#### Encoder Variants
+
+It is pretty straight forward when using an encoder variant:
+
+```html
+<script src="dist/flexsearch.light.js"></script>
+<script src="dist/lang/latin/advanced.min.js"></script>
+<script src="dist/lang/latin/extra.min.js"></script>
+<script src="dist/lang/en.min.js"></script>
+```
+
+When using the full "bundle" version the built-in latin encoders are already included and you just have to load the language file:
+
+```html
+<script src="dist/flexsearch.bundle.js"></script>
+<script src="dist/lang/en.min.js"></script>
+```
+
+```js
+const index_advanced = FlexSearch({
+    charset: "latin:advanced"
+});
+
+const index_extra = FlexSearch({
+    charset: "latin:extra"
+});
+```
+
+### Partial Tokenizer
+
+In FlexSearch you can't provide your own partial tokenizer, because it is a direct dependency to the core unit. The built-in tokenizer of FlexSearch splits each word into fragments by different patterns:
+
+1. strict (supports contextual index)
+2. forward
+3. reverse (including forward)
+4. full
+
+### Language Processing Pipeline
+
+This is the default pipeline provided by FlexSearch:
+
+<p>
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch/doc/pipeline.svg?2">
+</p>
+
+#### Custom Pipeline
+
+At first take a look into the default pipeline in `src/common.js`. It is very simple and straight forward. The pipeline will process as some sort of inversion of control, the final encoder implementation has to handle charset and also language specific transformations. This workaround has left over from many tests.
+
+Inject the default pipeline by e.g.:
+
+```js
+this.pipeline(
+
+    /* string: */ str.toLowerCase(),
+    /* normalize: */ false,
+    /* split: */ split,
+    /* collapse: */ false
+);
+```
+
+Use the pipeline schema from above to understand the iteration and the difference of pre-encoding and post-encoding. Stemmer and matchers needs to be applied after charset normalization but before language transformations, filters also.
+
+Here is a good example of extending pipelines: `src/lang/latin/extra.js` → `src/lang/latin/advanced.js` → `src/lang/latin/simple.js`.
+
+### How to contribute?
+
+Search for your language in `src/lang/`, if it exists you can extend or provide variants (like dialect/slang). If the language doesn't exist create a new file and check if any of the existing charsets (e.g. latin) fits to your language. When no charset exist, you need to provide a charset as a base for the language.
+
+A new charset should provide at least:
+
+1. `encode` A function which normalize the charset of a passed text content (remove special chars, lingual transformations, etc.) and __returns an array of separated words__. Also stemmer, matcher or stopword filter needs to be applied here. When the language has no words make sure to provide something similar, e.g. each chinese sign could also be a "word". Don't return the whole text content without split.
+3. `rtl` A boolean flag which indicates right-to-left encoding
+
+Basically the charset needs just to provide an encoder function along with an indicator for right-to-left encoding:
+
+```js
+export function encode(str){ return [str] }
+export const rtl = false;
+```
+
 <a name="compare" id="compare"></a>
-#### Encoder Matching Comparison
+## Encoder Matching Comparison
 
 > Reference String: __"Björn-Phillipp Mayer"__
 
