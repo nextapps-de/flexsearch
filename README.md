@@ -398,7 +398,7 @@ The basic idea of this concept is to limit relevance by its context instead of c
 This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
 
 <p align="center">
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4" width="100%">
 </p>
 
 <a name="installation"></a>
@@ -1116,8 +1116,8 @@ Create a new index and extend a preset with custom options:
 ```js
 var index = new FlexSearch({
     preset: "memory",
-    resolution: 5,
-    tokenize: "forward"
+    tokenize: "forward",
+    resolution: 5
 });
 ```
 
@@ -2787,9 +2787,9 @@ index = new Index({
 ```
 
 <a name="consumption"></a>
-### Memory Benchmark (Ranking)
+### Memory Consumption
 
-The book "Gulliver's Travels" (Swift Jonathan 1726) was used for this test.
+The book "Gulliver's Travels" (Swift Jonathan 1726) was completely indexed for this test:
 
 <br>
 <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg?v=2">

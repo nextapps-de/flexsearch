@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.1 (Light)
+ * FlexSearch.js v0.7.11 (Light)
  * Copyright 2018-2021 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Licence: Apache-2.0

@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.1 (Debug)
+ * FlexSearch.js v0.7.11 (Debug)
  * Copyright 2018-2021 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Licence: Apache-2.0
@@ -666,20 +666,19 @@ function U(a, b, c, d, e) {
   }
 }
 function V(a, b, c, d, e, f, g, h) {
-  a = a[g];
-  if (d === b.length - 1) {
-    if (a.constructor === Array) {
-      if (c[d]) {
-        for (b = 0; b < a.length; b++) {
-          e.add(f, a[b], !0, !0);
+  if (a = a[g]) {
+    if (d === b.length - 1) {
+      if (a.constructor === Array) {
+        if (c[d]) {
+          for (b = 0; b < a.length; b++) {
+            e.add(f, a[b], !0, !0);
+          }
+          return;
         }
-        return;
+        a = a.join(" ");
       }
-      a = a.join(" ");
-    }
-    e.add(f, a, h, !0);
-  } else {
-    if (a) {
+      e.add(f, a, h, !0);
+    } else {
       if (a.constructor === Array) {
         for (g = 0; g < a.length; g++) {
           V(a, b, c, d, e, f, g, h);

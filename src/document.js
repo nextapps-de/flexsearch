@@ -240,49 +240,52 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
 
     obj = obj[key];
 
-    // reached target field
+    if(obj){
 
-    if(pos === (tree.length - 1)){
+        // reached target field
 
-        // handle target value
+        if(pos === (tree.length - 1)){
 
-        if(is_array(obj)){
+            // handle target value
 
-            // append array contents so each entry gets a new scoring context
+            if(is_array(obj)){
 
-            if(marker[pos]){
+                // append array contents so each entry gets a new scoring context
 
-                for(let i = 0; i < obj.length; i++){
+                if(marker[pos]){
 
-                    index.add(id, obj[i], /* append: */ true, /* skip update: */ true);
+                    for(let i = 0; i < obj.length; i++){
+
+                        index.add(id, obj[i], /* append: */ true, /* skip update: */ true);
+                    }
+
+                    return;
                 }
 
-                return;
+                // or join array contents and use one scoring context
+
+                obj = obj.join(" ");
             }
 
-            // or join array contents and use one scoring context
-
-            obj = obj.join(" ");
-        }
-
-        index.add(id, obj, _append, /* skip_update: */ true);
-    }
-    else if(obj){
-
-        if(is_array(obj)){
-
-            for(let i = 0; i < obj.length; i++){
-
-                // do not increase index, an array is not a field
-
-                add_index(obj, tree, marker, pos, index, id, i, _append);
-            }
+            index.add(id, obj, _append, /* skip_update: */ true);
         }
         else{
 
-            key = tree[++pos];
+            if(is_array(obj)){
 
-            add_index(obj, tree, marker, pos, index, id, key, _append);
+                for(let i = 0; i < obj.length; i++){
+
+                    // do not increase index, an array is not a field
+
+                    add_index(obj, tree, marker, pos, index, id, i, _append);
+                }
+            }
+            else{
+
+                key = tree[++pos];
+
+                add_index(obj, tree, marker, pos, index, id, key, _append);
+            }
         }
     }
 }
