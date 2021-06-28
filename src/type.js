@@ -18,7 +18,7 @@ export function IndexInterface(){
  * @returns {string|Array<string>}
  */
 
-IndexInterface.prototype.pipeline;
+//IndexInterface.prototype.pipeline;
 
 /**
  * @param {!number|string} id

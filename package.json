@@ -1,6 +1,6 @@
 {
   "name": "flexsearch",
-  "version": "0.7.11",
+  "version": "0.7.2",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",

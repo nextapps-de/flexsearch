@@ -45,6 +45,7 @@ export function pipeline(str, normalize, split, _collapse){
     return str;
 }
 
+export const regex_whitespace = /[\p{Z}\p{S}\p{P}\p{C}]+/u;
 const regex_normalize = /[\u0300-\u036f]/g;
 
 export function normalize(str){

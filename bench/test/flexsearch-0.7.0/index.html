@@ -15,7 +15,7 @@
     //import Document from "../../../src/document.js";
     import { suite } from "../../bench.js";
 
-    let lib, split = /[^a-z]+/;
+    let lib, split = / /;
 
     suite["flexsearch-0.7.0"] = {
 
@@ -26,15 +26,14 @@
                 encode: str => str.toLowerCase().split(split),
                 tokenize: "strict",
                 resolution: 1,
-                minlength: 1,
+                minlength: 3,
                 optimize: false,
                 fastupdate: false,
                 context: {
                     depth: 1,
                     bidirectional: false,
                     resolution: 1
-                },
-                doc: "body"
+                }
             });
         },
         add: function(data){
@@ -48,16 +47,19 @@
 
             return lib.search(query, 9999);
         },
-        update: function(id){
+        update: function(data){
 
             for(let i = 0, len = data.length; i < len; i++){
 
                 lib.update(i, data[i]);
             }
         },
-        remove: function(id){
+        remove: function(data){
 
-            lib.remove(id);
+            for(let i = 0, len = data.length; i < len; i++){
+
+                lib.remove(i, data[i]);
+            }
         }
     };
 

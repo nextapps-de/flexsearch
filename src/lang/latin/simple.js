@@ -1,5 +1,5 @@
 import { IndexInterface } from "../../type.js";
-import { normalize, regex } from "../../lang.js";
+import { pipeline, normalize, regex_whitespace, regex } from "../../lang.js";
 
 export const rtl = false;
 export const tokenize = "";
@@ -11,7 +11,7 @@ export default {
 
 // Charset Normalization
 
-const regex_whitespace = /[\W_]+/,
+const //regex_whitespace = /\W+/,
     //regex_strip = regex("[^a-z0-9 ]"),
     regex_a = regex("[àáâãäå]"),
     regex_e = regex("[èéêë]"),
@@ -49,8 +49,9 @@ export function encode(str){
 
     str = "" + str;
 
-    return this.pipeline(
+    return pipeline.call(
 
+        this,
         /* string: */ normalize(str).toLowerCase(),
         /* normalize: */ !str.normalize && pairs,
         /* split: */ regex_whitespace,

@@ -85,6 +85,7 @@ function Index(options, _register){
     this.optimize = optimize = parse_option(options["optimize"], true);
     this.fastupdate = parse_option(options["fastupdate"], true);
     this.minlength = options["minlength"] || 1;
+    this.boost = options["boost"];
 
     // when not using the memory strategy the score array should not pre-allocated to its full length
 
@@ -104,7 +105,7 @@ function Index(options, _register){
 
 export default Index;
 
-Index.prototype.pipeline = pipeline;
+//Index.prototype.pipeline = pipeline;
 
 /**
  * @param {!number|string} id
@@ -153,7 +154,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                 if(term && (term_length >= this.minlength) && (depth || !dupes[term])){
 
-                    const score = get_score(resolution, length, i);
+                    let score = get_score(resolution, length, i);
                     let token = "";
 
                     switch(this.tokenize){
@@ -223,6 +224,11 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                         default:
                         // case "strict":
+
+                            if(this.boost){
+
+                                score = Math.min((score / this.boost(content, term, i)) | 0, resolution - 1);
+                            }
 
                             this.push_index(dupes, term, score, id, _append);
 

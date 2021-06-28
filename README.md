@@ -65,31 +65,31 @@ Plugins (extern projects):
     </tr>
     <tr>
         <td>flexsearch.bundle.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.bundle.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.bundle.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.light.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.light.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.light.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.light.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.compact.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.compact.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.compact.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.compact.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.es5.js *</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.1/dist/flexsearch.es5.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.1/dist/flexsearch.es5.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.es5.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.es5.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>ES6 Modules</td>
-        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.1/dist/module/" target="_blank">Download</a></td>
+        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.2/dist/module/" target="_blank">Download</a></td>
         <td>The <i>/dist/module/</i> folder of this Github repository</td>
     </tr>
 </table>
@@ -104,7 +104,7 @@ npm install flexsearch
 
 #### Get Latest Nightly (Do not use for production!)
 
-Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.1__/dist/" into "/flexsearch/__master__/dist".
+Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.2__/dist/" into "/flexsearch/__master__/dist".
 
 ### Compare Web-Bundles
 
@@ -269,12 +269,12 @@ Operation per seconds, higher is better, except the test "Memory" on which lower
     <tr>
         <td>1</td>
         <td>FlexSearch</td>
-        <td><b>23</b></td>
-        <td><b>7039844</b></td>
-        <td><b>1429457</b></td>
-        <td><b>113091</b></td>
-        <td><b>1467937</b></td>
-        <td>2895284</td>
+        <td><b>17</b></td>
+        <td><b>7084129</b></td>
+        <td><b>1586856</b></td>
+        <td><b>511585</b></td>
+        <td><b>2017142</b></td>
+        <td>3202006</td>
     </tr>
     <tr></tr>
     <tr>
@@ -436,7 +436,7 @@ const worker = new WorkerIndex(options);
 
 Or via CDN:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.1/dist/flexsearch.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"></script>
 ```
 
 AMD:
@@ -445,7 +445,7 @@ AMD:
 var FlexSearch = require("./flexsearch.js");
 ```
 
-Load one of the builds from the folder <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.1/dist">dist</a> within your html as a script and use as follows:
+Load one of the builds from the folder <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.2/dist">dist</a> within your html as a script and use as follows:
 
 ```js
 var index = new FlexSearch.Index(options);
@@ -576,7 +576,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td>Default</td>
     </tr>
     <tr>
-        <td>preset<br><br><br><br><br></td>
+        <td>preset</td>
         <td>
             "memory"<br>
             "performance"<br>
@@ -584,29 +584,28 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             "score"<br>
             "default"
         </td>
-        <td vertical-align="top">
+        <td>
             The <a href="#presets">configuration profile</a> as a shortcut or as a base for your custom settings.<br>
         </td>
         <td>"default"</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>tokenize<br><br><br><br><br></td>
+        <td>tokenize</td>
         <td>
             "strict"<br>
             "forward"<br>
             "reverse"<br>
-            "full"<br>
-            function()
+            "full"
         </td>
-        <td vertical-align="top">
+        <td>
             The <a href="#tokenizer">indexing mode (tokenizer)</a>.<br><br>Choose one of the <a href="#tokenizer">built-ins</a> or pass a <a href="#flexsearch.tokenizer">custom tokenizer function</a>.<br>
         </td>
         <td>"strict"</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>cache<br><br><br></td>
+        <td>cache</td>
         <td>
             Boolean<br>
             Number
@@ -625,7 +624,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
     </tr>
     <tr></tr>
     <tr>
-        <td>context<br><br></td>
+        <td>context</td>
         <td>
             Boolean<br>
             Context Options
@@ -635,12 +634,21 @@ FlexSearch is highly customizable. Make use of the right options can really impr
     </tr>
     <tr></tr>
     <tr>
-        <td>optimize<br></td>
+        <td>optimize</td>
         <td>
             Boolean
         </td>
         <td>When enabled it uses a memory-optimized stack flow for the index.</td>
         <td>true</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>boost</td>
+        <td>
+            function(arr, str, int) => float
+        </td>
+        <td>A custom boost function used when indexing contents to the index. The function has this signature: <code>Function(words[], term, index) => Float</code>. It has 3 parameters where you get an array of all words, the current term and the current index where the term is placed in the word array. You can apply your own calculation e.g. the occurrences of a term and return this factor (<1 means relevance is lowered, >1 means relevance is increased).<br><br>Note: this feature is currently limited by using the tokenizer "strict" only.</td>
+        <td>null</td>
     </tr>
     <tr>
         <td colspan="4">
@@ -680,7 +688,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
             "balance"<br>
             "advanced"<br>
             "extra"<br>
-            function(str):[words]
+            function(str) => [words]
         </td>
         <td>The encoding type.<br><br>Choose one of the <a href="#phonetic">built-ins</a> or pass a <a href="#flexsearch.encoder">custom encoding function</a>.</td>
         <td>"default"</td>
