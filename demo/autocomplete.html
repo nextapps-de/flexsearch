@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
     <title>Demo: Auto-Complete</title>
     <script src="../dist/flexsearch.compact.js"></script>
-    <script src="../data/movies.js"></script>
     <style>
         body{
             padding:0;
@@ -73,14 +72,16 @@
     </tr>
 </table>
 <div id="suggestions"></div>
-<script>
+<script type="module">
+
+    import data from "./data/movies.js";
+
     (function(){
 
-        var index = new FlexSearch({
+        const index = new FlexSearch.Index({
 
-            encode: "advanced",
+            charset: "latin:advanced",
             tokenize: "reverse",
-            suggest: true,
             cache: true
         });
 
@@ -100,7 +101,7 @@
         function show_results(){
 
             var value = this.value;
-            var results = index.search(value, 25);
+            var results = index.search(value, 25, { suggest: true });
             var entry, childs = suggestions.childNodes;
             var i = 0, len = results.length;
 

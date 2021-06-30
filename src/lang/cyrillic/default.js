@@ -9,6 +9,7 @@ export default {
 }
 
 const regex = /[\x00-\x7F]+/g;
+const split = /\s+/;
 
 /**
  * @this IndexInterface
@@ -21,7 +22,7 @@ export function encode(str){
         this,
         /* string: */ str.replace(regex, " "),
         /* normalize: */ false,
-        /* split: */ " ",
+        /* split: */ split,
         /* collapse: */ false
     );
 }
