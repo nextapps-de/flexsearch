@@ -30,6 +30,12 @@
 - Enhanced charset normalization
 - Improved bundler (support for inline WebWorker)
 
+These features have been removed:
+
+- Where-Clause
+- Index Information `index.info()`
+- Paging Cursor (was replaced by `offset`)
+
 #### Migration Quick Overview
 
 > The "async" options was removed, instead you can call each method in its async version, e.g. `index.addAsync` or `index.searchAsync`.
@@ -111,6 +117,33 @@ index.search({
     }]
 });
 ```
+
+#### Where Clause Replacement
+
+Old Syntax:
+
+```js
+const result = index.where({
+    cat: "comedy",
+    year: "2018"
+});
+```
+
+Equivalent Syntax (0.7.x):
+
+```js
+const data = Object.values(index.store);
+```
+
+The line above retrieves data from the document store (just useful when not already available in your runtime).
+
+```js
+const result = data.filter(function(item){ 
+    return item.cat === "comedy" && item.year === "2018";
+});
+```
+
+Also considering using the <a href="https://github.com/nextapps-de/flexsearch#tags">Tag-Search</a> feature, which partially replaces the Where-Clause with a huge performance boost.
 
 ### v0.6.0
 
