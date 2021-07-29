@@ -134,15 +134,17 @@ export function exportDocument(callback, self, field, index_doc, index){
 
         self = this;
 
-        setTimeout(function(){
+        return new Promise(async function(resolve){
 
-            if(!idx.export(callback, self, index ? field.replace(":", "-") : "", index_doc, index++)){
+            if(!(await idx.export(callback, self, index ? field.replace(":", "-") : "", index_doc, index++))){
 
                 index_doc++;
                 index = 1;
 
-                self.export(callback, self, field, index_doc, index);
+                await self.export(callback, self, field, index_doc, index);
             }
+
+          resolve(true);
         });
     }
     else{
@@ -171,10 +173,10 @@ export function exportDocument(callback, self, field, index_doc, index){
 
             default:
 
-                return;
+                return Promise.resolve(true);
         }
 
-        async(callback, this, key, index_doc, index, data);
+        return lazyExport(callback, this, key, index_doc, index, data);
     }
 }
 
