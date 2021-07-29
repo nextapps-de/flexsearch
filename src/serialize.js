@@ -1,26 +1,14 @@
 import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_string } from "./common.js";
 
-function async(callback, self, key, index_doc, index, data){
+async function lazyExport(callback, self, key, index_doc, index, data){
+  // Run the callback on the given data
+  const res = callback(key, JSON.stringify(data));
+  // If the callback gives a promise, then wait on that
+  if (res && res["then"]) { await res; }
 
-    setTimeout(function(){
-
-        const res = callback(key, JSON.stringify(data));
-
-        // await isn't supported by ES5
-
-        if(res && res["then"]){
-
-            res["then"](function(){
-
-                self.export(callback, self, key, index_doc, index + 1);
-            })
-        }
-        else{
-
-            self.export(callback, self, key, index_doc, index + 1);
-        }
-    });
+  // Recurse to export the next property
+  return self.export(callback, self, key, index_doc, index + 1)
 }
 
 /**
@@ -79,12 +67,12 @@ export function exportIndex(callback, self, field, index_doc, index){
 
         default:
 
-            return;
+            // If there are no properties remaining to export, then return an empty promise with
+            // 'true'
+            return Promise.resolve(true);
     }
 
-    async(callback, self || this, field ? field + "." + key : key, index_doc, index, data);
-
-    return true;
+    return lazyExport(callback, self || this, field ? field + "." + key : key, index_doc, index, data)
 }
 
 /**

@@ -58,7 +58,7 @@ declare module "flexsearch" {
 
     where(whereObj: { [key: string]: string } | ((o: T) => boolean)): T[];
     encode(str: string): string;
-    export(): string;
+    export(): Promise<boolean>;
     import(exported: string): this;
   }
 
