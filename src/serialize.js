@@ -8,14 +8,14 @@ async function lazyExport(callback, self, key, index_doc, index, data){
   if (res && res["then"]) { await res; }
 
   // Recurse to export the next property
-  return self.export(callback, self, key, index_doc, index + 1)
+  return await self.export(callback, self, key, index_doc, index + 1);
 }
 
 /**
  * @this IndexInterface
  */
 
-export function exportIndex(callback, self, field, index_doc, index){
+export async function exportIndex(callback, self, field, index_doc, index){
 
     let key, data;
 
@@ -69,10 +69,10 @@ export function exportIndex(callback, self, field, index_doc, index){
 
             // If there are no properties remaining to export, then return an empty promise with
             // 'true'
-            return Promise.resolve(true);
+            return true;
     }
 
-    return lazyExport(callback, self || this, field ? field + "." + key : key, index_doc, index, data)
+    return await lazyExport(callback, self || this, field ? field + "." + key : key, index_doc, index, data);
 }
 
 /**
@@ -122,7 +122,7 @@ export function importIndex(key, data){
  * @this DocumentInterface
  */
 
-export function exportDocument(callback, self, field, index_doc, index){
+export async function exportDocument(callback, self, field, index_doc, index){
 
     index || (index = 0);
     index_doc || (index_doc = 0);
@@ -134,18 +134,16 @@ export function exportDocument(callback, self, field, index_doc, index){
 
         self = this;
 
-        return new Promise(async function(resolve){
 
-            if(!(await idx.export(callback, self, index ? field.replace(":", "-") : "", index_doc, index++))){
+      if(!(await idx.export(callback, self, index ? field.replace(":", "-") : "", index_doc, index++))){
 
-                index_doc++;
-                index = 1;
+        index_doc++;
+        index = 1;
 
-                await self.export(callback, self, field, index_doc, index);
-            }
+        await self.export(callback, self, field, index_doc, index);
+      }
 
-          resolve(true);
-        });
+      return true;
     }
     else{
 
@@ -176,7 +174,7 @@ export function exportDocument(callback, self, field, index_doc, index){
                 return Promise.resolve(true);
         }
 
-        return lazyExport(callback, this, key, index_doc, index, data);
+        return await lazyExport(callback, this, key, index_doc, index, data);
     }
 }
 
