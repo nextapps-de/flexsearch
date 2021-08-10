@@ -392,7 +392,7 @@ function F(a) {
 }
 ;var ia = {encode:ha, rtl:!1, tokenize:""};
 function ha(a) {
-  return ca.call(this, a.toLowerCase(), !1, da, !1);
+  return ca.call(this, ("" + a).toLowerCase(), !1, da, !1);
 }
 ;const ja = {}, H = {};
 function ka(a) {
