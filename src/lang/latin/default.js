@@ -18,7 +18,7 @@ export function encode(str){
     return pipeline.call(
 
         this,
-        /* string: */ str.toLowerCase(),
+        /* string: */ ("" + str).toLowerCase(),
         /* normalize: */ false,
         /* split: */ regex_whitespace,
         /* collapse: */ false
