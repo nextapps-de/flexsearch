@@ -390,9 +390,9 @@ function F(a) {
   }
   return b;
 }
-;var ha = {encode:fa, rtl:!1, tokenize:""};
-function fa(a) {
-  return ba.call(this, ("" + a).toLowerCase(), !1, ca, !1);
+;var ia = {encode:ha, rtl:!1, tokenize:""};
+function ha(a) {
+  return ca.call(this, ("" + a).toLowerCase(), !1, da, !1);
 }
 ;const ja = {}, H = {};
 function ka(a) {
@@ -1192,7 +1192,7 @@ R.prototype.export = function(a, b, c, d, e) {
         k = f.store;
         break;
       default:
-        return Promise.resolve(!0);
+        return !0;
     }
     return yield qa(a, f, g, d, e, k);
   });
