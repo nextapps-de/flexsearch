@@ -171,7 +171,7 @@ export async function exportDocument(callback, self, field, index_doc, index){
 
             default:
 
-                return Promise.resolve(true);
+                return true;
         }
 
         return await lazyExport(callback, this, key, index_doc, index, data);
