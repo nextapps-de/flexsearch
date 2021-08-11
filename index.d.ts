@@ -65,7 +65,7 @@ declare module "flexsearch" {
       index_doc?: Number,
       index?: Number
     ): Promise<boolean>;
-    import(exported: string): this;
+    import(key: string, data: any): void;
   }
 
   interface SearchOptions {
