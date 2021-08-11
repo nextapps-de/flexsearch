@@ -1,5 +1,19 @@
-declare module "flexsearch" {
-  export interface Index<T> {
+export default FlexSearch
+export as namespace FlexSearch
+
+declare class FlexSearch {
+  static create<T>(options?: CreateOptions): FlexSearch.Index<T>;
+  static registerMatcher(matcher: Matcher): typeof FlexSearch;
+  static registerEncoder(name: string, encoder: EncoderFn): typeof FlexSearch;
+  static registerLanguage(
+    lang: string,
+    options: { stemmer?: Stemmer; filter?: string[] }
+  ): typeof FlexSearch;
+  static encode(name: string, str: string): string;
+}
+
+declare namespace FlexSearch {
+  export class Index<T> {
     readonly id: string;
     readonly index: string;
     readonly length: number;
@@ -67,78 +81,67 @@ declare module "flexsearch" {
     ): Promise<boolean>;
     import(key: string, data: any): void;
   }
-
-  interface SearchOptions {
-    limit?: number;
-    suggest?: boolean;
-    where?: { [key: string]: string };
-    field?: string | string[];
-    bool?: "and" | "or" | "not";
-    //TODO: Sorting
-  }
-
-  interface SearchResults<T> {
-    page?: Cursor;
-    next?: Cursor;
-    result: T[];
-  }
-
-  interface Document {
-    id: string;
-    field: any;
-  }
-
-  export type CreateOptions = {
-    profile?: IndexProfile;
-    tokenize?: DefaultTokenizer | TokenizerFn;
-    split?: RegExp;
-    encode?: DefaultEncoder | EncoderFn | false;
-    cache?: boolean | number;
-    async?: boolean;
-    worker?: false | number;
-    depth?: false | number;
-    threshold?: false | number;
-    resolution?: number;
-    stemmer?: Stemmer | string | false;
-    filter?: FilterFn | string | false;
-    rtl?: boolean;
-    doc?: Document;
-  };
-
-  //   limit	number	Sets the limit of results.
-  // suggest	true, false	Enables suggestions in results.
-  // where	object	Use a where-clause for non-indexed fields.
-  // field	string, Array<string>	Sets the document fields which should be searched. When no field is set, all fields will be searched. Custom options per field are also supported.
-  // bool	"and", "or"	Sets the used logical operator when searching through multiple fields.
-  // page	true, false, cursor	Enables paginated results.
-
-  type IndexProfile =
-    | "memory"
-    | "speed"
-    | "match"
-    | "score"
-    | "balance"
-    | "fast";
-  type DefaultTokenizer = "strict" | "forward" | "reverse" | "full";
-  type TokenizerFn = (str: string) => string[];
-  type DefaultEncoder = "icase" | "simple" | "advanced" | "extra" | "balance";
-  type EncoderFn = (str: string) => string;
-  type Stemmer = { [key: string]: string };
-  type Matcher = { [key: string]: string };
-  type FilterFn = (str: string) => boolean;
-  type Cursor = string;
-
-  export default class FlexSearch {
-    static create<T>(options?: CreateOptions): Index<T>;
-    static registerMatcher(matcher: Matcher): typeof FlexSearch;
-    static registerEncoder(name: string, encoder: EncoderFn): typeof FlexSearch;
-    static registerLanguage(
-      lang: string,
-      options: { stemmer?: Stemmer; filter?: string[] }
-    ): typeof FlexSearch;
-    static encode(name: string, str: string): string;
-  }
 }
+
+interface SearchOptions {
+  limit?: number;
+  suggest?: boolean;
+  where?: { [key: string]: string };
+  field?: string | string[];
+  bool?: "and" | "or" | "not";
+  //TODO: Sorting
+}
+
+interface SearchResults<T> {
+  page?: Cursor;
+  next?: Cursor;
+  result: T[];
+}
+
+interface Document {
+  id: string;
+  field: any;
+}
+
+export type CreateOptions = {
+  profile?: IndexProfile;
+  tokenize?: DefaultTokenizer | TokenizerFn;
+  split?: RegExp;
+  encode?: DefaultEncoder | EncoderFn | false;
+  cache?: boolean | number;
+  async?: boolean;
+  worker?: false | number;
+  depth?: false | number;
+  threshold?: false | number;
+  resolution?: number;
+  stemmer?: Stemmer | string | false;
+  filter?: FilterFn | string | false;
+  rtl?: boolean;
+  doc?: Document;
+};
+
+//   limit	number	Sets the limit of results.
+// suggest	true, false	Enables suggestions in results.
+// where	object	Use a where-clause for non-indexed fields.
+// field	string, Array<string>	Sets the document fields which should be searched. When no field is set, all fields will be searched. Custom options per field are also supported.
+// bool	"and", "or"	Sets the used logical operator when searching through multiple fields.
+// page	true, false, cursor	Enables paginated results.
+
+type IndexProfile =
+  | "memory"
+  | "speed"
+  | "match"
+  | "score"
+  | "balance"
+  | "fast";
+type DefaultTokenizer = "strict" | "forward" | "reverse" | "full";
+type TokenizerFn = (str: string) => string[];
+type DefaultEncoder = "icase" | "simple" | "advanced" | "extra" | "balance";
+type EncoderFn = (str: string) => string;
+type Stemmer = { [key: string]: string };
+type Matcher = { [key: string]: string };
+type FilterFn = (str: string) => boolean;
+type Cursor = string;
 
 // FlexSearch.create(<options>)
 // FlexSearch.registerMatcher({KEY: VALUE})
