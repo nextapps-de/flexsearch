@@ -1192,7 +1192,7 @@ R.prototype.export = function(a, b, c, d, e) {
         k = f.store;
         break;
       default:
-        return Promise.resolve(!0);
+        return !0;
     }
     return yield qa(a, f, g, d, e, k);
   });
