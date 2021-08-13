@@ -50,8 +50,10 @@
     "task/**",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "index.d.ts"
   ],
+  "types": "index.d.ts",
   "readme": "README.md",
   "devDependencies": {
     "babel-cli": "^6.26.0",
