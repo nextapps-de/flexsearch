@@ -54,6 +54,7 @@ interface SearchOptions {
   where?: { [key: string]: string };
   field?: string | string[];
   bool?: "and" | "or" | "not";
+  enrich?: boolean;
   //TODO: Sorting
 }
 
