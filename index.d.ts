@@ -38,7 +38,7 @@ export class Document<T> {
 
   search(
     query: string,
-    options?: SearchOptions & { query: string }
+    options?: SearchOptions
   ): any // The shape of the resulting object can vary widely,
   // so we will put off typing it for now
 
@@ -54,6 +54,7 @@ interface SearchOptions {
   where?: { [key: string]: string };
   field?: string | string[];
   bool?: "and" | "or" | "not";
+  query?: string;
   enrich?: boolean;
   //TODO: Sorting
 }
