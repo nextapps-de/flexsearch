@@ -7,8 +7,7 @@ export const global_charset = {};
  */
 
 export function registerCharset(name, charset){
-
-    global_charset[name] = charset;
+  global_charset[name] = charset;
 }
 
 /**
@@ -17,6 +16,5 @@ export function registerCharset(name, charset){
  */
 
 export function registerLanguage(name, lang){
-
-    global_lang[name] = lang;
+  global_lang[name] = lang;
 }

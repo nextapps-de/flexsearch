@@ -1,86 +1,51 @@
-export default FlexSearch
-export as namespace FlexSearch
+export class Index {
+  readonly id: string;
+  readonly index: string;
+  readonly length: number;
 
-declare class FlexSearch {
-  static create<T>(options?: CreateOptions): FlexSearch.Index<T>;
-  static registerMatcher(matcher: Matcher): typeof FlexSearch;
-  static registerEncoder(name: string, encoder: EncoderFn): typeof FlexSearch;
-  static registerLanguage(
-    lang: string,
-    options: { stemmer?: Stemmer; filter?: string[] }
-  ): typeof FlexSearch;
-  static encode(name: string, str: string): string;
+  constructor(options?: CreateOptions);
+  info(): {
+    id: any;
+    items: any;
+    cache: any;
+    matcher: number;
+    worker: any;
+    threshold: any;
+    depth: any;
+    resolution: any;
+    contextual: boolean;
+  };
+  add(id: number, o: string): this;
+
+  // Result without pagination -> T[]
+  search(query: string, options?: number | SearchOptions): any;
+  update(id: number, o: string): this;
+  remove(id: number): this;
+  clear(): this;
+  destroy(): this;
+  addMatcher(matcher: Matcher): this;
+  encode(str: string): string;
+  serialize(): Record<string, any>;
+  static deserialize(obj: Record<string, any>, params: Record<string, any>): Index;
 }
 
-declare namespace FlexSearch {
-  export class Index<T> {
-    readonly id: string;
-    readonly index: string;
-    readonly length: number;
+export class Document<T> {
+  constructor(options?: CreateOptions | CreateDocumentOptions);
+  add(o: T): this;
+  add(id: number, o: T): this;
+  update(o: T): this;
+  update(id: number, o: T): this;
 
-    init(options?: CreateOptions): this;
-    info(): {
-      id: any;
-      items: any;
-      cache: any;
-      matcher: number;
-      worker: any;
-      threshold: any;
-      depth: any;
-      resolution: any;
-      contextual: boolean;
-    };
-    add(o: T): this;
-    add(id: number, o: string): this;
+  search(
+    query: string,
+    options?: SearchOptions & { query: string }
+  ): any // The shape of the resulting object can vary widely,
+  // so we will put off typing it for now
 
-    // Result without pagination -> T[]
-    search(
-      query: string,
-      options: number | SearchOptions,
-      callback: (results: T[]) => void
-    ): void;
-    search(query: string, options?: number | SearchOptions): Promise<T[]>;
-    search(
-      options: SearchOptions & { query: string },
-      callback: (results: T[]) => void
-    ): void;
-    search(options: SearchOptions & { query: string }): Promise<T[]>;
-
-    // Result with pagination -> SearchResults<T>
-    search(
-      query: string,
-      options: number | (SearchOptions & { page?: boolean | Cursor }),
-      callback: (results: SearchResults<T>) => void
-    ): void;
-    search(
-      query: string,
-      options?: number | (SearchOptions & { page?: boolean | Cursor })
-    ): Promise<SearchResults<T>>;
-    search(
-      options: SearchOptions & { query: string; page?: boolean | Cursor },
-      callback: (results: SearchResults<T>) => void
-    ): void;
-    search(
-      options: SearchOptions & { query: string; page?: boolean | Cursor }
-    ): Promise<SearchResults<T>>;
-
-    update(id: number, o: T): this;
-    remove(id: number): this;
-    clear(): this;
-    destroy(): this;
-    addMatcher(matcher: Matcher): this;
-
-    where(whereObj: { [key: string]: string } | ((o: T) => boolean)): T[];
-    encode(str: string): string;
-    export(
-      callback: (key: string, data: any) => any,
-      self?: this,
-      field?: string,
-      index_doc?: Number,
-      index?: Number
-    ): Promise<boolean>;
-    import(key: string, data: any): void;
-  }
+  // TODO add async methods
+  // TODO add more methods
+  serialize(): Record<string, any>;
+  static deserialize(obj: Record<string, any>, params: Record<string, any>): Document<any>;
 }
 
 interface SearchOptions {
@@ -98,9 +63,18 @@ interface SearchResults<T> {
   result: T[];
 }
 
-interface Document {
+/**
+ * These are the options necessary for initializing a Document
+ * A document needs to know two things: what is the 'primary key' to index by (id)
+ * and what fields should be indexed (index). The `index` parameter can also
+ * contain much more complicated information, as described in the FlexSearch
+ * README. Therefore, we give it the any time to allow multiple different ways
+ * of creating it
+ */
+interface CreateDocumentOptions {
   id: string;
-  field: any;
+  index: any;
+  store: string[];
 }
 
 export type CreateOptions = {
@@ -117,7 +91,7 @@ export type CreateOptions = {
   stemmer?: Stemmer | string | false;
   filter?: FilterFn | string | false;
   rtl?: boolean;
-  doc?: Document;
+  document?: CreateDocumentOptions;
 };
 
 //   limit	number	Sets the limit of results.
@@ -148,3 +122,14 @@ type Cursor = string;
 // FlexSearch.registerEncoder(name, encoder)
 // FlexSearch.registerLanguage(lang, {stemmer:{}, filter:[]})
 // FlexSearch.encode(name, string)
+// declare class FlexSearch {
+//   static create<T>(options?: CreateOptions): FlexSearch.Index<T>;
+//   static registerMatcher(matcher: Matcher): typeof FlexSearch;
+//   static registerEncoder(name: string, encoder: EncoderFn): typeof FlexSearch;
+//   static registerLanguage(
+//     lang: string,
+//     options: { stemmer?: Stemmer; filter?: string[] }
+//   ): typeof FlexSearch;
+//   static encode(name: string, str: string): string;
+// }
+

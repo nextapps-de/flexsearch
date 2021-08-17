@@ -1,1281 +1,2291 @@
-/**!
- * FlexSearch.js v0.7.21 (Debug)
- * Copyright 2018-2021 Nextapps GmbH
- * Author: Thomas Wilkerling
- * Licence: Apache-2.0
- * https://github.com/nextapps-de/flexsearch
- */
-(function(self){'use strict';
-var h = h || {};
-h.scope = {};
-h.ASSUME_ES5 = !1;
-h.ASSUME_NO_NATIVE_MAP = !1;
-h.ASSUME_NO_NATIVE_SET = !1;
-h.SIMPLE_FROUND_POLYFILL = !1;
-h.ISOLATE_POLYFILLS = !1;
-h.FORCE_POLYFILL_PROMISE = !1;
-h.FORCE_POLYFILL_PROMISE_WHEN_NO_UNHANDLED_REJECTION = !1;
-h.defineProperty = h.ASSUME_ES5 || "function" == typeof Object.defineProperties ? Object.defineProperty : function(a, b, c) {
-  if (a == Array.prototype || a == Object.prototype) {
-    return a;
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.flexsearch = {}));
+}(this, (function (exports) { 'use strict';
+
+  function parse_option(value, default_value){
+    return typeof value !== 'undefined' ? value : default_value;
   }
-  a[b] = c.value;
-  return a;
-};
-h.getGlobal = function(a) {
-  a = ["object" == typeof globalThis && globalThis, a, "object" == typeof window && window, "object" == typeof self && self, "object" == typeof global && global, ];
-  for (var b = 0; b < a.length; ++b) {
-    var c = a[b];
-    if (c && c.Math == Math) {
-      return c;
+
+  /**
+   * @param {!number} count
+   * @returns {Array<Object>}
+   */
+
+  function create_object_array(count){
+    const array = new Array(count);
+
+    for(let i = 0; i < count; i++){
+      array[i] = create_object();
     }
+
+    return array;
   }
-  throw Error("Cannot find global object");
-};
-h.global = h.getGlobal(this);
-h.IS_SYMBOL_NATIVE = "function" === typeof Symbol && "symbol" === typeof Symbol("x");
-h.TRUST_ES6_POLYFILLS = !h.ISOLATE_POLYFILLS || h.IS_SYMBOL_NATIVE;
-h.polyfills = {};
-h.propertyToPolyfillSymbol = {};
-h.POLYFILL_PREFIX = "$jscp$";
-h.polyfill = function(a, b, c, d) {
-  b && (h.ISOLATE_POLYFILLS ? h.polyfillIsolated(a, b, c, d) : h.polyfillUnisolated(a, b, c, d));
-};
-h.polyfillUnisolated = function(a, b) {
-  var c = h.global;
-  a = a.split(".");
-  for (var d = 0; d < a.length - 1; d++) {
-    var e = a[d];
-    if (!(e in c)) {
-      return;
-    }
-    c = c[e];
+
+  /**
+   * @param {!Object} obj
+   * @returns {Array<string>}
+   */
+
+  function get_keys(obj){
+    return Object.keys(obj);
   }
-  a = a[a.length - 1];
-  d = c[a];
-  b = b(d);
-  b != d && null != b && h.defineProperty(c, a, {configurable:!0, writable:!0, value:b});
-};
-h.polyfillIsolated = function(a, b, c) {
-  var d = a.split(".");
-  a = 1 === d.length;
-  var e = d[0];
-  e = !a && e in h.polyfills ? h.polyfills : h.global;
-  for (var f = 0; f < d.length - 1; f++) {
-    var g = d[f];
-    if (!(g in e)) {
-      return;
-    }
-    e = e[g];
+
+  function create_object(){
+    return Object.create(null);
   }
-  d = d[d.length - 1];
-  c = h.IS_SYMBOL_NATIVE && "es6" === c ? e[d] : null;
-  b = b(c);
-  null != b && (a ? h.defineProperty(h.polyfills, d, {configurable:!0, writable:!0, value:b}) : b !== c && (void 0 === h.propertyToPolyfillSymbol[d] && (a = 1e9 * Math.random() >>> 0, h.propertyToPolyfillSymbol[d] = h.IS_SYMBOL_NATIVE ? h.global.Symbol(d) : h.POLYFILL_PREFIX + a + "$" + d), h.defineProperty(e, h.propertyToPolyfillSymbol[d], {configurable:!0, writable:!0, value:b})));
-};
-h.underscoreProtoCanBeSet = function() {
-  var a = {a:!0}, b = {};
-  try {
-    return b.__proto__ = a, b.a;
-  } catch (c) {
+
+  function concat(arrays){
+    return [].concat.apply([], arrays);
   }
-  return !1;
-};
-h.setPrototypeOf = h.TRUST_ES6_POLYFILLS && "function" == typeof Object.setPrototypeOf ? Object.setPrototypeOf : h.underscoreProtoCanBeSet() ? function(a, b) {
-  a.__proto__ = b;
-  if (a.__proto__ !== b) {
-    throw new TypeError(a + " is not extensible");
+
+  function sort_by_length_down(a, b){
+    return b.length - a.length;
   }
-  return a;
-} : null;
-h.arrayIteratorImpl = function(a) {
-  var b = 0;
-  return function() {
-    return b < a.length ? {done:!1, value:a[b++], } : {done:!0};
-  };
-};
-h.arrayIterator = function(a) {
-  return {next:h.arrayIteratorImpl(a)};
-};
-h.makeIterator = function(a) {
-  var b = "undefined" != typeof Symbol && Symbol.iterator && a[Symbol.iterator];
-  return b ? b.call(a) : h.arrayIterator(a);
-};
-h.generator = {};
-h.generator.ensureIteratorResultIsObject_ = function(a) {
-  if (!(a instanceof Object)) {
-    throw new TypeError("Iterator result " + a + " is not an object");
+
+  function is_array(val){
+    return val.constructor === Array;
   }
-};
-h.generator.Context = function() {
-  this.isRunning_ = !1;
-  this.yieldAllIterator_ = null;
-  this.yieldResult = void 0;
-  this.nextAddress = 1;
-  this.finallyAddress_ = this.catchAddress_ = 0;
-  this.finallyContexts_ = this.abruptCompletion_ = null;
-};
-h.generator.Context.prototype.start_ = function() {
-  if (this.isRunning_) {
-    throw new TypeError("Generator is already running");
+
+  function is_string(val){
+    return typeof val === 'string';
   }
-  this.isRunning_ = !0;
-};
-h.generator.Context.prototype.stop_ = function() {
-  this.isRunning_ = !1;
-};
-h.generator.Context.prototype.jumpToErrorHandler_ = function() {
-  this.nextAddress = this.catchAddress_ || this.finallyAddress_;
-};
-h.generator.Context.prototype.next_ = function(a) {
-  this.yieldResult = a;
-};
-h.generator.Context.prototype.throw_ = function(a) {
-  this.abruptCompletion_ = {exception:a, isException:!0};
-  this.jumpToErrorHandler_();
-};
-h.generator.Context.prototype.return = function(a) {
-  this.abruptCompletion_ = {return:a};
-  this.nextAddress = this.finallyAddress_;
-};
-h.generator.Context.prototype.jumpThroughFinallyBlocks = function(a) {
-  this.abruptCompletion_ = {jumpTo:a};
-  this.nextAddress = this.finallyAddress_;
-};
-h.generator.Context.prototype.yield = function(a, b) {
-  this.nextAddress = b;
-  return {value:a};
-};
-h.generator.Context.prototype.yieldAll = function(a, b) {
-  a = h.makeIterator(a);
-  var c = a.next();
-  h.generator.ensureIteratorResultIsObject_(c);
-  if (c.done) {
-    this.yieldResult = c.value, this.nextAddress = b;
-  } else {
-    return this.yieldAllIterator_ = a, this.yield(c.value, b);
+
+  function is_object(val){
+    return typeof val === 'object';
   }
-};
-h.generator.Context.prototype.jumpTo = function(a) {
-  this.nextAddress = a;
-};
-h.generator.Context.prototype.jumpToEnd = function() {
-  this.nextAddress = 0;
-};
-h.generator.Context.prototype.setCatchFinallyBlocks = function(a, b) {
-  this.catchAddress_ = a;
-  void 0 != b && (this.finallyAddress_ = b);
-};
-h.generator.Context.prototype.setFinallyBlock = function(a) {
-  this.catchAddress_ = 0;
-  this.finallyAddress_ = a || 0;
-};
-h.generator.Context.prototype.leaveTryBlock = function(a, b) {
-  this.nextAddress = a;
-  this.catchAddress_ = b || 0;
-};
-h.generator.Context.prototype.enterCatchBlock = function(a) {
-  this.catchAddress_ = a || 0;
-  a = this.abruptCompletion_.exception;
-  this.abruptCompletion_ = null;
-  return a;
-};
-h.generator.Context.prototype.enterFinallyBlock = function(a, b, c) {
-  c ? this.finallyContexts_[c] = this.abruptCompletion_ : this.finallyContexts_ = [this.abruptCompletion_];
-  this.catchAddress_ = a || 0;
-  this.finallyAddress_ = b || 0;
-};
-h.generator.Context.prototype.leaveFinallyBlock = function(a, b) {
-  b = this.finallyContexts_.splice(b || 0)[0];
-  if (b = this.abruptCompletion_ = this.abruptCompletion_ || b) {
-    if (b.isException) {
-      return this.jumpToErrorHandler_();
-    }
-    void 0 != b.jumpTo && this.finallyAddress_ < b.jumpTo ? (this.nextAddress = b.jumpTo, this.abruptCompletion_ = null) : this.nextAddress = this.finallyAddress_;
-  } else {
-    this.nextAddress = a;
+
+  function is_function(val){
+    return typeof val === 'function';
   }
-};
-h.generator.Context.prototype.forIn = function(a) {
-  return new h.generator.Context.PropertyIterator(a);
-};
-h.generator.Context.PropertyIterator = function(a) {
-  this.object_ = a;
-  this.properties_ = [];
-  for (var b in a) {
-    this.properties_.push(b);
-  }
-  this.properties_.reverse();
-};
-h.generator.Context.PropertyIterator.prototype.getNext = function() {
-  for (; 0 < this.properties_.length;) {
-    var a = this.properties_.pop();
-    if (a in this.object_) {
-      return a;
-    }
-  }
-  return null;
-};
-h.generator.Engine_ = function(a) {
-  this.context_ = new h.generator.Context;
-  this.program_ = a;
-};
-h.generator.Engine_.prototype.next_ = function(a) {
-  this.context_.start_();
-  if (this.context_.yieldAllIterator_) {
-    return this.yieldAllStep_(this.context_.yieldAllIterator_.next, a, this.context_.next_);
-  }
-  this.context_.next_(a);
-  return this.nextStep_();
-};
-h.generator.Engine_.prototype.return_ = function(a) {
-  this.context_.start_();
-  var b = this.context_.yieldAllIterator_;
-  if (b) {
-    return this.yieldAllStep_("return" in b ? b["return"] : function(c) {
-      return {value:c, done:!0};
-    }, a, this.context_.return);
-  }
-  this.context_.return(a);
-  return this.nextStep_();
-};
-h.generator.Engine_.prototype.throw_ = function(a) {
-  this.context_.start_();
-  if (this.context_.yieldAllIterator_) {
-    return this.yieldAllStep_(this.context_.yieldAllIterator_["throw"], a, this.context_.next_);
-  }
-  this.context_.throw_(a);
-  return this.nextStep_();
-};
-h.generator.Engine_.prototype.yieldAllStep_ = function(a, b, c) {
-  try {
-    var d = a.call(this.context_.yieldAllIterator_, b);
-    h.generator.ensureIteratorResultIsObject_(d);
-    if (!d.done) {
-      return this.context_.stop_(), d;
-    }
-    var e = d.value;
-  } catch (f) {
-    return this.context_.yieldAllIterator_ = null, this.context_.throw_(f), this.nextStep_();
-  }
-  this.context_.yieldAllIterator_ = null;
-  c.call(this.context_, e);
-  return this.nextStep_();
-};
-h.generator.Engine_.prototype.nextStep_ = function() {
-  for (; this.context_.nextAddress;) {
-    try {
-      var a = this.program_(this.context_);
-      if (a) {
-        return this.context_.stop_(), {value:a.value, done:!1};
+
+  /**
+   * @param {!string} str
+   * @param {boolean|Array<string|RegExp>=} normalize
+   * @param {boolean|string|RegExp=} split
+   * @param {boolean=} _collapse
+   * @returns {string|Array<string>}
+   * @this IndexInterface
+   */
+
+  function pipeline(str, normalize, split, _collapse){
+    if(str){
+      if(normalize){
+        str = replace(str, /** @type {Array<string|RegExp>} */ (normalize));
       }
-    } catch (b) {
-      this.context_.yieldResult = void 0, this.context_.throw_(b);
-    }
-  }
-  this.context_.stop_();
-  if (this.context_.abruptCompletion_) {
-    a = this.context_.abruptCompletion_;
-    this.context_.abruptCompletion_ = null;
-    if (a.isException) {
-      throw a.exception;
-    }
-    return {value:a.return, done:!0};
-  }
-  return {value:void 0, done:!0};
-};
-h.generator.Generator_ = function(a) {
-  this.next = function(b) {
-    return a.next_(b);
-  };
-  this.throw = function(b) {
-    return a.throw_(b);
-  };
-  this.return = function(b) {
-    return a.return_(b);
-  };
-  this[Symbol.iterator] = function() {
-    return this;
-  };
-};
-h.generator.createGenerator = function(a, b) {
-  b = new h.generator.Generator_(new h.generator.Engine_(b));
-  h.setPrototypeOf && a.prototype && h.setPrototypeOf(b, a.prototype);
-  return b;
-};
-h.asyncExecutePromiseGenerator = function(a) {
-  function b(d) {
-    return a.next(d);
-  }
-  function c(d) {
-    return a.throw(d);
-  }
-  return new Promise(function(d, e) {
-    function f(g) {
-      g.done ? d(g.value) : Promise.resolve(g.value).then(b, c).then(f, e);
-    }
-    f(a.next());
-  });
-};
-h.asyncExecutePromiseGeneratorFunction = function(a) {
-  return h.asyncExecutePromiseGenerator(a());
-};
-h.asyncExecutePromiseGeneratorProgram = function(a) {
-  return h.asyncExecutePromiseGenerator(new h.generator.Generator_(new h.generator.Engine_(a)));
-};
-function t(a, b) {
-  return "undefined" !== typeof a ? a : b;
-}
-function aa(a) {
-  const b = Array(a);
-  for (let c = 0; c < a; c++) {
-    b[c] = w();
-  }
-  return b;
-}
-function w() {
-  return Object.create(null);
-}
-function ba(a, b) {
-  return b.length - a.length;
-}
-function x(a) {
-  return "string" === typeof a;
-}
-function y(a) {
-  return "object" === typeof a;
-}
-function A(a) {
-  return "function" === typeof a;
-}
-;function ca(a, b, c, d) {
-  if (a && (b && (a = E(a, b)), this.matcher && (a = E(a, this.matcher)), this.stemmer && 1 < a.length && (a = E(a, this.stemmer)), d && 1 < a.length && (a = F(a)), c || "" === c)) {
-    a = a.split(c);
-    if (this.filter) {
-      b = this.filter;
-      c = a.length;
-      d = [];
-      for (let e = 0, f = 0; e < c; e++) {
-        const g = a[e];
-        g && !b[g] && (d[f++] = g);
+
+      if(this.matcher){
+        str = replace(str, this.matcher);
       }
-      a = d;
+
+      if(this.stemmer && (str.length > 1)){
+        str = replace(str, this.stemmer);
+      }
+
+      if(_collapse && (str.length > 1)){
+        str = collapse(str);
+      }
+
+      if(split || (split === '')){
+        const words = str.split(/** @type {string|RegExp} */ (split));
+
+        return this.filter ? filter(words, this.filter) : words;
+      }
     }
-    return a;
+
+    return str;
   }
-  return a;
-}
-const da = /[\p{Z}\p{S}\p{P}\p{C}]+/u, ea = /[\u0300-\u036f]/g;
-function fa(a, b) {
-  const c = Object.keys(a), d = c.length, e = [];
-  let f = "", g = 0;
-  for (let k = 0, l, n; k < d; k++) {
-    l = c[k], (n = a[l]) ? (e[g++] = G(b ? "(?!\\b)" + l + "(\\b|_)" : l), e[g++] = n) : f += (f ? "|" : "") + l;
+
+  const regex_whitespace = /[\p{Z}\p{S}\p{P}\p{C}]+/u;
+
+  /**
+   * @param {!string} str
+   * @param {boolean|Array<string|RegExp>=} normalize
+   * @param {boolean|string|RegExp=} split
+   * @param {boolean=} _collapse
+   * @returns {string|Array<string>}
+   */
+
+  // FlexSearch.prototype.pipeline = function(str, normalize, split, _collapse){
+  //
+  //     if(str){
+  //
+  //         if(normalize && str){
+  //
+  //             str = replace(str, /** @type {Array<string|RegExp>} */ (normalize));
+  //         }
+  //
+  //         if(str && this.matcher){
+  //
+  //             str = replace(str, this.matcher);
+  //         }
+  //
+  //         if(this.stemmer && str.length > 1){
+  //
+  //             str = replace(str, this.stemmer);
+  //         }
+  //
+  //         if(_collapse && str.length > 1){
+  //
+  //             str = collapse(str);
+  //         }
+  //
+  //         if(str){
+  //
+  //             if(split || (split === "")){
+  //
+  //                 const words = str.split(/** @type {string|RegExp} */ (split));
+  //
+  //                 return this.filter ? filter(words, this.filter) : words;
+  //             }
+  //         }
+  //     }
+  //
+  //     return str;
+  // };
+
+  // export function pipeline(str, normalize, matcher, stemmer, split, _filter, _collapse){
+  //
+  //     if(str){
+  //
+  //         if(normalize && str){
+  //
+  //             str = replace(str, normalize);
+  //         }
+  //
+  //         if(matcher && str){
+  //
+  //             str = replace(str, matcher);
+  //         }
+  //
+  //         if(stemmer && str.length > 1){
+  //
+  //             str = replace(str, stemmer);
+  //         }
+  //
+  //         if(_collapse && str.length > 1){
+  //
+  //             str = collapse(str);
+  //         }
+  //
+  //         if(str){
+  //
+  //             if(split !== false){
+  //
+  //                 str = str.split(split);
+  //
+  //                 if(_filter){
+  //
+  //                     str = filter(str, _filter);
+  //                 }
+  //             }
+  //         }
+  //     }
+  //
+  //     return str;
+  // }
+
+
+  /**
+   * @param {Array<string>} words
+   * @returns {Object<string, string>}
+   */
+
+  function init_filter(words){
+    const filter = create_object();
+
+    for(let i = 0, length = words.length; i < length; i++){
+      filter[words[i]] = 1;
+    }
+
+    return filter;
   }
-  f && (e[g++] = G(b ? "(?!\\b)(" + f + ")(\\b|_)" : "(" + f + ")"), e[g] = "");
-  return e;
-}
-function E(a, b) {
-  for (let c = 0, d = b.length; c < d && (a = a.replace(b[c], b[c + 1]), a); c += 2) {
+
+  /**
+   * @param {!Object<string, string>} obj
+   * @param {boolean} is_stemmer
+   * @returns {Array}
+   */
+
+  function init_stemmer_or_matcher(obj, is_stemmer){
+    const keys = get_keys(obj);
+    const length = keys.length;
+    const final = [];
+
+    let removal = '', count = 0;
+
+    for(let i = 0, key, tmp; i < length; i++){
+      key = keys[i];
+      tmp = obj[key];
+
+      if(tmp){
+        final[count++] = regex(is_stemmer ? '(?!\\b)' + key + '(\\b|_)' : key);
+        final[count++] = tmp;
+      }
+      else {
+        removal += (removal ? '|' : '') + key;
+      }
+    }
+
+    if(removal){
+      final[count++] = regex(is_stemmer ? '(?!\\b)(' + removal + ')(\\b|_)' : '(' + removal + ')');
+      final[count] = '';
+    }
+
+    return final;
   }
-  return a;
-}
-function G(a) {
-  return new RegExp(a, "g");
-}
-function F(a) {
-  let b = "", c = "";
-  for (let d = 0, e = a.length, f; d < e; d++) {
-    (f = a[d]) !== c && (b += c = f);
+
+
+  /**
+   * @param {!string} str
+   * @param {Array} regexp
+   * @returns {string}
+   */
+
+  function replace(str, regexp){
+    for(let i = 0, len = regexp.length; i < len; i += 2){
+      str = str.replace(regexp[i], regexp[i + 1]);
+
+      if(!str){
+        break;
+      }
+    }
+
+    return str;
   }
-  return b;
-}
-;var ia = {encode:ha, rtl:!1, tokenize:""};
-function ha(a) {
-  return ca.call(this, ("" + a).toLowerCase(), !1, da, !1);
-}
-;const ja = {}, H = {};
-function ka(a) {
-  J(a, "add");
-  J(a, "append");
-  J(a, "search");
-  J(a, "update");
-  J(a, "remove");
-}
-function J(a, b) {
-  a[b + "Async"] = function() {
-    const c = this, d = arguments;
-    var e = d[d.length - 1];
-    let f;
-    A(e) && (f = e, delete d[d.length - 1]);
-    e = new Promise(function(g) {
-      setTimeout(function() {
-        c.async = !0;
-        const k = c[b].apply(c, d);
-        c.async = !1;
-        g(k);
+
+  /**
+   * @param {!string} str
+   * @returns {RegExp}
+   */
+
+  function regex(str){
+    return new RegExp(str, 'g');
+  }
+
+  /**
+   * Regex: replace(/(?:(\w)(?:\1)*)/g, "$1")
+   * @param {!string} string
+   * @returns {string}
+   */
+
+  function collapse(string){
+    let final = '', prev = '';
+
+    for(let i = 0, len = string.length, char; i < len; i++){
+      if((char = string[i]) !== prev){
+        final += (prev = char);
+      }
+    }
+
+    return final;
+  }
+
+  // TODO using fast-swap
+  function filter(words, map){
+    const length = words.length;
+    const filtered = [];
+
+    for(let i = 0, count = 0; i < length; i++){
+      const word = words[i];
+
+      if(word && !map[word]){
+        filtered[count++] = word;
+      }
+    }
+
+    return filtered;
+  }
+
+  // const chars = {a:1, e:1, i:1, o:1, u:1, y:1};
+  //
+  // function collapse_repeating_chars(string){
+  //
+  //     let collapsed_string = "",
+  //         char_prev = "",
+  //         char_next = "";
+  //
+  //     for(let i = 0; i < string.length; i++){
+  //
+  //         const char = string[i];
+  //
+  //         if(char !== char_prev){
+  //
+  //             if(i && (char === "h")){
+  //
+  //                 if((chars[char_prev] && chars[char_next]) || (char_prev === " ")){
+  //
+  //                     collapsed_string += char;
+  //                 }
+  //             }
+  //             else{
+  //
+  //                 collapsed_string += char;
+  //             }
+  //         }
+  //
+  //         char_next = (
+  //
+  //             (i === (string.length - 1)) ?
+  //
+  //                 ""
+  //             :
+  //                 string[i + 1]
+  //         );
+  //
+  //         char_prev = char;
+  //     }
+  //
+  //     return collapsed_string;
+  // }
+
+  /**
+   * @this IndexInterface
+   */
+
+  function encode(str){
+    return pipeline.call(
+
+      this,
+      /* string: */ ('' + str).toLowerCase(),
+      /* normalize: */ false,
+      /* split: */ regex_whitespace,
+      /* collapse: */ false
+    );
+  }
+
+  const global_lang = {};
+  const global_charset = {};
+
+  //import { promise as Promise } from "./polyfill.js";
+
+  function apply_async(prototype){
+    register(prototype, 'add');
+    register(prototype, 'append');
+    register(prototype, 'search');
+    register(prototype, 'update');
+    register(prototype, 'remove');
+  }
+
+  function register(prototype, key){
+    prototype[key + 'Async'] = function(){
+      /** @type {IndexInterface|DocumentInterface} */
+      const self = this;
+      const args = /*[].slice.call*/(arguments);
+      const arg = args[args.length - 1];
+      let callback;
+
+      if(is_function(arg)){
+        callback = arg;
+        delete args[args.length - 1];
+      }
+
+      const promise = new Promise(function(resolve){
+        setTimeout(function(){
+          self.async = true;
+          const res = self[key].apply(self, args);
+          self.async = false;
+          resolve(res);
+        });
       });
-    });
-    return f ? (e.then(f), this) : e;
-  };
-}
-;function la(a, b, c, d) {
-  const e = a.length;
-  let f = [], g, k, l = 0;
-  d && (d = []);
-  for (let n = e - 1; 0 <= n; n--) {
-    const q = a[n], v = q.length, r = w();
-    let p = !g;
-    for (let m = 0; m < v; m++) {
-      const u = q[m], z = u.length;
-      if (z) {
-        for (let D = 0, C, B; D < z; D++) {
-          if (B = u[D], g) {
-            if (g[B]) {
-              if (!n) {
-                if (c) {
-                  c--;
-                } else {
-                  if (f[l++] = B, l === b) {
-                    return f;
+
+      if(callback){
+        promise.then(callback);
+        return this;
+      }
+      else {
+        return promise;
+      }
+    };
+  }
+
+  /**
+   * Implementation based on Array.indexOf() provides better performance,
+   * but it needs at least one word in the query which is less frequent.
+   * Also on large indexes it does not scale well performance-wise.
+   * This strategy also lacks of suggestion capabilities (matching & sorting).
+   *
+   * @param arrays
+   * @param limit
+   * @param offset
+   * @param {boolean|Array=} suggest
+   * @returns {Array}
+   */
+
+  // export function intersect(arrays, limit, offset, suggest) {
+  //
+  //     const length = arrays.length;
+  //     let result = [];
+  //     let check;
+  //
+  //     // determine shortest array and collect results
+  //     // from the sparse relevance arrays
+  //
+  //     let smallest_size;
+  //     let smallest_arr;
+  //     let smallest_index;
+  //
+  //     for(let x = 0; x < length; x++){
+  //
+  //         const arr = arrays[x];
+  //         const len = arr.length;
+  //
+  //         let size = 0;
+  //
+  //         for(let y = 0, tmp; y < len; y++){
+  //
+  //             tmp = arr[y];
+  //
+  //             if(tmp){
+  //
+  //                 size += tmp.length;
+  //             }
+  //         }
+  //
+  //         if(!smallest_size || (size < smallest_size)){
+  //
+  //             smallest_size = size;
+  //             smallest_arr = arr;
+  //             smallest_index = x;
+  //         }
+  //     }
+  //
+  //     smallest_arr = smallest_arr.length === 1 ?
+  //
+  //         smallest_arr[0]
+  //     :
+  //         concat(smallest_arr);
+  //
+  //     if(suggest){
+  //
+  //         suggest = [smallest_arr];
+  //         check = create_object();
+  //     }
+  //
+  //     let size = 0;
+  //     let steps = 0;
+  //
+  //     // process terms in reversed order often results in better performance.
+  //     // the outer loop must be the words array, using the
+  //     // smallest array here disables the "fast fail" optimization.
+  //
+  //     for(let x = length - 1; x >= 0; x--){
+  //
+  //         if(x !== smallest_index){
+  //
+  //             steps++;
+  //
+  //             const word_arr = arrays[x];
+  //             const word_arr_len = word_arr.length;
+  //             const new_arr = [];
+  //
+  //             let count = 0;
+  //
+  //             for(let z = 0, id; z < smallest_arr.length; z++){
+  //
+  //                 id = smallest_arr[z];
+  //
+  //                 let found;
+  //
+  //                 // process relevance in forward order (direction is
+  //                 // important for adding IDs during the last round)
+  //
+  //                 for(let y = 0; y < word_arr_len; y++){
+  //
+  //                     const arr = word_arr[y];
+  //
+  //                     if(arr.length){
+  //
+  //                         found = arr.indexOf(id) !== -1;
+  //
+  //                         if(found){
+  //
+  //                             // check if in last round
+  //
+  //                             if(steps === length - 1){
+  //
+  //                                 if(offset){
+  //
+  //                                     offset--;
+  //                                 }
+  //                                 else{
+  //
+  //                                     result[size++] = id;
+  //
+  //                                     if(size === limit){
+  //
+  //                                         // fast path "end reached"
+  //
+  //                                         return result;
+  //                                     }
+  //                                 }
+  //
+  //                                 if(suggest){
+  //
+  //                                     check[id] = 1;
+  //                                 }
+  //                             }
+  //
+  //                             break;
+  //                         }
+  //                     }
+  //                 }
+  //
+  //                 if(found){
+  //
+  //                     new_arr[count++] = id;
+  //                 }
+  //             }
+  //
+  //             if(suggest){
+  //
+  //                 suggest[steps] = new_arr;
+  //             }
+  //             else if(!count){
+  //
+  //                 return [];
+  //             }
+  //
+  //             smallest_arr = new_arr;
+  //         }
+  //     }
+  //
+  //     if(suggest){
+  //
+  //         // needs to iterate in reverse direction
+  //
+  //         for(let x = suggest.length - 1, arr, len; x >= 0; x--){
+  //
+  //             arr = suggest[x];
+  //             len = arr && arr.length;
+  //
+  //             if(len){
+  //
+  //                 for(let y = 0, id; y < len; y++){
+  //
+  //                     id = arr[y];
+  //
+  //                     if(!check[id]){
+  //
+  //                         check[id] = 1;
+  //
+  //                         if(offset){
+  //
+  //                             offset--;
+  //                         }
+  //                         else{
+  //
+  //                             result[size++] = id;
+  //
+  //                             if(size === limit){
+  //
+  //                                 // fast path "end reached"
+  //
+  //                                 return result;
+  //                             }
+  //                         }
+  //                     }
+  //                 }
+  //             }
+  //         }
+  //     }
+  //
+  //     return result;
+  // }
+
+  /**
+   * Implementation based on Object[key] provides better suggestions
+   * capabilities and has less performance scaling issues on large indexes.
+   *
+   * @param arrays
+   * @param limit
+   * @param offset
+   * @param {boolean|Array=} suggest
+   * @returns {Array}
+   */
+
+  function intersect(arrays, limit, offset, suggest) {
+    const length = arrays.length;
+    let result = [];
+    let check;
+    let check_suggest;
+    let size = 0;
+
+    if(suggest){
+      suggest = [];
+    }
+
+    // process terms in reversed order often has advantage for the fast path "end reached".
+    // also a reversed order prioritize the order of words from a query.
+
+    for(let x = length - 1; x >= 0; x--){
+      const word_arr = arrays[x];
+      const word_arr_len = word_arr.length;
+      const check_new = create_object();
+
+      let found = !check;
+
+      // process relevance in forward order (direction is
+      // important for adding IDs during the last round)
+
+      for(let y = 0; y < word_arr_len; y++){
+        const arr = word_arr[y];
+        const arr_len = arr.length;
+
+        if(arr_len){
+          // loop through IDs
+
+          for(let z = 0, check_idx, id; z < arr_len; z++){
+            id = arr[z];
+
+            if(check){
+              if(check[id]){
+                // check if in last round
+
+                if(!x){
+                  if(offset){
+                    offset--;
                   }
-                }
-              }
-              if (n || d) {
-                r[B] = 1;
-              }
-              p = !0;
-            }
-            if (d && (k[B] = (C = k[B]) ? ++C : C = 1, C < e)) {
-              const I = d[C - 2] || (d[C - 2] = []);
-              I[I.length] = B;
-            }
-          } else {
-            r[B] = 1;
-          }
-        }
-      }
-    }
-    if (d) {
-      g || (k = r);
-    } else {
-      if (!p) {
-        return [];
-      }
-    }
-    g = r;
-  }
-  if (d) {
-    for (let n = d.length - 1, q, v; 0 <= n; n--) {
-      q = d[n];
-      v = q.length;
-      for (let r = 0, p; r < v; r++) {
-        if (p = q[r], !g[p]) {
-          if (c) {
-            c--;
-          } else {
-            if (f[l++] = p, l === b) {
-              return f;
-            }
-          }
-          g[p] = 1;
-        }
-      }
-    }
-  }
-  return f;
-}
-function ma(a, b) {
-  const c = w(), d = w(), e = [];
-  for (let f = 0; f < a.length; f++) {
-    c[a[f]] = 1;
-  }
-  for (let f = 0, g; f < b.length; f++) {
-    g = b[f];
-    for (let k = 0, l; k < g.length; k++) {
-      l = g[k], c[l] && !d[l] && (d[l] = 1, e[e.length] = l);
-    }
-  }
-  return e;
-}
-;function K(a) {
-  this.limit = !0 !== a && a;
-  this.cache = w();
-  this.queue = [];
-}
-function na(a, b, c) {
-  y(a) && (a = a.query);
-  let d = this.cache.get(a);
-  d || (d = this.search(a, b, c), this.cache.set(a, d));
-  return d;
-}
-K.prototype.set = function(a, b) {
-  if (!this.cache[a]) {
-    var c = this.queue.length;
-    c === this.limit ? delete this.cache[this.queue[c - 1]] : c++;
-    for (--c; 0 < c; c--) {
-      this.queue[c] = this.queue[c - 1];
-    }
-    this.queue[0] = a;
-  }
-  this.cache[a] = b;
-};
-K.prototype.get = function(a) {
-  const b = this.cache[a];
-  if (this.limit && b && (a = this.queue.indexOf(a))) {
-    const c = this.queue[a - 1];
-    this.queue[a - 1] = this.queue[a];
-    this.queue[a] = c;
-  }
-  return b;
-};
-K.prototype.del = function(a) {
-  for (let b = 0, c, d; b < this.queue.length; b++) {
-    d = this.queue[b], c = this.cache[d], -1 !== c.indexOf(a) && (this.queue.splice(b--, 1), delete this.cache[d]);
-  }
-};
-const oa = {memory:{charset:"latin:extra", resolution:3, minlength:4, fastupdate:!1}, performance:{resolution:3, minlength:3, optimize:!1, context:{depth:2, resolution:1}}, match:{charset:"latin:extra", tokenize:"reverse", }, score:{charset:"latin:advanced", resolution:20, minlength:3, context:{depth:3, resolution:9, }}, "default":{}, };
-function qa(a, b, c, d, e, f) {
-  return h.asyncExecutePromiseGeneratorFunction(function*() {
-    const g = a(c, JSON.stringify(f));
-    g && g.then && (yield g);
-    return yield b.export(a, b, c, d, e + 1);
-  });
-}
-;function L(a, b) {
-  if (!(this instanceof L)) {
-    return new L(a);
-  }
-  var c;
-  if (a) {
-    if (x(a)) {
-      oa[a] || console.warn("Preset not found: " + a), a = oa[a];
-    } else {
-      if (c = a.preset) {
-        c[c] || console.warn("Preset not found: " + c), a = Object.assign({}, c[c], a);
-      }
-    }
-    c = a.charset;
-    var d = a.lang;
-    x(c) && (-1 === c.indexOf(":") && (c += ":default"), c = H[c]);
-    x(d) && (d = ja[d]);
-  } else {
-    a = {};
-  }
-  let e, f, g = a.context || {};
-  this.encode = a.encode || c && c.encode || ha;
-  this.register = b || w();
-  this.resolution = e = a.resolution || 9;
-  this.tokenize = b = c && c.tokenize || a.tokenize || "strict";
-  this.depth = "strict" === b && g.depth;
-  this.bidirectional = t(g.bidirectional, !0);
-  this.optimize = f = t(a.optimize, !0);
-  this.fastupdate = t(a.fastupdate, !0);
-  this.minlength = a.minlength || 1;
-  this.boost = a.boost;
-  this.map = f ? aa(e) : w();
-  this.resolution_ctx = e = g.resolution || 1;
-  this.ctx = f ? aa(e) : w();
-  this.rtl = c && c.rtl || a.rtl;
-  this.matcher = (b = a.matcher || d && d.matcher) && fa(b, !1);
-  this.stemmer = (b = a.stemmer || d && d.stemmer) && fa(b, !0);
-  if (c = b = a.filter || d && d.filter) {
-    c = b;
-    d = w();
-    for (let k = 0, l = c.length; k < l; k++) {
-      d[c[k]] = 1;
-    }
-    c = d;
-  }
-  this.filter = c;
-  this.cache = (b = a.cache) && new K(b);
-}
-L.prototype.append = function(a, b) {
-  return this.add(a, b, !0);
-};
-L.prototype.add = function(a, b, c, d) {
-  if (b && (a || 0 === a)) {
-    if (!d && !c && this.register[a]) {
-      return this.update(a, b);
-    }
-    b = this.encode(b);
-    if (d = b.length) {
-      const n = w(), q = w(), v = this.depth, r = this.resolution;
-      for (let p = 0; p < d; p++) {
-        let m = b[this.rtl ? d - 1 - p : p];
-        var e = m.length;
-        if (m && e >= this.minlength && (v || !q[m])) {
-          var f = M(r, d, p), g = "";
-          switch(this.tokenize) {
-            case "full":
-              if (3 < e) {
-                for (f = 0; f < e; f++) {
-                  for (var k = e; k > f; k--) {
-                    if (k - f >= this.minlength) {
-                      var l = M(r, d, p, e, f);
-                      g = m.substring(f, k);
-                      this.push_index(q, g, l, a, c);
+                  else {
+                    result[size++] = id;
+
+                    if(size === limit){
+                      // fast path "end reached"
+
+                      return result;
                     }
                   }
                 }
-                break;
-              }
-            case "reverse":
-              if (2 < e) {
-                for (k = e - 1; 0 < k; k--) {
-                  g = m[k] + g, g.length >= this.minlength && (l = M(r, d, p, e, k), this.push_index(q, g, l, a, c));
+
+                if(x || suggest){
+                  check_new[id] = 1;
                 }
-                g = "";
+
+                found = true;
               }
-            case "forward":
-              if (1 < e) {
-                for (k = 0; k < e; k++) {
-                  g += m[k], g.length >= this.minlength && this.push_index(q, g, f, a, c);
+
+              if(suggest){
+                check_suggest[id] = (check_idx = check_suggest[id]) ? ++check_idx : check_idx = 1;
+
+                // do not adding IDs which are already included in the result (saves one loop)
+                // the first intersection match has the check index 2, so shift by -2
+
+                if(check_idx < length){
+                  const tmp = suggest[check_idx - 2] || (suggest[check_idx - 2] = []);
+                  tmp[tmp.length] = id;
                 }
-                break;
               }
-            default:
-              if (this.boost && (f = Math.min(f / this.boost(b, m, p) | 0, r - 1)), this.push_index(q, m, f, a, c), v && 1 < d && p < d - 1) {
-                for (e = w(), g = this.resolution_ctx, f = m, k = Math.min(v + 1, d - p), e[f] = 1, l = 1; l < k; l++) {
-                  if ((m = b[this.rtl ? d - 1 - p - l : p + l]) && m.length >= this.minlength && !e[m]) {
-                    e[m] = 1;
-                    const u = M(g + (d / 2 > g ? 0 : 1), d, p, k - 1, l - 1), z = this.bidirectional && m > f;
-                    this.push_index(n, z ? f : m, u, a, c, z ? m : f);
+            }
+            else {
+              // pre-fill in first round
+
+              check_new[id] = 1;
+            }
+          }
+        }
+      }
+
+      if(suggest){
+        // re-use the first pre-filled check for suggestions
+
+        check || (check_suggest = check_new);
+      }
+      else if(!found){
+        return [];
+      }
+
+      check = check_new;
+    }
+
+    if(suggest){
+      // needs to iterate in reverse direction
+
+      for(let x = suggest.length - 1, arr, len; x >= 0; x--){
+        arr = suggest[x];
+        len = arr.length;
+
+        for(let y = 0, id; y < len; y++){
+          id = arr[y];
+
+          if(!check[id]){
+            if(offset){
+              offset--;
+            }
+            else {
+              result[size++] = id;
+
+              if(size === limit){
+                // fast path "end reached"
+
+                return result;
+              }
+            }
+
+            check[id] = 1;
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * @param mandatory
+   * @param arrays
+   * @returns {Array}
+   */
+
+  function intersect_union(mandatory, arrays) {
+    const check = create_object();
+    const union = create_object();
+    const result = [];
+
+    for(let x = 0; x < mandatory.length; x++){
+      check[mandatory[x]] = 1;
+    }
+
+    for(let x = 0, arr; x <  arrays.length; x++){
+      arr = arrays[x];
+
+      for(let y = 0, id; y < arr.length; y++){
+        id = arr[y];
+
+        if(check[id]){
+          if(!union[id]){
+            union[id] = 1;
+            result[result.length] = id;
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * @param {boolean|number=} limit
+   * @constructor
+   */
+
+  function CacheClass(limit){
+    /** @private */
+    this.limit = (limit !== true) && limit;
+
+    /** @private */
+    this.cache = create_object();
+
+    /** @private */
+    this.queue = [];
+
+    //this.clear();
+  }
+
+  /**
+   * @param {string|Object} query
+   * @param {number|Object=} limit
+   * @param {Object=} options
+   * @this {IndexInterface}
+   * @returns {Array<number|string>}
+   */
+
+  function searchCache(query, limit, options){
+    if(is_object(query)){
+      query = query['query'];
+    }
+
+    let cache = this.cache.get(query);
+
+    if(!cache){
+      cache = this.search(query, limit, options);
+      this.cache.set(query, cache);
+    }
+
+    return cache;
+  }
+
+  // CacheClass.prototype.clear = function(){
+  //
+  //     /** @private */
+  //     this.cache = create_object();
+  //
+  //     /** @private */
+  //     this.queue = [];
+  // };
+
+  CacheClass.prototype.set = function(key, value){
+    if(!this.cache[key]){
+      // it is just a shame that native function array.shift() performs so bad
+
+      // const length = this.queue.length;
+      //
+      // this.queue[length] = key;
+      //
+      // if(length === this.limit){
+      //
+      //     delete this.cache[this.queue.shift()];
+      // }
+
+      // the same bad performance
+
+      // this.queue.unshift(key);
+      //
+      // if(this.queue.length === this.limit){
+      //
+      //     this.queue.pop();
+      // }
+
+      // fast implementation variant
+
+      // let length = this.queue.length;
+      //
+      // if(length === this.limit){
+      //
+      //     length--;
+      //
+      //     delete this.cache[this.queue[0]];
+      //
+      //     for(let x = 0; x < length; x++){
+      //
+      //         this.queue[x] = this.queue[x + 1];
+      //     }
+      // }
+      //
+      // this.queue[length] = key;
+
+      // current fastest implementation variant
+      // theoretically that should not perform better compared to the example above
+
+      let length = this.queue.length;
+
+      if(length === this.limit){
+        delete this.cache[this.queue[length - 1]];
+      }
+      else {
+        length++;
+      }
+
+      for(let x = length - 1; x > 0; x--){
+        this.queue[x] = this.queue[x - 1];
+      }
+
+      this.queue[0] = key;
+    }
+
+    this.cache[key] = value;
+  };
+
+  CacheClass.prototype.get = function(key){
+    const cache = this.cache[key];
+
+    if(this.limit && cache){
+      // probably the indexOf() method performs faster when matched content is on front (left-to-right)
+      // using lastIndexOf() does not help, it performs almost slower
+
+      const pos = this.queue.indexOf(key);
+
+      // if(pos < this.queue.length - 1){
+      //
+      //     const tmp = this.queue[pos];
+      //     this.queue[pos] = this.queue[pos + 1];
+      //     this.queue[pos + 1] = tmp;
+      // }
+
+      if(pos){
+        const tmp = this.queue[pos - 1];
+        this.queue[pos - 1] = this.queue[pos];
+        this.queue[pos] = tmp;
+      }
+    }
+
+    return cache;
+  };
+
+  CacheClass.prototype.del = function(id){
+    for(let i = 0, item, key; i < this.queue.length; i++){
+      key = this.queue[i];
+      item = this.cache[key];
+
+      if(item.indexOf(id) !== -1){
+        this.queue.splice(i--, 1);
+        delete this.cache[key];
+      }
+    }
+  };
+
+  /**
+   * @enum {Object}
+   * @const
+   */
+
+  const preset = {
+
+    'memory': {
+      charset: 'latin:extra',
+      //tokenize: "strict",
+      resolution: 3,
+      //threshold: 0,
+      minlength: 4,
+      fastupdate: false
+    },
+
+    'performance': {
+      //charset: "latin",
+      //tokenize: "strict",
+      resolution: 3,
+      minlength: 3,
+      //fastupdate: true,
+      optimize: false,
+      //fastupdate: true,
+      context: {
+        depth: 2,
+        resolution: 1
+        //bidirectional: false
+      }
+    },
+
+    'match': {
+      charset: 'latin:extra',
+      tokenize: 'reverse',
+      //resolution: 9,
+      //threshold: 0
+    },
+
+    'score': {
+      charset: 'latin:advanced',
+      //tokenize: "strict",
+      resolution: 20,
+      minlength: 3,
+      context: {
+        depth: 3,
+        resolution: 9,
+        //bidirectional: true
+      }
+    },
+
+    'default': {
+      // charset: "latin:default",
+      // tokenize: "strict",
+      // resolution: 3,
+      // threshold: 0,
+      // depth: 3
+    },
+
+    // "fast": {
+    //     //charset: "latin",
+    //     //tokenize: "strict",
+    //     threshold: 8,
+    //     resolution: 9,
+    //     depth: 1
+    // }
+  };
+
+  function apply_preset(options){
+    if(is_string(options)){
+      if(!preset[options]){
+        console.warn('Preset not found: ' + options);
+      }
+
+      options = preset[options];
+    }
+    else {
+      const preset = options['preset'];
+
+      if(preset){
+        if(!preset[preset]){
+          console.warn('Preset not found: ' + preset);
+        }
+
+        options = Object.assign({}, preset[preset], /** @type {Object} */ (options));
+      }
+    }
+
+    return options;
+  }
+
+  /**!
+   * FlexSearch.js
+   * Copyright 2018-2021 Nextapps GmbH
+   * Author: Thomas Wilkerling
+   * Licence: Apache-2.0
+   * https://github.com/nextapps-de/flexsearch
+   */
+
+  /**
+   * @constructor
+   * @param {Object=} options
+   * @param {Object=} _register
+   * @return {Index}
+   */
+
+  class Index {
+    constructor(options, _register) {
+      if (!(this instanceof Index)) {
+        return new Index(options);
+      }
+
+      let charset, lang, tmp;
+
+      if (options) {
+        options = apply_preset(options);
+
+        charset = options['charset'];
+        lang = options['lang'];
+
+        if (is_string(charset)) {
+          if (charset.indexOf(':') === -1) {
+            charset += ':default';
+          }
+
+          charset = global_charset[charset];
+        }
+
+        if (is_string(lang)) {
+          lang = global_lang[lang];
+        }
+      }
+      else {
+        options = {};
+      }
+
+      let resolution, optimize, context = options['context'] || {};
+
+      this.encode = options['encode'] || (charset && charset.encode) || encode;
+      this.register = _register || create_object();
+      this.resolution = resolution = options['resolution'] || 9;
+      this.tokenize = tmp = (charset && charset.tokenize) || options['tokenize'] || 'strict';
+      this.depth = (tmp === 'strict') && context['depth'];
+      this.bidirectional = parse_option(context['bidirectional'], true);
+      this.optimize = optimize = parse_option(options['optimize'], true);
+      this.fastupdate = parse_option(options['fastupdate'], true);
+      this.minlength = options['minlength'] || 1;
+      this.boost = options['boost'];
+
+      // when not using the memory strategy the score array should not pre-allocated to its full length
+      this.map = optimize ? create_object_array(resolution) : create_object();
+      this.resolution_ctx = resolution = context['resolution'] || 1;
+      this.ctx = optimize ? create_object_array(resolution) : create_object();
+      this.rtl = (charset && charset.rtl) || options['rtl'];
+      this.matcher = (tmp = options['matcher'] || (lang && lang.matcher)) && init_stemmer_or_matcher(tmp, false);
+      this.stemmer = (tmp = options['stemmer'] || (lang && lang.stemmer)) && init_stemmer_or_matcher(tmp, true);
+      this.filter = (tmp = options['filter'] || (lang && lang.filter)) && init_filter(tmp);
+
+      this.cache = (tmp = options['cache']) && new CacheClass(tmp);
+    }
+    //Index.prototype.pipeline = pipeline;
+    /**
+     * @param {!number|string} id
+     * @param {!string} content
+     */
+    append(id, content) {
+      return this.add(id, content, true);
+    }
+    /**
+     * @param {!number|string} id
+     * @param {!string} content
+     * @param {boolean=} _append
+     * @param {boolean=} _skip_update
+     */
+    add(id, content, _append, _skip_update) {
+      if (content && (id || (id === 0))) {
+        if (!_skip_update && !_append && this.register[id]) {
+          return this.update(id, content);
+        }
+
+        content = this.encode(content);
+        const length = content.length;
+
+        if (length) {
+          // check context dupes to skip all contextual redundancy along a document
+          const dupes_ctx = create_object();
+          const dupes = create_object();
+          const depth = this.depth;
+          const resolution = this.resolution;
+
+          for (let i = 0; i < length; i++) {
+            let term = content[this.rtl ? length - 1 - i : i];
+            let term_length = term.length;
+
+            // skip dupes will break the context chain
+            if (term && (term_length >= this.minlength) && (depth || !dupes[term])) {
+              let score = get_score(resolution, length, i);
+              let token = '';
+
+              switch (this.tokenize) {
+              case 'full':
+
+                if (term_length > 3) {
+                  for (let x = 0; x < term_length; x++) {
+                    for (let y = term_length; y > x; y--) {
+                      if ((y - x) >= this.minlength) {
+                        const partial_score = get_score(resolution, length, i, term_length, x);
+                        token = term.substring(x, y);
+                        this.push_index(dupes, token, partial_score, id, _append);
+                      }
+                    }
+                  }
+
+                  break;
+                }
+
+                // fallthrough to next case when term length < 4
+              case 'reverse':
+
+                // skip last round (this token exist already in "forward")
+                if (term_length > 2) {
+                  for (let x = term_length - 1; x > 0; x--) {
+                    token = term[x] + token;
+
+                    if (token.length >= this.minlength) {
+                      const partial_score = get_score(resolution, length, i, term_length, x);
+                      this.push_index(dupes, token, partial_score, id, _append);
+                    }
+                  }
+
+                  token = '';
+                }
+
+                // fallthrough to next case to apply forward also
+              case 'forward':
+
+                if (term_length > 1) {
+                  for (let x = 0; x < term_length; x++) {
+                    token += term[x];
+
+                    if (token.length >= this.minlength) {
+                      this.push_index(dupes, token, score, id, _append);
+                    }
+                  }
+
+                  break;
+                }
+
+                // fallthrough to next case when token has a length of 1
+              default:
+                // case "strict":
+                if (this.boost) {
+                  score = Math.min((score / this.boost(content, term, i)) | 0, resolution - 1);
+                }
+
+                this.push_index(dupes, term, score, id, _append);
+
+                // context is just supported by tokenizer "strict"
+                if (depth) {
+                  if ((length > 1) && (i < (length - 1))) {
+                    // check inner dupes to skip repeating words in the current context
+                    const dupes_inner = create_object();
+                    const resolution = this.resolution_ctx;
+                    const keyword = term;
+                    const size = Math.min(depth + 1, length - i);
+
+                    dupes_inner[keyword] = 1;
+
+                    for (let x = 1; x < size; x++) {
+                      term = content[this.rtl ? length - 1 - i - x : i + x];
+
+                      if (term && (term.length >= this.minlength) && !dupes_inner[term]) {
+                        dupes_inner[term] = 1;
+
+                        const context_score = get_score(resolution + ((length / 2) > resolution ? 0 : 1), length, i, size - 1, x - 1);
+                        const swap = this.bidirectional && (term > keyword);
+                        this.push_index(dupes_ctx, swap ? keyword : term, context_score, id, _append, swap ? term : keyword);
+                      }
+                    }
                   }
                 }
               }
+            }
+          }
+
+          this.fastupdate || (this.register[id] = 1);
+        }
+      }
+
+      return this;
+    }
+    /**
+     * @private
+     * @param dupes
+     * @param value
+     * @param score
+     * @param id
+     * @param {boolean=} append
+     * @param {string=} keyword
+     */
+    push_index(dupes, value, score, id, append, keyword) {
+      let arr = keyword ? this.ctx : this.map;
+
+      if (!dupes[value] || (keyword && !dupes[value][keyword])) {
+        if (this.optimize) {
+          arr = arr[score];
+        }
+
+        if (keyword) {
+          dupes = dupes[value] || (dupes[value] = create_object());
+          dupes[keyword] = 1;
+
+          arr = arr[keyword] || (arr[keyword] = create_object());
+        }
+        else {
+          dupes[value] = 1;
+        }
+
+        arr = arr[value] || (arr[value] = []);
+
+        if (!this.optimize) {
+          arr = arr[score] || (arr[score] = []);
+        }
+
+        if (!append || (arr.indexOf(id) === -1)) {
+          arr[arr.length] = id;
+
+          // add a reference to the register for fast updates
+          if (this.fastupdate) {
+            const tmp = this.register[id] || (this.register[id] = []);
+            tmp[tmp.length] = arr;
           }
         }
       }
-      this.fastupdate || (this.register[a] = 1);
     }
-  }
-  return this;
-};
-function M(a, b, c, d, e) {
-  return c && 1 < a ? b + (d || 0) <= a ? c + (e || 0) : (a - 1) / (b + (d || 0)) * (c + (e || 0)) + 1 | 0 : 0;
-}
-L.prototype.push_index = function(a, b, c, d, e, f) {
-  let g = f ? this.ctx : this.map;
-  if (!a[b] || f && !a[b][f]) {
-    this.optimize && (g = g[c]), f ? (a = a[b] || (a[b] = w()), a[f] = 1, g = g[f] || (g[f] = w())) : a[b] = 1, g = g[b] || (g[b] = []), this.optimize || (g = g[c] || (g[c] = [])), e && -1 !== g.indexOf(d) || (g[g.length] = d, this.fastupdate && (a = this.register[d] || (this.register[d] = []), a[a.length] = g));
-  }
-};
-L.prototype.search = function(a, b, c) {
-  c || (!b && y(a) ? (c = a, a = c.query) : y(b) && (c = b));
-  let d = [], e;
-  let f, g = 0;
-  if (c) {
-    b = c.limit;
-    g = c.offset || 0;
-    var k = c.context;
-    f = c.suggest;
-  }
-  if (a && (a = this.encode(a), e = a.length, 1 < e)) {
-    c = w();
-    var l = [];
-    for (let q = 0, v = 0, r; q < e; q++) {
-      if ((r = a[q]) && r.length >= this.minlength && !c[r]) {
-        if (this.optimize || f || this.map[r]) {
-          l[v++] = r, c[r] = 1;
-        } else {
-          return d;
+    /**
+     * @param {string|Object} query
+     * @param {number|Object=} limit
+     * @param {Object=} options
+     * @returns {Array<number|string>}
+     */
+    search(query, limit, options) {
+      if (!options) {
+        if (!limit && is_object(query)) {
+          options = /** @type {Object} */ (query);
+          query = options['query'];
+        }
+        else if (is_object(limit)) {
+          options = /** @type {Object} */ (limit);
         }
       }
-    }
-    a = l;
-    e = a.length;
-  }
-  if (!e) {
-    return d;
-  }
-  b || (b = 100);
-  k = this.depth && 1 < e && !1 !== k;
-  c = 0;
-  let n;
-  k ? (n = a[0], c = 1) : 1 < e && a.sort(ba);
-  for (let q, v; c < e; c++) {
-    v = a[c];
-    k ? (q = this.add_result(d, f, b, g, 2 === e, v, n), f && !1 === q && d.length || (n = v)) : q = this.add_result(d, f, b, g, 1 === e, v);
-    if (q) {
-      return q;
-    }
-    if (f && c === e - 1) {
-      l = d.length;
-      if (!l) {
-        if (k) {
-          k = 0;
-          c = -1;
-          continue;
-        }
-        return d;
+
+      let result = [];
+      let length;
+      let context, suggest, offset = 0;
+
+      if (options) {
+        limit = options['limit'];
+        offset = options['offset'] || 0;
+        context = options['context'];
+        suggest = options['suggest'];
       }
-      if (1 === l) {
-        return ra(d[0], b, g);
-      }
-    }
-  }
-  return la(d, b, g, f);
-};
-L.prototype.add_result = function(a, b, c, d, e, f, g) {
-  let k = [], l = g ? this.ctx : this.map;
-  this.optimize || (l = sa(l, f, g, this.bidirectional));
-  if (l) {
-    let n = 0;
-    const q = Math.min(l.length, g ? this.resolution_ctx : this.resolution);
-    for (let v = 0, r = 0, p, m; v < q; v++) {
-      if (p = l[v]) {
-        if (this.optimize && (p = sa(p, f, g, this.bidirectional)), d && p && e && (m = p.length, m <= d ? (d -= m, p = null) : (p = p.slice(d), d = 0)), p && (k[n++] = p, e && (r += p.length, r >= c))) {
-          break;
-        }
-      }
-    }
-    if (n) {
-      if (e) {
-        return ra(k, c, 0);
-      }
-      a[a.length] = k;
-      return;
-    }
-  }
-  return !b && k;
-};
-function ra(a, b, c) {
-  a = 1 === a.length ? a[0] : [].concat.apply([], a);
-  return c || a.length > b ? a.slice(c, c + b) : a;
-}
-function sa(a, b, c, d) {
-  c ? (d = d && b > c, a = (a = a[d ? b : c]) && a[d ? c : b]) : a = a[b];
-  return a;
-}
-L.prototype.contain = function(a) {
-  return !!this.register[a];
-};
-L.prototype.update = function(a, b) {
-  return this.remove(a).add(a, b);
-};
-L.prototype.remove = function(a, b) {
-  const c = this.register[a];
-  if (c) {
-    if (this.fastupdate) {
-      for (let d = 0, e; d < c.length; d++) {
-        e = c[d], e.splice(e.indexOf(a), 1);
-      }
-    } else {
-      N(this.map, a, this.resolution, this.optimize), this.depth && N(this.ctx, a, this.resolution_ctx, this.optimize);
-    }
-    b || delete this.register[a];
-    this.cache && this.cache.del(a);
-  }
-  return this;
-};
-function N(a, b, c, d, e) {
-  let f = 0;
-  if (a.constructor === Array) {
-    if (e) {
-      b = a.indexOf(b), -1 !== b ? 1 < a.length && (a.splice(b, 1), f++) : f++;
-    } else {
-      e = Math.min(a.length, c);
-      for (let g = 0, k; g < e; g++) {
-        if (k = a[g]) {
-          f = N(k, b, c, d, e), d || f || delete a[g];
-        }
-      }
-    }
-  } else {
-    for (let g in a) {
-      (f = N(a[g], b, c, d, e)) || delete a[g];
-    }
-  }
-  return f;
-}
-L.prototype.searchCache = na;
-L.prototype.export = function(a, b, c, d, e) {
-  const f = this;
-  return h.asyncExecutePromiseGeneratorFunction(function*() {
-    let g, k;
-    switch(e || (e = 0)) {
-      case 0:
-        g = "reg";
-        if (f.fastupdate) {
-          k = w();
-          for (let l in f.register) {
-            k[l] = 1;
+
+      if (query) {
+        query = /** @type {Array} */ (this.encode(query));
+        length = query.length;
+
+        // TODO: solve this in one single loop below
+        if (length > 1) {
+          const dupes = create_object();
+          const query_new = [];
+
+          for (let i = 0, count = 0, term; i < length; i++) {
+            term = query[i];
+
+            if (term && (term.length >= this.minlength) && !dupes[term]) {
+              // this fast path just could applied when not in memory-optimized mode
+              if (!this.optimize && !suggest && !this.map[term]) {
+                // fast path "not found"
+                return result;
+              }
+              else {
+                query_new[count++] = term;
+                dupes[term] = 1;
+              }
+            }
           }
-        } else {
-          k = f.register;
+
+          query = query_new;
+          length = query.length;
         }
-        break;
-      case 1:
-        g = "cfg";
-        k = {doc:0, opt:f.optimize ? 1 : 0};
-        break;
-      case 2:
-        g = "map";
-        k = f.map;
-        break;
-      case 3:
-        g = "ctx";
-        k = f.ctx;
-        break;
-      default:
-        return !0;
-    }
-    return yield qa(a, b || f, c ? c + "." + g : g, d, e, k);
-  });
-};
-L.prototype.import = function(a, b) {
-  if (b) {
-    switch(x(b) && (b = JSON.parse(b)), a) {
-      case "cfg":
-        this.optimize = !!b.opt;
-        break;
-      case "reg":
-        this.fastupdate = !1;
-        this.register = b;
-        break;
-      case "map":
-        this.map = b;
-        break;
-      case "ctx":
-        this.ctx = b;
-    }
-  }
-};
-ka(L.prototype);
-function ta(a) {
-  a = a.data;
-  var b = self._index;
-  const c = a.args;
-  var d = a.task;
-  switch(d) {
-    case "init":
-      d = a.options || {};
-      a = a.factory;
-      b = d.encode;
-      d.cache = !1;
-      b && 0 === b.indexOf("function") && (d.encode = Function("return " + b)());
-      a ? (Function("return " + a)()(self), self._index = new self.FlexSearch.Index(d), delete self.FlexSearch) : self._index = new L(d);
-      break;
-    default:
-      a = a.id, b = b[d].apply(b, c), postMessage("search" === d ? {id:a, msg:b} : {id:a});
-  }
-}
-;let ua = 0;
-function O(a) {
-  if (!(this instanceof O)) {
-    return new O(a);
-  }
-  var b;
-  a ? A(b = a.encode) && (a.encode = b.toString()) : a = {};
-  (b = (self || window)._factory) && (b = b.toString());
-  const c = self.exports, d = this;
-  this.worker = va(b, c, a.worker);
-  this.resolver = w();
-  if (this.worker) {
-    if (c) {
-      this.worker.on("message", function(e) {
-        d.resolver[e.id](e.msg);
-        delete d.resolver[e.id];
-      });
-    } else {
-      this.worker.onmessage = function(e) {
-        e = e.data;
-        d.resolver[e.id](e.msg);
-        delete d.resolver[e.id];
-      };
-    }
-    this.worker.postMessage({task:"init", factory:b, options:a});
-  }
-}
-P("add");
-P("append");
-P("search");
-P("update");
-P("remove");
-function P(a) {
-  O.prototype[a] = O.prototype[a + "Async"] = function() {
-    const b = this, c = [].slice.call(arguments);
-    var d = c[c.length - 1];
-    let e;
-    A(d) && (e = d, c.splice(c.length - 1, 1));
-    d = new Promise(function(f) {
-      setTimeout(function() {
-        b.resolver[++ua] = f;
-        b.worker.postMessage({task:a, id:ua, args:c});
-      });
-    });
-    return e ? (d.then(e), this) : d;
-  };
-}
-function va(a, b, c) {
-  let d;
-  try {
-    d = b ? eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")') : a ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + ta.toString()], {type:"text/javascript"}))) : new Worker(x(c) ? c : "worker/worker.js", {type:"module"});
-  } catch (e) {
-  }
-  return d;
-}
-;function R(a) {
-  if (!(this instanceof R)) {
-    return new R(a);
-  }
-  var b = a.document || a.doc || a, c;
-  this.tree = [];
-  this.field = [];
-  this.marker = [];
-  this.register = w();
-  this.key = (c = b.key || b.id) && S(c, this.marker) || "id";
-  this.fastupdate = t(a.fastupdate, !0);
-  this.storetree = (c = b.store) && !0 !== c && [];
-  this.store = c && w();
-  this.tag = (c = b.tag) && S(c, this.marker);
-  this.tagindex = c && w();
-  this.cache = (c = a.cache) && new K(c);
-  a.cache = !1;
-  this.worker = a.worker;
-  this.async = !1;
-  c = w();
-  let d = b.index || b.field || b;
-  x(d) && (d = [d]);
-  for (let e = 0, f, g; e < d.length; e++) {
-    f = d[e], x(f) || (g = f, f = f.field), g = y(g) ? Object.assign({}, a, g) : a, this.worker && (c[f] = new O(g), c[f].worker || (this.worker = !1)), this.worker || (c[f] = new L(g, this.register)), this.tree[e] = S(f, this.marker), this.field[e] = f;
-  }
-  if (this.storetree) {
-    for (a = b.store, x(a) && (a = [a]), b = 0; b < a.length; b++) {
-      this.storetree[b] = S(a[b], this.marker);
-    }
-  }
-  this.index = c;
-}
-function S(a, b) {
-  const c = a.split(":");
-  let d = 0;
-  for (let e = 0; e < c.length; e++) {
-    a = c[e], 0 <= a.indexOf("[]") && (a = a.substring(0, a.length - 2)) && (b[d] = !0), a && (c[d++] = a);
-  }
-  d < c.length && (c.length = d);
-  return 1 < d ? c : c[0];
-}
-function T(a, b) {
-  if (x(b)) {
-    a = a[b];
-  } else {
-    for (let c = 0; a && c < b.length; c++) {
-      a = a[b[c]];
-    }
-  }
-  return a;
-}
-function U(a, b, c, d, e) {
-  a = a[e];
-  if (d === c.length - 1) {
-    b[e] = a;
-  } else {
-    if (a) {
-      if (a.constructor === Array) {
-        for (b = b[e] = Array(a.length), e = 0; e < a.length; e++) {
-          U(a, b, c, d, e);
-        }
-      } else {
-        b = b[e] || (b[e] = w()), e = c[++d], U(a, b, c, d, e);
       }
-    }
-  }
-}
-function V(a, b, c, d, e, f, g, k) {
-  if (a = a[g]) {
-    if (d === b.length - 1) {
-      if (a.constructor === Array) {
-        if (c[d]) {
-          for (b = 0; b < a.length; b++) {
-            e.add(f, a[b], !0, !0);
+
+      if (!length) {
+        return result;
+      }
+
+      limit || (limit = 100);
+
+      let depth = this.depth && (length > 1) && (context !== false);
+      let index = 0, keyword;
+
+      if (depth) {
+        keyword = query[0];
+        index = 1;
+      }
+      else {
+        if (length > 1) {
+          query.sort(sort_by_length_down);
+        }
+      }
+
+      for (let arr, term; index < length; index++) {
+        term = query[index];
+
+        // console.log(keyword);
+        // console.log(term);
+        // console.log("");
+        if (depth) {
+          arr = this.add_result(result, suggest, limit, offset, length === 2, term, keyword);
+
+          // console.log(arr);
+          // console.log(result);
+          // when suggestion enabled just forward keyword if term was found
+          // as long as the result is empty forward the pointer also
+          if (!suggest || (arr !== false) || !result.length) {
+            keyword = term;
           }
+        }
+        else {
+          arr = this.add_result(result, suggest, limit, offset, length === 1, term);
+        }
+
+        if (arr) {
+          return /** @type {Array<number|string>} */ (arr);
+        }
+
+        // apply suggestions on last loop or fallback
+        if (suggest && (index === length - 1)) {
+          let length = result.length;
+
+          if (!length) {
+            if (depth) {
+              // fallback to non-contextual search when no result was found
+              depth = 0;
+              index = -1;
+
+              continue;
+            }
+
+            return result;
+          }
+          else if (length === 1) {
+            // fast path optimization
+            return single_result(result[0], limit, offset);
+          }
+        }
+      }
+
+      return intersect(result, limit, offset, suggest);
+    }
+    /**
+     * Returns an array when the result is done (to stop the process immediately),
+     * returns false when suggestions is enabled and no result was found,
+     * or returns nothing when a set was pushed successfully to the results
+     *
+     * @private
+     * @param {Array} result
+     * @param {Array} suggest
+     * @param {number} limit
+     * @param {number} offset
+     * @param {boolean} single_term
+     * @param {string} term
+     * @param {string=} keyword
+     * @return {Array<Array<string|number>>|boolean|undefined}
+     */
+    add_result(result, suggest, limit, offset, single_term, term, keyword) {
+      let word_arr = [];
+      let arr = keyword ? this.ctx : this.map;
+
+      if (!this.optimize) {
+        arr = get_array(arr, term, keyword, this.bidirectional);
+      }
+
+      if (arr) {
+        let count = 0;
+        const arr_len = Math.min(arr.length, keyword ? this.resolution_ctx : this.resolution);
+
+        // relevance:
+        for (let x = 0, size = 0, tmp, len; x < arr_len; x++) {
+          tmp = arr[x];
+
+          if (tmp) {
+            if (this.optimize) {
+              tmp = get_array(tmp, term, keyword, this.bidirectional);
+            }
+
+            if (offset) {
+              if (tmp && single_term) {
+                len = tmp.length;
+
+                if (len <= offset) {
+                  offset -= len;
+                  tmp = null;
+                }
+                else {
+                  tmp = tmp.slice(offset);
+                  offset = 0;
+                }
+              }
+            }
+
+            if (tmp) {
+              // keep score (sparse array):
+              //word_arr[x] = tmp;
+              // simplified score order:
+              word_arr[count++] = tmp;
+
+              if (single_term) {
+                size += tmp.length;
+
+                if (size >= limit) {
+                  // fast path optimization
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        if (count) {
+          if (single_term) {
+            // fast path optimization
+            // offset was already applied at this point
+            return single_result(word_arr, limit, 0);
+          }
+
+          result[result.length] = word_arr;
           return;
         }
-        a = a.join(" ");
       }
-      e.add(f, a, k, !0);
-    } else {
-      if (a.constructor === Array) {
-        for (g = 0; g < a.length; g++) {
-          V(a, b, c, d, e, f, g, k);
+
+      // return an empty array will stop the loop,
+      // to prevent stop when using suggestions return a false value
+      return !suggest && word_arr;
+    }
+    contain(id) {
+      return !!this.register[id];
+    }
+    update(id, content) {
+      return this.remove(id).add(id, content);
+    }
+    /**
+     * @param {boolean=} _skip_deletion
+     */
+    remove(id, _skip_deletion) {
+      const refs = this.register[id];
+
+      if (refs) {
+        if (this.fastupdate) {
+          // fast updates performs really fast but did not fully cleanup the key entries
+          for (let i = 0, tmp; i < refs.length; i++) {
+            tmp = refs[i];
+            tmp.splice(tmp.indexOf(id), 1);
+          }
         }
-      } else {
-        g = b[++d], V(a, b, c, d, e, f, g, k);
+        else {
+          remove_index(this.map, id, this.resolution, this.optimize);
+
+          if (this.depth) {
+            remove_index(this.ctx, id, this.resolution_ctx, this.optimize);
+          }
+        }
+
+        _skip_deletion || delete this.register[id];
+
+        if (this.cache) {
+          this.cache.del(id);
+        }
       }
+
+      return this;
+    }
+
+    /**
+     * Convert `this` into an exportable object
+     */
+    serialize() {
+      return {
+        reg: this.register, // No support for fastupdate
+        opt: this.optimize,
+        map: this.map,
+        ctx: this.ctx
+      };
+    }
+
+    /**
+     * Given a string load an Index object from it
+     * @param {string} str the serialized Index object
+     */
+    static deserialize(obj, params) {
+      // TODO add extra parameter for index initialization?
+      const result = new Index(params);
+      result.optimize = obj.opt;
+      result.register = obj.reg;
+      result.map      = obj.map;
+      result.ctx      = obj.ctx;
+      return result;
     }
   }
-}
-R.prototype.add = function(a, b, c) {
-  y(a) && (b = a, a = T(b, this.key));
-  if (b && (a || 0 === a)) {
-    if (!c && this.register[a]) {
-      return this.update(a, b);
+
+
+
+  /**
+   * @param {number} resolution
+   * @param {number} length
+   * @param {number} i
+   * @param {number=} term_length
+   * @param {number=} x
+   * @returns {number}
+   */
+
+  function get_score(resolution, length, i, term_length, x){
+    // console.log("resolution", resolution);
+    // console.log("length", length);
+    // console.log("term_length", term_length);
+    // console.log("i", i);
+    // console.log("x", x);
+    // console.log((resolution - 1) / (length + (term_length || 0)) * (i + (x || 0)) + 1);
+
+    // the first resolution slot is reserved for the best match,
+    // when a query matches the first word(s).
+
+    // also to stretch score to the whole range of resolution, the
+    // calculation is shift by one and cut the floating point.
+    // this needs the resolution "1" to be handled additionally.
+
+    // do not stretch the resolution more than the term length will
+    // improve performance and memory, also it improves scoring in
+    // most cases between a short document and a long document
+
+    return i && (resolution > 1) ? (
+
+      (length + (term_length || 0)) <= resolution ?
+
+        i + (x || 0)
+        :
+        ((resolution - 1) / (length + (term_length || 0)) * (i + (x || 0)) + 1) | 0
+    ):
+      0;
+  }
+
+
+
+
+  function single_result(result, limit, offset){
+    if(result.length === 1){
+      result = result[0];
     }
-    for (let d = 0, e, f; d < this.field.length; d++) {
-      f = this.field[d], e = this.tree[d], x(e) && (e = [e]), V(b, e, this.marker, 0, this.index[f], a, e[0], c);
+    else {
+      result = concat(result);
     }
-    if (this.tag) {
-      let d = T(b, this.tag), e = w();
-      x(d) && (d = [d]);
-      for (let f = 0, g, k; f < d.length; f++) {
-        if (g = d[f], !e[g] && (e[g] = 1, k = this.tagindex[g] || (this.tagindex[g] = []), !c || -1 === k.indexOf(a))) {
-          if (k[k.length] = a, this.fastupdate) {
-            const l = this.register[a] || (this.register[a] = []);
-            l[l.length] = k;
+
+    return offset || (result.length > limit) ?
+
+      result.slice(offset, offset + limit)
+      :
+      result;
+  }
+
+  function get_array(arr, term, keyword, bidirectional){
+    if(keyword){
+      // the frequency of the starting letter is slightly less
+      // on the last half of the alphabet (m-z) in almost every latin language,
+      // so we sort downwards (https://en.wikipedia.org/wiki/Letter_frequency)
+
+      const swap = bidirectional && (term > keyword);
+
+      arr = arr[swap ? term : keyword];
+      arr = arr && arr[swap ? keyword : term];
+    }
+    else {
+      arr = arr[term];
+    }
+
+    return arr;
+  }
+
+
+
+
+  /**
+   * @param map
+   * @param id
+   * @param res
+   * @param optimize
+   * @param {number=} resolution
+   * @return {number}
+   */
+
+  function remove_index(map, id, res, optimize, resolution){
+    let count = 0;
+
+    if(is_array(map)){
+      // the first array is the score array in both strategies
+
+      if(!resolution){
+        resolution = Math.min(map.length, res);
+
+        for(let x = 0, arr; x < resolution; x++){
+          arr = map[x];
+
+          if(arr){
+            count = remove_index(arr, id, res, optimize, resolution);
+
+            if(!optimize && !count){
+              // when not memory optimized the score index should removed
+
+              delete map[x];
+            }
           }
         }
       }
-    }
-    if (this.store && (!c || !this.store[a])) {
-      let d;
-      if (this.storetree) {
-        d = w();
-        for (let e = 0, f; e < this.storetree.length; e++) {
-          f = this.storetree[e], x(f) ? d[f] = b[f] : U(b, d, f, 0, f[0]);
-        }
-      }
-      this.store[a] = d || b;
-    }
-  }
-  return this;
-};
-R.prototype.append = function(a, b) {
-  return this.add(a, b, !0);
-};
-R.prototype.update = function(a, b) {
-  return this.remove(a).add(a, b);
-};
-R.prototype.remove = function(a) {
-  y(a) && (a = T(a, this.key));
-  if (this.register[a]) {
-    for (var b = 0; b < this.field.length && (this.index[this.field[b]].remove(a, !this.worker), !this.fastupdate); b++) {
-    }
-    if (this.tag && !this.fastupdate) {
-      for (let c in this.tagindex) {
-        b = this.tagindex[c];
-        const d = b.indexOf(a);
-        -1 !== d && (1 < b.length ? b.splice(d, 1) : delete this.tagindex[c]);
-      }
-    }
-    this.store && delete this.store[a];
-    delete this.register[a];
-  }
-  return this;
-};
-R.prototype.search = function(a, b, c, d) {
-  c || (!b && y(a) ? (c = a, a = c.query) : y(b) && (c = b, b = 0));
-  let e = [], f = [], g, k, l, n, q, v, r = 0;
-  if (c) {
-    if (c.constructor === Array) {
-      l = c, c = null;
-    } else {
-      l = (g = c.pluck) || c.index || c.field;
-      n = c.tag;
-      k = this.store && c.enrich;
-      q = "and" === c.bool;
-      b = c.limit || 100;
-      v = c.offset || 0;
-      if (n && (x(n) && (n = [n]), !a)) {
-        for (let m = 0, u; m < n.length; m++) {
-          if (u = wa.call(this, n[m], b, v, k)) {
-            e[e.length] = u, r++;
+      else {
+        const pos = map.indexOf(id);
+
+        if(pos !== -1){
+          // fast path, when length is 1 or lower then the whole field gets deleted
+
+          if(map.length > 1){
+            map.splice(pos, 1);
+            count++;
           }
         }
-        return r ? e : [];
+        else {
+          count++;
+        }
       }
-      x(l) && (l = [l]);
     }
+    else {
+      for(let key in map){
+        count = remove_index(map[key], id, res, optimize, resolution);
+
+        if(!count){
+          delete map[key];
+        }
+      }
+    }
+
+    return count;
   }
-  l || (l = this.field);
-  q = q && (1 < l.length || n && 1 < n.length);
-  const p = !d && (this.worker || this.async) && [];
-  for (let m = 0, u, z, D; m < l.length; m++) {
-    let C;
-    z = l[m];
-    x(z) || (C = z, z = z.field);
-    if (p) {
-      p[m] = this.index[z].searchAsync(a, b, C || c);
-    } else {
-      D = (u = d ? d[m] : this.index[z].search(a, b, C || c)) && u.length;
-      if (n && D) {
-        const B = [];
-        let I = 0;
-        q && (B[0] = [u]);
-        for (let X = 0, pa, Q; X < n.length; X++) {
-          if (pa = n[X], D = (Q = this.tagindex[pa]) && Q.length) {
-            I++, B[B.length] = q ? [Q] : Q;
+
+  // TODO bring all these functions into this file
+  Index.prototype.searchCache = searchCache;
+  apply_async(Index.prototype);
+
+  /**!
+   * FlexSearch.js
+   * Copyright 2018-2021 Nextapps GmbH
+   * Author: Thomas Wilkerling
+   * Licence: Apache-2.0
+   * https://github.com/nextapps-de/flexsearch
+   */
+
+  /**
+   * @constructor
+   * @implements DocumentInterface
+   * @param {Object=} options
+   * @return {Document}
+   */
+
+  class Document {
+    constructor(options) {
+      const document = options['document'] || options['doc'] || options;
+      let opt;
+
+      this.tree = [];
+      this.field = [];
+      this.marker = [];
+      this.register = create_object();
+      this.key = ((opt = document['key'] || document['id']) && parse_tree(opt, this.marker)) || 'id';
+      this.fastupdate = parse_option(options['fastupdate'], true);
+
+      this.storetree = (opt = document['store']) && (opt !== true) && [];
+      this.store = opt && create_object();
+
+      this.tag = ((opt = document['tag']) && parse_tree(opt, this.marker));
+      this.tagindex = opt && create_object();
+
+      this.cache = (opt = options['cache']) && new CacheClass(opt);
+
+      // do not apply cache again for the indexes
+      options['cache'] = false;
+
+      this.worker = options['worker'];
+
+      // this switch is used by recall of promise callbacks
+      this.async = false;
+
+      this.index = this.parse_descriptor(options, document);
+    }
+
+    /**
+     *
+     * @param id
+     * @param content
+     * @param {boolean=} _append
+     * @returns {Document|Promise}
+     */
+    add(id, content, _append) {
+      if (is_object(id)) {
+        content = id;
+        id = parse_simple(content, this.key);
+      }
+
+      if (content && (id || (id === 0))) {
+        if (!_append && this.register[id]) {
+          return this.update(id, content);
+        }
+
+        for (let i = 0, tree, field; i < this.field.length; i++) {
+          field = this.field[i];
+          tree = this.tree[i];
+
+          if (is_string(tree)) {
+            tree = [tree];
+          }
+
+          add_index(content, tree, this.marker, 0, this.index[field], id, tree[0], _append);
+        }
+
+        if (this.tag) {
+          let tag = parse_simple(content, this.tag);
+          let dupes = create_object();
+
+          if (is_string(tag)) {
+            tag = [tag];
+          }
+
+          for (let i = 0, key, arr; i < tag.length; i++) {
+            key = tag[i];
+
+            if (!dupes[key]) {
+              dupes[key] = 1;
+              arr = this.tagindex[key] || (this.tagindex[key] = []);
+
+              if (!_append || (arr.indexOf(id) === -1)) {
+                arr[arr.length] = id;
+
+                // add a reference to the register for fast updates
+                if (this.fastupdate) {
+                  const tmp = this.register[id] || (this.register[id] = []);
+                  tmp[tmp.length] = arr;
+                }
+              }
+            }
           }
         }
-        I && (u = q ? la(B, b || 100, v || 0) : ma(u, B), D = u.length);
+
+        // TODO: how to handle store when appending contents?
+        if (this.store && (!_append || !this.store[id])) {
+          let store;
+
+          if (this.storetree) {
+            store = create_object();
+
+            for (let i = 0, tree; i < this.storetree.length; i++) {
+              tree = this.storetree[i];
+
+              if (is_string(tree)) {
+                store[tree] = content[tree];
+              }
+              else {
+                store_value(content, store, tree, 0, tree[0]);
+              }
+            }
+          }
+
+          this.store[id] = store || content;
+        }
       }
-      if (D) {
-        f[r] = z, e[r++] = u;
-      } else {
-        if (q) {
+
+      return this;
+    }
+    append(id, content) {
+      return this.add(id, content, true);
+    }
+    update(id, content) {
+      return this.remove(id).add(id, content);
+    }
+    remove(id) {
+      if (is_object(id)) {
+        id = parse_simple(id, this.key);
+      }
+
+      if (this.register[id]) {
+        for (let i = 0; i < this.field.length; i++) {
+          // workers does not share the register
+          this.index[this.field[i]].remove(id, !this.worker);
+
+          if (this.fastupdate) {
+            // when fastupdate was enabled all ids are removed
+            break;
+          }
+        }
+
+        if (this.tag) {
+          // when fastupdate was enabled all ids are already removed
+          if (!this.fastupdate) {
+            for (let key in this.tagindex) {
+              const tag = this.tagindex[key];
+              const pos = tag.indexOf(id);
+
+              if (pos !== -1) {
+                if (tag.length > 1) {
+                  tag.splice(pos, 1);
+                }
+                else {
+                  delete this.tagindex[key];
+                }
+              }
+            }
+          }
+        }
+
+        if (this.store) {
+          delete this.store[id];
+        }
+
+        delete this.register[id];
+      }
+
+      return this;
+    }
+    /**
+     * @param {!string|Object} query
+     * @param {number|Object=} limit
+     * @param {Object=} options
+     * @param {Array<Array>=} _resolve For internal use only.
+     * @returns {Promise|Array}
+     */
+    search(query, limit, options, _resolve) {
+      if (!options) {
+        if (!limit && is_object(query)) {
+          options = /** @type {Object} */ (query);
+          query = options['query'];
+        }
+        else if (is_object(limit)) {
+          options = /** @type {Object} */ (limit);
+          limit = 0;
+        }
+      }
+
+      let result = [], result_field = [];
+      let pluck, enrich;
+      let field, tag, bool, offset, count = 0;
+
+      if (options) {
+        if (is_array(options)) {
+          field = options;
+          options = null;
+        }
+        else {
+          pluck = options['pluck'];
+          field = pluck || options['index'] || options['field'] /*|| (is_string(options) && [options])*/;
+          tag = options['tag'];
+          enrich = this.store && options['enrich'];
+          bool = options['bool'] === 'and';
+          limit = options['limit'] || 100;
+          offset = options['offset'] || 0;
+
+          if (tag) {
+            if (is_string(tag)) {
+              tag = [tag];
+            }
+
+            // when tags is used and no query was set,
+            // then just return the tag indexes
+            if (!query) {
+              for (let i = 0, res; i < tag.length; i++) {
+                res = get_tag.call(this, tag[i], limit, offset, enrich);
+
+                if (res) {
+                  result[result.length] = res;
+                  count++;
+                }
+              }
+
+              return count ? result : [];
+            }
+          }
+
+          if (is_string(field)) {
+            field = [field];
+          }
+        }
+      }
+
+      field || (field = this.field);
+      bool = bool && ((field.length > 1) || (tag && (tag.length > 1)));
+
+      const promises = !_resolve && (this.worker || this.async) && [];
+
+      // TODO solve this in one loop below
+      for (let i = 0, res, key, len; i < field.length; i++) {
+        let opt;
+
+        key = field[i];
+
+        if (!is_string(key)) {
+          opt = key;
+          key = key['field'];
+        }
+
+        if (promises) {
+          promises[i] = this.index[key].searchAsync(query, limit, opt || options);
+
+          // just collect and continue
+          continue;
+        }
+        else if (_resolve) {
+          res = _resolve[i];
+        }
+        else {
+          // inherit options also when search? it is just for laziness, Object.assign() has a cost
+          res = this.index[key].search(query, limit, opt || options);
+        }
+
+        len = res && res.length;
+
+        if (tag && len) {
+          const arr = [];
+          let count = 0;
+
+          if (bool) {
+            // prepare for intersection
+            arr[0] = [res];
+          }
+
+          for (let y = 0, key, res; y < tag.length; y++) {
+            key = tag[y];
+            res = this.tagindex[key];
+            len = res && res.length;
+
+            if (len) {
+              count++;
+              arr[arr.length] = bool ? [res] : res;
+            }
+          }
+
+          if (count) {
+            if (bool) {
+              res = intersect(arr, limit || 100, offset || 0);
+            }
+            else {
+              res = intersect_union(res, arr);
+            }
+
+            len = res.length;
+          }
+        }
+
+        if (len) {
+          result_field[count] = key;
+          result[count++] = res;
+        }
+        else if (bool) {
           return [];
         }
       }
+
+      if (promises) {
+        const self = this;
+
+        // anyone knows a better workaround of optionally having async promises?
+        // the promise.all() needs to be wrapped into additional promise,
+        // otherwise the recursive callback wouldn't run before return
+        return new Promise(function (resolve) {
+          Promise.all(promises).then(function (result) {
+            resolve(self.search(query, limit, options, result));
+          });
+        });
+      }
+
+      if (!count) {
+        // fast path "not found"
+        return [];
+      }
+
+      if (pluck && (!enrich || !this.store)) {
+        // fast path optimization
+        return result[0];
+      }
+
+      for (let i = 0, res; i < result_field.length; i++) {
+        res = result[i];
+
+        if (res.length) {
+          if (enrich) {
+            res = apply_enrich.call(this, res);
+          }
+        }
+
+        if (pluck) {
+          return res;
+        }
+
+        result[i] = {
+          'field': result_field[i],
+          'result': res
+        };
+      }
+
+      return result;
     }
-  }
-  if (p) {
-    const m = this;
-    return new Promise(function(u) {
-      Promise.all(p).then(function(z) {
-        u(m.search(a, b, c, z));
+    contain(id) {
+      return !!this.register[id];
+    }
+    get(id) {
+      return this.store[id];
+    }
+    set(id, data) {
+      this.store[id] = data;
+      return this;
+    }
+
+    /**
+     * Serialize `this` into an exportable object
+     */
+    serialize() {
+      const result = {
+        tag:   this.tagIndex,
+        reg:   this.register,
+        store: this.store,
+        field: this.field,
+        index: {}
+      };
+      Object.entries(this.index).forEach(([key, index]) => {
+        result.index[key] = index.serialize();
       });
-    });
-  }
-  if (!r) {
-    return [];
-  }
-  if (g && (!k || !this.store)) {
-    return e[0];
-  }
-  for (let m = 0, u; m < f.length; m++) {
-    u = e[m];
-    u.length && k && (u = xa.call(this, u));
-    if (g) {
-      return u;
+      return result;
     }
-    e[m] = {field:f[m], result:u};
-  }
-  return e;
-};
-function wa(a, b, c, d) {
-  let e = this.tagindex[a], f = e && e.length - c;
-  if (f && 0 < f) {
-    if (f > b || c) {
-      e = e.slice(c, c + b);
+
+    /**
+     * Create a `Document` from a serialized object
+     */
+    static deserialize(obj, params) {
+      // TODO add properties here?
+      const result = new Document(params);
+      result.tagIndex = obj.tag;
+      result.register = obj.reg;
+      result.store    = obj.store;
+      result.field    = obj.field;
+      Object.entries(obj.index).forEach(([key, exportedIndex]) => {
+        result.index[key] = Index.deserialize(exportedIndex);
+        result.index[key].register = obj.reg;
+      });
+      return result;
     }
-    d && (e = xa.call(this, e));
-    return {tag:a, result:e};
-  }
-}
-function xa(a) {
-  const b = Array(a.length);
-  for (let c = 0, d; c < a.length; c++) {
-    d = a[c], b[c] = {id:d, doc:this.store[d]};
-  }
-  return b;
-}
-R.prototype.contain = function(a) {
-  return !!this.register[a];
-};
-R.prototype.get = function(a) {
-  return this.store[a];
-};
-R.prototype.set = function(a, b) {
-  this.store[a] = b;
-  return this;
-};
-R.prototype.searchCache = na;
-R.prototype.export = function(a, b, c, d, e) {
-  const f = this;
-  return h.asyncExecutePromiseGeneratorFunction(function*() {
-    e || (e = 0);
-    d || (d = 0);
-    if (d < f.field.length) {
-      var g = f.field[d], k = f.index[g];
-      b = f;
-      (yield k.export(a, b, e ? g.replace(":", "-") : "", d, e++)) || (d++, e = 1, yield b.export(a, b, g, d, e));
-      return !0;
-    }
-    switch(e) {
-      case 1:
-        g = "tag";
-        k = f.tagindex;
-        break;
-      case 2:
-        g = "store";
-        k = f.store;
-        break;
-      default:
-        return !0;
-    }
-    return yield qa(a, f, g, d, e, k);
-  });
-};
-R.prototype.import = function(a, b) {
-  if (b) {
-    switch(x(b) && (b = JSON.parse(b)), a) {
-      case "tag":
-        this.tagindex = b;
-        break;
-      case "reg":
-        this.fastupdate = !1;
-        this.register = b;
-        for (let d = 0, e; d < this.field.length; d++) {
-          e = this.index[this.field[d]], e.register = b, e.fastupdate = !1;
+
+    // Helper methods
+
+    parse_descriptor(options, document) {
+      const index = create_object();
+      let field = document['index'] || document['field'] || document;
+
+      if (is_string(field)) {
+        field = [field];
+      }
+
+      for (let i = 0, key, opt; i < field.length; i++) {
+        key = field[i];
+
+        if (!is_string(key)) {
+          opt = key;
+          key = key['field'];
         }
-        break;
-      case "store":
-        this.store = b;
-        break;
-      default:
-        a = a.split(".");
-        const c = a[0];
-        a = a[1];
-        c && a && this.index[c].import(a, b);
+
+        opt = is_object(opt) ? Object.assign({}, options, opt) : options;
+
+        if (!this.worker) {
+          index[key] = new Index(opt, this.register);
+        }
+
+        this.tree[i] = parse_tree(key, this.marker);
+        this.field[i] = key;
+      }
+
+      if (this.storetree) {
+        let store = document['store'];
+
+        if (is_string(store)) {
+          store = [store];
+        }
+
+        for (let i = 0; i < store.length; i++) {
+          this.storetree[i] = parse_tree(store[i], this.marker);
+        }
+      }
+
+      return index;
     }
   }
-};
-ka(R.prototype);
-var za = {encode:ya, rtl:!1, tokenize:""};
-const Aa = G("[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]"), Ba = G("[\u00e8\u00e9\u00ea\u00eb]"), Ca = G("[\u00ec\u00ed\u00ee\u00ef]"), Da = G("[\u00f2\u00f3\u00f4\u00f5\u00f6\u0151]"), Ea = G("[\u00f9\u00fa\u00fb\u00fc\u0171]"), Fa = G("[\u00fd\u0177\u00ff]"), Ga = G("\u00f1"), Ha = G("[\u00e7c]"), Ia = G("\u00df"), Ja = G(" & "), Ka = [Aa, "a", Ba, "e", Ca, "i", Da, "o", Ea, "u", Fa, "y", Ga, "n", Ha, "k", Ia, "s", Ja, " and "];
-function ya(a) {
-  var b = a = "" + a;
-  b.normalize && (b = b.normalize("NFD").replace(ea, ""));
-  return ca.call(this, b.toLowerCase(), !a.normalize && Ka, da, !1);
-}
-;var Ma = {encode:La, rtl:!1, tokenize:"strict"};
-const Na = /[^a-z0-9]+/, Oa = {b:"p", v:"f", w:"f", z:"s", x:"s", "\u00df":"s", d:"t", n:"m", c:"k", g:"k", j:"k", q:"k", i:"e", y:"e", u:"o"};
-function La(a) {
-  a = ya.call(this, a).join(" ");
-  const b = [];
-  if (a) {
-    const c = a.split(Na), d = c.length;
-    for (let e = 0, f, g = 0; e < d; e++) {
-      if ((a = c[e]) && (!this.filter || !this.filter[a])) {
-        f = a[0];
-        let k = Oa[f] || f, l = k;
-        for (let n = 1; n < a.length; n++) {
-          f = a[n];
-          const q = Oa[f] || f;
-          q && q !== l && (k += q, l = q);
+
+  function parse_tree(key, marker){
+    const tree = key.split(':');
+    let count = 0;
+
+    for(let i = 0; i < tree.length; i++){
+      key = tree[i];
+
+      if(key.indexOf('[]') >= 0){
+        key = key.substring(0, key.length - 2);
+
+        if(key){
+          marker[count] = true;
         }
-        b[g++] = k;
+      }
+
+      if(key){
+        tree[count++] = key;
+      }
+    }
+
+    if(count < tree.length){
+      tree.length = count;
+    }
+
+    return count > 1 ? tree : tree[0];
+  }
+
+  function parse_simple(obj, tree){
+    if(is_string(tree)){
+      obj = obj[tree];
+    }
+    else {
+      for(let i = 0; obj && (i < tree.length); i++){
+        obj = obj[tree[i]];
+      }
+    }
+
+    return obj;
+  }
+
+  function store_value(obj, store, tree, pos, key){
+    obj = obj[key];
+
+    // reached target field
+
+    if(pos === (tree.length - 1)){
+      // store target value
+
+      store[key] = obj;
+    }
+    else if(obj){
+      if(is_array(obj)){
+        store = store[key] = new Array(obj.length);
+
+        for(let i = 0; i < obj.length; i++){
+          // do not increase pos (an array is not a field)
+          store_value(obj, store, tree, pos, i);
+        }
+      }
+      else {
+        store = store[key] || (store[key] = create_object());
+        key = tree[++pos];
+
+        store_value(obj, store, tree, pos, key);
       }
     }
   }
-  return b;
-}
-;var Qa = {encode:Pa, rtl:!1, tokenize:""};
-const Ra = G("ae"), Sa = G("oe"), Ta = G("sh"), Ua = G("th"), Va = G("ph"), Wa = G("pf"), Xa = [Ra, "a", Sa, "o", Ta, "s", Ua, "t", Va, "f", Wa, "f", G("(?![aeo])h(?![aeo])"), "", G("(?!^[aeo])h(?!^[aeo])"), ""];
-function Pa(a, b) {
-  a && (a = La.call(this, a).join(" "), 2 < a.length && (a = E(a, Xa)), b || (1 < a.length && (a = F(a)), a && (a = a.split(" "))));
-  return a;
-}
-;var Za = {encode:Ya, rtl:!1, tokenize:""};
-const $a = G("(?!\\b)[aeo]");
-function Ya(a) {
-  a && (a = Pa.call(this, a, !0), 1 < a.length && (a = a.replace($a, "")), 1 < a.length && (a = F(a)), a && (a = a.split(" ")));
-  return a;
-}
-;H["latin:default"] = ia;
-H["latin:simple"] = za;
-H["latin:balance"] = Ma;
-H["latin:advanced"] = Qa;
-H["latin:extra"] = Za;
-const W = self;
-let Y;
-const Z = {Index:L, Document:R, Worker:O, registerCharset:function(a, b) {
-  H[a] = b;
-}, registerLanguage:function(a, b) {
-  ja[a] = b;
-}};
-(Y = W.define) && Y.amd ? Y([], function() {
-  return Z;
-}) : W.exports ? W.exports = Z : W.FlexSearch = Z;
-}(this));
+
+  function add_index(obj, tree, marker, pos, index, id, key, _append){
+    obj = obj[key];
+
+    if(obj){
+      // reached target field
+
+      if(pos === (tree.length - 1)){
+        // handle target value
+
+        if(is_array(obj)){
+          // append array contents so each entry gets a new scoring context
+
+          if(marker[pos]){
+            for(let i = 0; i < obj.length; i++){
+              index.add(id, obj[i], /* append: */ true, /* skip update: */ true);
+            }
+
+            return;
+          }
+
+          // or join array contents and use one scoring context
+
+          obj = obj.join(' ');
+        }
+
+        index.add(id, obj, _append, /* skip_update: */ true);
+      }
+      else {
+        if(is_array(obj)){
+          for(let i = 0; i < obj.length; i++){
+            // do not increase index, an array is not a field
+
+            add_index(obj, tree, marker, pos, index, id, i, _append);
+          }
+        }
+        else {
+          key = tree[++pos];
+
+          add_index(obj, tree, marker, pos, index, id, key, _append);
+        }
+      }
+    }
+  }
+
+
+
+
+
+
+  /**
+   * @this Document
+   */
+
+  function get_tag(key, limit, offset, enrich){
+    let res = this.tagindex[key];
+    let len = res && (res.length - offset);
+
+    if(len && (len > 0)){
+      if((len > limit) || offset){
+        res = res.slice(offset, offset + limit);
+      }
+
+      if(enrich){
+        res = apply_enrich.call(this, res);
+      }
+
+      return {
+
+        'tag': key,
+        'result': res
+      };
+    }
+  }
+
+  /**
+   * @this Document
+   */
+
+  function apply_enrich(res){
+    const arr = new Array(res.length);
+
+    for(let x = 0, id; x < res.length; x++){
+      id = res[x];
+
+      arr[x] = {
+
+        'id': id,
+        'doc': this.store[id]
+      };
+    }
+
+    return arr;
+  }
+
+  // TODO move all of this into this file
+  Document.prototype.searchCache = searchCache;
+  apply_async(Document.prototype);
+
+  exports.Document = Document;
+  exports.Index = Index;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+})));

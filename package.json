@@ -2,10 +2,12 @@
   "name": "flexsearch",
   "version": "0.7.21",
   "description": "Next-Generation full text search library with zero dependencies.",
-  "homepage": "https://github.com/nextapps-de/flexsearch/",
+  "homepage": "https://github.com/skiff-org/flexsearch/",
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
   "license": "Apache-2.0",
+  "browser": "dist/flexsearch.browser.js",
+  "debug": "dist/flexsearch.debug.js",
   "keywords": [
     "fulltext search",
     "elastic search",
@@ -17,33 +19,18 @@
     "search engine"
   ],
   "bugs": {
-    "url": "https://github.com/nextapps-de/flexsearch/issues",
+    "url": "https://github.com/skiff-org/flexsearch/issues",
     "email": "info@nextapps.de"
   },
-  "main": "dist/flexsearch.bundle.js",
-  "browser": "dist/flexsearch.bundle.js",
   "types": "./index.d.ts",
   "preferGlobal": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/nextapps-de/flexsearch.git"
+    "url": "https://github.com/skiff-org/flexsearch.git"
   },
   "scripts": {
-    "copy": "npm run clean && cpx \"src/**\" tmp/",
-    "clean": "npx shx rm -rf tmp && mkdir tmp",
-    "build": "npm run copy && npm run build:bundle",
-    "build:bundle": "node task/build RELEASE=bundle && cpx \"src/worker/node.js\" dist/node/",
-    "build:debug": "node task/build RELEASE=debug COMPILATION_LEVEL=SIMPLE FORMATTING=PRETTY_PRINT",
-    "build:compact": "node task/build RELEASE=compact",
-    "build:light": "node task/build RELEASE=light",
-    "build:custom": "node task/build RELEASE=custom",
-    "build:es5": "node task/build RELEASE=es5 LANGUAGE_OUT=ECMASCRIPT5_STRICT POLYFILL=true",
-    "build:pre": "node task/build RELEASE=pre COMPILATION_LEVEL=WHITESPACE FORMATTING=PRETTY_PRINT",
-    "build:lang": "node task/build RELEASE=lang",
-    "build:module": "npx babel src -d dist/module && exit 0",
-    "build:all": "npm run build && npm run build:light && npm run build:compact && npm run build:es5 && npm run build:debug && npm run build:module",
-    "test": "cd test && npm install && npm run test",
-    "server": "node task/server"
+    "lint": "yarn run eslint src",
+    "build": "yarn run rollup -c"
   },
   "files": [
     "dist/**",
@@ -56,25 +43,8 @@
   ],
   "readme": "README.md",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-minify-constant-folding": "^0.5.0",
-    "babel-plugin-minify-dead-code-elimination": "^0.5.1",
-    "babel-plugin-minify-flip-comparisons": "^0.4.3",
-    "babel-plugin-minify-guarded-expressions": "^0.4.4",
-    "babel-plugin-minify-infinity": "^0.4.3",
-    "babel-plugin-minify-mangle-names": "^0.5.0",
-    "babel-plugin-minify-replace": "^0.5.0",
-    "babel-plugin-minify-simplify": "^0.5.1",
-    "babel-plugin-minify-type-constructors": "^0.4.3",
-    "babel-plugin-transform-member-expression-literals": "^6.9.4",
-    "babel-plugin-transform-merge-sibling-variables": "^6.9.4",
-    "babel-plugin-transform-minify-booleans": "^6.9.4",
-    "babel-plugin-transform-property-literals": "^6.9.4",
-    "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
-    "babel-plugin-transform-undefined-to-void": "^6.9.4",
-    "cpx": "^1.5.0",
-    "shx": "^0.3.3",
-    "google-closure-compiler": "^20210604.0.0-nightly",
-    "web-servo": "^0.5.1"
+    "eslint": "^7.32.0",
+    "rollup": "^2.56.2",
+    "rollup-plugin-terser": "^7.0.2"
   }
 }

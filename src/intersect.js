@@ -1,4 +1,4 @@
-import { create_object, concat } from "./common.js";
+import { create_object } from './common.js';
 
 /**
  * Implementation based on Array.indexOf() provides better performance,
@@ -206,154 +206,130 @@ import { create_object, concat } from "./common.js";
  */
 
 export function intersect(arrays, limit, offset, suggest) {
+  const length = arrays.length;
+  let result = [];
+  let check;
+  let check_suggest;
+  let size = 0;
 
-    const length = arrays.length;
-    let result = [];
-    let check;
-    let check_suggest;
-    let size = 0;
+  if(suggest){
+    suggest = [];
+  }
 
-    if(suggest){
+  // process terms in reversed order often has advantage for the fast path "end reached".
+  // also a reversed order prioritize the order of words from a query.
 
-        suggest = [];
-    }
+  for(let x = length - 1; x >= 0; x--){
+    const word_arr = arrays[x];
+    const word_arr_len = word_arr.length;
+    const check_new = create_object();
 
-    // process terms in reversed order often has advantage for the fast path "end reached".
-    // also a reversed order prioritize the order of words from a query.
+    let found = !check;
 
-    for(let x = length - 1; x >= 0; x--){
+    // process relevance in forward order (direction is
+    // important for adding IDs during the last round)
 
-        const word_arr = arrays[x];
-        const word_arr_len = word_arr.length;
-        const check_new = create_object();
+    for(let y = 0; y < word_arr_len; y++){
+      const arr = word_arr[y];
+      const arr_len = arr.length;
 
-        let found = !check;
+      if(arr_len){
+        // loop through IDs
 
-        // process relevance in forward order (direction is
-        // important for adding IDs during the last round)
+        for(let z = 0, check_idx, id; z < arr_len; z++){
+          id = arr[z];
 
-        for(let y = 0; y < word_arr_len; y++){
+          if(check){
+            if(check[id]){
+              // check if in last round
 
-            const arr = word_arr[y];
-            const arr_len = arr.length;
-
-            if(arr_len){
-
-                // loop through IDs
-
-                for(let z = 0, check_idx, id; z < arr_len; z++){
-
-                    id = arr[z];
-
-                    if(check){
-
-                        if(check[id]){
-
-                            // check if in last round
-
-                            if(!x){
-
-                                if(offset){
-
-                                    offset--;
-                                }
-                                else{
-
-                                    result[size++] = id;
-
-                                    if(size === limit){
-
-                                        // fast path "end reached"
-
-                                        return result;
-                                    }
-                                }
-                            }
-
-                            if(x || suggest){
-
-                                check_new[id] = 1;
-                            }
-
-                            found = true;
-                        }
-
-                        if(suggest){
-
-                            check_suggest[id] = (check_idx = check_suggest[id]) ? ++check_idx : check_idx = 1;
-
-                            // do not adding IDs which are already included in the result (saves one loop)
-                            // the first intersection match has the check index 2, so shift by -2
-
-                            if(check_idx < length){
-
-                                const tmp = suggest[check_idx - 2] || (suggest[check_idx - 2] = []);
-                                tmp[tmp.length] = id;
-                            }
-                        }
-                    }
-                    else{
-
-                        // pre-fill in first round
-
-                        check_new[id] = 1;
-                    }
+              if(!x){
+                if(offset){
+                  offset--;
                 }
+                else{
+                  result[size++] = id;
+
+                  if(size === limit){
+                    // fast path "end reached"
+
+                    return result;
+                  }
+                }
+              }
+
+              if(x || suggest){
+                check_new[id] = 1;
+              }
+
+              found = true;
             }
+
+            if(suggest){
+              check_idx = check_suggest[id];
+              check_suggest[id] = check_idx ? ++check_idx : check_idx = 1;
+
+              // do not adding IDs which are already included in the result (saves one loop)
+              // the first intersection match has the check index 2, so shift by -2
+
+              if(check_idx < length){
+                const tmp = suggest[check_idx - 2] || (suggest[check_idx - 2] = []);
+                tmp[tmp.length] = id;
+              }
+            }
+          }
+          else{
+            // pre-fill in first round
+
+            check_new[id] = 1;
+          }
         }
-
-        if(suggest){
-
-            // re-use the first pre-filled check for suggestions
-
-            check || (check_suggest = check_new);
-        }
-        else if(!found){
-
-            return [];
-        }
-
-        check = check_new;
+      }
     }
 
     if(suggest){
+      // re-use the first pre-filled check for suggestions
 
-        // needs to iterate in reverse direction
-
-        for(let x = suggest.length - 1, arr, len; x >= 0; x--){
-
-            arr = suggest[x];
-            len = arr.length;
-
-            for(let y = 0, id; y < len; y++){
-
-                id = arr[y];
-
-                if(!check[id]){
-
-                    if(offset){
-
-                        offset--;
-                    }
-                    else{
-
-                        result[size++] = id;
-
-                        if(size === limit){
-
-                            // fast path "end reached"
-
-                            return result;
-                        }
-                    }
-
-                    check[id] = 1;
-                }
-            }
-        }
+      check || (check_suggest = check_new);
+    }
+    else if(!found){
+      return [];
     }
 
-    return result;
+    check = check_new;
+  }
+
+  if(suggest){
+    // needs to iterate in reverse direction
+
+    for(let x = suggest.length - 1, arr, len; x >= 0; x--){
+      arr = suggest[x];
+      len = arr.length;
+
+      for(let y = 0, id; y < len; y++){
+        id = arr[y];
+
+        if(!check[id]){
+          if(offset){
+            offset--;
+          }
+          else{
+            result[size++] = id;
+
+            if(size === limit){
+              // fast path "end reached"
+
+              return result;
+            }
+          }
+
+          check[id] = 1;
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -363,34 +339,28 @@ export function intersect(arrays, limit, offset, suggest) {
  */
 
 export function intersect_union(mandatory, arrays) {
+  const check = create_object();
+  const union = create_object();
+  const result = [];
 
-    const check = create_object();
-    const union = create_object();
-    const result = [];
+  for(let x = 0; x < mandatory.length; x++){
+    check[mandatory[x]] = 1;
+  }
 
-    for(let x = 0; x < mandatory.length; x++){
+  for(let x = 0, arr; x <  arrays.length; x++){
+    arr = arrays[x];
 
-        check[mandatory[x]] = 1;
-    }
+    for(let y = 0, id; y < arr.length; y++){
+      id = arr[y];
 
-    for(let x = 0, arr; x <  arrays.length; x++){
-
-        arr = arrays[x];
-
-        for(let y = 0, id; y < arr.length; y++){
-
-            id = arr[y];
-
-            if(check[id]){
-
-                if(!union[id]){
-
-                    union[id] = 1;
-                    result[result.length] = id;
-                }
-            }
+      if(check[id]){
+        if(!union[id]){
+          union[id] = 1;
+          result[result.length] = id;
         }
+      }
     }
+  }
 
-    return result;
+  return result;
 }
