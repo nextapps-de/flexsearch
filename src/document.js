@@ -8,7 +8,7 @@
 
 import { Index } from './index.js';
 import Cache, { searchCache } from './cache.js';
-import { create_object, is_array, is_string, is_object, parse_option } from './common.js';
+import { create_object, is_array, is_string, is_object } from './common.js';
 import apply_async from './async.js';
 import { intersect, intersect_union } from './intersect.js';
 
@@ -140,7 +140,6 @@ export class Document {
       for (let i = 0; i < this.field.length; i++) {
         // workers does not share the register
         this.index[this.field[i]].remove(id, !this.worker);
-
       }
 
       if (this.tag) {
