@@ -21,28 +21,28 @@ import { intersect, intersect_union } from './intersect.js';
 
 export class Document {
   constructor(options) {
-    const document = options['document'] || options['doc'] || options;
+    const document = options.document || options.doc || options;
     let opt;
 
     this.tree = [];
     this.field = [];
     this.marker = [];
     this.register = create_object();
-    this.key = ((opt = document['key'] || document['id']) && parse_tree(opt, this.marker)) || 'id';
-    this.fastupdate = parse_option(options['fastupdate'], true);
+    this.key = ((opt = document.key || document.id) && parse_tree(opt, this.marker)) || 'id';
+    this.fastupdate = parse_option(options.fastupdate, true);
 
-    this.storetree = (opt = document['store']) && (opt !== true) && [];
+    this.storetree = (opt = document.store) && (opt !== true) && [];
     this.store = opt && create_object();
 
-    this.tag = ((opt = document['tag']) && parse_tree(opt, this.marker));
+    this.tag = ((opt = document.tag) && parse_tree(opt, this.marker));
     this.tagindex = opt && create_object();
 
-    this.cache = (opt = options['cache']) && new Cache(opt);
+    this.cache = (opt = options.cache) && new Cache(opt);
 
     // do not apply cache again for the indexes
-    options['cache'] = false;
+    options.cache = false;
 
-    this.worker = options['worker'];
+    this.worker = options.worker;
 
     // this switch is used by recall of promise callbacks
     this.async = false;
@@ -193,7 +193,7 @@ export class Document {
     if (!options) {
       if (!limit && is_object(query)) {
         options = /** @type {Object} */ (query);
-        query = options['query'];
+        query = options.query;
       }
       else if (is_object(limit)) {
         options = /** @type {Object} */ (limit);
@@ -211,13 +211,13 @@ export class Document {
         options = null;
       }
       else {
-        pluck = options['pluck'];
-        field = pluck || options['index'] || options['field'] /*|| (is_string(options) && [options])*/;
-        tag = options['tag'];
-        enrich = this.store && options['enrich'];
-        bool = options['bool'] === 'and';
-        limit = options['limit'] || 100;
-        offset = options['offset'] || 0;
+        pluck = options.pluck;
+        field = pluck || options.index || options.field /*|| (is_string(options) && [options])*/;
+        tag = options.tag;
+        enrich = this.store && options.enrich;
+        bool = options.bool === 'and';
+        limit = options.limit || 100;
+        offset = options.offset || 0;
 
         if (tag) {
           if (is_string(tag)) {
@@ -259,7 +259,7 @@ export class Document {
 
       if (!is_string(key)) {
         opt = key;
-        key = key['field'];
+        key = key.field;
       }
 
       if (promises) {
@@ -412,7 +412,7 @@ export class Document {
 
   parse_descriptor(options, document) {
     const index = create_object();
-    let field = document['index'] || document['field'] || document;
+    let field = document.index || document.field || document;
 
     if (is_string(field)) {
       field = [field];
@@ -423,7 +423,7 @@ export class Document {
 
       if (!is_string(key)) {
         opt = key;
-        key = key['field'];
+        key = key.field;
       }
 
       opt = is_object(opt) ? Object.assign({}, options, opt) : options;
@@ -437,7 +437,7 @@ export class Document {
     }
 
     if (this.storetree) {
-      let store = document['store'];
+      let store = document.store;
 
       if (is_string(store)) {
         store = [store];

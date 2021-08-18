@@ -22,3 +22,5 @@ rules:
   semi:
     - error
     - always
+  dot-notation:
+    - error

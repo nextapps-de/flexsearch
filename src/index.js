@@ -24,14 +24,14 @@ export class Index {
   constructor(options, _register) {
     this.encode = default_encoder;
     this.register = _register || create_object();
-    this.resolution = options['resolution'] || 9;
-    this.tokenize = options['tokenize'] || 'strict';
-    this.depth = options?.context['depth'];
-    this.bidirectional = parse_option(options?.context['bidirectional'], true);
-    this.optimize = parse_option(options['optimize'], true);
-    this.fastupdate = parse_option(options['fastupdate'], true);
-    this.minlength = options['minlength'] || 1;
-    this.boost = options['boost'];
+    this.resolution = options.resolution || 9;
+    this.tokenize = options.tokenize || 'strict';
+    this.depth = options?.context.depth;
+    this.bidirectional = parse_option(options?.context.bidirectional, true);
+    this.optimize = parse_option(options.optimize, true);
+    this.fastupdate = parse_option(options.fastupdate, true);
+    this.minlength = options.minlength || 1;
+    this.boost = options.boost;
 
     // when not using the memory strategy the score array should not pre-allocated to its full length
     this.map = options.optimize ? create_object_array(options.resolution) : create_object();
@@ -229,7 +229,7 @@ export class Index {
     if (!options) {
       if (!limit && is_object(query)) {
         options = /** @type {Object} */ (query);
-        query = options['query'];
+        query = options.query;
       }
       else if (is_object(limit)) {
         options = /** @type {Object} */ (limit);
@@ -241,10 +241,10 @@ export class Index {
     let context, suggest, offset = 0;
 
     if (options) {
-      limit = options['limit'];
-      offset = options['offset'] || 0;
-      context = options['context'];
-      suggest = options['suggest'];
+      limit = options.limit;
+      offset = options.offset || 0;
+      context = options.context;
+      suggest = options.suggest;
     }
 
     if (query) {

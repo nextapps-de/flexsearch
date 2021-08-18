@@ -30,7 +30,7 @@ export default CacheClass;
 
 export function searchCache(query, limit, options){
   if(is_object(query)){
-    query = query['query'];
+    query = query.query;
   }
 
   let cache = this.cache.get(query);
