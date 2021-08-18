@@ -434,12 +434,10 @@ export class Index {
     const refs = this.register[id];
 
     if (refs) {
-      else {
-        remove_index(this.map, id, this.resolution, this.optimize);
+      remove_index(this.map, id, this.resolution, this.optimize);
 
-        if (this.depth) {
-          remove_index(this.ctx, id, this.resolution_ctx, this.optimize);
-        }
+      if (this.depth) {
+        remove_index(this.ctx, id, this.resolution_ctx, this.optimize);
       }
 
       _skip_deletion || delete this.register[id];

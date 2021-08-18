@@ -355,9 +355,6 @@
     );
   }
 
-  const global_lang = {};
-  const global_charset = {};
-
   //import { promise as Promise } from "./polyfill.js";
 
   function apply_async(prototype){
@@ -666,7 +663,8 @@
               }
 
               if(suggest){
-                check_suggest[id] = (check_idx = check_suggest[id]) ? ++check_idx : check_idx = 1;
+                check_idx = check_suggest[id];
+                check_suggest[id] = check_idx ? ++check_idx : check_idx = 1;
 
                 // do not adding IDs which are already included in the result (saves one loop)
                 // the first intersection match has the check index 2, so shift by -2
@@ -792,7 +790,7 @@
 
   function searchCache(query, limit, options){
     if(is_object(query)){
-      query = query['query'];
+      query = query.query;
     }
 
     let cache = this.cache.get(query);
@@ -914,96 +912,6 @@
     }
   };
 
-  /**
-   * @enum {Object}
-   * @const
-   */
-
-  const preset = {
-
-    'memory': {
-      charset: 'latin:extra',
-      //tokenize: "strict",
-      resolution: 3,
-      //threshold: 0,
-      minlength: 4,
-      fastupdate: false
-    },
-
-    'performance': {
-      //charset: "latin",
-      //tokenize: "strict",
-      resolution: 3,
-      minlength: 3,
-      //fastupdate: true,
-      optimize: false,
-      //fastupdate: true,
-      context: {
-        depth: 2,
-        resolution: 1
-        //bidirectional: false
-      }
-    },
-
-    'match': {
-      charset: 'latin:extra',
-      tokenize: 'reverse',
-      //resolution: 9,
-      //threshold: 0
-    },
-
-    'score': {
-      charset: 'latin:advanced',
-      //tokenize: "strict",
-      resolution: 20,
-      minlength: 3,
-      context: {
-        depth: 3,
-        resolution: 9,
-        //bidirectional: true
-      }
-    },
-
-    'default': {
-      // charset: "latin:default",
-      // tokenize: "strict",
-      // resolution: 3,
-      // threshold: 0,
-      // depth: 3
-    },
-
-    // "fast": {
-    //     //charset: "latin",
-    //     //tokenize: "strict",
-    //     threshold: 8,
-    //     resolution: 9,
-    //     depth: 1
-    // }
-  };
-
-  function apply_preset(options){
-    if(is_string(options)){
-      if(!preset[options]){
-        console.warn('Preset not found: ' + options);
-      }
-
-      options = preset[options];
-    }
-    else {
-      const preset = options['preset'];
-
-      if(preset){
-        if(!preset[preset]){
-          console.warn('Preset not found: ' + preset);
-        }
-
-        options = Object.assign({}, preset[preset], /** @type {Object} */ (options));
-      }
-    }
-
-    return options;
-  }
-
   /**!
    * FlexSearch.js
    * Copyright 2018-2021 Nextapps GmbH
@@ -1021,57 +929,26 @@
 
   class Index {
     constructor(options, _register) {
-      if (!(this instanceof Index)) {
-        return new Index(options);
-      }
-
-      let charset, lang, tmp;
-
-      if (options) {
-        options = apply_preset(options);
-
-        charset = options['charset'];
-        lang = options['lang'];
-
-        if (is_string(charset)) {
-          if (charset.indexOf(':') === -1) {
-            charset += ':default';
-          }
-
-          charset = global_charset[charset];
-        }
-
-        if (is_string(lang)) {
-          lang = global_lang[lang];
-        }
-      }
-      else {
-        options = {};
-      }
-
-      let resolution, optimize, context = options['context'] || {};
-
-      this.encode = options['encode'] || (charset && charset.encode) || encode;
+      this.encode = encode;
       this.register = _register || create_object();
-      this.resolution = resolution = options['resolution'] || 9;
-      this.tokenize = tmp = (charset && charset.tokenize) || options['tokenize'] || 'strict';
-      this.depth = (tmp === 'strict') && context['depth'];
-      this.bidirectional = parse_option(context['bidirectional'], true);
-      this.optimize = optimize = parse_option(options['optimize'], true);
-      this.fastupdate = parse_option(options['fastupdate'], true);
-      this.minlength = options['minlength'] || 1;
-      this.boost = options['boost'];
+      this.resolution = options.resolution || 9;
+      this.tokenize = options.tokenize || 'strict';
+      this.depth = options?.context.depth;
+      this.bidirectional = parse_option(options?.context.bidirectional, true);
+      this.optimize = parse_option(options.optimize, true);
+      this.minlength = options.minlength || 1;
+      this.boost = options.boost;
 
       // when not using the memory strategy the score array should not pre-allocated to its full length
-      this.map = optimize ? create_object_array(resolution) : create_object();
-      this.resolution_ctx = resolution = context['resolution'] || 1;
-      this.ctx = optimize ? create_object_array(resolution) : create_object();
-      this.rtl = (charset && charset.rtl) || options['rtl'];
-      this.matcher = (tmp = options['matcher'] || (lang && lang.matcher)) && init_stemmer_or_matcher(tmp, false);
-      this.stemmer = (tmp = options['stemmer'] || (lang && lang.stemmer)) && init_stemmer_or_matcher(tmp, true);
-      this.filter = (tmp = options['filter'] || (lang && lang.filter)) && init_filter(tmp);
+      this.map = options.optimize ? create_object_array(options.resolution) : create_object();
+      this.resolution_ctx = options?.context.resolution || 1;
+      this.ctx = options.optimize ? create_object_array(options.resolution) : create_object();
+      this.rtl = options.rtl;
+      this.matcher = init_stemmer_or_matcher(options.matcher, false);
+      this.stemmer = init_stemmer_or_matcher(options.stemmer, true);
+      this.filter = init_filter(options.filter);
 
-      this.cache = (tmp = options['cache']) && new CacheClass(tmp);
+      this.cache = new CacheClass(options.cache);
     }
     //Index.prototype.pipeline = pipeline;
     /**
@@ -1197,8 +1074,6 @@
               }
             }
           }
-
-          this.fastupdate || (this.register[id] = 1);
         }
       }
 
@@ -1239,12 +1114,6 @@
 
         if (!append || (arr.indexOf(id) === -1)) {
           arr[arr.length] = id;
-
-          // add a reference to the register for fast updates
-          if (this.fastupdate) {
-            const tmp = this.register[id] || (this.register[id] = []);
-            tmp[tmp.length] = arr;
-          }
         }
       }
     }
@@ -1258,7 +1127,7 @@
       if (!options) {
         if (!limit && is_object(query)) {
           options = /** @type {Object} */ (query);
-          query = options['query'];
+          query = options.query;
         }
         else if (is_object(limit)) {
           options = /** @type {Object} */ (limit);
@@ -1270,10 +1139,10 @@
       let context, suggest, offset = 0;
 
       if (options) {
-        limit = options['limit'];
-        offset = options['offset'] || 0;
-        context = options['context'];
-        suggest = options['suggest'];
+        limit = options.limit;
+        offset = options.offset || 0;
+        context = options.context;
+        suggest = options.suggest;
       }
 
       if (query) {
@@ -1472,19 +1341,10 @@
       const refs = this.register[id];
 
       if (refs) {
-        if (this.fastupdate) {
-          // fast updates performs really fast but did not fully cleanup the key entries
-          for (let i = 0, tmp; i < refs.length; i++) {
-            tmp = refs[i];
-            tmp.splice(tmp.indexOf(id), 1);
-          }
-        }
-        else {
-          remove_index(this.map, id, this.resolution, this.optimize);
+        remove_index(this.map, id, this.resolution, this.optimize);
 
-          if (this.depth) {
-            remove_index(this.ctx, id, this.resolution_ctx, this.optimize);
-          }
+        if (this.depth) {
+          remove_index(this.ctx, id, this.resolution_ctx, this.optimize);
         }
 
         _skip_deletion || delete this.register[id];
@@ -1502,7 +1362,7 @@
      */
     serialize() {
       return {
-        reg: this.register, // No support for fastupdate
+        reg: this.register,
         opt: this.optimize,
         map: this.map,
         ctx: this.ctx
@@ -1686,28 +1546,27 @@
 
   class Document {
     constructor(options) {
-      const document = options['document'] || options['doc'] || options;
+      const document = options.document || options.doc || options;
       let opt;
 
       this.tree = [];
       this.field = [];
       this.marker = [];
       this.register = create_object();
-      this.key = ((opt = document['key'] || document['id']) && parse_tree(opt, this.marker)) || 'id';
-      this.fastupdate = parse_option(options['fastupdate'], true);
+      this.key = ((opt = document.key || document.id) && parse_tree(opt, this.marker)) || 'id';
 
-      this.storetree = (opt = document['store']) && (opt !== true) && [];
+      this.storetree = (opt = document.store) && (opt !== true) && [];
       this.store = opt && create_object();
 
-      this.tag = ((opt = document['tag']) && parse_tree(opt, this.marker));
+      this.tag = ((opt = document.tag) && parse_tree(opt, this.marker));
       this.tagindex = opt && create_object();
 
-      this.cache = (opt = options['cache']) && new CacheClass(opt);
+      this.cache = (opt = options.cache) && new CacheClass(opt);
 
       // do not apply cache again for the indexes
-      options['cache'] = false;
+      options.cache = false;
 
-      this.worker = options['worker'];
+      this.worker = options.worker;
 
       // this switch is used by recall of promise callbacks
       this.async = false;
@@ -1761,12 +1620,6 @@
 
               if (!_append || (arr.indexOf(id) === -1)) {
                 arr[arr.length] = id;
-
-                // add a reference to the register for fast updates
-                if (this.fastupdate) {
-                  const tmp = this.register[id] || (this.register[id] = []);
-                  tmp[tmp.length] = arr;
-                }
               }
             }
           }
@@ -1813,26 +1666,19 @@
           // workers does not share the register
           this.index[this.field[i]].remove(id, !this.worker);
 
-          if (this.fastupdate) {
-            // when fastupdate was enabled all ids are removed
-            break;
-          }
         }
 
         if (this.tag) {
-          // when fastupdate was enabled all ids are already removed
-          if (!this.fastupdate) {
-            for (let key in this.tagindex) {
-              const tag = this.tagindex[key];
-              const pos = tag.indexOf(id);
+          for (let key in this.tagindex) {
+            const tag = this.tagindex[key];
+            const pos = tag.indexOf(id);
 
-              if (pos !== -1) {
-                if (tag.length > 1) {
-                  tag.splice(pos, 1);
-                }
-                else {
-                  delete this.tagindex[key];
-                }
+            if (pos !== -1) {
+              if (tag.length > 1) {
+                tag.splice(pos, 1);
+              }
+              else {
+                delete this.tagindex[key];
               }
             }
           }
@@ -1858,7 +1704,7 @@
       if (!options) {
         if (!limit && is_object(query)) {
           options = /** @type {Object} */ (query);
-          query = options['query'];
+          query = options.query;
         }
         else if (is_object(limit)) {
           options = /** @type {Object} */ (limit);
@@ -1876,13 +1722,13 @@
           options = null;
         }
         else {
-          pluck = options['pluck'];
-          field = pluck || options['index'] || options['field'] /*|| (is_string(options) && [options])*/;
-          tag = options['tag'];
-          enrich = this.store && options['enrich'];
-          bool = options['bool'] === 'and';
-          limit = options['limit'] || 100;
-          offset = options['offset'] || 0;
+          pluck = options.pluck;
+          field = pluck || options.index || options.field /*|| (is_string(options) && [options])*/;
+          tag = options.tag;
+          enrich = this.store && options.enrich;
+          bool = options.bool === 'and';
+          limit = options.limit || 100;
+          offset = options.offset || 0;
 
           if (tag) {
             if (is_string(tag)) {
@@ -1924,7 +1770,7 @@
 
         if (!is_string(key)) {
           opt = key;
-          key = key['field'];
+          key = key.field;
         }
 
         if (promises) {
@@ -2077,7 +1923,7 @@
 
     parse_descriptor(options, document) {
       const index = create_object();
-      let field = document['index'] || document['field'] || document;
+      let field = document.index || document.field || document;
 
       if (is_string(field)) {
         field = [field];
@@ -2088,7 +1934,7 @@
 
         if (!is_string(key)) {
           opt = key;
-          key = key['field'];
+          key = key.field;
         }
 
         opt = is_object(opt) ? Object.assign({}, options, opt) : options;
@@ -2102,7 +1948,7 @@
       }
 
       if (this.storetree) {
-        let store = document['store'];
+        let store = document.store;
 
         if (is_string(store)) {
           store = [store];
