@@ -30,7 +30,8 @@
   },
   "scripts": {
     "lint": "yarn run eslint src",
-    "build": "yarn run rollup -c"
+    "build": "rollup --config",
+    "watch": "rollup --config --watch"
   },
   "files": [
     "dist/**",
