@@ -923,32 +923,30 @@
   /**
    * @constructor
    * @param {Object=} options
-   * @param {Object=} _register
    * @return {Index}
    */
 
   class Index {
-    constructor(options, _register) {
+    constructor(options = {}) {
       this.encode = encode;
-      this.register = _register || create_object();
+      this.register = create_object();
       this.resolution = options.resolution || 9;
       this.tokenize = options.tokenize || 'strict';
-      this.depth = options?.context.depth;
-      this.bidirectional = parse_option(options?.context.bidirectional, true);
+      this.depth = options?.context?.depth;
+      this.bidirectional = parse_option(options?.context?.bidirectional, true);
       this.optimize = parse_option(options.optimize, true);
       this.minlength = options.minlength || 1;
       this.boost = options.boost;
 
       // when not using the memory strategy the score array should not pre-allocated to its full length
-      this.map = options.optimize ? create_object_array(options.resolution) : create_object();
-      this.resolution_ctx = options?.context.resolution || 1;
-      this.ctx = options.optimize ? create_object_array(options.resolution) : create_object();
+      this.map = this.optimize ? create_object_array(options?.context?.resolution || 9) : create_object();
+      this.resolution_ctx = options?.context?.resolution || 1;
+      this.ctx = this.optimize ? create_object_array(options?.context?.resolution || 1) : create_object();
       this.rtl = options.rtl;
-      this.matcher = init_stemmer_or_matcher(options.matcher, false);
-      this.stemmer = init_stemmer_or_matcher(options.stemmer, true);
-      this.filter = init_filter(options.filter);
-
-      this.cache = new CacheClass(options.cache);
+      this.matcher = options.matcher && init_stemmer_or_matcher(options.matcher, false);
+      this.stemmer = options.stemmer && init_stemmer_or_matcher(options.stemmer, true);
+      this.filter = options.filter && init_filter(options.filter);
+      this.cache = options.cache && new CacheClass(options.cache);
     }
     //Index.prototype.pipeline = pipeline;
     /**
@@ -1665,7 +1663,6 @@
         for (let i = 0; i < this.field.length; i++) {
           // workers does not share the register
           this.index[this.field[i]].remove(id, !this.worker);
-
         }
 
         if (this.tag) {
