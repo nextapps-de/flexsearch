@@ -414,7 +414,8 @@ export class Document {
       opt = is_object(opt) ? Object.assign({}, options, opt) : options;
 
       if (!this.worker) {
-        index[key] = new Index(opt, this.register);
+        index[key] = new Index(opt);
+        index[key].register = this.register;
       }
 
       this.tree[i] = parse_tree(key, this.marker);

@@ -205,6 +205,8 @@ export class Index {
 
       if (!append || (arr.indexOf(id) === -1)) {
         arr[arr.length] = id;
+        this.register[id] ||= [];
+        this.register[id].push(arr);
       }
     }
   }
