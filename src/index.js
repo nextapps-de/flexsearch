@@ -7,13 +7,11 @@
  */
 
 import { encode as default_encoder } from './lang/latin/default.js';
-import { create_object, create_object_array, concat, sort_by_length_down, is_array, is_string, is_object, parse_option } from './common.js';
+import { create_object, create_object_array, concat, sort_by_length_down, is_array, is_object, parse_option } from './common.js';
 import { init_stemmer_or_matcher, init_filter } from './lang.js';
-import { global_lang, global_charset } from './global.js';
 import apply_async from './async.js';
 import { intersect } from './intersect.js';
 import Cache, { searchCache } from './cache.js';
-import apply_preset from './preset.js';
 
 /**
  * @constructor
@@ -24,57 +22,27 @@ import apply_preset from './preset.js';
 
 export class Index {
   constructor(options, _register) {
-    if (!(this instanceof Index)) {
-      return new Index(options);
-    }
-
-    let charset, lang, tmp;
-
-    if (options) {
-      options = apply_preset(options);
-
-      charset = options['charset'];
-      lang = options['lang'];
-
-      if (is_string(charset)) {
-        if (charset.indexOf(':') === -1) {
-          charset += ':default';
-        }
-
-        charset = global_charset[charset];
-      }
-
-      if (is_string(lang)) {
-        lang = global_lang[lang];
-      }
-    }
-    else {
-      options = {};
-    }
-
-    let resolution, optimize, context = options['context'] || {};
-
-    this.encode = options['encode'] || (charset && charset.encode) || default_encoder;
+    this.encode = default_encoder;
     this.register = _register || create_object();
-    this.resolution = resolution = options['resolution'] || 9;
-    this.tokenize = tmp = (charset && charset.tokenize) || options['tokenize'] || 'strict';
-    this.depth = (tmp === 'strict') && context['depth'];
-    this.bidirectional = parse_option(context['bidirectional'], true);
-    this.optimize = optimize = parse_option(options['optimize'], true);
+    this.resolution = options['resolution'] || 9;
+    this.tokenize = options['tokenize'] || 'strict';
+    this.depth = options?.context['depth'];
+    this.bidirectional = parse_option(options?.context['bidirectional'], true);
+    this.optimize = parse_option(options['optimize'], true);
     this.fastupdate = parse_option(options['fastupdate'], true);
     this.minlength = options['minlength'] || 1;
     this.boost = options['boost'];
 
     // when not using the memory strategy the score array should not pre-allocated to its full length
-    this.map = optimize ? create_object_array(resolution) : create_object();
-    this.resolution_ctx = resolution = context['resolution'] || 1;
-    this.ctx = optimize ? create_object_array(resolution) : create_object();
-    this.rtl = (charset && charset.rtl) || options['rtl'];
-    this.matcher = (tmp = options['matcher'] || (lang && lang.matcher)) && init_stemmer_or_matcher(tmp, false);
-    this.stemmer = (tmp = options['stemmer'] || (lang && lang.stemmer)) && init_stemmer_or_matcher(tmp, true);
-    this.filter = (tmp = options['filter'] || (lang && lang.filter)) && init_filter(tmp);
+    this.map = options.optimize ? create_object_array(options.resolution) : create_object();
+    this.resolution_ctx = options?.context.resolution || 1;
+    this.ctx = options.optimize ? create_object_array(options.resolution) : create_object();
+    this.rtl = options.rtl;
+    this.matcher = init_stemmer_or_matcher(options.matcher, false);
+    this.stemmer = init_stemmer_or_matcher(options.stemmer, true);
+    this.filter = init_filter(options.filter);
 
-    this.cache = (tmp = options['cache']) && new Cache(tmp);
+    this.cache = new Cache(options.cache);
   }
   //Index.prototype.pipeline = pipeline;
   /**
