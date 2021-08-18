@@ -29,7 +29,6 @@ export class Document {
     this.marker = [];
     this.register = create_object();
     this.key = ((opt = document.key || document.id) && parse_tree(opt, this.marker)) || 'id';
-    this.fastupdate = parse_option(options.fastupdate, true);
 
     this.storetree = (opt = document.store) && (opt !== true) && [];
     this.store = opt && create_object();
@@ -96,12 +95,6 @@ export class Document {
 
             if (!_append || (arr.indexOf(id) === -1)) {
               arr[arr.length] = id;
-
-              // add a reference to the register for fast updates
-              if (this.fastupdate) {
-                const tmp = this.register[id] || (this.register[id] = []);
-                tmp[tmp.length] = arr;
-              }
             }
           }
         }
@@ -148,26 +141,19 @@ export class Document {
         // workers does not share the register
         this.index[this.field[i]].remove(id, !this.worker);
 
-        if (this.fastupdate) {
-          // when fastupdate was enabled all ids are removed
-          break;
-        }
       }
 
       if (this.tag) {
-        // when fastupdate was enabled all ids are already removed
-        if (!this.fastupdate) {
-          for (let key in this.tagindex) {
-            const tag = this.tagindex[key];
-            const pos = tag.indexOf(id);
+        for (let key in this.tagindex) {
+          const tag = this.tagindex[key];
+          const pos = tag.indexOf(id);
 
-            if (pos !== -1) {
-              if (tag.length > 1) {
-                tag.splice(pos, 1);
-              }
-              else {
-                delete this.tagindex[key];
-              }
+          if (pos !== -1) {
+            if (tag.length > 1) {
+              tag.splice(pos, 1);
+            }
+            else {
+              delete this.tagindex[key];
             }
           }
         }

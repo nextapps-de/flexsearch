@@ -29,7 +29,6 @@ export class Index {
     this.depth = options?.context.depth;
     this.bidirectional = parse_option(options?.context.bidirectional, true);
     this.optimize = parse_option(options.optimize, true);
-    this.fastupdate = parse_option(options.fastupdate, true);
     this.minlength = options.minlength || 1;
     this.boost = options.boost;
 
@@ -168,8 +167,6 @@ export class Index {
             }
           }
         }
-
-        this.fastupdate || (this.register[id] = 1);
       }
     }
 
@@ -210,12 +207,6 @@ export class Index {
 
       if (!append || (arr.indexOf(id) === -1)) {
         arr[arr.length] = id;
-
-        // add a reference to the register for fast updates
-        if (this.fastupdate) {
-          const tmp = this.register[id] || (this.register[id] = []);
-          tmp[tmp.length] = arr;
-        }
       }
     }
   }
@@ -443,13 +434,6 @@ export class Index {
     const refs = this.register[id];
 
     if (refs) {
-      if (this.fastupdate) {
-        // fast updates performs really fast but did not fully cleanup the key entries
-        for (let i = 0, tmp; i < refs.length; i++) {
-          tmp = refs[i];
-          tmp.splice(tmp.indexOf(id), 1);
-        }
-      }
       else {
         remove_index(this.map, id, this.resolution, this.optimize);
 
@@ -473,7 +457,7 @@ export class Index {
    */
   serialize() {
     return {
-      reg: this.register, // No support for fastupdate
+      reg: this.register,
       opt: this.optimize,
       map: this.map,
       ctx: this.ctx
