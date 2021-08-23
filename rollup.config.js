@@ -7,12 +7,20 @@ export default [
   {
     input: 'src/lib.js',
     output: {
-      name: pkg.name,
+      name: `dist/${pkg.name}.min.js`,
       file: pkg.browser,
-      format: 'es',
+      format: 'umd',
       sourcemap: true
     },
     plugins: terser({format: { keep_quoted_props: true }})
+  },
+  {
+    input: 'src/lib.js',
+    output: {
+      name: `dist/${pkg.name}.js`,
+      file: pkg.browser,
+      format: 'umd',
+    },
   }
 ]
 
