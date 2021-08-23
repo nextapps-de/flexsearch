@@ -9,7 +9,7 @@ export default [
     output: {
       name: pkg.name,
       file: pkg.browser,
-      format: 'es',
+      format: 'umd',
       sourcemap: true
     },
     plugins: terser({format: { keep_quoted_props: true }})
