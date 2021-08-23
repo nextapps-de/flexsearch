@@ -9,29 +9,10 @@ export default [
     output: {
       name: pkg.name,
       file: pkg.browser,
-      format: 'umd',
-      sourcemap: true
-    },
-    plugins: terser({format: { keep_quoted_props: true }})
-  },
-  {
-    input: 'src/lib.js',
-    output: {
-      name: pkg.name,
-      file: `dist/${pkg.name}.es.js`,
       format: 'es',
       sourcemap: true
     },
     plugins: terser({format: { keep_quoted_props: true }})
-  },
-  {
-    input: 'src/lib.js',
-    output: {
-      name: pkg.name,
-      file: pkg.debug,
-      format: 'umd'
-    },
-    plugins: []
   }
 ]
 
