@@ -34,7 +34,8 @@ export class Document<T> {
   add(o: T): this;
   add(id: number, o: T): this;
   update(o: T): this;
-  update(id: number, o: T): this;
+  update(id: any, o: T): this;
+  remove(id: any): this;
 
   search(
     query: string,
