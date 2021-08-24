@@ -1,26 +1,17 @@
-// Based on Rollup example app
-// https://github.com/rollup/rollup-starter-lib/blob/88a2d55d449e2cb12191199d993c08bc07c90be2/rollup.config.js
-import pkg from './package.json';
-import { terser } from 'rollup-plugin-terser';
-
 export default [
   {
     input: 'src/lib.js',
-    output: {
-      name: `dist/${pkg.name}.min.js`,
-      file: pkg.browser,
-      format: 'umd',
-      sourcemap: true
-    },
-    plugins: terser({format: { keep_quoted_props: true }})
-  },
-  {
-    input: 'src/lib.js',
-    output: {
-      name: `dist/${pkg.name}.js`,
-      file: pkg.browser,
-      format: 'umd',
-    },
+    output: [      {
+      dir: 'dist/esm',
+      format: 'esm',
+      exports: 'named',
+      sourcemap: true,
+    }, {
+      dir: 'dist/cjs',
+      format: 'cjs',
+      exports: 'named',
+      sourcemap: true,
+    }],
   }
-]
+];
 
