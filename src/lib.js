@@ -1,5 +1,4 @@
-import { Index } from './index';
-import { Document } from './document';
+export { Index } from './index';
+export { Document } from './document';
 
 // TODO Worker, registerCharset, registerLanguage
-export { Index, Document };

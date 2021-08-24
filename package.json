@@ -6,7 +6,8 @@
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
   "license": "Apache-2.0",
-  "browser": "dist/flexsearch.bundle.js",
+  "module": "dist/esm/lib.js",
+  "main": "dist/cjs/lib.js",
   "keywords": [
     "fulltext search",
     "elastic search",
