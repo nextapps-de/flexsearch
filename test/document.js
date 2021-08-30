@@ -1,5 +1,5 @@
 import test from 'ava';
-import { Document } from '../dist/flexsearch.bundle.js';
+import { Document } from '../dist/esm/lib.js';
 
 test('Create a Document without errors', t => {
   t.notThrows(() => new Document({

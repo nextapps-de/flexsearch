@@ -1,5 +1,5 @@
 import test from 'ava';
-import { Index } from '../dist/flexsearch.bundle.js';
+import { Index } from '../dist/esm/lib.js'
 
 test('Create an Index without errors', t => {
   t.notThrows(() => new Index());
