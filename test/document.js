@@ -91,3 +91,50 @@ test('Remove document', t => {
   doc.remove(9)
   t.is(doc.search('before').length, 0);
 });
+
+test('Fuzzy search', t => {
+  const doc = new Document({
+    tokenize: 'forward',
+    document: {
+      id: 'id',
+      field: ['content']
+    }
+  });
+
+  doc.add({
+    id: 9,
+    author: 'Lorde',
+    content: 'the sun will show us the Path'
+  });
+
+  t.deepEqual(doc.search('wil'),
+    [{
+      field: 'content',
+      result: [ 9 ]
+    }]
+  );
+
+  t.deepEqual(doc.search('will sho'),
+    [{
+      field: 'content',
+      result: [ 9 ]
+    }]
+  );
+
+  t.deepEqual(doc.search('the sun will show us the P'),
+    [{
+      field: 'content',
+      result: [ 9 ]
+    }]
+  );
+
+  t.deepEqual(doc.search('the sun will show us the Path'),
+    [{
+      field: 'content',
+      result: [ 9 ]
+    }]
+  );
+
+  // If we overextend by one character, this search should now fail
+  t.deepEqual(doc.search('the sun will show us the Pathh'), []);
+});
