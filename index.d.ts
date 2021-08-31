@@ -19,6 +19,7 @@ export class Index {
 
   // Result without pagination -> T[]
   search(query: string, options?: number | SearchOptions): any;
+  searchAsync(query: string, options?: number | SearchOptions): Promise<any>;
   update(id: number, o: string): this;
   remove(id: number): this;
   clear(): this;
@@ -42,6 +43,10 @@ export class Document<T> {
     options?: SearchOptions
   ): any // The shape of the resulting object can vary widely,
   // so we will put off typing it for now
+  search(
+    query: string,
+    options?: SearchOptions
+  ): Promise<any> // The shape of the resulting object can vary widely,
 
   // TODO add async methods
   // TODO add more methods
