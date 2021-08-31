@@ -63,3 +63,26 @@ test('Remove a document from the index', t => {
   // Now we should have zero results
   t.is(idx.search('ipsum').length, 0);
 });
+
+test('A serialized and deserialized index should retain its tokenizer', t => {
+  const idx = new Index({ tokenize: 'forward' });
+
+  idx.add(1, 'The is the green light, go! Tires burn the pavement');
+  idx.add(2, "I'm waiting for it, that green light, I want it");
+  idx.add(3, 'Meteor shower by the motel');
+  idx.add(4, 'I love cheap thrills!');
+  idx.add(5, 'Now my closet fifty shades of grey');
+
+  t.deepEqual(
+    idx.search('gr'),
+    [1, 2, 5]
+  )
+
+  const serialized = JSON.stringify(idx.serialize());
+  const deserialized = Index.deserialize(JSON.parse(serialized));
+
+  t.deepEqual(
+    deserialized.search('gr'),
+    [1, 2, 5]
+  )
+});

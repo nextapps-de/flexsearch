@@ -138,3 +138,40 @@ test('Fuzzy search', t => {
   // If we overextend by one character, this search should now fail
   t.deepEqual(doc.search('the sun will show us the Pathh'), []);
 });
+
+test('A serialized and deserialized index should retain its tokenizer', t => {
+  const options = {
+    tokenize: 'forward',
+    document: {
+      id: 'id',
+      field: ['content']
+    }
+  }
+
+  const doc = new Document(options);
+
+  doc.add({id: 1, content: 'The is the green light, go! Tires burn the pavement'});
+  doc.add({id: 2, content: "I'm waiting for it, that green light, I want it"});
+  doc.add({id: 3, content: 'Meteor shower by the motel'});
+  doc.add({id: 4, content: 'I love cheap thrills!'});
+  doc.add({id: 5, content: 'Now my closet fifty shades of grey'});
+
+  t.deepEqual(
+    doc.search('gr'),
+    [{
+      field: 'content',
+      result: [1, 2, 5]
+    }]
+  )
+
+  const serialized = JSON.stringify(doc.serialize());
+  const deserialized = Document.deserialize(JSON.parse(serialized), options);
+
+  t.deepEqual(
+    deserialized.search('gr'),
+    [{
+      field: 'content',
+      result: [1, 2, 5]
+    }]
+  )
+});
