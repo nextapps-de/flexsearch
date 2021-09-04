@@ -1,3 +1,7 @@
+import Index from "./src";
+import Document from "./src/document";
+import WorkerIndex from "./src/worker";
+
 declare module "flexsearch" {
   export interface Index<T> {
     readonly id: string;
@@ -123,6 +127,9 @@ declare module "flexsearch" {
   type Cursor = string;
 
   export default class FlexSearch {
+    static Worker = WorkerIndex
+    static Index = Index
+    static Document = Document
     static create<T>(options?: CreateOptions): Index<T>;
     static registerMatcher(matcher: Matcher): typeof FlexSearch;
     static registerEncoder(name: string, encoder: EncoderFn): typeof FlexSearch;
