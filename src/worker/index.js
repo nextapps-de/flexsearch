@@ -39,8 +39,8 @@ function WorkerIndex(options){
 
         factory = factory.toString();
     }
-
-    const is_node_js = self["exports"];
+    const is_browser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+    const is_node_js = !is_browser;
     const _self = this;
 
     this.worker = create(factory, is_node_js, options["worker"]);
