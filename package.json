@@ -6,6 +6,7 @@
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
   "license": "Apache-2.0",
+  "typings": "./index.d.ts",
   "keywords": [
     "fulltext search",
     "elastic search",
@@ -48,6 +49,7 @@
     "dist/**",
     "src/**",
     "task/**",
+    "index.d.ts",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
