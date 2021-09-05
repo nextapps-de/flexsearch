@@ -91,17 +91,29 @@ declare module "flexsearch" {
   export interface ICharsetOptions {
     split: false | string | RegExp;
     rtl: boolean;
-    encode: (input: string) => string[];
+    encode: (x: string) => string[];
   }
+
+  export interface Stemmer {
+    [key: string]: string;
+  }
+
+  export interface Matcher {
+    [key: string]: string;
+  }
+
+  export type FilterFunction = (x: string) => boolean;
+  export type FilterArray = string[];
 
   /**
    * **Documents:**
    * * Language Options: https://github.com/nextapps-de/flexsearch#language-options
+   * * Language: https://github.com/nextapps-de/flexsearch#languages
    */
   export interface ILanguageOptions {
-    stemmer: false | string | UnknownFunction;
-    filter: false | string | UnknownFunction;
-    matcher: false | string | UnknownFunction;
+    stemmer: false | string | Stemmer | UnknownFunction;
+    filter: false | string | FilterArray | FilterFunction;
+    matcher: false | string | Matcher | UnknownFunction;
   }
 
   /**
@@ -114,6 +126,7 @@ declare module "flexsearch" {
    *
    * **Documents:**
    * * Index options: https://github.com/nextapps-de/flexsearch#index-options
+   * * Language: https://github.com/nextapps-de/flexsearch#languages
    */
   export interface IIndexOptions<T, Store extends StoreOption = false> {
     preset?: Preset;
@@ -128,9 +141,9 @@ declare module "flexsearch" {
     charset?: ICharsetOptions | string;
     language?: ILanguageOptions | string;
     encode?: Encoders;
-    stemmer?: false | string | UnknownFunction;
-    filter?: false | string | UnknownFunction;
-    matcher?: false | string | UnknownFunction;
+    stemmer?: ILanguageOptions['stemmer'];
+    filter?: ILanguageOptions['filter'];
+    matcher?: ILanguageOptions['matcher'];
   }
 
   /************************************/
@@ -317,5 +330,8 @@ declare module "flexsearch" {
   /************************************/
   export function create(options: IIndexOptions<string, false>): Index;
   export function registerCharset(name: string, charset: ICharsetOptions): void;
-  export function registerLanguage(name: string, language: ILanguageOptions): void;
+  export function registerLanguage(
+    name: string,
+    language: ILanguageOptions
+  ): void;
 }
