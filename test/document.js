@@ -157,7 +157,7 @@ test('A serialized and deserialized index should retain its tokenizer', t => {
   doc.add({id: 5, content: 'Now my closet fifty shades of grey'});
 
   t.deepEqual(
-    doc.search('gr'),
+    doc.search('gre'),
     [{
       field: 'content',
       result: [1, 2, 5]
@@ -167,11 +167,11 @@ test('A serialized and deserialized index should retain its tokenizer', t => {
   const serialized = JSON.stringify(doc.serialize());
   const deserialized = Document.deserialize(JSON.parse(serialized), options);
 
+  deserialized.add({id: 6, content: 'My father left; my mother died; I grew up buck-wild'});
+  deserialized.add({id: 7, content: 'I am the greatest. I said that even before I knew I was'});
+
   t.deepEqual(
-    deserialized.search('gr'),
-    [{
-      field: 'content',
-      result: [1, 2, 5]
-    }]
+    deserialized.search('gre')[0].result.sort(),
+    [1, 2, 5, 6, 7]
   )
 });

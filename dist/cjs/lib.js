@@ -1363,7 +1363,8 @@ class Index {
       reg: this.register,
       opt: this.optimize,
       map: this.map,
-      ctx: this.ctx
+      ctx: this.ctx,
+      tok: this.tokenize
     };
   }
 
@@ -1378,6 +1379,7 @@ class Index {
     result.register = obj.reg;
     result.map      = obj.map;
     result.ctx      = obj.ctx;
+    result.tokenize = obj.tok;
     return result;
   }
 }
