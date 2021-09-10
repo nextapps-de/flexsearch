@@ -400,6 +400,7 @@ Index.prototype.search = function(query, limit, options){
         offset = options["offset"] || 0;
         context = options["context"];
         suggest = SUPPORT_SUGGESTION && options["suggest"];
+        query = options["query"] || query;
     }
 
     if(query){
