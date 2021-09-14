@@ -14,7 +14,7 @@ TODO make this trawler instead
 #### Get Latest (NPM)
 
 ```cmd
-npm install flexsearch
+npm install @skiff-org/trawler
 ```
 ## Start
 
@@ -836,38 +836,6 @@ FlexSearch.registerLanguage("us", {
 
     stemmer: { /* ... */ },
     filter:  [ /* ... */ ]
-});
-```
-
-Or use some pre-defined stemmer or filter of your preferred languages:
-```html
-<html>
-<head>
-    <script src="js/flexsearch.bundle.js"></script>
-    <script src="js/lang/en.min.js"></script>
-    <script src="js/lang/de.min.js"></script>
-</head>
-...
-```
-
-Now you can assign built-in stemmer during creation/initialization:
-```js
-var index_en = new FlexSearch.Index({
-    language: "en"
-});
-
-var index_de = new FlexSearch.Index({
-    language: "de"
-});
-```
-
-In Node.js all built-in language packs files are available:
-
-```js
-const { Index } = require("flexsearch");
-
-var index_en = new Index({
-    language: "en"
 });
 ```
 
