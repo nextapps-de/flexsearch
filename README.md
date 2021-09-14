@@ -1,7 +1,10 @@
 # 🚢 Trawler 💨
 <hr />
 
-The search library of Skiff.
+The search library of Skiff. Originally forked from
+[FlexSearch](https://github.com/nextapps-de/flexsearch), this library trims down
+unwanted features and modernizes code for a smooth and easy-to-use search
+library.
 
 Trawler removes many details and features from FlexSearch, to produce a trimmed-down, optimized, and modernized search library for our needs.
 
