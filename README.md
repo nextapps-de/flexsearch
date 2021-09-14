@@ -1,5 +1,4 @@
 # 🚢 Trawler 💨
-<hr />
 
 The search library of Skiff. Originally forked from
 [FlexSearch](https://github.com/nextapps-de/flexsearch), this library trims down
