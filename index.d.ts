@@ -15,13 +15,15 @@ export class Index {
     resolution: any;
     contextual: boolean;
   };
-  add(id: number, o: string): this;
+  add(id: any, o: string): this;
 
   // Result without pagination -> T[]
-  search(query: string, options?: number | SearchOptions): any;
-  searchAsync(query: string, options?: number | SearchOptions): Promise<any>;
-  update(id: number, o: string): this;
-  remove(id: number): this;
+  search(query: string, options?: number | SearchOptions): any[];
+  searchAsync(query: string, options?: number | SearchOptions): Promise<any[]>;
+  update(id: any, o: string): this;
+  updateAsync(id: any, o: string): Promise<this>;
+  remove(id: any): this;
+  removeAsync(id: any): this;
   clear(): this;
   destroy(): this;
   addMatcher(matcher: Matcher): this;
@@ -33,7 +35,7 @@ export class Index {
 export class Document<T> {
   constructor(options?: CreateOptions | CreateDocumentOptions);
   add(o: T): this;
-  add(id: number, o: T): this;
+  add(id: any, o: T): this;
   update(o: T): this;
   update(id: any, o: T): this;
   remove(id: any): this;
@@ -80,7 +82,7 @@ interface SearchResults<T> {
  * of creating it
  */
 interface CreateDocumentOptions {
-  id: string;
+  id: any;
   index: any;
   store: string[];
 }

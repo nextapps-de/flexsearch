@@ -1,10 +1,14 @@
 {
-  "name": "flexsearch",
-  "version": "0.7.21",
-  "description": "Next-Generation full text search library with zero dependencies.",
-  "homepage": "https://github.com/skiff-org/flexsearch/",
+  "name": "trawler",
+  "version": "0.1.0",
+  "description": "A modern search library for Skiff",
+  "homepage": "https://github.com/skiff-org/trawler/",
   "author": "Thomas Wilkerling",
-  "copyright": "Nextapps GmbH",
+  "contributors": ["Andrew Lee"],
+  "copyright": [
+    "Nextapps GmbH",
+    "Skiff World, Inc."
+  ],
   "license": "Apache-2.0",
   "module": "dist/esm/lib.js",
   "main": "dist/cjs/lib.js",
@@ -19,15 +23,15 @@
     "search engine"
   ],
   "bugs": {
-    "url": "https://github.com/skiff-org/flexsearch/issues",
-    "email": "info@nextapps.de"
+    "url": "https://github.com/skiff-org/trawler/issues",
+    "email": "support@skiff.org"
   },
   "types": "./index.d.ts",
   "type": "module",
   "preferGlobal": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/skiff-org/flexsearch.git"
+    "url": "https://github.com/skiff-org/trawler.git"
   },
   "scripts": {
     "lint": "yarn run eslint src",

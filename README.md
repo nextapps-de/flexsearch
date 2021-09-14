@@ -1,473 +1,25 @@
-<h1 align="center">
-    <p></p>
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg?v2" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
-    <p></p>
-</h1>
-<h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
+# 🚢 Trawler 💨
+<hr />
 
-<a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
-<a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE.md"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
-<!--<a target="_blank" href="https://travis-ci.org/nextapps-de/flexsearch"><img src="https://travis-ci.org/nextapps-de/flexsearch.svg?branch=master"></a>-->
-<!--<a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://coveralls.io/repos/github/nextapps-de/flexsearch/badge.svg?branch=master&v=0"></a>-->
+The search library of Skiff.
 
-<a href="#installation">Basic Start</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Document Indexes</a> &ensp;&bull;&ensp; <a>Using Worker</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
+Trawler removes many details and features from FlexSearch, to produce a trimmed-down, optimized, and modernized search library for our needs.
 
-### FlexSearch v0.7.0
+Trawler should be considered alpha-grade, software, so use with care
 
-The new version is finally available. FlexSearch v0.7.0 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
-
-This new version has a good compatibility with the old generation, but it might require some migrations steps in your code.
-
-Read the documentation of new features and changes:<br>
-<a href="https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0.md</a>
-
-Read the documentation of new language encoding features:<br>
-<a href="https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md</a>
-
-<h1></h1>
-
-When it comes to raw search speed <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
-
-Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 1,000,000 times faster compared to other libraries.
-FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
-
-<!--
-FlexSearch Server is available here: 
-<a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
--->
-
-Supported Platforms:
-- Browser
-- Node.js
-
-<!--
-Demos:
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/demo/autocomplete.html" target="_blank">Auto-Complete</a>
--->
-
-Library Comparison "Gulliver's Travels":
-- <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark</a>
-- <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">Scoring Benchmark</a>
-- <a href="#consumption">Memory Consumption</a>
-
-Plugins (extern projects):
-- https://github.com/angeloashmore/react-use-flexsearch
-- https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
-
-### Get Latest Stable Build (Recommended)
-
-<table>
-    <tr><td colspan="3"></td></tr>
-    <tr>
-        <td>Build</td>
-        <td>File</td>
-        <td>CDN</td>
-    </tr>
-    <tr>
-        <td>flexsearch.bundle.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.bundle.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.light.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.light.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.light.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.compact.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.compact.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.compact.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.es5.js *</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.es5.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.es5.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>ES6 Modules</td>
-        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.2/dist/module/" target="_blank">Download</a></td>
-        <td>The <i>/dist/module/</i> folder of this Github repository</td>
-    </tr>
-</table>
-
-<span>*</span> The bundle "flexsearch.es5.js" includes polyfills for EcmaScript 5 Support.
-
+TODO make this trawler instead
 #### Get Latest (NPM)
 
 ```cmd
 npm install flexsearch
 ```
+## Start
 
-#### Get Latest Nightly (Do not use for production!)
-
-Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.2__/dist/" into "/flexsearch/__master__/dist".
-
-### Compare Web-Bundles
-
-> The Node.js package includes all features from `flexsearch.bundle.js`.
-
-<table>
-    <tr><td colspan="4"></td></tr>
-    <tr>
-        <td>Feature</td>
-        <td>flexsearch.bundle.js</td>
-        <td>flexsearch.compact.js</td>
-        <td>flexsearch.light.js</td>
-    </tr>
-    <tr>
-        <td>
-            <a href="#presets">Presets</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#async">Async Search</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#webworker">Workers (Web + Node.js)</a>
-        </td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#contextual">Contextual Indexes</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#docs">Index Documents (Field-Search)</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#store">Document Store</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#tokenizer">Partial Matching</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            Relevance Scoring
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#cache">Auto-Balanced Cache by Popularity</a>
-        </td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#tags">Tags</a>
-        </td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#suggestions">Suggestions</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#phonetic">Phonetic Matching</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Customizable Charset/Language (Matcher, Encoder, Tokenizer, Stemmer, Filter, Split, RTL)</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><a href="#export">Export / Import Indexes</a></td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr>
-        <td>File Size (gzip)</td>
-        <td>6.8 kb</td>
-        <td>5.3 kb</td>
-        <td>2.9 kb</td>
-    </tr>
-</table>
-
-<a name="compare" id="compare"></a>
-## Performance Benchmark (Ranking)
-
-Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
-
-Operation per seconds, higher is better, except the test "Memory" on which lower is better.
-
-<table>
-    <tr><td colspan="8"></td></tr>
-    <tr>
-        <td>Rank</td>
-        <td>Library</td>
-        <td>Memory</td>
-        <td>Query (Single Term)</td>
-        <td>Query (Multi Term)</td>
-        <td>Query (Long)</td>
-        <td>Query (Dupes)</td>
-        <td>Query (Not Found)</td>	
-    </tr>
-    <tr>
-        <td>1</td>
-        <td>FlexSearch</td>
-        <td><b>17</b></td>
-        <td><b>7084129</b></td>
-        <td><b>1586856</b></td>
-        <td><b>511585</b></td>
-        <td><b>2017142</b></td>
-        <td>3202006</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>2</td>
-        <td>JSii</td>
-        <td>27</td>
-        <td>6564</td>
-        <td>158149</td>
-        <td>61290</td>
-        <td>95098</td>
-        <td>534109</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>3</td>
-        <td>Wade</td>
-        <td>424</td>
-        <td>20471</td>
-        <td>78780</td>
-        <td>16693</td>
-        <td>225824</td>
-        <td>213754</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>4</td>
-        <td>JS Search</td>
-        <td>193</td>
-        <td>8221</td>
-        <td>64034</td>
-        <td>10377</td>
-        <td>95830</td>
-        <td>167605</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>5</td>
-        <td>Elasticlunr.js</td>
-        <td>646</td>
-        <td>5412</td>
-        <td>7573</td>
-        <td>2865</td>
-        <td>23786</td>
-        <td>13982</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>6</td>
-        <td>BulkSearch</td>
-        <td>1021</td>
-        <td>3069</td>
-        <td>3141</td>
-        <td>3333</td>
-        <td>3265</td>
-        <td><b>21825569</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>7</td>
-        <td>MiniSearch</td>
-        <td>24348</td>
-        <td>4406</td>
-        <td>10945</td>
-        <td>72</td>
-        <td>39989</td>
-        <td>17624</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>8</td>
-        <td>bm25</td>
-        <td>15719</td>
-        <td>1429</td>
-        <td>789</td>
-        <td>366</td>
-        <td>884</td>
-        <td>1823</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>9</td>
-        <td>Lunr.js</td>
-        <td>2219</td>
-        <td>255</td>
-        <td>271</td>
-        <td>272</td>
-        <td>266</td>
-        <td>267</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>10</td>
-        <td>FuzzySearch</td>
-        <td>157373</td>
-        <td>53</td>
-        <td>38</td>
-        <td>15</td>
-        <td>32</td>
-        <td>43</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>11</td>
-        <td>Fuse</td>
-        <td>7641904</td>
-        <td>6</td>
-        <td>2</td>
-        <td>1</td>
-        <td>2</td>
-        <td>3</td>
-    </tr>
-</table>
-
-<a name="contextual"></a>
-## Contextual Search
-
-> __Note:__ This feature is disabled by default because of its extended memory usage. Read <a href="#contextual_enable">here</a> get more information about and how to enable.
-
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
-The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document.
-This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
-
-<p align="center">
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4" width="100%">
-</p>
-
-<a name="installation"></a>
-## Load Library
-
-There are 3 types of indexes:
+There are two types of indices:
 
 1. `Index` is a flat high performance index which stores id-content-pairs.
-2. `Worker` / `WorkerIndex` is also a flat index which stores id-content-pairs but runs in background as a dedicated worker thread.
-3. `Document` is multi-field index which can store complex JSON documents (could also exist of worker indexes).
+2. `Document` is multi-field index which can store complex JSON documents
 
-The most of you probably need just one of them according to your scenario.
-
-### ES6 Modules (Browser):
-
-```js
-import Index from "./index.js";
-import Document from "./document.js";
-import WorkerIndex from "./worker/index.js";
-
-const index = new Index(options);
-const document = new Document(options);
-const worker = new WorkerIndex(options);
-```
-
-### Bundle (Browser)
-
-```html
-<html>
-<head>
-    <script src="js/flexsearch.bundle.js"></script>
-</head>
-...
-```
-
-Or via CDN:
-```html
-<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"></script>
-```
-
-AMD:
-
-```javascript
-var FlexSearch = require("./flexsearch.js");
-```
-
-Load one of the builds from the folder <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.2/dist">dist</a> within your html as a script and use as follows:
-
-```js
-var index = new FlexSearch.Index(options);
-var document = new FlexSearch.Document(options);
-var worker = new FlexSearch.Worker(options);
-```
-
-### Node.js
-
-```npm
-npm install flexsearch
-```
-
-In your code include as follows:
-
-```js
-const { Index, Document, Worker } = require("flexsearch");
-
-const index = new Index(options);
-const document = new Document(options);
-const worker = new Worker(options);
-```
 
 ## Basic Usage and Variants
 
@@ -489,61 +41,24 @@ document.search(text, options);
 document.search(text, limit, options);
 document.search(options);
 ```
-
-```js
-worker.add(id, text);
-worker.search(text);
-worker.search(text, limit);
-worker.search(text, options);
-worker.search(text, limit, options);
-worker.search(text, limit, options, callback);
-worker.search(options);
-```
-
-The `worker` inherits from type `Index` and does not inherit from type `Document`. Therefore, a WorkerIndex basically works like a standard FlexSearch Index. Worker-Support in documents needs to be enabled by just passing the appropriate option during creation `{ worker: true }`.
-
-> Every method called on a `Worker` index is treated as async. You will get back a `Promise` or you can provide a callback function as the last parameter alternatively.
-
-<a name="api"></a>
 ## API Overview
-
-Global methods:
-
-- <a href="#flexsearch.register">FlexSearch.__registerCharset__(name, charset)</a>
-- <a href="#flexsearch.language">FlexSearch.__registerLanguage__(name, language)</a>
 
 Index methods:
 
-- <a href="#index.add">Index.__add__(id, string)</a> *
-- <a href="#index.append">Index.__append__(id, string)</a> *
-- <a href="#index.update">Index.__update__(id, string)</a> *
-- <a href="#index.remove">Index.__remove__(id)</a> *
-- <a href="#index.search">Index.__search__(string, \<limit\>, \<options\>)</a> *
-- <a href="#index.search">Index.__search__(options)</a> *
-- _async_ <a href="#index.export">Index.__export__(handler)</a>
-- _async_ <a href="#index.import">Index.__import__(key, data)</a>
-
-WorkerIndex methods:
-
-- _async_ <a href="#index.add">Index.__add__(id, string)</a>
-- _async_ <a href="#index.append">Index.__append__(id, string)</a>
-- _async_ <a href="#index.update">Index.__update__(id, string)</a>
-- _async_ <a href="#index.remove">Index.__remove__(id)</a>
-- _async_ <a href="#index.search">Index.__search__(string, \<limit\>, \<options\>)</a>
-- _async_ <a href="#index.search">Index.__search__(options)</a>
-- _async_ <a href="#index.export">~~Index.__export__(handler)~~</a> (WIP)
-- _async_ <a href="#index.import">~~Index.__import__(key, data)~~</a> (WIP)
+- [`index.add(id, string): this`](#index.add)*
+- [`index.update(id, string): this`](#index.update) *
+- [`index.remove(id): this`](#index.remove) *
+- [`index.search(string, limit?, options?): any[]`](#index.search) *
+- [`index.serialize(): Record<string, any>`](#index.serialize)
+- [`Index.deserialize(Record<string, any>): Index`](#Index.deserialize)
 
 Document methods:
 
-- <a href="#document.add">Document.__add__(\<id\>, document)</a> *
-- <a href="#document.append">Document.__append__(\<id\>, document)</a> *
-- <a href="#document.update">Document.__update__(\<id\>, document)</a> *
-- <a href="#document.remove">Document.__remove__(id || document)</a> *
-- <a href="#document.search">Document.__search__(string, \<limit\>, \<options\>)</a> *
-- <a href="#document.search">Document.__search__(options)</a> *
-- _async_ <a href="#document.export">Document.__export__(handler)</a>
-- _async_ <a href="#document.import">Document.__import__(key, data)</a>
+- [`document.add(id?, document): this`](#document.add) *
+- [`document.update(id?, document): this`](#document.update) *
+- [`document.remove(id): this`](#document.remove) *
+- [`document.search(string, limit?, options?): any`](#document.search) *
+- [`document.serialize(): Record<string, any>`]()
 
 <span>*</span> For each of those methods there exist an asynchronous equivalent:
 
@@ -555,16 +70,8 @@ Async Version:
 - _async_ <a href="#removeAsync">.__removeAsync__( ... , \<callback\>)</a>
 - _async_ <a href="#searchAsync">.__searchAsync__( ... , \<callback\>)</a>
 
-Async methods will return a `Promise`, alternatively you can pass a callback function as the last parameter.
+Async methods will return a `Promise`
 
-Methods `export` and also `import` are always async as well as every method you call on a Worker-based Index.
-
-<a name="options"></a>
-## Options
-
-FlexSearch is highly customizable. Make use of the right options can really improve your results as well as memory economy and query time.
-
-<a name="options-index"></a>
 ### Index Options
 
 <table>
@@ -1405,26 +912,13 @@ var results = index.search("单词");
 Assuming our document has a data structure like this:
 
 ```json
-{ 
-    "id": 0, 
+{
+    "id": 0,
     "content": "some text"
 }
 ```
 
-Old syntax FlexSearch v0.6.3 (___not supported anymore!___):
-
-```js
-const index = new Document({
-    doc: {
-        id: "id",
-        field: ["content"]
-    }
-});
-```
-
-> The document descriptor has slightly changed, there is no `field` branch anymore, instead just apply one level higher, so `key` becomes a main member of options.
-
-For the new syntax the field "doc" was renamed to `document` and the field "field" was renamed to `index`:
+We can initialize an index like so:
 
 ```js
 const index = new Document({
@@ -1434,8 +928,8 @@ const index = new Document({
     }
 });
 
-index.add({ 
-    id: 0, 
+index.add({
+    id: 0,
     content: "some text"
 });
 ```
@@ -1677,7 +1171,7 @@ const index = new Document({
 Again, when searching you have to use the same colon-separated-string from your field definition.
 
 ```js
-index.search(query, { 
+index.search(query, {
     index: "contents[]:body:title"
 });
 ```
@@ -1745,7 +1239,7 @@ function add(sequential_data){
                 record: record
             });
         }
-    }  
+    }
 }
 
 // now just use add() helper method as usual:
@@ -1909,9 +1403,9 @@ This result set is a replacement of "boolean search". Instead of applying your b
 There is one situation where the `bool` property is being still supported. When you like to switch the default "or" logic from the field search into "and", e.g.:
 
 ```js
-index.search(query, { 
+index.search(query, {
     index: ["title", "content"],
-    bool: "and" 
+    bool: "and"
 });
 ```
 
@@ -1923,7 +1417,7 @@ Like the `key` for the ID just define the path to the tag:
 
 ```js
 const index = new Document({
-    document: { 
+    document: {
         id: "id",
         tag: "tag",
         index: "content"
@@ -1952,9 +1446,9 @@ index.add({
 You can perform a tag-specific search by:
 
 ```js
-index.search(query, { 
+index.search(query, {
     index: "content",
-    tag: "animal" 
+    tag: "animal"
 });
 ```
 
@@ -1963,7 +1457,7 @@ This just gives you result which was tagged with the given tag.
 Use multiple tags when searching:
 
 ```js
-index.search(query, { 
+index.search(query, {
     index: "content",
     tag: ["cat", "dog"]
 });
@@ -1976,7 +1470,7 @@ This gives you result which are tagged with one of the given tag.
 This is another situation where the `bool` property is still supported. When you like to switch the default "or" logic from the tag search into "and", e.g.:
 
 ```js
-index.search(query, { 
+index.search(query, {
     index: "content",
     tag: ["dog", "animal"],
     bool: "and"
@@ -2033,7 +1527,7 @@ This will add the whole original content to the store:
 
 ```js
 const index = new Document({
-    document: { 
+    document: {
         index: "content",
         store: true
     }
@@ -2099,9 +1593,9 @@ Here a useful example of configuring doc and store:
 
 ```js
 const index = new Document({
-    document: { 
+    document: {
         index: "content",
-        store: ["author", "email"] 
+        store: ["author", "email"]
     }
 });
 
@@ -2169,7 +1663,7 @@ Create an index and apply custom options for the context:
 var index = new FlexSearch({
 
     tokenize: "strict",
-    context: { 
+    context: {
         resolution: 5,
         depth: 3,
         bidirectional: true
@@ -2200,856 +1694,51 @@ A common scenario for using a cache is an autocomplete or instant search when ty
 
 > When just using "true" the cache is unbounded and perform actually 2-3 times faster (because the balancer do not have to run).
 
-<a name="webworker"></a>
-## Worker Parallelism (Browser + Node.js)
 
-The new worker model from v0.7.0 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
+<a name="serialize"></a>
+## Serialize / Deserialize
 
-When using a document index, then just apply the option "worker":
-```js
-const index = new Document({
-    index: ["tag", "name", "title", "text"],
-    worker: true
-});
+### Serialize
 
-index.add({ 
-    id: 1, tag: "cat", name: "Tom", title: "some", text: "some" 
-}).add({
-    id: 2, tag: "dog", name: "Ben", title: "title", text: "content" 
-}).add({ 
-    id: 3, tag: "cat", name: "Max", title: "to", text: "to" 
-}).add({ 
-    id: 4, tag: "dog", name: "Tim", title: "index", text: "index" 
-});
-```
-
-```
-Worker 1: { 1: "cat", 2: "dog", 3: "cat", 4: "dog" }
-Worker 2: { 1: "Tom", 2: "Ben", 3: "Max", 4: "Tim" }
-Worker 3: { 1: "some", 2: "title", 3: "to", 4: "index" }
-Worker 4: { 1: "some", 2: "content", 3: "to", 4: "index" }
-```
-
-When you perform a field search through all fields then this task is being balanced perfectly through all workers, which can solve their subtasks independently.
-
-### Worker Index
-
-Above we have seen that documents will create worker automatically for each field. You can also create a WorkerIndex directly (same like using `Index` instead of `Document`).
-
-Use as ES6 module:
+In order to serialize a document or index, call `index.serialize()`, which returns an object storing all the relevant properties of an index:
 
 ```js
-import WorkerIndex from "./worker/index.js";
-const index = new WorkerIndex(options);
-index.add(1, "some")
-     .add(2, "content")
-     .add(3, "to")
-     .add(4, "index");
+index.serialize() // -> { map: {...}, reg: {...}, ...}
 ```
 
-Or when bundled version was used instead:
+If you want to write an index to a string, stringify this object:
 
 ```js
-var index = new FlexSearch.Worker(options);
-index.add(1, "some")
-     .add(2, "content")
-     .add(3, "to")
-     .add(4, "index");
-```
-
-Such a WorkerIndex works pretty much the same as a created instance of `Index`.
-
-> A WorkerIndex only support the `async` variant of all methods. That means when you call `index.search()` on a WorkerIndex this will perform also in async the same way as `index.searchAsync()` will do.
-
-### Worker Threads (Node.js)
-
-The worker model for Node.js is based on "worker threads" and works exactly the same way:
-
-```js
-const { Document } = require("flexsearch");
-
-const index = new Document({
-    index: ["tag", "name", "title", "text"],
-    worker: true
-});
-```
-
-Or create a single worker instance for a non-document index:
-
-```js
-const { Worker } = require("flexsearch");
-const index = new Worker({ options });
-```
-
-### The Worker Async Model (Best Practices)
-
-A worker will always perform as async. On a query method call you always should handle the returned promise (e.g. use `await`) or pass a callback function as the last parameter.
-
-```js
-const index = new Document({
-    index: ["tag", "name", "title", "text"],
-    worker: true
-});
-```
-
-All requests and sub-tasks will run in parallel (prioritize "all tasks completed"):
-
-```js
-index.searchAsync(query, callback);
-index.searchAsync(query, callback);
-index.searchAsync(query, callback);
-```
-
-Also (prioritize "all tasks completed"):
-
-```js
-index.searchAsync(query).then(callback);
-index.searchAsync(query).then(callback);
-index.searchAsync(query).then(callback);
-```
-
-Or when you have just one callback when all requests are done, simply use `Promise.all()` which also prioritize "all tasks completed":
-
-```js
-Promise.all([
-    index.searchAsync(query),
-    index.searchAsync(query),
-    index.searchAsync(query)
-]).then(callback);
-```
-
-Inside the callback of `Promise.all()` you will also get an array of results as the first parameter respectively for each query you put into.
-
-When using `await` you can prioritize the order (prioritize "first task completed") and solve requests one by one and just process the sub-tasks in parallel:
-
-```js
-await index.searchAsync(query);
-await index.searchAsync(query);
-await index.searchAsync(query);
-```
-
-Same for `index.add()`, `index.append()`, `index.remove()` or `index.update()`. Here there is a special case which isn't disabled by the library, but you need to keep in mind when using Workers.
-
-When you call the "synced" version on a worker index:
-
-```js
-index.add(doc);
-index.add(doc);
-index.add(doc);
-// contents aren't indexed yet,
-// they just queued on the message channel 
-```
-
-Of course, you can do that but keep in mind that the main thread does not have an additional queue for distributed worker tasks. Running these in a long loop fires content massively to the message channel via `worker.postMessage()` internally. Luckily the browser and Node.js will handle such incoming tasks for you automatically (as long enough free RAM is available). When using the "synced" version on a worker index, the content isn't indexed one line below, because all calls are treated as async by default.
-
-> When adding/updating/removing large bulks of content to the index (or high frequency), it is recommended to use the async version along with `async/await` to keep a low memory footprint during long processes.
-
-<a name="export"></a>
-## Export / Import
-
-### Export
-
-The export has slightly changed. The export now consist of several smaller parts, instead of just one large bulk. You need to pass a callback function which has 2 arguments "key" and "data". This callback function is called by each part, e.g.:
-
-```js
-index.export(function(key, data){ 
-    
-    // you need to store both the key and the data!
-    // e.g. use the key for the filename and save your data
-    
-    localStorage.setItem(key, data);
-});
+const str = JSON.stringify(index.serialize());
 ```
 
 Exporting data to the localStorage isn't really a good practice, but if size is not a concern than use it if you like. The export primarily exists for the usage in Node.js or to store indexes you want to delegate from a server to the client.
 
 > The size of the export corresponds to the memory consumption of the library. To reduce export size you have to use a configuration which has less memory footprint (use the table at the bottom to get information about configs and its memory allocation).
 
-When your save routine runs asynchronously you have to return a promise:
+
+### Deserialize
+
+If you want to deserialize an object, call the `Document.deserialize()` or `Index.deserialize()` methods.
+
+The `Index.deserialize()` is simply passed the output of the `index.serialize()` method:
 
 ```js
-index.export(function(key, data){ 
-    
-    return new Promise(function(resolve){
-        
-        // do the saving as async
+const serialized = JSON.stringify(idx.serialize());
+const deserialized = Index.deserialize(JSON.parse(serialized));
+```
 
-        resolve();
-    });
+On the other hand, the `Document.deserialize()` method requires the document `options` required to re-create the document configuration
+
+```js
+const serialized = JSON.stringify(idx.serialize());
+const deserialized = Document.deserialize(JSON.parse(serialized), {
+  document: {
+    id: 'id',
+    field: ['text']
+  }
 });
 ```
-
-> You cannot export the additional table for the "fastupdate" feature. These table exists of references and when stored they fully get serialized and becomes too large. The lib will handle these automatically for you. When importing data, the index automatically disables "fastupdate".
-
-### Import
-
-Before you can import data, you need to create your index first. For document indexes provide the same document descriptor you used when export the data. This configuration isn't stored in the export.
-
-```js
-var index = new Index({ ... });
-```
-
-To import the data just pass a key and data:
-
-```js
-index.import(key, localStorage.getItem(key));
-```
-
-You need to import every key! Otherwise, your index does not work. You need to store the keys from the export and use this keys for the import (the order of the keys can differ).
-
-This is just for demonstration and is not recommended, because you might have other keys in your localStorage which aren't supported as an import:
-
-```js
-var keys = Object.keys(localStorage);
-
-for(let i = 0, key; i < keys.length; i++){
-    
-    key = keys[i];
-    index.import(key, localStorage.getItem(key));
-}
-```
-
-## Languages
-
-Language-specific definitions are being divided into two groups:
-
-1. Charset
-    1. ___encode___, type: `function(string):string[]`
-    2. ___rtl___, type: `boolean`
-2. Language
-    1. ___matcher___, type: `{string: string}`
-    2. ___stemmer___, type: `{string: string}`
-    3. ___filter___, type: `string[]`
-
-The charset contains the encoding logic, the language contains stemmer, stopword filter and matchers. Multiple language definitions can use the same charset encoder. Also this separation let you manage different language definitions for special use cases (e.g. names, cities, dialects/slang, etc.).
-
-To fully describe a custom language __on the fly__ you need to pass:
-
-```js
-const index = FlexSearch({
-    // mandatory:
-    encode: (content) => [words],
-    // optionally:
-    rtl: false,
-    stemmer: {},
-    matcher: {},
-    filter: []
-});
-```
-
-When passing no parameter it uses the `latin:default` schema by default.
-
-<table>
-    <tr></tr>
-    <tr>
-        <td>Field</td>
-        <td>Category</td>
-        <td>Description</td>
-    </tr>
-    <tr>
-        <td><b>encode</b></td>
-        <td>charset</td>
-        <td>The encoder function. Has to return an array of separated words (or an empty string).</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>rtl</b></td>
-        <td>charset</td>
-        <td>A boolean property which indicates right-to-left encoding.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>filter</b></td>
-        <td>language</td>
-        <td>Filter are also known as "stopwords", they completely filter out words from being indexed.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>stemmer</b></td>
-        <td>language</td>
-        <td>Stemmer removes word endings and is a kind of "partial normalization". A word ending just matched when the word length is bigger than the matched partial.</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><b>matcher</b></td>
-        <td>language</td>
-        <td>Matcher replaces all occurrences of a given string regardless of its position and is also a kind of "partial normalization".</td>
-    </tr>
-</table>
-
-### 1. Language Packs: ES6 Modules
-
-The most simple way to assign charset/language specific encoding via modules is:
-
-```js
-import charset from "./dist/module/lang/latin/advanced.js";
-import lang from "./dist/module/lang/en.js";
-
-const index = FlexSearch({
-    charset: charset,
-    lang: lang
-});
-```
-
-Just import the __default export__ by each module and assign them accordingly.
-
-The full qualified example from above is:
-
-```js
-import { encode, rtl } from "./dist/module/lang/latin/advanced.js";
-import { stemmer, filter, matcher } from "./dist/module/lang/en.js";
-
-const index = FlexSearch({
-    encode: encode,
-    rtl: rtl,
-    stemmer: stemmer,
-    matcher: matcher,
-    filter: filter
-});
-```
-
-The example above is the standard interface which is at least exported from each charset/language.
-
-You can also define the encoder directly and left all other options:
-
-```js
-import simple from "./dist/module/lang/latin/simple.js";
-
-const index = FlexSearch({
-    encode: simple
-});
-```
-
-#### Available Latin Encoders
-
-1. default
-2. simple
-3. balance
-4. advanced
-5. extra
-
-You can assign a charset by passing the charset during initialization, e.g. `charset: "latin"` for the default charset encoder or `charset: "latin:soundex"` for a encoder variant.
-
-#### Dialect / Slang
-
-Language definitions (especially matchers) also could be used to normalize dialect and slang of a specific language.
-
-### 2. Language Packs: ES5 (Language Packs)
-
-You need to make the charset and/or language definitions available by:
-
-1. All charset definitions are included in the `flexsearch.bundle.js` build by default, but no language-specific definitions are included
-2. You can load packages located in `/dist/lang/` (files refers to languages, folders are charsets)
-3. You can make a custom build
-
-When loading language packs, make sure that the library was loaded before:
-
-```html
-<script src="dist/flexsearch.light.js"></script>
-<script src="dist/lang/latin/default.min.js"></script>
-<script src="dist/lang/en.min.js"></script>
-```
-
-When using the full "bundle" version the built-in latin encoders are already included and you just have to load the language file:
-
-```html
-<script src="dist/flexsearch.bundle.js"></script>
-<script src="dist/lang/en.min.js"></script>
-```
-
-Because you loading packs as external packages (non-ES6-modules) you have to initialize them by shortcuts:
-
-```js
-const index = FlexSearch({
-    charset: "latin:soundex",
-    lang: "en"
-});
-```
-
-> Use the `charset:variant` notation to assign charset and its variants. When just passing the charset without a variant will automatically resolve as `charset:default`.
-
-You can also override existing definitions, e.g.:
-
-```js
-const index = FlexSearch({
-    charset: "latin",
-    lang: "en",
-    matcher: {}
-});
-```
-
-> Passed definitions will __not__ extend default definitions, they will replace them.
-
-When you like to extend a definition just create a new language file and put in all the logic.
-
-#### Encoder Variants
-
-It is pretty straight forward when using an encoder variant:
-
-```html
-<script src="dist/flexsearch.light.js"></script>
-<script src="dist/lang/latin/advanced.min.js"></script>
-<script src="dist/lang/latin/extra.min.js"></script>
-<script src="dist/lang/en.min.js"></script>
-```
-
-When using the full "bundle" version the built-in latin encoders are already included and you just have to load the language file:
-
-```html
-<script src="dist/flexsearch.bundle.js"></script>
-<script src="dist/lang/en.min.js"></script>
-```
-
-```js
-const index_advanced = FlexSearch({
-    charset: "latin:advanced"
-});
-
-const index_extra = FlexSearch({
-    charset: "latin:extra"
-});
-```
-
-### Partial Tokenizer
-
-In FlexSearch you can't provide your own partial tokenizer, because it is a direct dependency to the core unit. The built-in tokenizer of FlexSearch splits each word into fragments by different patterns:
-
-1. strict (supports contextual index)
-2. forward
-3. reverse (including forward)
-4. full
-
-### Language Processing Pipeline
-
-This is the default pipeline provided by FlexSearch:
-
-<p>
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch/doc/pipeline.svg?2">
-</p>
-
-#### Custom Pipeline
-
-At first take a look into the default pipeline in `src/common.js`. It is very simple and straight forward. The pipeline will process as some sort of inversion of control, the final encoder implementation has to handle charset and also language specific transformations. This workaround has left over from many tests.
-
-Inject the default pipeline by e.g.:
-
-```js
-this.pipeline(
-
-    /* string: */ str.toLowerCase(),
-    /* normalize: */ false,
-    /* split: */ split,
-    /* collapse: */ false
-);
-```
-
-Use the pipeline schema from above to understand the iteration and the difference of pre-encoding and post-encoding. Stemmer and matchers needs to be applied after charset normalization but before language transformations, filters also.
-
-Here is a good example of extending pipelines: `src/lang/latin/extra.js` → `src/lang/latin/advanced.js` → `src/lang/latin/simple.js`.
-
-### How to contribute?
-
-Search for your language in `src/lang/`, if it exists you can extend or provide variants (like dialect/slang). If the language doesn't exist create a new file and check if any of the existing charsets (e.g. latin) fits to your language. When no charset exist, you need to provide a charset as a base for the language.
-
-A new charset should provide at least:
-
-1. `encode` A function which normalize the charset of a passed text content (remove special chars, lingual transformations, etc.) and __returns an array of separated words__. Also stemmer, matcher or stopword filter needs to be applied here. When the language has no words make sure to provide something similar, e.g. each chinese sign could also be a "word". Don't return the whole text content without split.
-3. `rtl` A boolean flag which indicates right-to-left encoding
-
-Basically the charset needs just to provide an encoder function along with an indicator for right-to-left encoding:
-
-```js
-export function encode(str){ return [str] }
-export const rtl = false;
-```
-
-<a name="compare" id="compare"></a>
-## Encoder Matching Comparison
-
-> Reference String: __"Björn-Phillipp Mayer"__
-
-<table>
-    <tr><td colspan="5"></td></tr>
-    <tr>
-        <td>Query</td>
-        <td>default</td>
-        <td>simple</td>
-        <td>advanced</td>
-        <td>extra</td>
-    </tr>
-    <tr>
-        <td>björn</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>björ</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bjorn</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bjoern</td>
-        <td>no</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>philipp</td>
-        <td>no</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>filip</td>
-        <td>no</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>björnphillip</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>meier</td>
-        <td>no</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>björn meier</td>
-        <td>no</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>meier fhilip</td>
-        <td>no</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>byorn mair</td>
-        <td>no</td>
-        <td>no</td>
-        <td>no</td>
-        <td><b>yes</b></td>
-    </tr>
-    <tr>
-        <td><i>(false positives)</i></td>
-        <td><b>no</b></td>
-        <td><b>no</b></td>
-        <td><b>no</b></td>
-        <td>yes</td>
-    </tr>
-</table>
-
-<a name="memory"></a>
-## Memory Allocation
-
-The book "Gulliver's Travels Swift Jonathan 1726" was fully indexed for the examples below.
-
-The most memory-optimized meaningful setting will allocate just 1.2 Mb for the whole book indexed! This is probably the most tiny memory footprint you will get from a search library.
-
-```js
-import { encode } from "./lang/latin/extra.js";
-
-index = new Index({
-    encode: encode,
-    tokenize: "strict",
-    optimize: true,
-    resolution: 1,
-    minlength: 3,
-    fastupdate: false,
-    context: false
-});
-```
-
-<a name="consumption"></a>
-### Memory Consumption
-
-The book "Gulliver's Travels" (Swift Jonathan 1726) was completely indexed for this test:
-
-<br>
-<img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/memory-comparison.svg?v=2">
-
-### Compare Impact of Memory Allocation
-
-by default a lexical index is very small:<br>
-`depth: 0, bidirectional: 0, resolution: 3, minlength: 0` => 2.1 Mb
-
-a higher resolution will increase the memory allocation:<br>
-`depth: 0, bidirectional: 0, resolution: 9, minlength: 0` => 2.9 Mb
-
-using the contextual index will increase the memory allocation:<br>
-`depth: 1, bidirectional: 0, resolution: 9, minlength: 0` => 12.5 Mb
-
-a higher contextual depth will increase the memory allocation:<br>
-`depth: 2, bidirectional: 0, resolution: 9, minlength: 0` => 21.5 Mb
-
-a higher minlength will decrease memory allocation:<br>
-`depth: 2, bidirectional: 0, resolution: 9, minlength: 3` => 19.0 Mb
-
-using bidirectional will decrease memory allocation:<br>
-`depth: 2, bidirectional: 1, resolution: 9, minlength: 3` => 17.9 Mb
-
-enable the option "fastupdate" will increase memory allocation:<br>
-`depth: 2, bidirectional: 1, resolution: 9, minlength: 3` => 6.3 Mb
-
-### Full Comparison Table
-
-Every search library is constantly in competition with these 4 properties:
-
-1. Memory Allocation
-2. Performance
-3. Matching Capabilities
-4. Relevance Order (Scoring)
-
-FlexSearch provides you many parameters you can use to adjust the optimal balance for your specific use-case.
-
-<table>
-    <tr><td colspan="5"></td></tr>
-    <tr>
-        <td>Modifier</td>
-        <td>Memory Impact *</td>
-        <td>Performance Impact **</td>
-        <td>Matching Impact **</td>
-        <td>Scoring Impact **</td>
-    </tr>
-    <tr>
-        <td>resolution</td>
-        <td>+1 (per level)</td>
-        <td>+1 (per level)</td>
-        <td>0</td>
-        <td>+2 (per level)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>depth</td>
-        <td>+4 (per level)</td>
-        <td>-1 (per level)</td>
-        <td>-10 + depth</td>
-        <td>+10</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>minlength</td>
-        <td>-2 (per level)</td>
-        <td>+2 (per level)</td>
-        <td>-3 (per level)</td>
-        <td>+2 (per level)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bidirectional</td>
-        <td>-2</td>
-        <td>0</td>
-        <td>+3</td>
-        <td>-1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>fastupdate</td>
-        <td>+1</td>
-        <td>+10 (update, remove)</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>optimize: true</td>
-        <td>-7</td>
-        <td>-1</td>
-        <td>0</td>
-        <td>-3</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encoder: "icase"</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encoder: "simple"</td>
-        <td>-2</td>
-        <td>-1</td>
-        <td>+2</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encoder: "advanced"</td>
-        <td>-3</td>
-        <td>-2</td>
-        <td>+4</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encoder: "extra"</td>
-        <td>-5</td>
-        <td>-5</td>
-        <td>+6</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encoder: "soundex"</td>
-        <td>-6</td>
-        <td>-2</td>
-        <td>+8</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>tokenize: "strict"</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>tokenize: "forward"</td>
-        <td>+3</td>
-        <td>-2</td>
-        <td>+5</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>tokenize: "reverse"</td>
-        <td>+5</td>
-        <td>-4</td>
-        <td>+7</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>tokenize: "full"</td>
-        <td>+8</td>
-        <td>-5</td>
-        <td>+10</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>document index</td>
-        <td>+3 (per field)</td>
-        <td>-1 (per field)</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>document tags</td>
-        <td>+1 (per tag)</td>
-        <td>-1 (per tag)</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>store: true</td>
-        <td>+5 (per document)</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>store: [fields]</td>
-        <td>+1 (per field)</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>cache: true</td>
-        <td>+10</td>
-        <td>+10</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>cache: 100</td>
-        <td>+1</td>
-        <td>+9</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>type of ids: number</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>type of ids: string</td>
-        <td>+3</td>
-        <td>-3</td>
-        <td>0</td>
-        <td>0</td>
-    </tr>
-</table>
-* range from -10 to 10, lower is better (-10 => big decrease, 0 => unchanged, +10 => big increase)<br>
-** range from -10 to 10, higher is better
-
-<a name="presets"></a>
-## Presets
-
-1. `memory` (primary optimize for memory)
-2. `performance` (primary optimize for performance)
-3. `match` (primary optimize for matching)
-4. `score` (primary optimize for scoring)
-5. `default` (the default balanced profile)
-
-These profiles are covering standard use cases. It is recommended to apply custom configuration instead of using profiles to get the best out for your situation. Every profile could be optimized further to its specific task, e.g. extreme performance optimized configuration or extreme memory and so on.
-
-You can pass a preset during creation/initialization of the index. 
-
-<!--
-Compare these presets:
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
--->
 
 ## Best Practices
 
@@ -3102,5 +1791,6 @@ Split indexes by categories improves performance significantly.
 
 ---
 
-Copyright 2018-2021 Nextapps GmbH<br>
-Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">Apache 2.0 License</a><br>
+Copyright 2018-2021 Nextapps GmbH, 2021– Skiff World, Inc.
+
+Released under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html)
