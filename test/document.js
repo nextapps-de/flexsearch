@@ -175,3 +175,27 @@ test('A serialized and deserialized index should retain its tokenizer', t => {
     [1, 2, 5, 6, 7]
   )
 });
+
+test('Removed documents should no longer be searchable', t => {
+  const doc = new Document({
+    document: {
+      id: 'id',
+      field: [
+        'title',
+      ]
+    }
+  });
+
+  doc.add({id: 1, title: 'Orange'});
+  doc.add({id: 2, title: 'Apple'});
+  doc.add({id: 3, title: 'Banana'});
+
+  let searchResult;
+
+  searchResult = doc.search('Orange');
+  t.deepEqual(searchResult, [{ field: 'title', result: [1] }]);
+
+  doc.remove(1);
+  searchResult = doc.search('Orange');
+  t.deepEqual(undefined);
+});
