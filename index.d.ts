@@ -24,6 +24,7 @@ export class Index {
   updateAsync(id: any, o: string): Promise<this>;
   remove(id: any): this;
   removeAsync(id: any): this;
+  contain(id: any): boolean;
   clear(): this;
   destroy(): this;
   addMatcher(matcher: Matcher): this;
@@ -49,6 +50,7 @@ export class Document<T> {
     query: string,
     options?: SearchOptions
   ): Promise<any> // The shape of the resulting object can vary widely,
+  contain(id: any): boolean;
 
   // TODO add async methods
   // TODO add more methods
