@@ -1,7 +1,7 @@
 import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_string } from "./common.js";
 
-function async(callback, self, key, index_doc, index, data){
+function async(callback, self, key, field, index_doc, index, data){
 
     setTimeout(function(){
 
@@ -13,12 +13,12 @@ function async(callback, self, key, index_doc, index, data){
 
             res["then"](function(){
 
-                self.export(callback, self, key, index_doc, index + 1);
+                self.export(callback, self, field, index_doc, index + 1);
             })
         }
         else{
 
-            self.export(callback, self, key, index_doc, index + 1);
+            self.export(callback, self, field, index_doc, index + 1);
         }
     });
 }
@@ -82,7 +82,7 @@ export function exportIndex(callback, self, field, index_doc, index){
             return;
     }
 
-    async(callback, self || this, field ? field + "." + key : key, index_doc, index, data);
+    async(callback, self || this, field ? field + "." + key : key, field, index_doc, index, data);
 
     return true;
 }
