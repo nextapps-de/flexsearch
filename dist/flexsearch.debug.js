@@ -670,6 +670,7 @@ L.prototype.search = function(a, b, c) {
     g = c.offset || 0;
     var k = c.context;
     f = c.suggest;
+    a = c.query || a;
   }
   if (a && (a = this.encode(a), e = a.length, 1 < e)) {
     c = w();
