@@ -12,6 +12,7 @@ const regex = /[\x00-\x7F]+/g;
 const split = /\s+/;
 
 /**
+ * @param {string|number} str
  * @this IndexInterface
  */
 
@@ -20,7 +21,7 @@ export function encode(str){
     return pipeline.call(
 
         this,
-        /* string: */ str.replace(regex, " "),
+        /* string: */ ("" + str).replace(regex, " "),
         /* normalize: */ false,
         /* split: */ split,
         /* collapse: */ false

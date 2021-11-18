@@ -41,7 +41,7 @@ const pairs = [
 ];
 
 /**
- * @param {string} str
+ * @param {string|number} str
  * @this IndexInterface
  */
 

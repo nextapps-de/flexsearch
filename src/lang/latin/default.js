@@ -10,6 +10,7 @@ export default {
 }
 
 /**
+ * @param {string|number} str
  * @this IndexInterface
  */
 

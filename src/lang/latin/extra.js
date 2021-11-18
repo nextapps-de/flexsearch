@@ -36,6 +36,7 @@ const pairs = [
 ];
 
 /**
+ * @param {string|number} str
  * @this IndexInterface
  */
 
@@ -62,5 +63,5 @@ export function encode(str){
         }
     }
 
-    return str;
+    return str || [];
 }

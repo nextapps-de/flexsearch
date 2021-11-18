@@ -58,6 +58,8 @@ const pairs = [
 ];
 
 /**
+ * @param {string|number} str
+ * @param {boolean=} _skip_postprocessing
  * @this IndexInterface
  */
 
@@ -86,5 +88,5 @@ export function encode(str, _skip_postprocessing){
         }
     }
 
-    return str;
+    return str || [];
 }

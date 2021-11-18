@@ -62,6 +62,7 @@ const soundex = {
 };
 
 /**
+ * @param {string|number} str
  * @this IndexInterface
  */
 

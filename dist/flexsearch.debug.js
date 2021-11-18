@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.21 (Debug)
+ * FlexSearch.js v0.7.22 (Debug)
  * Copyright 2018-2021 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Licence: Apache-2.0
@@ -666,11 +666,11 @@ L.prototype.search = function(a, b, c) {
   let d = [], e;
   let f, g = 0;
   if (c) {
+    a = c.query || a;
     b = c.limit;
     g = c.offset || 0;
     var k = c.context;
     f = c.suggest;
-    a = c.query || a;
   }
   if (a && (a = this.encode(a), e = a.length, 1 < e)) {
     c = w();
@@ -1256,13 +1256,13 @@ function La(a) {
 const Ra = G("ae"), Sa = G("oe"), Ta = G("sh"), Ua = G("th"), Va = G("ph"), Wa = G("pf"), Xa = [Ra, "a", Sa, "o", Ta, "s", Ua, "t", Va, "f", Wa, "f", G("(?![aeo])h(?![aeo])"), "", G("(?!^[aeo])h(?!^[aeo])"), ""];
 function Pa(a, b) {
   a && (a = La.call(this, a).join(" "), 2 < a.length && (a = E(a, Xa)), b || (1 < a.length && (a = F(a)), a && (a = a.split(" "))));
-  return a;
+  return a || [];
 }
 ;var Za = {encode:Ya, rtl:!1, tokenize:""};
 const $a = G("(?!\\b)[aeo]");
 function Ya(a) {
   a && (a = Pa.call(this, a, !0), 1 < a.length && (a = a.replace($a, "")), 1 < a.length && (a = F(a)), a && (a = a.split(" ")));
-  return a;
+  return a || [];
 }
 ;H["latin:default"] = ia;
 H["latin:simple"] = za;
