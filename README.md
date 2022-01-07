@@ -1545,7 +1545,7 @@ Assume the document array looks more complex (has nested branches etc.), e.g.:
 }
 ```
 
-Then use the colon separated notation ___"root:child:child"___ to define hierarchy within the document descriptor:
+Then use the colon separated notation ___`root:child:child`___ to define hierarchy within the document descriptor:
 
 ```js
 const index = new Document({
