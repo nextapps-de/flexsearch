@@ -22,6 +22,7 @@
   },
   "main": "dist/flexsearch.bundle.js",
   "browser": "dist/flexsearch.bundle.js",
+  "module": "dist/module/index.js",
   "preferGlobal": false,
   "repository": {
     "type": "git",
