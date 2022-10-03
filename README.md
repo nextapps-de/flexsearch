@@ -1,3 +1,5 @@
+<!-- TODO External Stemmer Lib -->
+
 <h1 align="center">
     <p></p>
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg?v2" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">

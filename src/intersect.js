@@ -1,7 +1,7 @@
 import { create_object, concat } from "./common.js";
 
 /**
- * Implementation based on Array.indexOf() provides better performance,
+ * Implementation based on Array.includes() provides better performance,
  * but it needs at least one word in the query which is less frequent.
  * Also on large indexes it does not scale well performance-wise.
  * This strategy also lacks of suggestion capabilities (matching & sorting).
@@ -97,7 +97,7 @@ import { create_object, concat } from "./common.js";
 //
 //                     if(arr.length){
 //
-//                         found = arr.indexOf(id) !== -1;
+//                         found = arr.includes(id);
 //
 //                         if(found){
 //
@@ -280,7 +280,8 @@ export function intersect(arrays, limit, offset, suggest) {
 
                         if(suggest){
 
-                            check_suggest[id] = (check_idx = check_suggest[id]) ? ++check_idx : check_idx = 1;
+                            check_idx = (check_suggest[id] || 0) + 1;
+                            check_suggest[id] = check_idx;
 
                             // do not adding IDs which are already included in the result (saves one loop)
                             // the first intersection match has the check index 2, so shift by -2
@@ -373,7 +374,7 @@ export function intersect_union(mandatory, arrays) {
         check[mandatory[x]] = 1;
     }
 
-    for(let x = 0, arr; x <  arrays.length; x++){
+    for(let x = 0, arr; x < arrays.length; x++){
 
         arr = arrays[x];
 

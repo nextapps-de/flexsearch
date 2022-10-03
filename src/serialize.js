@@ -1,3 +1,5 @@
+// TODO return promises instead of inner await
+
 import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_string } from "./common.js";
 

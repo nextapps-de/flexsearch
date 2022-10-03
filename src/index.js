@@ -117,6 +117,10 @@ Index.prototype.append = function(id, content){
     return this.add(id, content, true);
 };
 
+// TODO:
+// string + number as text
+// boolean, null, undefined as ?
+
 /**
  * @param {!number|string} id
  * @param {!string} content
@@ -133,7 +137,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
             return this.update(id, content);
         }
 
-        content = this.encode(content);
+        content = this.encode("" + content);
         const length = content.length;
 
         if(length){
@@ -353,7 +357,7 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
             arr = arr[score] || (arr[score] = []);
         }
 
-        if(!append || (arr.indexOf(id) === -1)){
+        if(!append || !arr.includes(id)){
 
             arr[arr.length] = id;
 
@@ -396,16 +400,16 @@ Index.prototype.search = function(query, limit, options){
 
     if(options){
 
+        query = options["query"] || query;
         limit = options["limit"];
         offset = options["offset"] || 0;
         context = options["context"];
         suggest = SUPPORT_SUGGESTION && options["suggest"];
-        query = options["query"] || query;
     }
 
     if(query){
 
-        query = /** @type {Array} */ (this.encode(query));
+        query = /** @type {Array} */ (this.encode("" + query));
         length = query.length;
 
         // TODO: solve this in one single loop below
@@ -421,7 +425,7 @@ Index.prototype.search = function(query, limit, options){
 
                 if(term && (term.length >= this.minlength) && !dupes[term]){
 
-                    // this fast path just could applied when not in memory-optimized mode
+                    // this fast path can just apply when not in memory-optimized mode
 
                     if(!this.optimize && !suggest && !this.map[term]){
 

@@ -58,6 +58,8 @@ function Document(options){
 
     if(SUPPORT_TAGS){
 
+        // TODO case-insensitive tags
+
         this.tag = ((opt = document["tag"]) && parse_tree(opt, this.marker));
         this.tagindex = opt && create_object();
     }
@@ -185,6 +187,8 @@ function parse_tree(key, marker){
     return count > 1 ? tree : tree[0];
 }
 
+// TODO support generic function created from string when tree depth > 1
+
 function parse_simple(obj, tree){
 
     if(is_string(tree)){
@@ -201,6 +205,8 @@ function parse_simple(obj, tree){
 
     return obj;
 }
+
+// TODO support generic function created from string when tree depth > 1
 
 function store_value(obj, store, tree, pos, key){
 
@@ -345,7 +351,7 @@ Document.prototype.add = function(id, content, _append){
                     dupes[key] = 1;
                     arr = this.tagindex[key] || (this.tagindex[key] = []);
 
-                    if(!_append || (arr.indexOf(id) === -1)){
+                    if(!_append || !arr.includes(id)){
 
                         arr[arr.length] = id;
 

@@ -160,7 +160,7 @@ CacheClass.prototype.del = function(id){
         key = this.queue[i];
         item = this.cache[key];
 
-        if(item.indexOf(id) !== -1){
+        if(item.includes(id)){
 
             this.queue.splice(i--, 1);
             delete this.cache[key];
