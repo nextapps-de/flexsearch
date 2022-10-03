@@ -165,7 +165,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                         case "full":
 
-                            if(term_length > 3){
+                            if(term_length > 2){
 
                                 for(let x = 0; x < term_length; x++){
 
@@ -183,13 +183,13 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                 break;
                             }
 
-                            // fallthrough to next case when term length < 4
+                            // fallthrough to next case when term length < 3
 
                         case "reverse":
 
                             // skip last round (this token exist already in "forward")
 
-                            if(term_length > 2){
+                            if(term_length > 1){
 
                                 for(let x = term_length - 1; x > 0; x--){
 
