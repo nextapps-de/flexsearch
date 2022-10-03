@@ -67,31 +67,31 @@ Plugins (extern projects):
     </tr>
     <tr>
         <td>flexsearch.bundle.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.bundle.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.3/dist/flexsearch.bundle.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.bundle.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.bundle.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.light.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.light.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.3/dist/flexsearch.light.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.light.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.light.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.compact.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.compact.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.3/dist/flexsearch.compact.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.compact.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.compact.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.es5.js *</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.2/dist/flexsearch.es5.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.2/dist/flexsearch.es5.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.7.3/dist/flexsearch.es5.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.es5.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.3/dist/flexsearch.es5.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>ES6 Modules</td>
-        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.2/dist/module/" target="_blank">Download</a></td>
+        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.3/dist/module/" target="_blank">Download</a></td>
         <td>The <i>/dist/module/</i> folder of this Github repository</td>
     </tr>
 </table>
@@ -106,7 +106,7 @@ npm install flexsearch
 
 #### Get Latest Nightly (Do not use for production!)
 
-Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.2__/dist/" into "/flexsearch/__master__/dist".
+Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.3__/dist/" into "/flexsearch/__master__/dist".
 
 ### Compare Web-Bundles
 
@@ -438,7 +438,7 @@ const worker = new WorkerIndex(options);
 
 Or via CDN:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.3/dist/flexsearch.bundle.js"></script>
 ```
 
 AMD:
@@ -447,7 +447,7 @@ AMD:
 var FlexSearch = require("./flexsearch.js");
 ```
 
-Load one of the builds from the folder <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.2/dist">dist</a> within your html as a script and use as follows:
+Load one of the builds from the folder <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.3/dist">dist</a> within your html as a script and use as follows:
 
 ```js
 var index = new FlexSearch.Index(options);

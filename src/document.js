@@ -1,6 +1,6 @@
 /**!
  * FlexSearch.js
- * Copyright 2018-2021 Nextapps GmbH
+ * Copyright 2018-2022 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Licence: Apache-2.0
  * https://github.com/nextapps-de/flexsearch
