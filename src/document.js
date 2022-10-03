@@ -484,7 +484,7 @@ Document.prototype.search = function(query, limit, options, _resolve){
         if(!limit && is_object(query)){
 
             options = /** @type {Object} */ (query);
-            query = options["query"];
+            query = "";
         }
         else if(is_object(limit)){
 
@@ -506,12 +506,13 @@ Document.prototype.search = function(query, limit, options, _resolve){
         }
         else{
 
+            query = options["query"] || query;
             pluck = options["pluck"];
             field = pluck || options["index"] || options["field"] /*|| (is_string(options) && [options])*/;
             tag = SUPPORT_TAGS && options["tag"];
             enrich = SUPPORT_STORE && this.store && options["enrich"];
             bool = options["bool"] === "and";
-            limit = options["limit"] || 100;
+            limit = options["limit"] || limit || 100;
             offset = options["offset"] || 0;
 
             if(tag){
