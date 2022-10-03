@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.3 (Debug)
+ * FlexSearch.js v0.7.31 (Debug)
  * Copyright 2018-2022 Nextapps GmbH
  * Author: Thomas Wilkerling
  * Licence: Apache-2.0
@@ -216,12 +216,12 @@ K.prototype.del = function(a) {
   }
 };
 const na = {memory:{charset:"latin:extra", resolution:3, minlength:4, fastupdate:!1}, performance:{resolution:3, minlength:3, optimize:!1, context:{depth:2, resolution:1}}, match:{charset:"latin:extra", tokenize:"reverse",}, score:{charset:"latin:advanced", resolution:20, minlength:3, context:{depth:3, resolution:9,}}, "default":{},};
-function pa(a, b, c, d, e, f) {
+function pa(a, b, c, d, e, f, g) {
   setTimeout(function() {
-    const g = a(c, JSON.stringify(f));
-    g && g.then ? g.then(function() {
-      b.export(a, b, c, d, e + 1);
-    }) : b.export(a, b, c, d, e + 1);
+    const h = a(c ? c + "." + d : d, JSON.stringify(g));
+    h && h.then ? h.then(function() {
+      b.export(a, b, c, e, f + 1);
+    }) : b.export(a, b, c, e, f + 1);
   });
 }
 ;function L(a, b) {
@@ -502,7 +502,7 @@ L.prototype.export = function(a, b, c, d, e) {
     default:
       return;
   }
-  pa(a, b || this, c ? c + "." + f : f, d, e, g);
+  pa(a, b || this, c, f, d, e, g);
   return !0;
 };
 L.prototype.import = function(a, b) {
@@ -859,20 +859,20 @@ R.prototype.export = function(a, b, c, d, e) {
       g.export(a, b, e ? f : "", d, e++) || (d++, e = 1, b.export(a, b, f, d, e));
     });
   } else {
-    let f;
+    let f, g;
     switch(e) {
       case 1:
-        c = "tag";
-        f = this.tagindex;
+        f = "tag";
+        g = this.tagindex;
         break;
       case 2:
-        c = "store";
-        f = this.store;
+        f = "store";
+        g = this.store;
         break;
       default:
         return;
     }
-    pa(a, this, c, d, e, f);
+    pa(a, this, c, f, d, e, g);
   }
 };
 R.prototype.import = function(a, b) {

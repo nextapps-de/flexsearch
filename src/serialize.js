@@ -3,11 +3,11 @@
 import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_string } from "./common.js";
 
-function async(callback, self, key, field, index_doc, index, data){
+function async(callback, self, field, key, index_doc, index, data){
 
     setTimeout(function(){
 
-        const res = callback(key, JSON.stringify(data));
+        const res = callback(field ? field + "." + key : key, JSON.stringify(data));
 
         // await isn't supported by ES5
 
@@ -84,7 +84,7 @@ export function exportIndex(callback, self, field, index_doc, index){
             return;
     }
 
-    async(callback, self || this, field ? field + "." + key : key, field, index_doc, index, data);
+    async(callback, self || this, field, key, index_doc, index, data);
 
     return true;
 }
@@ -188,7 +188,7 @@ export function exportDocument(callback, self, field, index_doc, index){
                 return;
         }
 
-        async(callback, this, key, index_doc, index, data);
+        async(callback, this, field, key, index_doc, index, data);
     }
 }
 
