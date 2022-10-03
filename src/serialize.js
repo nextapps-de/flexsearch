@@ -3,21 +3,33 @@
 import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_string } from "./common.js";
 
-async function lazyExport(callback, self, key, index_doc, index, data){
-  // Run the callback on the given data
-  const res = callback(key, JSON.stringify(data));
-  // If the callback gives a promise, then wait on that
-  if (res && res["then"]) { await res; }
+function async(callback, self, key, index_doc, index, data){
 
-  // Recurse to export the next property
-  return await self.export(callback, self, key, index_doc, index + 1);
+    setTimeout(function(){
+
+        const res = callback(key, JSON.stringify(data));
+
+        // await isn't supported by ES5
+
+        if(res && res["then"]){
+
+            res["then"](function(){
+
+                self.export(callback, self, key, index_doc, index + 1);
+            })
+        }
+        else{
+
+            self.export(callback, self, key, index_doc, index + 1);
+        }
+    });
 }
 
 /**
  * @this IndexInterface
  */
 
-export async function exportIndex(callback, self, field, index_doc, index){
+export function exportIndex(callback, self, field, index_doc, index){
 
     let key, data;
 
@@ -69,12 +81,12 @@ export async function exportIndex(callback, self, field, index_doc, index){
 
         default:
 
-            // If there are no properties remaining to export, then return an empty promise with
-            // 'true'
-            return true;
+            return;
     }
 
-    return await lazyExport(callback, self || this, field ? field + "." + key : key, index_doc, index, data);
+    async(callback, self || this, field ? field + "." + key : key, index_doc, index, data);
+
+    return true;
 }
 
 /**
@@ -124,7 +136,7 @@ export function importIndex(key, data){
  * @this DocumentInterface
  */
 
-export async function exportDocument(callback, self, field, index_doc, index){
+export function exportDocument(callback, self, field, index_doc, index){
 
     index || (index = 0);
     index_doc || (index_doc = 0);
@@ -136,16 +148,16 @@ export async function exportDocument(callback, self, field, index_doc, index){
 
         self = this;
 
+        setTimeout(function(){
 
-      if(!(await idx.export(callback, self, index ? field/*.replace(":", "-")*/ : "", index_doc, index++))){
+            if(!idx.export(callback, self, index ? field/*.replace(":", "-")*/ : "", index_doc, index++)){
 
-        index_doc++;
-        index = 1;
+                index_doc++;
+                index = 1;
 
-        await self.export(callback, self, field, index_doc, index);
-      }
-
-      return true;
+                self.export(callback, self, field, index_doc, index);
+            }
+        });
     }
     else{
 
@@ -173,10 +185,10 @@ export async function exportDocument(callback, self, field, index_doc, index){
 
             default:
 
-                return true;
+                return;
         }
 
-        return await lazyExport(callback, this, key, index_doc, index, data);
+        async(callback, this, key, index_doc, index, data);
     }
 }
 
