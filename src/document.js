@@ -558,19 +558,21 @@ Document.prototype.search = function(query, limit, options, _resolve){
 
     for(let i = 0, res, key, len; i < field.length; i++){
 
-        let opt;
+        let field_options;
 
         key = field[i];
 
         if(!is_string(key)){
 
-            opt = key;
-            key = key["field"];
+            field_options = key;
+            key = field_options["field"];
+            query = field_options["query"] || query;
+            limit = field_options["limit"] || limit;
         }
 
         if(promises){
 
-            promises[i] = this.index[key].searchAsync(query, limit, opt || options);
+            promises[i] = this.index[key].searchAsync(query, limit, field_options || options);
 
             // just collect and continue
 
@@ -584,7 +586,7 @@ Document.prototype.search = function(query, limit, options, _resolve){
 
             // inherit options also when search? it is just for laziness, Object.assign() has a cost
 
-            res = this.index[key].search(query, limit, opt || options);
+            res = this.index[key].search(query, limit, field_options || options);
         }
 
         len = res && res.length;
