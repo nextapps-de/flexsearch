@@ -137,7 +137,7 @@ export async function exportDocument(callback, self, field, index_doc, index){
         self = this;
 
 
-      if(!(await idx.export(callback, self, index ? field.replace(":", "-") : "", index_doc, index++))){
+      if(!(await idx.export(callback, self, index ? field/*.replace(":", "-")*/ : "", index_doc, index++))){
 
         index_doc++;
         index = 1;
