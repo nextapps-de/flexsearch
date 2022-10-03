@@ -11,7 +11,7 @@ const lib = encode ? [
     /*"flexsearch-0.6.2", "flexsearch-0.6.3",*/ "flexsearch-0.7.0-match",
     "bm25", "bulksearch-match", "elasticlunr",
     "fuzzysearch", "js-search", "jsii",
-    "minisearch-match", "fuse-match", "lunr", "wade"
+    "minisearch-match", "fuse-match", "lunr", "wade", "lyra"
 ];
 
 let promise;

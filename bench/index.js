@@ -24,7 +24,7 @@
         /*"flexsearch-0.6.2", "flexsearch-0.6.3",*/ "minisearch", "flexsearch-0.7.0",
         "bm25", "bulksearch", "elasticlunr",
         "fuzzysearch", "js-search", "jsii",
-        "fuse", "lunr", "wade"
+        "fuse", "lunr", "wade", "lyra"
     ]);
 
     list.render(lib);
