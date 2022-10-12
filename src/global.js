@@ -1,18 +1,19 @@
+/** @type {Record<string, object>} */
 export const global_lang = {};
+/** @type {Record<string, object>} */
 export const global_charset = {};
 
 /**
  * @param {string} name
- * @param {Object} charset
+ * @param {object} charset
  */
-
 export function registerCharset(name, charset) {
 	global_charset[name] = charset;
 }
 
 /**
  * @param {string} name
- * @param {Object} lang
+ * @param {object} lang
  */
 
 export function registerLanguage(name, lang) {
