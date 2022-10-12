@@ -19,7 +19,10 @@ specifiers:
   babel-plugin-transform-undefined-to-void: ^6.9.4
   cpx: ^1.5.0
   google-closure-compiler: ^20220905.0.0
+  mauss: ^0.3.3
+  prettier: ^2.7.1
   shx: ^0.3.3
+  typescript: ^4.8.4
   web-servo: ^0.5.1
 
 devDependencies:
@@ -41,7 +44,10 @@ devDependencies:
   babel-plugin-transform-undefined-to-void: 6.9.4
   cpx: 1.5.0
   google-closure-compiler: 20220905.0.0
+  mauss: 0.3.3
+  prettier: 2.7.1
   shx: 0.3.4
+  typescript: 4.8.4
   web-servo: 0.5.1
 
 packages:
@@ -1241,6 +1247,10 @@ packages:
     resolution: {integrity: sha512-rUxjysqif/BZQH2yhd5Aaq7vXMSx9NdEsQcyA07uEzIvxgI7zIr33gGsh+RU0/XjmQpCW7RsVof1vlkvQVCK5A==}
     dev: true
 
+  /mauss/0.3.3:
+    resolution: {integrity: sha512-NSTslY2so2r6+cEwQi5Yc6i+L2aEEesd1WPOfYommjmg8UAXS87MVWnLXuR0XR0gWS3ukit+JMCKuT1Xkg7EvQ==}
+    dev: true
+
   /micromatch/2.3.11:
     resolution: {integrity: sha512-LnU2XFEk9xxSJ6rfgAry/ty5qwUTyHYOBU0g4R6tIw5ljwgGIBmiKhRWLw5NpMOnrgUNcDJ4WMp8rl3sYVHLNA==}
     engines: {node: '>=0.10.0'}
@@ -1456,6 +1466,12 @@ packages:
   /preserve/0.2.0:
     resolution: {integrity: sha512-s/46sYeylUfHNjI+sA/78FAHlmIuKqI9wNnzEOGehAlUUYeObv5C2mOinXBjyUyWmJ2SfcS2/ydApH4hTF4WXQ==}
     engines: {node: '>=0.10.0'}
+    dev: true
+
+  /prettier/2.7.1:
+    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /private/0.1.8:
@@ -1802,6 +1818,12 @@ packages:
   /trim-right/1.0.1:
     resolution: {integrity: sha512-WZGXGstmCWgeevgTL54hrCuw1dyMQIzWy7ZfqRJfSmJZBwklI15egmQytFP6bPidmw3M8d5yEowl1niq4vmqZw==}
     engines: {node: '>=0.10.0'}
+    dev: true
+
+  /typescript/4.8.4:
+    resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
     dev: true
 
   /union-value/1.0.1:

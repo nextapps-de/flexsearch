@@ -1,51 +1,51 @@
-import { IndexInterface, DocumentInterface } from "./type.js";
-import { create_object, is_object } from "./common.js";
+import { create_object, is_object } from './common.js';
+
+/**
+ * @typedef {import('./type').DocumentInterface} Document
+ * @typedef {import('./type').IndexInterface} Index
+ */
 
 /**
  * @param {boolean|number=} limit
  * @constructor
  */
 
-function CacheClass(limit){
+function CacheClass(limit) {
+	/** @private */
+	this.limit = limit !== true && limit;
 
-    /** @private */
-    this.limit = (limit !== true) && limit;
+	/** @private */
+	this.cache = create_object();
 
-    /** @private */
-    this.cache = create_object();
+	/** @private */
+	this.queue = [];
 
-    /** @private */
-    this.queue = [];
-
-    //this.clear();
+	//this.clear();
 }
 
 export default CacheClass;
 
 /**
- * @param {string|Object} query
- * @param {number|Object=} limit
- * @param {Object=} options
- * @this {IndexInterface}
+ * @param {string | Object} query
+ * @param {number | Object} limit
+ * @param {Object} options
+ * @this {Index}
  * @returns {Array<number|string>}
  */
 
-export function searchCache(query, limit, options){
+export function searchCache(query, limit, options) {
+	if (is_object(query)) {
+		query = query['query'];
+	}
 
-    if(is_object(query)){
+	let cache = this.cache.get(query);
 
-        query = query["query"];
-    }
+	if (!cache) {
+		cache = this.search(query, limit, options);
+		this.cache.set(query, cache);
+	}
 
-    let cache = this.cache.get(query);
-
-    if(!cache){
-
-        cache = this.search(query, limit, options);
-        this.cache.set(query, cache);
-    }
-
-    return cache;
+	return cache;
 }
 
 // CacheClass.prototype.clear = function(){
@@ -57,113 +57,101 @@ export function searchCache(query, limit, options){
 //     this.queue = [];
 // };
 
-CacheClass.prototype.set = function(key, value){
+CacheClass.prototype.set = function (key, value) {
+	if (!this.cache[key]) {
+		// it is just a shame that native function array.shift() performs so bad
 
-    if(!this.cache[key]){
+		// const length = this.queue.length;
+		//
+		// this.queue[length] = key;
+		//
+		// if(length === this.limit){
+		//
+		//     delete this.cache[this.queue.shift()];
+		// }
 
-        // it is just a shame that native function array.shift() performs so bad
+		// the same bad performance
 
-        // const length = this.queue.length;
-        //
-        // this.queue[length] = key;
-        //
-        // if(length === this.limit){
-        //
-        //     delete this.cache[this.queue.shift()];
-        // }
+		// this.queue.unshift(key);
+		//
+		// if(this.queue.length === this.limit){
+		//
+		//     this.queue.pop();
+		// }
 
-        // the same bad performance
+		// fast implementation variant
 
-        // this.queue.unshift(key);
-        //
-        // if(this.queue.length === this.limit){
-        //
-        //     this.queue.pop();
-        // }
+		// let length = this.queue.length;
+		//
+		// if(length === this.limit){
+		//
+		//     length--;
+		//
+		//     delete this.cache[this.queue[0]];
+		//
+		//     for(let x = 0; x < length; x++){
+		//
+		//         this.queue[x] = this.queue[x + 1];
+		//     }
+		// }
+		//
+		// this.queue[length] = key;
 
-        // fast implementation variant
+		// current fastest implementation variant
+		// theoretically that should not perform better compared to the example above
 
-        // let length = this.queue.length;
-        //
-        // if(length === this.limit){
-        //
-        //     length--;
-        //
-        //     delete this.cache[this.queue[0]];
-        //
-        //     for(let x = 0; x < length; x++){
-        //
-        //         this.queue[x] = this.queue[x + 1];
-        //     }
-        // }
-        //
-        // this.queue[length] = key;
+		let length = this.queue.length;
 
-        // current fastest implementation variant
-        // theoretically that should not perform better compared to the example above
+		if (length === this.limit) {
+			delete this.cache[this.queue[length - 1]];
+		} else {
+			length++;
+		}
 
-        let length = this.queue.length;
+		for (let x = length - 1; x > 0; x--) {
+			this.queue[x] = this.queue[x - 1];
+		}
 
-        if(length === this.limit){
+		this.queue[0] = key;
+	}
 
-            delete this.cache[this.queue[length - 1]];
-        }
-        else{
-
-            length++;
-        }
-
-        for(let x = length - 1; x > 0; x--){
-
-            this.queue[x] = this.queue[x - 1];
-        }
-
-        this.queue[0] = key;
-    }
-
-    this.cache[key] = value;
+	this.cache[key] = value;
 };
 
-CacheClass.prototype.get = function(key){
+CacheClass.prototype.get = function (key) {
+	const cache = this.cache[key];
 
-    const cache = this.cache[key];
+	if (this.limit && cache) {
+		// probably the indexOf() method performs faster when matched content is on front (left-to-right)
+		// using lastIndexOf() does not help, it performs almost slower
 
-    if(this.limit && cache){
+		const pos = this.queue.indexOf(key);
 
-        // probably the indexOf() method performs faster when matched content is on front (left-to-right)
-        // using lastIndexOf() does not help, it performs almost slower
+		// if(pos < this.queue.length - 1){
+		//
+		//     const tmp = this.queue[pos];
+		//     this.queue[pos] = this.queue[pos + 1];
+		//     this.queue[pos + 1] = tmp;
+		// }
 
-        const pos = this.queue.indexOf(key);
+		if (pos) {
+			const tmp = this.queue[pos - 1];
+			this.queue[pos - 1] = this.queue[pos];
+			this.queue[pos] = tmp;
+		}
+	}
 
-        // if(pos < this.queue.length - 1){
-        //
-        //     const tmp = this.queue[pos];
-        //     this.queue[pos] = this.queue[pos + 1];
-        //     this.queue[pos + 1] = tmp;
-        // }
-
-        if(pos){
-
-            const tmp = this.queue[pos - 1];
-            this.queue[pos - 1] = this.queue[pos];
-            this.queue[pos] = tmp;
-        }
-    }
-
-    return cache;
+	return cache;
 };
 
-CacheClass.prototype.del = function(id){
+CacheClass.prototype.del = function (id) {
+	for (let i = 0, item, key; i < this.queue.length; i++) {
+		key = this.queue[i];
+		item = this.cache[key];
 
-    for(let i = 0, item, key; i < this.queue.length; i++){
-
-        key = this.queue[i];
-        item = this.cache[key];
-
-        if(item.includes(id)){
-
-            this.queue.splice(i--, 1);
-            delete this.cache[key];
-        }
-    }
+		if (item.includes(id)) {
+			this.queue.splice(i--, 1);
+			delete this.cache[key];
+		}
+	}
 };

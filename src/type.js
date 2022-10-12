@@ -2,12 +2,11 @@
  * @interface
  */
 
-export function IndexInterface(){
-
-    this.cache = null;
-    this.matcher = null;
-    this.stemmer = null;
-    this.filter = null;
+export function IndexInterface() {
+	this.cache = null;
+	this.matcher = null;
+	this.stemmer = null;
+	this.filter = null;
 }
 
 /**
@@ -60,10 +59,9 @@ IndexInterface.prototype.remove;
  * @interface
  */
 
-export function DocumentInterface(){
+export function DocumentInterface() {
+	this.field = null;
 
-    this.field = null;
-
-    /** @type IndexInterface */
-    this.index = null;
+	/** @type IndexInterface */
+	this.index = null;
 }

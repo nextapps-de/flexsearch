@@ -44,7 +44,9 @@
     "build:module": "npx babel src -d dist/module && exit 0",
     "build:all": "npm run build && npm run build:light && npm run build:compact && npm run build:es5 && npm run build:debug && npm run build:module",
     "test": "cd test && npm install && npm run test",
-    "server": "node task/server"
+    "server": "node task/server",
+    "format": "prettier --write src",
+    "check:style": "prettier --check src"
   },
   "files": [
     "dist/**",
@@ -56,6 +58,7 @@
     "LICENSE"
   ],
   "readme": "README.md",
+  "prettier": "mauss/prettier.json",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-minify-constant-folding": "^0.5.0",
@@ -75,7 +78,10 @@
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
     "cpx": "^1.5.0",
     "google-closure-compiler": "^20220905.0.0",
+    "mauss": "^0.3.3",
+    "prettier": "^2.7.1",
     "shx": "^0.3.3",
+    "typescript": "^4.8.4",
     "web-servo": "^0.5.1"
   }
 }

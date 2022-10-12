@@ -1,29 +1,26 @@
-import { IndexInterface } from "../../type.js";
-import { pipeline } from "../../lang.js";
+import { pipeline } from '../../lang.js';
 
 export const rtl = false;
-export const tokenize = "strict";
+export const tokenize = 'strict';
 export default {
-    encode: encode,
-    rtl: rtl,
-    tokenize: tokenize
-}
+	encode: encode,
+	rtl: rtl,
+	tokenize: tokenize,
+};
 
 const regex = /[\x00-\x7F]+/g;
 
 /**
  * @param {string|number} str
- * @this IndexInterface
+ * @this import('../../type').IndexInterface
  */
 
-export function encode(str){
-
-    return pipeline.call(
-
-        this,
-        /* string: */ ("" + str).replace(regex, ""),
-        /* normalize: */ false,
-        /* split: */ "",
-        /* collapse: */ false
-    );
+export function encode(str) {
+	return pipeline.call(
+		this,
+		/* string: */ ('' + str).replace(regex, ''),
+		/* normalize: */ false,
+		/* split: */ '',
+		/* collapse: */ false
+	);
 }
