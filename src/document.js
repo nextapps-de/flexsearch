@@ -568,6 +568,7 @@ Document.prototype.search = function(query, limit, options, _resolve){
             key = field_options["field"];
             query = field_options["query"] || query;
             limit = field_options["limit"] || limit;
+            enrich = SUPPORT_STORE && this.store && (field_options["enrich"] || false);
         }
 
         if(promises){
