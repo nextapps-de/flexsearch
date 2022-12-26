@@ -787,7 +787,7 @@ FlexSearch is highly customizable. Make use of the right options can really impr
         <td>
             Boolean
         </td>
-        <td>Sets the scoring resolution (default: 9).</td>
+        <td>Sets bidirectional search result. If enabled and the source text contains "red hat", it will be found for queries "red hat" and "hat red".</td>
         <td>true</td>
     </tr>
 </table>
