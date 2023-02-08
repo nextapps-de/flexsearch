@@ -3,7 +3,7 @@
 import { IndexInterface, DocumentInterface } from "./type.js";
 import { create_object, is_string } from "./common.js";
 
-function async(callback, self, field, key, index_doc, index, data){
+function async(callback, self, field, key, index_doc, index, data, on_done){
 
     setTimeout(function(){
 
@@ -15,12 +15,12 @@ function async(callback, self, field, key, index_doc, index, data){
 
             res["then"](function(){
 
-                self.export(callback, self, field, index_doc, index + 1);
+                self.export(callback, self, field, index_doc, index + 1, on_done);
             })
         }
         else{
 
-            self.export(callback, self, field, index_doc, index + 1);
+            self.export(callback, self, field, index_doc, index + 1, on_done);
         }
     });
 }
@@ -29,7 +29,14 @@ function async(callback, self, field, key, index_doc, index, data){
  * @this IndexInterface
  */
 
-export function exportIndex(callback, self, field, index_doc, index){
+export function exportIndex(callback, self, field, index_doc, index, on_done){
+
+    let return_value = true
+    if (typeof on_done === 'undefined') {
+        return_value = new Promise((resolve) => {
+            on_done = resolve
+        })
+    }
 
     let key, data;
 
@@ -81,12 +88,17 @@ export function exportIndex(callback, self, field, index_doc, index){
 
         default:
 
+            if (typeof field === 'undefined' && on_done) {
+
+                on_done();
+            }
+
             return;
     }
 
-    async(callback, self || this, field, key, index_doc, index, data);
+    async(callback, self || this, field, key, index_doc, index, data, on_done);
 
-    return true;
+    return return_value;
 }
 
 /**
@@ -136,7 +148,14 @@ export function importIndex(key, data){
  * @this DocumentInterface
  */
 
-export function exportDocument(callback, self, field, index_doc, index){
+export function exportDocument(callback, self, field, index_doc, index, on_done){
+
+    let return_value
+    if (typeof on_done === 'undefined') {
+        return_value = new Promise((resolve) => {
+            on_done = resolve
+        })
+    }
 
     index || (index = 0);
     index_doc || (index_doc = 0);
@@ -150,12 +169,12 @@ export function exportDocument(callback, self, field, index_doc, index){
 
         setTimeout(function(){
 
-            if(!idx.export(callback, self, index ? field/*.replace(":", "-")*/ : "", index_doc, index++)){
+            if(!idx.export(callback, self, index ? field/*.replace(":", "-")*/ : "", index_doc, index++, on_done)){
 
                 index_doc++;
                 index = 1;
 
-                self.export(callback, self, field, index_doc, index);
+                self.export(callback, self, field, index_doc, index, on_done);
             }
         });
     }
@@ -185,11 +204,14 @@ export function exportDocument(callback, self, field, index_doc, index){
 
             default:
 
+                on_done();
                 return;
         }
 
-        async(callback, this, field, key, index_doc, index, data);
+        async(callback, this, field, key, index_doc, index, data, on_done);
     }
+    
+    return return_value
 }
 
 /**
