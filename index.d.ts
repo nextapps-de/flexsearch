@@ -17,7 +17,7 @@ declare module "flexsearch" {
       contextual: boolean;
     };
     add(o: T): this;
-    add(id: number, o: string): this;
+    add(id: number | string, o: string): this;
 
     // Result without pagination -> T[]
     search(
