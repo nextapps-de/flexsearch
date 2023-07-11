@@ -1,8 +1,8 @@
 /**!
  * FlexSearch.js v0.7.31 (Compact)
- * Copyright 2018-2022 Nextapps GmbH
- * Author: Thomas Wilkerling
+ * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
+ * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
 (function(self){'use strict';var t;function v(a){return"undefined"!==typeof a?a:!0}function w(a){const b=Array(a);for(let c=0;c<a;c++)b[c]=y();return b}function y(){return Object.create(null)}function aa(a,b){return b.length-a.length}function C(a){return"string"===typeof a}function D(a){return"object"===typeof a};function E(a,b){var c=ba;if(a&&(b&&(a=F(a,b)),this.G&&(a=F(a,this.G)),this.H&&1<a.length&&(a=F(a,this.H)),c||""===c)){a=a.split(c);if(this.filter){b=this.filter;c=a.length;const e=[];for(let d=0,f=0;d<c;d++){const g=a[d];g&&!b[g]&&(e[f++]=g)}a=e}return a}return a}const ba=/[\p{Z}\p{S}\p{P}\p{C}]+/u,ca=/[\u0300-\u036f]/g;

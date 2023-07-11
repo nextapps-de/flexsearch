@@ -1,8 +1,8 @@
 /**!
  * FlexSearch.js v0.7.31 (ES5)
- * Copyright 2018-2022 Nextapps GmbH
- * Author: Thomas Wilkerling
+ * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
+ * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
 (function(self){'use strict';var t;function aa(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}}var v="function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,c){if(a==Array.prototype||a==Object.prototype)return a;a[b]=c.value;return a};

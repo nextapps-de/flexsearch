@@ -1,8 +1,8 @@
 /**!
  * FlexSearch.js v0.7.31 (Light)
- * Copyright 2018-2022 Nextapps GmbH
- * Author: Thomas Wilkerling
+ * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
+ * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
 (function(self){'use strict';function t(a){return"undefined"!==typeof a?a:!0}function v(a){const c=Array(a);for(let b=0;b<a;b++)c[b]=y();return c}function y(){return Object.create(null)}function z(a,c){return c.length-a.length};const A=/[\p{Z}\p{S}\p{P}\p{C}]+/u;function B(a,c){const b=Object.keys(a),d=b.length,e=[];let h="",f=0;for(let g=0,l,n;g<d;g++)l=b[g],(n=a[l])?(e[f++]=new RegExp(c?"(?!\\b)"+l+"(\\b|_)":l,"g"),e[f++]=n):h+=(h?"|":"")+l;h&&(e[f++]=new RegExp(c?"(?!\\b)("+h+")(\\b|_)":"("+h+")","g"),e[f]="");return e}function C(a,c){for(let b=0,d=c.length;b<d&&(a=a.replace(c[b],c[b+1]),a);b+=2);return a};function D(a){if(a=(""+a).toLowerCase())if(this.o&&(a=C(a,this.o)),this.A&&1<a.length&&(a=C(a,this.A)),A||""===A)if(a=a.split(A),this.filter){var c=this.filter;const b=a.length,d=[];for(let e=0,h=0;e<b;e++){const f=a[e];f&&!c[f]&&(d[h++]=f)}a=d}return a};const F={},G={};function H(a,c,b,d){const e=a.length;let h=[],f,g,l=0;d&&(d=[]);for(let n=e-1;0<=n;n--){const m=a[n],r=m.length,p=y();let q=!f;for(let k=0;k<r;k++){const u=m[k],M=u.length;if(M)for(let E=0,x,w;E<M;E++)if(w=u[E],f){if(f[w]){if(!n)if(b)b--;else if(h[l++]=w,l===c)return h;if(n||d)p[w]=1;q=!0}if(d&&(x=(g[w]||0)+1,g[w]=x,x<e)){const N=d[x-2]||(d[x-2]=[]);N[N.length]=w}}else p[w]=1}if(d)f||(g=p);else if(!q)return[];f=p}if(d)for(let n=d.length-1,m,r;0<=n;n--){m=d[n];r=m.length;for(let p=0,q;p<r;p++)if(q=

@@ -14,6 +14,36 @@
 
 <a href="#installation">Basic Start</a> &ensp;&bull;&ensp; <a href="#api">API Reference</a> &ensp;&bull;&ensp; <a href="#builds">Document Indexes</a> &ensp;&bull;&ensp; <a>Using Worker</a> &ensp;&bull;&ensp; <a href="CHANGELOG.md">Changelog</a>
 
+## Support this Project
+
+Hello my name is Thomas, also known as ts-thomas. This is a personal project which I fully made in my free time. It is hosted by the Github account from the company Nextapps where I work to give it more exposure.
+I have never received any financial support for this project from the company Nextapps as some of you might have guessed, since it is a free and open source project.
+I'm really happy that FlexSearch is getting so much positive feedback and also feature requests. Please feel free to support me by making a personal donation which helps me a lot to keep this project alive and also to providing all the contribution to keep FlexSearch on a professional top-end level.
+
+<a href="https://opencollective.com/flexsearch/donate" target="_blank" style="margin-right: 10px">
+    <img src="https://opencollective.com/webpack/donate/button@2x.png?color=blue" height="32" alt="Donate using Open Collective">
+</a>
+<a href="https://github.com/sponsors/ts-thomas/" target="_blank" style="margin-right: 10px">
+    <img src="https://camo.githubusercontent.com/b932f45963b659dfeb86b77ff29a9eaebe25a734d63a17a176aa82bf34845cf2/68747470733a2f2f696d672e736869656c64732e696f2f7374617469632f76313f6c6162656c3d53706f6e736f72266d6573736167653d254532253944254134266c6f676f3d47697448756226636f6c6f723d253233666538653836" height="32" alt="Donate using Github Sponsors">
+</a>
+<a href="https://liberapay.com/ts-thomas/donate" target="_blank" style="margin-right: 10px">
+    <img src="https://liberapay.com/assets/widgets/donate.svg" height="32" alt="Donate using Liberapay">
+</a>
+<a href="https://www.patreon.com/user?u=96245532" target="_blank" style="margin-right: 10px">
+    <img src="https://s3-us-west-1.amazonaws.com/widget-images/become-patron-widget-medium%402x.png" height="32" alt="Donate using Patreon">
+</a>
+<a href="https://salt.bountysource.com/teams/ts-thomas" target="_blank" style="margin-right: 10px">
+    <img src="https://d2bbtvgnhux6eq.cloudfront.net/assets/logos/alternate-7868987b01474c95f47678727f6657882f6565a36396eb4b637ea53cc5944ff8.svg" height="32" alt="Donate using Bountysource">
+</a>
+<a href="https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW" target="_blank">
+    <img src="https://www.paypalobjects.com/webstatic/de_DE/i/de-pp-logo-200px.png" height="32" alt="Donate using PayPal">
+</a>
+<!-- [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/ts-thomas/) -->
+<br><br>
+Thanks a lot,
+Thomas (ts-thomas)
+
+<!--
 ### FlexSearch v0.7.0
 
 The new version is finally available. FlexSearch v0.7.0 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
@@ -25,6 +55,7 @@ Read the documentation of new features and changes:<br>
 
 Read the documentation of new language encoding features:<br>
 <a href="https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md</a>
+-->
 
 <h1></h1>
 
@@ -3104,5 +3135,5 @@ Split indexes by categories improves performance significantly.
 
 ---
 
-Copyright 2018-2021 Nextapps GmbH<br>
+Copyright 2018-2023 Thomas Wilkerling, Hosted by Nextapps GmbH<br>
 Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">Apache 2.0 License</a><br>
