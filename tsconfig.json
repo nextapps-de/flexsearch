@@ -1,0 +1,7 @@
+{
+  "extends": "mauss/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*"]
+}
