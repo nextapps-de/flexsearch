@@ -84,8 +84,9 @@ Library Comparison "Gulliver's Travels":
 - <a href="#consumption">Memory Consumption</a>
 
 Plugins (extern projects):
-- https://github.com/angeloashmore/react-use-flexsearch
-- https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
+- React: https://github.com/angeloashmore/react-use-flexsearch
+- Vue: https://github.com/Noction/vue-use-flexsearch
+- Gatsby: https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
 
 ### Get Latest Stable Build (Recommended)
 
