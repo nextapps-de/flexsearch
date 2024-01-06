@@ -48,6 +48,8 @@ export function pipeline(str, normalize, split, _collapse){
 // TODO improve normalize + remove non-delimited chars like in "I'm" + split on whitespace+
 
 export const regex_whitespace = /[\p{Z}\p{S}\p{P}\p{C}]+/u;
+// https://github.com/nextapps-de/flexsearch/pull/414
+//export const regex_whitespace = /[\s\xA0\u2000-\u200B\u2028\u2029\u3000\ufeff!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/
 const regex_normalize = /[\u0300-\u036f]/g;
 
 export function normalize(str){
