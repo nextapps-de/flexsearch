@@ -1795,10 +1795,14 @@ You can skip the first loop when your document data has just one index as the ou
 
 ### Add/Update/Remove Documents to/from the Index
 
-Just pass the document array (or a single object) to the index:
+Add a document to the index:
 
 ```js
-index.add(docs);
+index.add({
+            id: 0,
+            title: "Foo",
+            content: "Bar"
+          });
 ```
 
 Update index with a single object or an array of objects:
