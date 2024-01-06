@@ -23,7 +23,6 @@
   "main": "dist/flexsearch.bundle.js",
   "browser": "dist/flexsearch.bundle.js",
   "module": "dist/module/index.js",
-  "types": "./index.d.ts",
   "preferGlobal": false,
   "repository": {
     "type": "git",
@@ -50,7 +49,6 @@
     "dist/**",
     "src/**",
     "task/**",
-    "index.d.ts",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
