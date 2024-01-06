@@ -188,12 +188,14 @@ export function exportDocument(callback, self, field, index_doc, index, on_done)
 
                 key = "tag";
                 data = this.tagindex;
+                field = null;
                 break;
 
             case 2:
 
                 key = "store";
                 data = this.store;
+                field = null;
                 break;
 
             // case 3:
