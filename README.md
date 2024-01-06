@@ -447,12 +447,12 @@ There are 3 types of indexes:
 
 The most of you probably need just one of them according to your scenario.
 
-### ES6 Modules (Browser):
+### ESM / ES6 Modules (Browser):
 
 ```js
-import Index from "./index.js";
-import Document from "./document.js";
-import WorkerIndex from "./worker/index.js";
+import Index from "flexsearch/dist/module";
+import Worker from "flexsearch/dist/module/worker";
+import Document from "flexsearch/dist/module/document";
 
 const index = new Index(options);
 const document = new Document(options);
