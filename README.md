@@ -1,5 +1,5 @@
 <!-- TODO External Stemmer Lib -->
-
+Let's discuss the upcoming version here: https://github.com/nextapps-de/flexsearch/discussions/415
 <h1 align="center">
     <p></p>
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg?v2" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
