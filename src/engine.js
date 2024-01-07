@@ -1,4 +1,6 @@
+// COMPILER BLOCK -->
 import { DEBUG, SUPPORT_ASYNC, SUPPORT_CACHE } from "./config";
+// <-- COMPILER BLOCK
 import { searchCache } from "./cache";
 
 /**

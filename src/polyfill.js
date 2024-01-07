@@ -1,5 +1,6 @@
+// COMPILER BLOCK -->
 import { POLYFILL, SUPPORT_ASYNC } from "./config.js";
-
+// <-- COMPILER BLOCK
 export let promise = Promise;
 
 if(POLYFILL){

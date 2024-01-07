@@ -1,11 +1,14 @@
 {
+  "public": true,
+  "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.7.34",
+  "version": "0.7.39",
   "description": "Next-Generation full text search library with zero dependencies.",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
   "license": "Apache-2.0",
+  "readme": "README.md",
   "keywords": [
     "fulltext search",
     "elastic search",
@@ -16,34 +19,43 @@
     "fuzzy match",
     "search engine"
   ],
-  "bugs": {
-    "url": "https://github.com/nextapps-de/flexsearch/issues",
-    "email": "info@nextapps.de"
-  },
-  "main": "dist/flexsearch.bundle.js",
-  "browser": "dist/flexsearch.bundle.js",
-  "module": "dist/module/index.js",
-  "preferGlobal": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/nextapps-de/flexsearch.git"
   },
+  "bugs": {
+    "url": "https://github.com/nextapps-de/flexsearch/issues",
+    "email": "info@nextapps.de"
+  },
+  "main": "dist/flexsearch.bundle.min.js",
+  "module": "dist/flexsearch.bundle.module.min.js",
+  "browser": {
+    "dist/flexsearch.bundle.min.js": "dist/flexsearch.bundle.min.js",
+    "dist/flexsearch.bundle.module.min.js": "dist/flexsearch.bundle.module.min.js"
+  },
   "scripts": {
-    "copy": "npm run clean && cpx \"src/**\" tmp/",
-    "clean": "npx shx rm -rf tmp && mkdir tmp",
     "build": "npm run copy && npm run build:bundle",
-    "build:bundle": "node task/build RELEASE=bundle && cpx \"src/worker/node.js\" dist/node/",
-    "build:debug": "node task/build RELEASE=debug COMPILATION_LEVEL=SIMPLE FORMATTING=PRETTY_PRINT",
-    "build:compact": "node task/build RELEASE=compact",
-    "build:light": "node task/build RELEASE=light",
+    "build:bundle": "node task/build RELEASE=bundle DEBUG=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false",
+    "build:bundle:debug": "node task/build RELEASE=bundle DEBUG=true SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false FORMATTING=PRETTY_PRINT",
+    "build:compact": "node task/build RELEASE=compact DEBUG=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=true POLYFILL=false",
+    "build:compact:debug": "node task/build RELEASE=compact DEBUG=true SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=true POLYFILL=false FORMATTING=PRETTY_PRINT",
+    "build:light": "node task/build RELEASE=light DEBUG=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false",
+    "build:light:debug": "node task/build RELEASE=light DEBUG=true SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false FORMATTING=PRETTY_PRINT",
     "build:custom": "node task/build RELEASE=custom",
-    "build:es5": "node task/build RELEASE=es5 LANGUAGE_OUT=ECMASCRIPT5_STRICT POLYFILL=true",
-    "build:pre": "node task/build RELEASE=pre COMPILATION_LEVEL=WHITESPACE FORMATTING=PRETTY_PRINT",
+    "build:es5": "node task/build RELEASE=es5 DEBUG=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true LANGUAGE_OUT=ECMASCRIPT5_STRICT POLYFILL=true",
+    "build:es5:debug": "node task/build RELEASE=es5 DEBUG=true SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true LANGUAGE_OUT=ECMASCRIPT5_STRICT POLYFILL=true FORMATTING=PRETTY_PRINT",
     "build:lang": "node task/build RELEASE=lang",
-    "build:module": "npx babel src -d dist/module && exit 0",
-    "build:all": "npm run build && npm run build:light && npm run build:compact && npm run build:es5 && npm run build:debug && npm run build:module",
-    "test": "cd test && npm install && npm run test",
-    "server": "node task/server"
+    "build:module": "node task/babel && exit 0",
+    "build:module:debug": "node task/babel DEBUG=true && exit 0",
+    "build:module:min": "node task/babel RELEASE=min && exit 0",
+    "build:module:bundle": "node task/build RELEASE=bundle.module DEBUG=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false",
+    "build:module:bundle:debug": "node task/build RELEASE=bundle.module DEBUG=true SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false FORMATTING=PRETTY_PRINT",
+    "build:module:compact": "node task/build RELEASE=compact.module DEBUG=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=true POLYFILL=false",
+    "build:module:compact:debug": "node task/build RELEASE=compact.module DEBUG=true SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CACHE=false SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=true POLYFILL=false FORMATTING=PRETTY_PRINT",
+    "build:module:light": "node task/build RELEASE=light.module DEBUG=false SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false",
+    "build:module:light:debug": "node task/build RELEASE=light.module DEBUG=true SUPPORT_WORKER=false SUPPORT_ENCODER=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=false SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false FORMATTING=PRETTY_PRINT",
+    "build:all": "npm version --no-git-tag-version patch && npm run build:bundle && npm run build:bundle:debug && npm run build:light && npm run build:light:debug && npm run build:compact && npm run build:compact:debug && npm run build:es5 && npm run build:es5:debug && npm run build:module && npm run build:module:debug && npm run build:module:min && npm run build:module:bundle && npm run build:module:bundle:debug && npm run build:module:light && npm run build:module:light:debug && npm run build:module:compact && npm run build:module:compact:debug",
+    "test": "cd test && npm install && npm run test"
   },
   "files": [
     "dist/**",
@@ -53,27 +65,24 @@
     "CHANGELOG.md",
     "LICENSE"
   ],
-  "readme": "README.md",
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-conditional-compile": "^0.0.5",
     "babel-plugin-minify-constant-folding": "^0.5.0",
-    "babel-plugin-minify-dead-code-elimination": "^0.5.1",
+    "babel-plugin-minify-dead-code-elimination": "^0.5.2",
     "babel-plugin-minify-flip-comparisons": "^0.4.3",
     "babel-plugin-minify-guarded-expressions": "^0.4.4",
     "babel-plugin-minify-infinity": "^0.4.3",
-    "babel-plugin-minify-mangle-names": "^0.5.0",
+    "babel-plugin-minify-mangle-names": "^0.5.1",
     "babel-plugin-minify-replace": "^0.5.0",
     "babel-plugin-minify-simplify": "^0.5.1",
     "babel-plugin-minify-type-constructors": "^0.4.3",
     "babel-plugin-transform-member-expression-literals": "^6.9.4",
-    "babel-plugin-transform-merge-sibling-variables": "^6.9.4",
+    "babel-plugin-transform-merge-sibling-variables": "^6.9.5",
     "babel-plugin-transform-minify-booleans": "^6.9.4",
     "babel-plugin-transform-property-literals": "^6.9.4",
     "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
-    "cpx": "^1.5.0",
-    "google-closure-compiler": "^20220905.0.0",
-    "shx": "^0.3.3",
-    "web-servo": "^0.5.1"
+    "google-closure-compiler": "^20230802.0.0"
   }
 }

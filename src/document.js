@@ -6,6 +6,7 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
+// COMPILER BLOCK -->
 import {
 
     SUPPORT_ASYNC,
@@ -16,6 +17,7 @@ import {
     SUPPORT_WORKER
 
 } from "./config.js";
+// <-- COMPILER BLOCK
 
 import Index from "./index.js";
 import { DocumentInterface } from "./type.js";
@@ -28,7 +30,7 @@ import WorkerIndex from "./worker/index.js";
 
 /**
  * @constructor
- * @implements DocumentInterface
+ * @implements {DocumentInterface}
  * @param {Object=} options
  * @return {Document}
  */

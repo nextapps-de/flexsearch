@@ -1,5 +1,5 @@
 const { parentPort } = require("worker_threads");
-const { Index } = require("../flexsearch.bundle.js");
+const { Index } = require("../flexsearch.bundle.min.js");
 
 let index;
 

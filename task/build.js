@@ -1,11 +1,11 @@
-const child_process = require('child_process');
-const fs = require('fs');
+const child_process = require("child_process");
+const fs = require("fs");
 
 console.log("Start build .....");
-console.log();
 
-fs.existsSync("log") || fs.mkdirSync("log");
-fs.existsSync("tmp") || fs.mkdirSync("tmp");
+fs.rmSync("tmp/", { recursive: true });
+fs.mkdirSync("tmp");
+//fs.existsSync("log") || fs.mkdirSync("log");
 fs.existsSync("dist") || fs.mkdirSync("dist");
 
 var supported_lang = [
@@ -61,46 +61,34 @@ var options = (function(argv){
             }
             else{
 
-                // if(index !== "RELEASE"){
-                //
-                //     flag_str += " --define='" + index + "=" + val + "'";
-                // }
-
+                if(val === "false") val = false;
                 arr[index] = val;
             }
-
-            if(count > 3) console.log(index + ': ' + val);
         }
     });
 
-    console.log('RELEASE: ' + (arr['RELEASE'] || 'custom'));
+    console.log('Release: ' + (arr['RELEASE'] || 'custom') + (arr['DEBUG'] ?  ":debug" : ""));
 
     return arr;
 
 })(process.argv);
 
-var release = options["RELEASE"];
+let release = options["RELEASE"].toLowerCase();
+const light_version = (release === "light") || (process.argv[2] === "--light");
+const es5_version = (release === "es5") || (process.argv[2] === "--es5");
+const module_version = (release === "module") || (process.argv[2] === "--module");
 
-// const light_version = (release === "light") || (process.argv[2] === "--light");
-// const es5_version = (release === "es5") || (process.argv[2] === "--es5");
-// const module_version = (release === "module") || (process.argv[2] === "--module");
-
-if(release){
-
-    let filename
-
-    if(!fs.existsSync(filename = "src/config/" + release + "/config.js")){
-
-        filename = "src/config/bundle/config.js";
-    }
-
-    fs.writeFileSync("tmp/config.js", fs.readFileSync(filename));
-}
-
-if(release === "es5"){
-
-    release = "ES5";
-}
+// if(release){
+//
+//     let filename
+//
+//     if(!fs.existsSync(filename = "src/config/" + release + "/config.js")){
+//
+//         filename = "src/config/bundle/config.js";
+//     }
+//
+//     fs.writeFileSync("tmp/config.js", fs.readFileSync(filename));
+// }
 
 let parameter = (function(opt){
 
@@ -115,7 +103,7 @@ let parameter = (function(opt){
 
         if(opt.hasOwnProperty(index)){
 
-            if((release !== "lang") || (index !== "entry_point")){
+            if((release !== "lang") /*|| (index !== "entry_point")*/){
 
                 parameter += ' --' + index + '=' + opt[index];
             }
@@ -127,26 +115,16 @@ let parameter = (function(opt){
 
     compilation_level: compilation_level || "ADVANCED_OPTIMIZATIONS", //"SIMPLE"
     use_types_for_optimization: true,
-    //new_type_inf: true,
-    //jscomp_warning: "newCheckTypes",
-    //jscomp_error: "strictCheckTypes",
-    //jscomp_error: "newCheckTypesExtraChecks",
     generate_exports: true,
     export_local_property_definitions: true,
-    language_in: "ECMASCRIPT_2017",
-    language_out: language_out || "ECMASCRIPT6_STRICT",
+    //language_in: "ECMASCRIPT_2017",
+    language_out: language_out || "ECMASCRIPT_2020",
     process_closure_primitives: true,
     summary_detail_level: 3,
     warning_level: "VERBOSE",
-    emit_use_strict: true, // release !== "lang",
-
-    output_manifest: "log/manifest.log",
-    //output_module_dependencies: "log/module_dependencies.log",
-    property_renaming_report: "log/property_renaming.log",
-    create_source_map: "log/source_map.log",
-    variable_renaming_report: "log/variable_renaming.log",
+    //emit_use_strict: true, // release !== "lang",,
     strict_mode_input: true,
-    assume_function_wrapper: true,
+    //assume_function_wrapper: true,
 
     //transform_amd_modules: true,
     process_common_js_modules: false,
@@ -155,24 +133,23 @@ let parameter = (function(opt){
     //js_module_root: "./",
     entry_point: "./tmp/webpack.js",
     //manage_closure_dependencies: true,
-    dependency_mode: "PRUNE", // PRUNE_LEGACY
+    dependency_mode: "PRUNE_LEGACY", // PRUNE_LEGACY
     rewrite_polyfills: use_polyfill || false,
 
-    // isolation_mode: "IIFE",
-    output_wrapper: /*release === "lang" ? "%output%" :*/ "\"(function(self){%output%}(this));\""
-
+    //isolation_mode: "IIFE",
+    //output_wrapper: /*release === "lang" ? "%output%" :*/ "\"(function(self){%output%}(this));\""
     //formatting: "PRETTY_PRINT"
 });
 
-// if(release === "pre" || release === "debug"){
-//
+// if(options["DEBUG"]){
 //     parameter += ' --formatting=PRETTY_PRINT';
 // }
 
-// if(release === "demo"){
-//
-//     options['RELEASE'] = "custom";
-// }
+if(release !== "bundle.module" && release !== "light.module"){
+    //parameter += ' --isolation_mode=IIFE';
+    parameter += ' --emit_use_strict=true';
+    parameter += ' --output_wrapper="\"(function(self){%output%}(this));\""';
+}
 
 const custom = (!release || (release === "custom"));
 
@@ -181,103 +158,151 @@ if(custom){
     release = "custom." + hashCode(parameter + flag_str).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 }
 
-if(release === "lang"){
+// if(release === "lang"){
+//
+//     const charsets = Object.keys(supported_charset);
+//
+//     (function next(x, y, z){
+//
+//         if(x < supported_lang.length){
+//
+//             (function(lang){
+//
+//                 fs.writeFileSync("tmp/" + lang + ".js", `
+//                     import lang from "../src/lang/${lang}.js";
+//                     self["FlexSearch"]["registerLanguage"]("${lang}", lang);
+//                 `);
+//
+//                 exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --entry_point='tmp/" + lang + ".js' --js='tmp/" + lang + ".js' --js='src/**.js'" + flag_str + " --js_output_file='dist/lang/" + lang + ".min.js' && exit 0", function(){
+//
+//                     console.log("Build Complete: " + lang + ".min.js");
+//                     next(++x, y, z);
+//                 });
+//
+//             })(supported_lang[x]);
+//         }
+//         else if(y < charsets.length){
+//
+//             const charset = charsets[y];
+//             const variants = supported_charset[charset];
+//
+//             if(z < variants.length){
+//
+//                 (function(charset, variant){
+//
+//                     fs.writeFileSync("tmp/" + charset + "_" + variant + ".js", `
+//                         import charset from "../src/lang/${charset}/${variant}.js";
+//                         /*try{if(module)self=module}catch(e){}*/
+//                         self["FlexSearch"]["registerCharset"]("${charset}:${variant}", charset);
+//                     `);
+//
+//                     exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --entry_point='tmp/" + charset + "_" + variant + ".js' --js='tmp/" + charset + "_" + variant + ".js' --js='src/**.js'" + flag_str + " --js_output_file='dist/lang/" + charset + "/" + variant + ".min.js' && exit 0", function(){
+//
+//                         console.log("Build Complete: " + charset + "/" + variant + ".min.js");
+//                         next(x, y, ++z);
+//                     });
+//
+//                 })(charset, variants[z]);
+//             }
+//             else{
+//
+//                 next(x, ++y, 0);
+//             }
+//         }
+//
+//     }(0, 0, 0));
+// }
+// else{
 
-    const charsets = Object.keys(supported_charset);
+    if(release === "lang") throw new Error("disabled");
 
-    (function next(x, y, z){
 
-        if(x < supported_lang.length){
+const files = [
 
-            (function(lang){
+    "async.js",
+    "cache.js",
+    "common.js",
+    "config.js",
+    "document.js",
+    "engine.js",
+    "global.js",
+    "index.js",
+    "intersect.js",
+    "lang.js",
+    "polyfill.js",
+    "preset.js",
+    "serialize.js",
+    "type.js",
+    "webpack.js"
+];
 
-                fs.writeFileSync("tmp/" + lang + ".js", `
-                    import lang from "../src/lang/${lang}.js";
-                    /*try{if(module)self=module}catch(e){}*/
-                    self["FlexSearch"]["registerLanguage"]("${lang}", lang);
-                `);
+files.forEach(function(file){
 
-                exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --entry_point='tmp/" + lang + ".js' --js='tmp/" + lang + ".js' --js='src/**.js'" + flag_str + " --js_output_file='dist/lang/" + lang + ".min.js' && exit 0", function(){
+    if(file === "config.js"){
 
-                    console.log("Build Complete: " + lang + ".min.js");
-                    next(++x, y, z);
-                });
+        let src = String(fs.readFileSync("src/" + file));
 
-            })(supported_lang[x]);
+        for(let opt in options){
+
+            src = src.replace(new RegExp('(export const ' + opt + ' = )(")?[^";]+(")?;'), "$1$2" + options[opt] + "$3;");
         }
-        else if(y < charsets.length){
 
-            const charset = charsets[y];
-            const variants = supported_charset[charset];
+        fs.writeFileSync("tmp/" + file, src);
+    }
+    else{
 
-            if(z < variants.length){
+        fs.copyFileSync("src/" + file, "tmp/" + file);
+    }
+});
 
-                (function(charset, variant){
+fs.cpSync("src/lang/", "tmp/lang/", { recursive: true });
+fs.cpSync("src/worker/", "tmp/worker/", { recursive: true });
 
-                    fs.writeFileSync("tmp/" + charset + "_" + variant + ".js", `
-                        import charset from "../src/lang/${charset}/${variant}.js";
-                        /*try{if(module)self=module}catch(e){}*/
-                        self["FlexSearch"]["registerCharset"]("${charset}:${variant}", charset);
-                    `);
+const filename = "dist/flexsearch." + (release || "custom") + (options["DEBUG"] ?  ".debug" : ".min") + ".js";
 
-                    exec("java -jar node_modules/google-closure-compiler-java/compiler.jar" + parameter + " --entry_point='tmp/" + charset + "_" + variant + ".js' --js='tmp/" + charset + "_" + variant + ".js' --js='src/**.js'" + flag_str + " --js_output_file='dist/lang/" + charset + "/" + variant + ".min.js' && exit 0", function(){
+const executable = process.platform === "win32" ?  "\"node_modules/google-closure-compiler-windows/compiler.exe\"" :
+                   process.platform === "darwin" ? "\"node_modules/google-closure-compiler-osx/compiler\"" :
+                                                   "java -jar node_modules/google-closure-compiler-java/compiler.jar";
 
-                        console.log("Build Complete: " + charset + "/" + variant + ".min.js");
-                        next(x, y, ++z);
-                    });
+exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
 
-                })(charset, variants[z]);
-            }
-            else{
+    let build = fs.readFileSync(filename);
+    let preserve = fs.readFileSync("src/index.js", "utf8");
 
-                next(x, ++y, 0);
-            }
-        }
+    const package_json = require("../package.json");
 
-    }(0, 0, 0));
-}
-else{
+    preserve = preserve.replace("* FlexSearch.js", "* FlexSearch.js v" + package_json.version + (release ? " (" + (release.charAt(0).toUpperCase() + release.substring(1)) + ")" : ""));
+    build = preserve.substring(0, preserve.indexOf('*/') + 2) + "\n" + build;
 
-    var filename = "dist/flexsearch." + (release || "custom") + ".js";
+    if(release === "bundle"){
 
-    exec((/^win/.test(process.platform) ?
+        build = build.replace("(function(self){'use strict';", "(function _factory(self){'use strict';");
+    }
 
-        "\"node_modules/google-closure-compiler-windows/compiler.exe\""
-    :
-        "java -jar node_modules/google-closure-compiler-java/compiler.jar"
+    if(release === "bundle.module" || release === "light.module"){
 
-    ) + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
+        build = build.replace(/window\.FlexSearch(\s+)?=(\s+)?/, "export default ");
+    }
 
-        let build = fs.readFileSync(filename);
-        let preserve = fs.readFileSync("src/index.js", "utf8");
+    // if(release === "pre"){
+    //
+    //     fs.existsSync("test/dist") || fs.mkdirSync("test/dist");
+    //     fs.writeFileSync("test/" + filename, build);
+    // }
+    // else{
 
-        const package_json = require("../package.json");
+        fs.writeFileSync(filename, build);
+    // }
 
-        preserve = preserve.replace("* FlexSearch.js", "* FlexSearch.js v" + package_json.version + (release ? " (" + (release.charAt(0).toUpperCase() + release.substring(1)) + ")" : ""));
-        build = preserve.substring(0, preserve.indexOf('*/') + 2) + "\n" + build;
+    fs.copyFileSync("src/worker/node.js", "dist/node/node.js");
 
-        if(release === "bundle"){
-
-            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
-        }
-
-        if(release === "pre"){
-
-            fs.existsSync("test/dist") || fs.mkdirSync("test/dist");
-            fs.writeFileSync("test/" + filename, build);
-        }
-        else{
-
-            fs.writeFileSync(filename, build);
-        }
-
-        console.log("Build Complete.");
-    });
-}
+    console.log("Build Complete.");
+});
+//}
 
 function hashCode(str) {
 
-    var hash = 0, i, chr;
+    let hash = 0, i, chr;
 
     if(str.length === 0){
 

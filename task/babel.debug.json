@@ -1,0 +1,41 @@
+{
+  "plugins": [
+    ["conditional-compile", {
+      "dropDebugger": true,
+      "define": {
+        "RELEASE": "module",
+        "DEBUG": true,
+        "POLYFILL": true,
+        "SUPPORT_WORKER": true,
+        "SUPPORT_ENCODER": true,
+        "SUPPORT_CACHE": true,
+        "SUPPORT_ASYNC": true,
+        "SUPPORT_STORE": true,
+        "SUPPORT_TAGS": true,
+        "SUPPORT_SUGGESTION": true,
+        "SUPPORT_SERIALIZE": true,
+        "SUPPORT_DOCUMENT": true
+      }
+    }],
+    "babel-plugin-minify-constant-folding",
+    "babel-plugin-minify-dead-code-elimination",
+    "babel-plugin-minify-flip-comparisons",
+    "babel-plugin-minify-guarded-expressions",
+    "babel-plugin-minify-infinity",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-type-constructors",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-simplify-comparison-operators",
+    "babel-plugin-transform-undefined-to-void"
+  ],
+  "ignore": [
+    "webpack.js",
+    "config.js"
+  ],
+  "minified": false,
+  "compact": false,
+  "comments": true
+}

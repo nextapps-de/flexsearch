@@ -1,4 +1,6 @@
+// COMPILER BLOCK -->
 import { DEBUG } from "./config.js";
+// <-- COMPILER BLOCK
 import { is_string } from "./common.js";
 
 /**

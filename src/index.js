@@ -6,6 +6,7 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
+// COMPILER BLOCK -->
 import {
 
     SUPPORT_ENCODER,
@@ -15,6 +16,7 @@ import {
     SUPPORT_SERIALIZE
 
 } from "./config.js";
+// <-- COMPILER BLOCK
 
 import { IndexInterface } from "./type.js";
 import { encode as default_encoder } from "./lang/latin/default.js";
