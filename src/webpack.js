@@ -1,4 +1,4 @@
-import { SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE, SUPPORT_WORKER, SUPPORT_ENCODER } from "./config.js";
+import { RELEASE, SUPPORT_ASYNC, SUPPORT_DOCUMENT, SUPPORT_CACHE, SUPPORT_SERIALIZE, SUPPORT_WORKER, SUPPORT_ENCODER } from "./config.js";
 import Document from "./document.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker/index.js";
@@ -63,9 +63,6 @@ if(SUPPORT_ENCODER){
     registerCharset("latin:extra", charset_extra);
 }
 
-const root = self;
-let tmp;
-
 const FlexSearch = {
 
     "Index": Index,
@@ -75,18 +72,29 @@ const FlexSearch = {
     "registerLanguage": registerLanguage
 };
 
-if((tmp = root["define"]) && tmp["amd"]){
+if(RELEASE !== "bundle.module" && RELEASE !== "light.module" && RELEASE !== "compact.module"){
 
-    tmp([], function(){
+    let tmp;
 
-        return FlexSearch;
-    });
-}
-else if(root["exports"]){
+    if((tmp = self["define"]) && tmp["amd"]){
 
-    root["exports"] = FlexSearch;
+        tmp([], function(){
+
+            return FlexSearch;
+        });
+    }
+    else if(self["exports"]){
+
+        self["exports"] = FlexSearch;
+    }
+    else{
+
+        /** @export */
+        self.FlexSearch = FlexSearch;
+    }
 }
 else{
 
-    root["FlexSearch"] = FlexSearch;
+    /** @export */
+    self.FlexSearch = FlexSearch;
 }

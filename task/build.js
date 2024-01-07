@@ -279,9 +279,9 @@ exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_
         build = build.replace("(function(self){'use strict';", "(function _factory(self){'use strict';");
     }
 
-    if(release === "bundle.module" || release === "light.module"){
+    if(release === "bundle.module" || release === "light.module" || release === "compact.module"){
 
-        build = build.replace(/window\.FlexSearch(\s+)?=(\s+)?/, "export default ");
+        build = build.replace(/self\.FlexSearch(\s+)?=(\s+)?/, "export default ");
     }
 
     // if(release === "pre"){

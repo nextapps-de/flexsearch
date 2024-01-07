@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.39 (Light)
+ * FlexSearch.js v0.7.40 (Light)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -37,7 +37,7 @@ function C(a, b) {
   }
   return a;
 }
-;function D(a) {
+;function E(a) {
   if (a = ("" + a).toLowerCase()) {
     if (this.o && (a = C(a, this.o)), this.A && 1 < a.length && (a = C(a, this.A)), A || "" === A) {
       const b = a.split(A);
@@ -65,10 +65,10 @@ function H(a, b, c, d) {
     const m = a[n], r = m.length, p = y();
     let q = !f;
     for (let k = 0; k < r; k++) {
-      const u = m[k], M = u.length;
-      if (M) {
-        for (let E = 0, x, w; E < M; E++) {
-          if (w = u[E], f) {
+      const u = m[k], L = u.length;
+      if (L) {
+        for (let D = 0, x, w; D < L; D++) {
+          if (w = u[D], f) {
             if (f[w]) {
               if (!n) {
                 if (c) {
@@ -85,8 +85,8 @@ function H(a, b, c, d) {
               q = !0;
             }
             if (d && (x = (g[w] || 0) + 1, g[w] = x, x < e)) {
-              const N = d[x - 2] || (d[x - 2] = []);
-              N[N.length] = w;
+              const M = d[x - 2] || (d[x - 2] = []);
+              M[M.length] = w;
             }
           } else {
             p[w] = 1;
@@ -135,7 +135,7 @@ function H(a, b, c, d) {
     a = {};
   }
   let e, h, f = a.context || {};
-  this.encode = a.encode || d && d.encode || D;
+  this.encode = a.encode || d && d.encode || E;
   this.register = b || y();
   this.s = e = a.resolution || 9;
   this.B = b = d && d.B || a.tokenize || "strict";
@@ -268,7 +268,7 @@ I.prototype.search = function(a, b, c) {
   g ? (n = a[0], c = 1) : 1 < e && a.sort(z);
   for (let m, r; c < e; c++) {
     r = a[c];
-    g ? (m = L(this, d, h, b, f, 2 === e, r, n), h && !1 === m && d.length || (n = r)) : m = L(this, d, h, b, f, 1 === e, r);
+    g ? (m = N(this, d, h, b, f, 2 === e, r, n), h && !1 === m && d.length || (n = r)) : m = N(this, d, h, b, f, 1 === e, r);
     if (m) {
       return m;
     }
@@ -289,7 +289,7 @@ I.prototype.search = function(a, b, c) {
   }
   return H(d, b, f, h);
 };
-function L(a, b, c, d, e, h, f, g) {
+function N(a, b, c, d, e, h, f, g) {
   let l = [], n = g ? a.l : a.map;
   a.g || (n = P(n, f, g, a.j));
   if (n) {
@@ -360,14 +360,13 @@ function Q(a, b, c, d, e) {
   }
   return h;
 }
-;const R = self;
-let S;
-const T = {Index:I, Document:null, Worker:null, registerCharset:function(a, b) {
+;const R = {Index:I, Document:null, Worker:null, registerCharset:function(a, b) {
   G[a] = b;
 }, registerLanguage:function(a, b) {
   F[a] = b;
 }};
-(S = R.define) && S.amd ? S([], function() {
-  return T;
-}) : R.exports ? R.exports = T : R.FlexSearch = T;
+let S;
+(S = self.define) && S.amd ? S([], function() {
+  return R;
+}) : self.exports ? self.exports = R : self.FlexSearch = R;
 }(this));

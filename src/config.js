@@ -1,3 +1,6 @@
+/** @define {string} */
+export const RELEASE = "custom";
+
 /** @define {boolean} */
 export const DEBUG = false;
 

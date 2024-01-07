@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.39 (Es5)
+ * FlexSearch.js v0.7.40 (Es5)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1162,9 +1162,9 @@ t.search = function(a, b, c, d) {
       if (l && w) {
         var z = [], B = 0;
         p && (z[0] = [u]);
-        var Z = 0, H = void 0;
-        for (H = void 0; Z < l.length; Z++) {
-          if (H = l[Z], w = (H = this.l[H]) && H.length) {
+        var Y = 0, H = void 0;
+        for (H = void 0; Y < l.length; Y++) {
+          if (H = l[Y], w = (H = this.l[H]) && H.length) {
             B++, z[z.length] = p ? [H] : H;
           }
         }
@@ -1178,10 +1178,10 @@ t.search = function(a, b, c, d) {
     }
   }
   if (q) {
-    var La = this;
-    return new Promise(function(Ma) {
-      Promise.all(q).then(function(Na) {
-        Ma(La.search(a, b, c, Na));
+    var Ka = this;
+    return new Promise(function(La) {
+      Promise.all(q).then(function(Ma) {
+        La(Ka.search(a, b, c, Ma));
       });
     });
   }
@@ -1291,12 +1291,12 @@ function Fa(a) {
   b.normalize && (b = b.normalize("NFD").replace(la, ""));
   return ja.call(this, b.toLowerCase(), !a.normalize && Ha);
 }
-;var Ja = {encode:Ia, G:!1, H:"strict"}, Ka = /[^a-z0-9]+/, Oa = {b:"p", v:"f", w:"f", z:"s", x:"s", "\u00df":"s", d:"t", n:"m", c:"k", g:"k", j:"k", q:"k", i:"e", y:"e", u:"o"};
+;var Ja = {encode:Ia, G:!1, H:"strict"}, Na = /[^a-z0-9]+/, Oa = {b:"p", v:"f", w:"f", z:"s", x:"s", "\u00df":"s", d:"t", n:"m", c:"k", g:"k", j:"k", q:"k", i:"e", y:"e", u:"o"};
 function Ia(a) {
   a = Fa.call(this, a).join(" ");
   var b = [];
   if (a) {
-    for (var c = a.split(Ka), d = c.length, e = 0, g, f = 0; e < d; e++) {
+    for (var c = a.split(Na), d = c.length, e = 0, g, f = 0; e < d; e++) {
       if ((a = c[e]) && (!this.filter || !this.filter[a])) {
         g = a[0];
         for (var h = Oa[g] || g, k = h, l = 1; l < a.length; l++) {
@@ -1323,12 +1323,12 @@ K["latin:simple"] = Ga;
 K["latin:balance"] = Ja;
 K["latin:advanced"] = Qa;
 K["latin:extra"] = Ta;
-var Y = self, Va, Wa = {Index:N, Document:T, Worker:R, registerCharset:function(a, b) {
+var Z = {Index:N, Document:T, Worker:R, registerCharset:function(a, b) {
   K[a] = b;
 }, registerLanguage:function(a, b) {
   qa[a] = b;
-}};
-(Va = Y.define) && Va.amd ? Va([], function() {
-  return Wa;
-}) : Y.exports ? Y.exports = Wa : Y.FlexSearch = Wa;
+}}, Va;
+(Va = self.define) && Va.amd ? Va([], function() {
+  return Z;
+}) : self.exports ? self.exports = Z : self.FlexSearch = Z;
 }(this));
