@@ -61,6 +61,7 @@
     "dist/**",
     "src/**",
     "task/**",
+    "index.d.ts",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
