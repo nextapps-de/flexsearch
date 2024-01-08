@@ -1,11 +1,11 @@
 /**!
- * FlexSearch.js v0.7.40 (Bundle)
+ * FlexSearch.js v0.7.41 (Bundle)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
-(function _factory(self){'use strict';
+(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;
 var t;
 function u(a) {
   return "undefined" !== typeof a ? a : !0;
@@ -602,7 +602,7 @@ function Q(a) {
 function wa(a, b, c) {
   let d;
   try {
-    d = b ? eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")') : a ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + ua.toString()], {type:"text/javascript"}))) : new Worker(C(c) ? c : "worker/worker.js", {type:"module"});
+    d = b ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : a ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + ua.toString()], {type:"text/javascript"}))) : new Worker(C(c) ? c : "worker/worker.js", {type:"module"});
   } catch (e) {
   }
   return d;

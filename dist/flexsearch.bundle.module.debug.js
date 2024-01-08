@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.40 (Bundle.module)
+ * FlexSearch.js v0.7.41 (Bundle.module)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -601,7 +601,7 @@ function T(a) {
 function ua(a, b, c) {
   let d;
   try {
-    d = b ? eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")') : a ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + sa.toString()], {type:"text/javascript"}))) : new Worker(C(c) ? c : "worker/worker.js", {type:"module"});
+    d = b ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : a ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + sa.toString()], {type:"text/javascript"}))) : new Worker(C(c) ? c : "worker/worker.js", {type:"module"});
   } catch (e) {
   }
   return d;

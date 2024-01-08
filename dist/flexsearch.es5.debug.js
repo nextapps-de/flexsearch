@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.40 (Es5)
+ * FlexSearch.js v0.7.41 (Es5)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -973,7 +973,7 @@ function S(a) {
 }
 function Ca(a, b, c) {
   try {
-    var d = b ? eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")') : a ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + Aa.toString()], {type:"text/javascript"}))) : new Worker(E(c) ? c : "worker/worker.js", {type:"module"});
+    var d = b ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : a ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + Aa.toString()], {type:"text/javascript"}))) : new Worker(E(c) ? c : "worker/worker.js", {type:"module"});
   } catch (e) {
   }
   return d;

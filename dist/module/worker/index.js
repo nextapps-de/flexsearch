@@ -129,7 +129,7 @@ function create(factory, is_node_js, worker_path) {
 
     try {
 
-        worker = is_node_js ? eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")') : factory ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" });
+        worker = is_node_js ? eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")') : factory ? new Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" });
     } catch (e) {}
 
     return worker;

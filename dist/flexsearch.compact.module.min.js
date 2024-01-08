@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.7.40 (Compact.module)
+ * FlexSearch.js v0.7.41 (Compact.module)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH

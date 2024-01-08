@@ -276,8 +276,10 @@ exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_
 
     if(release === "bundle"){
 
-        build = build.replace("(function(self){'use strict';", "(function _factory(self){'use strict';");
+        build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
     }
+
+    build = build.replace(/eval\('(.*)'\)/, "$1");
 
     if(release === "bundle.module" || release === "light.module" || release === "compact.module"){
 

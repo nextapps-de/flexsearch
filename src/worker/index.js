@@ -135,7 +135,7 @@ function create(factory, is_node_js, worker_path){
 
         worker = is_node_js ?
 
-            eval('new (require("worker_threads")["Worker"])("../dist/node/node.js")')
+            eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
         :(
             factory ?
 
