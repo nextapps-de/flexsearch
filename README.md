@@ -44,31 +44,12 @@ I'm really happy that FlexSearch is getting so much positive feedback and also f
 Thanks a lot,
 Thomas (ts-thomas)
 
-<!--
-### FlexSearch v0.7.0
-
-The new version is finally available. FlexSearch v0.7.0 is a modern re-implementation and was newly developed from the ground up. The result is an improvement in every single aspect and covers tons of enhancements and improvements which was collected over the last 3 years.
-
-This new version has a good compatibility with the old generation, but it might require some migrations steps in your code.
-
-Read the documentation of new features and changes:<br>
-<a href="https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0.md">https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0.md</a>
-
-Read the documentation of new language encoding features:<br>
-<a href="https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md">https://github.com/nextapps-de/flexsearch/blob/master/doc/0.7.0-lang.md</a>
--->
-
 <h1></h1>
 
 When it comes to raw search speed <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
 
 Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 1,000,000 times faster compared to other libraries.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
-
-<!--
-FlexSearch Server is available here: 
-<a target="_blank" href="https://github.com/nextapps-de/flexsearch-server">https://github.com/nextapps-de/flexsearch-server</a>.
--->
 
 Supported Platforms:
 - Browser
@@ -89,7 +70,7 @@ Plugins (extern projects):
 - Vue: https://github.com/Noction/vue-use-flexsearch
 - Gatsby: https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
 
-### Get Latest Stable Build (Recommended)
+### Get Latest
 
 <table>
     <tr><td colspan="3"></td></tr>
@@ -136,10 +117,6 @@ Plugins (extern projects):
 ```cmd
 npm install flexsearch
 ```
-
-#### Get Latest Nightly (Do not use for production!)
-
-Just exchange the version number from the URLs above with "master", e.g.: "/flexsearch/__0.7.31__/dist/" into "/flexsearch/__master__/dist".
 
 ### Compare Web-Bundles
 
@@ -447,45 +424,69 @@ There are 3 types of indexes:
 
 The most of you probably need just one of them according to your scenario.
 
-### ESM / ES6 Modules (Browser):
+### Browser
 
-```js
-import Index from "flexsearch/dist/module";
-import Worker from "flexsearch/dist/module/worker";
-import Document from "flexsearch/dist/module/document";
-
-const index = new Index(options);
-const document = new Document(options);
-const worker = new WorkerIndex(options);
-```
-
-### Bundle (Browser)
+#### Legacy ES5 Script Tag (Bundled)
 
 ```html
-<html>
-<head>
-    <script src="js/flexsearch.bundle.js"></script>
-</head>
-...
+<script src="node_modules/flexsearch/dist/flexsearch.bundle.min.js"></script>
+<script>
+
+    // FlexSearch is available on window.FlexSearch
+    // Access FlexSearch static methods via bundled export (static class methods of FlexSearch)
+
+    const index = FlexSearch.Index(options);
+    const document = FlexSearch.Document(options);
+    const worker = FlexSearch.Worker(options);
+
+</script>
+```
+
+### ESM/ES6 Modules:
+
+```html
+<script type="module">
+
+    // FlexSearch is NOT available on window.FlexSearch
+    // Access FlexSearch static methods by importing them explicitly
+
+    import Index from "./node_modules/flexsearch/dist/module/index";
+    import Document from "./node_modules/flexsearch/dist/module/document";
+    import Worker from "./node_modules/flexsearch/dist/module/worker";
+
+    const index = new Index(options);
+    const document = new Document(options);
+    const worker = new Worker(options);
+
+</script>
+```
+
+#### ESM/ES6 Bundled Module:
+
+```html
+<script type="module">
+
+    // FlexSearch is NOT available on window.FlexSearch
+    // Access FlexSearch static methods via bundled export (static class methods of FlexSearch)
+
+    import FlexSearch from "./node_modules/flexsearch/dist/flexsearch.bundle.module.min.js";
+
+    const index = FlexSearch.Index(options);
+    const document = FlexSearch.Document(options);
+    const worker = FlexSearch.Worker(options);
+
+</script>
 ```
 
 Or via CDN:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.31/dist/flexsearch.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.41/dist/flexsearch.bundle.min.js"></script>
 ```
 
-AMD:
+AMD / CommonJS:
 
 ```javascript
-var FlexSearch = require("./flexsearch.js");
-```
-
-Load one of the builds from the folder <a href="https://github.com/nextapps-de/flexsearch/tree/0.7.31/dist">dist</a> within your html as a script and use as follows:
-
-```js
-var index = new FlexSearch.Index(options);
-var document = new FlexSearch.Document(options);
-var worker = new FlexSearch.Worker(options);
+var FlexSearch = require("./node_modules/flexsearch/dist/flexsearch.bundle.min.js");
 ```
 
 ### Node.js
@@ -502,6 +503,16 @@ const { Index, Document, Worker } = require("flexsearch");
 const index = new Index(options);
 const document = new Document(options);
 const worker = new Worker(options);
+```
+
+Or:
+
+```js
+const FlexSearch = require("flexsearch");
+
+const index = new FlexSearch.Index(options);
+const document = new FlexSearch.Document(options);
+const worker = new FlexSearch.Worker(options);
 ```
 
 ## Basic Usage and Variants
