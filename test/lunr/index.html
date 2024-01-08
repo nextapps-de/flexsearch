@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark</title>
+</head>
+<body>
+<h2>Benchmark: lunr-2.3.5</h2><hr/>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="https://cdn.jsdelivr.net/npm/lunr@2.3.5/lunr.min.js"></script>
+<script type="module">
+
+    import { suite } from "../../bench.js";
+
+    let lib;
+
+    suite["lunr"] = {
+
+        init: function(){},
+        add: function(data){
+
+            lib = lunr(function(){
+
+                this.ref("id");
+                this.field("content");
+
+                for(let i = 0; i < data.length; i++){
+
+                    this.add({
+
+                        id: i,
+                        content: data[i]
+                    });
+                }
+            });
+        },
+        query: function(query){
+
+            return lib.query(function(q) {
+
+                q.term(query, { wildcard: lunr.Query.wildcard.LEADING })
+            });
+        }
+    };
+
+</script>
+</body>
+</html>

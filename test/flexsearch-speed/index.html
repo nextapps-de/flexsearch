@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark</title>
+</head>
+<body>
+<h2>Benchmark: flexsearch-ctx-0.7.0</h2><hr/>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="../../dist/flexsearch.min.js"></script>
+<script type="module">
+
+    import { suite } from "../../bench.js";
+
+    let lib;
+
+    suite["flexsearch-speed"] = {
+
+        init: function(){
+
+            lib = new FlexSearch("speed");
+        },
+        add: function(data){
+
+            for(let i = 0, len = data.length; i < len; i++){
+                lib.add(i, data[i]);
+            }
+        },
+        query: function(query){
+
+            return lib.search(query);
+        }
+    };
+
+</script>
+</body>
+</html>

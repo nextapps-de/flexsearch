@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark</title>
+</head>
+<body>
+<h2>Benchmark: js-search-1.4.2</h2><hr/>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="https://cdn.jsdelivr.net/npm/js-search@1.4.2/dist/umd/js-search.min.js"></script>
+<script type="module">
+
+    import { suite } from "../../bench.js";
+
+    let lib;
+
+    suite["js-search"] = {
+
+        init: function(){
+
+            lib = new JsSearch.Search("id");
+            lib.addIndex("content");
+        },
+        add: function(data){
+
+            const payload = [];
+
+            for(let i = 0; i < data.length; i++){
+
+                payload[i] = {id: i, content: data[i]};
+            }
+
+            lib.addDocuments(payload);
+        },
+        query: function(query){
+
+            return lib.search(query);
+        }
+    };
+
+</script>
+</body>
+</html>

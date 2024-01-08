@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark</title>
+</head>
+<body>
+<h2>Benchmark: fuzzysearch</h2><hr/>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="https://rawcdn.githack.com/jeancroy/FuzzySearch/cbcdd8307d70a209b1cbf17a535158d5c21840d7/dist/FuzzySearch.min.js"></script>
+<script type="module">
+
+    import { suite } from "../../bench.js";
+
+    let lib;
+
+    suite["fuzzysearch"] = {
+
+        init: function(){},
+        add: function(data){
+
+            lib = new FuzzySearch({source: data});
+        },
+        query: function(query){
+
+            return lib.search(query);
+        }
+    };
+
+</script>
+</body>
+</html>
