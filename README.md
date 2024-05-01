@@ -30,7 +30,7 @@ You can help me by making a personal donation to keep this project alive and als
 
 <table>
     <tr style="border:0">
-        <td align="center" style="border:0; padding: 15px">
+        <td align="center" style="padding: 15px">
             <a href="https://antithesis.com" target="_blank">
                 <img src="doc/antithesis_logo.svg" width="180" alt="Donate using Open Collective"><br>
                 Antithesis Operations LLC
