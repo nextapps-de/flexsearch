@@ -26,14 +26,14 @@ You can help me by making a personal donation to keep this project alive and als
 <a href="https://salt.bountysource.com/teams/ts-thomas" target="_blank" style="margin-right: 10px"><img src="doc/bountysource.svg" height="32" alt="Donate using Bountysource"></a>
 <a href="https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW" target="_blank"><img src="doc/paypal.png" height="32" alt="Donate using PayPal"></a>
 
-#### FlexSearch Sponsors
+### Sponsors
 
-<table style="border: 0">
+<table>
     <tr style="border:0">
-        <td align="center" border="0">
+        <td align="center" style="border:0; padding: 15px">
             <a href="https://antithesis.com" target="_blank">
                 <img src="doc/antithesis_logo.svg" width="180" alt="Donate using Open Collective"><br>
-                <b>Antithesis Operations LLC</b>
+                Antithesis Operations LLC
             </a>
         </td>
     </tr>
