@@ -28,17 +28,13 @@ You can help me by making a personal donation to keep this project alive and als
 
 ### Sponsors
 
-<table>
-    <tr style="border:0">
-        <td align="center">
-            <a href="https://antithesis.com" target="_blank">
-                <br>
-                <img src="doc/antithesis_logo.svg" width="180" alt="Donate using Open Collective"><br>
-                Antithesis Operations LLC<br><br>
-            </a>
-        </td>
-    </tr>
-</table>
+
+<a href="https://antithesis.com" target="_blank" style="display: inline-block">
+    <center>
+        <img src="doc/antithesis_logo.svg" width="180" alt="Donate using Open Collective"><br>
+        Antithesis Operations LLC
+    </center>
+</a>
 
 <h1></h1>
 
