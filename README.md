@@ -26,6 +26,19 @@ You can help me by making a personal donation to keep this project alive and als
 <a href="https://salt.bountysource.com/teams/ts-thomas" target="_blank" style="margin-right: 10px"><img src="doc/bountysource.svg" height="32" alt="Donate using Bountysource"></a>
 <a href="https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW" target="_blank"><img src="doc/paypal.png" height="32" alt="Donate using PayPal"></a>
 
+#### FlexSearch Sponsors
+
+<table style="border: 0">
+    <tr>
+        <td align="center">
+            <a href="https://antithesis.com" target="_blank">
+                <img src="doc/antithesis_logo.svg" width="180" alt="Donate using Open Collective"><br>
+                <b>Antithesis Operations LLC</b>
+            </a>
+        </td>
+    </tr>
+</table>
+
 <h1></h1>
 
 When it comes to raw search speed <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
