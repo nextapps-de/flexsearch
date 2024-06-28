@@ -61,6 +61,7 @@ Plugins (extern projects):
 - React: https://github.com/angeloashmore/react-use-flexsearch
 - Vue: https://github.com/Noction/vue-use-flexsearch
 - Gatsby: https://www.gatsbyjs.org/packages/gatsby-plugin-flexsearch/
+- Nikola: https://plugins.getnikola.com/v8/flexsearch_plugin/
 
 ### Get Latest
 
