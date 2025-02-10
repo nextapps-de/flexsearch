@@ -136,16 +136,17 @@ Or use predefined language and add custom options:
 ```js
 import EnglishBookPreset from "./lang/en.js";
 const encoder = new Encoder({
-    preset: EnglishBookPreset
+    preset: EnglishBookPreset,
+    filter: false
 });
 ```
 
-Apply extensions to the encoder instance:
+Assign extensions to the encoder instance:
 
 ```js
 import LatinEncoder from "./lang/latin/simple.js";
 import EnglishBookPreset from "./lang/en.js";
-// assign definitions to the encoder instance
+// stack definitions to the encoder instance
 LatinEncoder.assign(EnglishBookPreset);
 // assign further presets ...
 ```
@@ -153,7 +154,7 @@ LatinEncoder.assign(EnglishBookPreset);
 Add transformations to an existing index:
 
 ```js
-import LatinEncoder from "./lang/latin/simple.js";
+import LatinEncoder from "./lang/latin/default.js";
 LatinEncoder.addReplacer(/[´`’ʼ]/g, "'");
 LatinEncoder.addFilter("and");
 LatinEncoder.addMatcher("xvi", "16");
@@ -195,17 +196,17 @@ You can apply different resolver to the raw result.
 
 The default resolver:
 ```js
-import reduce from "./resolve/reduce.js";
+import collapse from "./resolve/collapse.js";
 const raw = index.search("a short query", { 
     resolve: false
 });
-const result = reduce(raw);
+const result = collapse(raw);
 ```
 
 Chainable boolean operations:
 ```js
 import and from "./resolve/and.js";
-import reduce from "./resolve/reduce.js";
+import collapse from "./resolve/collapse.js";
 const raw1 = index.search("a short query", { 
     resolve: false
 });
@@ -216,7 +217,7 @@ const raw2 = index.search("another query", {
 // apply boolean operations
 const raw3 = and(raw1, raw2, /* ... */);
 // resolve result
-const result = reduce(raw3);
+const result = collapse(raw3);
 ```
 
 Run at parallel (e.g. when using WorkerIndex):
@@ -224,9 +225,9 @@ Run at parallel (e.g. when using WorkerIndex):
 ```js
 import and from "./resolve/and.js";
 import or from "./resolve/or.js";
-import reduce from "./resolve/reduce.js";
+import collapse from "./resolve/collapse.js";
 // apply boolean operations (execute all)
-const result = reduce(
+const result = collapse(
     or( // union
         and( // intersection
             index.search("a short query", {
@@ -250,9 +251,9 @@ Lazy injection (recommended for most usage):
 ```js
 import and from "./resolve/and.js"; 
 import or from "./resolve/or.js"; 
-import reduce from "./resolve/reduce.js";
+import collapse from "./resolve/collapse.js";
 // define boolean operations (execute continually)
-const result = reduce(
+const result = collapse(
     or( // union
         and({ // intersection
             index: index,
@@ -272,9 +273,10 @@ const result = reduce(
 ```
 
 Custom result decoration:
+
 ```js
 import highlight from "./resolve/highlight.js";
-import reduce from "./resolve/reduce.js";
+import collapse from "./resolve/collapse.js";
 const raw = index.search("a short query", { 
     resolve: false
 });
@@ -286,7 +288,7 @@ const html = highlight(raw, {
     highlight: "<b>$1</b>"
 });
 // resolve result for further processing
-const result = reduce(raw);
+const result = collapse(raw);
 ```
 
 Alternatively:
@@ -310,6 +312,20 @@ const html = highlight(raw, {
         node.textContent = content;
         item.append(node);
     }
+});
+```
+
+#### Custom Resolver
+
+```js
+function resolver(raw){
+    // console.log(raw)
+    // generate output ...
+    return raw;
+}
+
+const result = index.search("a short query", { 
+    resolve: resolver
 });
 ```
 
