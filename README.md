@@ -203,7 +203,7 @@ const raw = index.search("a short query", {
 const result = collapse(raw);
 ```
 
-Chainable boolean operations:
+### Chainable Boolean Operations
 ```js
 import and from "./resolve/and.js";
 import collapse from "./resolve/collapse.js";
@@ -272,7 +272,7 @@ const result = collapse(
 );
 ```
 
-Custom result decoration:
+### Custom Result Decoration
 
 ```js
 import highlight from "./resolve/highlight.js";
@@ -315,7 +315,7 @@ const html = highlight(raw, {
 });
 ```
 
-#### Custom Resolver
+### Custom Resolver
 
 ```js
 function resolver(raw){
