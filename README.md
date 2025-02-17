@@ -1,5 +1,22 @@
 # FlexSearch v0.8 (Preview)
 
+## What's New
+
+- Persistent indexes support for: IndexedDB (Browser), SQLite, Postgres, MongoDB, Clickhouse, Redis, Redis-JSON
+- Enhanced language customization via the new Encoder class
+- Searching single terms is 7 times faster
+- Enhanced support for larger indexes or larger result sets
+- Improved offset and limit processing achieve up to 100 times faster traversal performance through large datasets
+- Support for larger In-Memory index with unlimited key size (the defaults maximum keystore limit is: 2^27)
+- Greatly enhanced performance of the whole text encoding pipeline
+- Improved indexing of numeric content (Triplets)
+- Immediate result sets and resolver
+- Basic Resolver: Collapse, And, Or, Output formatter
+- Improved charset collection
+- New charset preset "extreme" which greatly reduces memory consumption
+- Performance gain when polling tasks to the index by using "Event-Loop-Caches"
+- Memory consumption was reduced
+
 ## Persistent Indexes
 
 FlexSearch provides a new Storage Adapter where indexes are delegated through persistent storages.
@@ -9,8 +26,10 @@ Supported:
 - IndexedDB (Browser)
 - SQLite
 - Postgres
+- MongoDB
 - Clickhouse
 - Redis
+- Redis-JSON
 
 The `.export()` and `.import()` methods are still available for non-persistent In-Memory indexes.
 
@@ -18,36 +37,36 @@ The `.export()` and `.import()` methods are still available for non-persistent I
 
 ```js
 import FlexSearchIndex from "./index.js";
-import Storage from "./storage/idxdb.js";
+import Database from "./db/indexeddb/index.js";
+// create an index
 const index = new FlexSearchIndex();
-// create instance with optional store prefix
-const store = new Storage("my-store");
+// create db instance with optional prefix
+const db = new Database("my-store");
 // mount and await before transfering data
-await store.mount(flexsearch)
+await flexsearch.mount(db);
 
 // update the index as usual
 index.add(1, "content...");
-index.append(2, "content...");
-index.update(3, "content...");
-index.remove(4);
+index.update(2, "content...");
+index.remove(3);
 // ....
 
 // transfer all changes to the storage
-await store.commit();
+await flexsearch.commit();
 ```
 
 Alternatively:
 
 ```js
 const index = new FlexSearchIndex({
-    store: new Storage("my-store")
+    db: new Storage("my-store")
 });
 // apply changes to the index
 // ...
-// await for the storage response before access the first time
-await index.store;
-// transfer all changes to the storage
-await index.store.commit();
+// await for the db response before access the first time
+await index.db;
+// transfer all changes to the db
+await index.commit();
 ```
 
 Query against a persistent storage just as usual:
@@ -55,6 +74,138 @@ Query against a persistent storage just as usual:
 ```js
 const result = await index.search("gulliver");
 ```
+
+Auto-Commit:
+
+```js
+const index = new FlexSearchIndex({
+    db: new Storage("my-store"),
+    commit: "auto"
+});
+// update the index
+index.add(1, "content...");
+index.update(2, "content...");
+index.remove(3);
+// updates will be commited asynchronously in background 
+// (somewhere later in the event loop)
+```
+
+### Benchmark
+
+The performance really depends on text size/length, so the benchmark was measured in "terms per second". To make the best pick you should evaluate scaling capabilities and also if replace/remove is needed.
+
+<table>
+    <tr>
+        <th align="left">Store</th>
+        <th>Add Index</th>
+        <th>Search Index</th>
+        <th>Replace Index</th>
+        <th>Remove Index</th>
+        <th>Size</th>
+        <th>Scaling</th>
+    </tr>
+    <tr>
+        <td></td>
+        <td align="right"><sub>terms per sec</sub></td>
+        <td align="right"><sub>terms per sec</sub></td>
+        <td align="right"><sub>terms per sec</sub></td>
+        <td align="right"><sub>terms per sec</sub></td>
+        <td align="right"><sub>Mb</sub></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td align="left">Memory</td>
+        <td align="right">8,418,364</td>
+        <td align="right">8,229,778</td>
+        <td align="right">3,666,862</td>
+        <td align="right">10,636,088</td>
+        <td align="right">3.1</td>
+        <td align="right">No</td>
+    </tr>
+    <!--
+    <tr>
+        <td align="left">v0.7.x</td>
+        <td align="right">10,119,783</td>
+        <td align="right">7,032,473</td>
+        <td align="right">5,723,363</td>
+        <td align="right">17,363,447</td>
+        <td align="right">3.1</td>
+        <td align="right">No</td>
+    </tr>
+    -->
+    <tr>
+        <td align="left">Redis</td>
+        <td align="right">1,138,725</td>
+        <td align="right">65,849</td>
+        <td align="right">119,315</td>
+        <td align="right">1,458,896</td>
+        <td align="right"></td>
+        <td align="right">Yes (RAM)</td>
+    </tr>
+    <tr>
+        <td align="left">Redis-ZADD</td>
+        <td align="right">857,507</td>
+        <td align="right">109,800</td>
+        <td align="right">117,112</td>
+        <td align="right">1,303,697</td>
+        <td align="right"></td>
+        <td align="right">Yes (RAM)</td>
+    </tr>
+    <tr>
+        <td align="left">Redis-JSON</td>
+        <td align="right">22,672</td>
+        <td align="right">297,762</td>
+        <td align="right">18,548</td>
+        <td align="right">393,354</td>
+        <td align="right"></td>
+        <td align="right">Yes (RAM)</td>
+    </tr>
+    <tr>
+        <td align="left">Clickhouse</td>
+        <td align="right">1,220,158</td>
+        <td align="right">4,684</td>
+        <td align="right"></td>
+        <td align="right"></td>
+        <td align="right"></td>
+        <td align="right">Yes</td>
+    </tr>
+    <tr>
+        <td align="left">Sqlite</td>
+        <td align="right">271,955</td>
+        <td align="right">38,113</td>
+        <td align="right">179,982</td>
+        <td align="right">393,302</td>
+        <td align="right"></td>
+        <td align="right">No</td>
+    </tr>
+    <tr>
+        <td align="left">Postgres</td>
+        <td align="right">361,230</td>
+        <td align="right">11,914</td>
+        <td align="right"></td>
+        <td align="right">43,219</td>
+        <td align="right"></td>
+        <td align="right">Yes</td>
+    </tr>
+    <tr>
+        <td align="left">MongoDB</td>
+        <td align="right">543,840</td>
+        <td align="right">12,115</td>
+        <td align="right">528,177</td>
+        <td align="right">234,526</td>
+        <td align="right"></td>
+        <td align="right">Yes</td>
+    </tr>
+    <tr>
+        <td align="left">IndexedDB</td>
+        <td align="right">22,109</td>
+        <td align="right">19,602</td>
+        <td align="right"></td>
+        <td align="right"></td>
+        <td align="right"></td>
+        <td align="right">No</td>
+    </tr>
+</table>
 
 ## Encoder
 
@@ -120,7 +271,7 @@ const encoder = new Encoder({
         "and",
     ]),
     matcher: new Map([
-        ["XV", "15"]
+        ["xvi", "16"]
     ]),
     stemmer: new Map([
         ["ly", ""]
@@ -151,7 +302,7 @@ LatinEncoder.assign(EnglishBookPreset);
 // assign further presets ...
 ```
 
-Add transformations to an existing index:
+Add custom transformations to an existing index:
 
 ```js
 import LatinEncoder from "./lang/latin/default.js";
@@ -179,6 +330,7 @@ Example of intermediate raw result set:
     field: "...",
     query: "a short query",
     matches: ["a", "query"],
+    data: { /* the data item */ },
     result: [
         [ /* ids */ ],
         [ /* ids */ ],
@@ -281,12 +433,13 @@ const raw = index.search("a short query", {
     resolve: false
 });
 // resolve result for display
-const html = highlight(raw, {
+const template = highlight(raw, {
     wrapper: "<ul>$1</ul>",
     item: "<li>$1</li>",
     text: "$1",
     highlight: "<b>$1</b>"
 });
+document.body.appendChild(template);
 // resolve result for further processing
 const result = collapse(raw);
 ```
@@ -294,41 +447,59 @@ const result = collapse(raw);
 Alternatively:
 
 ```js
-const html = highlight(raw, {
-    wrapper: function(content){
+const template = highlight(raw, {
+    wrapper: function(){
         const wrapper = document.createElement("ul");
         return wrapper;
     },
-    item: function(content, wrapper){
+    item: function(wrapper){
         const item = document.createElement("li");
         wrapper.append(item);
     },
-    text: function(content, item){
+    text: function(item, content){
         const node = document.createTextNode(content);
         item.append(node);
     },
-    highlight: function(content, item){
+    highlight: function(item, content){
         const node = document.createElement("b");
         node.textContent = content;
         item.append(node);
     }
 });
+document.body.appendChild(template);
 ```
 
 ### Custom Resolver
 
 ```js
-function resolver(raw){
+function CustomResolver(raw){
     // console.log(raw)
+    let output;
     // generate output ...
-    return raw;
+    return output;
 }
 
 const result = index.search("a short query", { 
-    resolve: resolver
+    resolve: CustomResolver
 });
 ```
 
-## Index Compression
+## Big In-Memory Keystores
 
-... follow soon
+The default maximum keystore limit for the In-Memory index is 2^27 of stored ids or terms/partials. An additional 64-Bit register could be enabled and is dividing the index into self-balanced partitions.
+
+```js
+const index = new FlexSearchIndex({
+    // set keysize limit to 32-Bit,
+    // use a power of 2:
+    keystore: 2**32 
+});
+```
+
+You can theoretically store up to 2^91 keys (64-Bit address range) which you will probably never will reach.
+
+> Persistent storages has no keystore limit by default.
+
+<!--
+## Index Compression
+-->
