@@ -2,20 +2,21 @@
 
 ## What's New
 
-- Persistent indexes support for: IndexedDB (Browser), SQLite, Postgres, MongoDB, Clickhouse, Redis, Redis-JSON
+- Persistent indexes support for: IndexedDB (Browser), Redis, SQLite, Postgres, MongoDB, Clickhouse
 - Enhanced language customization via the new Encoder class
-- Searching single terms is 7 times faster
+- Searching single terms is up to 7 times faster
 - Enhanced support for larger indexes or larger result sets
 - Improved offset and limit processing achieve up to 100 times faster traversal performance through large datasets
-- Support for larger In-Memory index with unlimited key size (the defaults maximum keystore limit is: 2^27)
+- Support for larger In-Memory index with extended key size (the defaults maximum keystore limit is: 2^24)
 - Greatly enhanced performance of the whole text encoding pipeline
 - Improved indexing of numeric content (Triplets)
 - Immediate result sets and resolver
 - Basic Resolver: Collapse, And, Or, Output formatter
 - Improved charset collection
-- New charset preset "extreme" which greatly reduces memory consumption
+- New charset preset "extreme" which further reduces memory consumption
 - Performance gain when polling tasks to the index by using "Event-Loop-Caches"
-- Memory consumption was reduced
+- Up to 100 times faster deletion/replacement when not using the additional "fastupdate" register
+- Regex Pre-Compilation (transforms hundreds of regex rules into just a few)
 
 ## Persistent Indexes
 
@@ -24,14 +25,28 @@ FlexSearch provides a new Storage Adapter where indexes are delegated through pe
 Supported:
 
 - IndexedDB (Browser)
+- Redis 
 - SQLite
 - Postgres
 - MongoDB
 - Clickhouse
-- Redis
-- Redis-JSON
 
 The `.export()` and `.import()` methods are still available for non-persistent In-Memory indexes.
+
+All search capabilities are available on persistent indexes like:
+- Context-Search
+- Suggestions
+- Cursor-based Queries (Limit/Offset)
+- Scoring (supports a resolution of up to 32767 slots)
+- Document-Search
+- Partial Search
+- Boost Fields
+- Resolver
+- Document Store
+- Worker Threads to run in parallel
+- Auto-Balanced Cache (top queries, last queries)
+
+All persistent variants are optimized for larger sized indexes under heavy workload. Almost every task will be streamlined to run in batch/parallel, getting the most out of the selected database engine. Whereas the InMemory index can't share their data between different nodes when running in a cluster, every persistent storage can handle this by default.
 
 ### Example
 
@@ -49,24 +64,24 @@ await flexsearch.mount(db);
 index.add(1, "content...");
 index.update(2, "content...");
 index.remove(3);
-// ....
 
-// transfer all changes to the storage
-await flexsearch.commit();
+// changes are automatically committed by default
+// when you need to wait for the task completion, then you
+// can use the commit method explicitely:
+await index.commit();
 ```
 
-Alternatively:
+Alternatively mount a store by index creation:
 
 ```js
 const index = new FlexSearchIndex({
     db: new Storage("my-store")
 });
-// apply changes to the index
-// ...
+
 // await for the db response before access the first time
 await index.db;
-// transfer all changes to the db
-await index.commit();
+// apply changes to the index
+// ...
 ```
 
 Query against a persistent storage just as usual:
@@ -75,20 +90,24 @@ Query against a persistent storage just as usual:
 const result = await index.search("gulliver");
 ```
 
-Auto-Commit:
+Auto-Commit is enabled by default and will process changes asynchronously in batch.
+You can fully disable the auto-commit feature and perform them manually:
 
 ```js
 const index = new FlexSearchIndex({
     db: new Storage("my-store"),
-    commit: "auto"
+    commit: false
 });
 // update the index
 index.add(1, "content...");
 index.update(2, "content...");
 index.remove(3);
-// updates will be commited asynchronously in background 
-// (somewhere later in the event loop)
+
+// transfer all changes to the db
+await index.commit();
 ```
+
+You can call the commit method manually also when `commit: true` option was set.
 
 ### Benchmark
 
@@ -97,11 +116,13 @@ The performance really depends on text size/length, so the benchmark was measure
 <table>
     <tr>
         <th align="left">Store</th>
-        <th>Add Index</th>
-        <th>Search Index</th>
-        <th>Replace Index</th>
-        <th>Remove Index</th>
-        <th>Size</th>
+        <th>Add</th>
+        <th>Search 1</th>
+        <th>Search N</th>
+        <th>Replace</th>
+        <th>Remove</th>
+        <th>Not Found</th>
+        <!--<th>Size</th>-->
         <th>Scaling</th>
     </tr>
     <tr>
@@ -110,55 +131,32 @@ The performance really depends on text size/length, so the benchmark was measure
         <td align="right"><sub>terms per sec</sub></td>
         <td align="right"><sub>terms per sec</sub></td>
         <td align="right"><sub>terms per sec</sub></td>
-        <td align="right"><sub>Mb</sub></td>
+        <td align="right"><sub>terms per sec</sub></td>
+        <td align="right"><sub>terms per sec</sub></td>
+        <!--<td align="right"><sub>Mb</sub></td>-->
         <td></td>
     </tr>
     <tr>
         <td align="left">Memory</td>
-        <td align="right">8,418,364</td>
-        <td align="right">8,229,778</td>
+        <td align="right">11,267,299</td>
+        <td align="right">21,273,578</td>
+        <td align="right"></td>
         <td align="right">3,666,862</td>
         <td align="right">10,636,088</td>
-        <td align="right">3.1</td>
+        <td align="right">121,414,478</td>
+        <!--<td align="right">3.1</td>-->
         <td align="right">No</td>
     </tr>
-    <!--
-    <tr>
-        <td align="left">v0.7.x</td>
-        <td align="right">10,119,783</td>
-        <td align="right">7,032,473</td>
-        <td align="right">5,723,363</td>
-        <td align="right">17,363,447</td>
-        <td align="right">3.1</td>
-        <td align="right">No</td>
-    </tr>
-    -->
     <tr>
         <td align="left">Redis</td>
-        <td align="right">1,138,725</td>
-        <td align="right">65,849</td>
-        <td align="right">119,315</td>
-        <td align="right">1,458,896</td>
-        <td align="right"></td>
-        <td align="right">Yes (RAM)</td>
-    </tr>
-    <tr>
-        <td align="left">Redis-ZADD</td>
-        <td align="right">857,507</td>
-        <td align="right">109,800</td>
-        <td align="right">117,112</td>
-        <td align="right">1,303,697</td>
-        <td align="right"></td>
-        <td align="right">Yes (RAM)</td>
-    </tr>
-    <tr>
-        <td align="left">Redis-JSON</td>
-        <td align="right">22,672</td>
-        <td align="right">297,762</td>
-        <td align="right">18,548</td>
-        <td align="right">393,354</td>
-        <td align="right"></td>
-        <td align="right">Yes (RAM)</td>
+        <td align="right">1,463,878</td>
+        <td align="right">106,210</td>
+        <td align="right">1,535,598</td>
+        <td align="right">121,915</td>
+        <td align="right">119,418</td>
+        <td align="right">2,419,564</td>
+        <!--<td align="right"></td>-->
+        <td align="right">Yes</td>
     </tr>
     <tr>
         <td align="left">Clickhouse</td>
@@ -167,33 +165,41 @@ The performance really depends on text size/length, so the benchmark was measure
         <td align="right"></td>
         <td align="right"></td>
         <td align="right"></td>
+        <td align="right"></td>
+        <!--<td align="right"></td>-->
         <td align="right">Yes</td>
     </tr>
     <tr>
         <td align="left">Sqlite</td>
-        <td align="right">271,955</td>
-        <td align="right">38,113</td>
-        <td align="right">179,982</td>
-        <td align="right">393,302</td>
-        <td align="right"></td>
+        <td align="right">232,484</td>
+        <td align="right">26,129</td>
+        <td align="right">52,190</td>
+        <td align="right">152,443</td>
+        <td align="right">1,439,203</td>
+        <td align="right">295,171</td>
+        <!--<td align="right"></td>-->
         <td align="right">No</td>
     </tr>
     <tr>
         <td align="left">Postgres</td>
-        <td align="right">361,230</td>
-        <td align="right">11,914</td>
-        <td align="right"></td>
-        <td align="right">43,219</td>
-        <td align="right"></td>
+        <td align="right">343,097</td>
+        <td align="right">23,706</td>
+        <td align="right">133,729</td>
+        <td align="right">308,259</td>
+        <td align="right">3,783,992</td>
+        <td align="right">156,588</td>
+        <!--<td align="right"></td>-->
         <td align="right">Yes</td>
     </tr>
     <tr>
         <td align="left">MongoDB</td>
-        <td align="right">543,840</td>
-        <td align="right">12,115</td>
-        <td align="right">528,177</td>
-        <td align="right">234,526</td>
-        <td align="right"></td>
+        <td align="right">501,242</td>
+        <td align="right">18,269</td>
+        <td align="right">13,745</td>
+        <td align="right">237,323</td>
+        <td align="right">482,317</td>
+        <td align="right">67,133</td>
+        <!--<td align="right"></td>-->
         <td align="right">Yes</td>
     </tr>
     <tr>
@@ -203,9 +209,14 @@ The performance really depends on text size/length, so the benchmark was measure
         <td align="right"></td>
         <td align="right"></td>
         <td align="right"></td>
+        <td align="right"></td>
+        <!--<td align="right"></td>-->
         <td align="right">No</td>
     </tr>
 </table>
+
+__Search 1:__ single term query<br>
+__Search N:__ multi term query (this often performs better because of the intersection is shrinking the final result, especially when using Context-Search)
 
 ## Encoder
 
@@ -486,20 +497,24 @@ const result = index.search("a short query", {
 
 ## Big In-Memory Keystores
 
-The default maximum keystore limit for the In-Memory index is 2^27 of stored ids or terms/partials. An additional 64-Bit register could be enabled and is dividing the index into self-balanced partitions.
+The default maximum keystore limit for the In-Memory index is 2^24 of stored ids or terms/partials. An additional 64-Bit register could be enabled and is dividing the index into self-balanced partitions by using Proxy.
 
 ```js
 const index = new FlexSearchIndex({
-    // set keysize limit to 32-Bit,
-    // use a power of 2:
-    keystore: 2**32 
+    // e.g. set keystore range to 16-Bit:
+    // 2^16 * 2^24 = 2^40 keys total
+    keystore: 16 
 });
 ```
 
-You can theoretically store up to 2^91 keys (64-Bit address range) which you will probably never will reach.
+You can theoretically store up to 2^88 keys (64-Bit address range).
 
 > Persistent storages has no keystore limit by default.
 
-<!--
-## Index Compression
--->
+## Migration
+
+- The index option property "minlength" has moved to the Encoder Class
+- The index option flag "optimize" was removed
+- The index option flag "lang" was replaced by the Encoder Class `.assign()`
+- Boost cannot apply upfront anymore when indexing, instead you can use the boost property on a query dynamically
+- All definitions of the old text encoding process was replaced by similar definitions (Array changed to Set, Object changed to Map). You can use of the helper methods like `.addMatcher(char_match, char_replace)` which adds everything properly (almost everything will pre-compiled anyway).
