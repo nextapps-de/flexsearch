@@ -122,7 +122,6 @@ The performance really depends on text size/length, so the benchmark was measure
         <th>Replace</th>
         <th>Remove</th>
         <th>Not Found</th>
-        <!--<th>Size</th>-->
         <th>Scaling</th>
     </tr>
     <tr>
@@ -133,85 +132,77 @@ The performance really depends on text size/length, so the benchmark was measure
         <td align="right"><sub>terms per sec</sub></td>
         <td align="right"><sub>terms per sec</sub></td>
         <td align="right"><sub>terms per sec</sub></td>
-        <!--<td align="right"><sub>Mb</sub></td>-->
         <td></td>
     </tr>
     <tr>
         <td align="left">Memory</td>
-        <td align="right">11,267,299</td>
-        <td align="right">21,273,578</td>
-        <td align="right"></td>
-        <td align="right">3,666,862</td>
-        <td align="right">10,636,088</td>
-        <td align="right">121,414,478</td>
-        <!--<td align="right">3.1</td>-->
+        <td align="right">16,647,301</td>
+        <td align="right">10,892,933</td>
+        <td align="right">11,767,590</td>
+        <td align="right">19,099,981</td>
+        <td align="right">80,675,387</td>
+        <td align="right">143,369,175</td>
+        <td align="right">No</td>
+    </tr>
+   <tr>
+        <td align="left">IndexedDB</td>
+        <td align="right">123,298</td>
+        <td align="right">126,666</td>
+        <td align="right">62,370</td>
+        <td align="right">50,599</td>
+        <td align="right">151,201</td>
+        <td align="right">430,322</td>
         <td align="right">No</td>
     </tr>
     <tr>
         <td align="left">Redis</td>
-        <td align="right">1,463,878</td>
+        <td align="right">1,574,878</td>
         <td align="right">106,210</td>
-        <td align="right">1,535,598</td>
-        <td align="right">121,915</td>
-        <td align="right">119,418</td>
-        <td align="right">2,419,564</td>
-        <!--<td align="right"></td>-->
-        <td align="right">Yes</td>
-    </tr>
-    <tr>
-        <td align="left">Clickhouse</td>
-        <td align="right">1,220,158</td>
-        <td align="right">4,684</td>
-        <td align="right"></td>
-        <td align="right"></td>
-        <td align="right"></td>
-        <td align="right"></td>
-        <!--<td align="right"></td>-->
+        <td align="right">690,143</td>
+        <td align="right">117,013</td>
+        <td align="right">129,595</td>
+        <td align="right">656,157</td>
         <td align="right">Yes</td>
     </tr>
     <tr>
         <td align="left">Sqlite</td>
-        <td align="right">232,484</td>
+        <td align="right">194,942</td>
         <td align="right">26,129</td>
-        <td align="right">52,190</td>
-        <td align="right">152,443</td>
-        <td align="right">1,439,203</td>
-        <td align="right">295,171</td>
-        <!--<td align="right"></td>-->
+        <td align="right">131,162</td>
+        <td align="right">133,440</td>
+        <td align="right">1,468,800</td>
+        <td align="right">134,144</td>
         <td align="right">No</td>
     </tr>
     <tr>
         <td align="left">Postgres</td>
-        <td align="right">343,097</td>
-        <td align="right">23,706</td>
-        <td align="right">133,729</td>
-        <td align="right">308,259</td>
-        <td align="right">3,783,992</td>
-        <td align="right">156,588</td>
-        <!--<td align="right"></td>-->
+        <td align="right">354,894</td>
+        <td align="right">24,329</td>
+        <td align="right">76,189</td>
+        <td align="right">324,546</td>
+        <td align="right">3,702,647</td>
+        <td align="right">50,305</td>
         <td align="right">Yes</td>
     </tr>
     <tr>
         <td align="left">MongoDB</td>
-        <td align="right">501,242</td>
-        <td align="right">18,269</td>
-        <td align="right">13,745</td>
-        <td align="right">237,323</td>
-        <td align="right">482,317</td>
-        <td align="right">67,133</td>
-        <!--<td align="right"></td>-->
+        <td align="right">520,991</td>
+        <td align="right">18,820</td>
+        <td align="right">83,233</td>
+        <td align="right">254,758</td>
+        <td align="right">506,018</td>
+        <td align="right">67,362</td>
         <td align="right">Yes</td>
     </tr>
     <tr>
-        <td align="left">IndexedDB</td>
-        <td align="right">22,109</td>
-        <td align="right">19,602</td>
-        <td align="right"></td>
-        <td align="right"></td>
-        <td align="right"></td>
-        <td align="right"></td>
-        <!--<td align="right"></td>-->
-        <td align="right">No</td>
+        <td align="left">Clickhouse</td>
+        <td align="right">1,659,693</td>
+        <td align="right">13,482</td>
+        <td align="right">12,587</td>
+        <td align="right">1,296,331</td>
+        <td align="right">5,447,723</td>
+        <td align="right">9,713</td>
+        <td align="right">Yes</td>
     </tr>
 </table>
 
