@@ -1,5 +1,5 @@
 import pg_promise from "pg-promise";
-const config = {
+const defaults = {
     schema: "flexsearch",
     user: "postgres",
     pass: "postgres",
@@ -22,13 +22,25 @@ function sanitize(str) {
  * @implements StorageInterface
  */
 
-export default function PostgresDB(sid, config){
+export default function PostgresDB(name, config = {}){
+    if(typeof name === "object"){
+        name = name.name;
+        config = name;
+    }
+    if(!name){
+        console.info("Default storage space was used, because a name was not passed.");
+    }
     //field = "Test-456";
-    this.id = config && config.schema + (sid ? "_" + sanitize(sid) : "");
-    this.field = config && config.field ? "_" + sanitize(config.field) : "";
+    this.id = sanitize(config.schema) + (name ? "_" + sanitize(name) : "");
+    this.field = config.field ? "_" + sanitize(config.field) : "";
     this.type = "int";
-    this.db = null;
+    this.db = config.db || null;
     this.trx = false;
+    // todo:
+    //this.type = config && config.type ? types[config.type.toLowerCase()] : "String";
+    //if(!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
+    Object.assign(defaults, config);
+    this.db && delete defaults.db;
 };
 
 PostgresDB.mount = function(flexsearch){
@@ -42,11 +54,11 @@ PostgresDB.prototype.mount = function(flexsearch){
 
 PostgresDB.prototype.open = async function(){
 
-    if(this.db) return this.db;
-    const self = this;
-    const db = this.db = pgp(`postgres://${config.user}:${encodeURIComponent(config.pass)}@${config.host}:${config.port}/${config.name}`);
+    if(!this.db) {
+        this.db = pgp(`postgres://${defaults.user}:${encodeURIComponent(defaults.pass)}@${defaults.host}:${defaults.port}/${defaults.name}`);
+    }
 
-    const exist = await db.oneOrNone(`
+    const exist = await this.db.oneOrNone(`
         SELECT EXISTS (
             SELECT 1 
             FROM information_schema.schemata 
@@ -54,22 +66,22 @@ PostgresDB.prototype.open = async function(){
         );
     `);
     if(!exist || !exist.exist){
-        await db.none(`CREATE SCHEMA IF NOT EXISTS ${this.id};`);
+        await this.db.none(`CREATE SCHEMA IF NOT EXISTS ${this.id};`);
     }
 
     for(let i = 0; i < fields.length; i++){
-        const exist = await db.oneOrNone(`
+        const exist = await this.db.oneOrNone(`
             SELECT EXISTS (
                 SELECT 1 FROM pg_tables
-                WHERE schemaname = '${this.id}' AND tablename = '${fields[i] + (fields[i] !== "reg" ? self.field : "")}'
+                WHERE schemaname = '${this.id}' AND tablename = '${fields[i] + (fields[i] !== "reg" ? this.field : "")}'
             );
         `);
         if(exist && exist.exist) continue;
 
         switch(fields[i]){
             case "map":
-                await db.none(`
-                    create table if not exists ${this.id}.map${self.field}(
+                await this.db.none(`
+                    create table if not exists ${this.id}.map${this.field}(
                         key varchar(128) not null,
                         res smallint     not null,
                         id  integer      not null,
@@ -77,13 +89,13 @@ PostgresDB.prototype.open = async function(){
                             unique (key, id)
                     );
                     create index if not exists map_id_index
-                        on ${this.id}.map${self.field} (id);
+                        on ${this.id}.map${this.field} (id);
                 `);
                 break;
 
             case "ctx":
-                await db.none(`
-                    create table if not exists ${this.id}.ctx${self.field}(
+                await this.db.none(`
+                    create table if not exists ${this.id}.ctx${this.field}(
                         ctx varchar(128) not null,
                         key varchar(128) not null,
                         res smallint     not null,
@@ -92,12 +104,12 @@ PostgresDB.prototype.open = async function(){
                             unique (ctx, key, id)
                     );
                     create index if not exists ctx_id_index
-                        on ${this.id}.ctx${self.field} (id);
+                        on ${this.id}.ctx${this.field} (id);
                 `);
                 break;
 
             case "reg":
-                await db.none(`
+                await this.db.none(`
                     create table if not exists ${this.id}.reg(
                         id integer not null
                             constraint reg_pk
@@ -107,8 +119,8 @@ PostgresDB.prototype.open = async function(){
                 break;
 
             case "cfg":
-                await db.none(`
-                    create table if not exists ${this.id}.cfg${self.field}(
+                await this.db.none(`
+                    create table if not exists ${this.id}.cfg${this.field}(
                         cfg text not null
                     );
                 `);
@@ -116,7 +128,7 @@ PostgresDB.prototype.open = async function(){
         }
     }
 
-    return db;
+    return this.db;
 };
 
 PostgresDB.prototype.close = function(){
