@@ -73,6 +73,8 @@ await index.mount(db);
 
 The SQLite driver does not properly support upgrading a key field type by ALTER TABLE. Therefore, the default type for ID is `text`.
 
+You can save required disk space and also gain performance when defining a numeric ID type expicitely.
+
 ```js
 // pass type in options
 const db = new Database("my-store", {
@@ -87,8 +89,6 @@ const db = new Database("my-store", {
     type: "bigint"
 });
 ```
-
-> You can save required disk space and also gain the performance when defining a numeric ID type expicitely.
 
 To change the ID type later you'll need to delete and re-create the index by calling `index.db.destroy()`.
 

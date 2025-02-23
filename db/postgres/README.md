@@ -89,7 +89,10 @@ FlexSearch is creating different `SCHEMA` for each index name e.g. "my-store". T
 ```
 DATABASE_NAME
   |__ SCHEMA
-        |__TABLE (FlexSearch Data) 
+        |__TABLE map:field (FlexSearch Data) 
+        |__TABLE ctx:field (FlexSearch Data) 
+        |__TABLE reg:field (FlexSearch Data) 
+        |__TABLE cfg:field (FlexSearch Data) 
 ```
 
 You can force using a specific SCHEMA by option without passing a name:

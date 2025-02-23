@@ -421,14 +421,26 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
         }
 
         tmp = arr.get(value);
-        tmp ? arr = tmp : arr.set(value, arr = []);
-        arr = arr[score] || (
-            arr[score] = SUPPORT_KEYSTORE && this.keystore
-                ? new KeystoreArray(this.keystore)
-                : []
-        );
+        tmp ? arr = tmp : arr.set(value, arr = tmp = []);
+        // the ID array will be upgraded dynamically
+        arr = arr[score] || (arr[score] = []);
 
         if(!append || !arr.includes(id)){
+
+            // auto-upgrade to keystore array if max size exceeded
+            if(SUPPORT_KEYSTORE){
+                if(arr.length === 2**31-1 /*|| !(arr instanceof KeystoreArray)*/){
+                    const keystore = new KeystoreArray(arr);
+                    if(this.fastupdate){
+                        for(let value of this.reg.values()){
+                            if(value.includes(arr)){
+                                value[value.indexOf(arr)] = keystore;
+                            }
+                        }
+                    }
+                    tmp[score] = arr = keystore;
+                }
+            }
 
             arr.push(id);
 
@@ -438,6 +450,7 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
                 tmp ? tmp.push(arr)
                     : this.reg.set(id, [arr]);
             }
+
         }
     }
 }
@@ -739,6 +752,7 @@ function single_term_query(query, limit, offset){
         // });
 
         return self.db.get("map", query[0], "", limit, offset).then(function(result){
+            //console.log(result);
             if(result && result.length){
                 result = result.filter(arr => arr && !!arr.length);
             }
@@ -950,9 +964,11 @@ Index.prototype.remove = function(id, _skip_deletion){
             // fast updates did not fully cleanup the key entries
             for(let i = 0, tmp; i < refs.length; i++){
                 tmp = refs[i];
+                // todo investigate empty entries
+                if(!tmp) continue;
                 // todo remove
-                if(tmp.length < 1) throw new Error("invalid length");
-                if(tmp.indexOf(id) < 0) throw new Error("invalid id");
+                //if(tmp.length < 1) throw new Error("invalid length");
+                //if(tmp.indexOf(id) < 0) throw new Error("invalid id");
                 if(tmp.length < 2) tmp.pop();
                 else {
                     const index = tmp.indexOf(id);
@@ -981,7 +997,7 @@ Index.prototype.remove = function(id, _skip_deletion){
 
     // the cache could be used outside the InMemory store
     if(SUPPORT_CACHE && this.cache){
-        this.cache.del(id);
+        this.cache.remove(id);
     }
 
     return this;

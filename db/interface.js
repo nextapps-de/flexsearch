@@ -3,28 +3,36 @@
  */
 export default function StorageInterface(sid, field){};
 
+// Mandatory Initializer
+// ------------------------------
+
 // assign store to an index
-StorageInterface.prototype.mount = function(index){};
+StorageInterface.prototype.mount = async function(index){};
 // open connection
-StorageInterface.prototype.open = function(){};
+StorageInterface.prototype.open = async function(){};
 // close connection
-StorageInterface.prototype.close = function(){};
-// clean the database
-StorageInterface.prototype.destroy = function(){};
+StorageInterface.prototype.close = async function(){};
+// drop the database (drop tables)
+StorageInterface.prototype.destroy = async function(){};
 
-// set a value by a given key to a specific table
-//StorageInterface.prototype.set = function(ref, key, value){};
-// get a key from a specific table
-StorageInterface.prototype.get = async function(ref, key){};
-// check if a key exists on a specific table
-StorageInterface.prototype.has = async function(ref, key){};
-// delete an id on a specific table
-StorageInterface.prototype.remove = async function(id){};
-StorageInterface.prototype.remove = async function(ids){};
-// clear a specific table
-StorageInterface.prototype.clear = async function(ref){};
+// Mandatory Query Tasks
+// ------------------------------
 
-StorageInterface.prototype.transaction = async function(fn){};
+// transfer all changes of an index to the database
 StorageInterface.prototype.commit = async function(){};
-StorageInterface.prototype.reset = function(){};
-StorageInterface.prototype.info = function(){};
+// get results of a term "key" with optional context "ctx"
+StorageInterface.prototype.get = async function(key, ctx, limit, offset, resolve){};
+// check if id exists on a specific index
+StorageInterface.prototype.has = async function(id){};
+// delete one id or multiple ids on a specific index
+StorageInterface.prototype.remove = async function(ids){};
+// clear all data (truncate)
+StorageInterface.prototype.clear = async function(){};
+
+// Optional Methods
+// ------------------------------
+
+// perform the query intersection on database side
+StorageInterface.prototype.search = async function(index, query, suggest, limit, offset, resolve){};
+// give some information about the storage
+StorageInterface.prototype.info = async function(){};

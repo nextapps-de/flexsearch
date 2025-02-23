@@ -1,4 +1,5 @@
 import { parse_option } from "./common.js";
+import { SUPPORT_CACHE, SUPPORT_COMPRESSION } from "./config.js";
 
 /*
 
@@ -378,9 +379,7 @@ Encoder.prototype.assign = function(options){
 
     // options
 
-    this.cache = options.cache !== false;
     this.rtl = options.rtl || false;
-    this.compression = parse_option(options.compress || options.compression, 0, this.compression);
     this.dedupe = parse_option(options.dedupe, true, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
@@ -394,12 +393,19 @@ Encoder.prototype.assign = function(options){
     //this.tokenize = options["tokenize"] || "";
 
     // auto-balanced cache
-    this.timer = null;
-    this.cache_enc = this.cache ? new Map() : null;
-    this.cache_cmp = this.cache ? new Map() : null;
-    this.cache_prt = this.cache ? new Map() : null;
-    this.cache_enc_length = 24;
-    this.cache_prt_length = 24; // also cache_cmp_length
+    if(SUPPORT_CACHE){
+        this.cache = tmp = options.cache !== false;
+        if(tmp){
+            this.timer = null;
+            this.cache_size = typeof tmp === "number" ? tmp : 2e5;
+            this.cache_enc = new Map();
+            this.cache_cmp = new Map();
+            this.cache_prt = new Map();
+            this.cache_enc_length = 128;
+            // also alias for cache_cmp_length:
+            this.cache_prt_length = 128;
+        }
+    }
 
     // regex temporary state
     this.matcher_str = "";
@@ -427,20 +433,31 @@ Encoder.prototype.assign = function(options){
             this.stemmer_str += (this.stemmer_str ? "|" : "") + key;
         }
     }
-    if(this.compression && !table){
-        table = new Array(radix);
-        for(let i = 0; i < radix; i++) table[i] = i + 33;
-        table = String.fromCharCode.apply(null, table);
+
+    if(SUPPORT_COMPRESSION){
+        this.compression = parse_option(options.compress || options.compression, 0, this.compression);
+        if(this.compression && !table){
+            table = new Array(radix);
+            for(let i = 0; i < radix; i++) table[i] = i + 33;
+            table = String.fromCharCode.apply(null, table);
+        }
     }
 };
 
 Encoder.prototype.addMatcher = function(match, replace){
-    if(typeof match === "object") return this.addReplacer(match, replace);
-    if(match.length < 2) return this.addMapper(match, replace);
+    // regex:
+    if(typeof match === "object"){
+        return this.addReplacer(match, replace);
+    }
+    // a single char:
+    if(match.length < 2){
+        return this.addMapper(match, replace);
+    }
     this.matcher || (this.matcher = new Map());
     this.matcher.set(match , replace);
     this.matcher_str += (this.matcher_str ? "|" : "") + match;
     this.matcher_test = null; //new RegExp("(" + this.matcher_str + ")");
+    SUPPORT_CACHE && this.cache && this.invalidate();
     return this;
 };
 
@@ -449,38 +466,53 @@ Encoder.prototype.addStemmer = function(match, replace){
     this.stemmer.set(match, replace);
     this.stemmer_str += (this.stemmer_str ? "|" : "") + match;
     this.stemmer_test = null; //new RegExp("(" + this.stemmer_str + ")");
+    SUPPORT_CACHE && this.cache && this.invalidate();
     return this;
 };
 
 Encoder.prototype.addFilter = function(str){
     this.filter || (this.filter = new Set());
     this.filter.add(str);
+    SUPPORT_CACHE && this.cache && this.invalidate();
     return this;
 };
 
-Encoder.prototype.addMapper = function(char, replace){
-    if(typeof char === "object") return this.addReplacer(char, replace);
-    if(char.length > 1) return this.addMatcher(char, replace);
+Encoder.prototype.addMapper = function(char_match, char_replace){
+    // regex:
+    if(typeof char_match === "object"){
+        return this.addReplacer(char_match, char_replace);
+    }
+    // not a char:
+    if(char_match.length > 1){
+        return this.addMatcher(char_match, char_replace);
+    }
     this.mapper || (this.mapper = new Map());
-    this.mapper.set(char , replace);
+    this.mapper.set(char_match, char_replace);
+    SUPPORT_CACHE && this.cache && this.invalidate();
     return this;
 };
 
 Encoder.prototype.addReplacer = function(match, replace){
     if(typeof match === "string") match = new RegExp(match, "g");
     this.replacer || (this.replacer = []);
-    this.replacer.push(match);
-    this.replacer.push(replace || "");
+    this.replacer.push(match, replace || "");
+    SUPPORT_CACHE && this.cache && this.invalidate();
     return this;
 };
+
+if(SUPPORT_CACHE){
+    Encoder.prototype.invalidate = function(){
+        this.cache_enc.clear();
+        this.cache_prt.clear();
+    };
+}
 
 Encoder.prototype.encode = function(str){
 
     //if(!str) return str;
-
     // todo remove dupe terms
 
-    if(this.cache && str.length <= this.cache_enc_length){
+    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_enc_length){
         if(this.timer){
             if(this.cache_enc.has(str)){
                 return this.cache_enc.get(str);
@@ -550,7 +582,7 @@ Encoder.prototype.encode = function(str){
             // 1. pre-filter before cache
             if(word.length >= this.minlength && (!this.filter || !this.filter.has(word))){
 
-                if(this.cache && word.length <= this.cache_prt_length){
+                if(SUPPORT_CACHE && this.cache && word.length <= this.cache_prt_length){
                     if(this.timer){
                         const tmp = this.cache_prt.get(word);
                         //if(this.cache_prt.has(word)){
@@ -661,17 +693,17 @@ Encoder.prototype.encode = function(str){
                 // if(word){
                 //     words[i] = word;
                 // }
+
+                if(SUPPORT_CACHE && this.cache && base.length <= this.cache_prt_length){
+                    this.cache_prt.set(base, word);
+                    if(this.cache_prt.size > this.cache_size){
+                        this.cache_prt.clear();
+                        this.cache_prt_length = this.cache_prt_length / 1.1 | 0;
+                    }
+                }
             }
             else{
                 word = "";
-            }
-
-            if(this.cache && base.length <= this.cache_prt_length){
-                this.cache_prt.set(base, word);
-                if(this.cache_prt.size > 1e5){
-                    this.cache_prt.clear();
-                    this.cache_prt_length = this.cache_prt_length / 1.2 | 0;
-                }
             }
         }
 
@@ -689,11 +721,11 @@ Encoder.prototype.encode = function(str){
     //     }
     // }
 
-    if(this.cache && str.length <= this.cache_enc_length){
+    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_enc_length){
         this.cache_enc.set(str, final);
-        if(this.cache_enc.size > 1e5){
+        if(this.cache_enc.size > this.cache_size){
             this.cache_enc.clear();
-            this.cache_enc_length = this.cache_enc_length / 1.2 | 0;
+            this.cache_enc_length = this.cache_enc_length / 1.1 | 0;
         }
     }
 
@@ -703,10 +735,9 @@ Encoder.prototype.encode = function(str){
 Encoder.prototype.compress = function(str) {
 
     //return str;
+    //if(!str) return str;
 
-    if(!str) return str;
-
-    if(this.cache && str.length <= this.cache_prt_length){
+    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
         if(this.timer){
             if(this.cache_cmp.has(str)){
                 return this.cache_cmp.get(str);
@@ -717,36 +748,22 @@ Encoder.prototype.compress = function(str) {
         }
     }
 
-    let result = "";
+    const result = typeof this.compression === "function"
+        ? this.compression(str)
+        : hash(str); //window.hash(str);
 
-    if(typeof this.compression === "function"){
-        result = this.compression(str);
+    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
+        this.cache_cmp.set(str, result);
+        this.cache_cmp.size > this.cache_size &&
+        this.cache_cmp.clear();
     }
-    else{
-        result = window.hash(str);
-
-        // result = crc(str).toString(36);
-        //
-        // let rixit;
-        // let residual = crc(str);
-        //
-        // while(true){
-        //     rixit = residual % radix;
-        //     result = table.charAt(rixit) + result;
-        //     residual = residual / radix | 0;
-        //     if(!residual)
-        //         break;
-        // }
-    }
-
-    this.cache &&
-    this.cache_cmp.set(str, result);
-
-    this.cache_cmp.size > 1e6 &&
-    this.cache_cmp.clear();
 
     return result;
 };
+
+function hash(str){
+    return str;
+}
 
 function tick(self){
     self.timer = null;

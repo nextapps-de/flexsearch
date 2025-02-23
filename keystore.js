@@ -6,33 +6,37 @@ export function KeystoreObj(bitlength = 8){
         return new KeystoreObj(bitlength);
     }
 
-    this.index = new Map();
+    this.index = create_object();
+    this.keys = [];
 
     if(bitlength > 32){
-        this.crc = crc64;
-        this.size = BigInt(2**bitlength);
+        this.crc = lcg64;
+        this.bit = BigInt(bitlength);
     }
-    else{
-        this.crc = crc32;
-        this.size = 2**bitlength;
+    else {
+        this.crc = lcg;
+        this.bit = bitlength;
     }
 
-    return this.proxy = new Proxy(this, {
+    return /*this.proxy =*/ new Proxy(this, {
         get(target, key) {
             const address = target.crc(key);
-            const obj = target.index.get(address);
+            const obj = target.index[address];
             return obj && obj[key];
         },
         set(target, key, value){
             const address = target.crc(key);
-            let obj = target.index.get(address);
-            obj || target.index.set(address, obj = create_object());
+            let obj = target.index[address];
+            if(!obj){
+                target.index[address] = obj = create_object();
+                target.keys.push(address);
+            }
             obj[key] = value;
             return true;
         },
         delete(target, key){
             const address = target.crc(key);
-            const obj = target.index.get(address);
+            const obj = target.index[address];
             obj && delete obj[key];
             return true;
         }
@@ -41,223 +45,132 @@ export function KeystoreObj(bitlength = 8){
 
 KeystoreObj.prototype.clear = function(){
     this.index = create_object();
+    this.keys = [];
 };
 
-KeystoreObj.prototype.destroy = function(){
-    this.index = null;
-    this.proxy = null;
-};
+// KeystoreObj.prototype.destroy = function(){
+//     this.index = null;
+//     this.keys = null;
+//     this.proxy = null;
+// };
 
-export function KeystoreArray(bitlength = 8){
+function _slice(self, start, end, splice){
+    let arr = [];
+    for(let i = 0, index; i < self.index.length; i++){
+        index = self.index[i];
+        if(start >= index.length){
+            start -= index.length;
+        }
+        else{
+            const tmp = index[splice ? "splice" : "slice"](start, end);
+            const length = tmp.length;
+            if(length){
+                arr = arr.length
+                    ? arr.concat(tmp)
+                    : tmp;
+                end -= length;
+                if(splice) self.length -= length;
+                if(!end) break;
+            }
+            start = 0;
+        }
+    }
+    return arr;
+}
+
+export function KeystoreArray(arr){
 
     if(!(this instanceof KeystoreArray)){
-        return new KeystoreArray(bitlength);
+        return new KeystoreArray(arr);
     }
 
-    this.index = [];
-    this.length = 0;
+    this.index = arr ? [arr] : [];
+    this.length = arr ? arr.length : 0;
+    const self = this;
 
-    return this.proxy = new Proxy(this, {
+    return /*this.proxy =*/ new Proxy([], {
         get(target, key) {
             if(key === "length"){
-                return target.length;
+                return self.length;
             }
             if(key === "push"){
-                const self = this;
                 return function(value){
-                    self.set(target, target.length, value);
+                    self.index[self.index.length - 1].push(value);
+                    self.length++;
+                }
+            }
+            if(key === "pop"){
+                return function(){
+                    if(self.length){
+                        self.length--;
+                        return self.index[self.index.length - 1].pop();
+                    }
                 }
             }
             if(key === "indexOf"){
-                const self = this;
                 return function(key){
-                    const index = key / 2**30 | 0;
-                    const arr = self.index[index];
-                    return arr && arr.indexOf(key);
+                    let index = 0;
+                    for(let i = 0, arr, tmp; i < self.index.length; i++){
+                        arr = self.index[i];
+                        //if(!arr.includes(key)) continue;
+                        tmp = arr.indexOf(key);
+                        if(tmp >= 0) return index + tmp;
+                        index += arr.length;
+                    }
+                    return -1;
                 }
             }
             if(key === "includes"){
-                const self = this;
                 return function(key){
-                    const index = key / 2**30 | 0;
-                    const arr = self.index[index];
-                    return arr && arr.includes(key);
+                    for(let i = 0; i < self.index.length; i++){
+                        if(self.index[i].includes(key)){
+                            return true;
+                        }
+                    }
+                    return false;
                 }
             }
             if(key === "slice"){
-                const self = this;
-                return function(start = 0, end){
-                    let arr = [];
-                    for(let i = 0, index; i < target.index.length; i++){
-                        index = target.index[i];
-                        if(start >= index.length){
-                            start -= index.length;
-                        }
-                        else{
-                            const tmp = index.slice(start, end);
-                            tmp.length && (arr = arr.concat(tmp));
-                            end -= tmp.length;
-                            start = 0;
-                            if(!end) break;
-                        }
-                    }
-                    return arr;
+                return function(start, end){
+                    return _slice(
+                        self,
+                        start || 0,
+                        end || self.length,
+                        false
+                    );
                 }
             }
             if(key === "splice"){
-                const self = this;
-                return function(start = 0, end){
-                    let arr = [];
-                    for(let i = 0, index; i < target.index.length; i++){
-                        index = target.index[i];
-                        if(start >= index.length){
-                            start -= index.length;
-                        }
-                        else{
-                            const tmp = index.splice(start, end);
-                            tmp.length && (arr = arr.concat());
-                            end -= tmp.length;
-                            start = 0;
-                            if(!end) break;
-                        }
-                    }
-                    return arr;
+                return function(start, end){
+                    return _slice(
+                        self,
+                        start || 0,
+                        end || self.length,
+                        // splice:
+                        true
+                    );
                 }
             }
-            if(typeof key !== "number"){
+            if(key === "constructor"){
+                return Array;
+            }
+            if(typeof key === "symbol" /*|| isNaN(key)*/){
                 // not supported
                 return;
             }
-            const index = key / 2**30 | 0;
-            const arr = target.index[index];
+            const index = key / (2**31) | 0;
+            const arr = self.index[index];
             return arr && arr[key];
         },
         set(target, key, value){
-            const index = key / 2**30 | 0;
-            const arr = target.index[index] || (target.index[index] = []);
+            const index = key / (2**31) | 0;
+            const arr = self.index[index] || (self.index[index] = []);
             arr[key] = value;
-            target.length++;
+            self.length++;
             return true;
-        },
-        has(target, key){
-            const index = key / 2**30 | 0;
-            const arr = target.index[index];
-            return !!(arr && arr[key]);
-        },
-        delete(target, key){
-            const index = key / 2**30 | 0;
-            const arr = target.index[index];
-            const res = arr && arr.splice(key, 1);
-            res.length && target.length--;
-            arr.length || target.index.splice(index, 1);
-            return res;
         }
     });
 }
-
-// export function KeystoreArray(bitlength = 8){
-//
-//     if(!(this instanceof KeystoreArray)){
-//         return new KeystoreArray(bitlength);
-//     }
-//
-//     this.index = new Map();
-//     this.length = 0;
-//
-//     if(bitlength > 32){
-//         this.crc = crc64;
-//         this.size = BigInt(2**bitlength);
-//     }
-//     else{
-//         this.crc = crc32;
-//         this.size = 2**bitlength;
-//     }
-//
-//     return this.proxy = new Proxy(this, {
-//         get(target, key) {
-//             if(key === "length"){
-//                 return target.length;
-//             }
-//             if(key === "push"){
-//                 const self = this;
-//                 return function(value){
-//                     self.set(target, target.length, value);
-//                 }
-//             }
-//             if(key === "indexOf"){
-//                 const self = this;
-//                 return function(key){
-//                     const address = self.crc(key);
-//                     const arr = self.index.get(address);
-//                     return arr && arr.indexOf(key);
-//                 }
-//             }
-//             if(key === "includes"){
-//                 const self = this;
-//                 return function(key){
-//                     const address = self.crc(key);
-//                     const arr = self.index.get(address);
-//                     return arr && arr.includes(key);
-//                 }
-//             }
-//             if(key === "slice"){
-//                 const self = this;
-//                 return function(start = 0, end){
-//                     const limit = end
-//                         ? Math.min(end - start, target.length - start)
-//                         : target.length - start;
-//                     if(limit < 1) return [];
-//                     const arr = new Array(limit);
-//                     for(let i = 0; i < limit; i++){
-//                         // todo improve strategy
-//                         arr[i] = self.get(target, start + i);
-//                     }
-//                     return arr;
-//                 }
-//             }
-//             if(key === "splice"){
-//                 const self = this;
-//                 return function(start = 0, end){
-//                     const limit = end
-//                         ? Math.min(end - start, target.length - start)
-//                         : target.length - start;
-//                     if(limit < 1) return [];
-//                     const arr = new Array(limit);
-//                     for(let i = 0; i < limit; i++){
-//                         // todo improve strategy
-//                         arr[i] = self.delete(target, start + i);
-//                     }
-//                     return arr;
-//                 }
-//             }
-//             const address = target.crc(key);
-//             const arr = target.index.get(address);
-//             return arr && arr[key];
-//         },
-//         set(target, key, value){
-//             const address = target.crc(key);
-//             let arr = target.index.get(address);
-//             arr || target.index.set(address, arr = []);
-//             arr[key] = value;
-//             target.length++;
-//             return true;
-//         },
-//         has(target, key){
-//             const address = target.crc(key);
-//             const arr = target.index.get(address);
-//             return !!(arr && arr[key]);
-//         },
-//         delete(target, key){
-//             const address = target.crc(key);
-//             const arr = target.index.get(address);
-//             const res = arr && arr.splice(key, 1);
-//             res.length
-//                 ? target.length--
-//                 : target.index.delete(address);
-//             return res;
-//         }
-//     });
-// }
 
 KeystoreArray.prototype.clear = function(){
     this.index.length = 0;
@@ -274,52 +187,39 @@ export function KeystoreMap(bitlength = 8){
         return new KeystoreMap(bitlength);
     }
 
-    this.index = new Map();
+    this.index = create_object();
+    this.refs = [];
+    this.size = 0;
 
     if(bitlength > 32){
-        this.crc = crc64;
-        this.size = BigInt(2**bitlength);
+        this.crc = lcg64;
+        this.bit = BigInt(bitlength);
     }
-    else{
-        this.crc = crc32;
-        this.size = 2**bitlength;
+    else {
+        this.crc = lcg;
+        this.bit = bitlength;
     }
 }
 
 KeystoreMap.prototype.get = function(key) {
     const address = this.crc(key);
-    const map = this.index.get(address);
+    const map = this.index[address];
     return map && map.get(key);
 };
 
 KeystoreMap.prototype.set = function(key, value){
     const address = this.crc(key);
-    let map = this.index.get(address);
-    map || this.index.set(address, map = new Map());
-    map.set(key, value);
-};
-
-KeystoreMap.prototype.has = function(key) {
-    const address = this.crc(key);
-    const map = this.index.get(address);
-    return map && map.has(key);
-};
-
-KeystoreMap.prototype.delete = function(key){
-    const address = this.crc(key);
-    const map = this.index.get(address);
-    map && (map.size === 1
-        ? this.index.delete(address)
-        : map.delete(key));
-};
-
-KeystoreMap.prototype.clear = function(){
-    this.index.clear();
-};
-
-KeystoreMap.prototype.destroy = function(){
-    this.index = null;
-    this.proxy = null;
+    let map = this.index[address];
+    if(map){
+        let size = map.size;
+        map.set(key, value);
+        size -= map.size;
+        size && this.size++;
+    }
+    else{
+        this.index[address] = map = new Map([[key, value]]);
+        this.refs.push(map);
+    }
 };
 
 export function KeystoreSet(bitlength = 8){
@@ -328,241 +228,136 @@ export function KeystoreSet(bitlength = 8){
         return new KeystoreSet(bitlength);
     }
 
-    this.index = new Map();
+    this.index = create_object();
+    this.refs = [];
 
     if(bitlength > 32){
-        this.crc = crc64;
-        this.size = BigInt(2**bitlength);
+        this.crc = lcg64;
+        this.bit = BigInt(bitlength);
     }
-    else{
-        this.crc = crc32;
-        this.size = 2**bitlength;
+    else {
+        this.crc = lcg;
+        this.bit = bitlength;
     }
 }
-
-KeystoreSet.prototype.has = function(key) {
-    const address = this.crc(key);
-    const set = this.index.get(address);
-    return set && set.has(key);
-};
 
 KeystoreSet.prototype.add = function(key){
     const address = this.crc(key);
-    let set = this.index.get(address);
-    set || this.index.set(address, set = new Set());
-    set.add(key);
+    let set = this.index[address];
+    if(set){
+        let size = set.size;
+        set.add(key);
+        size -= set.size;
+        size && this.size++;
+    }
+    else{
+        this.index[address] = set = new Set([key]);
+        this.refs.push(set);
+    }
 };
 
+KeystoreMap.prototype.has =
+KeystoreSet.prototype.has = function(key) {
+    const address = this.crc(key);
+    const map_or_set = this.index[address];
+    return map_or_set && map_or_set.has(key);
+};
+
+/*
+KeystoreMap.prototype.size =
+KeystoreSet.prototype.size = function(){
+    let size = 0;
+    const values = Object.values(this.index);
+    for(let i = 0; i < values.length; i++){
+        size += values[i].size;
+    }
+    return size;
+};
+*/
+
+KeystoreMap.prototype.delete =
 KeystoreSet.prototype.delete = function(key){
     const address = this.crc(key);
-    const set = this.index.get(address);
-    set && (set.size === 1
-        ? this.index.delete(address)
-        : set.delete(key));
+    const map_or_set = this.index[address];
+    // set && (set.size === 1
+    //     ? this.index.delete(address)
+    //     : set.delete(key));
+    map_or_set &&
+    map_or_set.delete(key) &&
+    this.size--;
 };
 
+KeystoreMap.prototype.clear =
 KeystoreSet.prototype.clear = function(){
-    this.index.clear();
+    this.index = create_object();
+    this.refs = [];
+    this.size = 0;
 };
 
-KeystoreSet.prototype.destroy = function(){
-    this.index = null;
-    this.proxy = null;
+// KeystoreMap.prototype.destroy =
+// KeystoreSet.prototype.destroy = function(){
+//     this.index = null;
+//     this.refs = null;
+//     this.proxy = null;
+// };
+
+KeystoreMap.prototype.values =
+KeystoreSet.prototype.values = function*(){
+    // alternatively iterate through this.keys[]
+    //const refs = Object.values(this.index);
+    for(let i = 0; i < this.refs.length; i++){
+        for(let value of this.refs[i].values()){
+            yield value;
+        }
+    }
 };
 
-// https://www.eevblog.com/forum/embedded-computing/32-bit-crc-is-it-standard/
-function crc32(str){
-    let crc = 0;
+KeystoreMap.prototype.keys =
+KeystoreSet.prototype.keys = function*(){
+    //const values = Object.values(this.index);
+    for(let i = 0; i < this.refs.length; i++){
+        for(let key of this.refs[i].keys()){
+            yield key;
+        }
+    }
+};
+
+KeystoreMap.prototype.entries =
+KeystoreSet.prototype.entries = function*(){
+    //const values = Object.values(this.index);
+    for(let i = 0; i < this.refs.length; i++){
+        for(let entry of this.refs[i].entries()){
+            yield entry;
+        }
+    }
+};
+
+// Linear Congruential Generator (LCG)
+
+function lcg(str) {
+    let range = 2 ** this.bit - 1;
     if(typeof str == "number"){
-        crc = str;
+        return str & range;
     }
-    else{
-        let i = 0, x;
-        for(; i < str.length; i++){
-            x = str.charCodeAt(i) ^ crc;
-            //x ^= crc;
-            crc >>= 8;
-            if(x & 0x01) crc ^= 0x77073096;
-            if(x & 0x02) crc ^= 0xEE0E612C;
-            if(x & 0x04) crc ^= 0x076DC419;
-            if(x & 0x08) crc ^= 0x0EDB8832;
-            if(x & 0x10) crc ^= 0x1DB71064;
-            if(x & 0x20) crc ^= 0x3B6E20C8;
-            if(x & 0x40) crc ^= 0x76DC4190;
-            if(x & 0x80) crc ^= 0xEDB88320;
-        }
+    let crc = 0, bit = this.bit + 1;
+    for(let i = 0; i < str.length; i++) {
+        crc = (crc * bit ^ str.charCodeAt(i)) & range;
     }
-    return (crc % this.size).toString(36);
+    return crc;// & 0xFFFF;
 }
 
-// https://stackoverflow.com/questions/60270174/most-efficent-way-to-calculate-crc64-with-reflected-input
-let crctbl;
-
-function gentbl(){
-    crctbl = [];
-    let crc = 0n;
-    let b = 0n;
-    let i = 0;
-    for(let c = 0n; c < 0x100n; c++){
-        crc = c;
-        for(i = 0; i < 8; i++){
-            b = crc & 1n;
-            crc >>= 1n;
-            // crc64 iso
-            crc ^= (0n - b) & 0xd800000000000000n;
-            // crc64 ecma
-            //crc ^= (0 - b) & 0xc96c5795d7870f42;
-        }
-        crctbl[c] = crc;
+function lcg64(str) {
+    let range = 2n ** this.bit - 1n;
+    let type = typeof str;
+    if(type === "bigint"){
+        return str & range;
     }
+    if(type === "number"){
+        return BigInt(str) & range;
+    }
+    let crc = 0n, bit = this.bit + 1n;
+    for(let i = 0; i < str.length; i++) {
+        crc = (crc * bit ^ BigInt(str.charCodeAt(i))) & range;
+    }
+    return crc;// & 0xFFFFFFFFFFFFFFFF;
 }
-
-function crc64(str){
-    let crc;
-    if(typeof str == "number"){
-        crc = BigInt(str);
-    }
-    else{
-        crctbl || gentbl();
-        crc = 0n;
-        for(let i = 0, x; i < str.length; i++){
-            x = BigInt(str.charCodeAt(i));
-            crc = (crc >> 8n) ^ crctbl[(crc & 0xFFn) ^ x];
-        }
-    }
-    return (crc % this.size).toString(36);
-}
-
-// https://github.com/glenmurphy/crc64
-// const mask8 = 0xFFFFFFFFFFFFFFFFn;
-// let crc64_table;
-//
-// function generateTable() {
-//     crc64_table = [];
-//     let c = 0n, crc = 0n;
-//     for(let i = 0n, j; i < 256n; i++) {
-//         crc = 0n;
-//         c = i << 56n;
-//         for(j = 0; j < 8; j++) {
-//             (crc ^ c) & 0x8000000000000000n
-//                 ? crc = (crc << 1n) ^ 0x42F0E1EBA9EA3693n // ECMA182 Polynomial
-//                 : crc <<= 1n;
-//             c <<= 1n;
-//         }
-//         crc64_table[i] = crc & mask8;
-//     }
-// }
-//
-// export function crc64(str) {
-//     crc64_table || generateTable();
-//     //str = unescape(encodeURIComponent(str)); // convert to UTF8
-//     let crc = 0n;
-//     for(let i = 0, byte56, index; i < str.length; i++) {
-//         byte56 = BigInt(str.charCodeAt(i) & 0xFF) << 56n;
-//         crc ^= byte56;
-//         index = (crc >> 56n) & 0xFFn;
-//         crc = ((crc << 8n) ^ crc64_table[index]) & mask8;
-//     }
-//     return crc.toString(36);
-// }
-
-// https://github.com/metalwarrior665/big-map/tree/master
-// export class KeystoreMap{
-//     /**
-//      * @param {Iterable<any>} [iterable]
-//      */
-//     constructor(iterable) {
-//         this._maps = [new Map()];
-//         this._perMapSizeLimit = 2**24;
-//
-//         if (iterable) {
-//             for (const key in iterable) {
-//                 this.set(key, iterable[key]);
-//             }
-//         }
-//     }
-//     /**
-//      * @param {string} key
-//      */
-//     has(key) {
-//         for(let i = 0; i < this._maps.length; i++){
-//             if(this._maps[i].has(key)){
-//                 return true;
-//             }
-//         }
-//         return false;
-//     }
-//     /**
-//      * @param {string} key
-//      * @returns {any | undefined}
-//      */
-//     get(key) {
-//         for(let i = 0, map; i < this._maps.length; i++){
-//             if((map = this._maps[i]).has(key)){
-//                 return map.get(key);
-//             }
-//         }
-//         return undefined;
-//     }
-//     /**
-//      * @param {string} key
-//      * @returns {this}
-//      */
-//     set(key, value) {
-//
-//         for(let i = 0, map; i < this._maps.length; i++){
-//             if((map = this._maps[i]).has(key)){
-//                 map.set(key, value);
-//                 return this;
-//             }
-//         }
-//         let map = this._maps[this._maps.length - 1];
-//         if (map.size >= this._perMapSizeLimit) {
-//             map = new Map();
-//             this._maps.push(map);
-//         }
-//         map.set(key, value);
-//         return this;
-//     }
-//     clear() {
-//         for(let i = 0; i < this._maps.length; i++){
-//             this._maps[i].clear();
-//         }
-//         this._maps.length = 1;
-//     }
-//     /**
-//      * @returns {number}
-//      */
-//     get size() {
-//         let size = 0;
-//         for(let i = 0; i < this._maps.length; i++){
-//             size += this._maps[i].size();
-//         }
-//         return size;
-//     }
-//     /**
-//      * @private
-//      * @param {Exclude<keyof Map<any, any>, 'number'>} type
-//      */
-//     _reduceSpread(type) {
-//         return this._maps.reduce((out, map) => out.concat([...map[type]()]), []);
-//     }
-//     /**
-//      * @returns {any[]}
-//      */
-//     values() {
-//         return this._reduceSpread('values');
-//     }
-//     /**
-//      * @returns {string[]}
-//      */
-//     keys() {
-//         return this._reduceSpread('keys');
-//     }
-//     /**
-//      * @returns {Array<[string, any]>}
-//      */
-//     entries() {
-//         return this._reduceSpread('entries');
-//     }
-// }

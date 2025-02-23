@@ -1,9 +1,9 @@
 import { createClient } from "redis";
-const config = {
-    url: "redis://localhost:6379",
-    // host: "localhost",
-    // port: "6379",
-    // password: null
+const defaults = {
+    host: "localhost",
+    port: "6379",
+    user: null,
+    pass: null
 };
 const VERSION = 1;
 const fields = ["map", "ctx", "reg", "cfg"];
@@ -18,14 +18,23 @@ function sanitize(str) {
  * @implements StorageInterface
  */
 
-export default function RedisDB(sid, config){
+export default function RedisDB(name, config = {}){
+    if(typeof name === "object"){
+        name = name.name;
+        config = name;
+    }
+    if(!name){
+        console.info("Default storage space was used, because a name was not passed.");
+    }
     //field = "Test-456";
-    this.id = "flexsearch" + (sid ? "-" + sanitize(sid) : "") + "|";
-    this.field = config && config.field ? "-" + sanitize(config.field) : "";
+    this.id = (name ? sanitize(name) : "flexsearch") + "|";
+    this.field = config.field ? "-" + sanitize(config.field) : "";
     this.type = "";
     this.fastupdate = true;
-    this.db = null;
+    this.db = config.db || null;
     this.trx = false;
+    Object.assign(defaults, config);
+    this.db && delete defaults.db;
 };
 
 RedisDB.mount = function(flexsearch){
@@ -40,11 +49,19 @@ RedisDB.prototype.mount = function(flexsearch){
 };
 
 RedisDB.prototype.open = async function(){
-    return this.db || (this.db =
-        await createClient(config)
+    if(this.db){
+        return this.db
+    }
+    let url = defaults.url;
+    if(!url){
+        url = defaults.user
+            ? `redis://${defaults.user}:${defaults.pass}@${defaults.host}:${defaults.port}`
+            : `redis://${defaults.host}:${defaults.port}`;
+    }
+    return this.db =
+        await createClient(url)
         .on("error", err => console.error(err))
-        .connect()
-    );
+        .connect();
 };
 
 RedisDB.prototype.close = async function(){

@@ -286,14 +286,14 @@ SqliteDB.prototype.clear = function(){
     });
 };
 
-SqliteDB.prototype.get = function(ref, key, ctx, limit = 100, offset = 0){
+SqliteDB.prototype.get = function(ref, key, ctx, limit = 0, offset = 0, resolve = true){
     let result;
     switch(ref){
         case "map":
             result = this.promisfy({
                 method: "all",
                 stmt: `
-                    SELECT id/*, res*/
+                    SELECT id ${resolve ? "" : ", res"}
                     FROM main.map${this.field} 
                     WHERE key = ? 
                     ORDER BY res 
@@ -307,7 +307,7 @@ SqliteDB.prototype.get = function(ref, key, ctx, limit = 100, offset = 0){
             result = result || this.promisfy({
                 method: "all",
                 stmt: `
-                    SELECT id/*, res*/
+                    SELECT id ${resolve ? "" : ", res"}
                     FROM main.map${this.field} 
                     WHERE ctx = ? AND key = ? 
                     ORDER BY res 
@@ -317,17 +317,21 @@ SqliteDB.prototype.get = function(ref, key, ctx, limit = 100, offset = 0){
                 params: [ctx, key]
             });
             return result.then(function(rows){
-                //const arr = [];
-                // for(let i = 0, row; i < rows.length; i++){
-                //     row = rows[i];
-                //     arr[row.res] || (arr[row.res] = []);
-                //     arr[row.res].push(row.id);
-                // }
-                // return arr;
-                for(let i = 0; i < rows.length; i++){
-                    rows[i] = rows[i].id
+                if(resolve){
+                    for(let i = 0; i < rows.length; i++){
+                        rows[i] = rows[i].id
+                    }
+                    return [rows];
                 }
-                return [rows];
+                else{
+                    const arr = [];
+                    for(let i = 0, row; i < rows.length; i++){
+                        row = rows[i];
+                        arr[row.res] || (arr[row.res] = []);
+                        arr[row.res].push(row.id);
+                    }
+                    return arr;
+                }
             });
         // case "reg":
         //     return this.promisfy({
@@ -374,7 +378,7 @@ SqliteDB.prototype.has = function(ref, key, ctx){
     }
 };
 
-SqliteDB.prototype.search = async function(flexsearch, query, suggest, limit = 100, offset = 0){
+SqliteDB.prototype.search = async function(flexsearch, query, suggest, limit = 100, offset = 0, resolve = true){
 
     let rows;
     let stmt = "";
@@ -504,19 +508,21 @@ SqliteDB.prototype.search = async function(flexsearch, query, suggest, limit = 1
         });
     }
 
-    // const arr = [];
-    // for(let i = 0, row; i < rows.length; i++){
-    //     row = rows[i];
-    //     arr[row.res] || (arr[row.res] = []);
-    //     arr[row.res].push(row.id);
-    // }
-    // return arr;
-
-    for(let i = 0; i < rows.length; i++){
-        rows[i] = rows[i].id;
+    if(resolve){
+        for(let i = 0; i < rows.length; i++){
+            rows[i] = rows[i].id;
+        }
+        return rows;
     }
-
-    return rows;
+    else{
+        const arr = [];
+        for(let i = 0, row; i < rows.length; i++){
+            row = rows[i];
+            arr[row.res] || (arr[row.res] = []);
+            arr[row.res].push(row.id);
+        }
+        return arr;
+    }
 }
 
 SqliteDB.prototype.info = function(){

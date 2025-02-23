@@ -24,12 +24,12 @@ FlexSearch provides a new Storage Adapter where indexes are delegated through pe
 
 Supported:
 
-- IndexedDB (Browser)
-- Redis 
-- SQLite
-- Postgres
-- MongoDB
-- Clickhouse
+- [IndexedDB (Browser)](db/indexeddb/README.md)
+- [Redis](db/redis/README.md)
+- [SQLite](db/sqlite/README.md)
+- [Postgres](db/postgres/README.md)
+- [MongoDB](db/mongo/README.md)
+- [Clickhouse](db/clickhouse/README.md)
 
 The `.export()` and `.import()` methods are still available for non-persistent In-Memory indexes.
 
@@ -166,12 +166,12 @@ The performance really depends on text size/length, so the benchmark was measure
     </tr>
     <tr>
         <td align="left">Sqlite</td>
-        <td align="right">194,942</td>
-        <td align="right">26,129</td>
-        <td align="right">131,162</td>
-        <td align="right">133,440</td>
-        <td align="right">1,468,800</td>
-        <td align="right">134,144</td>
+        <td align="right">252,328</td>
+        <td align="right">35,184</td>
+        <td align="right">138,487</td>
+        <td align="right">193,342</td>
+        <td align="right">1,751,232</td>
+        <td align="right">141,939</td>
         <td align="right">No</td>
     </tr>
     <tr>
@@ -186,22 +186,22 @@ The performance really depends on text size/length, so the benchmark was measure
     </tr>
     <tr>
         <td align="left">MongoDB</td>
-        <td align="right">520,991</td>
-        <td align="right">18,820</td>
-        <td align="right">83,233</td>
-        <td align="right">254,758</td>
-        <td align="right">506,018</td>
-        <td align="right">67,362</td>
+        <td align="right">515,938</td>
+        <td align="right">19,684</td>
+        <td align="right">81,558</td>
+        <td align="right">243,353</td>
+        <td align="right">485,192</td>
+        <td align="right">67,751</td>
         <td align="right">Yes</td>
     </tr>
     <tr>
         <td align="left">Clickhouse</td>
-        <td align="right">1,659,693</td>
-        <td align="right">13,482</td>
-        <td align="right">12,587</td>
-        <td align="right">1,296,331</td>
-        <td align="right">5,447,723</td>
-        <td align="right">9,713</td>
+        <td align="right">1,436,992</td>
+        <td align="right">11,507</td>
+        <td align="right">22,196</td>
+        <td align="right">931,026</td>
+        <td align="right">3,276,847</td>
+        <td align="right">16,644</td>
         <td align="right">Yes</td>
     </tr>
 </table>
@@ -488,19 +488,21 @@ const result = index.search("a short query", {
 
 ## Big In-Memory Keystores
 
-The default maximum keystore limit for the In-Memory index is 2^24 of stored ids or terms/partials. An additional 64-Bit register could be enabled and is dividing the index into self-balanced partitions by using Proxy.
+The default maximum keystore limit for the In-Memory index is 2^24 of distinct terms/partials being stored. An additional register could be enabled and is dividing the index into self-balanced partitions.
 
 ```js
 const index = new FlexSearchIndex({
-    // e.g. set keystore range to 16-Bit:
-    // 2^16 * 2^24 = 2^40 keys total
-    keystore: 16 
+    // e.g. set keystore range to 8-Bit:
+    // 2^8 * 2^24 = 2^32 keys total
+    keystore: 8 
 });
 ```
 
 You can theoretically store up to 2^88 keys (64-Bit address range).
 
-> Persistent storages has no keystore limit by default.
+The internal ID arrays scales automatically when limit of 2^31 has reached by using Proxy.
+
+> Persistent storages has no keystore limit by default. You should not enable keystore when using persistent indexes, as long as you do not stress the buffer too hard before calling `index.commit()`.
 
 ## Migration
 

@@ -1,4 +1,10 @@
 import { MongoClient } from "mongodb";
+const defaults = {
+    host: "localhost",
+    port: "27017",
+    user: null,
+    pass: null
+};
 const VERSION = 1;
 const fields = ["map", "ctx", "reg", "cfg"];
 import StorageInterface from "../interface.js";
@@ -12,13 +18,22 @@ function sanitize(str) {
  * @implements StorageInterface
  */
 
-export default function MongoDB(sid, config){
+export default function MongoDB(name, config = {}){
+    if(typeof name === "object"){
+        name = name.name;
+        config = name;
+    }
+    if(!name){
+        console.info("Default storage space was used, because a name was not passed.");
+    }
     //field = "Test-456";
-    this.id = "flexsearch" + (sid ? "-" + sanitize(sid) : "");
-    this.field = config && config.field ? "-" + sanitize(config) : "";
+    this.id = "flexsearch" + (name ? "-" + sanitize(name) : "");
+    this.field = config.field ? "-" + sanitize(config) : "";
     this.type = "";
-    this.db = null;
+    this.db = config.db || null;
     this.trx = false;
+    Object.assign(defaults, config);
+    this.db && delete defaults.db;
 };
 
 MongoDB.mount = function(flexsearch){
@@ -53,10 +68,19 @@ async function createCollection(db, ref, field){
 
 MongoDB.prototype.open = async function(){
 
-    if(this.db) return this.db;
-    let db = new MongoClient("mongodb://localhost:27017/" + this.id);
-    await db.connect();
-    this.db = db.db(this.id);
+    if(!this.db){
+        let url = defaults.url;
+        if(!url){
+            url = defaults.user
+                ? `mongodb://${defaults.user}:${defaults.pass}@${defaults.host}:${defaults.port}`
+                : `mongodb://${defaults.host}:${defaults.port}`;
+        }
+
+        this.db = new MongoClient(url);
+        await this.db.connect();
+    }
+
+    if(this.db.db) this.db = this.db.db(this.id);
     const collections = await this.db.listCollections().toArray();
 
     for(let i = 0; i < fields.length; i++){
@@ -72,7 +96,7 @@ MongoDB.prototype.open = async function(){
         }
     }
 
-    return db;
+    return this.db;
 };
 
 MongoDB.prototype.close = function(){
@@ -80,13 +104,14 @@ MongoDB.prototype.close = function(){
     this.db = null;
 };
 
-MongoDB.prototype.destroy = function(){
-    return Promise.all([
+MongoDB.prototype.destroy = async function(){
+    await Promise.all([
         this.db.dropCollection("map" + this.field),
         this.db.dropCollection("ctx" + this.field),
         this.db.dropCollection("cfg" + this.field),
         this.db.dropCollection("reg")
-    ]).then(() => this.close());
+    ]);
+    this.close();
 };
 
 async function clear(ref){
@@ -103,7 +128,7 @@ MongoDB.prototype.clear = function(){
     ]);
 };
 
-MongoDB.prototype.get = function(ref, key, ctx, limit, offset){
+MongoDB.prototype.get = function(ref, key, ctx, limit = 0, offset = 0, resolve = true){
     let rows;
     switch(ref){
         case "map":
@@ -116,13 +141,21 @@ MongoDB.prototype.get = function(ref, key, ctx, limit, offset){
                                   .find({ ctx, key }, { projection: { _id: 0, res: 1, id: 1 }, limit, skip: offset })
                                   .toArray();
             return rows.then(function(rows){
-                const arr = [];
-                for(let i = 0, row; i < rows.length; i++){
-                    row = rows[i];
-                    arr[row.res] || (arr[row.res] = []);
-                    arr[row.res].push(row.id);
+                if(resolve){
+                    for(let i = 0; i < rows.length; i++){
+                        rows[i] = rows[i].id;
+                    }
+                    return [rows];
                 }
-                return arr;
+                else{
+                    const arr = [];
+                    for(let i = 0, row; i < rows.length; i++){
+                        row = rows[i];
+                        arr[row.res] || (arr[row.res] = []);
+                        arr[row.res].push(row.id);
+                    }
+                    return arr;
+                }
             });
         case "reg":
             return this.db.collection("reg").findOne({ id: key });
@@ -144,7 +177,7 @@ MongoDB.prototype.has = function(ref, key, ctx){
     }
 };
 
-MongoDB.prototype.search = async function(flexsearch, query, suggest, limit = 100, offset = 0){
+MongoDB.prototype.search = async function(flexsearch, query, suggest, limit = 100, offset = 0, resolve = true){
 
     let result = [], rows;
 
@@ -168,7 +201,7 @@ MongoDB.prototype.search = async function(flexsearch, query, suggest, limit = 10
             { $match: { $or: params } },
             { $group: {
                 _id: "$id",
-                res: { $sum: 1 },
+                res: suggest ? { $sum: 1 } : { $min: 1 },
                 count: { $sum: 1 }
             } }
         ];
@@ -177,12 +210,11 @@ MongoDB.prototype.search = async function(flexsearch, query, suggest, limit = 10
         );
         stmt.push(
             { $sort: suggest
-                ? { res: 1, count: -1 }
-                : { res: 1 }
-            },
+                ? { count: -1, res: 1}
+                : { res: 1 } },
             { $skip: offset},
             { $limit: limit },
-            { $project: { res: 0, count: 0 } }
+            { $project: { count: 0, res: resolve ? 0 : 1 } }
         );
 
         rows = await this.db.collection("ctx" + this.field).aggregate(stmt);
@@ -203,10 +235,12 @@ MongoDB.prototype.search = async function(flexsearch, query, suggest, limit = 10
             { $match: { count: query.length } }
         );
         stmt.push(
-            { $sort: suggest ? { count: -1, res: 1 } : { res: 1 } },
+            { $sort: suggest
+                ? { count: -1, res: 1 }
+                : { res: 1 } },
             { $skip: offset},
             { $limit: limit },
-            { $project: { count: 0, res: 0 } }
+            { $project: { count: 0, res: resolve ? 0 : 1 } }
         );
 
         rows = await this.db.collection("map" + this.field).aggregate(stmt);
@@ -214,20 +248,22 @@ MongoDB.prototype.search = async function(flexsearch, query, suggest, limit = 10
 
     while(true/*await rows.hasNext()*/) {
         const row = await rows.next();
-        if(row) result.push(row._id)
+        if(row) result.push(resolve ? row._id : row)
         else break;
     }
 
-
-    return result;
-
-    // const arr = [];
-    // for(let i = 0, row; i < rows.length; i++){
-    //     row = rows[i];
-    //     arr[row.res] || (arr[row.res] = []);
-    //     arr[row.res].push(row.id);
-    // }
-    // return arr;
+    if(resolve){
+        return result;
+    }
+    else{
+        const arr = [];
+        for(let i = 0, row; i < rows.length; i++){
+            row = rows[i];
+            arr[row.res] || (arr[row.res] = []);
+            arr[row.res].push(row.id);
+        }
+        return arr;
+    }
 }
 
 MongoDB.prototype.info = function(){
