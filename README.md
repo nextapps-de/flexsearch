@@ -24,12 +24,12 @@ FlexSearch provides a new Storage Adapter where indexes are delegated through pe
 
 Supported:
 
-- [IndexedDB (Browser)](db/indexeddb/README.md)
-- [Redis](db/redis/README.md)
-- [SQLite](db/sqlite/README.md)
-- [Postgres](db/postgres/README.md)
-- [MongoDB](db/mongo/README.md)
-- [Clickhouse](db/clickhouse/README.md)
+- [IndexedDB (Browser)](db/indexeddb/)
+- [Redis](db/redis/)
+- [SQLite](db/sqlite/)
+- [Postgres](db/postgres/)
+- [MongoDB](db/mongo/)
+- [Clickhouse](db/clickhouse/)
 
 The `.export()` and `.import()` methods are still available for non-persistent In-Memory indexes.
 
