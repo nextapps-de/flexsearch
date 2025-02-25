@@ -61,6 +61,6 @@ FlexSearch is creating different `DATABASE` entries for each index name e.g. "my
 DATABASE
    |__COLLECTION map:field (FlexSearch Data) 
    |__COLLECTION ctx:field (FlexSearch Data) 
-   |__COLLECTION reg:field (FlexSearch Data) 
    |__COLLECTION cfg:field (FlexSearch Data) 
+   |__COLLECTION reg       (FlexSearch Data) 
 ```

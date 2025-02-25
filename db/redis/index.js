@@ -19,6 +19,9 @@ function sanitize(str) {
  */
 
 export default function RedisDB(name, config = {}){
+    if(!(this instanceof RedisDB)){
+        return new RedisDB(name, config);
+    }
     if(typeof name === "object"){
         name = name.name;
         config = name;
@@ -37,9 +40,9 @@ export default function RedisDB(name, config = {}){
     this.db && delete defaults.db;
 };
 
-RedisDB.mount = function(flexsearch){
-    return new this().mount(flexsearch);
-};
+// RedisDB.mount = function(flexsearch){
+//     return new this().mount(flexsearch);
+// };
 
 RedisDB.prototype.mount = function(flexsearch){
     flexsearch.db = this;
@@ -75,85 +78,95 @@ RedisDB.prototype.clear = function(){
         this.id + "map" + this.field,
         this.id + "ctx" + this.field,
         this.id + "cfg" + this.field,
+        this.id + "doc",
         this.id + "reg",
     ]);
 };
 
-RedisDB.prototype.get = function(ref, key, ctx, limit = 0, offset = 0){
+function create_result(range, type, resolve, enrich){
+    let result = [];
+    if(resolve){
+        for(let i = 0, tmp, id; i < range.length; i++){
+            tmp = range[i];
+            id = type === "number"
+                ? parseInt(tmp.value, 10)
+                : tmp.value
+            result[i] = enrich
+                ? { id, doc: tmp.doc }
+                : id
+        }
+    }
+    else{
+        for(let i = 0, tmp, id, score; i < range.length; i++){
+            tmp = range[i];
+            id = type === "number"
+                ? parseInt(tmp.value, 10)
+                : tmp.value
+            score = tmp.score;
+            result[score] || (result[score] = []);
+            result[score].push(
+                enrich
+                    ? { id, doc: tmp.doc }
+                    : id
+            );
+        }
+    }
+    return result;
+}
+
+RedisDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
     let result;
-    switch(ref){
-        case "ctx":
-            result = this.db.zRangeWithScores(
-                this.id + "ctx" + this.field + ":" + ctx + ":" + key,
-                "" + offset,
-                "" + (offset + limit - 1),
-                { REV: true }
-            );
-            // fallthrough
-        case "map":
-            result = result || this.db.zRangeWithScores(
-                this.id + "map" + this.field + ":" + key,
-                "" + offset,
-                "" + (offset + limit - 1),
-                { REV: true }
-            );
-            const type = this.type;
-            return result.then(function(range){
-                let result = [];
-                for(let i = 0, tmp, score; i < range.length; i++){
-                    tmp = range[i];
-                    score = tmp.score;
-                    result[score] || (result[score] = []);
-                    result[score].push(
-                        type === "number"
-                            ? parseInt(tmp.value, 10)
-                            : tmp.value
-                    );
-                }
-                return result;
-            });
-        // case "reg":
-        //     return this.db.sIsMember(
-        //         this.id + "reg",
-        //         "" + key
-        //     );
-        // case "cfg":
-        //     return this.db.get(
-        //         this.id + "cfg" + this.field
-        //     );
+    if(ctx){
+        result = this.db[resolve ? "zRange" : "zRangeWithScores"](
+            this.id + "ctx" + this.field + ":" + ctx + ":" + key,
+            "" + offset,
+            "" + (offset + limit - 1),
+            { REV: true }
+        );
     }
+    else{
+        result = this.db[resolve ? "zRange" : "zRangeWithScores"](
+            this.id + "map" + this.field + ":" + key,
+            "" + offset,
+            "" + (offset + limit - 1),
+            { REV: true }
+        );
+    }
+    const type = this.type;
+    return result.then(function(range){
+        return create_result(range, type, resolve, enrich);
+    });
 };
 
-RedisDB.prototype.has = function(ref, key, ctx){
-    switch(ref){
-        case "ctx":
-            return this.db.sIsMember(
-                this.id + "ctx" + this.field + ":" + ctx + ":" + key,
-                "" + key
-            );
-        case "map":
-            return this.db.sIsMember(
-                this.id + "map" + this.field + ":" + key,
-                "" + key
-            );
-        case "reg":
-            return this.db.sIsMember(
-                this.id + "reg",
-                "" + key
-            );
-        // case "cfg":
-        //     return this.db.exists(
-        //         this.id + "cfg" + this.field
-        //     );
-    }
+RedisDB.prototype.has = function(id){
+    return this.db.sIsMember(this.id + "reg", "" + id);
 };
 
-RedisDB.prototype.search = function(flexsearch, query, suggest, limit = 100, offset = 0){
+// RedisDB.prototype.has = function(ref, key, ctx){
+//     switch(ref){
+//         case "ctx":
+//             return this.db.sIsMember(
+//                 this.id + "ctx" + this.field + ":" + ctx + ":" + key,
+//                 "" + key
+//             );
+//         case "map":
+//             return this.db.sIsMember(
+//                 this.id + "map" + this.field + ":" + key,
+//                 "" + key
+//             );
+//         case "reg":
+//             return this.db.sIsMember(
+//                 this.id + "reg",
+//                 "" + key
+//             );
+//         // case "cfg":
+//         //     return this.db.exists(
+//         //         this.id + "cfg" + this.field
+//         //     );
+//     }
+// };
 
-    // if(suggest){
-    //     // not supported
-    //     return false;
-    // }
+RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false){
 
     let result;
 
@@ -170,7 +183,6 @@ RedisDB.prototype.search = function(flexsearch, query, suggest, limit = 100, off
             params.push(key + (swap ? term : keyword) + ":" + (swap ? keyword : term));
             keyword = term;
         }
-        //result = this.db.zInterWithScores(params);
         query = params;
     }
     else{
@@ -179,8 +191,6 @@ RedisDB.prototype.search = function(flexsearch, query, suggest, limit = 100, off
         for(let i = 0; i < query.length; i++){
             query[i] = key + query[i];
         }
-        //query = query.map(term => key + term);
-        //result = this.db.zInterWithScores(query);
     }
 
     const type = this.type;
@@ -188,41 +198,32 @@ RedisDB.prototype.search = function(flexsearch, query, suggest, limit = 100, off
     result = suggest
         ? this.db.multi()
             .zUnionStore(key, query, { AGGREGATE: "SUM" })
-            .zRangeWithScores(key, "" + offset, "" + (offset + limit - 1), { REV: true })
+            [(resolve ? "zRange" : "zRangeWithScores")](key, "" + offset, "" + (offset + limit - 1), { REV: true })
+            //.zRangeWithScores
             .unlink(key)
             .exec()
         : this.db.multi()
             .zInterStore(key, query, { AGGREGATE: "MIN" })
-            .zRangeWithScores(key, "" + offset, "" + (offset + limit - 1), { REV: true })
+            [(resolve ? "zRange" : "zRangeWithScores")](key, "" + offset, "" + (offset + limit - 1), { REV: true })
+            //.zRangeWithScores
             .unlink(key)
             .exec();
 
-    return result.then(function(result){
+    return result.then(async function(range){
         // take the 2nd result from batch return
-        result = result[1];
-        // if(offset){
-        //     if(result.length < offset){
-        //         return [];
-        //     }
-        //     if(result.length > offset){
-        //         //result.splice(0, offset);
-        //         result = result.slice(offset, offset + limit);
-        //     }
-        // }
-        // else if(limit){
-        //     if(result.length > limit){
-        //         //result.splice(limit);
-        //         result = result.slice(0, limit);
-        //     }
-        // }
+        range = range[1];
+        if(enrich) range = await this.enrich(range);
+        return create_result(range, type, resolve, enrich);
+    });
+};
 
-        for(let i = 0; i < result.length; i++){
-            result[i] = type === "number"
-                ? parseInt(result[i].value, 10)
-                : result[i].value
+RedisDB.prototype.enrich = function(ids){
+    const keys = ids.map(id => this.id + "doc:" + (id.value || id));
+    return this.db.sMembers(keys).then(function(res){
+        for(let i = 0; i < res.length; i++){
+            ids[i].doc = res[i];
         }
-
-        return result;
+        return ids;
     });
 };
 

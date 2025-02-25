@@ -98,8 +98,8 @@ FlexSearch is creating different `DATABASE` entries for each index name e.g. "my
 DATABASE
    |__TABLE map:field (FlexSearch Data) 
    |__TABLE ctx:field (FlexSearch Data) 
-   |__TABLE reg:field (FlexSearch Data) 
    |__TABLE cfg:field (FlexSearch Data) 
+   |__TABLE reg       (FlexSearch Data) 
 ```
 
 The default DATABASE in Clickhouse is commonly named `default` and is required to make the first connection for creating the new databases. You can force using a specific default DATABASE by option:

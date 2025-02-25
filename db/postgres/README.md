@@ -91,8 +91,8 @@ DATABASE_NAME
   |__ SCHEMA
         |__TABLE map:field (FlexSearch Data) 
         |__TABLE ctx:field (FlexSearch Data) 
-        |__TABLE reg:field (FlexSearch Data) 
         |__TABLE cfg:field (FlexSearch Data) 
+        |__TABLE reg       (FlexSearch Data) 
 ```
 
 You can force using a specific SCHEMA by option without passing a name:

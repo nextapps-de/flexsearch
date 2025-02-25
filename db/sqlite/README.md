@@ -107,5 +107,8 @@ FlexSearch is creating different files for each index name e.g. "my-store". That
 ```
 FILENAME
   |__ MAIN
-        |__TABLES (FlexSearch Data) 
+        |__TABLES map:field (FlexSearch Data) 
+        |__TABLES ctx:field (FlexSearch Data) 
+        |__TABLES cfg:field (FlexSearch Data) 
+        |__TABLES reg       (FlexSearch Data) 
 ```

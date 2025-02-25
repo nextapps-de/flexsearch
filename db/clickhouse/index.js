@@ -52,9 +52,12 @@ function sanitize(str) {
  * @implements StorageInterface
  */
 
-export default function ClickhouseDB(sid, config = {}){
+export default function ClickhouseDB(name, config = {}){
+    if(!(this instanceof ClickhouseDB)){
+        return new ClickhouseDB(name, config);
+    }
     //field = "Test-456";
-    this.id = "flexsearch" + (sid ? "_" + sanitize(sid) : "");
+    this.id = "flexsearch" + (name ? "_" + sanitize(name) : "");
     this.field = config.field ? "_" + sanitize(config.field) : "";
     this.db = config.db || null;
     this.trx = false;
@@ -67,9 +70,9 @@ export default function ClickhouseDB(sid, config = {}){
     this.db && delete defaults.db;
 };
 
-ClickhouseDB.mount = function(flexsearch){
-    return new this().mount(flexsearch);
-};
+// ClickhouseDB.mount = function(flexsearch){
+//     return new this().mount(flexsearch);
+// };
 
 ClickhouseDB.prototype.mount = function(flexsearch){
     flexsearch.db = this;
@@ -125,7 +128,8 @@ ClickhouseDB.prototype.open = async function(){
             case "reg":
                 await this.db.query(`
                     CREATE TABLE IF NOT EXISTS ${this.id}.reg(
-                        id ${this.type}
+                        id  ${this.type},
+                        doc Nullable(String)
                     )
                     ENGINE = MergeTree
                     ORDER BY (id);
@@ -170,108 +174,128 @@ ClickhouseDB.prototype.clear = function(){
     ]);
 };
 
-ClickhouseDB.prototype.get = async function(ref, key, ctx, limit = 0, offset = 0, resolve = true){
-    let rows;
-    switch(ref){
-        case "map":
-            rows = await this.db.query(`
-                SELECT res, id 
-                FROM ${this.id}.map${this.field}
-                WHERE key = {key:String}
-                ${limit ? `LIMIT ${limit}` : ''}
-                ${offset ? `OFFSET ${offset}` : ''}`,
-                { params: { key }}
-            ).toPromise();
-            // fallthrough
-        case "ctx":
-            rows = rows || await this.db.query(`
-                SELECT res, id 
-                FROM ${this.id}.ctx${this.field}
-                WHERE ctx = {ctx:String} AND key = {key:String}
-                ${limit ? `LIMIT ${limit}` : ''}
-                ${offset ? `OFFSET ${offset}` : ''}`,
-                { params: { ctx, key }}
-            ).toPromise();
-            if(resolve){
-                for(let i = 0; i < rows.length; i++){
-                    rows[i] = rows[i].id
-                }
-                return [rows];
-            }
-            else{
-                const arr = [];
-                for(let i = 0, row; i < rows.length; i++){
-                    row = rows[i];
-                    arr[row.res] || (arr[row.res] = []);
-                    arr[row.res].push(row.id);
-                }
-                return arr;
-            }
-        case "reg":
-            return this.has(ref, key);
-        case "cfg":
-            const cfg = (
-                await this.db.query(`
-                    SELECT cfg 
-                    FROM ${this.id}.cfg${this.field} 
-                    LIMIT 1`
-                ).toPromise()
-            )[0];
-            return cfg ? JSON.parse(cfg) : {};
+function create_result(rows, resolve, enrich){
+    if(resolve){
+        if(!enrich) for(let i = 0; i < rows.length; i++){
+            rows[i] = rows[i].id
+        }
+        return rows;
     }
+    else{
+        const arr = [];
+        for(let i = 0, row; i < rows.length; i++){
+            row = rows[i];
+            arr[row.res] || (arr[row.res] = []);
+            arr[row.res].push(enrich
+                ? row
+                : row.id
+            );
+        }
+        return arr;
+    }
+}
+
+ClickhouseDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
+    let rows;
+    if(ctx){
+        const table = this.id + ".ctx" + this.field;
+        rows = this.db.query(`
+            SELECT ${ table }.id
+                   ${ resolve ? "" : ", res" }
+                   ${ enrich ? ", doc" : "" }
+            FROM ${ table }
+            ${ enrich ? `
+                LEFT OUTER JOIN ${ this.id }.reg ON ${ this.id }.reg.id = ${ table }.id
+            ` : "" }
+            WHERE ctx = {ctx:String} AND key = {key :String} 
+            ORDER BY res
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }`,
+            { params: { ctx, key } }
+        ).toPromise();
+    }
+    else{
+        const table = this.id + ".map" + this.field;
+        rows = this.db.query(`
+            SELECT ${ table }.id
+                   ${ resolve ? "" : ", res" }
+                   ${ enrich ? ", doc" : "" }
+            FROM ${ table }
+            ${ enrich ? `
+                LEFT OUTER JOIN ${ this.id }.reg ON ${ this.id }.reg.id = ${ table }.id
+            ` : "" }
+            WHERE key = {key:String}
+            ORDER BY res
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }`,
+            { params: { key }}
+        ).toPromise();
+    }
+    return rows.then(function(rows){
+        return create_result(rows, resolve, enrich);
+    });
 };
 
-ClickhouseDB.prototype.has = async function(ref, key, ctx){
-    switch(ref){
-        case "map":
-            return (
-                await this.db.query(`
-                    SELECT 1 
-                    FROM ${this.id}.map${this.field} 
-                    WHERE key = {key:String} 
-                    LIMIT 1`,
-                    { params: { key }}
-                ).toPromise()
-            )[0];
-        case "ctx":
-            return (
-                await this.db.query(`
-                    SELECT 1
-                    FROM ${this.id}.ctx${this.field}
-                    WHERE ctx = {ctx:String} AND key = {key:String} 
-                    LIMIT 1`,
-                    { params: { ctx, key }}
-                ).toPromise()
-            )[0];
-        case "reg":
-            return (
-                await this.db.query(`
-                    SELECT 1
-                    FROM ${this.id}.reg
-                    WHERE id = {key:${this.type /*=== "number" ? "Int32" : "String"*/}}
-                    LIMIT 1`,
-                    { params: { key }}
-                ).toPromise()
-            )[0];
-        case "cfg":
-            return (
-                await this.db.query(`
-                    SELECT 1 
-                    FROM ${this.id}.cfg${this.field} 
-                    WHERE cfg IS NOT NULL 
-                    LIMIT 1`
-                ).toPromise()
-            )[0];
-    }
+ClickhouseDB.prototype.has = function(id){
+    return this.db.query(`
+        SELECT EXISTS(
+            SELECT 1
+            FROM ${this.id}.reg
+            WHERE id = {id:${this.type /*=== "number" ? "Int32" : "String"*/}}
+            LIMIT 1)`,
+        { params: { id }}
+    ).toPromise();
 };
 
-ClickhouseDB.prototype.search = async function(flexsearch, query, suggest, limit = 100, offset = 0, resolve = true){
+// ClickhouseDB.prototype.has = async function(ref, key, ctx){
+//     switch(ref){
+//         case "map":
+//             return (
+//                 await this.db.query(`
+//                     SELECT 1
+//                     FROM ${this.id}.map${this.field}
+//                     WHERE key = {key:String}
+//                     LIMIT 1`,
+//                     { params: { key }}
+//                 ).toPromise()
+//             )[0];
+//         case "ctx":
+//             return (
+//                 await this.db.query(`
+//                     SELECT 1
+//                     FROM ${this.id}.ctx${this.field}
+//                     WHERE ctx = {ctx:String} AND key = {key:String}
+//                     LIMIT 1`,
+//                     { params: { ctx, key }}
+//                 ).toPromise()
+//             )[0];
+//         case "reg":
+//             return (
+//                 await this.db.query(`
+//                     SELECT 1
+//                     FROM ${this.id}.reg
+//                     WHERE id = {key:${this.type /*=== "number" ? "Int32" : "String"*/}}
+//                     LIMIT 1`,
+//                     { params: { key }}
+//                 ).toPromise()
+//             )[0];
+//         case "cfg":
+//             return (
+//                 await this.db.query(`
+//                     SELECT 1
+//                     FROM ${this.id}.cfg${this.field}
+//                     WHERE cfg IS NOT NULL
+//                     LIMIT 1`
+//                 ).toPromise()
+//             )[0];
+//     }
+// };
 
+ClickhouseDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = true){
     let rows;
-    let stmt = "";
-
     if(query.length > 1 && flexsearch.depth){
 
+        let stmt = "";
         let params = {};
         let keyword = query[0];
         let term;
@@ -285,18 +309,24 @@ ClickhouseDB.prototype.search = async function(flexsearch, query, suggest, limit
             keyword = term;
         }
 
-        rows = await this.db.query(`
-            SELECT id ${resolve ? "" : ", res"}
+        rows = this.db.query(`
+            SELECT r.id
+                   ${ resolve ? "" : ", res" }
+                   ${ enrich ? ", doc" : "" }
             FROM (
-                SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-                FROM ${this.id}.ctx${this.field}
-                WHERE ${stmt}
+                SELECT id, count(*) as count,
+                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                FROM ${ this.id + ".ctx" + this.field }
+                WHERE ${ stmt }
                 GROUP BY id
-                ORDER BY count DESC, res
+                ORDER BY ${ suggest ? "count DESC, res" : "res" }
             ) as r
+            ${ enrich ? `
+                LEFT OUTER JOIN ${ this.id }.reg ON ${ this.id }.reg.id = r.id
+            ` : "" }
             ${ suggest ? "" : "WHERE count = " + (query.length - 1) }
-            LIMIT ${limit}
-            ${offset ? "OFFSET " + offset : ""}
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }
         `, { params }).toPromise();
 
         // for(let i = 1; i < query.length; i++){
@@ -327,24 +357,32 @@ ClickhouseDB.prototype.search = async function(flexsearch, query, suggest, limit
     }
     else{
 
+        let stmt = "";
         let params = {};
 
         for(let i = 0; i < query.length; i++){
             stmt += (stmt ? "," : "") + `{key${i}:String}`;
             params["key" + i] = query[i];
         }
-        rows = await this.db.query(`
-            SELECT id ${resolve ? "" : ", res"}
+
+        rows = this.db.query(`
+            SELECT r.id
+                   ${ resolve ? "" : ", res" }
+                   ${ enrich ? ", doc" : "" }
             FROM (
-                SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-                FROM ${this.id}.map${this.field}
-                WHERE key ${query.length > 1 ? "IN (" + stmt + ")" : "= " + stmt }
+                SELECT id, count(*) as count,
+                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                FROM ${ this.id + ".map" + this.field }
+                WHERE key ${ query.length > 1 ? "IN (" + stmt + ")" : "= " + stmt }
                 GROUP BY id
-                ORDER BY count DESC, res
-            )
+                ORDER BY ${ suggest ? "count DESC, res" : "res" }
+            ) as r
+            ${ enrich ? `
+                LEFT OUTER JOIN ${ this.id }.reg ON ${ this.id }.reg.id = r.id
+            ` : "" }            
             ${ suggest ? "" : "WHERE count = " + query.length }
-            LIMIT ${limit}
-            ${offset ? "OFFSET " + offset : ""}
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }
         `, { params }).toPromise();
 
         // for(let i = 0; i < query.length; i++){
@@ -368,29 +406,9 @@ ClickhouseDB.prototype.search = async function(flexsearch, query, suggest, limit
         //     ${ suggest ? "" : "WHERE count = " + query.length }
         // `, { params }).toPromise();
     }
-
-    // const arr = [];
-    // for(let i = 0, row; i < rows.length; i++){
-    //     row = rows[i];
-    //     arr[row.res] || (arr[row.res] = []);
-    //     arr[row.res].push(row.id);
-    // }
-
-    if(resolve){
-        for(let i = 0; i < rows.length; i++){
-            rows[i] = rows[i].id;
-        }
-        return rows;
-    }
-    else{
-        const arr = [];
-        for(let i = 0, row; i < rows.length; i++){
-            row = rows[i];
-            arr[row.res] || (arr[row.res] = []);
-            arr[row.res].push(row.id);
-        }
-        return arr;
-    }
+    return rows.then(function(rows){
+        return create_result(rows, resolve, enrich);
+    });
 }
 
 ClickhouseDB.prototype.info = function(){

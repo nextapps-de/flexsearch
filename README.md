@@ -111,7 +111,7 @@ You can call the commit method manually also when `commit: true` option was set.
 
 ### Benchmark
 
-The performance really depends on text size/length, so the benchmark was measured in "terms per second". To make the best pick you should evaluate scaling capabilities and also if replace/remove is needed.
+The benchmark was measured in "terms per second".
 
 <table>
     <tr>
@@ -134,40 +134,42 @@ The performance really depends on text size/length, so the benchmark was measure
         <td align="right"><sub>terms per sec</sub></td>
         <td></td>
     </tr>
+    <!--
     <tr>
         <td align="left">Memory</td>
         <td align="right">16,647,301</td>
-        <td align="right">10,892,933</td>
+        <td align="right">65,180,102</td>
         <td align="right">11,767,590</td>
         <td align="right">19,099,981</td>
         <td align="right">80,675,387</td>
         <td align="right">143,369,175</td>
         <td align="right">No</td>
     </tr>
-   <tr>
+    -->
+    <tr>
         <td align="left">IndexedDB</td>
         <td align="right">123,298</td>
-        <td align="right">126,666</td>
+        <td align="right">83,823</td>
         <td align="right">62,370</td>
-        <td align="right">50,599</td>
-        <td align="right">151,201</td>
-        <td align="right">430,322</td>
+        <td align="right">57,410</td>
+        <td align="right">171,053</td>
+        <td align="right">425,744</td>
         <td align="right">No</td>
     </tr>
     <tr>
         <td align="left">Redis</td>
-        <td align="right">1,574,878</td>
-        <td align="right">106,210</td>
-        <td align="right">690,143</td>
+        <td align="right">1,566,091</td>
+        <td align="right">201,534</td>
+        <td align="right">859,463</td>
         <td align="right">117,013</td>
         <td align="right">129,595</td>
-        <td align="right">656,157</td>
+        <td align="right">875,526</td>
         <td align="right">Yes</td>
     </tr>
     <tr>
         <td align="left">Sqlite</td>
         <td align="right">252,328</td>
-        <td align="right">35,184</td>
+        <td align="right">37,589</td>
         <td align="right">138,487</td>
         <td align="right">193,342</td>
         <td align="right">1,751,232</td>
@@ -208,6 +210,8 @@ The performance really depends on text size/length, so the benchmark was measure
 
 __Search 1:__ single term query<br>
 __Search N:__ multi term query (this often performs better because of the intersection is shrinking the final result, especially when using Context-Search)
+
+The benchmark was executed against a single client without any scaling involved.
 
 ## Encoder
 
@@ -289,9 +293,17 @@ Or use predefined language and add custom options:
 ```js
 import EnglishBookPreset from "./lang/en.js";
 const encoder = new Encoder({
-    preset: EnglishBookPreset,
+    assign: EnglishBookPreset,
     filter: false
 });
+```
+
+Equivalent:
+
+```js
+import EnglishBookPreset from "./lang/en.js";
+const encoder = new Encoder(EnglishBookPreset);
+encoder.assign({ filter: false });
 ```
 
 Assign extensions to the encoder instance:
@@ -300,7 +312,11 @@ Assign extensions to the encoder instance:
 import LatinEncoder from "./lang/latin/simple.js";
 import EnglishBookPreset from "./lang/en.js";
 // stack definitions to the encoder instance
-LatinEncoder.assign(EnglishBookPreset);
+const encoder = new Encoder()
+    .assign(LatinEncoder)
+    .assign(EnglishBookPreset)
+// override preset options ...
+    .assign({ minlength: 3 });
 // assign further presets ...
 ```
 
@@ -308,11 +324,12 @@ Add custom transformations to an existing index:
 
 ```js
 import LatinEncoder from "./lang/latin/default.js";
-LatinEncoder.addReplacer(/[´`’ʼ]/g, "'");
-LatinEncoder.addFilter("and");
-LatinEncoder.addMatcher("xvi", "16");
-LatinEncoder.addStemmer("ly", "");
-LatinEncoder.addMapper("é", "e");
+const encoder = new Encoder(LatinEncoder);
+encoder.addReplacer(/[´`’ʼ]/g, "'");
+encoder.addFilter("and");
+encoder.addMatcher("xvi", "16");
+encoder.addStemmer("ly", "");
+encoder.addMapper("é", "e");
 ```
 
 ## Resolver
@@ -504,10 +521,54 @@ The internal ID arrays scales automatically when limit of 2^31 has reached by us
 
 > Persistent storages has no keystore limit by default. You should not enable keystore when using persistent indexes, as long as you do not stress the buffer too hard before calling `index.commit()`.
 
+<!--
+## Index Compression
+
+You can reduce the memory footprint of stored terms by enable compression:
+
+```js
+const index = new FlexSearchIndex({
+    compress: true 
+});
+```
+
+The basic idea is to transform terms into a number and then applying a radix with a high base to it. A maximum radix of 2^16-1 is covered by the UTF-8 Standard.
+
+Take this example of a long term `ExtraLongTermsCanIncreaseTheIndexSize` will reduce to `#oPG`, from 37 chars to just 4 by using a radix of 2^8. The minimum length I could achieve was `⎐珗` 2 chars with a radix of 2^16-1 but without further memory reduction.
+
+```js
+// Compression Off:
+"ExtraLongTermsCanIncreaseTheIndexSize"
+// Compression On: (radix of 2^8)
+"#oPG" // 4 chars
+// Compression Max: (radix of 2^16)
+"⎐珗"  // 2 chars
+```
+
+Indexing 2,000,000 created unique tokens with a length of 32 letters:
+
+<table>
+    <tr>
+        <td>Compression Off</td>
+        <td>878 Mb</td>
+    </tr>
+    <tr>
+        <td>Compression On</td>
+        <td>62 Mb (93% ratio)</td>
+    </tr>
+</table>
+
+There is a small chance, usually with less than 0.01%, that hash collision will occur. In this case you will get a "false-positive" entry in the search result. A collision does not occur on usual term length but might happen on longer term length of e.g. 32 chars.
+-->
+
 ## Migration
 
 - The index option property "minlength" has moved to the Encoder Class
 - The index option flag "optimize" was removed
 - The index option flag "lang" was replaced by the Encoder Class `.assign()`
 - Boost cannot apply upfront anymore when indexing, instead you can use the boost property on a query dynamically
-- All definitions of the old text encoding process was replaced by similar definitions (Array changed to Set, Object changed to Map). You can use of the helper methods like `.addMatcher(char_match, char_replace)` which adds everything properly (almost everything will pre-compiled anyway).
+- All definitions of the old text encoding process was replaced by similar definitions (Array changed to Set, Object changed to Map). You can use of the helper methods like `.addMatcher(char_match, char_replace)` which adds everything properly.
+- The default value for `fastupdate` is set to `false` by default when not passed via options
+- The method `index.encode()` has moved to `index.encoder.encode()`
+- The options `charset` and `lang` was removed from index (replaced by `Encoder.assign({...})`)
+- Every charset collection (files in folder `/lang/**.js`) is now exported as a config object (instead of a function). This config needs to be created by passing to the constructor `new Encoder(config)` or can be added to an existing instance via `encoder.assign(config)`.

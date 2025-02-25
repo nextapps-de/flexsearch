@@ -38,8 +38,6 @@ Pipeline:
    10. apply this.compression
 */
 
-let table = null;
-const radix = 512;
 const whitespace = /[^\p{L}\p{N}]+/u; // /[\p{Z}\p{S}\p{P}\p{C}]+/u;
 //const numeric_split = /(\d{3})/g;
 const numeric_split_length = /(\d{3})/g;
@@ -399,10 +397,8 @@ Encoder.prototype.assign = function(options){
             this.timer = null;
             this.cache_size = typeof tmp === "number" ? tmp : 2e5;
             this.cache_enc = new Map();
-            this.cache_cmp = new Map();
             this.cache_prt = new Map();
             this.cache_enc_length = 128;
-            // also alias for cache_cmp_length:
             this.cache_prt_length = 128;
         }
     }
@@ -434,14 +430,16 @@ Encoder.prototype.assign = function(options){
         }
     }
 
-    if(SUPPORT_COMPRESSION){
-        this.compression = parse_option(options.compress || options.compression, 0, this.compression);
-        if(this.compression && !table){
-            table = new Array(radix);
-            for(let i = 0; i < radix; i++) table[i] = i + 33;
-            table = String.fromCharCode.apply(null, table);
-        }
-    }
+    // if(SUPPORT_COMPRESSION){
+    //     this.compression = parse_option(options.compress || options.compression, 0, this.compression);
+    //     if(this.compression && !table){
+    //         table = new Array(radix);
+    //         for(let i = 0; i < radix; i++) table[i] = i + 33;
+    //         table = String.fromCharCode.apply(null, table);
+    //     }
+    // }
+
+    return this;
 };
 
 Encoder.prototype.addMatcher = function(match, replace){
@@ -732,42 +730,41 @@ Encoder.prototype.encode = function(str){
     return final;
 };
 
-Encoder.prototype.compress = function(str) {
+// Encoder.prototype.compress = function(str) {
+//
+//     //return str;
+//     //if(!str) return str;
+//
+//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
+//         if(this.timer){
+//             if(this.cache_cmp.has(str)){
+//                 return this.cache_cmp.get(str);
+//             }
+//         }
+//         else{
+//             this.timer = setTimeout(tick, 0, this);
+//         }
+//     }
+//
+//     const result = typeof this.compression === "function"
+//         ? this.compression(str)
+//         : hash(str); //window.hash(str);
+//
+//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
+//         this.cache_cmp.set(str, result);
+//         this.cache_cmp.size > this.cache_size &&
+//         this.cache_cmp.clear();
+//     }
+//
+//     return result;
+// };
 
-    //return str;
-    //if(!str) return str;
-
-    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
-        if(this.timer){
-            if(this.cache_cmp.has(str)){
-                return this.cache_cmp.get(str);
-            }
-        }
-        else{
-            this.timer = setTimeout(tick, 0, this);
-        }
-    }
-
-    const result = typeof this.compression === "function"
-        ? this.compression(str)
-        : hash(str); //window.hash(str);
-
-    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
-        this.cache_cmp.set(str, result);
-        this.cache_cmp.size > this.cache_size &&
-        this.cache_cmp.clear();
-    }
-
-    return result;
-};
-
-function hash(str){
-    return str;
-}
+// function hash(str){
+//     return str;
+// }
 
 function tick(self){
     self.timer = null;
     self.cache_enc.clear();
     self.cache_prt.clear();
-    self.cache_cmp.clear();
 }

@@ -56,13 +56,13 @@ export const replacer = [
     /([aeo])h([^aeo]|$)/g, "$1$2",
 ];
 
-export default new Encoder({
+export default {
     normalize: true,
     dedupe: true,
     mapper: soundex,
     replacer: replacer,
     matcher: matcher
-});
+};
 
 // import { regex, replace, collapse } from "../../lang.js";
 // import { encode as encode_balance } from "./balance.js";

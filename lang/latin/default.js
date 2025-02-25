@@ -1,11 +1,11 @@
 import Encoder from "../../encoder.js";
 
-export default new Encoder({
+export default {
     normalize: function(str){
         return str.toLowerCase();
     },
     dedupe: false
-});
+};
 
 // import { pipeline } from "../../lang.js";
 //

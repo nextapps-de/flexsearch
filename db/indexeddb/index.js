@@ -25,6 +25,9 @@ function sanitize(str) {
  */
 
 export default function IdxDB(name, config = {}){
+    if(!(this instanceof IdxDB)){
+        return new IdxDB(name, config);
+    }
     if(typeof name === "object"){
         name = name.name;
         config = name;
@@ -36,9 +39,9 @@ export default function IdxDB(name, config = {}){
     this.trx = {};
 };
 
-IdxDB.mount = function(flexsearch){
-    return new this().mount(flexsearch);
-};
+// IdxDB.mount = function(flexsearch){
+//     return new this().mount(flexsearch);
+// };
 
 IdxDB.prototype.mount = function(flexsearch){
     flexsearch.db = this;
@@ -49,10 +52,10 @@ IdxDB.prototype.open = function(){
 
     let self = this;
 
-    return this.db || new Promise(function(resolve, reject){
+    navigator.storage &&
+    navigator.storage.persist();
 
-        navigator.storage &&
-        navigator.storage.persist();
+    return this.db || new Promise(function(resolve, reject){
 
         const req = IndexedDB.open(self.id, VERSION);
 
@@ -64,7 +67,7 @@ IdxDB.prototype.open = function(){
             // too bad and blows up amazingly in size
             // The schema map:key => [res][id] is currently used instead
             // In fact that bypass the idea of a storage solution,
-            // IndexedDB is just a poor contribution :(
+            // IndexedDB is such a poor contribution :(
 
             fields.forEach(ref => {
                 db.objectStoreNames.contains(ref) ||
@@ -135,19 +138,20 @@ IdxDB.prototype.clear = function(){
     for(let i = 0; i < fields.length; i++){
         transaction.objectStore(fields[i]).clear();
     }
-    return transaction;
+    return promisfy(transaction);
 };
 
-IdxDB.prototype.get = function(ref, key, ctx, limit = 0, offset = 0, resolve = true){
-
-    const transaction = this.db.transaction(ref, "readonly");
-    const map = transaction.objectStore(ref);
+IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
+    const transaction = this.db.transaction(ctx ? "ctx" : "map", "readonly");
+    const map = transaction.objectStore(ctx ? "ctx" : "map");
     const req = map.get(ctx ? ctx + ":" + key : key);
-
     return promisfy(req).then(function(res){
         let result = [];
-        if(!res) return result;
+        if(!res || !res.length) return result;
         if(resolve){
+            if(!limit && !offset && res.length === 1){
+                return res[0];
+            }
             for(let i = 0, arr; i < res.length; i++){
                 if((arr = res[i]) && arr.length){
                     if(offset >= arr.length){
@@ -162,11 +166,11 @@ IdxDB.prototype.get = function(ref, key, ctx, limit = 0, offset = 0, resolve = t
                     }
                     offset = 0;
                     if(result.length === limit){
-                        return [result];
+                        return result;
                     }
                 }
             }
-            return [result];
+            return result;
         }
         else{
             return res;
@@ -174,12 +178,19 @@ IdxDB.prototype.get = function(ref, key, ctx, limit = 0, offset = 0, resolve = t
     });
 };
 
-IdxDB.prototype.has = function(ref, key, ctx){
-    const transaction = this.db.transaction(ref, "readonly");
-    const map = transaction.objectStore(ref);
-    const req = map.getKey(ctx ? ctx + ":" + key : key);
+IdxDB.prototype.has = function(id){
+    const transaction = this.db.transaction("reg", "readonly");
+    const map = transaction.objectStore("reg");
+    const req = map.getKey(id);
     return promisfy(req);
 };
+
+// IdxDB.prototype.has = function(ref, key, ctx){
+//     const transaction = this.db.transaction(ref, "readonly");
+//     const map = transaction.objectStore(ref);
+//     const req = map.getKey(ctx ? ctx + ":" + key : key);
+//     return promisfy(req);
+// };
 
 IdxDB.prototype.info = function(){
     // todo
@@ -359,14 +370,14 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
 
     await this.transaction("cfg", "readwrite", function(store){
         store.put({
-            "encode": typeof flexsearch.encode === "string" ? flexsearch.encode : "",
-            "charset": typeof flexsearch.charset === "string" ? flexsearch.charset : "",
+            "charset": flexsearch.charset,
             "tokenize": flexsearch.tokenize,
             "resolution": flexsearch.resolution,
-            "minlength": flexsearch.minlength,
-            "optimize": flexsearch.optimize,
             "fastupdate": flexsearch.fastupdate,
-            "encoder": flexsearch.encoder,
+            "compress": flexsearch.compress,
+            "encoder": {
+                "minlength": flexsearch.encoder.minlength
+            },
             "context": {
                 "depth": flexsearch.depth,
                 "bidirectional": flexsearch.bidirectional,
@@ -475,6 +486,10 @@ IdxDB.prototype.remove = function(ids){
 function promisfy(req, callback){
     return new Promise((resolve, reject) => {
         req.onsuccess = function(){
+            callback && callback(this.result);
+            resolve(this.result);
+        };
+        req.oncomplete = function(){
             callback && callback(this.result);
             resolve(this.result);
         };

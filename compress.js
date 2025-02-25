@@ -1,36 +1,76 @@
-let table = null;
-const radix = 512;
+import { SUPPORT_CACHE } from "./config.js";
 
+let table;// = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/";
+let timer;
+const cache = new Map();
 
-export default function(str, level){
+function toRadix(number, radix = 255) {
 
     if(!table){
         table = new Array(radix);
-        for(let i = 0; i < radix; i++) table[i] = i + 33;
+        // the char code 0 could be a special marker
+        for(let i = 0; i < radix; i++) table[i] = i + 1;
         table = String.fromCharCode.apply(null, table);
     }
 
-    return str;
-}
+    let rixit;
+    let residual = number;
+    let result = "";
 
-function crc(data, crc = 0, prime = 0) {
-    for(let i = 0, t, z; i < data.length; i++, crc &= 0xFFFF) {
-        t = (crc >> 8) ^ data.charCodeAt(i);
-        z = t;
-        t ^= t >> 1;
-        t ^= t >> 2;
-        t ^= t >> 4;
-        t &= 1;
-        t |= z << 1;
-        crc = (crc << 8) ^ (t << 15) ^ (t << 1) ^ (t);
+    while(true){
+        rixit = residual % radix;
+        result = table.charAt(rixit) + result;
+        residual = residual / radix | 0;
+        if(!residual)
+            break;
     }
-    return (prime ? (crc ^ 0) % prime : (crc ^ 0));
+
+    return result;
 }
 
-// 1252 3106 3841 [5559] 6191 7623 [[10239]
-function crc2(str, crc = 0, prime = 5559) {
+export default function(str){
+
+    if(SUPPORT_CACHE){
+        if(timer){
+            if(cache.has(str)){
+                return cache.get(str);
+            }
+        }
+        else{
+            timer = setTimeout(tick);
+        }
+    }
+
+    /* 2 ** ((level + 1.5) * 1.6 | 0) */
+
+    const result = toRadix(
+        typeof str == "number"
+            ? str
+            : lcg(str)
+    );
+
+    if(SUPPORT_CACHE){
+        cache.size > 2e5 && cache.clear();
+        cache.set(str, result);
+    }
+
+    return result;
+}
+
+function lcg(str) {
+    let range = 2 ** 32 - 1;
+    if(typeof str == "number"){
+        return str & range;
+    }
+    let crc = 0, bit = 32 + 1;
     for(let i = 0; i < str.length; i++) {
-        crc += (crc << 2) - crc + str.charCodeAt(i);
+        crc = (crc * bit ^ str.charCodeAt(i)) & range;
     }
-    return prime ? (crc >>> 0) % prime : crc >>> 0;
+    // shift up from Int32 to UInt32 range 0xFFFFFFFF
+    return crc + 2 ** 31;
+}
+
+function tick(){
+    timer = null;
+    cache.clear();
 }

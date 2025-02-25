@@ -10,7 +10,7 @@ function sort(a, b){
     return a < b ? -1 : 0;
 }
 
-export default new Encoder({
+export default {
     normalize: true,
     dedupe: true,
     // prepare: function(str){
@@ -32,7 +32,7 @@ export default new Encoder({
         ["j", "k"],
         ["q", "k"],
     ])
-});
+};
 
 // //import { encode as encode_simple } from "./simple.js";
 // import { pipeline } from "../../lang.js";

@@ -11,43 +11,43 @@ import { is_string } from "./common.js";
 const preset = {
 
     "memory": {
-        charset: "latin:extreme",
-        compression: 9,
+        //charset: "latin:extreme",
+        // compression: 9,
         //tokenize: "strict",
-        resolution: 3,
-        minlength: 4,
-        maxlength: 24,
-        fastupdate: false
+        resolution: 1,
+        // minlength: 4,
+        // maxlength: 24,
+        // fastupdate: false
     },
 
     "performance": {
         //charset: "latin:default",
         //tokenize: "strict",
-        resolution: 5,
-        minlength: 3,
-        maxlength: 24,
-        //fastupdate: true,
+        resolution: 6,
+        // minlength: 3,
+        // maxlength: 24,
+        fastupdate: true,
         context: {
-            depth: 2,
+            depth: 1,
             resolution: 3
             //bidirectional: true
         }
     },
 
     "match": {
-        charset: "latin:extreme",
-        tokenize: "reverse",
+        //charset: "latin:extreme",
+        tokenize: "forward",
         //resolution: 9,
     },
 
     "score": {
-        charset: "latin:advanced",
+        //charset: "latin:extreme",
         //tokenize: "strict",
         resolution: 15,
-        minlength: 3,
+        // minlength: 3,
         context: {
-            depth: 3,
-            resolution: 5,
+            depth: 2,
+            resolution: 3,
             //bidirectional: true
         }
     }

@@ -16,24 +16,24 @@ import {
     SUPPORT_SUGGESTION,
     SUPPORT_SERIALIZE,
     SUPPORT_PERSISTENT,
-    SUPPORT_COMPRESSION, SUPPORT_KEYSTORE
+    SUPPORT_COMPRESSION,
+    SUPPORT_KEYSTORE
 
 } from "./config.js";
 // <-- COMPILER BLOCK
 
+import Encoder from "./encoder.js";
 import { IndexInterface } from "./type.js";
-import default_encoder from "./lang/latin/default.js";
-import { create_object, create_object_array, concat, sort_by_length_down, is_array, is_string, is_object, parse_option } from "./common.js";
-import { pipeline, init_stemmer_or_matcher, init_filter } from "./lang.js";
-import { global_lang, global_charset } from "./global.js";
-import default_compress from "./compress.js";
-import apply_async from "./async.js";
-import { intersect } from "./intersect.js";
 import Cache, { searchCache } from "./cache.js";
-import apply_preset from "./preset.js";
-import { exportIndex, importIndex } from "./serialize.js";
-import default_resolver from "./resolve/default.js";
 import { KeystoreMap, KeystoreSet, KeystoreArray } from "./keystore.js";
+import { create_object, sort_by_length_down, is_array, is_object } from "./common.js";
+import { intersect } from "./intersect.js";
+import { exportIndex, importIndex } from "./serialize.js";
+import default_encoder from "./lang/latin/default.js";
+import default_resolver from "./resolve/default.js";
+import default_compress from "./compress.js";
+import apply_preset from "./preset.js";
+import apply_async from "./async.js";
 
 /**
  * @constructor
@@ -49,69 +49,33 @@ export default function Index(options, _register){
         return new Index(options);
     }
 
-    //let charset, lang, tmp;
-
     if(options){
-
         if(SUPPORT_ENCODER){
             options = apply_preset(options);
         }
-
-        // charset = options["charset"];
-        // lang = options["lang"];
-
-        // if(is_string(charset)){
-        //
-        //     if(charset.indexOf(":") === -1){
-        //
-        //         charset += ":default";
-        //     }
-        //
-        //     charset = global_charset[charset];
-        // }
-
-        // if(is_string(lang)){
-        //
-        //     lang = global_lang[lang];
-        // }
     }
     else{
-
         options = {};
     }
 
-    let tmp;
-
     const context = options.context || {};
     const encoder = options.encode || options.encoder || default_encoder;
-
-    let encode = encoder && encoder.encode;
-    this.encode = (encode && encode.bind(encoder)) || encoder /* || (charset && charset.encode) || default_encoder*/;
+    this.encoder = encoder.encode
+        ? encoder
+        : this.encoder = typeof encoder === "object"
+            ? new Encoder(encoder)
+            : { encode: encoder };
 
     if(SUPPORT_COMPRESSION){
-        tmp = options.compress || (encoder && encoder.compression);
-        //this.compress = (typeof tmp === "function" && tmp.bind(encoder)) || (tmp && compress) || null;
-        //this.cmplevel = typeof tmp === "number" ? tmp : 1;
-        this.compress = typeof tmp === "function" ? tmp : (tmp ? default_compress : null);
+        this.compress = options.compress || options.compression || false;
     }
 
-    // this.minquery = options.minquery || 1;
-    // this.minquery && encode && (encoder.minlength = Math.max(encoder.minlength || 1, this.minquery));
-    //this.maxquery = (encode && encoder.maxlength) || 0;
-
-    // this.minlength = options["minlength"] || (encoder && encoder["minlength"]) || 1;
-    // this.minlength && encode && (encoder["minlength"] = this.minlength);
-    // this.maxlength = options["maxlength"] || (encoder && encoder["maxlength"]) || 1;
-    // this.maxlength && encode && (encoder["maxlength"] = this.maxlength);
-
+    let tmp;
     this.resolution = options.resolution || 9;
-    this.tokenize = tmp = /*(charset && charset.tokenize) ||*/ options.tokenize || "strict";
+    this.tokenize = tmp = options.tokenize || "strict";
     this.depth = (tmp === "strict" && context.depth) || 0;
     this.bidirectional = context.bidirectional !== false;
-    this.fastupdate = options.fastupdate !== false;
-    // TODO: apply boost in search only
-    //this.boost = options["boost"] || 0;
-    //this.minlength = options["minlength"] || 1;
+    this.fastupdate = !!options.fastupdate;
 
     tmp = SUPPORT_KEYSTORE && (options.keystore || 0);
     tmp && (this.keystore = tmp);
@@ -124,7 +88,7 @@ export default function Index(options, _register){
             : (tmp ? new KeystoreSet(tmp) : new Set())
     );
     this.resolution_ctx = context.resolution || 1;
-    this.rtl = (encode && encoder.rtl) /*|| (charset && charset.rtl)*/ || options.rtl || false;
+    this.rtl = (encoder.rtl) /*|| (charset && charset.rtl)*/ || options.rtl || false;
 
     // TODO deprecated by new Encoder
     // this.matcher = (tmp = options["matcher"] || (lang && lang.matcher) || false) && init_stemmer_or_matcher(tmp, false);
@@ -225,7 +189,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
             return this.update(id, content);
         }
 
-        content = this.encode("" + content);
+        content = this.encoder.encode("" + content);
         const word_length = content.length;
 
         if(word_length){
@@ -388,40 +352,44 @@ function get_score(resolution, length, i, term_length, x){
 /**
  * @private
  * @param dupes
- * @param value
+ * @param term
  * @param score
  * @param id
  * @param {boolean=} append
  * @param {string=} keyword
  */
 
-Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
+Index.prototype.push_index = function(dupes, term, score, id, append, keyword){
 
     let arr = keyword ? this.ctx : this.map;
     let tmp;
 
-    if(SUPPORT_COMPRESSION && this.compress){
-        value = this.compress(value);
-        keyword && (keyword = this.compress(keyword));
-    }
-
-    if(!dupes[value] || (keyword && !(tmp = dupes[value])[keyword])){
+    if(!dupes[term] || !keyword || !(tmp = dupes[term])[keyword]){
 
         if(keyword){
 
-            dupes = tmp || (dupes[value] = create_object());
+            dupes = tmp || (dupes[term] = create_object());
             dupes[keyword] = 1;
+
+            if(SUPPORT_COMPRESSION && this.compress){
+                keyword = default_compress(keyword);
+            }
+
             tmp = arr.get(keyword);
             tmp ? arr = tmp
                 : arr.set(keyword, arr = new Map());
         }
         else{
 
-            dupes[value] = 1;
+            dupes[term] = 1;
         }
 
-        tmp = arr.get(value);
-        tmp ? arr = tmp : arr.set(value, arr = tmp = []);
+        if(SUPPORT_COMPRESSION && this.compress){
+            term = default_compress(term);
+        }
+
+        tmp = arr.get(term);
+        tmp ? arr = tmp : arr.set(term, arr = tmp = []);
         // the ID array will be upgraded dynamically
         arr = arr[score] || (arr[score] = []);
 
@@ -450,7 +418,6 @@ Index.prototype.push_index = function(dupes, value, score, id, append, keyword){
                 tmp ? tmp.push(arr)
                     : this.reg.set(id, [arr]);
             }
-
         }
     }
 }
@@ -480,19 +447,23 @@ Index.prototype.search = function(query, limit, options){
 
     let result = [];
     let length;
-    let context, suggest, offset = 0;
+    let context, suggest, offset = 0, resolve, enrich;
 
     if(options){
 
-        query = options["query"] || query;
-        limit = options["limit"] || limit;
-        offset = options["offset"] || 0;
-        context = options["context"];
-        suggest = SUPPORT_SUGGESTION && options["suggest"];
+        query = options.query || query;
+        limit = options.limit || limit;
+        offset = options.offset || 0;
+        context = options.context;
+        resolve = options.resolve !== false;
+        enrich = options.enrich;
+        suggest = SUPPORT_SUGGESTION && options.suggest;
     }
 
+    // todo: term deduplication during encoding when context is disabled
+
     /** @type {Array<string>} */
-    query = this.encode("" + query);
+    query = this.encoder.encode("" + query);
     length = query.length;
     limit || (limit = 100);
 
@@ -503,47 +474,42 @@ Index.prototype.search = function(query, limit, options){
     let maxlength = 0;
     let minlength = 0;
 
+    context = this.depth && context !== false;
+
     // fast path single term
-    // TODO EXCHANGE
     if(length === 1){
-
-        // if(SUPPORT_PERSISTENT && this.db){
-        //
-        //     const self = this;
-        //
-        //     // return new Promise(async function(resolve){
-        //     //     result = await self.store.get("map", query[0]);
-        //     //     resolve(result ? single_term_result(result, limit, offset) : []);
-        //     // });
-        //
-        //     return self.store.get("map", query[0]).then(function(result){
-        //         return result && result.length
-        //             ? single_term_result(result, limit, offset)
-        //             : [];
-        //     });
-        // }
-        //
-        // result = this.map.get(query[0]);
-        // return result ? single_term_result(result, limit, offset) : [];
-        return single_term_query.call(this, query, limit, offset);
+        return single_term_query.call(this, query[0], "", limit, offset, resolve, enrich);
     }
-    else
 
-    // todo term deduplication?
-    // todo pre-check if conditions met
-    // todo check context chain
+    // fast path single context
+    if(length === 2 && context && !suggest){
+        return single_term_query.call(this, query[0], query[1], limit, offset, resolve, enrich);
+    }
+
     if(length > 1){
 
+        // term deduplication will break the context chain
+        // todo add context to dupe check
         const dupes = create_object();
         const query_new = [];
+
+        // if(context){
+        //     keyword = query[0];
+        //     dupes[keyword] = 1;
+        //     query_new.push(keyword);
+        //     maxlength = minlength = keyword.length;
+        //     i = 1;
+        // }
 
         for(let i = 0, term; i < length; i++){
 
             term = query[i];
 
-            if(term /*&& (term.length >= this.minlength)*/ && !dupes[term]){
+            if(term && !dupes[term]){
 
-                if(!suggest && !(SUPPORT_PERSISTENT && this.db) && !this.get_array(term) /*!this.map.get(SUPPORT_COMPRESSION && this.compress ? this.compress(term) : term)*/){
+                // todo add keyword check
+                // this fast path can't apply to persistent indexes
+                if(!suggest && !(SUPPORT_PERSISTENT && this.db) && !this.get_array(term/*, keyword*/)){
 
                     // fast path "not found"
                     return result;
@@ -567,57 +533,50 @@ Index.prototype.search = function(query, limit, options){
         length = query.length;
     }
 
+    // the term length could be changed after deduplication
+
     if(!length){
         return result;
     }
 
     let index = 0, keyword;
 
+    // fast path single term
+    if(length === 1){
+        return single_term_query.call(this, query[0], "", limit, offset, resolve, enrich);
+    }
+
+    // fast path single context
+    if(length === 2 && context && !suggest){
+        return single_term_query.call(this, query[0], query[1], limit, offset, resolve, enrich);
+    }
+
     if(length > 1){
-
-        if(this.depth && context !== false){
-
+        if(context){
             // start with context right away
             keyword = query[0];
             index = 1;
         }
         // todo
         else if(maxlength > 9 && (maxlength / minlength) > 3){
-
+            // sorting terms will break the context chain
             // bigger terms has less occurrence
             // this might also reduce the intersection task
             // todo check intersection order
             query.sort(sort_by_length_down);
         }
     }
-    // TODO EXCHANGE
-    else{
-
-        return single_term_query.call(this, query, limit, offset);
-    }
 
     if(SUPPORT_PERSISTENT && this.db){
 
         if(this.db.search){
             // when the configuration is not supported it returns false
-            const result = this.db.search(this, query, suggest, limit, offset);
+            const result = this.db.search(this, query, limit, offset, suggest, resolve, enrich);
             if(result !== false) return result;
         }
 
         const self = this;
-
         return (async function(){
-
-            // let promises = [];
-            // for(let i = index, term; i < length; i++){
-            //     term = query[i];
-            //     promises[i] = self.get_array(term, keyword);
-            //     if(keyword){
-            //
-            //     }
-            // }
-            //
-            // await Promise.all(promises);
 
             for(let arr, term; index < length; index++){
 
@@ -641,31 +600,24 @@ Index.prototype.search = function(query, limit, options){
                     arr = add_result(arr, result, suggest, self.resolution, limit, offset, length === 1/*, term*/);
                 }
 
+                // limit reached
                 if(arr){
-
-                    // fast path optimization
-                    return /** @type {Array<number|string>} */ (arr);
+                    return arr;
                 }
 
-                // apply suggestions on last loop or fallback
+                // apply suggestions on last loop
                 if(suggest && (index === length - 1)){
-
                     let length = result.length;
-
                     if(!length){
-
+                        // fallback to non-contextual search when no result was found
                         if(keyword){
-                            // fallback to non-contextual search when no result was found
                             keyword = "";
                             index = -1;
                             continue;
                         }
-
                         return result;
                     }
                     else if(length === 1){
-
-                        // fast path optimization
                         return single_term_result(result[0], limit, offset);
                     }
                 }
@@ -679,18 +631,10 @@ Index.prototype.search = function(query, limit, options){
 
         term = query[index];
 
-        // console.log(keyword);
-        // console.log(term);
-        // console.log("");
-
         if(keyword){
 
-            //arr = this.ctx;
             arr = this.get_array(term, keyword);
             arr = /*this.*/add_result(arr, result, suggest, this.resolution_ctx, limit, offset, length === 2/*, term, keyword*/);
-
-            // console.log(arr);
-            // console.log(result);
 
             // 1. when suggestion enabled just forward keyword if term was found
             // 2. as long as the result is empty forward the pointer also
@@ -701,37 +645,28 @@ Index.prototype.search = function(query, limit, options){
         }
         else{
 
-            //arr = this.map;
             arr = this.get_array(term);
             arr = /*this.*/add_result(arr, result, suggest, this.resolution, limit, offset, length === 1/*, term*/);
         }
 
+        // limit reached
         if(arr){
-
-            // fast path optimization
-            return /** @type {Array<number|string>} */ (arr);
+            return arr;
         }
 
-        // apply suggestions on last loop or fallback
+        // apply suggestions on last loop
         if(suggest && (index === length - 1)){
-
-            let length = result.length;
-
+            const length = result.length;
             if(!length){
-
+                // fallback to non-contextual search when no result was found
                 if(keyword){
-
-                    // fallback to non-contextual search when no result was found
                     keyword = "";
                     index = -1;
                     continue;
                 }
-
                 return result;
             }
             else if(length === 1){
-
-                // fast path optimization
                 return single_term_result(result[0], limit, offset);
             }
         }
@@ -740,22 +675,13 @@ Index.prototype.search = function(query, limit, options){
     return intersect(result, limit, offset, suggest);
 };
 
-function single_term_query(query, limit, offset){
+function single_term_query(term, keyword, limit, offset, resolve, enrich){
+
+    const result = this.get_array(term, keyword, limit, offset, resolve, enrich);
 
     if(SUPPORT_PERSISTENT && this.db){
-
-        const self = this;
-
-        // return new Promise(async function(resolve){
-        //     const result = await self.store.get("map", query[0]);
-        //     resolve(result ? single_term_result(result, limit, offset) : []);
-        // });
-
-        return self.db.get("map", query[0], "", limit, offset).then(function(result){
-            //console.log(result);
-            if(result && result.length){
-                result = result.filter(arr => arr && !!arr.length);
-            }
+        return result.then(function(result){
+            if(resolve) return result;
             return result && result.length
                 // todo apply on database
                 ? single_term_result(result, limit, offset)
@@ -763,8 +689,39 @@ function single_term_query(query, limit, offset){
         });
     }
 
-    const result = this.map.get(query[0]);
-    return result ? single_term_result(result, limit, offset) : [];
+    return result && result.length
+        ? single_term_result(result, limit, offset)
+        : [];
+
+    // if(SUPPORT_COMPRESSION && this.compress){
+    //     term = default_compress(term);
+    // }
+    //
+    // if(SUPPORT_PERSISTENT && this.db){
+    //
+    //     // return new Promise(async function(resolve){
+    //     //     const result = await self.store.get("map", term[0]);
+    //     //     resolve(result ? single_term_result(result, limit, offset) : []);
+    //     // });
+    //
+    //     const swap = keyword && this.bidirectional && (term > keyword);
+    //     return this.db.get(swap ? keyword : term, swap ? term : keyword, limit, offset, resolve, enrich).then(function(result){
+    //         //console.log(result);
+    //         if(resolve) return result;
+    //         // if(result && result.length){
+    //         //     result = result.filter(arr => arr && !!arr.length);
+    //         // }
+    //         return result && result.length
+    //             // todo apply on database
+    //             ? single_term_result(result, limit, offset)
+    //             : [];
+    //     });
+    // }
+    //
+    // const result = this.get_array(term, keyword);
+    // return result && result.length
+    //     ? single_term_result(result, limit, offset)
+    //     : [];
 }
 
 /**
@@ -886,7 +843,7 @@ let single_term_result = default_resolver;
 //         result;
 // }
 
-Index.prototype.get_array = function(term, keyword){
+Index.prototype.get_array = function(term, keyword, limit, offset, resolve, enrich){
 
     let arr, swap;
 
@@ -895,15 +852,15 @@ Index.prototype.get_array = function(term, keyword){
     }
 
     if(SUPPORT_COMPRESSION && this.compress){
-        term = this.compress(term);
-        keyword && (keyword = this.compress(keyword));
+        term = default_compress(term);
+        keyword && (keyword = default_compress(keyword));
     }
 
     if(SUPPORT_PERSISTENT && this.db){
         // todo apply limit/offset on single term search
         return keyword
-            ? this.db.get("ctx", swap ? keyword : term, swap ? term : keyword) // keyword last
-            : this.db.get("map", term);
+            ? this.db.get(swap ? keyword : term, swap ? term : keyword, limit, offset, resolve, enrich) // keyword last
+            : this.db.get(term, "", limit, offset, resolve, enrich);
     }
 
     if(keyword){
@@ -926,7 +883,7 @@ Index.prototype.get_array = function(term, keyword){
 Index.prototype.contain = function(id){
 
     if(SUPPORT_PERSISTENT && this.db){
-        return this.db.has("reg", id);
+        return this.db.has(id);
     }
 
     return this.reg.has(id);
@@ -937,9 +894,10 @@ Index.prototype.update = function(id, content){
     // todo check the async part
     if(this.async || (SUPPORT_PERSISTENT && this.db)){
         const self = this;
-        return this.remove(id).then(
+        const res = this.remove(id);
+        return res.then ? res.then(
             () => self.add(id, content)
-        );
+        ) : this.add(id, content);
     }
 
     return this.remove(id).add(id, content);
@@ -962,19 +920,67 @@ Index.prototype.remove = function(id, _skip_deletion){
         if(this.fastupdate){
 
             // fast updates did not fully cleanup the key entries
+
             for(let i = 0, tmp; i < refs.length; i++){
-                tmp = refs[i];
-                // todo investigate empty entries
-                if(!tmp) continue;
-                // todo remove
-                //if(tmp.length < 1) throw new Error("invalid length");
-                //if(tmp.indexOf(id) < 0) throw new Error("invalid id");
-                if(tmp.length < 2) tmp.pop();
-                else {
-                    const index = tmp.indexOf(id);
-                    index >= 0 && tmp.splice(index, 1);
+                if((tmp = refs[i])){
+                    // todo check
+                    //if(tmp.length < 1) throw new Error("invalid length");
+                    //if(tmp.indexOf(id) < 0) throw new Error("invalid id");
+                    if(tmp.length < 2){
+                        tmp.pop();
+                    }
+                    else{
+                        const index = tmp.indexOf(id);
+                        index === refs.length - 1
+                            ? tmp.pop()
+                            : tmp.splice(index, 1);
+                    }
+                }
+                else{
+                    // todo investigate empty entries
                 }
             }
+
+            // todo variation which cleans up, requires to push [ctx, key] instead of arr to the index.reg
+            // for(let i = 0, arr, term, keyword; i < refs.length; i++){
+            //     arr = refs[i];
+            //     if(typeof arr === "string"){
+            //         arr = this.map.get(term = arr);
+            //     }
+            //     else{
+            //         arr = this.ctx.get(keyword = arr[0]);
+            //         arr && (arr = arr.get(arr[1]));
+            //     }
+            //     let counter = 0, found;
+            //     if(arr && arr.length){
+            //         for(let j = 0, tmp; j < arr.length; j++){
+            //             if((tmp = arr[j])){
+            //                 if(!found && tmp.length){
+            //                     const index = tmp.indexOf(id);
+            //                     if(index >= 0){
+            //                         tmp.splice(index, 1);
+            //                         // the index [ctx, key]:[res, id] is unique
+            //                         found = 1;
+            //                     }
+            //                 }
+            //                 if(tmp.length){
+            //                     counter++;
+            //                     if(found){
+            //                         break;
+            //                     }
+            //                 }
+            //                 else{
+            //                     delete arr[j];
+            //                 }
+            //             }
+            //         }
+            //     }
+            //     if(!counter){
+            //         keyword
+            //             ? this.ctx.delete(keyword)
+            //             : this.map.delete(term);
+            //     }
+            // }
         }
         else{
 
@@ -1006,56 +1012,43 @@ Index.prototype.remove = function(id, _skip_deletion){
 /**
  * @param map
  * @param id
- * @param res
- * @param optimize
- * @param {number=} resolution
  * @return {number}
  */
 
-function remove_index(map, id, res, resolution){
+function remove_index(map, id){
 
+    // a check counter of filled resolution slots
+    // to prevent removing the field
     let count = 0;
 
     if(is_array(map)){
-
-        // the first array is the score array in both strategies
-
-        if(!resolution){
-
-            resolution = Math.min(map.length, res);
-
-            for(let x = 0, arr; x < resolution; x++){
-                if((arr = map[x])){
-                    const tmp = remove_index(arr, id, res, resolution);
-                    tmp ? count += tmp
-                        : delete map[x]; // map[x] = [];
+        for(let x = 0, arr, index; x < map.length; x++){
+            if((arr = map[x]) && arr.length){
+                index = arr.indexOf(id);
+                if(index >= 0){
+                    if(arr.length > 1){
+                        arr.splice(index, 1);
+                        count++;
+                    }
+                    else{
+                        // remove resolution slot
+                        delete map[x];
+                    }
+                    // the index key:[res, id] is unique
+                    break;
                 }
-            }
-        }
-        else{
-
-            const index = map.indexOf(id);
-
-            if(index > -1){
-
-                // fast path, when length is 1 or lower then the whole field gets deleted
-                if(map.length > 1){
-                    map.splice(index, 1);
+                else{
                     count++;
                 }
-            }
-            else{
-                count++;
             }
         }
     }
     else for(let item of map){
         const key = item[0];
         const value = item[1];
-        const tmp = remove_index(value, id, res, resolution);
+        const tmp = remove_index(value, id);
         tmp ? count += tmp
             : map.delete(key);
-
     }
 
     return count;
@@ -1102,7 +1095,7 @@ Index.prototype.cleanup = function(){
 };
 
 if(SUPPORT_CACHE){
-
+    // todo move to config
     Index.prototype.searchCache = searchCache;
 }
 

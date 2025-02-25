@@ -12,7 +12,8 @@ import { create_object, is_object } from "./common.js";
 export function searchCache(query, limit, options){
     //if(!query) return;
     query = "" + (query["query"] || query);
-    let encoded = this.encode(query).join("");
+    // todo move to config
+    let encoded = this.encode(query).join(" ");
     let cache = this.cache.get(encoded);
     if(!cache){
         cache = this.search(query, limit, options);

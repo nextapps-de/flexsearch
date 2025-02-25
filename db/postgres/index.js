@@ -10,6 +10,7 @@ const defaults = {
 
 const pgp = pg_promise();
 const VERSION = 1;
+const MAXIMUM_QUERY_VARS = 16000;
 const fields = ["map", "ctx", "reg", "cfg"];
 import StorageInterface from "../interface.js";
 
@@ -23,6 +24,9 @@ function sanitize(str) {
  */
 
 export default function PostgresDB(name, config = {}){
+    if(!(this instanceof PostgresDB)){
+        return new PostgresDB(name, config);
+    }
     if(typeof name === "object"){
         name = name.name;
         config = name;
@@ -43,9 +47,9 @@ export default function PostgresDB(name, config = {}){
     this.db && delete defaults.db;
 };
 
-PostgresDB.mount = function(flexsearch){
-    return new this().mount(flexsearch);
-};
+// PostgresDB.mount = function(flexsearch){
+//     return new this().mount(flexsearch);
+// };
 
 PostgresDB.prototype.mount = function(flexsearch){
     flexsearch.db = this;
@@ -109,8 +113,9 @@ PostgresDB.prototype.open = async function(){
             case "reg":
                 await this.db.none(`
                     create table if not exists ${this.id}.reg(
-                        id integer not null
-                            /*constraint reg_pk primary key*/
+                        id  integer not null
+                            constraint reg_pk primary key,
+                        doc text default null
                     );
                 `);
                 break;
@@ -129,7 +134,7 @@ PostgresDB.prototype.open = async function(){
 };
 
 PostgresDB.prototype.close = function(){
-    this.db.close();
+    this.db.close && this.db.close();
     this.db = null;
 };
 
@@ -152,80 +157,92 @@ PostgresDB.prototype.clear = function(){
     });
 };
 
-PostgresDB.prototype.get = async function(ref, key, ctx, limit = 0, offset = 0, resolve = true){
-
-    let rows;
-    let stmt = "";
-
-    if(limit){
-        stmt += " LIMIT " + limit;
-        if(offset){
-            stmt += " OFFSET " + offset
+function create_result(rows, resolve, enrich){
+    if(resolve){
+        if(!enrich) for(let i = 0; i < rows.length; i++){
+            rows[i] = rows[i].id
         }
+        return rows;
     }
-
-    switch(ref){
-        case "map":
-            rows = await this.db.any(`
-                SELECT id ${resolve ? "" : ", res"}
-                FROM ${this.id}.${ref + this.field} 
-                WHERE key = $1 
-                ORDER BY res` + stmt,
-                [key]
+    else{
+        const arr = [];
+        for(let i = 0, row; i < rows.length; i++){
+            row = rows[i];
+            arr[row.res] || (arr[row.res] = []);
+            arr[row.res].push(enrich
+                ? row
+                : row.id
             );
-            // fallthrough
-        case "ctx":
-            rows = rows || await this.db.any(`
-                SELECT id ${resolve ? "" : ", res"}
-                FROM ${this.id}.${ref + this.field} 
-                WHERE ctx = $1 AND key = $2 
-                ORDER BY res` + stmt,
-                [ctx, key]
-            );
-            if(resolve){
-                for(let i = 0; i < rows.length; i++){
-                    rows[i] = rows[i].id
-                }
-                return [rows];
-            }
-            else{
-                const arr = [];
-                for(let i = 0, row; i < rows.length; i++){
-                    row = rows[i];
-                    arr[row.res] || (arr[row.res] = []);
-                    arr[row.res].push(row.id);
-                }
-                return arr;
-            }
-        case "reg":
-            return this.db.oneOrNone(`SELECT 1 FROM ${this.id}.reg WHERE id = $1`, [key]);
-        case "cfg":
-            const cfg = await this.db.oneOrNone(`SELECT cfg FROM ${this.id}.cfg${this.field}`);
-            return cfg ? JSON.parse(cfg) : null;
+        }
+        return arr;
     }
-};
+}
 
-PostgresDB.prototype.has = function(ref, key, ctx){
-    switch(ref){
-        case "map":
-            return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".map" + this.field + " WHERE key = $1)", [key]);
-        case "ctx":
-            return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".ctx" + this.field + " WHERE ctx = $1 AND key = $2)", [ctx, key]);
-        case "cfg":
-            return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".cfg" + this.field + " WHERE cfg IS NOT NULL)");
-        case "reg":
-            return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [key]);
-    }
-};
-
-PostgresDB.prototype.search = async function(flexsearch, query, suggest, limit = 100, offset = 0, resolve = true){
-
-    const db = this.db;
+PostgresDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
     let rows;
-    let stmt = "";
+    if(ctx){
+        const table = this.id + ".ctx" + this.field;
+        rows = this.db.any(`
+            SELECT ${ table }.id 
+                   ${ resolve ? "" : ", res" }
+                   ${ enrich ? ", doc" : "" }
+            FROM ${ table }
+            ${ enrich ? `
+                LEFT JOIN ${ this.id }.reg ON ${ this.id }.reg.id = ${ table }.id
+            ` : "" }  
+            WHERE ctx = $1 AND key = $2
+            ORDER BY res
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }`,
+            [ctx, key]
+        );
+    }
+    else{
+        const table = this.id + ".map" + this.field;
+        rows = this.db.any(`
+            SELECT ${ table }.id
+                   ${ resolve ? "" : ", res" }
+                   ${ enrich ? ", doc" : "" }
+            FROM ${ table }
+            ${ enrich ? `
+                LEFT JOIN ${ this.id }.reg ON ${ this.id }.reg.id = ${ table }.id
+            ` : "" }
+            WHERE key = $1
+            ORDER BY res
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }`,
+            [key]
+        );
+    }
+    return rows.then(function(rows){
+        return create_result(rows, resolve, enrich);
+    });
+};
+
+// PostgresDB.prototype.has = function(ref, key, ctx){
+//     switch(ref){
+//         case "map":
+//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".map" + this.field + " WHERE key = $1)", [key]);
+//         case "ctx":
+//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".ctx" + this.field + " WHERE ctx = $1 AND key = $2)", [ctx, key]);
+//         case "cfg":
+//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".cfg" + this.field + " WHERE cfg IS NOT NULL)");
+//         case "reg":
+//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [key]);
+//     }
+// };
+
+PostgresDB.prototype.has = function(id){
+    return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [id]);
+};
+
+PostgresDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false){
+
+    let rows;
 
     if(query.length > 1 && flexsearch.depth){
 
+        let stmt = "";
         let params = [];
         let keyword = query[0];
         let term;
@@ -235,22 +252,29 @@ PostgresDB.prototype.search = async function(flexsearch, query, suggest, limit =
         for(let i = 1, count = 1; i < query.length; i++){
             term = query[i];
             const swap = flexsearch.bidirectional && (term > keyword);
-            stmt += (stmt ? " OR " : "") + `(ctx = $${count++} AND key = $${count++})`
+            stmt += (stmt ? " OR " : "") + `(ctx = $${ count++ } AND key = $${ count++ })`
             params.push(swap ? term : keyword, swap ? keyword : term);
             keyword = term;
         }
-        rows = await db.any(`
-            SELECT id ${resolve ? "" : ", res"}
+
+        rows = this.db.any(`
+            SELECT r.id 
+                   ${ resolve ? "" : ", res" }
+                   ${ enrich ? ", doc" : "" }
             FROM (
-                SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-                FROM ${this.id}.ctx${this.field}
-                WHERE ${stmt}
+                SELECT id, count(*) as count,
+                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                FROM ${ this.id + ".ctx" + this.field }
+                WHERE ${ stmt }
                 GROUP BY id
-                ORDER BY count DESC, res
-            )
+                ORDER BY ${ suggest ? "count DESC, res" : "res" }
+            ) as r
+            ${ enrich ? `
+                LEFT JOIN ${ this.id }.reg ON ${ this.id }.reg.id = r.id
+            ` : "" } 
             ${ suggest ? "" : "WHERE count = " + (query.length - 1) }
-            LIMIT ${limit}
-            ${offset ? "OFFSET " + offset : ""}
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }
         `, params);
 
         // variant 1
@@ -286,23 +310,29 @@ PostgresDB.prototype.search = async function(flexsearch, query, suggest, limit =
     }
     else{
 
-        // variant new
-
+        let stmt = "";
         for(let i = 0, count = 1; i < query.length; i++){
             stmt += (stmt ? "," : "") + "$" + count++;
         }
-        rows = await db.any(`
-            SELECT id ${resolve ? "" : ", res"}
+
+        rows = this.db.any(`
+            SELECT r.id 
+                   ${ resolve ? "" : ", res" }   
+                   ${ enrich ? ", doc" : "" }
             FROM (
-                SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-                FROM ${this.id}.map${this.field}
-                WHERE key ${query.length > 1 ? "IN (" + stmt + ")" : "= " + stmt }
+                SELECT id, count(*) as count,
+                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                FROM ${ this.id + ".map" + this.field }
+                WHERE key ${ query.length > 1 ? "IN (" + stmt + ")" : "= " + stmt }
                 GROUP BY id
-                ORDER BY count DESC, res
-            )
+                ORDER BY ${ suggest ? "count DESC, res" : "res" }
+            ) as r
+            ${ enrich ? `
+                LEFT JOIN ${ this.id }.reg ON ${ this.id }.reg.id = r.id
+            ` : "" }   
             ${ suggest ? "" : "WHERE count = " + query.length }
-            LIMIT ${limit}
-            ${offset ? "OFFSET " + offset : ""}
+            ${ limit ? "LIMIT " + limit : "" }
+            ${ offset ? "OFFSET " + offset : "" }
         `, query);
 
         // variant 1
@@ -367,21 +397,9 @@ PostgresDB.prototype.search = async function(flexsearch, query, suggest, limit =
         // `, query);
     }
 
-    if(resolve){
-        for(let i = 0; i < rows.length; i++){
-            rows[i] = rows[i].id;
-        }
-        return rows;
-    }
-    else{
-        const arr = [];
-        for(let i = 0, row; i < rows.length; i++){
-            row = rows[i];
-            arr[row.res] || (arr[row.res] = []);
-            arr[row.res].push(row.id);
-        }
-        return arr;
-    }
+    return rows.then(function(rows){
+        return create_result(rows, resolve, enrich);
+    });
 };
 
 PostgresDB.prototype.info = function(){
@@ -576,19 +594,31 @@ PostgresDB.prototype.remove = function(ids){
 
         let migration;
         let stmt = "";
+        let chunk = 0;
+        let next;
         for(let i = 1; i <= ids.length; i++) {
             stmt += (stmt ? "," : "") + "$" + i; // + "::text";
             if(this.type !== "string"){
                 migration = checkMigration.call(this, ids[i]);
                 migration && await migration;
             }
+            // maximum count of variables supported
+            if(++chunk === MAXIMUM_QUERY_VARS){
+                next = ids.slice(MAXIMUM_QUERY_VARS);
+                break;
+            }
         }
 
+        const self = this;
         return trx.batch([
             trx.none("DELETE FROM " + this.id + ".map" + this.field + " WHERE id IN (" + stmt + ")", ids),
             trx.none("DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id IN (" + stmt + ")", ids),
             trx.none("DELETE FROM " + this.id + ".reg WHERE id IN (" + stmt + ")", ids)
-        ]);
+        ]).then(function(res){
+            return next
+                ? self.remove(next)
+                : res;
+        });
 
         // return trx.batch([
         //     trx.none("DELETE FROM " + this.id + ".map" + self.field + " WHERE id IN ($1:csv)", [ids]),

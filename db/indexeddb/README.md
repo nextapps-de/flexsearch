@@ -35,6 +35,6 @@ FlexSearch is creating different `DATABASE` entries for each index name e.g. "my
 DATABASE
    |__OBJECTSTORE map:field (FlexSearch Data) 
    |__OBJECTSTORE ctx:field (FlexSearch Data) 
-   |__OBJECTSTORE reg:field (FlexSearch Data) 
    |__OBJECTSTORE cfg:field (FlexSearch Data) 
+   |__OBJECTSTORE reg       (FlexSearch Data) 
 ```

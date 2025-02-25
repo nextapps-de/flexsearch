@@ -38,11 +38,11 @@ export const soundex = new Map([
     ["u", "o"]
 ]);
 
-export default new Encoder({
+export default {
     normalize: true,
     dedupe: true,
     mapper: soundex
-});
+};
 
 // //import { encode as encode_simple } from "./simple.js";
 // import { pipeline } from "../../lang.js";

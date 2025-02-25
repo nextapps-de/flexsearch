@@ -1,9 +1,9 @@
 import Encoder from "../../encoder.js";
 
-export default new Encoder({
+export default {
     normalize: true,
     dedupe: true
-});
+};
 
 // import { pipeline, regex } from "../../lang.js";
 //

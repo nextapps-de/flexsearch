@@ -2,9 +2,10 @@
 import sqlite3 from "sqlite3";
 import path from "path";
 import StorageInterface from "../interface.js";
+import { concat } from "../../common.js";
 
 const VERSION = 1;
-const defaults = {};
+const MAXIMUM_QUERY_VARS = 16000;
 const fields = ["map", "ctx", "reg", "cfg"];
 const types = {
     "text": "text",
@@ -38,6 +39,9 @@ function sanitize(str) {
  */
 
 export default function SqliteDB(name, config = {}){
+    if(!(this instanceof SqliteDB)){
+        return new SqliteDB(name, config);
+    }
     if(typeof name === "object"){
         name = name.name;
         config = name;
@@ -60,9 +64,9 @@ export default function SqliteDB(name, config = {}){
     if(!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
 };
 
-SqliteDB.mount = function(flexsearch){
-    return new this().mount(flexsearch);
-};
+// SqliteDB.mount = function(flexsearch){
+//     return new this().mount(flexsearch);
+// };
 
 SqliteDB.prototype.mount = function(flexsearch){
     flexsearch.db = this;
@@ -87,7 +91,6 @@ SqliteDB.prototype.open = async function(){
 
     const db = this.db;
     db.exec("PRAGMA optimize = 0x10002");
-    //db.exec("PRAGMA journal_mode = WAL");
 
     for(let i = 0; i < fields.length; i++){
         const exist = await this.promisfy({
@@ -108,7 +111,8 @@ SqliteDB.prototype.open = async function(){
                         );
                     `;
                     stmt_index = `
-                        CREATE INDEX map_key_res_index${this.field} ON map${this.field} (key, res);
+                        CREATE INDEX map_key_res_index${this.field} 
+                            ON map${this.field} (key, res);
                     `;
                     break;
 
@@ -124,14 +128,16 @@ SqliteDB.prototype.open = async function(){
                     
                     `;
                     stmt_index = `
-                        CREATE INDEX ctx_key_res_index${this.field} ON ctx${this.field} (ctx, key, res);
+                        CREATE INDEX ctx_key_res_index${this.field} 
+                            ON ctx${this.field} (ctx, key, res);
                     `;
                     break;
 
                 case "reg":
                     stmt = `
-                        CREATE TABLE main.reg${this.field}(
-                            id ${this.type} NOT NULL
+                        CREATE TABLE main.reg(
+                            id ${this.type} NOT NULL,
+                            doc TEXT DEFAULT NULL                    
                                /*CONSTRAINT reg_pk${this.field} PRIMARY KEY*/
                         );
                     `;
@@ -139,7 +145,9 @@ SqliteDB.prototype.open = async function(){
 
                 case "cfg":
                     stmt = `
-                        CREATE TABLE main.cfg${this.field} (cfg TEXT NOT NULL);
+                        CREATE TABLE main.cfg${this.field} (
+                            cfg TEXT NOT NULL
+                        );
                     `;
                     break;
             }
@@ -278,117 +286,200 @@ SqliteDB.prototype.destroy = async function(){
 // };
 
 SqliteDB.prototype.clear = function(){
-    return this.transaction(async function(){
-        const self = this;
-        fields.forEach(function(ref){
-            self.db.exec("DELETE FROM main." + ref + self.field + ";");
-        });
+    return this.transaction(function(){
+        this.db.exec("DELETE FROM main.map" + this.field + ";")
+        this.db.exec("DELETE FROM main.ctx" + this.field + ";")
+        this.db.exec("DELETE FROM main.cfg" + this.field + ";")
+        this.db.exec("DELETE FROM main.reg;")
     });
 };
 
-SqliteDB.prototype.get = function(ref, key, ctx, limit = 0, offset = 0, resolve = true){
+function create_result(rows, resolve, enrich){
+    if(resolve){
+        if(!enrich) for(let i = 0; i < rows.length; i++){
+            rows[i] = rows[i].id;
+        }
+        return rows;
+    }
+    else{
+        const arr = [];
+        for(let i = 0, row; i < rows.length; i++){
+            row = rows[i];
+            arr[row.res] || (arr[row.res] = []);
+            arr[row.res].push(enrich
+                ? row
+                : row.id
+            );
+        }
+        return arr;
+    }
+}
+
+SqliteDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
     let result;
-    switch(ref){
-        case "map":
-            result = this.promisfy({
-                method: "all",
-                stmt: `
-                    SELECT id ${resolve ? "" : ", res"}
-                    FROM main.map${this.field} 
-                    WHERE key = ? 
-                    ORDER BY res 
-                    LIMIT ${limit}
-                    ${offset ? "OFFSET " + offset : ""}
-                `,
-                params: [key]
-            });
-            // fallthrough
-        case "ctx":
-            result = result || this.promisfy({
-                method: "all",
-                stmt: `
-                    SELECT id ${resolve ? "" : ", res"}
-                    FROM main.map${this.field} 
-                    WHERE ctx = ? AND key = ? 
-                    ORDER BY res 
-                    LIMIT ${limit}
-                    ${offset ? "OFFSET " + offset : ""}
-                `,
-                params: [ctx, key]
-            });
-            return result.then(function(rows){
-                if(resolve){
-                    for(let i = 0; i < rows.length; i++){
-                        rows[i] = rows[i].id
-                    }
-                    return [rows];
-                }
-                else{
-                    const arr = [];
-                    for(let i = 0, row; i < rows.length; i++){
-                        row = rows[i];
-                        arr[row.res] || (arr[row.res] = []);
-                        arr[row.res].push(row.id);
-                    }
-                    return arr;
-                }
-            });
-        // case "reg":
-        //     return this.promisfy({
-        //         method: "get",
-        //         stmt: "SELECT 1 FROM main.reg" + this.field + " WHERE id = ?",
-        //         params: [key]
-        //     });
-        // case "cfg":
-        //     result = this.promisfy({
-        //         method: "get",
-        //         stmt: "SELECT cfg FROM main.cfg" + this.field
-        //     });
-        //     return result.then(function(cfg){
-        //         return cfg && JSON.parse(cfg);
-        //     });
+    if(ctx){
+        const table = "main.ctx" + this.field;
+        result = this.promisfy({
+            method: "all",
+            stmt: `
+                SELECT ${ table }.id 
+                       ${ resolve ? "" : ", res" }
+                       ${ enrich ? ", doc" : "" }
+                FROM ${ table }
+                ${ enrich ? `
+                    LEFT JOIN main.reg ON main.reg.id = ${ table }.id
+                ` : "" }
+                WHERE ctx = ? AND key = ? 
+                ORDER BY res 
+                ${ limit ? "LIMIT " + limit : "" }
+                ${ offset ? "OFFSET " + offset : "" }
+            `,
+            params: [ctx, key]
+        });
     }
+    else{
+        const table = "main.map" + this.field;
+        result = this.promisfy({
+            method: "all",
+            stmt: `
+                SELECT ${ table }.id
+                       ${ resolve ? "" : ", res" } 
+                       ${ enrich ? ", doc" : "" }
+                FROM ${ table }
+                ${ enrich ? `
+                    LEFT JOIN main.reg ON main.reg.id = ${ table }.id
+                ` : "" }
+                WHERE key = ?
+                ORDER BY res
+                ${ limit ? "LIMIT " + limit : "" }
+                ${ offset ? "OFFSET " + offset : "" }
+            `,
+            params: [key]
+        });
+    }
+    return result.then(function(rows){
+        return create_result(rows, resolve, enrich);
+    });
+    // case "reg":
+    //     return this.promisfy({
+    //         method: "get",
+    //         stmt: "SELECT 1 FROM main.reg WHERE id = ?",
+    //         params: [key]
+    //     });
+    // case "cfg":
+    //     result = this.promisfy({
+    //         method: "get",
+    //         stmt: "SELECT cfg FROM main.cfg" + this.field
+    //     });
+    //     return result.then(function(cfg){
+    //         return cfg && JSON.parse(cfg);
+    //     });
 };
 
-SqliteDB.prototype.has = function(ref, key, ctx){
-    switch(ref){
-        case "map":
-            return this.promisfy({
-                method: "get",
-                stmt: "SELECT EXISTS(SELECT 1 FROM main." + ref + self.field + " WHERE key = ? LIMIT 1)",
-                params: [key]
-            });
-        case "ctx":
-            return this.promisfy({
-                method: "get",
-                stmt: "SELECT EXISTS(SELECT 1 FROM main." + ref + self.field + " WHERE ctx = ? AND key = ? LIMIT 1)",
-                params: [ctx, key]
-            });
-        case "reg":
-            return this.promisfy({
-                method: "get",
-                stmt: "SELECT EXISTS(SELECT 1 FROM main.reg" + self.field + " WHERE id = ? LIMIT 1)",
-                params: [key]
-            });
-        // case "cfg":
-        //     return this.promisfy({
-        //         method: "get",
-        //         stmt: "SELECT EXISTS(SELECT 1 FROM main.cfg" + self.field + " WHERE cfg IS NOT NULL LIMIT 1)"
-        //     });
+SqliteDB.prototype.enrich = async function(ids){
+    let result = [];
+    for(let count = 0; count < ids.length;){
+        const chunk = ids.length - count > MAXIMUM_QUERY_VARS
+            ? ids.slice(count, count + MAXIMUM_QUERY_VARS)
+            : count ? ids.slice(count) : ids;
+        count += chunk.length;
+        const stmt = chunk.map(() => "?").join(',');
+        const res = await this.promisfy({
+            method: "all",
+            stmt: `SELECT id, doc FROM main.reg WHERE id IN (${stmt})`,
+            params: chunk
+        });
+        if(res && res.length){
+            result.push(res);
+        }
     }
+    return result.length === 1
+        ? result[0]
+        : result.length > 1
+            ? concat(result)
+            : result;
+}
+
+SqliteDB.prototype.has = function(id){
+    return this.promisfy({
+        method: "get",
+        stmt: `SELECT EXISTS(SELECT 1 FROM main.reg WHERE id = ? LIMIT 1)`,
+        params: [id]
+    });
 };
 
-SqliteDB.prototype.search = async function(flexsearch, query, suggest, limit = 100, offset = 0, resolve = true){
+// SqliteDB.prototype.has = function(ref, key, ctx){
+//     switch(ref){
+//         case "map":
+//             return this.promisfy({
+//                 method: "get",
+//                 stmt: "SELECT EXISTS(SELECT 1 FROM main." + ref + self.field + " WHERE key = ? LIMIT 1)",
+//                 params: [key]
+//             });
+//         case "ctx":
+//             return this.promisfy({
+//                 method: "get",
+//                 stmt: "SELECT EXISTS(SELECT 1 FROM main." + ref + self.field + " WHERE ctx = ? AND key = ? LIMIT 1)",
+//                 params: [ctx, key]
+//             });
+//         case "reg":
+//             return this.promisfy({
+//                 method: "get",
+//                 stmt: "SELECT EXISTS(SELECT 1 FROM main.reg" + self.field + " WHERE id = ? LIMIT 1)",
+//                 params: [key]
+//             });
+//         // case "cfg":
+//         //     return this.promisfy({
+//         //         method: "get",
+//         //         stmt: "SELECT EXISTS(SELECT 1 FROM main.cfg" + self.field + " WHERE cfg IS NOT NULL LIMIT 1)"
+//         //     });
+//     }
+// };
+
+SqliteDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false){
 
     let rows;
-    let stmt = "";
 
     if(query.length > 1 && flexsearch.depth){
 
+        let stmt = "";
         let params = [];
         let keyword = query[0];
         let term;
 
+        for(let i = 1; i < query.length; i++){
+            term = query[i];
+            const swap = flexsearch.bidirectional && (term > keyword);
+            stmt += (stmt ? " OR " : "") + `(ctx = ? AND key = ?)`
+            params.push(swap ? term : keyword, swap ? keyword : term);
+            keyword = term;
+        }
+
+        rows = this.promisfy({
+            method: "all",
+            stmt: `
+                SELECT r.id 
+                       ${ resolve ? "" : ", res" }
+                       ${ enrich ? ", doc" : "" }
+                FROM (
+                    SELECT id, count(*) as count,
+                           ${ suggest ? "SUM" : "MIN" }(res) as res
+                    FROM main.ctx${ this.field }
+                    WHERE ${ stmt }
+                    GROUP BY id
+                    ORDER BY ${ suggest ? "count DESC, res" : "res" }
+                ) as r
+                ${ enrich ? `
+                    LEFT JOIN main.reg ON main.reg.id = r.id
+                ` : "" }  
+                ${ suggest ? "" : "WHERE count = " + (query.length - 1) }
+                ${ limit ? "LIMIT " + limit : "" }
+                ${ offset ? "OFFSET " + offset : "" }
+            `,
+            params
+        });
+
+        // variant 1
         // for(let i = 1; i < query.length; i++){
         //     stmt += (stmt ? " UNION ALL " : "") + `
         //         SELECT id, res
@@ -417,47 +508,38 @@ SqliteDB.prototype.search = async function(flexsearch, query, suggest, limit = 1
         //     `,
         //     params
         // });
-
-        for(let i = 1; i < query.length; i++){
-            term = query[i];
-            const swap = flexsearch.bidirectional && (term > keyword);
-            stmt += (stmt ? " OR " : "") + `(ctx = ? AND key = ?)`
-            params.push(swap ? term : keyword, swap ? keyword : term);
-            keyword = term;
-        }
-
-        rows = await this.promisfy({
-            method: "all",
-            stmt: `
-                SELECT id
-                FROM (
-                    SELECT id, count(id) as count
-                    FROM main.ctx${this.field}
-                    WHERE ${stmt}
-                    GROUP BY id
-                    ORDER BY count DESC, res
-                )
-                ${ suggest ? "" : "WHERE count = " + (query.length - 1) }
-                LIMIT ${limit}
-                ${offset ? "OFFSET " + offset : ""}
-            `,
-            params
-        });
-
-        // rows = await db.any(`
-        //     SELECT id, res
-        //     FROM (
-        //         SELECT id, min(res) as res, count(*) as count
-        //         FROM (${stmt}) as t
-        //         GROUP BY id
-        //         ORDER BY count desc, res
-        //         LIMIT ${limit || 100}
-        //         OFFSET ${offset || 0}
-        //     ) as r
-        //     ${suggest ? "" : "WHERE count = " + (query.length - 1)}
-        // `, params);
     }
     else{
+
+        let stmt = "";
+        for(let i = 0; i < query.length; i++){
+            stmt += (stmt ? " OR " : "") + `key = ?`
+        }
+
+        const table = "main.map" + this.field;
+        rows = this.promisfy({
+            method: "all",
+            stmt: `
+                SELECT id 
+                       ${ resolve ? "" : ", res" }  
+                       ${ enrich ? ", doc" : "" }
+                FROM (
+                    SELECT id, count(*) as count,
+                           ${ suggest ? "SUM" : "MIN" }(res) as res
+                    FROM ${ table }
+                    WHERE ${ stmt }
+                    GROUP BY id
+                    ORDER BY ${ suggest ? "count DESC, res" : "res" }
+                )
+                ${ enrich ? `
+                    LEFT JOIN main.reg ON main.reg.id = ${ table }.id
+                ` : "" }  
+                ${ suggest ? "" : "WHERE count = " + query.length }
+                ${ limit ? "LIMIT " + limit : "" }
+                ${ offset ? "OFFSET " + offset : "" }
+            `,
+            params: query
+        });
 
         // variant 1
         // for(let i = 0; i < query.length; i++){
@@ -485,44 +567,11 @@ SqliteDB.prototype.search = async function(flexsearch, query, suggest, limit = 1
         //     params: query
         // });
 
-        for(let i = 0; i < query.length; i++){
-            stmt += (stmt ? " OR " : "") + `key = ?`
-        }
-
-        rows = await this.promisfy({
-            method: "all",
-            stmt: `
-                SELECT id
-                FROM (
-                    SELECT id, count(id) as count
-                    FROM main.map${this.field}
-                    WHERE ${stmt}
-                    GROUP BY id
-                    ORDER BY count DESC, res
-                )
-                ${ suggest ? "" : "WHERE count = " + query.length }
-                LIMIT ${limit}
-                ${offset ? "OFFSET " + offset : ""}
-            `,
-            params: query
-        });
     }
 
-    if(resolve){
-        for(let i = 0; i < rows.length; i++){
-            rows[i] = rows[i].id;
-        }
-        return rows;
-    }
-    else{
-        const arr = [];
-        for(let i = 0, row; i < rows.length; i++){
-            row = rows[i];
-            arr[row.res] || (arr[row.res] = []);
-            arr[row.res].push(row.id);
-        }
-        return arr;
-    }
+    return rows.then(function(rows){
+        return create_result(rows, resolve, enrich);
+    });
 }
 
 SqliteDB.prototype.info = function(){
@@ -538,7 +587,9 @@ SqliteDB.prototype.transaction = function(task, callback){
 
     const self = this;
     const db = this.db;
+
     return new Promise(function(resolve, reject){
+        db.exec("PRAGMA optimize");
         db.exec("BEGIN TRANSACTION");
         db.parallelize(function(){
             task.call(self);
@@ -548,6 +599,7 @@ SqliteDB.prototype.transaction = function(task, callback){
             callback && callback(rows);
             resolve(rows);
         });
+        db.exec("PRAGMA shrink_memory");
         self.trx = false;
     });
 };
@@ -587,14 +639,7 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
         return;
     }
 
-    const self = this;
-    const db = this.db;
-
-    db.exec("PRAGMA optimize");
-
     await this.transaction(function(){
-
-        //stmt = db.prepare("INSERT INTO map (key, res, id) VALUES (?, ?, ?)");
 
         for(const item of flexsearch.map){
             const key = item[0];
@@ -602,21 +647,23 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
 
             for(let i = 0, ids; i < arr.length; i++){
                 if((ids = arr[i]) && ids.length){
-                    let stmt = "(?,?,?)";
-                    let params = [key, i, ids[0]];
-                    for(let j = 1; j < ids.length; j++){
-                        stmt += ",(?,?,?)";
+                    let stmt = "";
+                    let params = [];
+
+                    for(let j = 0; j < ids.length; j++){
+                        stmt += (stmt ? "," : "") + "(?,?,?)";
                         params.push(key, i, ids[j]);
-                        //db.run("INSERT INTO map (key, res, id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING", [key, i, ids[j]]);
-                        //db.run("INSERT INTO map (key, res, id) VALUES (?, ?, ?)", [key, i, ids[j]]);
-                        //stmt.run(key, i, ids[j]);
+                        // maximum count of variables supported
+                        if((j === ids.length - 1) || (params.length + 3 > MAXIMUM_QUERY_VARS)){
+                            this.db.run("INSERT INTO main.map" + this.field + " (key, res, id) VALUES " + stmt, params);
+                            stmt = "";
+                            params = [];
+                        }
+                        //this.db.run("INSERT INTO map (key, res, id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING", [key, i, ids[j]]);
                     }
-                    db.run("INSERT INTO main.map" + self.field + " (key, res, id) VALUES " + stmt, params);
                 }
             }
         }
-
-        //stmt = db.prepare("INSERT INTO ctx (key, res, id) VALUES (?, ?, ?)");
 
         for(const ctx of flexsearch.ctx){
             const ctx_key = ctx[0];
@@ -628,36 +675,43 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
 
                 for(let i = 0, ids; i < arr.length; i++){
                     if((ids = arr[i]) && ids.length){
-                        let stmt = "(?,?,?,?)";
-                        let params = [ctx_key, key, i, ids[0]];
-                        for(let j = 1; j < ids.length; j++){
-                            stmt += ",(?,?,?,?)";
+                        let stmt = "";
+                        let params = [];
+
+                        for(let j = 0; j < ids.length; j++){
+                            stmt += (stmt ? "," : "") + "(?,?,?,?)";
                             params.push(ctx_key, key, i, ids[j]);
-                            //db.run("INSERT INTO ctx (key, res, id) VALUES (?, ?, ?)", [ctx_key + ":" + key, i, ids[j]]);
-                            //stmt.run(ctx_key + ":" + key, i, ids[j]);
+                            // maximum count of variables supported
+                            if((j === ids.length - 1) || (params.length + 4 > MAXIMUM_QUERY_VARS)){
+                                this.db.run("INSERT INTO main.ctx" + this.field + " (ctx, key, res, id) VALUES " + stmt, params);
+                                stmt = "";
+                                params = [];
+                            }
                         }
-                        db.run("INSERT INTO main.ctx" + self.field + " (ctx, key, res, id) VALUES " + stmt, params);
                     }
                 }
             }
         }
-        //stmt.finalize();
 
-        //stmt = db.prepare("INSERT INTO reg (id) VALUES (?)");
-        let params = [...flexsearch.reg.keys()];
-        let stmt = params.map(() => "(?)").join(",");
-        db.run("INSERT INTO main.reg" + self.field + " (id) VALUES " + stmt, params);
-        //stmt.finalize();
+        let ids = [...flexsearch.reg.keys()];
+        for(let count = 0; count < ids.length;){
+            const chunk = ids.length - count > MAXIMUM_QUERY_VARS
+                ? ids.slice(count, count + MAXIMUM_QUERY_VARS)
+                : count ? ids.slice(count) : ids;
+            count += chunk.length;
+            const stmt = chunk.map(() => "(?)").join(",");
+            this.db.run("INSERT INTO main.reg (id) VALUES " + stmt, chunk);
+        }
 
-        db.run("INSERT INTO main.cfg" + self.field + " (cfg) VALUES (?)", [JSON.stringify({
-            "encode": typeof flexsearch.encode === "string" ? flexsearch.encode : "",
-            "charset": typeof flexsearch.charset === "string" ? flexsearch.charset : "",
+        this.db.run("INSERT INTO main.cfg" + this.field + " (cfg) VALUES (?)", [JSON.stringify({
+            "charset": flexsearch.charset,
             "tokenize": flexsearch.tokenize,
             "resolution": flexsearch.resolution,
-            //"minlength": flexsearch.minlength,
-            "optimize": flexsearch.optimize,
             "fastupdate": flexsearch.fastupdate,
-            "encoder": flexsearch.encoder,
+            "compress": flexsearch.compress,
+            "encoder": {
+                "minlength": flexsearch.encoder.minlength
+            },
             "context": {
                 "depth": flexsearch.depth,
                 "bidirectional": flexsearch.bidirectional,
@@ -665,8 +719,6 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
             }
         })]);
     });
-
-    db.exec("PRAGMA shrink_memory");
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
@@ -679,12 +731,23 @@ SqliteDB.prototype.remove = function(ids, _skip_transaction){
         ids = [ids];
     }
 
+    let next;
+    // maximum count of variables supported
+    if(ids.length > MAXIMUM_QUERY_VARS){
+        next = ids.slice(MAXIMUM_QUERY_VARS);
+        ids = ids.slice(0, MAXIMUM_QUERY_VARS);
+    }
+
     const self = this;
     return this.transaction(function(){
         const stmt = ids.map(() => "?").join(',');
         this.db.run("DELETE FROM main.map" + self.field + " WHERE id IN (" + stmt + ")", ids);
         this.db.run("DELETE FROM main.ctx" + self.field + " WHERE id IN (" + stmt + ")", ids);
-        this.db.run("DELETE FROM main.reg" + self.field + " WHERE id IN (" + stmt + ")", ids);
+        this.db.run("DELETE FROM main.reg WHERE id IN (" + stmt + ")", ids);
+    }).then(function(res){
+        return next
+            ? self.remove(next)
+            : res;
     });
 };
 

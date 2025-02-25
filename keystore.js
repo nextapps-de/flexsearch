@@ -228,6 +228,8 @@ export function KeystoreSet(bitlength = 8){
         return new KeystoreSet(bitlength);
     }
 
+    // using plain Object with numeric key access
+    // just for max performance
     this.index = create_object();
     this.refs = [];
 
@@ -343,7 +345,11 @@ function lcg(str) {
     for(let i = 0; i < str.length; i++) {
         crc = (crc * bit ^ str.charCodeAt(i)) & range;
     }
-    return crc;// & 0xFFFF;
+    // shift Int32 to UInt32 because negative numbers
+    // extremely slows down key lookup
+    return this.bit === 32
+        ? crc + 2 ** 31
+        : crc;// & 0xFFFF;
 }
 
 function lcg64(str) {
