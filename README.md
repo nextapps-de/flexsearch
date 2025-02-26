@@ -2,16 +2,16 @@
 
 ## What's New
 
-- Persistent indexes support for: IndexedDB (Browser), Redis, SQLite, Postgres, MongoDB, Clickhouse
-- Enhanced language customization via the new Encoder class
+- Persistent indexes support for: `IndexedDB` (Browser), `Redis`, `SQLite`, `Postgres`, `MongoDB`, `Clickhouse`
+- Enhanced language customization via the new `Encoder` class
 - Searching single terms is up to 7 times faster
 - Enhanced support for larger indexes or larger result sets
 - Improved offset and limit processing achieve up to 100 times faster traversal performance through large datasets
 - Support for larger In-Memory index with extended key size (the defaults maximum keystore limit is: 2^24)
 - Greatly enhanced performance of the whole text encoding pipeline
 - Improved indexing of numeric content (Triplets)
-- Immediate result sets and resolver
-- Basic Resolver: Collapse, And, Or, Output formatter
+- Intermediate result sets and `Resolver`
+- Basic Resolver: `and`, `or`, `xor`, `not`, `limit`, `offset`, `enrich`, `resolve`, Output formatter
 - Improved charset collection
 - New charset preset "extreme" which further reduces memory consumption
 - Performance gain when polling tasks to the index by using "Event-Loop-Caches"
@@ -137,11 +137,11 @@ The benchmark was measured in "terms per second".
     <!--
     <tr>
         <td align="left">Memory</td>
-        <td align="right">16,647,301</td>
+        <td align="right">28,345,405</td>
         <td align="right">65,180,102</td>
-        <td align="right">11,767,590</td>
+        <td align="right">12,098,298</td>
         <td align="right">19,099,981</td>
-        <td align="right">80,675,387</td>
+        <td align="right">36,164,827</td>
         <td align="right">143,369,175</td>
         <td align="right">No</td>
     </tr>
@@ -342,7 +342,8 @@ const raw = index.search("a short query", {
 });
 ```
 
-Example of intermediate raw result set:
+<!--
+Example of an intermediate raw result set:
 
 ```js
 [{
@@ -362,22 +363,65 @@ Example of intermediate raw result set:
     ]
 }]
 ```
+-->
 
-You can apply different resolver to the raw result.
+You can apply different resolver methods to the raw result, e.g.:
+
+```js
+raw.and( ... )
+   .and( ... )
+   .boost(2)
+   .or( ... ,  ... )
+   .limit(100)
+   .xor( ... )
+   .not( ... )
+   // final resolve
+   .resolve({
+       limit: 10,
+       offset: 0,
+       enrich: true
+   });
+```
 
 The default resolver:
+
+<!--
 ```js
-import collapse from "./resolve/collapse.js";
+import resolve from "./resolve/resolve.js";
 const raw = index.search("a short query", { 
     resolve: false
 });
-const result = collapse(raw);
+const result = resolve(raw);
+```
+-->
+```js
+const raw = index.search("a short query", { 
+    resolve: false
+});
+const result = raw.resolve();
+```
+
+Or use declaration style:
+
+```js
+import Resolver from "./resolver.js";
+const raw = new Resolver({ 
+    index: index,
+    query: "a short query"
+});
+const result = raw.resolve();
 ```
 
 ### Chainable Boolean Operations
+
+The basic concept explained:
+
+<!--
 ```js
 import and from "./resolve/and.js";
-import collapse from "./resolve/collapse.js";
+import resolve from "./resolve/resolve.js";
+
+// 1. get multiple unresolved results
 const raw1 = index.search("a short query", { 
     resolve: false
 });
@@ -385,23 +429,57 @@ const raw2 = index.search("another query", {
     resolve: false,
     boost: 2
 });
-// apply boolean operations
+
+// 2. apply boolean operations
 const raw3 = and(raw1, raw2, /* ... */);
-// resolve result
-const result = collapse(raw3);
+// when raw3.length is 0 then no result was found
+
+// 3. resolve final result
+const result = resolve(raw3, {
+    limit: 100,
+    offset: 0
+});
+```
+-->
+```js
+// 1. get multiple unresolved results
+const raw1 = index.search("a short query", { 
+    resolve: false
+});
+const raw2 = index.search("another query", {
+    resolve: false,
+    boost: 2
+});
+
+// 2. apply resolver operations
+const raw3 = raw1.and(raw2, /* ... */);
+// you can access the aggregated result by raw3.result
+console.log("The aggregated result is:", raw3.result)
+// apply further operations ...
+
+// 3. resolve final result
+const result = raw3.resolve({
+    limit: 100,
+    offset: 0
+});
+console.log("The final result is:", result)
 ```
 
-Run at parallel (e.g. when using WorkerIndex):
+Use inline queries:
 
+<!--
+Run at parallel (e.g. when using WorkerIndex):
 ```js
 import and from "./resolve/and.js";
 import or from "./resolve/or.js";
-import collapse from "./resolve/collapse.js";
-// apply boolean operations (execute all)
-const result = collapse(
+import resolve from "./resolve/resolve.js";
+// apply boolean operations (execute all immediately)
+const result =
+// resolve the result
+resolve(
     or( // union
         and( // intersection
-            index.search("a short query", {
+            index.search("a query", {
                 resolve: false
             }),
             index.search("another query", {
@@ -413,12 +491,45 @@ const result = collapse(
             resolve: false,
             boost: 2
         })
+    ),
+    not( // exclusion
+        index.search("some query", {
+            resolve: false
+        })
     )
 );
 ```
+-->
+```js
+const result = index.search("further query", {
+    // set resolve to false on the first query
+    resolve: false,
+    boost: 2
+})
+.or( // union
+    index.search("a query")
+    .and( // intersection
+        index.search("another query", {
+            boost: 2
+        })
+    )
+)
+.not( // exclusion
+    index.search("some query")
+)
+// resolve the result
+.resolve({
+    limit: 100,
+    offset: 0
+});
+```
 
-Lazy injection (recommended for most usage):
+<!--
+Chained injection (recommended for most use cases):
+-->
+Or use a fully declarative style (also recommended when run in parallel):
 
+<!--
 ```js
 import and from "./resolve/and.js"; 
 import or from "./resolve/or.js"; 
@@ -428,7 +539,7 @@ const result = collapse(
     or( // union
         and({ // intersection
             index: index,
-            query: "a short query",
+            query: "a query",
         },{
             index: index,
             query: "another query",
@@ -438,9 +549,57 @@ const result = collapse(
             index: index,
             query: "further query",
             boost: 2
+        },{
+            // optionally apply resolve
+            // in the outer last stage
+            limit: 100,
+            offset: 0,
+            resolve: true,
+            enrich: true
         }
     )
 );
+```
+-->
+```js
+import Resolver from "./resolver.js";
+const result = new Resolver({
+    index: index,
+    query: "further query",
+    boost: 2
+})
+.or({
+    and: [{ // inner expression
+        index: index,
+        query: "a query"
+    },{
+        index: index,
+        query: "another query",
+        boost: 2
+    }]
+})
+.not({ // exclusion
+    index: index,
+    query: "some query"
+})
+.resolve({
+    limit: 100,
+    offset: 0
+});
+```
+
+When all queries are made against the same index, you can skip the index in every declaration followed after initially calling `new Resolve()`:
+
+```js
+import Resolver from "./resolver.js";
+const result = new Resolver({
+    index: index,
+    query: "a query"
+})
+.and({ query: "another query", boost: 2 })
+.or ({ query: "further query", boost: 2 })
+.not({ query: "some query" })
+.resolve(100);
 ```
 
 ### Custom Result Decoration

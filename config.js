@@ -42,3 +42,6 @@ export const SUPPORT_KEYSTORE = true;
 
 /** @define {boolean} */
 export const SUPPORT_COMPRESSION = true;
+
+/** @define {boolean} */
+export const SUPPORT_RESOLVER = true;

@@ -532,6 +532,7 @@ Encoder.prototype.encode = function(str){
         else{
             str = str.toLowerCase();
             this.mapper = this.mapper
+                // todo replace spread
                 ? new Map([...normalize_mapper, ...this.mapper])
                 : new Map(/** @type {Map<string, string>} */ normalize_mapper);
         }

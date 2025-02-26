@@ -1,7 +1,7 @@
 /**
  * @interface
  */
-export default function StorageInterface(sid, field){};
+export default function StorageInterface(name, config){};
 
 // Mandatory Initializer
 // ------------------------------
@@ -21,7 +21,9 @@ StorageInterface.prototype.destroy = async function(){};
 // transfer all changes of an index to the database
 StorageInterface.prototype.commit = async function(){};
 // get results of a term "key" with optional context "ctx"
-StorageInterface.prototype.get = async function(key, ctx, limit, offset, resolve){};
+StorageInterface.prototype.get = async function(key, ctx, limit, offset, resolve, enrich){};
+// get documents stored in index (enrich result)
+StorageInterface.prototype.enrich = async function(ids){};
 // check if id exists on a specific index
 StorageInterface.prototype.has = async function(id){};
 // delete one id or multiple ids on a specific index
@@ -33,6 +35,6 @@ StorageInterface.prototype.clear = async function(){};
 // ------------------------------
 
 // perform the query intersection on database side
-StorageInterface.prototype.search = async function(index, query, suggest, limit, offset, resolve){};
+StorageInterface.prototype.search = async function(index, query, limit, offset, suggest, resolve, enrich){};
 // give some information about the storage
 StorageInterface.prototype.info = async function(){};

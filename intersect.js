@@ -1,5 +1,16 @@
 import { create_object, concat } from "./common.js";
 
+/*
+
+ from -> result[
+    res[score][id],
+    res[score][id],
+ ]
+
+ to -> [id]
+
+ */
+
 /**
  * Implementation based on Object[key] provides better suggestions
  * capabilities and has less performance scaling issues on large indexes.
@@ -199,7 +210,7 @@ export function intersect_union(mandatory, arrays) {
                 if(!union[id]){
 
                     union[id] = 1;
-                    result[result.length] = id;
+                    result.push(id);
                 }
             }
         }

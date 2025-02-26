@@ -5,9 +5,6 @@
 export function IndexInterface(){
 
     this.cache = null;
-    this.matcher = null;
-    this.stemmer = null;
-    this.filter = null;
 }
 
 /**

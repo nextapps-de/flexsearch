@@ -1,12 +1,30 @@
-import { concat } from "../common.js";
+import { concat, create_object } from "../common.js";
 
-export default function(result, limit, offset){
+
+/*
+ from -> res[score][id]
+ to   -> [id]
+*/
+
+/**
+ * Aggregate the union of a single raw result
+ * @param result
+ * @param limit
+ * @param offset
+ * @param enrich
+ * @return {*|*[]}
+ */
+
+export default function(result, limit = 0, offset = 0, enrich){
 
     // fast path: when there is just one slot in the result
     if(result.length === 1){
         result = result[0];
         return offset || (result.length > limit)
-            ? result.slice(offset, offset + limit)
+            ? (limit
+                ? result.slice(offset, offset + limit)
+                : result.slice(offset)
+            )
             : result;
     }
 
@@ -23,7 +41,9 @@ export default function(result, limit, offset){
             }
             // apply offset pointer when length differs
             if(offset < len){
-                arr = arr.slice(offset, offset + limit);
+                arr = limit
+                    ? arr.slice(offset, offset + limit)
+                    : arr.slice(offset);
                 len = arr.length;
                 offset = 0;
             }
@@ -65,7 +85,7 @@ export default function(result, limit, offset){
     // todo remove
     if(!final.length){
         //throw new Error("No results found");
-        return [];
+        return final;
     }
 
     return final.length > 1
