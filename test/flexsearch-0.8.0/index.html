@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark</title>
+</head>
+<body>
+<h2>Benchmark: flexsearch-0.8.0</h2><hr/>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script type="module">
+
+    import Index from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/index.js";
+    import Encoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/encoder.js";
+    import DefaultEncoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/lang/latin/default.js";
+    import { suite } from "../../bench.js";
+
+    let lib;
+
+    suite["flexsearch-0.8.0"] = {
+
+        init: function(){
+            lib = new Index({
+                tokenize: "strict",
+                resolution: 1,
+                fastupdate: false,
+                encoder: new Encoder({
+                    assign: DefaultEncoder,
+                    include: {
+                        letter: true
+                    }
+                }),
+                context: {
+                    depth: 1,
+                    bidirectional: false,
+                    resolution: 1
+                }
+            });
+        },
+        add: function(data){
+            for(let i = 0, len = data.length; i < len; i++){
+                lib.add(i, data[i]);
+            }
+        },
+        query: function(query){
+            return lib.search(query, 9999);
+        },
+        update: function(data){
+            for(let i = 0, len = data.length; i < len; i++){
+                lib.update(i, data[i]);
+            }
+        },
+        remove: function(data){
+            for(let i = 0, len = data.length; i < len; i++){
+                lib.remove(i, data[i]);
+            }
+        }
+    };
+
+</script>
+</body>
+</html>

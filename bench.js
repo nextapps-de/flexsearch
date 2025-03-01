@@ -20,6 +20,11 @@ const params = (function(){
     return obj;
 }());
 
+let term_length = 0;
+for(let i = 0; i < text_data.length; i++){
+    term_length += text_data[i].toLowerCase().split(/[^a-z0-9]+/).filter(item => !!item).length;
+}
+
 let runs;
 let duration;
 
@@ -40,58 +45,61 @@ else{
 //     text_data.push('zero one two three four five six seven eight nine ten');
 // }
 
-// queue.push({
-//     name: "add",
-//     init: null,
-//     test: null,
-//     start: null,
-//     prepare: null,
-//     fn: function(){
-//         lib.init();
-//         lib.add(text_data);
-//     },
-//     end: null,
-//     complete: null,
-//     count: text_data.length
-// });
-//
-// queue.push({
-//     name: "update",
-//     init: null,
-//     test: null,
-//     start: function(){
-//         lib.init();
-//         lib.add(text_data);
-//     },
-//     prepare: null,
-//     fn: function(){
-//         lib.add(text_data);
-//     },
-//     end: null,
-//     complete: null,
-//     count: text_data.length
-// });
-//
-// let index;
-//
-// queue.push({
-//     name: "remove",
-//     init: null,
-//     test: null,
-//     start: function(){
-//         lib.init();
-//         lib.add(text_data);
-//         index = 0;
-//     },
-//     prepare: null,
-//     fn: function(){
-//         lib.remove(index++);
-//     },
-//     end: null,
-//     complete: null,
-//     cycle: text_data.length,
-//     count: 1
-// });
+queue.push({
+    name: "add",
+    init: null,
+    test: null,
+    start: function(){
+        lib.init();
+    },
+    prepare: null,
+    fn: function(){
+        lib.add(text_data);
+    },
+    end: null,
+    complete: null,
+    cycle: 1,
+    count: term_length
+});
+
+queue.push({
+    name: "update",
+    init: function(){
+        lib.init();
+        lib.add(text_data);
+    },
+    test: null,
+    start: null,
+    prepare: null,
+    fn: function(){
+        lib.add(text_data);
+    },
+    end: null,
+    complete: null,
+    cycle: 1,
+    count: term_length
+});
+
+let _index;
+
+queue.push({
+    name: "remove",
+    init: null,
+    test: null,
+    start: function(){
+        lib.init();
+        lib.add(text_data);
+        _index = 0;
+    },
+    prepare: null,
+    fn: function(){
+        lib.remove(_index++);
+    },
+    end: null,
+    complete: null,
+    cycle: text_data.length,
+    count: term_length / text_data.length
+});
 
 queue.push({
     name: "query-single",
@@ -131,7 +139,7 @@ queue.push({
     },
     end: null,
     complete: null,
-    count: 5
+    count: 11
 });
 
 queue.push({
@@ -141,13 +149,13 @@ queue.push({
     start: null,
     prepare: null,
     fn: function(){
-        lib.query("there were six spanish pieces of four pistoles");
-        lib.query("glumdalclitch and i attended the king and queen in a progress");
+        //lib.query("there were six spanish pieces of four pistoles");
+        //lib.query("glumdalclitch and i attended the king and queen in a progress");
         lib.query("only in this island of luggnagg the appetite for living was not so eager");
     },
     end: null,
     complete: null,
-    count: 3
+    count: 14
 });
 
 queue.push({
@@ -162,7 +170,7 @@ queue.push({
     },
     end: null,
     complete: null,
-    count: 2
+    count: 7
 });
 
 queue.push({
@@ -178,7 +186,7 @@ queue.push({
     },
     end: null,
     complete: null,
-    count: 3
+    count: 7
 });
 
 // #####################################################################################
@@ -189,8 +197,8 @@ window.onload = function(){
     if(queue.length){
 
         lib = suite[Object.keys(suite)[0]];
-        lib.init();
-        lib.add(text_data);
+        //lib.init();
+        //lib.add(text_data);
 
         setTimeout(match ? perform_match : perform, 200);
     }
@@ -211,7 +219,7 @@ function check_test(test){
 
     //console.log(results);
 
-    return results.length >= 6;
+    return (results.length || results.size) >= 6;
 }
 
 function msg(message, a){
@@ -229,36 +237,57 @@ const perf = window.performance;
 
 let current = 0;
 
-function perform(){
+async function perform(){
 
     const test = queue[current];
 
     if(current === 0) check_test(test) || msg("Main test failed!");
 
-    let elapsed = 0, memory = 0;
     let status = true;
-    let loops = 0, cycle = 1, now = 0, max_cycle = test.cycle, inner_count = test.count;
+    let cycle = 1, max_cycle = test.cycle, inner_count = test.count;
+    let elapsed = 0, memory = 0;
+    let loops = 0, now = 0;
+    let start, mem_start, mem;
 
     if(status){
 
         if(test.init) test.init();
-
         const end = perf.now() + duration;
+        let start, mem_start, mem;
 
-        for(let start, mem_start, mem; now < end;){
+        while(now < end){
 
             if(test.start) test.start(loops);
 
+            // -- START ------------------
             mem_start = perf.memory.usedJSHeapSize;
             start = perf.now();
             for(let i = 0; i < cycle; i++) test.fn();
             now = perf.now();
             mem = perf.memory.usedJSHeapSize - mem_start;
-            elapsed += (now - start);
-            loops += cycle;
-            if(mem > 0) memory += mem;
+            // -- END -------------------
 
+            elapsed += (now - start);
+            if(mem > 0) memory += mem;
             if(test.end) test.end(loops);
+            loops += cycle;
+
+            cycle = (loops / (elapsed || 1) * (duration - elapsed) * 1.2) | 0;
+            if(cycle < 1){
+                break;
+            }
+            if(max_cycle && (cycle > max_cycle)){
+                cycle = max_cycle;
+            }
+
+            // mem_start = perf.memory.usedJSHeapSize;
+            // start = performance.now();
+            // for(let i = 0; i < cycle; i++) test.fn();
+            // elapsed += (performance.now() - start);
+            // mem = perf.memory.usedJSHeapSize - mem_start;
+            // loops += cycle;
+            // if(mem > 0) memory += mem;
+            // if(test.end) test.end(loops);
 
             // console.log(test.name);
             // console.log("duration", duration);
@@ -266,18 +295,25 @@ function perform(){
             // console.log("cycle", cycle);
             // console.log("loops", loops);
 
-            cycle *= duration / (elapsed || 1);
-            //cycle = loops / (elapsed || 1) * (duration - elapsed);
+            //if(cycle ===1) cycle = cycle * (duration / (elapsed || 1)) | 0;
 
-            // if(cycle < 0){
+            // console.log("loops", loops, "elapsed", elapsed, "duration", duration, "cycle", (loops / (elapsed || 1) * (duration - elapsed)) | 0);
             //
+            // //cycle = (loops / (elapsed || 1) * (duration - elapsed) * 1.2) | 0;
+            // //cycle *= loops / (elapsed || 1) * (duration - elapsed) / 2 | 0;
+            // cycle *= duration / (elapsed || 1);
+            // if(cycle < 1){
             //     break;
             // }
-
-            if(max_cycle && (cycle > max_cycle)){
-
-                cycle = max_cycle;
-            }
+            //
+            // //cycle = loops / (elapsed || 1) * (duration - elapsed);
+            //
+            // if(max_cycle && (cycle > max_cycle)){
+            //     cycle = max_cycle;
+            // }
+            //
+            // //console.log(elapsed, duration, cycle)
+            // //await new Promise(resolve => setTimeout(resolve, 50));
         }
 
         if(test.complete) test.complete();
@@ -292,7 +328,7 @@ function perform(){
     }
     else{
 
-        window.top.postMessage(test.name + "," + (status ? Math.ceil(1000 / elapsed * loops) : 0) + "," + (status ? Math.ceil(memory / loops) : 0), location.protocol + "//" + location.hostname); //"https://nextapps-de.github.io" "https://raw.githack.com"
+        window.top.postMessage(test.name + "," + (status ? Math.ceil(1000 / elapsed * loops) : 0) + "," + (status ? Math.ceil(memory / loops) : 0), location.protocol + "//" + location.hostname + ":" + location.port); //"https://nextapps-de.github.io" "https://raw.githack.com"
     }
 
     if(current < queue.length){
@@ -320,7 +356,7 @@ function perform_match(){
     }
     else{
 
-        window.top.postMessage(JSON.stringify(res), location.protocol + "//" + location.hostname);
+        window.top.postMessage(JSON.stringify(res), location.protocol + "//" + location.hostname + ":" + location.port);
     }
 
 

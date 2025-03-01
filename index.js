@@ -21,10 +21,11 @@
         "flexsearch-match", "flexsearch-memory", "flexsearch-score",
         "flexsearch-speed"
     ]:[
-        /*"flexsearch-0.6.2", "flexsearch-0.6.3",*/ "minisearch", "flexsearch-0.7.0",
+        //"flexsearch-0.6.2", "flexsearch-0.6.3",
+        "flexsearch-0.7.0", "flexsearch-0.8.0",
         "bm25", "bulksearch", "elasticlunr",
         "fuzzysearch", "js-search", "jsii",
-        "fuse", "lunr", "wade", "lyra"
+        "fuse", "lunr", "wade", "lyra", "minisearch"
     ]);
 
     list.render(lib);
@@ -225,7 +226,7 @@
 
         if(index < lib.length){
 
-            if(event.origin === location.protocol + "//" + location.hostname){ // "https://nextapps-de.github.io" "https://raw.githack.com"
+            if(event.origin === location.protocol + "//" + location.hostname + ":" + location.port){ // "https://nextapps-de.github.io" "https://raw.githack.com"
 
                 //console.log(event.data);
 

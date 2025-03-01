@@ -18,7 +18,7 @@ let promise;
 
 window.onmessage = function(event){
 
-    if(event.origin === location.protocol + "//" + location.hostname){
+    if(event.origin === location.protocol + "//" + location.hostname + ":" + location.port){
 
         const results = JSON.parse(event.data);
         //console.log(results);
