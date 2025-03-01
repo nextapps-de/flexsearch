@@ -1,9 +1,9 @@
 <!-- TODO External Stemmer Lib -->
 Let's discuss the upcoming FlexSearch v0.8 here: https://github.com/nextapps-de/flexsearch/discussions/415
 <h1></h1>
-<h1 align="center">
+<h1>
     <p></p>
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg?v2" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
+    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/flexsearch-logo-glass.svg?v2" style="max-width: 500px" alt="FlexSearch.js: Next-Generation full text search library for Browser and Node.js">
     <p></p>
 </h1>
 <h3>Web's fastest and most memory-flexible full-text search library with zero dependencies.</h3>
@@ -26,8 +26,7 @@ You can help me by making a personal donation to keep this project alive and als
 <a href="https://salt.bountysource.com/teams/ts-thomas" target="_blank" style="margin-right: 10px"><img src="doc/bountysource.svg" height="32" alt="Donate using Bountysource"></a>
 <a href="https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW" target="_blank"><img src="doc/paypal.png" height="32" alt="Donate using PayPal"></a>
 
-### Sponsors
-
+### FlexSearch Sponsors
 
 <a href="https://antithesis.com" target="_blank" style="display: inline-block">
     <center>
@@ -35,7 +34,6 @@ You can help me by making a personal donation to keep this project alive and als
         Antithesis Operations LLC
     </center>
 </a>
-
 <h1></h1>
 
 When it comes to raw search speed <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
