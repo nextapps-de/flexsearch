@@ -18,38 +18,31 @@
     suite["flexsearch-0.6.2"] = {
 
         init: function(){
-
             lib = new FlexSearch({
-
                 encode: "icase",
                 tokenize: "strict",
                 resolution: 9,
                 threshold: 8,
                 depth: 1
             });
-
-            window["lib"] = lib;
+            //window["lib"] = lib;
         },
         add: function(data){
-
             for(let i = 0, len = data.length; i < len; i++){
-
                 lib.add(i, data[i]);
             }
         },
-        update: function(id){
-
+        update: function(data){
             for(let i = 0, len = data.length; i < len; i++){
-
                 lib.add(i, data[i]);
             }
         },
-        remove: function(id){
-
-            lib.remove(id);
+        remove: function(data){
+            for(let i = 0, len = data.length; i < len; i++){
+                lib.remove(i);
+            }
         },
         query: function(query){
-
             return lib.search(query);
         }
     };
