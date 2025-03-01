@@ -1,4 +1,4 @@
-import { text_data } from "../demo/data/gulliver.js";
+import { text_data } from "https://rawcdn.githack.com/nextapps-de/flexsearch/master/demo/data/gulliver.js";
 
 export let suite = {};
 export const test = {};
