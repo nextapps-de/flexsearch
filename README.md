@@ -1,4 +1,6 @@
 <!-- TODO External Stemmer Lib -->
+FlexSearch v0.8-Preview: https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
+
 Let's discuss the upcoming FlexSearch v0.8 here: https://github.com/nextapps-de/flexsearch/discussions/415
 <h1></h1>
 <h1>
