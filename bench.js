@@ -45,6 +45,7 @@ else{
 //     text_data.push('zero one two three four five six seven eight nine ten');
 // }
 
+/*
 queue.push({
     name: "add",
     init: null,
@@ -97,14 +98,21 @@ queue.push({
         lib.remove(text_data);
     },
     end: null,
-    complete: null,
+    complete: function(){
+        lib.init();
+        lib.add(text_data);
+    },
     cycle: 1,
     count: term_length
 });
+*/
 
 queue.push({
     name: "query-single",
-    init: null,
+    init: function(){
+        lib.init();
+        lib.add(text_data);
+    },
     test: null,
     start: null,
     prepare: null,
