@@ -93,7 +93,8 @@ queue.push({
     },
     prepare: null,
     fn: function(){
-        lib.remove(_index++);
+        //lib.remove(_index++);
+        lib.remove(text_data);
     },
     end: null,
     complete: null,
