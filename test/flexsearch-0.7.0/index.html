@@ -8,7 +8,7 @@
 <h2>Benchmark: flexsearch-0.7.0</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
-<script src="../../../dist/flexsearch.light.min.js"></script>
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/master/dist/flexsearch.light.min.js"></script>
 <script type="module">
 
     import { suite } from "../../bench.js";
@@ -19,7 +19,6 @@
 
         init: function(){
             lib = new FlexSearch.Index({
-
                 encode: str => str.toLowerCase().split(split),
                 tokenize: "strict",
                 resolution: 1,
