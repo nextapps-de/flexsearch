@@ -40,7 +40,7 @@ You can help me by making a personal donation to keep this project alive and als
 
 <h1></h1>
 
-When it comes to raw search speed <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
+When it comes to raw search speed <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">FlexSearch outperforms every single searching library out there</a> and also provides flexible search capabilities like multi-field search, phonetic transformations or partial matching. 
 
 Depending on the used <a href="#options">options</a> it also provides the <a href="#memory">most memory-efficient index</a>. FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a> based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 1,000,000 times faster compared to other libraries.
 FlexSearch also provides you a non-blocking asynchronous processing model as well as web workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
@@ -55,8 +55,8 @@ Demos:
 -->
 
 Library Comparison "Gulliver's Travels":
-- <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark</a>
-- <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">Scoring Benchmark</a>
+- <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">Performance Benchmark</a>
+- <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">Scoring Benchmark</a>
 - <a href="#consumption">Memory Consumption</a>
 
 Plugins (extern projects):
@@ -256,7 +256,7 @@ npm install flexsearch
 <a name="compare" id="compare"></a>
 ## Performance Benchmark (Ranking)
 
-Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
+Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
 
 Operation per seconds, higher is better, except the test "Memory" on which lower is better.
 
@@ -2188,9 +2188,9 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 
 > __Note:__ This feature is disabled by default because of its extended memory usage. Read <a href="#contextual_enable">here</a> get more information about and how to enable.
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document.
-This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
+This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
 
 <p align="center">
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4" width="100%">
