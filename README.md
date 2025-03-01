@@ -4,7 +4,7 @@
 
 - Persistent indexes support for: `IndexedDB` (Browser), `Redis`, `SQLite`, `Postgres`, `MongoDB`, `Clickhouse`
 - Enhanced language customization via the new `Encoder` class
-- Searching single terms is up to 7 times faster
+- Searching single terms is up to 7 times faster, the overall benchmark score was doubled
 - Enhanced support for larger indexes or larger result sets
 - Improved offset and limit processing achieve up to 100 times faster traversal performance through large datasets
 - Support for larger In-Memory index with extended key size (the defaults maximum keystore limit is: 2^24)
@@ -18,6 +18,8 @@
 - Up to 100 times faster deletion/replacement when not using the additional "fastupdate" register
 - Regex Pre-Compilation (transforms hundreds of regex rules into just a few)
 - Extended support for multiple tags (DocumentIndex)
+
+Compare Benchmark: [0.7.0](https://nextapps-de.github.io/flexsearch/test/flexsearch-0.7.0/) vs. [0.8.0](https://nextapps-de.github.io/flexsearch/test/flexsearch-0.8.0/)
 
 ## Persistent Indexes
 
