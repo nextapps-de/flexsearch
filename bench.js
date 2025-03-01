@@ -197,8 +197,8 @@ window.onload = function(){
     if(queue.length){
 
         lib = suite[Object.keys(suite)[0]];
-        //lib.init();
-        //lib.add(text_data);
+        lib.init();
+        lib.add(text_data);
 
         setTimeout(match ? perform_match : perform, 200);
     }
