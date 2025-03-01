@@ -6,8 +6,10 @@ const defaults = {
     pass: null
 };
 const VERSION = 1;
-const fields = ["map", "ctx", "reg", "cfg"];
+const fields = ["map", "ctx", "reg", "tag", "doc", "cfg"];
 import StorageInterface from "../interface.js";
+import Document from "../../document.js";
+import { toArray } from "../../common.js";
 
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
@@ -45,6 +47,9 @@ export default function RedisDB(name, config = {}){
 // };
 
 RedisDB.prototype.mount = function(flexsearch){
+    if(flexsearch instanceof Document){
+        return flexsearch.mount(this);
+    }
     flexsearch.db = this;
     // todo support
     //this.fastupdate = flexsearch.fastupdate;
@@ -77,26 +82,28 @@ RedisDB.prototype.clear = function(){
     return this.db.unlink([
         this.id + "map" + this.field,
         this.id + "ctx" + this.field,
+        this.id + "tag" + this.field,
         this.id + "cfg" + this.field,
         this.id + "doc",
-        this.id + "reg",
+        this.id + "reg"
     ]);
 };
 
 function create_result(range, type, resolve, enrich){
-    let result = [];
     if(resolve){
         for(let i = 0, tmp, id; i < range.length; i++){
             tmp = range[i];
             id = type === "number"
-                ? parseInt(tmp.value, 10)
-                : tmp.value
-            result[i] = enrich
+                ? parseInt(tmp.value || tmp, 10)
+                : tmp.value || tmp;
+            range[i] = /*enrich
                 ? { id, doc: tmp.doc }
-                : id
+                :*/ id;
         }
+        return range;
     }
     else{
+        let result = [];
         for(let i = 0, tmp, id, score; i < range.length; i++){
             tmp = range[i];
             id = type === "number"
@@ -110,8 +117,8 @@ function create_result(range, type, resolve, enrich){
                     : id
             );
         }
+        return result;
     }
-    return result;
 }
 
 RedisDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
@@ -135,6 +142,33 @@ RedisDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true
     const type = this.type;
     return result.then(function(range){
         return create_result(range, type, resolve, enrich);
+    });
+};
+
+RedisDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
+    const self = this;
+    return this.db.sMembers(this.id + "tag" + this.field + ":" + tag).then(function(ids){
+        if(!ids || !ids.length || offset >= ids.length) return [];
+        if(!limit && !offset) return ids;
+        const result = ids.slice(offset, offset + limit);
+        return enrich
+            ? self.enrich(result)
+            : result;
+    });
+};
+
+RedisDB.prototype.enrich = function(ids){
+    if(typeof ids !== "object"){
+        ids = [ids];
+    }
+    return this.db.hmGet(this.id + "doc", ids).then(function(res){
+        for(let i = 0; i < res.length; i++){
+            res[i] = {
+                id: ids[i],
+                doc: res[i] && JSON.parse(res[i])
+            };
+        }
+        return res;
     });
 };
 
@@ -199,13 +233,11 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
         ? this.db.multi()
             .zUnionStore(key, query, { AGGREGATE: "SUM" })
             [(resolve ? "zRange" : "zRangeWithScores")](key, "" + offset, "" + (offset + limit - 1), { REV: true })
-            //.zRangeWithScores
             .unlink(key)
             .exec()
         : this.db.multi()
             .zInterStore(key, query, { AGGREGATE: "MIN" })
             [(resolve ? "zRange" : "zRangeWithScores")](key, "" + offset, "" + (offset + limit - 1), { REV: true })
-            //.zRangeWithScores
             .unlink(key)
             .exec();
 
@@ -214,16 +246,6 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
         range = range[1];
         if(enrich) range = await this.enrich(range);
         return create_result(range, type, resolve, enrich);
-    });
-};
-
-RedisDB.prototype.enrich = function(ids){
-    const keys = ids.map(id => this.id + "doc:" + (id.value || id));
-    return this.db.sMembers(keys).then(function(res){
-        for(let i = 0; i < res.length; i++){
-            ids[i].doc = res[i];
-        }
-        return ids;
     });
 };
 
@@ -270,7 +292,7 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
         }
         if(!_replace){
             if(!_append){
-                tasks = tasks.concat([...flexsearch.reg.keys()]);
+                tasks = tasks.concat(toArray(flexsearch.reg));
             }
             tasks.length && await this.remove(tasks);
         }
@@ -282,7 +304,7 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
 
     await this.transaction(function(trx){
 
-        let refs = Object.create(null);
+        let refs = new Map();
         for(const item of flexsearch.map){
             const key = item[0];
             const arr = item[1];
@@ -312,7 +334,8 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
                         // tmp || refs.set(id, tmp = []);
                         // tmp.push(ref);
                         id = ids[j];
-                        let tmp = refs[id] || (refs[id] = []);
+                        let tmp = refs.get(id);
+                        tmp || refs.set(id, tmp = []);
                         tmp.push(ref);
                     }
                 }
@@ -323,11 +346,13 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
         //     const value = item[1];
         //     trx.sAdd("ref" + this.field + ":" + key, value);
         // }
-        if(this.fastupdate) for(let key in refs){
-            trx.sAdd(this.id + "ref" + this.field + ":" + key, refs[key]);
+        if(this.fastupdate) for(const item of refs){
+            const key = item[0];
+            const value = item[1];
+            trx.sAdd(this.id + "ref" + this.field + ":" + key, value);
         }
 
-        refs = Object.create(null);
+        refs = new Map();
         for(const ctx of flexsearch.ctx){
             const ctx_key = ctx[0];
             const ctx_value = ctx[1];
@@ -336,7 +361,6 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
                 const arr = item[1];
                 for(let i = 0, ids; i < arr.length; i++){
                     if((ids = arr[i]) && ids.length){
-
                         let result = [];
                         for(let j = 0; j < ids.length; j++){
                             result.push({ score: i, value: "" + ids[j] });
@@ -344,7 +368,6 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
                         if(typeof ids[0] === "number"){
                             this.type = "number";
                         }
-
                         const ref = this.id + "ctx" + this.field + ":" + ctx_key + ":" + key;
                         trx.zAdd(ref, result);
                         // if(this.fastupdate) for(let j = 0; j < ids.length; j++){
@@ -357,28 +380,49 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
                             // tmp || refs.set(id, tmp = []);
                             // tmp.push(ref);
                             id = ids[j];
-                            let tmp = refs[id] || (refs[id] = []);
+                            let tmp = refs.get(id);
+                            tmp || refs.set(id, tmp = []);
                             tmp.push(ref);
                         }
                     }
                 }
             }
         }
-        // if(this.fastupdate) for(let item of refs){
-        //     const key = item[0];
-        //     const value = item[1];
-        //     trx.sAdd("ref" + this.field + ":" + key, value);
-        // }
-        if(this.fastupdate) for(let key in refs){
-            trx.sAdd(this.id + "ref" + this.field + ":" + key, refs[key]);
+
+
+        if(this.fastupdate) for(const item of refs){
+            const key = item[0];
+            const value = item[1];
+            trx.sAdd(this.id + "ref" + this.field + ":" + key, value);
         }
 
-        let ids = [...flexsearch.reg.keys()];
-        if(ids.length){
-            if(typeof ids[0] === "number"){
-                ids = ids.map(id => "" + id);
+        if(flexsearch.store){
+            for(const item of flexsearch.store.entries()){
+                const id = item[0];
+                const doc = item[1];
+                doc && trx.hSet(this.id + "doc", "" + id, JSON.stringify(doc));
             }
-            trx.sAdd(this.id + "reg", ids);
+        }
+        if(!flexsearch.bypass){
+            let ids = toArray(flexsearch.reg);
+            if(ids.length){
+                if(typeof ids[0] === "number"){
+                    ids = ids.map(id => "" + id);
+                }
+                trx.sAdd(this.id + "reg", ids);
+            }
+        }
+
+        if(flexsearch.tag){
+            for(const item of flexsearch.tag){
+                const tag = item[0];
+                let ids = item[1];
+                if(!ids.length) continue;
+                if(typeof ids[0] === "number"){
+                    ids = ids.map(id => "" + id);
+                }
+                trx.sAdd(this.id + "tag" + this.field + ":" + tag, ids);
+            }
         }
 
         trx.set(this.id + "cfg" + this.field, JSON.stringify({
@@ -400,6 +444,11 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
+    flexsearch.tag &&
+    flexsearch.tag.clear();
+    flexsearch.store &&
+    flexsearch.store.clear();
+    flexsearch instanceof Document ||
     flexsearch.reg.clear();
 };
 
@@ -429,7 +478,7 @@ RedisDB.prototype.remove = function(ids){
 
         for(let i = 0, id; i < ids.length; i++){
             if(!check[i]) continue;
-            id = ids[i];
+            id = "" + ids[i];
 
             if(this.fastupdate){
                 // const refs = new Map();
@@ -453,6 +502,7 @@ RedisDB.prototype.remove = function(ids){
                 // todo scan
             }
 
+            trx.hDel(this.id + "doc", id);
             trx.sRem(this.id + "reg", id);
         }
     });

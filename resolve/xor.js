@@ -3,6 +3,7 @@ import default_resolver from "./default.js";
 import { create_object } from "../common.js";
 import or from "./or.js";
 import and from "./and.js";
+import not from "./not.js";
 
 export default function xor(){
     const self = this;
@@ -46,6 +47,9 @@ export default function xor(){
             else if(query.and){
                 result = and(query.and);
             }
+            else if(query.not){
+                result = not(query.not);
+            }
             else{
                 limit = query.limit || 0;
                 offset = query.offset || 0;
@@ -75,9 +79,24 @@ export default function xor(){
     return resolve ? this.result : this;
 }
 
-function exclusive(result, limit, offset, resolve){
+function exclusive(result, limit, offset, enrich, resolve){
 
-    if(!result.length) return this.result;
+    if(!result.length){
+        // todo remove
+        console.log("Empty Result")
+        return result;
+    }
+
+    if(result.length < 2){
+        // todo remove
+        console.log("Single Result")
+        if(resolve){
+            return default_resolver(result[0], limit, offset, enrich);
+        }
+        else{
+            return result[0];
+        }
+    }
 
     const final = [];
     const check = create_object()
@@ -114,13 +133,16 @@ function exclusive(result, limit, offset, resolve){
                         final.push(id);
                     }
                     else{
-                        final[j] || (final[j] = []);
-                        final[j].push(id);
+                        // shift resolution by boost (inverse)
+                        const index = j + (i ? this.boost : 0);
+                        final[index] || (final[index] = []);
+                        final[index].push(id);
                     }
                 }
             }
         }
     }
 
+    //this.boost = 0;
     return final;
 }

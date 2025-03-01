@@ -89,8 +89,8 @@ export default function Index(options, _register){
     this.resolution_ctx = context.resolution || 1;
     this.rtl = (encoder.rtl) || options.rtl || false;
 
-    if(SUPPORT_CACHE && (tmp = options.cache)){
-        this.cache = new Cache(tmp);
+    if(SUPPORT_CACHE){
+        this.cache = (tmp = options.cache || null) && new Cache(tmp);
     }
 
     if(SUPPORT_PERSISTENT){
@@ -104,12 +104,12 @@ export default function Index(options, _register){
 }
 
 if(SUPPORT_PERSISTENT){
-    Index.prototype.mount = function(db){
+    Index.prototype.mount = async function(db){
         if(this.commit_timer){
             clearTimeout(this.commit_timer);
             this.commit_timer = null;
         }
-        return this.db = db.mount(this);
+        return this.db = await db.mount(this);
     };
     Index.prototype.commit = function(replace, append){
         if(this.commit_timer){

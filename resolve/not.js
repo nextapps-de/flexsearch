@@ -1,6 +1,9 @@
 import Resolver from "../resolver.js";
 import default_resolver from "./default.js";
 import { create_object } from "../common.js";
+import or from "./or.js";
+import and from "./and.js";
+import xor from "./xor.js";
 
 export default function not(){
     const self = this;
@@ -38,6 +41,15 @@ export default function not(){
                 query.resolve = false;
                 result = query.index.search(query).result;
             }
+            else if(query.or){
+                result = or(query.or);
+            }
+            else if(query.and){
+                result = and(query.and);
+            }
+            else if(query.xor){
+                result = xor(query.xor);
+            }
             else{
                 limit = query.limit || 0;
                 offset = query.offset || 0;
@@ -67,7 +79,9 @@ export default function not(){
 
 function exclusion(result, limit, offset, resolve){
 
-    if(!result.length) return this.result;
+    if(!result.length){
+        return this.result;
+    }
 
     const final = [];
     const exclude = new Set(result.flat().flat());

@@ -28,14 +28,11 @@ export function set_resolve(resolve){
 Index.prototype.search = function(query, limit, options){
 
     if(!options){
-
         if(!limit && is_object(query)){
-
             options = /** @type {Object} */ (query);
             //query = options["query"];
         }
         else if(is_object(limit)){
-
             options = /** @type {Object} */ (limit);
             limit = 0;
         }
@@ -46,18 +43,17 @@ Index.prototype.search = function(query, limit, options){
     let context, suggest, offset = 0, resolve, enrich;
 
     if(options){
-
         query = options.query || query;
         limit = options.limit || limit;
         offset = options.offset || 0;
         context = options.context;
         suggest = SUPPORT_SUGGESTION && options.suggest;
-        resolve = global_resolve && options.resolve !== false;
+        resolve = !SUPPORT_RESOLVER || (global_resolve && options.resolve !== false);
         resolve || (global_resolve = 0);
         enrich = resolve && options.enrich;
     }
     else{
-        resolve = global_resolve;
+        resolve = !SUPPORT_RESOLVER || global_resolve;
     }
 
     // todo: term deduplication during encoding when context is disabled

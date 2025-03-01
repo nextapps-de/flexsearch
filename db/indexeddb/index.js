@@ -1,3 +1,5 @@
+import Document from "../../document.js";
+
 const VERSION = 1;
 const IndexedDB =
     window.indexedDB ||
@@ -12,8 +14,10 @@ const IDBKeyRange =
     window.IDBKeyRange ||
     window.webkitIDBKeyRange ||
     window.msIDBKeyRange;
-const fields = ["map", "ctx", "reg", "cfg"];
+const fields = ["map", "ctx", "tag", "reg", "cfg"];
 import StorageInterface from "../interface.js";
+import { toArray } from "../../common.js";
+import { SUPPORT_STORE, SUPPORT_TAGS } from "../../config.js";
 
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
@@ -32,18 +36,20 @@ export default function IdxDB(name, config = {}){
         name = name.name;
         config = name;
     }
+    if(!name){
+        console.info("Default storage space was used, because a name was not passed.");
+    }
     //field = "Test-456";
+    this.id = "flexsearch" + (name ? ":" + sanitize(name) : "");
     this.field = config.field ? sanitize(config.field) : "";
-    this.id = "flexsearch" + (name ? ":" + sanitize(name) : "") + (this.field ? ":" + this.field : "");
     this.db = null;
     this.trx = {};
 };
 
-// IdxDB.mount = function(flexsearch){
-//     return new this().mount(flexsearch);
-// };
-
 IdxDB.prototype.mount = function(flexsearch){
+    if(flexsearch instanceof Document){
+        return flexsearch.mount(this);
+    }
     flexsearch.db = this;
     return this.open();
 };
@@ -57,7 +63,7 @@ IdxDB.prototype.open = function(){
 
     return this.db || new Promise(function(resolve, reject){
 
-        const req = IndexedDB.open(self.id, VERSION);
+        const req = IndexedDB.open(self.id + (self.field ? ":" + self.field : ""), VERSION);
 
         req.onupgradeneeded = function(event){
 
@@ -116,7 +122,7 @@ IdxDB.prototype.close = function(){
 
 IdxDB.prototype.destroy = function(){
     this.db && this.close();
-    return IndexedDB.deleteDatabase(this.id);
+    return IndexedDB.deleteDatabase(this.id + (this.field ? ":" + this.field : ""));
 };
 
 // IdxDB.prototype.set = function(ref, key, ctx, data){
@@ -145,6 +151,7 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
     const transaction = this.db.transaction(ctx ? "ctx" : "map", "readonly");
     const map = transaction.objectStore(ctx ? "ctx" : "map");
     const req = map.get(ctx ? ctx + ":" + key : key);
+    const self = this;
     return promisfy(req).then(function(res){
         let result = [];
         if(!res || !res.length) return result;
@@ -166,11 +173,13 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
                     }
                     offset = 0;
                     if(result.length === limit){
-                        return result;
+                       break;
                     }
                 }
             }
-            return result;
+            return SUPPORT_STORE && enrich
+                ? self.enrich(result)
+                : result;
         }
         else{
             return res;
@@ -178,12 +187,56 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
     });
 };
 
+if(SUPPORT_TAGS){
+
+    IdxDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
+        const transaction = this.db.transaction("tag", "readonly");
+        const map = transaction.objectStore("tag");
+        const req = map.get(tag);
+        const self = this;
+        return promisfy(req).then(function(ids){
+            if(!ids || !ids.length || offset >= ids.length) return [];
+            if(!limit && !offset) return ids;
+            const result = ids.slice(offset, offset + limit);
+            return SUPPORT_STORE && enrich
+                ? self.enrich(result)
+                : result;
+        });
+    };
+}
+
+if(SUPPORT_STORE){
+
+    IdxDB.prototype.enrich = function(ids){
+        if(typeof ids !== "object"){
+            ids = [ids];
+        }
+        const transaction = this.db.transaction("reg", "readonly");
+        const map = transaction.objectStore("reg");
+        const promises = [];
+        for(let i = 0; i < ids.length; i++){
+            promises[i] = promisfy(map.get(ids[i]));
+        }
+        return Promise.all(promises).then(function(docs){
+            for(let i = 0; i < docs.length; i++){
+                docs[i] = {
+                    id: ids[i],
+                    doc: docs[i] ? JSON.parse(docs[i]) : null
+                };
+            }
+            return docs;
+        });
+    };
+}
+
 IdxDB.prototype.has = function(id){
     const transaction = this.db.transaction("reg", "readonly");
     const map = transaction.objectStore("reg");
     const req = map.getKey(id);
     return promisfy(req);
 };
+
+IdxDB.prototype.search = null;
 
 // IdxDB.prototype.has = function(ref, key, ctx){
 //     const transaction = this.db.transaction(ref, "readonly");
@@ -247,7 +300,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         }
         if(!_replace){
             if(!_append){
-                tasks = tasks.concat([...flexsearch.reg.keys()]);
+                tasks = tasks.concat(toArray(flexsearch.reg));
             }
             tasks.length && await this.remove(tasks);
         }
@@ -362,11 +415,43 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         }
     });
 
-    await this.transaction("reg", "readwrite", function(store){
-        for(const key of flexsearch.reg.keys()){
-            store.put(1, key);
-        }
-    });
+    if(SUPPORT_STORE && flexsearch.store){
+        await this.transaction("reg", "readwrite", function(store){
+            for(const item of flexsearch.store){
+                const id = item[0];
+                const doc = item[1];
+                store.put(typeof doc === "object"
+                    ? JSON.stringify(doc)
+                    : 1
+                , id);
+            }
+        });
+    }
+    else if(!flexsearch.bypass){
+        await this.transaction("reg", "readwrite", function(store){
+            for(const id of flexsearch.reg.keys()){
+                store.put(1, id);
+            }
+        });
+    }
+
+    if(SUPPORT_TAGS && flexsearch.tag){
+        await this.transaction("tag", "readwrite", function(store){
+            for(const item of flexsearch.tag){
+                const tag = item[0];
+                const ids = item[1];
+                if(!ids.length) continue;
+
+                store.get(tag).onsuccess = function(){
+                    let result = this.result;
+                    result = result && result.length
+                        ? result.concat(ids)
+                        : ids;
+                    store.put(result, tag);
+                }
+            }
+        });
+    }
 
     await this.transaction("cfg", "readwrite", function(store){
         store.put({
@@ -388,10 +473,19 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
+    if(SUPPORT_TAGS){
+        flexsearch.tag &&
+        flexsearch.tag.clear();
+    }
+    if(SUPPORT_STORE){
+        flexsearch.store &&
+        flexsearch.store.clear();
+    }
+    flexsearch instanceof Document ||
     flexsearch.reg.clear();
 };
 
-function handle(cursor, ids){
+function handle(cursor, ids, _tag){
 
     const arr = cursor.value;
     let changed;
@@ -399,7 +493,8 @@ function handle(cursor, ids){
     let count = 0;
 
     for(let x = 0, result; x < arr.length; x++){
-        if((result = arr[x])){
+        // tags has no resolution layer
+        if((result = _tag ? arr : arr[x])){
             for(let i = 0, pos, id; i < ids.length; i++){
                 id = ids[i];
                 pos = result.indexOf(parse ? parseInt(id, 10) : id);
@@ -421,6 +516,7 @@ function handle(cursor, ids){
 
             count += result.length;
         }
+        if(_tag) break;
     }
 
     if(!count){
@@ -455,6 +551,12 @@ IdxDB.prototype.remove = function(ids){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids);
+            };
+        }),
+        SUPPORT_TAGS && this.transaction("tag", "readwrite", function(store){
+            store.openCursor().onsuccess = function(){
+                const cursor = this.result;
+                cursor && handle(cursor, ids, /* tag? */ true);
             };
         }),
         // let filtered = [];

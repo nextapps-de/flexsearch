@@ -8,15 +8,19 @@ const defaults = {
     port: "5432"
 };
 
-const pgp = pg_promise();
+const pgp = pg_promise({ noWarnings: true });
 const VERSION = 1;
 const MAXIMUM_QUERY_VARS = 16000;
-const fields = ["map", "ctx", "reg", "cfg"];
+const fields = ["map", "ctx", "reg", "tag", "cfg"];
 import StorageInterface from "../interface.js";
+import Document from "../../document.js";
+import { concat, toArray } from "../../common.js";
 
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_]/g, "");
 }
+
+let DB;
 
 /**
  * @constructor
@@ -38,7 +42,7 @@ export default function PostgresDB(name, config = {}){
     this.id = (config.schema ? sanitize(config.schema) : defaults.schema) + (name ? "_" + sanitize(name) : "");
     this.field = config.field ? "_" + sanitize(config.field) : "";
     this.type = "int";
-    this.db = config.db || null;
+    this.db = DB = config.db || null;
     this.trx = false;
     // todo:
     //this.type = config && config.type ? types[config.type.toLowerCase()] : "String";
@@ -52,6 +56,9 @@ export default function PostgresDB(name, config = {}){
 // };
 
 PostgresDB.prototype.mount = function(flexsearch){
+    if(flexsearch instanceof Document){
+        return flexsearch.mount(this);
+    }
     flexsearch.db = this;
     return this.open();
 };
@@ -59,7 +66,10 @@ PostgresDB.prototype.mount = function(flexsearch){
 PostgresDB.prototype.open = async function(){
 
     if(!this.db) {
-        this.db = pgp(`postgres://${defaults.user}:${encodeURIComponent(defaults.pass)}@${defaults.host}:${defaults.port}/${defaults.name}`);
+        // todo enable warnings and share database instance
+        this.db = DB || (
+            DB = pgp(`postgres://${defaults.user}:${encodeURIComponent(defaults.pass)}@${defaults.host}:${defaults.port}/${defaults.name}`)
+        );
     }
 
     const exist = await this.db.oneOrNone(`
@@ -70,7 +80,7 @@ PostgresDB.prototype.open = async function(){
         );
     `);
     if(!exist || !exist.exist){
-        await this.db.none(`CREATE SCHEMA IF NOT EXISTS ${this.id};`);
+        await this.db.none(`CREATE SCHEMA IF NOT EXISTS ${ this.id };`);
     }
 
     for(let i = 0; i < fields.length; i++){
@@ -85,45 +95,61 @@ PostgresDB.prototype.open = async function(){
         switch(fields[i]){
             case "map":
                 await this.db.none(`
-                    create table if not exists ${this.id}.map${this.field}(
-                        key varchar(128) not null,
-                        res smallint     not null,
-                        id  integer      not null
-                        /*constraint map_pk unique (key, id)*/
+                    CREATE TABLE IF NOT EXISTS ${this.id}.map${this.field}(
+                        key varchar(128) NOT NULL,
+                        res smallint     NOT NULL,
+                        id  integer      NOT NULL
                     );
-                    create index if not exists map_index
-                        on ${this.id}.map${this.field} (key);
+                    CREATE INDEX IF NOT EXISTS map_index
+                        ON ${this.id}.map${this.field} (key);
+                    CREATE INDEX IF NOT EXISTS map_id
+                        ON ${this.id}.map${this.field} (id);
                 `);
                 break;
 
             case "ctx":
                 await this.db.none(`
-                    create table if not exists ${this.id}.ctx${this.field}(
-                        ctx varchar(128) not null,
-                        key varchar(128) not null,
-                        res smallint     not null,
-                        id  integer      not null
-                        /*constraint ctx_pk unique (ctx, key, id)*/
+                    CREATE TABLE IF NOT EXISTS ${this.id}.ctx${this.field}(
+                        ctx varchar(128) NOT NULL,
+                        key varchar(128) NOT NULL,
+                        res smallint     NOT NULL,
+                        id  integer      NOT NULL
                     );
-                    create index if not exists ctx_index
-                        on ${this.id}.ctx${this.field} (ctx, key);
+                    CREATE INDEX IF NOT EXISTS ctx_index
+                        ON ${this.id}.ctx${this.field} (ctx, key);
+                    CREATE INDEX IF NOT EXISTS ctx_id
+                        ON ${this.id}.ctx${this.field} (id);
+                `);
+                break;
+
+            case "tag":
+                await this.db.none(`
+                    CREATE TABLE IF NOT EXISTS ${this.id}.tag${this.field}(
+                        tag varchar(128) NOT NULL,
+                        id  integer      NOT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS tag_index
+                        ON ${this.id}.tag${this.field} (tag);
+                    CREATE INDEX IF NOT EXISTS tag_id
+                        ON ${this.id}.tag${this.field} (id);
                 `);
                 break;
 
             case "reg":
                 await this.db.none(`
-                    create table if not exists ${this.id}.reg(
-                        id  integer not null
-                            constraint reg_pk primary key,
-                        doc text default null
+                    CREATE TABLE IF NOT EXISTS ${this.id}.reg(
+                        id  integer NOT NULL,
+                        doc text DEFAULT NULL
                     );
+                    CREATE INDEX IF NOT EXISTS reg_id
+                        ON ${this.id}.reg (id);
                 `);
                 break;
 
             case "cfg":
                 await this.db.none(`
-                    create table if not exists ${this.id}.cfg${this.field}(
-                        cfg text not null
+                    CREATE TABLE IF NOT EXISTS ${this.id}.cfg${this.field}(
+                        cfg text NOT NULL
                     );
                 `);
                 break;
@@ -135,18 +161,19 @@ PostgresDB.prototype.open = async function(){
 
 PostgresDB.prototype.close = function(){
     this.db.close && this.db.close();
-    this.db = null;
+    this.db = DB = null;
 };
 
 PostgresDB.prototype.destroy = async function(){
     await this.db.none(`
-        DROP TABLE ${this.id}.map${this.field};
-        DROP TABLE ${this.id}.ctx${this.field};
-        DROP TABLE ${this.id}.cfg${this.field};
-        DROP TABLE ${this.id}.reg;
+        DROP TABLE IF EXISTS ${this.id}.map${this.field};
+        DROP TABLE IF EXISTS ${this.id}.ctx${this.field};
+        DROP TABLE IF EXISTS ${this.id}.tag${this.field};
+        DROP TABLE IF EXISTS ${this.id}.cfg${this.field};
+        DROP TABLE IF EXISTS ${this.id}.reg;
         /*DROP SCHEMA ${this.id} CASCADE;*/
     `);
-    return this.close();
+    this.close();
 };
 
 PostgresDB.prototype.clear = function(){
@@ -219,18 +246,61 @@ PostgresDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = t
     });
 };
 
-// PostgresDB.prototype.has = function(ref, key, ctx){
-//     switch(ref){
-//         case "map":
-//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".map" + this.field + " WHERE key = $1)", [key]);
-//         case "ctx":
-//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".ctx" + this.field + " WHERE ctx = $1 AND key = $2)", [ctx, key]);
-//         case "cfg":
-//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".cfg" + this.field + " WHERE cfg IS NOT NULL)");
-//         case "reg":
-//             return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [key]);
-//     }
-// };
+PostgresDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
+    const table = this.id + ".tag" + this.field;
+    const promise = this.db.any(`
+        SELECT ${ table }.id
+               ${ enrich ? ", doc" : "" }
+        FROM ${ table }
+        ${ enrich ? `
+            LEFT JOIN ${ this.id }.reg ON ${ this.id }.reg.id = ${ table }.id
+        ` : "" }
+        WHERE tag = $1
+        ${ limit ? "LIMIT " + limit : "" }
+        ${ offset ? "OFFSET " + offset : "" }`,
+        [tag]
+    );
+    enrich || promise.then(function(rows){
+        return create_result(rows, true, false);
+    });
+    return promise;
+};
+
+PostgresDB.prototype.enrich = async function(ids){
+    let result = [];
+    if(typeof ids !== "object"){
+        ids = [ids];
+    }
+    for(let count = 0; count < ids.length;){
+        const chunk = ids.length - count > MAXIMUM_QUERY_VARS
+            ? ids.slice(count, count + MAXIMUM_QUERY_VARS)
+            : count ? ids.slice(count) : ids;
+        count += chunk.length;
+        let stmt = "";
+        for(let i = 1; i <= chunk.length; i++){
+            stmt += (stmt ? "," : "") + "$" + i;
+        }
+        const res = await this.db.any(`
+            SELECT id, doc 
+            FROM ${ this.id }.reg
+            WHERE id IN (${ stmt })`,
+            ids
+        );
+        if(res && res.length){
+            for(let i = 0, doc; i < res.length; i++){
+                if((doc = res[i].doc)){
+                    res[i].doc = JSON.parse(doc);
+                }
+            }
+            result.push(res);
+        }
+    }
+    return result.length === 1
+        ? result[0]
+        : result.length > 1
+            ? concat(result)
+            : result;
+};
 
 PostgresDB.prototype.has = function(id){
     return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [id]);
@@ -264,7 +334,7 @@ PostgresDB.prototype.search = function(flexsearch, query, limit = 100, offset = 
             FROM (
                 SELECT id, count(*) as count,
                        ${ suggest ? "SUM" : "MIN" }(res) as res
-                FROM ${ this.id + ".ctx" + this.field }
+                FROM ${ this.id }.ctx${ this.field }
                 WHERE ${ stmt }
                 GROUP BY id
                 ORDER BY ${ suggest ? "count DESC, res" : "res" }
@@ -322,7 +392,7 @@ PostgresDB.prototype.search = function(flexsearch, query, limit = 100, offset = 
             FROM (
                 SELECT id, count(*) as count,
                        ${ suggest ? "SUM" : "MIN" }(res) as res
-                FROM ${ this.id + ".map" + this.field }
+                FROM ${ this.id }.map${ this.field }
                 WHERE key ${ query.length > 1 ? "IN (" + stmt + ")" : "= " + stmt }
                 GROUP BY id
                 ORDER BY ${ suggest ? "count DESC, res" : "res" }
@@ -445,7 +515,7 @@ PostgresDB.prototype.commit = async function(flexsearch, _replace, _append){
         }
         if(!_replace){
             if(!_append){
-                tasks = tasks.concat([...flexsearch.reg.keys()]);
+                tasks = tasks.concat(toArray(flexsearch.reg));
             }
             tasks.length && await this.remove(tasks);
         }
@@ -457,29 +527,49 @@ PostgresDB.prototype.commit = async function(flexsearch, _replace, _append){
 
     await this.transaction(async function(trx){
 
-        let stmt = new pgp.helpers.ColumnSet(["id"],{
-            table: this.id + ".reg"
-        });
-        let data = [];
-        for(const id of flexsearch.reg.keys()){
-            const migration = checkMigration.call(this, id);
-            migration && await migration;
-            data.push({ id });
+        let stmt, data;
+
+        if(flexsearch.store){
+            stmt = new pgp.helpers.ColumnSet(["id", "doc"],{
+                table: this.id + ".reg"
+            });
+            data = [];
+            for(const item of flexsearch.store.entries()){
+                const id = item[0];
+                const doc = item[1];
+                const migration = checkMigration.call(this, id);
+                migration && await migration;
+                data.push({ id, doc: doc && JSON.stringify(doc) });
+            }
+            if(data.length){
+                let insert = pgp.helpers.insert(data, stmt);
+                trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2'));
+            }
         }
-        // data = Object.keys(flexsearch.reg).map(id => {
-        //     return { id: id }
-        // });
-        //stmt = db.prepare("INSERT INTO reg (id) VALUES (?)");
-        //stmt.finalize();
-        if(data.length){
-            let insert = pgp.helpers.insert(data, stmt);
-            trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2'));
+        else if(!flexsearch.bypass){
+            stmt = new pgp.helpers.ColumnSet(["id"],{
+                table: this.id + ".reg"
+            });
+            data = [];
+            for(const id of flexsearch.reg.keys()){
+                const migration = checkMigration.call(this, id);
+                migration && await migration;
+                data.push({ id });
+            }
+            // data = Object.keys(flexsearch.reg).map(id => {
+            //     return { id: id }
+            // });
+            //stmt = db.prepare("INSERT INTO reg (id) VALUES (?)");
+            //stmt.finalize();
+            if(data.length){
+                let insert = pgp.helpers.insert(data, stmt);
+                trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2'));
+            }
         }
 
         stmt = new pgp.helpers.ColumnSet(["key", "res", "id"],{
             table: this.id + ".map" + this.field
         });
-
         data = [];
         for(const item of flexsearch.map){
             const key = item[0];
@@ -503,7 +593,6 @@ PostgresDB.prototype.commit = async function(flexsearch, _replace, _append){
                 }
             }
         }
-
         if(data.length){
             let insert = pgp.helpers.insert(data, stmt);
             trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2'));
@@ -512,7 +601,6 @@ PostgresDB.prototype.commit = async function(flexsearch, _replace, _append){
         stmt = new pgp.helpers.ColumnSet(["ctx", "key", "res", "id"],{
             table: this.id + ".ctx" + this.field
         });
-
         data = [];
         for(const ctx of flexsearch.ctx){
             const ctx_key = ctx[0];
@@ -547,6 +635,25 @@ PostgresDB.prototype.commit = async function(flexsearch, _replace, _append){
             trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2'));
         }
 
+        if(flexsearch.tag){
+            stmt = new pgp.helpers.ColumnSet(["tag", "id"],{
+                table: this.id + ".tag" + this.field
+            });
+            data = [];
+            for(const item of flexsearch.tag){
+                const tag = item[0];
+                const ids = item[1];
+                if(!ids.length) continue;
+                for(let j = 0; j < ids.length; j++){
+                    data.push({ tag, id: ids[j] });
+                }
+            }
+            if(data.length){
+                let insert = pgp.helpers.insert(data, stmt);
+                trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2'));
+            }
+        }
+
         trx.none("INSERT INTO " + this.id + ".cfg" + this.field + " (cfg) VALUES ($1)", [
             JSON.stringify({
                 "encode": typeof flexsearch.encode === "string" ? flexsearch.encode : "",
@@ -568,6 +675,11 @@ PostgresDB.prototype.commit = async function(flexsearch, _replace, _append){
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
+    flexsearch.tag &&
+    flexsearch.tag.clear();
+    flexsearch.store &&
+    flexsearch.store.clear();
+    flexsearch instanceof Document ||
     flexsearch.reg.clear();
 };
 
@@ -613,6 +725,7 @@ PostgresDB.prototype.remove = function(ids){
         return trx.batch([
             trx.none("DELETE FROM " + this.id + ".map" + this.field + " WHERE id IN (" + stmt + ")", ids),
             trx.none("DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id IN (" + stmt + ")", ids),
+            trx.none("DELETE FROM " + this.id + ".tag" + this.field + " WHERE id IN (" + stmt + ")", ids),
             trx.none("DELETE FROM " + this.id + ".reg WHERE id IN (" + stmt + ")", ids)
         ]).then(function(res){
             return next
@@ -667,6 +780,9 @@ function migrateTextId(){
         ALTER TABLE ${this.id}.ctx${this.field}
             ALTER COLUMN id type varchar(128)
                 USING id::text;
+        ALTER TABLE ${this.id}.tag${this.field}
+            ALTER COLUMN id type varchar(128) 
+                USING id::text;
         ALTER TABLE ${this.id}.reg
             ALTER COLUMN id type varchar(128) 
                 USING id::text;
@@ -680,9 +796,12 @@ function migrateBigIntId(){
                 USING id::bigint;
         ALTER TABLE ${this.id}.ctx${this.field}
             ALTER COLUMN id type bigint 
-                  USING id::bigint;
+                USING id::bigint;
+        ALTER TABLE ${this.id}.tag${this.field}
+            ALTER COLUMN id type bigint 
+                USING id::bigint;
         ALTER TABLE ${this.id}.reg
             ALTER COLUMN id type bigint 
-                  USING id::bigint;
+                USING id::bigint;
     `);
 }

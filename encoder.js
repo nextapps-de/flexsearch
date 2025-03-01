@@ -572,137 +572,139 @@ Encoder.prototype.encode = function(str){
 
     for(let i = 0, word, base; i < words.length; i++){
         // filter empty entries
-        if((word = base = words[i])){
-            if(skip) {
-                final.push(word);
-                continue;
-            }
+        if(!(word = base = words[i])){
+            continue;
+        }
+        if(word.length < this.minlength){
+            continue;
+        }
+        if(skip) {
+            final.push(word);
+            continue;
+        }
 
-            // 1. pre-filter before cache
-            if(word.length >= this.minlength && (!this.filter || !this.filter.has(word))){
+        // 1. pre-filter before cache
+        if(this.filter && this.filter.has(word)){
+            continue;
+        }
 
-                if(SUPPORT_CACHE && this.cache && word.length <= this.cache_prt_length){
-                    if(this.timer){
-                        const tmp = this.cache_prt.get(word);
-                        //if(this.cache_prt.has(word)){
-                        if(tmp || tmp === ""){
-                            //word = this.cache_prt.get(word);
-                            tmp && final.push(tmp);
-                            //word ? words[i] = word : words.splice(i--, 1);
-                            continue;
-                        }
-                    }
-                    else{
-                        this.timer = setTimeout(tick, 0, this);
-                    }
-                }
-
-                let postfilter;
-
-                // if(this.normalize === true && normalize){
-                //     word = word.normalize("NFKD").replace(normalize, "");
-                //     postfilter = 1;
-                // }
-
-                // if(this.normalize){
-                //     if(typeof this.normalize === "function"){
-                //         word = this.normalize(word);
-                //     }
-                //     else if(normalize){
-                //         word = word.normalize("NFKD").replace(normalize, "").toLowerCase();
-                //     }
-                //     else{
-                //         word = word.toLowerCase();
-                //         this.mapper = this.mapper
-                //             ? new Map([...normalize_mapper, ...this.mapper])
-                //             : new Map(/** @type {Map<string, string>} */ normalize_mapper);
-                //     }
-                //     postfilter = 1;
-                //     //if(!str) return str;
-                // }
-
-                // 2. apply stemmer after matcher
-                if(this.stemmer && (word.length > 2)){
-                    // for(const item of this.stemmer){
-                    //     const key = item[0];
-                    //     const value = item[1];
-                    //
-                    //     if(word.length > key.length && word.endsWith(key)){
-                    //         word = word.substring(0, word.length - key.length) + value;
-                    //         break;
-                    //     }
-                    //
-                    //     // const position = word.length - key.length;
-                    //     // if(position > 0 && word.substring(position) === key){
-                    //     //     word = word.substring(0, position) + value;
-                    //     //     break;
-                    //     // }
-                    // }
-                    this.stemmer_test || (
-                        this.stemmer_test = new RegExp("(?!^)(" + this.stemmer_str + ")$")
-                    );
-                    word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
-                    postfilter = 1;
-                }
-
-                // 3. apply matcher
-                if(this.matcher && (word.length > 1)){
-                    this.matcher_test || (
-                        this.matcher_test = new RegExp("(" + this.matcher_str + ")", "g")
-                    );
-                    word = word.replace(this.matcher_test, match => this.matcher.get(match));
-                    postfilter = 1;
-                }
-
-                // 4. post-filter after matcher and stemmer was applied
-                if(word && postfilter && (word.length < this.minlength || (this.filter && this.filter.has(word)))){
-                    word = "";
-                }
-
-                // apply custom regex
-                if(word && this.replacer){
-                    for(let i = 0; word && (i < this.replacer.length); i+=2){
-                        word = word.replace(this.replacer[i], this.replacer[i+1]);
-                    }
-                }
-
-                // 5. apply mapper and collapsing
-                if(word && (this.mapper || (this.dedupe && word.length > 1))){
-                    //word = this.replace_dedupe(word);
-                    //word = replace_deduped(word, this.mapper, true);
-                    let final = "";
-                    for(let i = 0, prev = "", char, tmp; i < word.length; i++){
-                        char = word.charAt(i);
-                        if(char !== prev || !this.dedupe){
-                            tmp = this.mapper && this.mapper.get(char);
-                            if(!tmp && tmp !== "")
-                                final += (prev = char);
-                            else if((tmp !== prev || !this.dedupe) && (prev = tmp))
-                                final += tmp;
-                        }
-                    }
-                    word = final;
-                }
-
-                // slower variants for removing same chars in a row:
-                //word = word.replace(/([^0-9])\1+/g, "$1");
-                //word = word.replace(/(.)\1+/g, "$1");
-                //word = word.replace(/(?<=(.))\1+/g, "");
-
-                // if(word){
-                //     words[i] = word;
-                // }
-
-                if(SUPPORT_CACHE && this.cache && base.length <= this.cache_prt_length){
-                    this.cache_prt.set(base, word);
-                    if(this.cache_prt.size > this.cache_size){
-                        this.cache_prt.clear();
-                        this.cache_prt_length = this.cache_prt_length / 1.1 | 0;
-                    }
+        if(SUPPORT_CACHE && this.cache && word.length <= this.cache_prt_length){
+            if(this.timer){
+                const tmp = this.cache_prt.get(word);
+                //if(this.cache_prt.has(word)){
+                if(tmp || tmp === ""){
+                    //word = this.cache_prt.get(word);
+                    tmp && final.push(tmp);
+                    //word ? words[i] = word : words.splice(i--, 1);
+                    continue;
                 }
             }
             else{
-                word = "";
+                this.timer = setTimeout(tick, 0, this);
+            }
+        }
+
+        let postfilter;
+
+        // if(this.normalize === true && normalize){
+        //     word = word.normalize("NFKD").replace(normalize, "");
+        //     postfilter = 1;
+        // }
+
+        // if(this.normalize){
+        //     if(typeof this.normalize === "function"){
+        //         word = this.normalize(word);
+        //     }
+        //     else if(normalize){
+        //         word = word.normalize("NFKD").replace(normalize, "").toLowerCase();
+        //     }
+        //     else{
+        //         word = word.toLowerCase();
+        //         this.mapper = this.mapper
+        //             ? new Map([...normalize_mapper, ...this.mapper])
+        //             : new Map(/** @type {Map<string, string>} */ normalize_mapper);
+        //     }
+        //     postfilter = 1;
+        //     //if(!str) return str;
+        // }
+
+        // 2. apply stemmer after matcher
+        if(this.stemmer && (word.length > 2)){
+            // for(const item of this.stemmer){
+            //     const key = item[0];
+            //     const value = item[1];
+            //
+            //     if(word.length > key.length && word.endsWith(key)){
+            //         word = word.substring(0, word.length - key.length) + value;
+            //         break;
+            //     }
+            //
+            //     // const position = word.length - key.length;
+            //     // if(position > 0 && word.substring(position) === key){
+            //     //     word = word.substring(0, position) + value;
+            //     //     break;
+            //     // }
+            // }
+            this.stemmer_test || (
+                this.stemmer_test = new RegExp("(?!^)(" + this.stemmer_str + ")$")
+            );
+            word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
+            postfilter = 1;
+        }
+
+        // 3. apply matcher
+        if(this.matcher && (word.length > 1)){
+            this.matcher_test || (
+                this.matcher_test = new RegExp("(" + this.matcher_str + ")", "g")
+            );
+            word = word.replace(this.matcher_test, match => this.matcher.get(match));
+            postfilter = 1;
+        }
+
+        // 4. post-filter after matcher and stemmer was applied
+        if(word && postfilter && (word.length < this.minlength || (this.filter && this.filter.has(word)))){
+            word = "";
+        }
+
+        // apply custom regex
+        if(word && this.replacer){
+            for(let i = 0; word && (i < this.replacer.length); i+=2){
+                word = word.replace(this.replacer[i], this.replacer[i+1]);
+            }
+        }
+
+        // 5. apply mapper and collapsing
+        if(word && (this.mapper || (this.dedupe && word.length > 1))){
+            //word = this.replace_dedupe(word);
+            //word = replace_deduped(word, this.mapper, true);
+            let final = "";
+            for(let i = 0, prev = "", char, tmp; i < word.length; i++){
+                char = word.charAt(i);
+                if(char !== prev || !this.dedupe){
+                    tmp = this.mapper && this.mapper.get(char);
+                    if(!tmp && tmp !== "")
+                        final += (prev = char);
+                    else if((tmp !== prev || !this.dedupe) && (prev = tmp))
+                        final += tmp;
+                }
+            }
+            word = final;
+        }
+
+        // slower variants for removing same chars in a row:
+        //word = word.replace(/([^0-9])\1+/g, "$1");
+        //word = word.replace(/(.)\1+/g, "$1");
+        //word = word.replace(/(?<=(.))\1+/g, "");
+
+        // if(word){
+        //     words[i] = word;
+        // }
+
+        if(SUPPORT_CACHE && this.cache && base.length <= this.cache_prt_length){
+            this.cache_prt.set(base, word);
+            if(this.cache_prt.size > this.cache_size){
+                this.cache_prt.clear();
+                this.cache_prt_length = this.cache_prt_length / 1.1 | 0;
             }
         }
 

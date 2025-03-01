@@ -3,6 +3,7 @@ import default_resolver from "./default.js";
 import { create_object } from "../common.js";
 import xor from "./xor.js";
 import or from "./or.js";
+import not from "./not.js";
 
 export default function and(){
     if(this.result.length){
@@ -61,6 +62,9 @@ export default function and(){
                 else if(query.xor){
                     result = xor(query.xor);
                 }
+                else if(query.not){
+                    result = not(query.not);
+                }
                 else{
                     limit = query.limit || 0;
                     offset = query.offset || 0;
@@ -80,13 +84,13 @@ export default function and(){
         if(promises.length){
             return Promise.all(promises).then(function(){
                 final = [self.result].concat(final);
-                self.result = intersect(final, limit, offset, resolve);
+                self.result = intersect(final, limit, offset, enrich, resolve);
                 return resolve ? self.result : self;
             });
         }
 
         final = [this.result].concat(final);
-        this.result = intersect(final, limit, offset, resolve);
+        this.result = intersect(final, limit, offset, enrich, resolve);
         return resolve ? this.result : this;
     }
     return this;
@@ -96,46 +100,63 @@ export default function and(){
  * Aggregate the intersection of N raw results
  */
 
-function intersect(result, limit, offset, resolve){
+function intersect(result, limit, offset, enrich, resolve){
 
-    if(!result.length){
+    // if(!result.length){
+    //     // todo remove
+    //     console.log("Empty Result")
+    //     return result;
+    // }
+
+    if(result.length < 2){
+        // todo remove
+        console.log("Single Result")
         return [];
+        // if(resolve){
+        //     return default_resolver(result[0], limit, offset, enrich);
+        // }
+        // else{
+        //     return result[0];
+        // }
     }
 
     let final = [];
     let count = 0;
 
-    if(result.length < 2){
-        if(limit || offset){
-            let res = result[0];
-            for(let j = 0, ids; j < res.length; j++){
-                ids = res[j];
-                if(!ids) continue;
-                for(let k = 0, id; k < ids.length; k++){
-                    id = ids[k];
-                    if(offset){
-                        offset--;
-                        continue;
-                    }
-                    if(resolve){
-                        final.push(id);
-                    }
-                    else{
-                        final[j] || (final[j] = []);
-                        final[j].push(id);
-                    }
-                    if(limit && ++count === limit){
-                        return final;
-                    }
-                }
-            }
-        }
-        return result[0];
-    }
+    // fast path single slot
+    // if(result.length < 2){
+    //     if(limit || offset){
+    //         let res = result[0];
+    //         for(let j = 0, ids; j < res.length; j++){
+    //             ids = res[j];
+    //             if(!ids) continue;
+    //             for(let k = 0, id; k < ids.length; k++){
+    //                 id = ids[k];
+    //                 if(offset){
+    //                     offset--;
+    //                     continue;
+    //                 }
+    //                 if(resolve){
+    //                     final.push(id);
+    //                 }
+    //                 else{
+    //                     final[j + this.boost] || (final[j + this.boost] = []);
+    //                     final[j + this.boost].push(id);
+    //                 }
+    //                 if(limit && ++count === limit){
+    //                     this.boost = 0;
+    //                     return final;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     this.boost = 0;
+    //     return result[0];
+    // }
 
     let contain = create_object();
     let maxres = Math.max.apply(Math, result.map(item => item ? item.length : 0));
-    if(!maxres) return [];
+    if(!maxres) return final;
 
     // for(let j = 0, ids, res = result[0]; j < res.length; j++){
     //     ids = res[j];
@@ -160,7 +181,8 @@ function intersect(result, limit, offset, resolve){
                 // fill in first round
                 if(!i){
                     // shift resolution +1
-                    contain_new[id] = j + 1;
+                    // shift resolution by boost (inverse)
+                    contain_new[id] = j + 1 + (i ? this.boost : 0);
                     match = 1;
                 }
                 // result in last round
@@ -183,6 +205,7 @@ function intersect(result, limit, offset, resolve){
                             final[min].push(id);
                         }
                         if(limit && ++count === limit){
+                            //this.boost = 0;
                             return final;
                         }
                         // shift resolution +1
@@ -200,9 +223,14 @@ function intersect(result, limit, offset, resolve){
             }
         }
 
-        if(!match) return [];
+        if(!match){
+            //this.boost = 0;
+            return [];
+        }
+
         contain = contain_new;
     }
 
+    //this.boost = 0;
     return final;
 }

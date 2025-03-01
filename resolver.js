@@ -21,6 +21,7 @@ export default function Resolver(result){
     }
     this.index = null;
     this.result = result || [];
+    this.boost = 0;
 }
 
 Resolver.prototype.or = or;
@@ -64,6 +65,11 @@ Resolver.prototype.offset = function(offset){
         }
         this.result = final;
     }
+    return this;
+};
+
+Resolver.prototype.boost = function(boost){
+    this.boost += boost;
     return this;
 };
 

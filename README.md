@@ -17,6 +17,7 @@
 - Performance gain when polling tasks to the index by using "Event-Loop-Caches"
 - Up to 100 times faster deletion/replacement when not using the additional "fastupdate" register
 - Regex Pre-Compilation (transforms hundreds of regex rules into just a few)
+- Extended support for multiple tags (DocumentIndex)
 
 ## Persistent Indexes
 
@@ -365,7 +366,7 @@ Example of an intermediate raw result set:
 ```
 -->
 
-You can apply different resolver methods to the raw result, e.g.:
+You can apply and chain different resolver methods to the raw result, e.g.:
 
 ```js
 raw.and( ... )
@@ -442,7 +443,7 @@ const result = resolve(raw3, {
 ```
 -->
 ```js
-// 1. get multiple unresolved results
+// 1. get one or multiple unresolved results
 const raw1 = index.search("a short query", { 
     resolve: false
 });
@@ -451,7 +452,7 @@ const raw2 = index.search("another query", {
     boost: 2
 });
 
-// 2. apply resolver operations
+// 2. apply and chain resolver operations
 const raw3 = raw1.and(raw2, /* ... */);
 // you can access the aggregated result by raw3.result
 console.log("The aggregated result is:", raw3.result)
@@ -720,6 +721,95 @@ Indexing 2,000,000 created unique tokens with a length of 32 letters:
 There is a small chance, usually with less than 0.01%, that hash collision will occur. In this case you will get a "false-positive" entry in the search result. A collision does not occur on usual term length but might happen on longer term length of e.g. 32 chars.
 -->
 
+## Tag-Search
+
+Assume this document schema (a dataset from IMDB):
+```js
+{
+    "tconst": "tt0000001",
+    "titleType": "short",
+    "primaryTitle": "Carmencita",
+    "originalTitle": "Carmencita",
+    "isAdult": 0,
+    "startYear": "1894",
+    "endYear": "",
+    "runtimeMinutes": "1",
+    "genres": [
+        "Documentary",
+        "Short"
+    ]
+}
+```
+
+An appropriate document descriptor could look like:
+```js
+import LatinEncoder from "./lang/latin/simple.js";
+
+const flexsearch = new Document({
+    encoder: new Encoder(LatinEncoder),
+    resolution: 3,
+    document: {
+        id: "tconst",
+        //store: true, // document store
+        index: [{
+            field: "primaryTitle",
+            tokenize: "forward"
+        },{
+            field: "originalTitle",
+            tokenize: "forward"
+        }],
+        tag: [
+            "titleType",
+            "startYear",
+            "genres"
+        ]
+    }
+});
+```
+The field contents of `primaryTitle` and `originalTitle` are encoded by the forward tokenizer. The field contents of `titleType`, `startYear` and `genres` are added as tags.
+
+<!--
+Get all entries of all tags by document field: 
+```js
+const result = flexsearch.search({
+    //enrich: true, // enrich documents
+    tag: "genres"
+});
+```
+-->
+
+Get all entries of a specific tag:
+```js
+const result = flexsearch.search({
+    //enrich: true, // enrich documents
+    tag: { "genres": "Documentary" },
+    limit: 1000,
+    offset: 0
+});
+```
+
+Get entries of multiple tags (intersection):
+```js
+const result = flexsearch.search({
+    //enrich: true, // enrich documents
+    tag: { 
+        "genres": ["Documentary", "Short"],
+        "startYear": "1894"
+    }
+});
+```
+
+Combine tags with queries (intersection):
+```js
+const result = flexsearch.search({
+    query: "Carmen", // forward tokenizer
+    tag: { 
+        "genres": ["Documentary", "Short"],
+        "startYear": "1894"
+    }
+});
+```
+
 ## Migration
 
 - The index option property "minlength" has moved to the Encoder Class
@@ -731,3 +821,4 @@ There is a small chance, usually with less than 0.01%, that hash collision will 
 - The method `index.encode()` has moved to `index.encoder.encode()`
 - The options `charset` and `lang` was removed from index (replaced by `Encoder.assign({...})`)
 - Every charset collection (files in folder `/lang/**.js`) is now exported as a config object (instead of a function). This config needs to be created by passing to the constructor `new Encoder(config)` or can be added to an existing instance via `encoder.assign(config)`.
+- The property `bool` from DocumentOptions was removed (replaced by `Resolver`)

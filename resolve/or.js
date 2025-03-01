@@ -3,6 +3,7 @@ import default_resolver from "./default.js";
 import { create_object } from "../common.js";
 import xor from "./xor.js";
 import and from "./and.js";
+import not from "./not.js";
 
 export default function or(){
 
@@ -72,6 +73,9 @@ export default function or(){
             else if(query.xor){
                 result = xor(query.xor);
             }
+            else if(query.not){
+                result = not(query.not);
+            }
             else{
                 limit = query.limit || 0;
                 offset = query.offset || 0;
@@ -91,13 +95,13 @@ export default function or(){
     if(promises.length){
         return Promise.all(promises).then(function(){
             self.result.length && (final = [self.result].concat(final));
-            self.result = resolver(final, limit, offset, enrich, !resolve);
+            self.result = resolver(final, limit, offset, enrich, resolve);
             return resolve ? self.result : self;
         });
     }
 
     this.result.length && (final = [this.result].concat(final));
-    this.result = resolver(final, limit, offset, enrich, !resolve);
+    this.result = resolver(final, limit, offset, enrich, resolve);
     return resolve ? this.result : this;
 };
 
@@ -107,24 +111,33 @@ export default function or(){
  * @param limit
  * @param offset
  * @param enrich
- * @param _skip_resolve
+ * @param resolve
  * @return {*|*[]}
  */
 
-function resolver(result, limit, offset, enrich, _skip_resolve){
+function resolver(result, limit, offset, enrich, resolve){
 
     if(!result.length){
         // todo remove
         console.log("Empty Result")
         return result;
     }
+
     if(typeof limit === "object"){
         offset = limit.offset || 0;
         enrich = limit.enrich || false;
         limit = limit.limit || 0;
     }
-    if(!_skip_resolve && result.length < 2){
-        return default_resolver(result[0], limit, offset, enrich);
+
+    if(result.length < 2){
+        // todo remove
+        console.log("Single Result")
+        if(resolve){
+            return default_resolver(result[0], limit, offset, enrich);
+        }
+        else{
+            return result[0];
+        }
     }
 
     let final = [];
@@ -147,19 +160,24 @@ function resolver(result, limit, offset, enrich, _skip_resolve){
                         offset--;
                         continue;
                     }
-                    if(_skip_resolve){
-                        final[j] || (final[j] = []);
-                        final[j].push(id);
-                    }
-                    else{
+                    if(resolve){
                         final.push(id);
                     }
+                    else{
+                        // shift resolution by boost (inverse)
+                        const index = j + (i ? this.boost : 0);
+                        final[index] || (final[index] = []);
+                        final[index].push(id);
+                    }
                     if(limit && ++count === limit){
+                        //this.boost = 0;
                         return final;
                     }
                 }
             }
         }
     }
+
+    //this.boost = 0;
     return final;
 }

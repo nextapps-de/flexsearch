@@ -1,30 +1,34 @@
 export function parse_option(value, default_value, merge_value){
 
-    if(merge_value){
-        if(value){
+    if(typeof merge_value !== "undefined"){
+        if(typeof value !== "undefined"){
 
-            if(typeof value === "function" &&
-                typeof merge_value === "function"){
-                return function(str){
-                    return value(
-                        merge_value(str)
-                    );
+            if(merge_value){
+                if(typeof value === "function" &&
+                    typeof merge_value === "function"){
+                    return function(str){
+                        return value(
+                            merge_value(str)
+                        );
+                    }
                 }
-            }
 
-            if(value.constructor === Array &&
-                merge_value.constructor === Array){
-                return merge_value.concat(value);
-            }
+                if(value.constructor === Array &&
+                    merge_value.constructor === Array){
+                    return merge_value.concat(value);
+                }
 
-            if(value.constructor === Map &&
-                merge_value.constructor === Map){
-                return new Map([...merge_value, ...value]);
-            }
+                if(value.constructor === Map &&
+                    merge_value.constructor === Map){
+                    // todo replace spread
+                    return new Map([...merge_value, ...value]);
+                }
 
-            if(value.constructor === Set &&
-                merge_value.constructor === Set){
-                return new Set([...merge_value, ...value]);
+                if(value.constructor === Set &&
+                    merge_value.constructor === Set){
+                    // todo replace spread
+                    return new Set([...merge_value, ...value]);
+                }
             }
 
             return value;
@@ -128,4 +132,12 @@ export function is_object(val){
 export function is_function(val){
 
     return typeof val === "function";
+}
+
+export function toArray(val){
+    const result = [];
+    for(const key of val.keys()){
+        result.push(key);
+    }
+    return result;
 }
