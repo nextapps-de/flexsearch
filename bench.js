@@ -98,8 +98,8 @@ queue.push({
     },
     end: null,
     complete: null,
-    cycle: text_data.length,
-    count: term_length / text_data.length
+    cycle: 1,
+    count: term_length
 });
 
 queue.push({
