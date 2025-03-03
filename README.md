@@ -97,7 +97,7 @@ Plugins (extern projects):
     <tr></tr>
     <tr>
         <td>ES6 Modules</td>
-        <td><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/nextapps-de/flexsearch/tree/0.7.31/dist/module/" target="_blank">Download</a></td>
+        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.7.31%2Fdist%2Fmodule" target="_blank">Download</a></td>
         <td>The <i>/dist/module/</i> folder of this Github repository</td>
     </tr>
 </table>
