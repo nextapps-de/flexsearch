@@ -365,7 +365,7 @@ function perform_match(){
     }
     else{
 
-        window.top.postMessage(JSON.stringify(res), location.protocol + "//" + location.hostname + ":" + location.port);
+        window.top.postMessage(JSON.stringify(res), location.origin /*location.protocol + "//" + location.hostname + ":" + location.port*/);
     }
 
 
