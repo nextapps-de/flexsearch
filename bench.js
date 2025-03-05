@@ -297,7 +297,7 @@ async function perform(){
 
     if(window === window.top){
 
-        result.nodeValue = (str_results += (status ? test.name.padEnd(12) + String(Math.ceil(1000 / elapsed * loops)).padStart(8) + " op/s, Memory:\t" + (memory ? Math.ceil(memory / loops) : "-") : "- failed -") + "\n") + (current < queue.length ? "running..." : "");
+        result.nodeValue = (str_results += (status ? test.name.padEnd(12) + String(Math.ceil(1000 / elapsed * loops)).padStart(10) + " terms/s, Memory:\t" + (memory ? Math.ceil(memory / loops) : "-") : "- failed -") + "\n") + (current < queue.length ? "running..." : "");
     }
     else{
 
