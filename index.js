@@ -226,7 +226,7 @@
 
         if(index < lib.length){
 
-            if(event.origin === location.protocol + "//" + location.hostname + ":" + location.port){ // "https://nextapps-de.github.io" "https://raw.githack.com"
+            if(event.origin === location.origin /*location.protocol + "//" + location.hostname + ":" + location.port*/){ // "https://nextapps-de.github.io" "https://raw.githack.com"
 
                 //console.log(event.data);
 

@@ -337,7 +337,7 @@ async function perform(){
     }
     else{
 
-        window.top.postMessage(test.name + "," + (status ? Math.ceil(1000 / elapsed * loops) : 0) + "," + (status ? Math.ceil(memory / loops) : 0), location.protocol + "//" + location.hostname + ":" + location.port); //"https://nextapps-de.github.io" "https://raw.githack.com"
+        window.top.postMessage(test.name + "," + (status ? Math.ceil(1000 / elapsed * loops) : 0) + "," + (status ? Math.ceil(memory / loops) : 0), location.origin /*location.protocol + "//" + location.hostname + ":" + location.port*/); //"https://nextapps-de.github.io" "https://raw.githack.com"
     }
 
     if(current < queue.length){
