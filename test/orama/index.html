@@ -2,16 +2,16 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Benchmark: lyra-0.2.4</title>
+    <title>Benchmark: orama-3.1.1</title>
 </head>
 <body>
-<h2>Benchmark: lyra-0.2.4</h2><hr/>
+<h2>Benchmark: orama-3.1.1</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
 <script type="module">
 
     import { suite } from "../../bench.js";
-    import { create, search, insert } from "https://unpkg.com/@lyrasearch/lyra@0.2.4/dist/esm/src/lyra.js";
+    import { create, search, insert } from "https://cdn.jsdelivr.net/npm/@orama/orama@v3.1.1/+esm";
 
     let index;
 

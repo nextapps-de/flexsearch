@@ -55,7 +55,7 @@ Mikado.register({
         "data['query-long']"
       ]
     },
-    {
+    /*{
       "t": "td",
       "s": [
         "'background-color:' + data['color_query-dupes']"
@@ -63,7 +63,7 @@ Mikado.register({
       "x": [
         "data['query-dupes']"
       ]
-    },
+    },*/
     {
       "t": "td",
       "s": [
@@ -78,11 +78,11 @@ Mikado.register({
       "i": {
         "t": "b",
         "x": [
-          "data.index"
+          "data.score"
         ]
       },
       "s": [
-        "'background-color:' + data.color_index"
+        "'background-color:' + data.color_score"
       ]
     },
     {
@@ -90,11 +90,11 @@ Mikado.register({
       "i": {
         "t": "b",
         "x": [
-          "data.score"
+          "data.index"
         ]
       },
       "s": [
-        "'background-color:' + data.color_score"
+        "'background-color:' + data.color_index"
       ]
     }
   ],

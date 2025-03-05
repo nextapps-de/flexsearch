@@ -167,6 +167,7 @@ queue.push({
     count: 25
 });
 
+/*
 queue.push({
     name: "query-dupes",
     init: null,
@@ -181,6 +182,7 @@ queue.push({
     complete: null,
     count: 7
 });
+*/
 
 queue.push({
     name: "not-found",
@@ -256,15 +258,13 @@ async function perform(){
     let cycle = 1, max_cycle = test.cycle, inner_count = test.count;
     let elapsed = 0, memory = 0;
     let loops = 0, now = 0;
-    let start, mem_start, mem;
 
     if(status){
 
         if(test.init) test.init();
-        const end = perf.now() + duration;
         let start, mem_start, mem;
 
-        while(now < end){
+        while(elapsed < duration){
 
             if(test.start) test.start(loops);
 
@@ -272,11 +272,10 @@ async function perform(){
             mem_start = perf.memory.usedJSHeapSize;
             start = perf.now();
             for(let i = 0; i < cycle; i++) test.fn();
-            now = perf.now();
+            elapsed += perf.now() - start;
             mem = perf.memory.usedJSHeapSize - mem_start;
             // -- END -------------------
 
-            elapsed += (now - start);
             if(mem > 0) memory += mem;
             if(test.end) test.end(loops);
             loops += cycle;
@@ -288,41 +287,6 @@ async function perform(){
             if(max_cycle && (cycle > max_cycle)){
                 cycle = max_cycle;
             }
-
-            // mem_start = perf.memory.usedJSHeapSize;
-            // start = performance.now();
-            // for(let i = 0; i < cycle; i++) test.fn();
-            // elapsed += (performance.now() - start);
-            // mem = perf.memory.usedJSHeapSize - mem_start;
-            // loops += cycle;
-            // if(mem > 0) memory += mem;
-            // if(test.end) test.end(loops);
-
-            // console.log(test.name);
-            // console.log("duration", duration);
-            // console.log("elapsed", elapsed);
-            // console.log("cycle", cycle);
-            // console.log("loops", loops);
-
-            //if(cycle ===1) cycle = cycle * (duration / (elapsed || 1)) | 0;
-
-            // console.log("loops", loops, "elapsed", elapsed, "duration", duration, "cycle", (loops / (elapsed || 1) * (duration - elapsed)) | 0);
-            //
-            // //cycle = (loops / (elapsed || 1) * (duration - elapsed) * 1.2) | 0;
-            // //cycle *= loops / (elapsed || 1) * (duration - elapsed) / 2 | 0;
-            // cycle *= duration / (elapsed || 1);
-            // if(cycle < 1){
-            //     break;
-            // }
-            //
-            // //cycle = loops / (elapsed || 1) * (duration - elapsed);
-            //
-            // if(max_cycle && (cycle > max_cycle)){
-            //     cycle = max_cycle;
-            // }
-            //
-            // //console.log(elapsed, duration, cycle)
-            // //await new Promise(resolve => setTimeout(resolve, 50));
         }
 
         if(test.complete) test.complete();

@@ -21,11 +21,19 @@
         "flexsearch-match", "flexsearch-memory", "flexsearch-score",
         "flexsearch-speed"
     ]:[
-        //"flexsearch-0.6.2", "flexsearch-0.6.3",
-        "flexsearch-0.7.0", "flexsearch-0.8.0",
-        "bm25", "bulksearch", "elasticlunr",
-        "fuzzysearch", "js-search", "jsii",
-        "fuse", "lunr", "wade", "lyra", "minisearch"
+        //"flexsearch-0.6.2", "flexsearch-0.6.3", /*"bulksearch",*/
+        "flexsearch-0.7.0",
+        "flexsearch-0.8.0",
+        "bm25",
+        "elasticlunr",
+        "fuzzysearch",
+        "js-search",
+        "jsii",
+        "fuse",
+        "lunr",
+        "wade",
+        "minisearch",
+        "orama" // was lyra before
     ]);
 
     list.render(lib);
@@ -65,35 +73,10 @@
     ]:[
         "size", "memory",
         //"add",
-        "query-single", "query-multi", "query-long", "query-dupes", "not-found"
+        "query-single", "query-multi", "query-long", /*"query-dupes",*/ "not-found"
     ];
 
     const current = new Array(lib.length);
-
-    // let size = {
-    //
-    //     "bm25": 1,
-    //     "bulksearch": 1,
-    //     "elasticlunr": 1,
-    //     "fuse": 1,
-    //     "fuzzysearch": 1,
-    //     "js-search": 1,
-    //     "jsii": 1,
-    //     "lunr": 1,
-    //     "wade": 1,
-    //
-    //     "flexsearch-0.6.2": 1,
-    //     "flexsearch-0.6.3": 1,
-    //     "flexsearch-0.7.0": 1,
-    //
-    //     "flexsearch-balance": 1,
-    //     "flexsearch-default": 1,
-    //     "flexsearch-fast": 1,
-    //     "flexsearch-match": 1,
-    //     "flexsearch-memory": 1,
-    //     "flexsearch-score": 1,
-    //     "flexsearch-speed": 1
-    // };
 
     for(let x = 0; x < lib.length; x++){
 
@@ -142,21 +125,18 @@
                 if(current[x][test[y]] && (current[x][test[y]] !== "-failed-")){
 
                     if(current[x][test[y]]){
-
                         val[y].push(current[x][test[y]]);
                     }
 
+                    // lower is better
                     if((test[y] === "size") || (test[y] === "memory")){
-
                         if((current[x][test[y]] < max[y]) || !max[y]){
-
                             max[y] = current[x][test[y]];
                         }
                     }
+                    // higher is better
                     else{
-
                         if(current[x][test[y]] > max[y]){
-
                             max[y] = current[x][test[y]];
                         }
                     }
@@ -168,6 +148,7 @@
         let index = new Array(lib.length);
         let length = new Array(lib.length);
         let max_score = 0, max_index = 0;
+        let calc = document.getElementById("calc").value;
 
         for(let x = 0; x < lib.length; x++){
 
@@ -181,15 +162,16 @@
 
                     length[x]++;
 
+                    // reduce importance of test "size" and "memory"
                     if((test[y] === "size") || (test[y] === "memory")){
-
-                        score[x] += Math.sqrt(median(val[y]) / current[x][test[y]]);
+                        // median on timing results will cut out garbage collector and will lead into false results
+                        score[x] += Math.sqrt((calc === "median" ? median : average)(val[y]) / current[x][test[y]]);
                         index[x] += Math.sqrt(max[y] / current[x][test[y]]);
                         current[x]["color_" + test[y]] = color(Math.sqrt(max[y]), Math.sqrt(current[x][test[y]]));
                     }
                     else{
-
-                        score[x] += current[x][test[y]] / median(val[y]);
+                        // median on timing results will cut out garbage collector and will lead into false results
+                        score[x] += current[x][test[y]] / (calc === "median" ? median : average)(val[y]);
                         index[x] += current[x][test[y]] / max[y];
                         current[x]["color_" + test[y]] = color(current[x][test[y]], max[y]);
                     }
@@ -200,8 +182,8 @@
                 }
             }
 
-            current[x]["score"] = (score[x] / length[x] * 1000 + 0.5) | 0;
-            current[x]["index"] = (index[x] / length[x] * 1000 + 0.5) | 0;
+            current[x]["score"] = (score[x] / length[x] * 100 + 0.5) | 0;
+            current[x]["index"] = (index[x] / length[x] * 100 + 0.5) | 0;
             if(max_score < current[x]["score"]) max_score = current[x]["score"];
             if(max_index < current[x]["index"]) max_index = current[x]["index"];
         }
@@ -344,6 +326,24 @@
             :
                 (arr[half - 1] + arr[half]) / 2
         );
+    }
+
+    function sum(arr){
+
+        const length = arr.length;
+        let sum = 0;
+
+        for(let i = 0; i < length; i++){
+
+            sum += arr[i];
+        }
+
+        return sum;
+    }
+
+    function average(arr){
+
+        return sum(arr) / arr.length;
     }
 
 }());

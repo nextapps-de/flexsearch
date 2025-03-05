@@ -1,5 +1,6 @@
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Benchmark of Web Templating Engines (Non-Keyed)</title>
     <style>
         body{
@@ -38,11 +39,21 @@
             <input type="button" id="start" click="start" value="Start">
         </td>
         <td>&emsp;</td>
+        <!--
         <td>
             Mode:
             <select id="mode" change="mode">
                 <option value>Simple</option>
                 <option disabled>Advanced</option>
+            </select>
+        </td>
+        <td>&emsp;</td>
+        -->
+        <td>
+            Results:
+            <select id="calc">
+                <option value="median">Median</option>
+                <option value="average">Average</option>
             </select>
         </td>
         <td>&emsp;</td>
@@ -83,25 +94,28 @@
         <tr>
             <th>Library</th>
             <th hidden>Size</th>
-            <th>Memory *</th>
+            <th>Memory <sup>1</sup></th>
             <!--
             <th>Add</th>
             <th>Update</th>
             <th>Remove</th>
             -->
-            <th>Query (Single Term)</th>
-            <th>Query (Multi Term)</th>
-            <th>Query (Long)</th>
-            <th>Query (Dupes)</th>
-            <th>Query (Not Found)</th>
-            <th>Index</th>
-            <th>Score</th>
+            <th>Query: Single <sup>2</sup></th>
+            <th>Query: Multi <sup>2</sup></th>
+            <th>Query: Large <sup>2</sup></th>
+            <!--<th>Query (Dupes)</th>-->
+            <th>Query: Not Found <sup>2</sup></th>
+            <th>Score <sup>3</sup></th>
+            <th>Index <sup>4</sup></th>
         </tr>
     </thead>
     <tbody id="result"></tbody>
 </table>
 <br>
-* To measure memory you have to run in Chrome browser.<br><br>
+<sup>1</sup> Measure memory is just supported by Chrome browser so far.<br>
+<sup>2</sup> The results of these query tests are measured in "terms per second".<br>
+<sup>3</sup> The score value is based on median/average factorization, here a score of 100 represents the statistical midfield of all candidates.<br>
+<sup>4</sup> The index is a statistic rank having a maximum possible value of 100, this requires a library to be the best in each test category (regardless how much better).<br><br>
 <b>Single Tests:</b>
 <ul id="lib"></ul>
 <iframe id="iframe" hidden></iframe>
