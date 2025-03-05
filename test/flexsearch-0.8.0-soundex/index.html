@@ -12,7 +12,7 @@
 
     import Index from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/index.js";
     import Encoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/encoder.js";
-    import DefaultEncoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/lang/latin/default.js";
+    import SoundexEncoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/lang/latin/soundex.js";
     import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/lang/en.js";
     import { suite } from "../../bench.js";
 
@@ -25,8 +25,8 @@
                 tokenize: "strict",
                 resolution: 1,
                 encoder: new Encoder(
-                    DefaultEncoder,
-                    EnglishPreset
+                    EnglishPreset,
+                    SoundexEncoder
                 ),
                 context: {
                     depth: 1,

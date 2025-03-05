@@ -159,12 +159,12 @@ queue.push({
     prepare: null,
     fn: function(){
         //lib.query("there were six spanish pieces of four pistoles");
-        //lib.query("glumdalclitch and i attended the king and queen in a progress");
+        lib.query("glumdalclitch and i attended the king and queen in a progress");
         lib.query("only in this island of luggnagg the appetite for living was not so eager");
     },
     end: null,
     complete: null,
-    count: 14
+    count: 25
 });
 
 queue.push({
