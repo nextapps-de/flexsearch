@@ -11,39 +11,40 @@
 <script type="module">
 
     import { suite } from "../../bench.js";
-    import { create, search, insert } from "https://cdn.jsdelivr.net/npm/@orama/orama@v3.1.1/+esm";
+    import { create, search, insertMultiple } from "https://cdn.jsdelivr.net/npm/@orama/orama@v3.1.1/+esm";
 
     let index;
 
-    suite["lyra"] = {
+    suite["orama"] = {
 
         init: function(){
-
             index = create({
                 schema: {
-                    _id: "number",
+                    id: "string",
                     content: "string"
                 },
             });
         },
         add: function(data){
-
+            const result = [];
             for(let i = 0, len = data.length; i < len; i++){
-
-                insert(index, {
-                    _id: i,
+                result[i] = {
+                    id: "" + i,
                     content: data[i]
-                });
+                }
             }
+            insertMultiple(index, result);
         },
         query: function(query){
-
             const searchResult = search(index, {
                 term: query,
                 properties: ["content"]
             });
-
-            return searchResult.hits.map(hit => hit._id);
+            const result = [];
+            for(let i = 0; i < searchResult.hits.length; i++){
+                result[i] = parseInt(searchResult.hits[i].id, 10);
+            }
+            return result;
         }
     };
 

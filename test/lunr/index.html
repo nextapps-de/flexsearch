@@ -26,9 +26,7 @@
                 this.field("content");
 
                 for(let i = 0; i < data.length; i++){
-
                     this.add({
-
                         id: i,
                         content: data[i]
                     });
@@ -37,10 +35,7 @@
         },
         query: function(query){
 
-            return lib.query(function(q) {
-
-                q.term(query, { wildcard: lunr.Query.wildcard.LEADING })
-            });
+            return lib.search(query);
         }
     };
 

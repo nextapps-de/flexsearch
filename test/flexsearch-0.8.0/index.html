@@ -2,18 +2,25 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height">
     <title>Benchmark: flexsearch-0.8.0</title>
 </head>
 <body>
 <h2>Benchmark: flexsearch-0.8.0</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/5532ff3b82906fd8c0595840505174b928916a55/dist/flexsearch.compact.min.js"></script>
 <script type="module">
 
-    import Index from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/index.js";
-    import Encoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/encoder.js";
-    import DefaultEncoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/lang/latin/default.js";
-    import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/lang/en.js";
+    // import Index from "https://rawcdn.githack.com/nextapps-de/flexsearch/5532ff3b82906fd8c0595840505174b928916a55/index.js";
+    // import Encoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/5532ff3b82906fd8c0595840505174b928916a55/encoder.js";
+    import DefaultEncoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/5532ff3b82906fd8c0595840505174b928916a55/lang/latin/default.js";
+    import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/5532ff3b82906fd8c0595840505174b928916a55/lang/en.js";
+
+    // import Index from "../../../src/index.js";
+    // import Encoder from "../../../src/encoder.js";
+    // import DefaultEncoder from "../../../src/lang/latin/default.js";
+    // import EnglishPreset from "../../../src/lang/en.js";
     import { suite } from "../../bench.js";
 
     let lib;
@@ -21,10 +28,11 @@
     suite["flexsearch-0.8.0"] = {
 
         init: function(){
-            lib = new Index({
+            lib = new FlexSearch.Index({
                 tokenize: "strict",
                 resolution: 1,
-                encoder: new Encoder(
+                cache: false,
+                encoder: new FlexSearch.Encoder(
                     DefaultEncoder,
                     EnglishPreset
                 ),
