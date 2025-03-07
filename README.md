@@ -1548,7 +1548,7 @@ const flexsearch = new Document({
             // the field name needs to be set here
             field: "custom_field",
             // path to your config from above:
-            config: "./config.js",
+            config: "./custom_field.js",
         }]
     }
 });
@@ -1582,7 +1582,7 @@ const flexsearch = await new Document({
             // the field name needs to be set here
             field: "custom_field",
             // Absolute URL to your config from above:
-            config: "http://localhost/config.js"
+            config: "http://localhost/custom_field.js"
         }]
     }
 });
@@ -1601,7 +1601,7 @@ Tokens: 128,898,832<br>
 The used index configuration has 2 fields (using bidirectional context of `depth: 1`), 1 custom field, 2 tags and a full datastore of all input json documents.
 
 A non-Worker Document index requires 181 seconds to index all contents.<br>
-The Worker index takes just 32 seconds to index them all, by processing every field and tag in parallel. For such large content it is a quite impressive result.
+The Worker index just takes 32 seconds to index them all, by processing every field and tag in parallel. For such large content it is a quite impressive result.
 
 ## Fuzzy-Search
 

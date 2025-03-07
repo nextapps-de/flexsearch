@@ -1,10 +1,9 @@
 const { parentPort } = require("worker_threads"),
       { join } = require("path"),
-      { Index } = require("../../dist/flexsearch.bundle.min.js");
-// TODO EXCHANGE
+      { Index } = require("../flexsearch.bundle.min.js");
+// Test Path
+//const { Index } = require("../../dist/flexsearch.bundle.min.js");
 
-
-//const { Index } = require("../flexsearch.bundle.min.js");
 
 let index;
 
