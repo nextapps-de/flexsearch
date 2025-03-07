@@ -1,4 +1,3 @@
-import { IndexInterface } from "../../type.js";
 import { pipeline } from "../../lang.js";
 
 export const rtl = true;
@@ -13,7 +12,6 @@ const split = /\s+/;
 
 /**
  * @param {string|number} str
- * @this IndexInterface
  */
 
 export function encode(str){

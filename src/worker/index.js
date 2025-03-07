@@ -1,32 +1,29 @@
 //import { promise as Promise } from "../polyfill.js";
+import { IndexOptions } from "../type.js";
 import { create_object, is_function, is_object, is_string } from "../common.js";
 import handler from "./handler.js";
 
 let pid = 0;
 
 /**
- * @param {Object=} options
+ * @param {IndexOptions=} options
  * @constructor
  */
 
 function WorkerIndex(options){
 
     if(!(this instanceof WorkerIndex)) {
-
         return new WorkerIndex(options);
     }
 
-    let opt;
-
     if(options){
-
-        if(is_function(opt = options["encode"])){
-
-            options["encode"] = opt.toString();
-        }
+        // deprecated:
+        // was replaced by dynamic config loading
+        // if(is_function(options.encode)){
+        //     options.encode = options.encode.toString();
+        // }
     }
     else{
-
         options = {};
     }
 
@@ -34,16 +31,14 @@ function WorkerIndex(options){
     // we use "self" as a trap for node.js
 
     let factory = (self||window)["_factory"];
-
     if(factory){
-
         factory = factory.toString();
     }
 
     const is_node_js = typeof window === "undefined" && self["exports"];
     const _self = this;
 
-    this.worker = create(factory, is_node_js, options["worker"]);
+    this.worker = create(factory, is_node_js, options.worker);
     this.resolver = create_object();
 
     if(!this.worker){
@@ -51,26 +46,38 @@ function WorkerIndex(options){
         return;
     }
 
-    if(is_node_js){
-
-        this.worker["on"]("message", function(msg){
-
-            _self.resolver[msg["id"]](msg["msg"]) ;
-            delete _self.resolver[msg["id"]];
-        });
+    function onmessage(msg){
+        msg = msg["data"] || msg;
+        const id = msg["id"];
+        const res = id && _self.resolver[id];
+        if(res){
+            res(msg["msg"]);
+            delete _self.resolver[id];
+        }
     }
-    else{
 
-        this.worker.onmessage = function(msg){
+    is_node_js
+        ? this.worker["on"]("message", onmessage)
+        : this.worker.onmessage = onmessage;
 
-            msg = msg["data"];
-            _self.resolver[msg["id"]](msg["msg"]);
-            delete _self.resolver[msg["id"]];
-        };
+    if(options["config"]){
+
+        // when extern configuration needs to be loaded
+        // it needs to return a promise to await for
+        return new Promise(function(resolve){
+            _self.resolver[++pid] = function(){
+                resolve(_self);
+            };
+            _self.worker.postMessage({
+                "id": pid,
+                "task": "init",
+                "factory": factory,
+                "options": options
+            });
+        });
     }
 
     this.worker.postMessage({
-
         "task": "init",
         "factory": factory,
         "options": options
@@ -96,27 +103,22 @@ function register(key){
         let callback;
 
         if(is_function(arg)){
-
             callback = arg;
             args.splice(args.length - 1, 1);
         }
 
         const promise = new Promise(function(resolve){
-
-            setTimeout(function(){
-
+            //setTimeout(function(){
                 self.resolver[++pid] = resolve;
                 self.worker.postMessage({
-
                     "task": key,
                     "id": pid,
                     "args": args
                 });
-            });
+            //});
         });
 
         if(callback){
-
             promise.then(callback);
             return this;
         }
@@ -131,27 +133,21 @@ function create(factory, is_node_js, worker_path){
 
     let worker
 
-    try{
-
-        worker = is_node_js ?
-
-            eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
-        :(
-            factory ?
-
-                new Worker(URL.createObjectURL(
-
-                    new Blob([
-
-                        "onmessage=" + handler.toString()
-
-                    ], { "type": "text/javascript" })
-                ))
-            :
-                new Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" })
-        );
-    }
-    catch(e){}
+    worker = is_node_js ?
+        // This eval will be removed when compiling, it isn't there in final build
+        (0,eval)('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
+        //eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
+    :(
+        factory ?
+            new window.Worker(URL.createObjectURL(
+                new Blob(
+                    ["onmessage=" + handler.toString()],
+                    { "type": "text/javascript" }
+                )
+            ))
+        :
+            new window.Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" })
+    );
 
     return worker;
 }

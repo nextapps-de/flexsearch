@@ -2,98 +2,58 @@
 import { DEBUG } from "./config.js";
 // <-- COMPILER BLOCK
 import { is_string } from "./common.js";
+import { IndexOptions } from "./type.js";
 
 /**
  * @enum {Object}
  * @const
  */
 
-const preset = {
+const presets = {
 
     "memory": {
-        charset: "latin:extra",
-        //tokenize: "strict",
-        resolution: 3,
-        //threshold: 0,
-        minlength: 4,
-        fastupdate: false
+        resolution: 1
     },
 
     "performance": {
-        //charset: "latin",
-        //tokenize: "strict",
-        resolution: 3,
-        minlength: 3,
-        //fastupdate: true,
-        optimize: false,
-        //fastupdate: true,
+        resolution: 6,
+        fastupdate: true,
         context: {
-            depth: 2,
-            resolution: 1
-            //bidirectional: false
+            depth: 1,
+            resolution: 3
         }
     },
 
     "match": {
-        charset: "latin:extra",
-        tokenize: "reverse",
-        //resolution: 9,
-        //threshold: 0
+        tokenize: "forward"
     },
 
     "score": {
-        charset: "latin:advanced",
-        //tokenize: "strict",
-        resolution: 20,
-        minlength: 3,
+        resolution: 9,
         context: {
-            depth: 3,
-            resolution: 9,
-            //bidirectional: true
+            depth: 2,
+            resolution: 9
         }
-    },
-
-    "default": {
-        // charset: "latin:default",
-        // tokenize: "strict",
-        // resolution: 3,
-        // threshold: 0,
-        // depth: 3
-    },
-
-    // "fast": {
-    //     //charset: "latin",
-    //     //tokenize: "strict",
-    //     threshold: 8,
-    //     resolution: 9,
-    //     depth: 1
-    // }
+    }
 };
+
+/**
+ *
+ * @param {!IndexOptions|string} options
+ * @return {IndexOptions}
+ */
 
 export default function apply_preset(options){
 
-    if(is_string(options)){
+    const preset = is_string(options)
+        ? options
+        : options["preset"];
 
-        if(DEBUG && !preset[options]){
-
-            console.warn("Preset not found: " + options);
+    if(preset){
+        if(DEBUG && !presets[preset]){
+            console.warn("Preset not found: " + preset);
         }
-
-        options = preset[options];
-    }
-    else{
-
-        const preset = options["preset"];
-
-        if(preset){
-
-            if(DEBUG && !preset[preset]){
-
-                console.warn("Preset not found: " + preset);
-            }
-
-            options = Object.assign({}, preset[preset], /** @type {Object} */ (options));
-        }
+        options = Object.assign({}, presets[preset], /** @type {Object} */ (options));
     }
 
     return options;

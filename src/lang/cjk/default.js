@@ -1,4 +1,3 @@
-import { IndexInterface } from "../../type.js";
 import { pipeline } from "../../lang.js";
 
 export const rtl = false;
@@ -13,7 +12,6 @@ const regex = /[\x00-\x7F]+/g;
 
 /**
  * @param {string|number} str
- * @this IndexInterface
  */
 
 export function encode(str){

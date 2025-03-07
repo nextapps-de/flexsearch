@@ -1,27 +1,36 @@
-import { IndexInterface } from "../../type.js";
-import { pipeline, normalize, regex_whitespace } from "../../lang.js";
+import Encoder from "../../encoder.js";
 
-export const rtl = false;
-export const tokenize = "";
 export default {
-    encode: encode,
-    rtl: rtl,
-    tokenize: tokenize
-}
+    normalize: function(str){
+        return str.toLowerCase();
+    },
+    dedupe: false
+};
 
-/**
- * @param {string|number} str
- * @this IndexInterface
- */
-
-export function encode(str){
-
-    return pipeline.call(
-
-        this,
-        /* string: */ ("" + str).toLowerCase(),
-        /* normalize: */ false,
-        /* split: */ regex_whitespace,
-        /* collapse: */ false
-    );
-}
+// import { pipeline } from "../../lang.js";
+//
+// const whitespace = /[\p{Z}\p{S}\p{P}\p{C}]+/u;
+//
+// export const rtl = false;
+// export const tokenize = "";
+// export default {
+//     encode: encode,
+//     rtl: rtl,
+//     tokenize: tokenize
+// }
+//
+// /**
+//  * @param {string|number} str
+//  */
+//
+// export function encode(str){
+//
+//     return pipeline.call(
+//
+//         this,
+//         /* string: */ ("" + str).toLowerCase(),
+//         /* normalize: */ false,
+//         /* split: */ whitespace,
+//         /* collapse: */ false
+//     );
+// }

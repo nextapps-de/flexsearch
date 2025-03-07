@@ -1,51 +1,71 @@
-import { IndexInterface, DocumentInterface } from "./type.js";
-//import { promise as Promise } from "./polyfill.js";
-import { is_function, is_object, is_string } from "./common.js";
+import Document from "./document.js";
+import Index from "./index.js";
 
 export default function (prototype) {
-
-    register(prototype, "add");
-    register(prototype, "append");
-    register(prototype, "search");
-    register(prototype, "update");
-    register(prototype, "remove");
+    register.call(prototype, "add");
+    register.call(prototype, "append");
+    register.call(prototype, "search");
+    register.call(prototype, "update");
+    register.call(prototype, "remove");
 }
 
-function register(prototype, key) {
+// let cycle;
+// let budget = 0;
+//
+// function tick(resolve){
+//     cycle = null;
+//     budget = 0;
+//     resolve();
+// }
 
-    prototype[key + "Async"] = function () {
+/**
+ * @param {!string} key
+ * @this {Index|Document}
+ */
 
-        /** @type {IndexInterface|DocumentInterface} */
-        const self = this,
-              args = /*[].slice.call*/arguments,
+function register(key) {
+    this[key + "Async"] = function () {
+
+        // // prevent stack overflow of adding too much tasks to the same event loop
+        // // actually limit stack to 1,000,000 tasks every ~4ms
+        // cycle || (
+        //     cycle = new Promise(resolve => setTimeout(tick, 0, resolve))
+        // );
+        //
+        // // apply different performance budgets
+        // if(key === "update" || key === "remove" && this.fastupdate === false){
+        //     budget += 1000 * this.resolution;
+        //     if(this.depth)
+        //         budget += 1000 * this.resolution_ctx;
+        // }
+        // else if(key === "search"){
+        //     budget++;
+        // }
+        // else{
+        //     budget += 20 * this.resolution;
+        //     if(this.depth)
+        //         budget += 20 * this.resolution_ctx;
+        // }
+        //
+        // // wait for the event loop cycle
+        // if(budget >= 1e6){
+        //     await cycle;
+        // }
+
+        const args = /*[].slice.call*/arguments,
               arg = args[args.length - 1];
 
         let callback;
 
-        if (is_function(arg)) {
-
+        if ("function" == typeof arg) {
             callback = arg;
             delete args[args.length - 1];
         }
 
-        const promise = new Promise(function (resolve) {
-
-            setTimeout(function () {
-
-                self.async = !0;
-                const res = self[key].apply(self, args);
-                self.async = !1;
-                resolve(res);
-            });
-        });
-
-        if (callback) {
-
-            promise.then(callback);
-            return this;
-        } else {
-
-            return promise;
-        }
+        this.async = !0;
+        const res = this[key].apply(this, args);
+        this.async = !1;
+        res.then ? res.then(callback) : callback(res);
+        return res;
     };
 }

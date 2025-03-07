@@ -1,10 +1,11 @@
 /**
  * http://www.ranks.nl/stopwords
- * @type {Array<string>}
+ * @type {Set<string>}
  */
 
-export const filter = [
 
+// todo filter out minlength
+export const filter = new Set([
     "a",
     "about",
     "above",
@@ -18,32 +19,32 @@ export const filter = [
     "and",
     "any",
     "are",
-    "aren't",
+    "arent",
     "as",
     "at",
-    //"back",
+    "back",
     "be",
     "because",
     "been",
     "before",
     "being",
     "below",
-    //"between",
+    "between",
     "both",
     "but",
     "by",
     "can",
     "cannot",
-    "can't",
+    "cant",
     "come",
     "could",
-    "couldn't",
+    "couldnt",
     //"day",
     "did",
-    "didn't",
+    "didnt",
     "do",
     "does",
-    "doesn't",
+    "doesnt",
     "doing",
     "dont",
     "down",
@@ -51,27 +52,27 @@ export const filter = [
     "each",
     "even",
     "few",
-    "first",
+    //"first",
     "for",
     "from",
     "further",
     "get",
     //"give",
     "go",
-    //"good",
+    "good",
     "had",
-    "hadn't",
+    "hadnt",
     "has",
-    "hasn't",
+    "hasnt",
     "have",
-    "haven't",
+    "havent",
     "having",
     "he",
     "hed",
     //"hell",
     "her",
     "here",
-    "here's",
+    "heres",
     "hers",
     "herself",
     "hes",
@@ -79,7 +80,7 @@ export const filter = [
     "himself",
     "his",
     "how",
-    "how's",
+    "hows",
     "i",
     "id",
     "if",
@@ -88,21 +89,23 @@ export const filter = [
     "in",
     "into",
     "is",
-    "isn't",
+    "isnt",
     "it",
-    "it's",
+    "its",
     "itself",
-    "i've",
+    "ive",
     "just",
     "know",
-    "let's",
+    "lets",
     "like",
     //"look",
+    "lot",
     "make",
+    "made",
     "me",
     "more",
     "most",
-    "mustn't",
+    "mustnt",
     "my",
     "myself",
     "new",
@@ -114,35 +117,35 @@ export const filter = [
     "off",
     "on",
     "once",
-    //"one",
+    "one",
     "only",
     "or",
     "other",
     "ought",
     "our",
-    "our's",
+    "ours",
     "ourselves",
     "out",
     "over",
     "own",
-    //"people",
+    "people",
     "same",
     "say",
     "see",
-    "shan't",
+    "shant",
     "she",
-    "she'd",
+    "shed",
     "shell",
     "shes",
     "should",
-    "shouldn't",
+    "shouldnt",
     "so",
     "some",
     "such",
-    //"take",
+    "take",
     "than",
     "that",
-    "that's",
+    "thats",
     "the",
     "their",
     "theirs",
@@ -150,127 +153,232 @@ export const filter = [
     "themselves",
     "then",
     "there",
-    "there's",
+    "theres",
     "these",
     "they",
-    "they'd",
-    "they'll",
-    "they're",
-    "they've",
-    //"think",
+    "theyd",
+    "theyll",
+    "theyre",
+    "theyve",
+    "think",
     "this",
     "those",
     "through",
     "time",
+    "times",
     "to",
     "too",
     //"two",
-    //"under",
+    "under",
     "until",
     "up",
     "us",
-    //"use",
+    "use",
     "very",
     "want",
     "was",
-    "wasn't",
+    "wasnt",
     "way",
     "we",
     "wed",
     "well",
     "were",
-    "weren't",
-    "we've",
+    "werent",
+    "weve",
     "what",
-    "what's",
+    "whats",
     "when",
-    "when's",
+    "whens",
     "where",
-    "where's",
+    "wheres",
     "which",
     "while",
     "who",
     "whom",
-    "who's",
+    "whos",
     "why",
-    "why's",
+    "whys",
     "will",
     "with",
-    "won't",
-    //"work",
+    "wont",
+    "work",
     "would",
-    "wouldn't",
+    "wouldnt",
     //"year",
+    "ya",
     "you",
-    "you'd",
-    "you'll",
+    "youd",
+    "youll",
     "your",
-    "you're",
-    "your's",
+    "youre",
+    "yours",
     "yourself",
     "yourselves",
-    "you've"
-];
+    "youve"
+]);
 
 /**
  * @type {Object<string, string>}
  */
 
-export const stemmer = {
+export const stemmer = new Map([
+    ["ational", ""],
+    ["iveness", ""],
+    ["fulness", ""],
+    ["ousness", ""],
+    ["ization", ""],
+    ["tional", ""],
+    ["biliti", ""],
+    ["icate", ""],
+    ["ative", ""],
+    ["alize", ""],
+    ["iciti", ""],
+    ["entli", ""],
+    ["ousli", ""],
+    ["alism", ""],
+    ["ation", ""],
+    ["aliti", ""],
+    ["iviti", ""],
+    ["ement", ""],
+    ["izer", ""],
+    ["able", ""],
+    ["alli", ""],
+    ["ator", ""],
+    ["logi", ""],
+    ["ical", ""],
+    ["ance", ""],
+    ["ence", ""],
+    ["ness", ""],
+    ["ble", ""],
+    ["ment", ""],
+    ["eli", ""],
+    ["bli", ""],
+    ["ful", ""],
+    ["ant", ""],
+    ["ent", ""],
+    ["ism", ""],
+    ["ate", ""],
+    ["iti", ""],
+    ["ous", ""],
+    ["ive", ""],
+    ["ize", ""],
+    ["ing", ""],
+    ["ion", ""],
+    ["al", ""],
+    ["ou", ""],
+    ["er", ""],
+    ["ic", ""],
+    ["ly", ""]
+]);
 
-    "ational": "ate",
-    "iveness": "ive",
-    "fulness": "ful",
-    "ousness": "ous",
-    "ization": "ize",
-    "tional": "tion",
-    "biliti": "ble",
-    "icate": "ic",
-    "ative": "",
-    "alize": "al",
-    "iciti": "ic",
-    "entli": "ent",
-    "ousli": "ous",
-    "alism": "al",
-    "ation": "ate",
-    "aliti": "al",
-    "iviti": "ive",
-    "ement": "",
-    "enci": "ence",
-    "anci": "ance",
-    "izer": "ize",
-    "alli": "al",
-    "ator": "ate",
-    "logi": "log",
-    "ical": "ic",
-    "ance": "",
-    "ence": "",
-    "ness": "",
-    "able": "",
-    "ible": "",
-    "ment": "",
-    "eli": "e",
-    "bli": "ble",
-    "ful": "",
-    "ant": "",
-    "ent": "",
-    "ism": "",
-    "ate": "",
-    "iti": "",
-    "ous": "",
-    "ive": "",
-    "ize": "",
-    "al": "",
-    "ou": "",
-    "er": "",
-    "ic": ""
-};
+// export const replacer = new Map([
+//     ["&", " and "],
+// ]);
 
-export const matcher = {};
+/*
+    he’s (= he is / he has)
+    she’s (= she is / she has)
+    I’ll (= I will)
+    I’ve (= I have)
+    I’d (= I would / I had)
+    don’t (= do not)
+    doesn’t (= does not)
+    didn’t (= did not)
+    isn’t (= is not)
+    hasn’t (= has not)
+    can’t (= cannot)
+    won’t (= will not)
+*/
+
+// const explode = new Map([
+//     ["^i'm$", "i am"],
+//     ["^can't$", "can not"],
+//     ["^cannot$", "can not"],
+//     ["^won't$", "will not"],
+//     ["'s$", " is has"],
+//     ["n't$", " not"],
+//     ["'ll$", " will"],
+//     ["'re$", " are"],
+//     ["'ve$", " have"],
+//     ["'d$", " would had"],
+// ]);
+
+// const pairs = [
+//     /´`’ʼ/, /´`’ʼ/g, "'",
+//     /_/, /_+/g, " ",
+//     /&/, /&/g, " and ",
+//     /\bi'm\b/, /\bi'm\b/g, "i am",
+//     /\b(can't|cannot)\b/, /\b(can't|cannot)\b/g, "can not",
+//     /\bwon't\b/, /\bwon't\b/g, "will not",
+//     /[a-z]n't\b/, /[a-z]n't\b/g, "$1 not",
+//     /[a-z]'s\b/, /([a-z])'s\b/g, "$1 is has",
+//     /[a-z]'ll\b/, /[a-z]'ll\b/g, "$1 will",
+//     /[a-z]'re\b/, /[a-z]'re\b/g, "$1 are",
+//     /[a-z]'ve\b/, /[a-z]'ve\b/g, "$1 have",
+//     /[a-z]'d\b/, /[a-z]'d\b/g, "$1 is has"
+// ];
+
+// const map = new Map([
+//     ["´", "'"],
+//     ["`", "'"],
+//     ["’", "'"],
+//     ["ʼ", "'"],
+//     ["_", " "],
+//     ["&", " and "]
+// ]);
 
 export default {
+    prepare: function(str){
+        // if(/[´`’ʼ_&]/.test(str))
+        //     str = str.replace(/[´`’ʼ_&]/g, match => map.get(match));
 
+        // if(/´`’ʼ/.test(str))
+        //     str = str.replace(/´`’ʼ/g, "'");
+        // if(/_/.test(str))
+        //     str = str.replace(/_+/g, " ");
+        // if(/&/.test(str))
+        //     str = str.replace(/&/g, " and ");
+
+        // if(/\bi'm\b/.test(str))
+        //     str = str.replace(/\bi'm\b/g, "i am");
+        // if(/\b(can't|cannot)\b/.test(str))
+        //     str = str.replace(/\b(can't|cannot)\b/g, "can not");
+        // if(/\bwon't\b/.test(str))
+        //     str = str.replace(/\bwon't\b/g, "will not");
+        // if(/[a-z]n't\b/.test(str))
+        //     str = str.replace(/([a-z])n't\b/g, "$1 not");
+        // if(/[a-z]'s\b/.test(str))
+        //     str = str.replace(/([a-z])'s\b/g, "$1 is has");
+        // if(/[a-z]'ll\b/.test(str))
+        //     str = str.replace(/([a-z])'ll\b/g, "$1 will");
+        // if(/[a-z]'re\b/.test(str))
+        //     str = str.replace(/([a-z])'re\b/g, "$1 are");
+        // if(/[a-z]'ve\b/.test(str))
+        //     str = str.replace(/([a-z])'ve\b/g, "$1 have");
+        // if(/[a-z]'d\b/.test(str))
+        //     str = str.replace(/([a-z])'d\b/g, "$1 would had");
+        // return str;
+
+        return str//.replace(/[´`’ʼ_&]/g, match => map.get(match))
+                  // normalization
+                  .replace(/´`’ʼ/g, "'")
+                  .replace(/_+/g, " ")
+                  .replace(/&/g, " and ")
+                  //.replace(/([0-9 ]|^)\$([0-9 ]|$)/g, "$1 USD $2")
+                  //.replace(/([0-9 ]|^)£([0-9 ]|$)/g, "$1 GBP $2")
+                  .replace(/\$/g, " USD ")
+                  .replace(/£/g, " GBP ")
+                  // explode short forms
+                  .replace(/([a-z])'s\b/g, "$1 is")
+                  .replace(/\bi'm\b/g, "i am")
+                  .replace(/\b(can't|cannot)\b/g, "can not")
+                  .replace(/\bwon't\b/g, "will not")
+                  .replace(/([a-z])n't\b/g, "$1 not")
+                  .replace(/([a-z])'ll\b/g, "$1 will")
+                  .replace(/([a-z])'re\b/g, "$1 are")
+                  .replace(/([a-z])'ve\b/g, "$1 have")
+                  .replace(/([a-z])'d\b/g, "$1 would");
+    },
     filter: filter,
-    stemmer: stemmer,
-    matcher: matcher
-}
+    stemmer: stemmer
+};

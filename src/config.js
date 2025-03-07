@@ -2,7 +2,10 @@
 export const RELEASE = "custom";
 
 /** @define {boolean} */
-export const DEBUG = false;
+export const DEBUG = true;
+
+/** @define {boolean} */
+export const PROFILER = true;
 
 /** @define {boolean} */
 export const POLYFILL = true;
@@ -23,9 +26,6 @@ export const SUPPORT_ASYNC = true;
 export const SUPPORT_STORE = true;
 
 /** @define {boolean} */
-export const SUPPORT_TAGS = true;
-
-/** @define {boolean} */
 export const SUPPORT_SUGGESTION = true;
 
 /** @define {boolean} */
@@ -33,3 +33,18 @@ export const SUPPORT_SERIALIZE = true;
 
 /** @define {boolean} */
 export const SUPPORT_DOCUMENT = true;
+
+/** @define {boolean} */
+export const SUPPORT_TAGS = true;
+
+/** @define {boolean} */
+export const SUPPORT_PERSISTENT = true;
+
+/** @define {boolean} */
+export const SUPPORT_KEYSTORE = true;
+
+/** @define {boolean} */
+export const SUPPORT_COMPRESSION = true;
+
+/** @define {boolean} */
+export const SUPPORT_RESOLVER = true;

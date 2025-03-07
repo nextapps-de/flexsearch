@@ -1,96 +1,56 @@
 
 import { is_string } from "./common.js";
+import { IndexOptions } from "./type.js";
 
 /**
  * @enum {Object}
  * @const
  */
 
-const preset = {
+const presets = {
 
     memory: {
-        charset: "latin:extra",
-        //tokenize: "strict",
-        resolution: 3,
-        //threshold: 0,
-        minlength: 4,
-        fastupdate: /* normalize: */ /* collapse: */ /* normalize: */ /* collapse: */ /* normalize: */ /* collapse: */ /* normalize: */
-        /* collapse: */
-        /* collapse: */!1
+        resolution: 1
     },
 
     performance: {
-        //charset: "latin",
-        //tokenize: "strict",
-        resolution: 3,
-        minlength: 3,
-        //fastupdate: true,
-        optimize: !1, //fastupdate: true,
+        resolution: 6,
+        fastupdate: /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
+        !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/,
         context: {
-            depth: 2, resolution: 1
-            //bidirectional: false
+            depth: 1,
+            resolution: 3
         }
     },
 
     match: {
-        charset: "latin:extra",
-        tokenize: "reverse"
-        //resolution: 9,
-        //threshold: 0
+        tokenize: "forward"
     },
 
     score: {
-        charset: "latin:advanced",
-        //tokenize: "strict",
-        resolution: 20,
-        minlength: 3,
+        resolution: 9,
         context: {
-            depth: 3,
+            depth: 2,
             resolution: 9
-            //bidirectional: true
         }
-    },
-
-    default: {
-        // charset: "latin:default",
-        // tokenize: "strict",
-        // resolution: 3,
-        // threshold: 0,
-        // depth: 3
     }
-
-    // "fast": {
-    //     //charset: "latin",
-    //     //tokenize: "strict",
-    //     threshold: 8,
-    //     resolution: 9,
-    //     depth: 1
-    // }
 };
+
+/**
+ *
+ * @param {!IndexOptions|string} options
+ * @return {IndexOptions}
+ */
 
 export default function apply_preset(options) {
 
-    if (is_string(options)) {
+    const preset = is_string(options) ? options : options.preset;
 
-        if (!preset[options]) {
-
-            console.warn("Preset not found: " + options);
+    if (preset) {
+        if (!presets[preset]) {
+            console.warn("Preset not found: " + preset);
         }
-
-        options = preset[options];
-    } else {
-
-        const preset = options.preset;
-
-        if (preset) {
-
-            if (!preset[preset]) {
-
-                console.warn("Preset not found: " + preset);
-            }
-
-            options = Object.assign({}, preset[preset], /** @type {Object} */options);
-        }
+        options = Object.assign({}, presets[preset], /** @type {Object} */options);
     }
 
     return options;

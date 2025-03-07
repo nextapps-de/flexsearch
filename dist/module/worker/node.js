@@ -1,5 +1,10 @@
 const { parentPort } = require("worker_threads"),
-      { Index } = require("../flexsearch.bundle.min.js");
+      { join } = require("path"),
+      { Index } = require("../../dist/flexsearch.bundle.min.js");
+// TODO EXCHANGE
+
+
+//const { Index } = require("../flexsearch.bundle.min.js");
 
 let index;
 
@@ -14,16 +19,25 @@ parentPort.on("message", function (data) {
             switch (task) {
 
                         case "init":
-                                    const options = data.options || {},
-                                          encode = options.encode;
+                                    let options = data.options || {},
+                                        filepath = options.config;
 
+                                    // load extern field configuration
 
-                                    options.cache = /* normalize: */ /* collapse: */ /* normalize: */ /* collapse: */ /* normalize: */ /* collapse: */ /* normalize: */ /* collapse: */ /* collapse: */!1;
-
-                                    if (encode && 0 === encode.indexOf("function")) {
-
-                                                options.encode = new Function("return " + encode)();
+                                    if ("/" !== filepath[0] && "\\" !== filepath[0]) {
+                                                // current working directory
+                                                const dir = process.cwd();
+                                                filepath = join(dir, filepath);
                                     }
+                                    if (filepath) {
+                                                options = require(filepath);
+                                    }
+
+                                    // deprecated:
+                                    // const encode = options["encode"];
+                                    // if(encode && (encode.indexOf("function") === 0)){
+                                    //     options["encode"] = new Function("return " + encode)();
+                                    // }
 
                                     index = new Index(options);
                                     break;

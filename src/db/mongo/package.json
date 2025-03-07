@@ -1,0 +1,16 @@
+{
+  "public": true,
+  "preferGlobal": false,
+  "name": "flexsearch-mongo",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {},
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "mongodb": "^6.13.0"
+  }
+}

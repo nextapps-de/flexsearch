@@ -6,57 +6,67 @@ const minify = process.argv[2] && process.argv[2].toLowerCase().includes("releas
 console.log("Start build .....");
 console.log('Bundle: ' + ('module' /* 'custom' */) + (debug ?  ":debug" : (minify ?  ":min" : "")));
 
-//fs.existsSync("log") || fs.mkdirSync("log");
-fs.existsSync("tmp") || fs.mkdirSync("tmp");
+fs.rmSync("tmp/", { recursive: true });
+fs.mkdirSync("tmp");
 fs.existsSync("dist") || fs.mkdirSync("dist");
 
-const files = [
+(async function(){
 
-    "async.js",
-    "cache.js",
-    "common.js",
-    "config.js",
-    "document.js",
-    "engine.js",
-    "global.js",
-    "index.js",
-    "intersect.js",
-    "lang.js",
-    "polyfill.js",
-    "preset.js",
-    "serialize.js",
-    "type.js",
-    "webpack.js"
-];
+    let files = await fs.promises.readdir("./src/");
+    files.forEach(function(file){
+        if(file.endsWith(".js")){
+            let src = fs.readFileSync("src/" + file, "utf8");
+            src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
+            fs.writeFileSync("tmp/" + file, src);
+        }
+    });
 
-files.forEach(function(file){
+    fs.existsSync("./tmp/db") || fs.mkdirSync("./tmp/db/");
+    fs.existsSync("./tmp/lang") || fs.mkdirSync("./tmp/lang/");
 
-    let src = String(fs.readFileSync("src/" + file));
-    src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
-    fs.writeFileSync("tmp/" + file, src);
-});
+    ["db/clickhouse",
+     "db/indexeddb",
+     "db/mongo",
+     "db/postgres",
+     "db/redis",
+     "db/sqlite",
+     "document",
+     "index",
+     "resolve",
+     "worker",
+     "lang",
+     "lang/latin",
+    ].forEach(await async function(path){
+        fs.existsSync("./tmp/" + path + "/") || fs.mkdirSync("./tmp/" + path + "/");
+        files = await fs.promises.readdir("./src/" + path + "/");
+        files.forEach(function(file){
+            if(file.endsWith(".old.js")) return;
+            if(file.endsWith(".wip.js")) return;
+            if(file.endsWith(".js")){
+                let src = fs.readFileSync("src/" + path + "/" + file, "utf8");
+                src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
+                fs.writeFileSync("tmp/" + path + "/" + file, src);
+            }
+        });
+    });
 
-fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");
+    fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");
+    fs.rmSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")), { recursive: true });
+    fs.mkdirSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")));
 
-exec("npx babel tmp -d dist/module" + (debug ? "-debug" : (minify ? "-min --minified --compact true" : "")) + " --config-file tmp/.babelrc && exit 0", function(){
-
-    console.log("Build Complete.");
-});
+    exec("npx babel tmp -d dist/module" + (debug ? "-debug" : (minify ? "-min --minified --compact true" : "")) + " --config-file tmp/.babelrc && exit 0", function(){
+        console.log("Build Complete.");
+    });
+}());
 
 function exec(prompt, callback){
 
     const child = child_process.exec(prompt, function(err, stdout, stderr){
-
         if(err){
-
             console.error(err);
         }
         else{
-
-            if(callback){
-
-                callback();
-            }
+            callback && callback();
         }
     });
 

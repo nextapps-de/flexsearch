@@ -5,20 +5,17 @@ console.log("Start build .....");
 
 fs.rmSync("tmp/", { recursive: true });
 fs.mkdirSync("tmp");
-//fs.existsSync("log") || fs.mkdirSync("log");
 fs.existsSync("dist") || fs.mkdirSync("dist");
 
-var supported_lang = [
-
+let supported_lang = [
     'en',
     'de',
-    'at',
+    'fr',
     'us'
 ];
 
-var supported_charset = {
-
-    'latin': ["default", "advanced", "balance", "extra", "simple"],
+let supported_charset = {
+    'latin': ["default", "advanced", "balance", "extra", "simple", "extreme"],
     'cjk': ["default"],
     'cyrillic': ["default"],
     'arabic': ["default"],
@@ -27,10 +24,10 @@ var supported_charset = {
 let flag_str = "";
 let language_out;
 let use_polyfill;
-var formatting;
-var compilation_level;
+let formatting;
+let compilation_level;
 
-var options = (function(argv){
+let options = (function(argv){
 
     const arr = {};
     let count = 0;
@@ -47,17 +44,9 @@ var options = (function(argv){
 
                 language_out = val;
             }
-            else if(index === "FORMATTING"){
-
-                formatting = val;
-            }
-            else if(index === "COMPILATION_LEVEL"){
-
-                compilation_level = val;
-            }
             else if(index === "POLYFILL"){
 
-                use_polyfill = val === "true";
+                use_polyfill = val !== "false";
             }
             else{
 
@@ -78,24 +67,7 @@ const light_version = (release === "light") || (process.argv[2] === "--light");
 const es5_version = (release === "es5") || (process.argv[2] === "--es5");
 const module_version = (release === "module") || (process.argv[2] === "--module");
 
-// if(release){
-//
-//     let filename
-//
-//     if(!fs.existsSync(filename = "src/config/" + release + "/config.js")){
-//
-//         filename = "src/config/bundle/config.js";
-//     }
-//
-//     fs.writeFileSync("tmp/config.js", fs.readFileSync(filename));
-// }
-
 let parameter = (function(opt){
-
-    if(formatting && !opt["formatting"]){
-
-        opt["formatting"] = formatting;
-    }
 
     let parameter = '';
 
@@ -103,8 +75,7 @@ let parameter = (function(opt){
 
         if(opt.hasOwnProperty(index)){
 
-            if((release !== "lang") /*|| (index !== "entry_point")*/){
-
+            if(release !== "lang"){
                 parameter += ' --' + index + '=' + opt[index];
             }
         }
@@ -113,7 +84,7 @@ let parameter = (function(opt){
     return parameter;
 })({
 
-    compilation_level: compilation_level || "ADVANCED_OPTIMIZATIONS", //"SIMPLE"
+    compilation_level: release === "bundle.profiler" ? "SIMPLE" : "ADVANCED", //"WHITESPACE"
     use_types_for_optimization: true,
     generate_exports: true,
     export_local_property_definitions: true,
@@ -133,7 +104,7 @@ let parameter = (function(opt){
     //js_module_root: "./",
     entry_point: "./tmp/webpack.js",
     //manage_closure_dependencies: true,
-    dependency_mode: "PRUNE_LEGACY", // PRUNE_LEGACY
+    dependency_mode: "PRUNE", // PRUNE_LEGACY
     rewrite_polyfills: use_polyfill || false,
 
     //isolation_mode: "IIFE",
@@ -141,21 +112,26 @@ let parameter = (function(opt){
     //formatting: "PRETTY_PRINT"
 });
 
-// if(options["DEBUG"]){
-//     parameter += ' --formatting=PRETTY_PRINT';
-// }
-
-if(release !== "bundle.module" && release !== "light.module"){
-    //parameter += ' --isolation_mode=IIFE';
-    parameter += ' --emit_use_strict=true';
-    parameter += ' --output_wrapper="\"(function(self){%output%}(this));\""';
+if(options["DEBUG"]){
+    parameter += ' --formatting=PRETTY_PRINT';
 }
 
-const custom = (!release || (release === "custom"));
+if(!release.endsWith(".module")){
+    //parameter += ' --isolation_mode=IIFE';
+    parameter += ' --output_wrapper=\"(function(self){%output%}(this));\"';
+    parameter += ' --emit_use_strict=true';
+}
+
+// if(language_out === "ECMASCRIPT5_STRICT"){
+//     parameter += " --js='!tmp/keystore.js'";
+// }
+
+const custom = (!release || release.startsWith("custom"))
+    && hashCode(parameter + flag_str).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
 if(custom){
 
-    release = "custom." + hashCode(parameter + flag_str).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    release || (options["RELEASE"] = release = "custom");
 }
 
 // if(release === "lang"){
@@ -214,93 +190,163 @@ if(custom){
 // }
 // else{
 
-    if(release === "lang") throw new Error("disabled");
+if(release === "lang") throw new Error("disabled");
+
+(async function(){
+
+    const files = await fs.promises.readdir("./src/");
+
+    // const files = [
+    //     "async.js",
+    //     "cache.js",
+    //     "common.js",
+    //     "compress.js",
+    //     "config.js",
+    //     "document.js",
+    //     "encoder.js",
+    //     "engine.js",
+    //     "global.js",
+    //     "index.js",
+    //     "intersect.js",
+    //     "keystore.js",
+    //     "lang.js",
+    //     "polyfill.js",
+    //     "preset.js",
+    //     "resolver.js",
+    //     "serialize.js",
+    //     "type.js",
+    //     "webpack.js"
+    // ];
+
+    files.forEach(function(file){
+
+        if(file === "config.js"){
+
+            let src = String(fs.readFileSync("src/" + file));
+
+            if(custom){
+
+                let defaults = src.split(/export const /);
+                defaults.unshift();
+                defaults = defaults.filter(str => /^(SUPPORT|RELEASE)/.test(str)).map(str => str.replace(/=[\s\S]+/, "").trim());
+
+                for(let i = 0, opt; i < defaults.length; i++){
+
+                    opt = defaults[i];
+                    options[opt] = typeof options[opt] === "undefined" ? false : options[opt];
+                }
+            }
+
+            for(let opt in options){
+
+                src = src.replace(new RegExp('(export const ' + opt + ' = )(")?[^";]+(")?;'), "$1$2" + options[opt] + "$3;");
+            }
+
+            fs.writeFileSync("tmp/" + file, src);
+        }
+        else{
+
+            if(file.endsWith(".js")){
+                if(language_out === "ECMASCRIPT5_STRICT" && file === "keystore.js"){
+                    let content = fs.readFileSync("src/" + file, "utf8");
+
+                    content = content.substring(0, content.indexOf("function lcg64"));
+                    content += "function lcg64(str){ throw new Error('The keystore is limited to 32 for EcmaScript5'); }";
+                    fs.writeFileSync("tmp/keystore.js",
+                        content
+                        // "/** @constructor */ export function KeystoreMap(arg){};" +
+                        // "/** @constructor */ export function KeystoreSet(arg){};" +
+                        // "/** @constructor */ export function KeystoreArray(arg){}; KeystoreArray.prototype.push = function(arg){};"
+                    );
+                }
+                else{
+                    fs.copyFileSync("src/" + file, "tmp/" + file);
+                }
+            }
+        }
+    });
+
+    fs.existsSync("tmp/db/") || fs.mkdirSync("tmp/db/");
+    fs.cpSync("src/lang/", "tmp/lang/", { recursive: true });
+    fs.cpSync("src/worker/", "tmp/worker/", { recursive: true });
+    fs.cpSync("src/db/indexeddb/", "tmp/db/indexeddb/", { recursive: true });
+    fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
+    fs.cpSync("src/index/", "tmp/index/", { recursive: true });
+    fs.cpSync("src/document/", "tmp/document/", { recursive: true });
+    fs.cpSync("src/resolve/", "tmp/resolve/", { recursive: true });
+
+    const filename = "dist/flexsearch." + (release + (custom ? "." + custom : "")) + (options["DEBUG"] ?  ".debug" : ".min") + ".js";
+    const executable = process.platform === "win32" ?  "\"node_modules/google-closure-compiler-windows/compiler.exe\"" :
+                       process.platform === "darwin" ? "\"node_modules/google-closure-compiler-osx/compiler\"" :
+                                                       "java -jar node_modules/google-closure-compiler-java/compiler.jar";
+
+    exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
+
+        let build = fs.readFileSync(filename);
+        let preserve = fs.readFileSync("src/index.js", "utf8");
+
+        const package_json = require("../package.json");
+
+        let name = (
+            custom ? release.replace("custom.", "Custom/") :
+            light_version ? "Light" + (release === "light.module" ? "/Module" : "") :
+            es5_version ? "ES5" : "Bundle" + (release === "bundle.module" ? "/Module" : "")
+        );
+
+        if(custom) name += "/" + custom;
+        if(options["DEBUG"]) name += "/Debug";
+
+        preserve = preserve.replace("* FlexSearch.js", "* FlexSearch.js v" + package_json.version + " (" + name + ")" );
+        build = preserve.substring(0, preserve.indexOf('*/') + 2) + "\n" + build;
 
 
-const files = [
+        if(release === "bundle.module" ||
+           release === "light.module" ||
+           release === "compact.module" ||
+           release === "custom.module"){
 
-    "async.js",
-    "cache.js",
-    "common.js",
-    "config.js",
-    "document.js",
-    "engine.js",
-    "global.js",
-    "index.js",
-    "intersect.js",
-    "lang.js",
-    "polyfill.js",
-    "preset.js",
-    "serialize.js",
-    "type.js",
-    "webpack.js"
-];
+            // export default {
+            //     Index: O,
+            //     Encoder: H,
+            //     Charset: M,
+            //     Language: ma,
+            //     Document: Y,
+            //     Worker: W,
+            //     Resolver: null,
+            //     IndexedDB: null
+            // };
 
-files.forEach(function(file){
+            const pos_start = build.indexOf("window.FlexSearch");
+            const pos_end = build.indexOf("};", pos_start) + 2;
 
-    if(file === "config.js"){
+            let part = build.substring(build.indexOf("{", pos_start) + 1, pos_end - 2);
+            part = part.split(",");
+            part = part.map(entry => "export const " + entry.replace(":", "="));
+            part = part.join(";") + ";";
+            //console.log(build.substring(pos_start - 50, pos_start) + part + build.substring(pos_end))
 
-        let src = String(fs.readFileSync("src/" + file));
-
-        for(let opt in options){
-
-            src = src.replace(new RegExp('(export const ' + opt + ' = )(")?[^";]+(")?;'), "$1$2" + options[opt] + "$3;");
+            //build = build.substring(0, pos_start) + part + build.substring(pos_end);
+            build = build.replace(/window\.FlexSearch(\s+)?=(\s+)?/, "export default ") + part;
+            //build = build.replace(/self\.FlexSearch(\s+)?=(\s+)?/, "export default ");
         }
 
-        fs.writeFileSync("tmp/" + file, src);
-    }
-    else{
+        // fix closure compiler dynamic import
+        build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=await import($4))");
 
-        fs.copyFileSync("src/" + file, "tmp/" + file);
-    }
-});
+        if(release === "bundle"){
+            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
+        }
 
-fs.cpSync("src/lang/", "tmp/lang/", { recursive: true });
-fs.cpSync("src/worker/", "tmp/worker/", { recursive: true });
-
-const filename = "dist/flexsearch." + (release || "custom") + (options["DEBUG"] ?  ".debug" : ".min") + ".js";
-
-const executable = process.platform === "win32" ?  "\"node_modules/google-closure-compiler-windows/compiler.exe\"" :
-                   process.platform === "darwin" ? "\"node_modules/google-closure-compiler-osx/compiler\"" :
-                                                   "java -jar node_modules/google-closure-compiler-java/compiler.jar";
-
-exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
-
-    let build = fs.readFileSync(filename);
-    let preserve = fs.readFileSync("src/index.js", "utf8");
-
-    const package_json = require("../package.json");
-
-    preserve = preserve.replace("* FlexSearch.js", "* FlexSearch.js v" + package_json.version + (release ? " (" + (release.charAt(0).toUpperCase() + release.substring(1)) + ")" : ""));
-    build = preserve.substring(0, preserve.indexOf('*/') + 2) + "\n" + build;
-
-    if(release === "bundle"){
-
-        build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
-    }
-
-    build = build.replace(/eval\('(.*)'\)/, "$1");
-
-    if(release === "bundle.module" || release === "light.module" || release === "compact.module"){
-
-        build = build.replace(/self\.FlexSearch(\s+)?=(\s+)?/, "export default ");
-    }
-
-    // if(release === "pre"){
-    //
-    //     fs.existsSync("test/dist") || fs.mkdirSync("test/dist");
-    //     fs.writeFileSync("test/" + filename, build);
-    // }
-    // else{
+        // replace the eval wrapper
+        build = build.replace(/\(0,eval\)\('([^']+)'\)/, "$1");
 
         fs.writeFileSync(filename, build);
-    // }
+        fs.copyFileSync("src/worker/node.js", "dist/node/node.js");
 
-    fs.copyFileSync("src/worker/node.js", "dist/node/node.js");
-
-    console.log("Build Complete.");
-});
-//}
+        console.log("Saved to " + filename);
+        console.log("Build Complete.");
+    });
+}());
 
 function hashCode(str) {
 

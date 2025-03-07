@@ -1,23 +1,36 @@
-import { IndexInterface } from "../../type.js";
-import { pipeline, normalize, regex_whitespace } from "../../lang.js";
+import Encoder from "../../encoder.js";
 
-export const rtl = /* normalize: */
-/* collapse: */ /* normalize: */ /* collapse: */ /* normalize: */ /* collapse: */
-/* normalize: */
-/* collapse: */!1;
-export const tokenize = "";
 export default {
-    encode: encode,
-    rtl: !1,
-    tokenize: ""
+    normalize: function (str) {
+        return str.toLowerCase();
+    },
+    dedupe: /* suggest */ /* append: */ /* enrich */!1
+};
 
-    /**
-     * @param {string|number} str
-     * @this IndexInterface
-     */
-
-};export function encode(str) {
-
-    return pipeline.call(this,
-    /* string: */("" + str).toLowerCase(), !1, /* split: */regex_whitespace, !1);
-}
+// import { pipeline } from "../../lang.js";
+//
+// const whitespace = /[\p{Z}\p{S}\p{P}\p{C}]+/u;
+//
+// export const rtl = false;
+// export const tokenize = "";
+// export default {
+//     encode: encode,
+//     rtl: rtl,
+//     tokenize: tokenize
+// }
+//
+// /**
+//  * @param {string|number} str
+//  */
+//
+// export function encode(str){
+//
+//     return pipeline.call(
+//
+//         this,
+//         /* string: */ ("" + str).toLowerCase(),
+//         /* normalize: */ false,
+//         /* split: */ whitespace,
+//         /* collapse: */ false
+//     );
+// }

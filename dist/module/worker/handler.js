@@ -1,6 +1,7 @@
 import Index from "../index.js";
+import { IndexOptions } from "../type.js";
 
-export default function (data) {
+export default (async function (data) {
 
             data = data.data;
 
@@ -13,18 +14,25 @@ export default function (data) {
             switch (task) {
 
                         case "init":
-                                    const options = data.options || {},
-                                          factory = data.factory,
-                                          encode = options.encode;
 
+                                    /** @type IndexOptions */
+                                    let options = data.options || {},
+                                        filepath = options.config;
 
-                                    options.cache = /* normalize: */ /* collapse: */ /* normalize: */
-
-                                    /* collapse: */ /* normalize: */ /* collapse: */ /* normalize: */ /* collapse: */ /* collapse: */!1;
-
-                                    if (encode && 0 === encode.indexOf("function")) {
-                                                options.encode = Function("return " + encode)();
+                                    if (filepath) {
+                                                options = filepath;
+                                                // will be replaced after build with the line below because
+                                                // there is an issue with closure compiler dynamic import
+                                                //options = await import(filepath);
                                     }
+
+                                    // deprecated:
+                                    // const encode = options.encode;
+                                    // if(encode && (encode.indexOf("function") === 0)){
+                                    //     options.encode = Function("return " + encode)();
+                                    // }
+
+                                    const factory = data.factory;
 
                                     if (factory) {
 
@@ -41,6 +49,7 @@ export default function (data) {
                                                 self._index = new Index(options);
                                     }
 
+                                    postMessage({ id: data.id });
                                     break;
 
                         default:
@@ -49,4 +58,4 @@ export default function (data) {
 
                                     postMessage("search" === task ? { id: id, msg: message } : { id: id });
             }
-}
+});

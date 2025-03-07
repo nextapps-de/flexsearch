@@ -1,6 +1,7 @@
 import Index from "../index.js";
+import { IndexOptions } from "../type.js";
 
-export default function(data) {
+export default async function(data) {
 
     data = data["data"];
 
@@ -13,16 +14,23 @@ export default function(data) {
 
         case "init":
 
-            const options = data["options"] || {};
-            const factory = data["factory"];
-            const encode = options["encode"];
-
-            options["cache"] = false;
-
-            if(encode && (encode.indexOf("function") === 0)){
-
-                options["encode"] = Function("return " + encode)();
+            /** @type IndexOptions */
+            let options = data["options"] || {};
+            let filepath = options.config;
+            if(filepath){
+                options = filepath;
+                // will be replaced after build with the line below because
+                // there is an issue with closure compiler dynamic import
+                //options = await import(filepath);
             }
+
+            // deprecated:
+            // const encode = options.encode;
+            // if(encode && (encode.indexOf("function") === 0)){
+            //     options.encode = Function("return " + encode)();
+            // }
+
+            const factory = data["factory"];
 
             if(factory){
 
@@ -40,6 +48,7 @@ export default function(data) {
                 self["_index"] = new Index(options);
             }
 
+            postMessage({ "id": data["id"] });
             break;
 
         default:

@@ -2,11 +2,10 @@
  * Filter are also known as "stopwords", they completely filter out words from being indexed.
  * Source: http://www.ranks.nl/stopwords
  * Object Definition: Just provide an array of words.
- * @type {Array<string>}
+ * @type {Set<string>}
  */
 
-export const filter = [
-
+export const filter = new Set([
     "aber",
     "als",
     "am",
@@ -23,7 +22,7 @@ export const filter = [
     "daher",
     "darum",
     "das",
-    "daß",
+    "dass",
     "dass",
     "dein",
     "deine",
@@ -51,7 +50,7 @@ export const filter = [
     "es",
     "euer",
     "eure",
-    "für",
+    "fuer",
     "hatte",
     "hatten",
     "hattest",
@@ -73,23 +72,25 @@ export const filter = [
     "jener",
     "jenes",
     "jetzt",
+    "ggf",
     "kann",
     "kannst",
-    "können",
-    "könnt",
+    "koennen",
+    "koennt",
     "machen",
     "mein",
     "meine",
     "mit",
-    "muß",
-    "mußt",
+    "muss",
     "musst",
-    "müssen",
-    "müßt",
+    "musst",
+    "muessen",
+    "muesst",
     "nach",
     "nachdem",
     "nein",
     "nicht",
+    "noch",
     "nun",
     "oder",
     "seid",
@@ -109,6 +110,8 @@ export const filter = [
     "unser",
     "unsere",
     "unter",
+    "usw",
+    "uvm",
     "vom",
     "von",
     "vor",
@@ -135,51 +138,68 @@ export const filter = [
     "zu",
     "zum",
     "zur",
-    "über"
-];
+    "ueber"
+]);
 
 /**
  * Stemmer removes word endings and is a kind of "partial normalization". A word ending just matched when the word length is bigger than the matched partial.
  * Example: The word "correct" and "correctness" could be the same word, so you can define {"ness": ""} to normalize the ending.
  * Object Definition: the key represents the word ending, the value contains the replacement (or empty string for removal).
- * @type {Object<string, string>}
+ * http://snowball.tartarus.org/algorithms/german/stemmer.html
+ * @type {Map<string>}
  */
 
-export const stemmer = {
-
-    "niss": "",
-    "isch": "",
-    "lich": "",
-    "heit": "",
-    "keit": "",
-    "ell": "",
-    "bar": "",
-    "end": "",
-    "ung": "",
-    "est": "",
-    "ern": "",
-    "em": "",
-    "er": "",
-    "en": "",
-    "es": "",
-    "st": "",
-    "ig": "",
-    "ik": "",
-    "e": "",
-    "s": ""
-};
+export const stemmer = new Map([
+    ["niss", ""],
+    ["isch", ""],
+    ["lich", ""],
+    ["heit", ""],
+    ["keit", ""],
+    ["ell", ""],
+    ["bar", ""],
+    ["end", ""],
+    ["ung", ""],
+    ["est", ""],
+    ["ern", ""],
+    ["em", ""],
+    ["er", ""],
+    ["en", ""],
+    ["es", ""],
+    ["st", ""],
+    ["ig", ""],
+    ["ik", ""],
+    ["e", ""],
+    ["s", ""]
+]);
 
 /**
  * Matcher replaces all occurrences of a given string regardless of its position and is also a kind of "partial normalization".
  * Object Definition: the key represents the target term, the value contains the search string which should be replaced (could also be an array of multiple terms).
- * @type {Object<string, Array<string>|string>}
+ * @type {Map<string>}
  */
-
-export const matcher = {};
+const map = new Map([
+    ["_", " "],
+    ["ä", "ae"],
+    ["ö", "oe"],
+    ["ü", "ue"],
+    ["ß", "ss"],
+    ["&", " und "],
+    ["€", " EUR "]
+]);
 
 export default {
-
+    normalize: function(str){
+        return str.toLowerCase();
+    },
+    prepare: function(str){
+        // normalization
+        if(/[_äöüß&€]/.test(str))
+            str = str.replace(/[_äöüß&€]/g, match => map.get(match));
+        // street names
+        return str.replace(/str\b/g, "strasse")
+                  .replace(/(?!\b)strasse\b/g, " strasse")
+                  .replace(/\bst\b/g, "sankt");
+    },
     filter: filter,
-    stemmer: stemmer,
-    matcher: matcher
-}
+    stemmer: stemmer
+};

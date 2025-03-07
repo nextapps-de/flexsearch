@@ -5,16 +5,21 @@
       "define": {
         "RELEASE": "module",
         "DEBUG": false,
-        "POLYFILL": true,
+        "PROFILER": false,
+        "POLYFILL": false,
         "SUPPORT_WORKER": true,
         "SUPPORT_ENCODER": true,
         "SUPPORT_CACHE": true,
         "SUPPORT_ASYNC": true,
         "SUPPORT_STORE": true,
-        "SUPPORT_TAGS": true,
         "SUPPORT_SUGGESTION": true,
         "SUPPORT_SERIALIZE": true,
-        "SUPPORT_DOCUMENT": true
+        "SUPPORT_DOCUMENT": true,
+        "SUPPORT_TAGS": true,
+        "SUPPORT_PERSISTENT": true,
+        "SUPPORT_KEYSTORE": true,
+        "SUPPORT_COMPRESSION": true,
+        "SUPPORT_RESOLVER": true
       }
     }],
     "babel-plugin-minify-constant-folding",
@@ -32,8 +37,8 @@
     "babel-plugin-transform-undefined-to-void"
   ],
   "ignore": [
-    "webpack.js",
-    "config.js"
+    "config.js",
+    "profiler.js"
   ],
   "minified": false,
   "compact": false,

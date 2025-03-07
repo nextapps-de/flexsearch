@@ -1,69 +1,144 @@
-/**
- * @interface
- */
-
-export function IndexInterface(){
-
-    this.cache = null;
-    this.matcher = null;
-    this.stemmer = null;
-    this.filter = null;
-}
+// When you are looking for type definitions which fully describes the usage take a look into the index.d.ts file.
+// Some of the types here aren't supposed to be used as public, they might be defined just for internal state.
+import Encoder from "./encoder.js";
+import StorageInterface from "./db/interface.js";
 
 /**
- * @param {!string} str
- * @param {boolean|Array<string|RegExp>=} normalize
- * @param {boolean|string|RegExp=} split
- * @param {boolean=} collapse
- * @returns {string|Array<string>}
+ * @typedef IndexOptions {{
+ *   preset: string|undefined,
+ *   context: (IndexOptions|undefined),
+ *   encoder: Encoder|Function|Object|undefined,
+ *   encode: Function|undefined,
+ *   resolution: [number=9],
+ *   tokenize: [string="strict"],
+ *   fastupdate: [boolean:false],
+ *   score: Function]|undefined,
+ *   keystore: [number=0],
+ *   rtl: [boolean=false],
+ *   cache: [number=null],
+ *   resolve: [boolean=true],
+ *   db: StorageInterface|undefined,
+ *   config: string|undefined
+ * }}
  */
-
-//IndexInterface.prototype.pipeline;
+export let IndexOptions;
 
 /**
- * @param {!number|string} id
- * @param {!string} content
+ * @typedef DocumentOptions {{
+ *   context: (IndexOptions|undefined),
+ *   encoder: Encoder|Function|Object|undefined,
+ *   encode: Function|undefined,
+ *   resolution: [number=9],
+ *   tokenize: [string="strict"],
+ *   fastupdate: [boolean:false],
+ *   score: Function]|undefined,
+ *   keystore: [number=0],
+ *   rtl: [boolean=false],
+ *   cache: [number=null],
+ *   db: StorageInterface|undefined,
+ *   doc: DocumentDescriptor|Array<DocumentDescriptor>|undefined,
+ *   document: DocumentDescriptor|Array<DocumentDescriptor>|undefined,
+ *   worker: boolean|string|undefined
+ * }}
  */
-
-IndexInterface.prototype.add;
+export let DocumentOptions;
 
 /**
- * @param {!number|string} id
- * @param {!string} content
+ * @typedef ContextOptions {{
+ *   depth: number,
+ *   bidirectional: boolean|undefined,
+ *   resolution: number|undefined
+ * }}
  */
-
-IndexInterface.prototype.append;
+export let ContextOptions;
 
 /**
- * @param {!string|Object} query
- * @param {number|Object=} limit
- * @param {Object=} options
- * @returns {Array<number|string>}
+ * @typedef DocumentDescriptor {{
+ *   field: FieldOptions|Array<FieldOptions>|undefined,
+ *   index: FieldOptions|Array<FieldOptions>|undefined,
+ *   tag: TagOptions|Array<TagOptions>|undefined,
+ *   store: StoreOptions|Array<StoreOptions>|undefined,
+ *   config: string|undefined
+ * }}
  */
-
-IndexInterface.prototype.search;
+export let DocumentDescriptor;
 
 /**
- * @param {!number|string} id
- * @param {!string} content
+ * @typedef FieldOptions {{
+ *   field: string,
+ *   filter: Function|undefined,
+ *   custom: Function|undefined,
+ *   context: (IndexOptions|undefined),
+ *   encoder: Encoder|Function|Object|undefined,
+ *   encode: Function|undefined,
+ *   resolution: [number=9],
+ *   tokenize: [string="strict"],
+ *   fastupdate: [boolean:false],
+ *   score: Function]|undefined,
+ *   keystore: [number=0],
+ *   rtl: [boolean=false],
+ *   cache: [number=null],
+ *   db: StorageInterface|undefined,
+ *   config: string|undefined
+ * }}
  */
-
-IndexInterface.prototype.update;
+export let FieldOptions;
 
 /**
- * @param {!number|string} id
+ * @typedef TagOptions {{
+ *   field: string,
+ *   tag: Object<string, string|Array<string>>|Array<string>|string,
+ *   filter: Function|undefined,
+ *   custom: Function|undefined,
+ *   keystore: [number=0],
+ *   db: StorageInterface|undefined,
+ *   config: string|undefined
+ * }}
  */
-
-IndexInterface.prototype.remove;
+export let TagOptions;
 
 /**
- * @interface
+ * @typedef StoreOptions {{
+ *   field: string,
+ *   filter: Function|undefined,
+ *   custom: Function|undefined,
+ *   keystore: [number=0],
+ *   db: StorageInterface|undefined,
+ *   config: string|undefined
+ * }}
  */
+export let StoreOptions;
 
-export function DocumentInterface(){
+/**
+ * @typedef SearchOptions {{
+ *   query: string=,
+ *   limit: [number=100],
+ *   offset: [number=0],
+ *   context: boolean|undefined,
+ *   suggest: [boolean=false],
+ *   resolve: [boolean=true],
+ *   enrich: [boolean=false],
+ *   tag: Array|undefined
+ * }}
+ */
+export let SearchOptions;
 
-    this.field = null;
+/**
+ * @typedef DocumentSearchOptions {{
+ *   query: string=,
+ *   limit: [number=100],
+ *   offset: [number=0],
+ *   context: boolean|undefined,
+ *   suggest: [boolean=false],
+ *   enrich: [boolean=false],
+ *   tag: Array|undefined,
+ *   field: FieldOptions|Array<FieldOptions>|undefined,
+ *   index: FieldOptions|Array<FieldOptions>|undefined,
+ *   pluck: boolean|undefined,
+ *   merge: [boolean=false]
+ * }}
+ */
+export let DocumentSearchOptions;
 
-    /** @type IndexInterface */
-    this.index = null;
-}
+export let EncoderOptions;
+export let ResolverOptions;

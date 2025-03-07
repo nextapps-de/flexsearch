@@ -1,11 +1,12 @@
 // TODO return promises instead of inner await
 
-import { IndexInterface, DocumentInterface } from "./type.js";
+import Index from "./index.js";
+import Document from "./document.js";
 import { create_object, is_string } from "./common.js";
 
 function async(callback, self, field, key, index_doc, index, data, on_done){
 
-    setTimeout(function(){
+    //setTimeout(function(){
 
         const res = callback(field ? field + "." + key : key, JSON.stringify(data));
 
@@ -22,11 +23,17 @@ function async(callback, self, field, key, index_doc, index, data, on_done){
 
             self.export(callback, self, field, index_doc, index + 1, on_done);
         }
-    });
+    //});
 }
 
 /**
- * @this IndexInterface
+ * @param callback
+ * @param self
+ * @param field
+ * @param index_doc
+ * @param index
+ * @param on_done
+ * @this {Index|Document}
  */
 
 export function exportIndex(callback, self, field, index_doc, index, on_done){
@@ -52,14 +59,14 @@ export function exportIndex(callback, self, field, index_doc, index, on_done){
 
                 data = create_object();
 
-                for(let key in this.register){
+                for(let key of this.reg.keys()){
 
                     data[key] = 1;
                 }
             }
             else{
 
-                data = this.register;
+                data = this.reg;
             }
 
             break;
@@ -102,7 +109,7 @@ export function exportIndex(callback, self, field, index_doc, index, on_done){
 }
 
 /**
- * @this IndexInterface
+ * @this Index
  */
 
 export function importIndex(key, data){
@@ -129,7 +136,7 @@ export function importIndex(key, data){
             // fastupdate isn't supported by import
 
             this.fastupdate = false;
-            this.register = data;
+            this.reg = data;
             break;
 
         case "map":
@@ -145,7 +152,7 @@ export function importIndex(key, data){
 }
 
 /**
- * @this DocumentInterface
+ * @this Document
  */
 
 export function exportDocument(callback, self, field, index_doc, index, on_done){
@@ -167,7 +174,7 @@ export function exportDocument(callback, self, field, index_doc, index, on_done)
 
         self = this;
 
-        setTimeout(function(){
+        //setTimeout(function(){
 
             if(!idx.export(callback, self, index ? field/*.replace(":", "-")*/ : "", index_doc, index++, on_done)){
 
@@ -176,7 +183,7 @@ export function exportDocument(callback, self, field, index_doc, index, on_done)
 
                 self.export(callback, self, field, index_doc, index, on_done);
             }
-        });
+        //});
     }
     else{
 
@@ -217,7 +224,7 @@ export function exportDocument(callback, self, field, index_doc, index, on_done)
 }
 
 /**
- * @this DocumentInterface
+ * @this Document
  */
 
 export function importDocument(key, data){
@@ -244,12 +251,12 @@ export function importDocument(key, data){
             // fastupdate isn't supported by import
 
             this.fastupdate = false;
-            this.register = data;
+            this.reg = data;
 
             for(let i = 0, index; i < this.field.length; i++){
 
                 index = this.index[this.field[i]];
-                index.register = data;
+                index.reg = data;
                 index.fastupdate = false;
             }
 
