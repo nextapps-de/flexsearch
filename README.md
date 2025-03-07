@@ -1,5 +1,9 @@
 # FlexSearch v0.8 (Preview)
 
+```bash
+npm install git+https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
+```
+
 ## What's New
 
 - Persistent indexes support for: `IndexedDB` (Browser), `Redis`, `SQLite`, `Postgres`, `MongoDB`, `Clickhouse`
