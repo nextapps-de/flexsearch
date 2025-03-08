@@ -6,7 +6,7 @@ import WorkerIndex from "./worker/index.js";
 import Resolver from "./resolver.js";
 import Encoder from "./encoder.js";
 import IdxDB from "./db/indexeddb/index.js";
-import { global_charset, global_lang } from "./global.js";
+import { global_charset } from "./charset.js";
 import charset_exact from "./lang/latin/exact.js";
 import charset_default from "./lang/latin/default.js";
 import charset_simple from "./lang/latin/simple.js";
@@ -136,9 +136,8 @@ global_charset["latin:soundex"] = charset_soundex;
 
 const FlexSearch = {
     Index: Index,
-    Encoder: Encoder,
     Charset: global_charset,
-    Language: global_lang,
+    Encoder: Encoder,
     Document: Document,
     Worker: WorkerIndex,
     Resolver: Resolver,

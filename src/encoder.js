@@ -1,6 +1,7 @@
 // COMPILER BLOCK -->
 import {
     SUPPORT_CACHE,
+    SUPPORT_CHARSET,
     SUPPORT_COMPRESSION,
     SUPPORT_ENCODER
 } from "./config.js";
@@ -53,7 +54,7 @@ const numeric_split_next_char = /(\d{3})(\D)/g;
 //.replace(/([^\d])([\d])/g, "$1 $2")
 //.replace(/([\d])([^\d])/g, "$1 $2")
 const normalize = "".normalize && /[\u0300-\u036f]/g; // '´`’ʼ.,
-const normalize_mapper = SUPPORT_ENCODER && !normalize && new Map([
+const normalize_mapper = SUPPORT_CHARSET && !normalize && [
 
     // Charset Normalization
 
@@ -285,7 +286,7 @@ const normalize_mapper = SUPPORT_ENCODER && !normalize && new Map([
     // ["|", " "],
     // ["/", " "],
     // ["\\", " "]
-]);
+];
 
 /**
  * @param options
@@ -397,6 +398,15 @@ Encoder.prototype.assign = function(options){
     this.finalize = /** @type {Function|null} */ (
         parse_option(options.finalize, null, this.finalize)
     );
+
+    // move the normalization fallback to the mapper
+    if(normalize_mapper){
+        this.mapper = new Map(
+            /** @type {Array<Array<string, string>>} */ (
+                normalize_mapper
+            )
+        );
+    }
 
     // options
 
@@ -554,12 +564,12 @@ Encoder.prototype.encode = function(str){
         }
         else{
             str = str.toLowerCase();
-            if(SUPPORT_ENCODER){
-                this.mapper = this.mapper
-                    // todo replace spread
-                    ? new Map([.../** @type {!Iterable} */(normalize_mapper), ...this.mapper])
-                    : new Map(/** @type {Map<string,string>} */ (normalize_mapper));
-            }
+            // if(SUPPORT_CHARSET){
+            //     this.mapper = this.mapper
+            //         // todo replace spread
+            //         ? new Map([.../** @type {!Iterable} */(normalize_mapper), ...this.mapper])
+            //         : new Map(/** @type {Map<string,string>} */ (normalize_mapper));
+            // }
         }
         //if(!str) return str;
     }

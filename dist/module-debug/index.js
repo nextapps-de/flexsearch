@@ -12,7 +12,6 @@ import Cache, { searchCache } from "./cache.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex } from "./serialize.js";
-import { global_lang, global_charset } from "./global.js";
 import default_encoder from "./lang/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
@@ -33,30 +32,7 @@ export default function Index(options, _register) {
         return new Index(options);
     }
 
-    if (options) {
-
-        options = apply_preset(options);
-        // charset = options.charset;
-        // // lang = options.lang;
-        //
-        // if(is_string(charset)){
-        //
-        //     if(!charset.includes(":")){
-        //         charset += ":default";
-        //     }
-        //
-        //     charset = global_charset[charset];
-        // }
-
-        // if(is_string(lang)){
-        //
-        //     lang = global_lang[lang];
-        // }
-    } else {
-        options = {};
-    }
-
-    // let charset, lang, tmp;
+    options = options ? apply_preset(options) : {};
 
     const context = options.context || {},
           encoder = options.encode || options.encoder || default_encoder;
@@ -77,9 +53,9 @@ export default function Index(options, _register) {
     tmp = options.keystore || 0;
     tmp && (this.keystore = tmp);
 
-    this.map = tmp ? new KeystoreMap(tmp) : new Map();
-    this.ctx = tmp ? new KeystoreMap(tmp) : new Map();
-    this.reg = _register || (this.fastupdate ? tmp ? new KeystoreMap(tmp) : new Map() : tmp ? new KeystoreSet(tmp) : new Set());
+    this.map = tmp && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(tmp) : new Map();
+    this.ctx = tmp && !0 ? new KeystoreMap(tmp) : new Map();
+    this.reg = _register || (this.fastupdate ? tmp && !0 ? new KeystoreMap(tmp) : new Map() : tmp && !0 ? new KeystoreSet(tmp) : new Set());
     this.resolution_ctx = context.resolution || 1;
     this.rtl = encoder.rtl || options.rtl || !1;
 
@@ -146,7 +122,7 @@ Index.prototype.clear = function () {
     if (this.db) {
         this.commit_timer && clearTimeout(this.commit_timer);
         this.commit_timer = null;
-        this.commit_task = [{ clear: /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ }];
+        this.commit_task = [{ clear: !0 }];
         //return this.db.clear();
     }
 

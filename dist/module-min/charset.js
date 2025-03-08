@@ -1,0 +1,1 @@
+import{create_object}from"./common.js";export const global_charset=create_object();export function registerCharset(a,b){global_charset[a]=b}

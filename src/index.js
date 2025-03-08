@@ -29,7 +29,6 @@ import Cache, { searchCache } from "./cache.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex } from "./serialize.js";
-import { global_lang, global_charset } from "./global.js";
 import default_encoder from "./lang/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
@@ -52,38 +51,23 @@ export default function Index(options, _register){
 
     PROFILER && tick("Index.create");
 
-    if(options){
-
-        options = apply_preset(options);
-        // charset = options.charset;
-        // // lang = options.lang;
-        //
-        // if(is_string(charset)){
-        //
-        //     if(!charset.includes(":")){
-        //         charset += ":default";
-        //     }
-        //
-        //     charset = global_charset[charset];
-        // }
-
-        // if(is_string(lang)){
-        //
-        //     lang = global_lang[lang];
-        // }
-    }
-    else{
-        options = {};
-    }
-
-    // let charset, lang, tmp;
+    options = options
+        ? apply_preset(options)
+        : {};
 
     const context = options.context || {};
-    const encoder = options.encode || options.encoder || default_encoder;
+    const encoder = options.encode || options.encoder || (
+        SUPPORT_ENCODER ? default_encoder : function(str){
+            return str.toLowerCase().trim().split(/\s+/);
+        }
+    );
     this.encoder = encoder.encode
         ? encoder
         : typeof encoder === "object"
-            ? new Encoder(encoder)
+            ? (SUPPORT_ENCODER
+                ? new Encoder(encoder)
+                : encoder
+            )
             : { encode: encoder };
 
     if(SUPPORT_COMPRESSION){
@@ -101,12 +85,12 @@ export default function Index(options, _register){
     tmp = SUPPORT_KEYSTORE && (options.keystore || 0);
     tmp && (this.keystore = tmp);
 
-    this.map = tmp ? new KeystoreMap(tmp) : new Map();
-    this.ctx = tmp ? new KeystoreMap(tmp) : new Map();
+    this.map = tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map();
+    this.ctx = tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map();
     this.reg = _register || (
         this.fastupdate
-            ? (tmp ? new KeystoreMap(tmp) : new Map())
-            : (tmp ? new KeystoreSet(tmp) : new Set())
+            ? (tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map())
+            : (tmp && SUPPORT_KEYSTORE ? new KeystoreSet(tmp) : new Set())
     );
     this.resolution_ctx = context.resolution || 1;
     this.rtl = (encoder.rtl) || options.rtl || false;

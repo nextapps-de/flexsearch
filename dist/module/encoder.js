@@ -43,7 +43,7 @@ const whitespace = /[^\p{L}\p{N}]+/u,
       numeric_split_prev_char = /(\D)(\d{3})/g,
       numeric_split_next_char = /(\d{3})(\D)/g,
       normalize = /[\u0300-\u036f]/g,
-      normalize_mapper = !normalize && new Map([
+      normalize_mapper = !normalize && [
 
 // Charset Normalization
 
@@ -71,7 +71,7 @@ const whitespace = /[^\p{L}\p{N}]+/u,
 // ["|", " "],
 // ["/", " "],
 // ["\\", " "]
-]); // /[\p{Z}\p{S}\p{P}\p{C}]+/u;
+]; // /[\p{Z}\p{S}\p{P}\p{C}]+/u;
 //const numeric_split = /(\d{3})/g;
 
 //.replace(/(\d{3})/g, "$1 ")
@@ -183,9 +183,16 @@ Encoder.prototype.assign = function (options) {
      */
     this.finalize = /** @type {Function|null} */parse_option(options.finalize, null, this.finalize);
 
+    // move the normalization fallback to the mapper
+    if (normalize_mapper) {
+        this.mapper = new Map(
+        /** @type {Array<Array<string, string>>} */normalize_mapper);
+    }
+
     // options
 
-    this.rtl = options.rtl || /* suggest */ /* append: */ /* enrich */!1;
+    this.rtl = options.rtl ||
+    /* suggest */ /* append: */ /* enrich */!1;
     this.dedupe = parse_option(options.dedupe, !0, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
@@ -333,10 +340,12 @@ Encoder.prototype.encode = function (str) {
             str = str.normalize("NFKD").replace(normalize, "").toLowerCase();
         } else {
             str = str.toLowerCase();
-
-            this.mapper = this.mapper
-            // todo replace spread
-            ? new Map([... /** @type {!Iterable} */normalize_mapper, ...this.mapper]) : new Map( /** @type {Map<string,string>} */normalize_mapper);
+            // if(SUPPORT_CHARSET){
+            //     this.mapper = this.mapper
+            //         // todo replace spread
+            //         ? new Map([.../** @type {!Iterable} */(normalize_mapper), ...this.mapper])
+            //         : new Map(/** @type {Map<string,string>} */ (normalize_mapper));
+            // }
         }
         //if(!str) return str;
     }

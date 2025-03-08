@@ -7,6 +7,7 @@ import {
     SUPPORT_SERIALIZE,
     SUPPORT_WORKER,
     SUPPORT_ENCODER,
+    SUPPORT_CHARSET,
     SUPPORT_PERSISTENT,
     SUPPORT_RESOLVER,
     SUPPORT_STORE
@@ -27,7 +28,7 @@ import WorkerIndex from "./worker/index.js";
 import Resolver from "./resolver.js";
 import Encoder from "./encoder.js";
 import IdxDB from "./db/indexeddb/index.js";
-import { global_charset, global_lang } from "./global.js";
+import { global_charset } from "./charset.js";
 import charset_exact from "./lang/latin/exact.js"
 import charset_default from "./lang/latin/default.js"
 import charset_simple from "./lang/latin/simple.js"
@@ -161,7 +162,7 @@ if(SUPPORT_PERSISTENT && SUPPORT_DOCUMENT){
 /** @export */ DocumentSearchOptions.pluck;
 /** @export */ DocumentSearchOptions.merge;
 
-if(SUPPORT_ENCODER){
+if(SUPPORT_CHARSET){
     global_charset["latin:exact"] = charset_exact;
     global_charset["latin:default"] = charset_default;
     global_charset["latin:simple"] = charset_simple;
@@ -173,9 +174,8 @@ if(SUPPORT_ENCODER){
 
 const FlexSearch = {
     "Index": Index,
-    "Encoder": Encoder,
     "Charset": global_charset,
-    "Language": global_lang,
+    "Encoder": SUPPORT_ENCODER ? Encoder : null,
     "Document": SUPPORT_DOCUMENT ? Document : null,
     "Worker": SUPPORT_WORKER ? WorkerIndex : null,
     "Resolver": SUPPORT_RESOLVER ? Resolver : null,

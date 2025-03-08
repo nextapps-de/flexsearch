@@ -1,0 +1,1 @@
+import Encoder from"../../encoder.js";export default{normalize:!0,dedupe:!0};

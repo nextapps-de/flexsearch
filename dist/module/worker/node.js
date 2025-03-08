@@ -23,7 +23,7 @@ parentPort.on("message", function (data) {
 
                                     // load extern field configuration
 
-                                    if ("/" !== filepath[0] && "\\" !== filepath[0]) {
+                                    if (filepath && "/" !== filepath[0] && "\\" !== filepath[0]) {
                                                 // current working directory
                                                 const dir = process.cwd();
                                                 filepath = join(dir, filepath);

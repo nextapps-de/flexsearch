@@ -1,0 +1,1 @@
+import Encoder from"../../encoder.js";export default{normalize:function(a){return a.toLowerCase()},dedupe:!1};

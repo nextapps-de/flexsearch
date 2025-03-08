@@ -54,14 +54,14 @@ export default function Document(options){
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
     this.reg = this.fastupdate
-        ? (keystore ? new KeystoreMap(keystore) : new Map())
-        : (keystore ? new KeystoreSet(keystore) : new Set());
+        ? (keystore && SUPPORT_KEYSTORE ? new KeystoreMap(keystore) : new Map())
+        : (keystore && SUPPORT_KEYSTORE ? new KeystoreSet(keystore) : new Set());
 
     if(SUPPORT_STORE){
         // todo support custom filter function
         this.storetree = (tmp = document.store || null) && tmp !== true && [];
         this.store = tmp && (
-            keystore
+            keystore && SUPPORT_KEYSTORE
                 ? new KeystoreMap(keystore)
                 : new Map()
         );

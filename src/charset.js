@@ -1,6 +1,6 @@
 import { create_object } from "./common.js";
 
-export const global_lang = create_object();
+// export const global_lang = create_object();
 export const global_charset = create_object();
 
 /**
@@ -17,6 +17,6 @@ export function registerCharset(name, charset){
  * @param {Object} lang
  */
 
-export function registerLanguage(name, lang){
-    global_lang[name] = lang;
-}
+// export function registerLanguage(name, lang){
+//     global_lang[name] = lang;
+// }

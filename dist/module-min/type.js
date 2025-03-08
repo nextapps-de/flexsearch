@@ -1,0 +1,1 @@
+import Encoder from"./encoder.js";import StorageInterface from"./db/interface.js";export let IndexOptions;export let DocumentOptions;export let ContextOptions;export let DocumentDescriptor;export let FieldOptions;export let TagOptions;export let StoreOptions;export let SearchOptions;export let DocumentSearchOptions;export let EncoderOptions;export let ResolverOptions;

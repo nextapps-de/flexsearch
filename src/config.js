@@ -16,6 +16,9 @@ export const SUPPORT_WORKER = true;
 /** @define {boolean|string} */
 export const SUPPORT_ENCODER = true;
 
+/** @define {boolean|string} */
+export const SUPPORT_CHARSET = true;
+
 /** @define {boolean} */
 export const SUPPORT_CACHE = true;
 
