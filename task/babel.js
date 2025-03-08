@@ -50,6 +50,7 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
         });
     });
 
+    fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
     fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");
     fs.rmSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")), { recursive: true });
     fs.mkdirSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")));
