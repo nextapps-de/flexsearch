@@ -2,7 +2,7 @@
 import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, DocumentIndexOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions } from "./type.js";
 import Document from "./document.js";
 import Index from "./index.js";
-import WorkerIndex from "./worker/index.js";
+import WorkerIndex from "./worker.js";
 import Resolver from "./resolver.js";
 import Encoder from "./encoder.js";
 import IdxDB from "./db/indexeddb/index.js";

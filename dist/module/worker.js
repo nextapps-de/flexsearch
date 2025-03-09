@@ -1,7 +1,7 @@
 //import { promise as Promise } from "../polyfill.js";
-import { IndexOptions } from "../type.js";
-import { create_object, is_function, is_object, is_string } from "../common.js";
-import handler from "./handler.js";
+import { IndexOptions } from "./type.js";
+import { create_object, is_function, is_object, is_string } from "./common.js";
+import handler from "./worker/handler.js";
 
 let pid = 0;
 

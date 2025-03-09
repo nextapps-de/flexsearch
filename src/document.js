@@ -22,7 +22,7 @@ import {
 
 import { DocumentOptions, DocumentDescriptor, DocumentIndexOptions, StoreOptions } from "./type.js";
 import Index from "./index.js";
-import WorkerIndex from "./worker/index.js";
+import WorkerIndex from "./worker.js";
 import Cache, { searchCache } from "./cache.js";
 import { is_string, is_object, parse_simple } from "./common.js";
 import apply_async from "./async.js";

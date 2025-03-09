@@ -8,7 +8,7 @@
 
 import { DocumentOptions, DocumentDescriptor, DocumentIndexOptions, StoreOptions } from "./type.js";
 import Index from "./index.js";
-import WorkerIndex from "./worker/index.js";
+import WorkerIndex from "./worker.js";
 import Cache, { searchCache } from "./cache.js";
 import { is_string, is_object, parse_simple } from "./common.js";
 import apply_async from "./async.js";
@@ -40,8 +40,7 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */
-    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
     this.storetree = (tmp = document.store || null) && !0 !== tmp && [];
@@ -197,7 +196,8 @@ function parse_descriptor(options, document) {
 
         if (this.worker) {
             const worker = new WorkerIndex(opt);
-            index.set(key, worker);if (!worker.worker) {
+            index.set(key, worker);
+            if (!worker.worker) {
                 // fallback when not supported
                 this.worker = !1;
             }

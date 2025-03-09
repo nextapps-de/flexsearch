@@ -3,7 +3,7 @@
   "preferGlobal": false,
   "name": "flexsearch",
   "version": "0.8.0",
-  "description": "Next-Generation full text search library with zero dependencies.",
+  "description": "Next-Generation full text search library with zero dependencies for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
   "copyright": "Nextapps GmbH",
