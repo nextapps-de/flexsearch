@@ -2,32 +2,32 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Benchmark</title>
+    <meta name="viewport" content="width=device-width, height=device-height">
+    <title>Benchmark: flexsearch-0.8.0-soundex</title>
 </head>
 <body>
-<h2>Benchmark: flexsearch-0.8.0</h2><hr/>
+<h2>Benchmark: flexsearch-0.8.0-soundex</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.compact.min.js"></script>
 <script type="module">
 
-    import Index from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/index.js";
-    import Encoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/encoder.js";
-    import SoundexEncoder from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/lang/latin/soundex.js";
-    import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/112c30f50fc1fc27390ba25b475336298b5817fe/lang/en.js";
+    import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/module-min/lang/en.js";
     import { suite } from "../../bench.js";
 
     let lib;
 
-    suite["flexsearch-0.8.0"] = {
+    suite["flexsearch-0.8.0-soundex"] = {
 
         init: function(){
-            lib = new Index({
+            lib = new FlexSearch.Index({
+                encoder: new FlexSearch.Encoder(
+                    FlexSearch.Charset.LatinSoundex,
+                    EnglishPreset
+                ),
                 tokenize: "strict",
                 resolution: 1,
-                encoder: new Encoder(
-                    EnglishPreset,
-                    SoundexEncoder
-                ),
+                cache: false,
                 context: {
                     depth: 1,
                     bidirectional: false,
