@@ -32,7 +32,9 @@
     ".": "./dist/flexsearch.bundle.min.js",
     "./lang/*": "./dist/lang/*.min.js",
     "./lang/*.js": "./dist/lang/*.min.js",
-    "./db/*/*.js": "./dist/db/*/*.js"
+    "./db/*": "./dist/db/*/index.cjs",
+    "./db/*/index": "./dist/db/*/index.cjs",
+    "./db/*/index.js": "./dist/db/*/index.cjs"
   },
   "module": "dist/flexsearch.bundle.module.min.js",
   "browser": {
