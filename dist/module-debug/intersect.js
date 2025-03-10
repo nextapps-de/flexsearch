@@ -9,21 +9,18 @@ import { create_object, concat, sort_by_length_up, get_max_len } from "./common.
 
  to -> [id]
 
- */
+*/
 
 /**
- * Implementation based on Object[key] provides better suggestions
- * capabilities and has less performance scaling issues on large indexes.
- *
  * @param arrays
+ * @param {number} resolution
  * @param limit
  * @param offset
- * @param {boolean|Array=} suggest
- * @param {boolean=} resolve
+ * @param suggest
  * @returns {Array}
  */
 
-export function intersect(arrays, limit, offset, suggest) {
+export function intersect(arrays, resolution, limit, offset, suggest) {
 
     const length = arrays.length;
 
@@ -33,161 +30,283 @@ export function intersect(arrays, limit, offset, suggest) {
     // }
 
     let result = [],
-        size = 0,
         check,
-        check_suggest,
-        check_new,
-        res_arr;
+        count;
 
 
-    if (suggest) {
-        suggest = [];
-    }
-
-    // 1. a reversed order prioritize the order of words from a query
-    //    because it ends with the first term.
-    // 2. process terms in reversed order often has advantage for
-    //    the fast path "end reached".
+    // if(suggest){
+    //     suggest = [];
+    // }
 
     // alternatively the results could be sorted by length up
     //arrays.sort(sort_by_length_up);
 
-    // todo the outer loop should be the res array instead of term array,
-    // this isn't just simple because the intersection calculation needs to reflect this
-    //const maxlen = get_max_len(arrays);
+    check = create_object();
 
-    for (let x = length - 1, found; 0 <= x; x--) {
-        //for(let x = 0, found; x < length; x++){
+    for (let y = 0, ids, id, res_arr, tmp; y < resolution; y++) {
 
-        res_arr = arrays[x];
-        check_new = create_object();
-        found = !check;
+        for (let x = 0; x < length; x++) {
 
-        // process relevance in forward order (direction is
-        // important for adding IDs during the last round)
+            res_arr = arrays[x];
 
-        for (let y = 0, ids; y < res_arr.length; y++) {
+            if (y < res_arr.length && (ids = res_arr[y])) {
 
-            ids = res_arr[y];
-            if (!ids || !ids.length) continue;
+                for (let z = 0; z < ids.length; z++) {
 
-            for (let z = 0, id; z < ids.length; z++) {
+                    id = ids[z];
 
-                id = ids[z];
-
-                // check exists starting from the 2nd slot
-                if (check) {
-                    if (check[id]) {
-
-                        // check if in last round
-                        if (!x) {
-                            //if(x === length - 1){
-
-                            if (offset) {
-                                offset--;
-                            } else {
-
-                                result[size++] = id;
-
-                                if (size === limit) {
-                                    // fast path "end reached"
-                                    return result; /*resolve === false
-                                                   ? { result, suggest }
-                                                   :*/
-                                }
-                            }
-                        }
-
-                        if (x || suggest) {
-                            //if((x < length - 1) || suggest){
-                            check_new[id] = 1;
-                        }
-
-                        found = /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/
-                        /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+                    if (count = check[id]) {
+                        check[id]++;
+                        // tmp.count++;
+                        // tmp.sum += y;
+                    } else {
+                        count = 0;
+                        check[id] = 1;
+                        // check[id] = {
+                        //     count: 1,
+                        //     sum: y
+                        // };
                     }
 
-                    if (suggest) {
-
-                        if (!check_suggest[id]) {
-                            check_suggest[id] = 1;
-                            const arr = suggest[y] || (suggest[y] = []);
-                            arr.push(id);
-                        }
-
-                        // OLD:
-                        //
-                        // check_idx = (check_suggest[id] || 0) + 1;
-                        // check_suggest[id] = check_idx;
-                        //
-                        // // do not adding IDs which are already included in the result (saves one loop)
-                        // // the first intersection match has the check index 2, so shift by -2
-                        //
-                        // if(check_idx < length){
-                        //
-                        //     const tmp = suggest[check_idx - 2] || (suggest[check_idx - 2] = []);
-                        //     tmp[tmp.length] = id;
-                        // }
-                    }
-                } else {
-
-                    // pre-fill in first round
-                    check_new[id] = 1;
+                    tmp = result[count] || (result[count] = []);
+                    tmp.push(id);
                 }
             }
         }
-
-        if (suggest) {
-
-            // re-use the first pre-filled check for suggestions
-            check || (check_suggest = check_new);
-        } else if (!found) {
-
-            return [];
-        }
-
-        check = check_new;
     }
 
-    // return intermediate result
-    // if(resolve === false){
-    //     return { result, suggest };
-    // }
+    // result.sort(function(a, b){
+    //     return check[a] - check[b];
+    // });
 
-    if (suggest) {
+    const result_len = result.length;
 
-        // needs to iterate in reverse direction
-        for (let x = suggest.length - 1, ids, len; 0 <= x; x--) {
+    if (result_len) {
 
-            ids = suggest[x];
-            len = ids.length;
+        if (!suggest) {
 
-            for (let y = 0, id; y < len; y++) {
+            if (result_len < length) {
+                return [];
+            }
 
-                id = ids[y];
+            result = result[result_len - 1];
 
-                if (!check[id]) {
+            if (result.length > limit || offset) {
+                result = result.slice(offset, limit + offset);
+            }
+        } else {
 
-                    if (offset) {
-                        offset--;
-                    } else {
+            const final = [];
 
-                        result[size++] = id;
+            for (let i = result_len - 1, count = 0, arr, arr_len; 0 <= i; i--) {
+                arr = result[i];
+                arr_len = arr.length;
 
-                        if (size === limit) {
-                            // fast path "end reached"
-                            return result;
-                        }
-                    }
+                if (offset >= arr_len) {
+                    offset -= arr_len;
+                    continue;
+                }
 
-                    check[id] = 1;
+                if (arr_len + count > limit || offset) {
+                    arr = arr.slice(offset, limit - count + offset);
+                    arr_len = arr.length;
+                }
+
+                final.push(arr);
+                count += arr_len;
+
+                if (limit === count) {
+                    break;
                 }
             }
+
+            result = 1 < final.length ? concat(final) : final[0];
         }
     }
 
     return result;
 }
+
+//
+// /**
+//  * Implementation based on Object[key] provides better suggestions
+//  * capabilities and has less performance scaling issues on large indexes.
+//  *
+//  * @param arrays
+//  * @param limit
+//  * @param offset
+//  * @param {boolean|Array=} suggest
+//  * @param {boolean=} resolve
+//  * @returns {Array}
+//  */
+//
+// export function intersect(arrays, limit, offset, suggest, resolve) {
+//
+//     const length = arrays.length;
+//
+//     // todo remove
+//     // if(length < 2){
+//     //     throw new Error("Not optimized intersect");
+//     // }
+//
+//     let result = [];
+//     let size = 0;
+//     let check;
+//     let check_suggest;
+//     let check_new;
+//     let res_arr;
+//
+//     if(suggest){
+//         suggest = [];
+//     }
+//
+//     // 1. a reversed order prioritize the order of words from a query
+//     //    because it ends with the first term.
+//     // 2. process terms in reversed order often has advantage for
+//     //    the fast path "end reached".
+//
+//     // alternatively the results could be sorted by length up
+//     //arrays.sort(sort_by_length_up);
+//
+//     // todo the outer loop should be the res array instead of term array,
+//     // this isn't just simple because the intersection calculation needs to reflect this
+//     //const maxlen = get_max_len(arrays);
+//
+//     for(let x = length - 1, found; x >= 0; x--){
+//     //for(let x = 0, found; x < length; x++){
+//
+//         res_arr = arrays[x];
+//         check_new = create_object();
+//         found = !check;
+//
+//         // process relevance in forward order (direction is
+//         // important for adding IDs during the last round)
+//
+//         for(let y = 0, ids; y < res_arr.length; y++){
+//
+//             ids = res_arr[y];
+//             if(!ids || !ids.length) continue;
+//
+//             for(let z = 0, id; z < ids.length; z++){
+//
+//                 id = ids[z];
+//
+//                 // check exists starting from the 2nd slot
+//                 if(check){
+//                     if(check[id]){
+//
+//                         // check if in last round
+//                         if(!x){
+//                         //if(x === length - 1){
+//
+//                             if(offset){
+//                                 offset--;
+//                             }
+//                             else{
+//
+//                                 result[size++] = id;
+//
+//                                 if(size === limit){
+//                                     // fast path "end reached"
+//                                     return result /*resolve === false
+//                                         ? { result, suggest }
+//                                         :*/
+//                                 }
+//                             }
+//                         }
+//
+//                         if(x || suggest){
+//                         //if((x < length - 1) || suggest){
+//                             check_new[id] = 1;
+//                         }
+//
+//                         found = true;
+//                     }
+//
+//                     if(suggest){
+//
+//                         if(!check_suggest[id]){
+//                             check_suggest[id] = 1;
+//                             const arr = suggest[y] || (suggest[y] = []);
+//                             arr.push(id);
+//                         }
+//
+//                         // OLD:
+//                         //
+//                         // check_idx = (check_suggest[id] || 0) + 1;
+//                         // check_suggest[id] = check_idx;
+//                         //
+//                         // // do not adding IDs which are already included in the result (saves one loop)
+//                         // // the first intersection match has the check index 2, so shift by -2
+//                         //
+//                         // if(check_idx < length){
+//                         //
+//                         //     const tmp = suggest[check_idx - 2] || (suggest[check_idx - 2] = []);
+//                         //     tmp[tmp.length] = id;
+//                         // }
+//                     }
+//                 }
+//                 else{
+//
+//                     // pre-fill in first round
+//                     check_new[id] = 1;
+//                 }
+//             }
+//         }
+//
+//         if(suggest){
+//
+//             // re-use the first pre-filled check for suggestions
+//             check || (check_suggest = check_new);
+//         }
+//         else if(!found){
+//
+//             return [];
+//         }
+//
+//         check = check_new;
+//     }
+//
+//     // return intermediate result
+//     // if(resolve === false){
+//     //     return { result, suggest };
+//     // }
+//
+//     if(suggest){
+//
+//         // needs to iterate in reverse direction
+//         for(let x = suggest.length - 1, ids, len; x >= 0; x--){
+//
+//             ids = suggest[x];
+//             len = ids.length;
+//
+//             for(let y = 0, id; y < len; y++){
+//
+//                 id = ids[y];
+//
+//                 if(!check[id]){
+//
+//                     if(offset){
+//                         offset--;
+//                     }
+//                     else{
+//
+//                         result[size++] = id;
+//
+//                         if(size === limit){
+//                             // fast path "end reached"
+//                             return result;
+//                         }
+//                     }
+//
+//                     check[id] = 1;
+//                 }
+//             }
+//         }
+//     }
+//
+//     return result;
+// }
 
 /**
  * @param mandatory

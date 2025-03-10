@@ -233,7 +233,7 @@ Index.prototype.search = function (query, limit, options) {
                 }
             }
 
-            return resolve ? intersect(result, /** @type {number} */limit, offset, suggest) : new Resolver(result[0]);
+            return resolve ? intersect(result, self.resolution, /** @type {number} */limit, offset, suggest) : new Resolver(result[0]);
         }();
     }
 
@@ -286,7 +286,9 @@ Index.prototype.search = function (query, limit, options) {
         }
     }
 
-    return resolve ? intersect(result, limit, offset, suggest) : new Resolver(result[0]);
+    result = intersect(result, this.resolution, limit, offset, suggest);
+
+    return resolve ? result : new Resolver(result);
 };
 
 /**

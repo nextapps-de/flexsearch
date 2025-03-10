@@ -286,7 +286,7 @@ Index.prototype.search = function(query, limit, options){
             }
 
             return !SUPPORT_RESOLVER || resolve
-                ? intersect(result, /** @type {number} */ (limit), offset, suggest)
+                ? intersect(result, self.resolution, /** @type {number} */ (limit), offset, suggest)
                 : new Resolver(result[0])
         }());
     }
@@ -355,9 +355,11 @@ Index.prototype.search = function(query, limit, options){
         }
     }
 
+    result = intersect(result, this.resolution, limit, offset, suggest);
+
     return !SUPPORT_RESOLVER || resolve
-        ? intersect(result, limit, offset, suggest)
-        : new Resolver(result[0]);
+        ? result
+        : new Resolver(result);
 };
 
 /**
