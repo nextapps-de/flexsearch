@@ -93,33 +93,9 @@ export function intersect(arrays, resolution, limit, offset, suggest) {
         }
         else{
 
-            const final = [];
-
-            for(let i = result_len - 1, count = 0, arr, arr_len; i >= 0; i--){
-                arr = result[i];
-                arr_len = arr.length;
-
-                if(offset >= arr_len){
-                    offset -= arr_len;
-                    continue;
-                }
-
-                if((arr_len + count) > limit || offset){
-                    arr = arr.slice(offset, limit - count + offset);
-                    arr_len = arr.length;
-                }
-
-                final.push(arr);
-                count += arr_len;
-
-                if(limit === count){
-                    break;
-                }
-            }
-
-            result = final.length > 1
-                ? union(final, offset, limit)
-                : final[0];
+            result = result.length > 1
+                ? union(result, offset, limit)
+                : result[0];
         }
     }
 

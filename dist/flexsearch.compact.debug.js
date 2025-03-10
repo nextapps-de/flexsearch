@@ -480,38 +480,22 @@ function O(a, c, b, e, d) {
   a: {
     a = e;
     e = this.resolution;
-    m = g;
-    b = a.length;
-    g = [];
+    m = a.length;
+    b = [];
     f = y();
     for (let r = 0, t, p, n, w; r < e; r++) {
-      for (k = 0; k < b; k++) {
+      for (k = 0; k < m; k++) {
         if (n = a[k], r < n.length && (t = n[r])) {
           for (l = 0; l < t.length; l++) {
-            p = t[l], (h = f[p]) ? f[p]++ : (h = 0, f[p] = 1), w = g[h] || (g[h] = []), w.push(p);
+            p = t[l], (h = f[p]) ? f[p]++ : (h = 0, f[p] = 1), w = b[h] || (b[h] = []), w.push(p);
           }
         }
       }
     }
-    if (a = g.length) {
-      if (m) {
-        e = [];
-        for (let r = a - 1, t = 0, p, n; 0 <= r; r--) {
-          if (p = g[r], n = p.length, d >= n) {
-            d -= n;
-          } else {
-            if (n + t > c || d) {
-              p = p.slice(d, c - t + d), n = p.length;
-            }
-            e.push(p);
-            t += n;
-            if (c === t) {
-              break;
-            }
-          }
-        }
-        if (1 < e.length) {
-          g = e;
+    if (a = b.length) {
+      if (g) {
+        if (1 < b.length) {
+          g = b;
           a = [];
           e = y();
           f = g.length;
@@ -530,21 +514,21 @@ function O(a, c, b, e, d) {
           }
           c = a;
         } else {
-          c = e[0];
+          c = b[0];
         }
-        g = c;
+        b = c;
       } else {
-        if (a < b) {
+        if (a < m) {
           e = [];
           break a;
         }
-        g = g[a - 1];
-        if (g.length > c || d) {
-          g = g.slice(d, c + d);
+        b = b[a - 1];
+        if (b.length > c || d) {
+          b = b.slice(d, c + d);
         }
       }
     }
-    e = g;
+    e = b;
   }
   return e;
 };

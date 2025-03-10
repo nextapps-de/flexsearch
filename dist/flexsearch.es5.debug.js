@@ -1867,42 +1867,27 @@ function ib(a, b, c, d, e) {
   }
   if (a = f.length) {
     if (e) {
-      e = [];
-      g = a - 1;
-      for (a = 0; 0 <= g; g--) {
-        if (b = f[g], k = b.length, d >= k) {
-          d -= k;
-        } else {
-          if (k + a > c || d) {
-            b = b.slice(d, c - a + d), k = b.length;
-          }
-          e.push(b);
-          a += k;
-          if (c === a) {
-            break;
-          }
-        }
-      }
-      if (1 < e.length) {
-        f = [];
-        g = K();
+      if (1 < f.length) {
+        e = f;
+        g = [];
+        f = K();
         k = e.length;
         for (m = 0; m < k; m++) {
           for (a = e[m], l = a.length, p = 0; p < l; p++) {
-            if (b = a[p], !g[b]) {
-              if (g[b] = 1, d) {
+            if (b = a[p], !f[b]) {
+              if (f[b] = 1, d) {
                 d--;
               } else {
-                if (f.push(b), f.length === c) {
+                if (g.push(b), g.length === c) {
                   break;
                 }
               }
             }
           }
         }
-        c = f;
+        c = g;
       } else {
-        c = e[0];
+        c = f[0];
       }
       f = c;
     } else {

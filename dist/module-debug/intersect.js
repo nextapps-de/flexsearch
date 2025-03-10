@@ -92,31 +92,7 @@ export function intersect(arrays, resolution, limit, offset, suggest) {
             }
         } else {
 
-            const final = [];
-
-            for (let i = result_len - 1, count = 0, arr, arr_len; 0 <= i; i--) {
-                arr = result[i];
-                arr_len = arr.length;
-
-                if (offset >= arr_len) {
-                    offset -= arr_len;
-                    continue;
-                }
-
-                if (arr_len + count > limit || offset) {
-                    arr = arr.slice(offset, limit - count + offset);
-                    arr_len = arr.length;
-                }
-
-                final.push(arr);
-                count += arr_len;
-
-                if (limit === count) {
-                    break;
-                }
-            }
-
-            result = 1 < final.length ? union(final, offset, limit) : final[0];
+            result = 1 < result.length ? union(result, offset, limit) : result[0];
         }
     }
 

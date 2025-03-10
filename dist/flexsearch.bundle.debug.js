@@ -1010,42 +1010,27 @@ function Ia(a, b, c, d, e) {
   }
   if (a = g.length) {
     if (e) {
-      e = [];
-      for (let n = a - 1, q = 0, r, p; 0 <= n; n--) {
-        if (r = g[n], p = r.length, d >= p) {
-          d -= p;
-        } else {
-          if (p + q > c || d) {
-            r = r.slice(d, c - q + d), p = r.length;
-          }
-          e.push(r);
-          q += p;
-          if (c === q) {
-            break;
-          }
-        }
-      }
-      if (1 < e.length) {
-        g = e;
-        e = [];
-        f = z();
-        k = g.length;
+      if (1 < g.length) {
+        e = g;
+        f = [];
+        g = z();
+        k = e.length;
         for (l = 0; l < k; l++) {
-          for (a = g[l], h = a.length, m = 0; m < h; m++) {
-            if (b = a[m], !f[b]) {
-              if (f[b] = 1, d) {
+          for (a = e[l], h = a.length, m = 0; m < h; m++) {
+            if (b = a[m], !g[b]) {
+              if (g[b] = 1, d) {
                 d--;
               } else {
-                if (e.push(b), e.length === c) {
+                if (f.push(b), f.length === c) {
                   break;
                 }
               }
             }
           }
         }
-        c = e;
+        c = f;
       } else {
-        c = e[0];
+        c = g[0];
       }
       g = c;
     } else {
