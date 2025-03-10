@@ -33,7 +33,8 @@
         "lunr",
         "wade",
         "minisearch",
-        "orama" // was lyra before
+        "orama", // was lyra before
+        "ufuzzy"
     ]);
 
     list.render(lib);
