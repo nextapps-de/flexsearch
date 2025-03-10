@@ -41,7 +41,7 @@ function ca(a) {
   throw Error("Cannot find global object");
 }
 var z = ca(this);
-function C(a, b) {
+function B(a, b) {
   if (b) {
     a: {
       var c = z;
@@ -207,7 +207,7 @@ function ra(a) {
 function sa(a) {
   return ra(new pa(new ma(a)));
 }
-C("Symbol", function(a) {
+B("Symbol", function(a) {
   function b(g) {
     if (this instanceof b) {
       throw new TypeError("Symbol is not a constructor");
@@ -227,7 +227,7 @@ C("Symbol", function(a) {
   var d = "jscomp_symbol_" + (1E9 * Math.random() >>> 0) + "_", e = 0;
   return b;
 });
-C("Symbol.iterator", function(a) {
+B("Symbol.iterator", function(a) {
   if (a) {
     return a;
   }
@@ -247,7 +247,7 @@ function ta(a) {
   };
   return a;
 }
-C("Promise", function(a) {
+B("Promise", function(a) {
   function b(f) {
     this.A = 0;
     this.C = void 0;
@@ -489,7 +489,7 @@ function ua(a, b) {
   };
   return e;
 }
-C("Array.prototype.values", function(a) {
+B("Array.prototype.values", function(a) {
   return a ? a : function() {
     return ua(this, function(b, c) {
       return c;
@@ -499,7 +499,7 @@ C("Array.prototype.values", function(a) {
 function H(a, b) {
   return Object.prototype.hasOwnProperty.call(a, b);
 }
-C("WeakMap", function(a) {
+B("WeakMap", function(a) {
   function b(k) {
     this.h = (h += Math.random() + 1).toString();
     if (k) {
@@ -576,7 +576,7 @@ C("WeakMap", function(a) {
   };
   return b;
 });
-C("Map", function(a) {
+B("Map", function(a) {
   function b() {
     var h = {};
     return h.K = h.next = h.head = h;
@@ -689,14 +689,14 @@ C("Map", function(a) {
   var f = 0;
   return e;
 });
-C("Array.prototype.keys", function(a) {
+B("Array.prototype.keys", function(a) {
   return a ? a : function() {
     return ua(this, function(b) {
       return b;
     });
   };
 });
-C("Set", function(a) {
+B("Set", function(a) {
   function b(c) {
     this.h = new Map();
     if (c) {
@@ -762,12 +762,12 @@ C("Set", function(a) {
   };
   return b;
 });
-C("Object.is", function(a) {
+B("Object.is", function(a) {
   return a ? a : function(b, c) {
     return b === c ? 0 !== b || 1 / b === 1 / c : b !== b && c !== c;
   };
 });
-C("Array.prototype.includes", function(a) {
+B("Array.prototype.includes", function(a) {
   return a ? a : function(b, c) {
     var d = this;
     d instanceof String && (d = String(d));
@@ -782,7 +782,7 @@ C("Array.prototype.includes", function(a) {
     return !1;
   };
 });
-C("String.prototype.includes", function(a) {
+B("String.prototype.includes", function(a) {
   return a ? a : function(b, c) {
     if (null == this) {
       throw new TypeError("The 'this' value for String.prototype.includes must not be null or undefined");
@@ -793,7 +793,7 @@ C("String.prototype.includes", function(a) {
     return -1 !== this.indexOf(b, c || 0);
   };
 });
-C("Array.prototype.entries", function(a) {
+B("Array.prototype.entries", function(a) {
   return a ? a : function() {
     return ua(this, function(b, c) {
       return [b, c];
@@ -811,10 +811,10 @@ var va = "function" == typeof Object.assign ? Object.assign : function(a, b) {
   }
   return a;
 };
-C("Object.assign", function(a) {
+B("Object.assign", function(a) {
   return a || va;
 });
-C("Array.prototype.flat", function(a) {
+B("Array.prototype.flat", function(a) {
   return a ? a : function(b) {
     b = void 0 === b ? 1 : b;
     var c = [];
@@ -1883,7 +1883,28 @@ function ib(a, b, c, d, e) {
           }
         }
       }
-      f = 1 < e.length ? [].concat.apply([], e) : e[0];
+      if (1 < e.length) {
+        f = [];
+        g = K();
+        k = e.length;
+        for (m = 0; m < k; m++) {
+          for (a = e[m], l = a.length, p = 0; p < l; p++) {
+            if (b = a[p], !g[b]) {
+              if (g[b] = 1, d) {
+                d--;
+              } else {
+                if (f.push(b), f.length === c) {
+                  break;
+                }
+              }
+            }
+          }
+        }
+        c = f;
+      } else {
+        c = e[0];
+      }
+      f = c;
     } else {
       if (a < g) {
         return [];
@@ -1975,7 +1996,7 @@ V.prototype.search = function(a, b, c) {
     }
     var v = this;
     return function() {
-      var A, D, B;
+      var A, D, C;
       return sa(function(E) {
         switch(E.h) {
           case 1:
@@ -1999,8 +2020,8 @@ V.prototype.search = function(a, b, c) {
               return E.return(A);
             }
             if (h && u === m - 1) {
-              B = d.length;
-              if (!B) {
+              C = d.length;
+              if (!C) {
                 if (t) {
                   t = "";
                   u = -1;
@@ -2009,7 +2030,7 @@ V.prototype.search = function(a, b, c) {
                 }
                 return E.return(d);
               }
-              if (1 === B) {
+              if (1 === C) {
                 return E.return(g ? W(d[0], b, e) : new X(d[0]));
               }
             }
@@ -2513,8 +2534,8 @@ function tb(a, b, c, d, e, g, f, h) {
           v = 0;
           for (var A = void 0, D = void 0; v < t.length; v++) {
             if (A = t[v], D = u[A], D.constructor === Array) {
-              for (var B = 0; B < D.length; B++) {
-                r.push(A, D[B]);
+              for (var C = 0; C < D.length; C++) {
+                r.push(A, D[C]);
               }
             } else {
               r.push(A, D);
@@ -2588,8 +2609,8 @@ function tb(a, b, c, d, e, g, f, h) {
         D = 0;
         if (this.db && d) {
           if (!E) {
-            for (B = l.length; B < d.length; B++) {
-              var J = d[B];
+            for (C = l.length; C < d.length; C++) {
+              var J = d[C];
               if (J && J.length) {
                 D++, A.push(J);
               } else if (!p) {
@@ -2598,17 +2619,17 @@ function tb(a, b, c, d, e, g, f, h) {
             }
           }
         } else {
-          B = 0;
-          for (var Gb = J = void 0; B < m.length; B += 2) {
-            J = this.tag.get(m[B]);
+          C = 0;
+          for (var Gb = J = void 0; C < m.length; C += 2) {
+            J = this.tag.get(m[C]);
             if (!J) {
-              if (console.warn("Tag '" + m[B] + ":" + m[B + 1] + "' will be skipped because there is no field '" + m[B] + "'."), p) {
+              if (console.warn("Tag '" + m[C] + ":" + m[C + 1] + "' will be skipped because there is no field '" + m[C] + "'."), p) {
                 continue;
               } else {
                 return e;
               }
             }
-            if (Gb = (J = J && J.get(m[B + 1])) && J.length) {
+            if (Gb = (J = J && J.get(m[C + 1])) && J.length) {
               D++, A.push(J);
             } else if (!p) {
               return e;
@@ -3172,8 +3193,8 @@ w.commit = function(a, b, c) {
                     for (var v = Math.max(u.length, r.T.length), A = 0, D; A < v; A++) {
                       if ((D = r.T[A]) && D.length) {
                         if ((t = u[A]) && t.length) {
-                          for (var B = 0; B < D.length; B++) {
-                            t.push(D[B]);
+                          for (var C = 0; C < D.length; C++) {
+                            t.push(D[C]);
                           }
                         } else {
                           u[A] = D;

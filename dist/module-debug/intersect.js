@@ -34,10 +34,6 @@ export function intersect(arrays, resolution, limit, offset, suggest) {
         count;
 
 
-    // if(suggest){
-    //     suggest = [];
-    // }
-
     // alternatively the results could be sorted by length up
     //arrays.sort(sort_by_length_up);
 
@@ -120,7 +116,40 @@ export function intersect(arrays, resolution, limit, offset, suggest) {
                 }
             }
 
-            result = 1 < final.length ? concat(final) : final[0];
+            result = 1 < final.length ? union(final, offset, limit) : final[0];
+        }
+    }
+
+    return result;
+}
+
+function union(arrays, offset, limit) {
+    const result = [],
+          check = create_object();
+
+    let ids,
+        id,
+        arr_len = arrays.length,
+        ids_len;
+
+    for (let i = 0; i < arr_len; i++) {
+
+        ids = arrays[i];
+        ids_len = ids.length;
+
+        for (let j = 0; j < ids_len; j++) {
+            id = ids[j];
+            if (!check[id]) {
+                check[id] = 1;
+                if (offset) {
+                    offset--;
+                } else {
+                    result.push(id);
+                    if (result.length === limit) {
+                        break;
+                    }
+                }
+            }
         }
     }
 

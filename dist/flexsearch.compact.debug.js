@@ -510,7 +510,29 @@ function O(a, c, b, e, d) {
             }
           }
         }
-        g = 1 < e.length ? [].concat.apply([], e) : e[0];
+        if (1 < e.length) {
+          g = e;
+          a = [];
+          e = y();
+          f = g.length;
+          for (k = 0; k < f; k++) {
+            for (m = g[k], h = m.length, l = 0; l < h; l++) {
+              if (b = m[l], !e[b]) {
+                if (e[b] = 1, d) {
+                  d--;
+                } else {
+                  if (a.push(b), a.length === c) {
+                    break;
+                  }
+                }
+              }
+            }
+          }
+          c = a;
+        } else {
+          c = e[0];
+        }
+        g = c;
       } else {
         if (a < b) {
           e = [];

@@ -499,18 +499,18 @@ O.prototype.add = function(a, b, c, d) {
     b = this.encoder.encode(b);
     if (d = b.length) {
       const l = z(), m = z(), n = this.depth, q = this.resolution;
-      for (let t = 0; t < d; t++) {
-        let p = b[this.rtl ? d - 1 - t : t];
+      for (let r = 0; r < d; r++) {
+        let p = b[this.rtl ? d - 1 - r : r];
         var e = p.length;
         if (e && (n || !m[p])) {
-          var f = this.score ? this.score(b, p, t, null, 0) : P(q, d, t), g = "";
+          var f = this.score ? this.score(b, p, r, null, 0) : P(q, d, r), g = "";
           switch(this.tokenize) {
             case "full":
               if (2 < e) {
                 for (f = 0; f < e; f++) {
                   for (var h = e; h > f; h--) {
                     g = p.substring(f, h);
-                    var k = this.score ? this.score(b, p, t, g, f) : P(q, d, t, e, f);
+                    var k = this.score ? this.score(b, p, r, g, f) : P(q, d, r, e, f);
                     Q(this, m, g, k, a, c);
                   }
                 }
@@ -519,7 +519,7 @@ O.prototype.add = function(a, b, c, d) {
             case "reverse":
               if (1 < e) {
                 for (h = e - 1; 0 < h; h--) {
-                  g = p[h] + g, k = this.score ? this.score(b, p, t, g, h) : P(q, d, t, e, h), Q(this, m, g, k, a, c);
+                  g = p[h] + g, k = this.score ? this.score(b, p, r, g, h) : P(q, d, r, e, h), Q(this, m, g, k, a, c);
                 }
                 g = "";
               }
@@ -531,12 +531,12 @@ O.prototype.add = function(a, b, c, d) {
                 break;
               }
             default:
-              if (Q(this, m, p, f, a, c), n && 1 < d && t < d - 1) {
-                for (e = z(), g = this.U, f = p, h = Math.min(n + 1, d - t), e[f] = 1, k = 1; k < h; k++) {
-                  if ((p = b[this.rtl ? d - 1 - t - k : t + k]) && !e[p]) {
+              if (Q(this, m, p, f, a, c), n && 1 < d && r < d - 1) {
+                for (e = z(), g = this.U, f = p, h = Math.min(n + 1, d - r), e[f] = 1, k = 1; k < h; k++) {
+                  if ((p = b[this.rtl ? d - 1 - r - k : r + k]) && !e[p]) {
                     e[p] = 1;
-                    const r = this.score ? this.score(b, f, t, p, k) : P(g + (d / 2 > g ? 0 : 1), d, t, h - 1, k - 1), x = this.bidirectional && p > f;
-                    Q(this, l, x ? f : p, r, a, c, x ? p : f);
+                    const t = this.score ? this.score(b, f, r, p, k) : P(g + (d / 2 > g ? 0 : 1), d, r, h - 1, k - 1), x = this.bidirectional && p > f;
+                    Q(this, l, x ? f : p, t, a, c, x ? p : f);
                   }
                 }
               }
@@ -678,17 +678,17 @@ function Ea(a, b, c, d, e, f) {
     for (let n = 0, q; n < a.length; n++) {
       if (q = a[n]) {
         if (m = q[l]) {
-          for (let t = 0, p; t < m.length; t++) {
-            if (p = m[t], !h[p]) {
+          for (let r = 0, p; r < m.length; r++) {
+            if (p = m[r], !h[p]) {
               if (h[p] = 1, c) {
                 c--;
               } else {
                 if (e) {
                   d.push(p);
                 } else {
-                  const r = l + (n ? f : 0);
-                  d[r] || (d[r] = []);
-                  d[r].push(p);
+                  const t = l + (n ? f : 0);
+                  d[t] || (d[t] = []);
+                  d[t].push(p);
                 }
                 if (b && ++g === b) {
                   return d;
@@ -769,13 +769,13 @@ function Fa(a, b, c, d, e) {
     if (!m || !m.length) {
       return [];
     }
-    let n = z(), q = 0, t = l === a.length - 1;
-    for (let p = 0, r; p < k; p++) {
-      if (r = m[p]) {
-        for (let x = 0, A, w; x < r.length; x++) {
-          if (A = r[x], !l) {
+    let n = z(), q = 0, r = l === a.length - 1;
+    for (let p = 0, t; p < k; p++) {
+      if (t = m[p]) {
+        for (let x = 0, A, w; x < t.length; x++) {
+          if (A = t[x], !l) {
             n[A] = p + 1 + (l ? e : 0), q = 1;
-          } else if (t) {
+          } else if (r) {
             if (w = h[A]) {
               if (q = 1, c) {
                 c--;
@@ -997,14 +997,13 @@ S.prototype.resolve = function(a, b, c) {
   return d.length ? ("object" === typeof a && (c = a.enrich, b = a.offset, a = a.limit), R(d, a || 100, b, c)) : d;
 };
 function Ia(a, b, c, d, e) {
-  const f = a.length;
-  let g = [], h, k;
-  h = z();
-  for (let l = 0, m, n, q, t; l < b; l++) {
-    for (let p = 0; p < f; p++) {
-      if (q = a[p], l < q.length && (m = q[l])) {
-        for (let r = 0; r < m.length; r++) {
-          n = m[r], (k = h[n]) ? h[n]++ : (k = 0, h[n] = 1), t = g[k] || (g[k] = []), t.push(n);
+  var f = a.length, g = [], h;
+  var k = z();
+  for (let n = 0, q, r, p, t; n < b; n++) {
+    for (var l = 0; l < f; l++) {
+      if (p = a[l], n < p.length && (q = p[n])) {
+        for (var m = 0; m < q.length; m++) {
+          r = q[m], (h = k[r]) ? k[r]++ : (h = 0, k[r] = 1), t = g[h] || (g[h] = []), t.push(r);
         }
       }
     }
@@ -1012,21 +1011,43 @@ function Ia(a, b, c, d, e) {
   if (a = g.length) {
     if (e) {
       e = [];
-      for (let l = a - 1, m = 0, n, q; 0 <= l; l--) {
-        if (n = g[l], q = n.length, d >= q) {
-          d -= q;
+      for (let n = a - 1, q = 0, r, p; 0 <= n; n--) {
+        if (r = g[n], p = r.length, d >= p) {
+          d -= p;
         } else {
-          if (q + m > c || d) {
-            n = n.slice(d, c - m + d), q = n.length;
+          if (p + q > c || d) {
+            r = r.slice(d, c - q + d), p = r.length;
           }
-          e.push(n);
-          m += q;
-          if (c === m) {
+          e.push(r);
+          q += p;
+          if (c === q) {
             break;
           }
         }
       }
-      g = 1 < e.length ? [].concat.apply([], e) : e[0];
+      if (1 < e.length) {
+        g = e;
+        e = [];
+        f = z();
+        k = g.length;
+        for (l = 0; l < k; l++) {
+          for (a = g[l], h = a.length, m = 0; m < h; m++) {
+            if (b = a[m], !f[b]) {
+              if (f[b] = 1, d) {
+                d--;
+              } else {
+                if (e.push(b), e.length === c) {
+                  break;
+                }
+              }
+            }
+          }
+        }
+        c = e;
+      } else {
+        c = e[0];
+      }
+      g = c;
     } else {
       if (a < f) {
         return [];
@@ -1081,11 +1102,11 @@ O.prototype.search = function(a, b, c) {
   }
   let n = c = 0;
   if (1 < e) {
-    const p = z(), r = [];
+    const p = z(), t = [];
     for (let x = 0, A; x < e; x++) {
       if ((A = a[x]) && !p[A]) {
         if (f || this.db || V(this, A)) {
-          r.push(A), p[A] = 1;
+          t.push(A), p[A] = 1;
         } else {
           return h ? d : new S(d);
         }
@@ -1094,37 +1115,37 @@ O.prototype.search = function(a, b, c) {
         n = n ? Math.min(n, w) : w;
       }
     }
-    a = r;
+    a = t;
     e = a.length;
   }
   if (!e) {
     return h ? d : new S(d);
   }
-  let q = 0, t;
+  let q = 0, r;
   if (1 === e) {
     return U.call(this, a[0], "", b, g, h, k, l);
   }
   if (2 === e && m && !f) {
     return U.call(this, a[0], a[1], b, g, h, k, l);
   }
-  1 < e && (m ? (t = a[0], q = 1) : 9 < c && 3 < c / n && a.sort(aa));
+  1 < e && (m ? (r = a[0], q = 1) : 9 < c && 3 < c / n && a.sort(aa));
   if (this.db) {
     if (this.db.search && (m = this.db.search(this, a, b, g, f, h, k, l), !1 !== m)) {
       return m;
     }
     const p = this;
     return async function() {
-      for (let r, x; q < e; q++) {
+      for (let t, x; q < e; q++) {
         x = a[q];
-        t ? (r = await V(p, x, t), r = Ka(r, d, f, p.U, b, g, 2 === e), f && !1 === r && d.length || (t = x)) : (r = await V(p, x), r = Ka(r, d, f, p.resolution, b, g, 1 === e));
-        if (r) {
-          return r;
+        r ? (t = await V(p, x, r), t = Ka(t, d, f, p.U, b, g, 2 === e), f && !1 === t && d.length || (r = x)) : (t = await V(p, x), t = Ka(t, d, f, p.resolution, b, g, 1 === e));
+        if (t) {
+          return t;
         }
         if (f && q === e - 1) {
           let A = d.length;
           if (!A) {
-            if (t) {
-              t = "";
+            if (r) {
+              r = "";
               q = -1;
               continue;
             }
@@ -1138,17 +1159,17 @@ O.prototype.search = function(a, b, c) {
       return h ? Ia(d, p.resolution, b, g, f) : new S(d[0]);
     }();
   }
-  for (let p, r; q < e; q++) {
-    r = a[q];
-    t ? (p = V(this, r, t), p = Ka(p, d, f, this.U, b, g, 2 === e), f && !1 === p && d.length || (t = r)) : (p = V(this, r), p = Ka(p, d, f, this.resolution, b, g, 1 === e));
+  for (let p, t; q < e; q++) {
+    t = a[q];
+    r ? (p = V(this, t, r), p = Ka(p, d, f, this.U, b, g, 2 === e), f && !1 === p && d.length || (r = t)) : (p = V(this, t), p = Ka(p, d, f, this.resolution, b, g, 1 === e));
     if (p) {
       return p;
     }
     if (f && q === e - 1) {
       m = d.length;
       if (!m) {
-        if (t) {
-          t = "";
+        if (r) {
+          r = "";
           q = -1;
           continue;
         }
@@ -1597,7 +1618,7 @@ function Qa(a, b, c, d, e, f, g, h) {
     k = g || c.field || c.index;
     var n = this.tag && c.tag;
     var q = this.store && c.enrich;
-    var t = c.suggest;
+    var r = c.suggest;
     b = c.limit || b;
     l = c.offset || 0;
     b || (b = 100);
@@ -1610,18 +1631,18 @@ function Qa(a, b, c, d, e, f, g, h) {
           throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
         }
         if (v.field && v.tag) {
-          var r = v.tag;
-          if (r.constructor === Array) {
-            for (var x = 0; x < r.length; x++) {
-              p.push(v.field, r[x]);
+          var t = v.tag;
+          if (t.constructor === Array) {
+            for (var x = 0; x < t.length; x++) {
+              p.push(v.field, t[x]);
             }
           } else {
-            p.push(v.field, r);
+            p.push(v.field, t);
           }
         } else {
-          r = Object.keys(v);
-          for (let I = 0, J, D; I < r.length; I++) {
-            if (J = r[I], D = v[J], D.constructor === Array) {
+          t = Object.keys(v);
+          for (let I = 0, J, D; I < t.length; I++) {
+            if (J = t[I], D = v[J], D.constructor === Array) {
               for (x = 0; x < D.length; x++) {
                 p.push(J, D[x]);
               }
@@ -1636,7 +1657,7 @@ function Qa(a, b, c, d, e, f, g, h) {
       }
       n = p;
       if (!a) {
-        t = [];
+        r = [];
         if (p.length) {
           for (n = 0; n < p.length; n += 2) {
             if (this.db) {
@@ -1645,14 +1666,14 @@ function Qa(a, b, c, d, e, f, g, h) {
                 console.warn("Tag '" + p[n] + ":" + p[n + 1] + "' will be skipped because there is no field '" + p[n] + "'.");
                 continue;
               }
-              t.push(d = d.db.tag(p[n + 1], b, l, q));
+              r.push(d = d.db.tag(p[n + 1], b, l, q));
             } else {
               d = Sa.call(this, p[n], p[n + 1], b, l, q);
             }
             e.push({field:p[n], tag:p[n + 1], result:d});
           }
         }
-        return t.length ? Promise.all(t).then(function(w) {
+        return r.length ? Promise.all(r).then(function(w) {
           for (let v = 0; v < w.length; v++) {
             e[v].result = w[v];
           }
@@ -1671,29 +1692,29 @@ function Qa(a, b, c, d, e, f, g, h) {
       continue;
     }
     let D;
-    B(I) || (D = I, I = D.field, a = D.query || a, b = D.limit || b, t = D.suggest || t);
+    B(I) || (D = I, I = D.field, a = D.query || a, b = D.limit || b, r = D.suggest || r);
     if (d) {
       v = d[w];
     } else {
-      if (r = D || c, x = this.index.get(I), n && (this.db && (r.tag = n, A = x.db.Z, r.field = k), A || (r.enrich = !1)), p) {
-        p[w] = x.searchAsync(a, b, r);
-        r && q && (r.enrich = q);
+      if (t = D || c, x = this.index.get(I), n && (this.db && (t.tag = n, A = x.db.Z, t.field = k), A || (t.enrich = !1)), p) {
+        p[w] = x.searchAsync(a, b, t);
+        t && q && (t.enrich = q);
         continue;
       } else {
-        v = x.search(a, b, r), r && q && (r.enrich = q);
+        v = x.search(a, b, t), t && q && (t.enrich = q);
       }
     }
     J = v && v.length;
     if (n && J) {
-      r = [];
+      t = [];
       x = 0;
       if (this.db && d) {
         if (!A) {
           for (let E = k.length; E < d.length; E++) {
             let F = d[E];
             if (F && F.length) {
-              x++, r.push(F);
-            } else if (!t) {
+              x++, t.push(F);
+            } else if (!r) {
               return e;
             }
           }
@@ -1702,23 +1723,23 @@ function Qa(a, b, c, d, e, f, g, h) {
         for (let E = 0, F, bb; E < n.length; E += 2) {
           F = this.tag.get(n[E]);
           if (!F) {
-            if (console.warn("Tag '" + n[E] + ":" + n[E + 1] + "' will be skipped because there is no field '" + n[E] + "'."), t) {
+            if (console.warn("Tag '" + n[E] + ":" + n[E + 1] + "' will be skipped because there is no field '" + n[E] + "'."), r) {
               continue;
             } else {
               return e;
             }
           }
           if (bb = (F = F && F.get(n[E + 1])) && F.length) {
-            x++, r.push(F);
-          } else if (!t) {
+            x++, t.push(F);
+          } else if (!r) {
             return e;
           }
         }
       }
       if (x) {
-        v = Ja(v, r);
+        v = Ja(v, t);
         J = v.length;
-        if (!J && !t) {
+        if (!J && !r) {
           return e;
         }
         x--;
@@ -1735,7 +1756,7 @@ function Qa(a, b, c, d, e, f, g, h) {
       for (q = 0; q < n.length; q += 2) {
         d = this.index.get(n[q]);
         if (!d) {
-          if (console.warn("Tag '" + n[q] + ":" + n[q + 1] + "' was not found because there is no field '" + n[q] + "'."), t) {
+          if (console.warn("Tag '" + n[q] + ":" + n[q + 1] + "' was not found because there is no field '" + n[q] + "'."), r) {
             continue;
           } else {
             return e;
@@ -2229,14 +2250,14 @@ u.commit = async function(a, b, c) {
           var n;
           if (m && m.length) {
             const q = Math.max(m.length, l.length);
-            for (let t = 0, p, r; t < q; t++) {
-              if ((r = l[t]) && r.length) {
-                if ((p = m[t]) && p.length) {
-                  for (n = 0; n < r.length; n++) {
-                    p.push(r[n]);
+            for (let r = 0, p, t; r < q; r++) {
+              if ((t = l[r]) && t.length) {
+                if ((p = m[r]) && p.length) {
+                  for (n = 0; n < t.length; n++) {
+                    p.push(t[n]);
                   }
                 } else {
-                  m[t] = r;
+                  m[r] = t;
                 }
                 n = 1;
               }
