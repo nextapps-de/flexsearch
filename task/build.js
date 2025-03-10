@@ -361,7 +361,7 @@ else (async function(){
         build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=await import($4))");
 
         if(release === "bundle"){
-            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;");
+            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;self._factory=_f;");
         }
 
         // replace the eval wrapper

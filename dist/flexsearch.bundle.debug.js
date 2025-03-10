@@ -5,7 +5,7 @@
  * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
-(function _f(self){'use strict';try{if(module)self=module}catch(e){}self._factory=_f;
+(function _f(self){'use strict';if(typeof module!=='undefined')self=module;self._factory=_f;
 var u;
 function y(a, b, c) {
   const d = typeof c, e = typeof a;
