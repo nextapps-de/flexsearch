@@ -29,6 +29,7 @@ npm install git+https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
 - Enhanced Worker Support
 - Improved Build System + Bundler (Supported: CommonJS, ESM, Global Namespace), also the import of language packs are now supported for Node.js
 - Full covering index.d.ts type definitions
+- Fast-Boot Serialization optimized for Server-Side-Rendering (PHP, Python, Ruby, Rust, Java, Go, Node.js, ...)
 
 Compare Benchmark: [0.7.0](https://nextapps-de.github.io/flexsearch/test/flexsearch-0.7.0/) vs. [0.8.0](https://nextapps-de.github.io/flexsearch/test/flexsearch-0.8.0/)
 
@@ -1632,6 +1633,72 @@ const index = new Index({
 ```
 
 If you get some good results please feel free to share your encoder.
+
+## Fast-Boot Serialization for Server-Side-Rendering (PHP, Python, Ruby, Rust, Java, Go, Node.js, ...)
+
+When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore an index on page load.
+
+> When your index is too large you should use the default export/import mechanism.
+
+As the first step populate the FlexSearch index with your contents.
+
+You have two options:
+
+### 1. Create a function as string
+
+```js
+const fn_string = index.serialize();
+```
+
+The contents of `fn_string` is a valid Javascript-Function declared as `inject(index)`. Store it or place this somewhere in your code.
+
+This function basically looks like:
+
+```js
+function inject(index){
+    index.reg = new Set([/* ... */]);
+    index.map = new Map([/* ... */]);
+    index.ctx = new Map([/* ... */]);
+}
+```
+
+After creating the index on client side just call the inject method like:
+
+```js
+const index = new Index();
+inject(index);
+```
+
+That's it.
+
+### 2. Create just a function body as string
+
+Alternatively you can use lazy function declaration by passing `false` to the serialize function:
+
+```js
+const fn_body = index.serialize(false);
+```
+
+You will get just the function body which looks like:
+
+```js
+index.reg = new Set([/* ... */]);
+index.map = new Map([/* ... */]);
+index.ctx = new Map([/* ... */]);
+```
+
+Now you can place this in your code directly (name your index as `index`), or you can also create an inject function from it, e.g.:
+
+```js
+const inject = new Function("index", fn_body);
+```
+
+This function is callable like the above example:
+
+```js
+const index = new Index();
+inject(index);
+```
 
 ## Load Library (Node.js, ESM, Legacy Browser)
 

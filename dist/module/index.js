@@ -12,7 +12,7 @@ import Cache, { searchCache } from "./cache.js";
 import Charset from "./charset.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
-import { exportIndex, importIndex } from "./serialize.js";
+import { exportIndex, importIndex, serialize } from "./serialize.js";
 import default_encoder from "./charset/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
@@ -206,6 +206,7 @@ Index.prototype.searchCache = searchCache;
 
 Index.prototype.export = exportIndex;
 Index.prototype.import = importIndex;
+Index.prototype.serialize = serialize;
 
 
 apply_async(Index.prototype);
