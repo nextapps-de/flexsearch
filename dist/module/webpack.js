@@ -1,5 +1,6 @@
 
-import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, DocumentIndexOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions } from "./type.js";
+import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, DocumentIndexOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions, PersistentOptions } from "./type.js";
+import StorageInterface from "./db/interface.js";
 import Document from "./document.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
@@ -27,11 +28,21 @@ import Charset from "./charset.js";
 /** @export */Index.prototype.serialize;
 /** @export */Index.prototype.mount;
 /** @export */Index.prototype.commit;
-/** @export */Index.db;
 
 /** @export */Index.prototype.reg;
 /** @export */Index.prototype.map;
 /** @export */Index.prototype.ctx;
+
+/** @export */Index.prototype.db;
+/** @export */Index.prototype.tag;
+/** @export */Index.prototype.store;
+/** @export */Index.prototype.depth;
+/** @export */Index.prototype.bidirectional;
+/** @export */Index.prototype.commit_task;
+/** @export */Index.prototype.commit_timer;
+/** @export */Index.prototype.cache;
+/** @export */Index.prototype.bypass;
+/** @export */Index.prototype.document;
 
 /** @export */Document.prototype.add;
 /** @export */Document.prototype.append;
@@ -48,7 +59,6 @@ import Charset from "./charset.js";
 /** @export */Document.prototype.removeAsync;
 /** @export */Document.prototype.mount;
 /** @export */Document.prototype.commit;
-/** @export */Document.db;
 /** @export */Document.prototype.export;
 /** @export */Document.prototype.import;
 /** @export */Document.prototype.searchCache;
@@ -63,6 +73,23 @@ import Charset from "./charset.js";
 /** @export */Resolver.prototype.and;
 /** @export */Resolver.prototype.xor;
 /** @export */Resolver.prototype.not;
+
+/** @export */StorageInterface.id;
+/** @export */StorageInterface.db;
+/** @export */StorageInterface.support_tag_search;
+/** @export */StorageInterface.prototype.mount;
+/** @export */StorageInterface.prototype.open;
+/** @export */StorageInterface.prototype.close;
+/** @export */StorageInterface.prototype.destroy;
+/** @export */StorageInterface.prototype.clear;
+/** @export */StorageInterface.prototype.get;
+/** @export */StorageInterface.prototype.tag;
+/** @export */StorageInterface.prototype.enrich;
+/** @export */StorageInterface.prototype.has;
+/** @export */StorageInterface.prototype.search;
+/** @export */StorageInterface.prototype.info;
+/** @export */StorageInterface.prototype.commit;
+/** @export */StorageInterface.prototype.remove;
 
 /** @export */Charset.LatinExact;
 /** @export */Charset.LatinDefault;
@@ -187,6 +214,11 @@ import Charset from "./charset.js";
 /** @export */EncoderSplitOptions.punctuation;
 /** @export */EncoderSplitOptions.control;
 /** @export */EncoderSplitOptions.char;
+
+/** @export */PersistentOptions.name;
+/** @export */PersistentOptions.field;
+/** @export */PersistentOptions.type;
+/** @export */PersistentOptions.db;
 
 const FlexSearch = {
     Index: Index,

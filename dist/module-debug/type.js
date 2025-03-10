@@ -18,6 +18,7 @@ import StorageInterface from "./db/interface.js";
  *   cache: [number=null],
  *   resolve: [boolean=true],
  *   db: StorageInterface|undefined,
+ *   commit: boolean=true,
  *   config: string|undefined
  * }}
  */
@@ -37,6 +38,7 @@ export let IndexOptions;
  *   rtl: [boolean=false],
  *   cache: [number=null],
  *   db: StorageInterface|undefined,
+ *   commit: boolean=true,
  *   config: string|undefined,
  *
  *   field: string,
@@ -172,3 +174,13 @@ export let EncoderOptions;
  * }}
  */
 export let EncoderSplitOptions;
+
+/**
+ * @typedef PersistentOptions {{
+ *   name: string="flexsearch",
+ *   field: string|undefined,
+ *   type: string|undefined,
+ *   db: *|undefined
+ * }}
+ */
+export let PersistentOptions;

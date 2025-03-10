@@ -41,7 +41,8 @@ export default function MongoDB(name, config = {}) {
     this.type = config.type || "";
     this.db = config.db || DB[this.id] || CLIENT || null;
     this.trx = !1;
-    this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search =
+    /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
     Object.assign(defaults, config);
     this.db && delete defaults.db;
 }
@@ -547,8 +548,7 @@ MongoDB.prototype.commit = async function (flexsearch, _replace, _append) {
     }
     if (data.length) {
         await this.db.collection("reg").insertMany(data);
-        flexsearch.store && flexsearch.store.clear();
-        flexsearch.document || flexsearch.reg.clear();
+        flexsearch.store && flexsearch.store.clear();flexsearch.document || flexsearch.reg.clear();
     }
 
     // TODO

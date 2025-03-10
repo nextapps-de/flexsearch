@@ -1636,7 +1636,7 @@ If you get some good results please feel free to share your encoder.
 
 ## Fast-Boot Serialization for Server-Side-Rendering (PHP, Python, Ruby, Rust, Java, Go, Node.js, ...)
 
-> This is an experimental feature which probably might drop in future release. You're welcome to give some feedback.
+> This is an experimental feature with limited support which probably might drop in future release. You're welcome to give some feedback.
 
 When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore a __static__ index on page load. Document-Indexes aren't supported yet for this method.
 

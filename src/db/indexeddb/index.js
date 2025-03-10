@@ -6,6 +6,7 @@ import {
 } from "../../config.js";
 // <-- COMPILER BLOCK
 import Document from "../../document.js";
+import { PersistentOptions } from "../../type.js";
 
 const VERSION = 1;
 const IndexedDB = typeof window !== "undefined" && (
@@ -33,6 +34,8 @@ function sanitize(str) {
 }
 
 /**
+ * @param {string|PersistentOptions=} name
+ * @param {PersistentOptions=} config
  * @constructor
  * @implements StorageInterface
  */

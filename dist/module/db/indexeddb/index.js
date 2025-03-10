@@ -1,5 +1,6 @@
 
 import Document from "../../document.js";
+import { PersistentOptions } from "../../type.js";
 
 const VERSION = 1,
       IndexedDB = "undefined" != typeof window && (window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB),
@@ -15,6 +16,8 @@ function sanitize(str) {
 }
 
 /**
+ * @param {string|PersistentOptions=} name
+ * @param {PersistentOptions=} config
  * @constructor
  * @implements StorageInterface
  */
