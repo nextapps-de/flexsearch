@@ -1500,7 +1500,7 @@ The Worker index just takes 32 seconds to index them all, by processing every fi
 
 ## Fuzzy-Search
 
-Fuzzysearch describes a basic concept of how making queries more tolerant. Something like Levinstein distance can't be added because of the core architecture. Instead, FlexSearch provides several methods to achieve fuzziness:
+Fuzzysearch describes a basic concept of how making queries more tolerant. FlexSearch provides several methods to achieve fuzziness:
 
 1. Use a tokenizer: `forward`, `reverse` or `full`
 2. Don't forget to use any of the builtin encoder `simple` > `balanced` > `advanced` > `extra` > `soundex` (sorted by fuzziness)
@@ -1710,19 +1710,19 @@ The **_dist_** folder are located in: `node_modules/flexsearch/dist/`
     </tr>
     <tr></tr>
     <tr>
-        <td>Javascript Modules</td>
+        <td>Javascript Modules (ESM)</td>
         <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/module/" target="_blank">Download</a></td>
         <td><a href="https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module" target="_blank">https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module</a></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>Javascript Modules (Minified)</td>
+        <td>Javascript Modules Minified (ESM)</td>
         <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/module-min/" target="_blank">Download</a></td>
         <td><a href="https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-min" target="_blank">https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-min</a></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>Javascript Modules (Debug)</td>
+        <td>Javascript Modules Debug (ESM)</td>
         <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/module-debug/" target="_blank">Download</a></td>
         <td><a href="https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-debug" target="_blank">https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-debug</a></td>
     </tr>
@@ -1890,6 +1890,175 @@ const MongoDB = require("flexsearch/db/mongo");
 const Redis = require("flexsearch/db/redis");
 const Clickhouse = require("flexsearch/db/clickhouse");
 ```
+
+<a name="builds" id="builds"></a>
+
+## Custom Builds
+
+The `/src/` folder of this repository requires some compilation to resolve the build flags. Those are your options:
+
+- Closure Compiler (Advanced Compilation) (used by this library <a href="task/build.js">here</a>)
+- Babel + Plugin `babel-plugin-conditional-compile` (used by this library <a href="task/babel.min.json">here</a>)
+
+You can't resolve build flags with:
+
+- Webpack
+- esbuild
+- rollup
+- Terser
+
+These are some of the basic builds located in the `/dist/` folder:
+
+```bash
+npm run build:bundle
+npm run build:light
+npm run build:module
+npm run build:es5
+```
+
+Perform a custom build (UMD bundle) by passing build flags:
+
+```bash
+npm run build:custom SUPPORT_DOCUMENT=true SUPPORT_TAGS=true LANGUAGE_OUT=ECMASCRIPT5 POLYFILL=true
+```
+
+Perform a custom build in ESM module format:
+
+```bash
+npm run build:custom RELEASE=custom.module SUPPORT_DOCUMENT=true SUPPORT_TAGS=true 
+```
+
+Perform a debug build:
+
+```bash
+npm run build:custom DEBUG=true SUPPORT_DOCUMENT=true SUPPORT_TAGS=true 
+```
+
+> On custom builds each build flag will be set to `false` by default when not passed.
+
+The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when format is module to `dist/flexsearch.custom.module.xxxx.min.js` (the "xxxx" is a hash based on the used build flags).
+
+<a name="build-flags" id="builds"></a>
+
+##### Supported Build Flags
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Flag</td>
+        <td>Values</td>
+        <td>Info</td>
+    </tr>
+    <tr>
+        <td>DEBUG</td>
+        <td>true, <b>false</b></td>
+        <td>Output debug information to the console (default: false)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_CACHE</td>
+        <td>true, false</td>
+        <td>DOM State Cache</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_EVENTS</td>
+        <td>true, false</td>
+        <td>Routing & Event Delegation (template event bindings)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_KEYED</td>
+        <td>true, false</td>
+        <td>Support for keyed recycling (reconciliation)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_WEB_COMPONENTS</td>
+        <td>true, false</td>
+        <td>Support for web components (Shadow DOM)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_DOM_HELPERS</td>
+        <td>true, false</td>
+        <td>DOM Manipulation Helpers</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_CACHE_HELPERS</td>
+        <td>true, false</td>
+        <td>DOM Cache Helpers</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_ASYNC</td>
+        <td>true, false</td>
+        <td>Asynchronous Rendering (support Promises)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_POOLS</td>
+        <td>true, false</td>
+        <td>Support component pools for keyed and non-keyed recycle strategies</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_REACTIVE</td>
+        <td>true, false</td>
+        <td>Use reactive data binding</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>REACTIVE_ONLY</td>
+        <td>true, <b>false</b></td>
+        <td>Use a full reactive approach for all views, exclude <code>.render()</code> and dependencies from build (default: false)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_CALLBACKS</td>
+        <td>true, false</td>
+        <td>Use callbacks for specific render tasks</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_COMPACT_TEMPLATE</td>
+        <td>true, false</td>
+        <td>Turn on when templates are compiled with the <code>compact</code> or <code>default</code> strategy</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_COMPILE</td>
+        <td>true, false</td>
+        <td>Use the runtime compiler</td>
+    </tr>
+    <tr>
+        <td colspan="3"><br><b>Compiler Flags</b></td>
+    </tr>
+    <tr>
+        <td>RELEASE<br><br><br><br><br></td>
+        <td><b>custom</b><br>custom.module<br>bundle<br>bundle.module<br>es5<br>light</td>
+        <td>Output debug information to the console (default: false)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>POLYFILL</td>
+        <td>true, <b>false</b></td>
+        <td>Include Polyfills (based on LANGUAGE_OUT)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>PROFILER</td>
+        <td>true, <b>false</b></td>
+        <td>Just used for automatic performance tests</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>LANGUAGE_OUT<br><br><br><br><br><br><br><br><br><br><br></td>
+        <td>ECMASCRIPT3<br>ECMASCRIPT5<br>ECMASCRIPT_2015<br>ECMASCRIPT_2016<br>ECMASCRIPT_2017<br>ECMASCRIPT_2018<br>ECMASCRIPT_2019<br>ECMASCRIPT_2020<br>ECMASCRIPT_2021<br>ECMASCRIPT_2022<br>ECMASCRIPT_NEXT<br>STABLE</td>
+        <td>Target language</td>
+    </tr>
+</table>
 
 ## Migration
 

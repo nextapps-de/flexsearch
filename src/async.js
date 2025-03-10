@@ -64,8 +64,11 @@ function register(key){
         this.async = true;
         const res = this[key].apply(this, args);
         this.async = false;
-        res.then ? res.then(callback)
-                 : callback(res);
+        if(callback){
+            res.then
+                ? res.then(callback)
+                : callback(res);
+        }
         return res;
     };
 }

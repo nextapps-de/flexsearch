@@ -77,6 +77,7 @@ export let ContextOptions;
 
 /**
  * @typedef DocumentDescriptor {{
+ *   id: string="id",
  *   field: FieldOptions|Array<FieldOptions>|undefined,
  *   index: FieldOptions|Array<FieldOptions>|undefined,
  *   tag: TagOptions|Array<TagOptions>|undefined,

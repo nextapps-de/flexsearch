@@ -1355,7 +1355,7 @@ function U(a) {
     this.async = !0;
     b = this[a].apply(this, b);
     this.async = !1;
-    b.then ? b.then(d) : d(b);
+    d && (b.then ? b.then(d) : d(b));
     return b;
   };
 }

@@ -217,7 +217,7 @@ function N(a) {
     this.async = !0;
     c = this[a].apply(this, c);
     this.async = !1;
-    c.then ? c.then(e) : e(c);
+    e && (c.then ? c.then(e) : e(c));
     return c;
   };
 }
