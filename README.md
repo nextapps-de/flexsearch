@@ -1636,7 +1636,9 @@ If you get some good results please feel free to share your encoder.
 
 ## Fast-Boot Serialization for Server-Side-Rendering (PHP, Python, Ruby, Rust, Java, Go, Node.js, ...)
 
-When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore an index on page load.
+> This is an experimental feature which probably might drop in future release. You're welcome to give some feedback.
+
+When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore a __static__ index on page load. Document-Indexes aren't supported yet for this method.
 
 > When your index is too large you should use the default export/import mechanism.
 
@@ -2007,55 +2009,39 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
 
 <a name="build-flags" id="builds"></a>
 
-##### Supported Build Flags
+### Supported Build Flags
 
 <table>
-    <tr></tr>
     <tr>
         <td>Flag</td>
         <td>Values</td>
         <td>Info</td>
     </tr>
     <tr>
-        <td>DEBUG</td>
-        <td>true, <b>false</b></td>
-        <td>Output debug information to the console (default: false)</td>
+        <td colspan="3"><br><b>Feature Flags</b></td>
+    </tr>
+    <tr>
+        <td>SUPPORT_WORKER</td>
+        <td>true, false</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_ENCODER</td>
+        <td>true, false</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_CHARSET</td>
+        <td>true, false</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_CACHE</td>
         <td>true, false</td>
-        <td>DOM State Cache</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_EVENTS</td>
-        <td>true, false</td>
-        <td>Routing & Event Delegation (template event bindings)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_KEYED</td>
-        <td>true, false</td>
-        <td>Support for keyed recycling (reconciliation)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_WEB_COMPONENTS</td>
-        <td>true, false</td>
-        <td>Support for web components (Shadow DOM)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_DOM_HELPERS</td>
-        <td>true, false</td>
-        <td>DOM Manipulation Helpers</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_CACHE_HELPERS</td>
-        <td>true, false</td>
-        <td>DOM Cache Helpers</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
@@ -2065,47 +2051,71 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_POOLS</td>
+        <td>SUPPORT_STORE</td>
         <td>true, false</td>
-        <td>Support component pools for keyed and non-keyed recycle strategies</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_REACTIVE</td>
+        <td>SUPPORT_SUGGESTION</td>
         <td>true, false</td>
-        <td>Use reactive data binding</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>REACTIVE_ONLY</td>
+        <td>SUPPORT_SERIALIZE</td>
         <td>true, <b>false</b></td>
-        <td>Use a full reactive approach for all views, exclude <code>.render()</code> and dependencies from build (default: false)</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_CALLBACKS</td>
+        <td>SUPPORT_DOCUMENT</td>
         <td>true, false</td>
-        <td>Use callbacks for specific render tasks</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_COMPACT_TEMPLATE</td>
+        <td>SUPPORT_TAGS</td>
         <td>true, false</td>
-        <td>Turn on when templates are compiled with the <code>compact</code> or <code>default</code> strategy</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>SUPPORT_COMPILE</td>
+        <td>SUPPORT_PERSISTENT</td>
         <td>true, false</td>
-        <td>Use the runtime compiler</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_KEYSTORE</td>
+        <td>true, false</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_COMPRESSION</td>
+        <td>true, false</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_RESOLVER</td>
+        <td>true, false</td>
+        <td></td>
     </tr>
     <tr>
         <td colspan="3"><br><b>Compiler Flags</b></td>
     </tr>
     <tr>
-        <td>RELEASE<br><br><br><br><br></td>
-        <td><b>custom</b><br>custom.module<br>bundle<br>bundle.module<br>es5<br>light</td>
+        <td>DEBUG</td>
+        <td>true, <b>false</b></td>
         <td>Output debug information to the console (default: false)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>RELEASE<br><br><br><br><br></td>
+        <td><b>custom</b><br>custom.module<br>bundle<br>bundle.module<br>es5<br>light<br>compact</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>

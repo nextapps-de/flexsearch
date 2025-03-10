@@ -35,7 +35,7 @@ let options = (function(argv){
 
         if(++count > 2){
 
-            index = val.split('=');
+            index = val.split("=");
             val = index[1];
             index = index[0].toUpperCase();
 
@@ -122,7 +122,7 @@ if(!release.endsWith(".module")){
 }
 
 const custom = (!release || release.startsWith("custom"))
-    && hashCode(parameter + flag_str).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    && hashCode(parameter + flag_str + JSON.stringify(options)).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
 if(custom){
     release || (options["RELEASE"] = release = "custom");
@@ -376,24 +376,34 @@ else (async function(){
     });
 }());
 
+// function hashCode(str) {
+//
+//     let hash = 0, i, chr;
+//
+//     if(str.length === 0){
+//
+//         return hash;
+//     }
+//
+//     for(i = 0; i < str.length; i++){
+//
+//         chr = str.charCodeAt(i);
+//         hash = (hash << 5) - hash + chr;
+//     }
+//
+//     hash = Math.abs(hash) >> 0;
+//
+//     return hash.toString(16).substring(0, 5);
+// }
+
 function hashCode(str) {
-
-    let hash = 0, i, chr;
-
-    if(str.length === 0){
-
-        return hash;
+    console.log(str)
+    let range = 2 ** 16 - 1;
+    let crc = 0, bit = 16 + 1;
+    for(let i = 0; i < str.length; i++) {
+        crc = (crc * bit ^ str.charCodeAt(i)) & range;
     }
-
-    for(i = 0; i < str.length; i++){
-
-        chr = str.charCodeAt(i);
-        hash = (hash << 5) - hash + chr;
-    }
-
-    hash = Math.abs(hash) >> 0;
-
-    return hash.toString(16).substring(0, 5);
+    return crc.toString(36).substring(0, 5);
 }
 
 function exec(prompt, callback){
