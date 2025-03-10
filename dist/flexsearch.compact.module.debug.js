@@ -752,70 +752,67 @@ function X(a, c, b, e, f, d, g, h) {
   let g, h, k, n, l;
   let r = 0;
   if (b) {
-    if (b.constructor === Array) {
-      n = b, b = null;
-    } else {
-      a = b.query || a;
-      var t = b.pluck;
-      h = b.merge;
-      n = t || b.field || b.index;
-      l = !1;
-      g = this.store && b.enrich;
-      k = b.suggest;
-      c = b.limit || c;
-      var p = b.offset || 0;
-      c || (c = 100);
-      if (l) {
-        l.constructor !== Array && (l = [l]);
-        var m = [];
-        for (let v = 0, q; v < l.length; v++) {
-          q = l[v];
-          if (z(q)) {
-            throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
-          }
-          if (q.field && q.tag) {
-            var u = q.tag;
-            if (u.constructor === Array) {
-              for (var B = 0; B < u.length; B++) {
-                m.push(q.field, u[B]);
-              }
-            } else {
-              m.push(q.field, u);
+    b.constructor === Array && (b = {index:b});
+    a = b.query || a;
+    var t = b.pluck;
+    h = b.merge;
+    n = t || b.field || b.index;
+    l = !1;
+    g = this.store && b.enrich;
+    k = b.suggest;
+    c = b.limit || c;
+    var p = b.offset || 0;
+    c || (c = 100);
+    if (l) {
+      l.constructor !== Array && (l = [l]);
+      var m = [];
+      for (let v = 0, q; v < l.length; v++) {
+        q = l[v];
+        if (z(q)) {
+          throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
+        }
+        if (q.field && q.tag) {
+          var u = q.tag;
+          if (u.constructor === Array) {
+            for (var B = 0; B < u.length; B++) {
+              m.push(q.field, u[B]);
             }
           } else {
-            u = Object.keys(q);
-            for (let C = 0, D, A; C < u.length; C++) {
-              if (D = u[C], A = q[D], A.constructor === Array) {
-                for (B = 0; B < A.length; B++) {
-                  m.push(D, A[B]);
-                }
-              } else {
-                m.push(D, A);
+            m.push(q.field, u);
+          }
+        } else {
+          u = Object.keys(q);
+          for (let C = 0, D, A; C < u.length; C++) {
+            if (D = u[C], A = q[D], A.constructor === Array) {
+              for (B = 0; B < A.length; B++) {
+                m.push(D, A[B]);
               }
+            } else {
+              m.push(D, A);
             }
           }
-        }
-        if (!m.length) {
-          throw Error("Your tag definition within the search options is probably wrong. No valid tags found.");
-        }
-        l = m;
-        if (!a) {
-          e = [];
-          if (m.length) {
-            for (d = 0; d < m.length; d += 2) {
-              t = ta.call(this, m[d], m[d + 1], c, p, g), f.push({field:m[d], tag:m[d + 1], result:t});
-            }
-          }
-          return e.length ? Promise.all(e).then(function(v) {
-            for (let q = 0; q < v.length; q++) {
-              f[q].result = v[q];
-            }
-            return f;
-          }) : f;
         }
       }
-      z(n) && (n = [n]);
+      if (!m.length) {
+        throw Error("Your tag definition within the search options is probably wrong. No valid tags found.");
+      }
+      l = m;
+      if (!a) {
+        e = [];
+        if (m.length) {
+          for (d = 0; d < m.length; d += 2) {
+            t = ta.call(this, m[d], m[d + 1], c, p, g), f.push({field:m[d], tag:m[d + 1], result:t});
+          }
+        }
+        return e.length ? Promise.all(e).then(function(v) {
+          for (let q = 0; q < v.length; q++) {
+            f[q].result = v[q];
+          }
+          return f;
+        }) : f;
+      }
     }
+    z(n) && (n = [n]);
   }
   n || (n = this.field);
   p = !e && (this.worker || this.async) && [];

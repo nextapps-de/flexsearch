@@ -1607,80 +1607,77 @@ function Qa(a, b, c, d, e, f, g, h) {
   let k;
   let l, m = 0;
   if (c) {
-    if (c.constructor === Array) {
-      k = c, c = null;
-    } else {
-      a = c.query || a;
-      g = c.pluck;
-      h = c.merge;
-      k = g || c.field || c.index;
-      var n = this.tag && c.tag;
-      var q = this.store && c.enrich;
-      var t = c.suggest;
-      b = c.limit || b;
-      l = c.offset || 0;
-      b || (b = 100);
-      if (n && (!this.db || !d)) {
-        n.constructor !== Array && (n = [n]);
-        var p = [];
-        for (let w = 0, v; w < n.length; w++) {
-          v = n[w];
-          if (B(v)) {
-            throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
-          }
-          if (v.field && v.tag) {
-            var r = v.tag;
-            if (r.constructor === Array) {
-              for (var x = 0; x < r.length; x++) {
-                p.push(v.field, r[x]);
-              }
-            } else {
-              p.push(v.field, r);
+    c.constructor === Array && (c = {index:c});
+    a = c.query || a;
+    g = c.pluck;
+    h = c.merge;
+    k = g || c.field || c.index;
+    var n = this.tag && c.tag;
+    var q = this.store && c.enrich;
+    var t = c.suggest;
+    b = c.limit || b;
+    l = c.offset || 0;
+    b || (b = 100);
+    if (n && (!this.db || !d)) {
+      n.constructor !== Array && (n = [n]);
+      var p = [];
+      for (let w = 0, v; w < n.length; w++) {
+        v = n[w];
+        if (B(v)) {
+          throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
+        }
+        if (v.field && v.tag) {
+          var r = v.tag;
+          if (r.constructor === Array) {
+            for (var x = 0; x < r.length; x++) {
+              p.push(v.field, r[x]);
             }
           } else {
-            r = Object.keys(v);
-            for (let I = 0, J, D; I < r.length; I++) {
-              if (J = r[I], D = v[J], D.constructor === Array) {
-                for (x = 0; x < D.length; x++) {
-                  p.push(J, D[x]);
-                }
-              } else {
-                p.push(J, D);
+            p.push(v.field, r);
+          }
+        } else {
+          r = Object.keys(v);
+          for (let I = 0, J, D; I < r.length; I++) {
+            if (J = r[I], D = v[J], D.constructor === Array) {
+              for (x = 0; x < D.length; x++) {
+                p.push(J, D[x]);
               }
+            } else {
+              p.push(J, D);
             }
           }
-        }
-        if (!p.length) {
-          throw Error("Your tag definition within the search options is probably wrong. No valid tags found.");
-        }
-        n = p;
-        if (!a) {
-          t = [];
-          if (p.length) {
-            for (n = 0; n < p.length; n += 2) {
-              if (this.db) {
-                d = this.index.get(p[n]);
-                if (!d) {
-                  console.warn("Tag '" + p[n] + ":" + p[n + 1] + "' will be skipped because there is no field '" + p[n] + "'.");
-                  continue;
-                }
-                t.push(d = d.db.tag(p[n + 1], b, l, q));
-              } else {
-                d = Sa.call(this, p[n], p[n + 1], b, l, q);
-              }
-              e.push({field:p[n], tag:p[n + 1], result:d});
-            }
-          }
-          return t.length ? Promise.all(t).then(function(w) {
-            for (let v = 0; v < w.length; v++) {
-              e[v].result = w[v];
-            }
-            return e;
-          }) : e;
         }
       }
-      B(k) && (k = [k]);
+      if (!p.length) {
+        throw Error("Your tag definition within the search options is probably wrong. No valid tags found.");
+      }
+      n = p;
+      if (!a) {
+        t = [];
+        if (p.length) {
+          for (n = 0; n < p.length; n += 2) {
+            if (this.db) {
+              d = this.index.get(p[n]);
+              if (!d) {
+                console.warn("Tag '" + p[n] + ":" + p[n + 1] + "' will be skipped because there is no field '" + p[n] + "'.");
+                continue;
+              }
+              t.push(d = d.db.tag(p[n + 1], b, l, q));
+            } else {
+              d = Sa.call(this, p[n], p[n + 1], b, l, q);
+            }
+            e.push({field:p[n], tag:p[n + 1], result:d});
+          }
+        }
+        return t.length ? Promise.all(t).then(function(w) {
+          for (let v = 0; v < w.length; v++) {
+            e[v].result = w[v];
+          }
+          return e;
+        }) : e;
+      }
     }
+    B(k) && (k = [k]);
   }
   k || (k = this.field);
   p = !d && (this.worker || this.async) && [];

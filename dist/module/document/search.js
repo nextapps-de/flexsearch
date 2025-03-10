@@ -41,109 +41,108 @@ Document.prototype.search = function (query, limit, options, _resolve) {
 
     if (options) {
 
-        // todo remove support?
         if (is_array(options)) {
-            field = options;
-            options = null;
-        } else {
+            options = {
+                index: options
+            };
+        }
 
-            query = options.query || query;
-            pluck = options.pluck;
-            merge = options.merge;
-            field = pluck || options.field || options.index;
-            tag = this.tag && options.tag;
-            enrich = this.store && options.enrich;
-            suggest = options.suggest;
-            limit = options.limit || limit;
-            offset = options.offset || 0;
-            limit || (limit = 100);
+        query = options.query || query;
+        pluck = options.pluck;
+        merge = options.merge;
+        field = pluck || options.field || options.index;
+        tag = this.tag && options.tag;
+        enrich = this.store && options.enrich;
+        suggest = options.suggest;
+        limit = options.limit || limit;
+        offset = options.offset || 0;
+        limit || (limit = 100);
 
-            if (tag && (!this.db || !_resolve)) {
+        if (tag && (!this.db || !_resolve)) {
 
-                if (tag.constructor !== Array) {
-                    tag = [tag];
-                }
+            if (tag.constructor !== Array) {
+                tag = [tag];
+            }
 
-                // Tag-Search
-                // -----------------------------
+            // Tag-Search
+            // -----------------------------
 
-                let pairs = [];
+            let pairs = [];
 
-                for (let i = 0, field; i < tag.length; i++) {
-                    field = tag[i];
+            for (let i = 0, field; i < tag.length; i++) {
+                field = tag[i];
 
-                    // default array notation
-                    if (field.field && field.tag) {
-                        const value = field.tag;
-                        if (value.constructor === Array) {
-                            for (let k = 0; k < value.length; k++) {
-                                pairs.push(field.field, value[k]);
-                            }
-                        } else {
-                            pairs.push(field.field, value);
+                // default array notation
+                if (field.field && field.tag) {
+                    const value = field.tag;
+                    if (value.constructor === Array) {
+                        for (let k = 0; k < value.length; k++) {
+                            pairs.push(field.field, value[k]);
                         }
+                    } else {
+                        pairs.push(field.field, value);
                     }
-                    // shorter object notation
-                    else {
-                            const keys = Object.keys(field);
-                            for (let j = 0, key, value; j < keys.length; j++) {
-                                key = keys[j];
-                                value = field[key];
-                                if (value.constructor === Array) {
-                                    for (let k = 0; k < value.length; k++) {
-                                        pairs.push(key, value[k]);
-                                    }
-                                } else {
-                                    pairs.push(key, value);
+                }
+                // shorter object notation
+                else {
+                        const keys = Object.keys(field);
+                        for (let j = 0, key, value; j < keys.length; j++) {
+                            key = keys[j];
+                            value = field[key];
+                            if (value.constructor === Array) {
+                                for (let k = 0; k < value.length; k++) {
+                                    pairs.push(key, value[k]);
                                 }
+                            } else {
+                                pairs.push(key, value);
                             }
                         }
-                }
+                    }
+            }
 
-                // tag used as pairs from this point
-                tag = pairs;
+            // tag used as pairs from this point
+            tag = pairs;
 
-                // when tags is used and no query was set,
-                // then just return the tag indexes
-                if (!query) {
+            // when tags is used and no query was set,
+            // then just return the tag indexes
+            if (!query) {
 
-                    let promises = [];
-                    if (pairs.length) for (let j = 0; j < pairs.length; j += 2) {
-                        let ids;
-                        if (this.db) {
-                            const index = this.index.get(pairs[j]);
-                            if (!index) {
-                                continue;
-                            }
-
-                            promises.push(ids = index.db.tag(pairs[j + 1], limit, offset, enrich));
-                        } else {
-                            ids = get_tag.call(this, pairs[j], pairs[j + 1], limit, offset, enrich);
+                let promises = [];
+                if (pairs.length) for (let j = 0; j < pairs.length; j += 2) {
+                    let ids;
+                    if (this.db) {
+                        const index = this.index.get(pairs[j]);
+                        if (!index) {
+                            continue;
                         }
-                        result.push({
-                            field: pairs[j],
-                            tag: pairs[j + 1],
-                            result: ids
-                        });
-                    }
 
-                    if (promises.length) {
-                        return Promise.all(promises).then(function (promises) {
-                            for (let j = 0; j < promises.length; j++) {
-                                result[j].result = promises[j];
-                            }
-                            return result;
-                        });
+                        promises.push(ids = index.db.tag(pairs[j + 1], limit, offset, enrich));
+                    } else {
+                        ids = get_tag.call(this, pairs[j], pairs[j + 1], limit, offset, enrich);
                     }
-
-                    return result;
+                    result.push({
+                        field: pairs[j],
+                        tag: pairs[j + 1],
+                        result: ids
+                    });
                 }
-            }
 
-            // extend to multi field search by default
-            if (is_string(field)) {
-                field = [field];
+                if (promises.length) {
+                    return Promise.all(promises).then(function (promises) {
+                        for (let j = 0; j < promises.length; j++) {
+                            result[j].result = promises[j];
+                        }
+                        return result;
+                    });
+                }
+
+                return result;
             }
+        }
+
+        // extend to multi field search by default
+        if (is_string(field)) {
+            field = [field];
         }
     }
 

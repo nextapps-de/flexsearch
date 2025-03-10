@@ -2495,88 +2495,84 @@ function tb(a, b, c, d, e, g, f, h) {
   c || (!b && M(a) ? (c = a, a = "") : M(b) && (c = b, b = 0));
   var e = [], g = [], f = 0;
   if (c) {
-    if (c.constructor === Array) {
-      var h = c;
-      c = null;
-    } else {
-      a = c.query || a;
-      var k = c.pluck;
-      var l = c.merge;
-      h = k || c.field || c.index;
-      var m = this.tag && c.tag;
-      var n = this.store && c.enrich;
-      var p = c.suggest;
-      b = c.limit || b;
-      var q = c.offset || 0;
-      b || (b = 100);
-      if (m && (!this.db || !d)) {
-        m.constructor !== Array && (m = [m]);
-        for (var r = [], x = 0, u = void 0; x < m.length; x++) {
-          u = m[x];
-          if (L(u)) {
-            throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
-          }
-          if (u.field && u.tag) {
-            var t = u.tag;
-            if (t.constructor === Array) {
-              for (var v = 0; v < t.length; v++) {
-                r.push(u.field, t[v]);
-              }
-            } else {
-              r.push(u.field, t);
+    c.constructor === Array && (c = {index:c});
+    a = c.query || a;
+    var h = c.pluck;
+    var k = c.merge;
+    var l = h || c.field || c.index;
+    var m = this.tag && c.tag;
+    var n = this.store && c.enrich;
+    var p = c.suggest;
+    b = c.limit || b;
+    var q = c.offset || 0;
+    b || (b = 100);
+    if (m && (!this.db || !d)) {
+      m.constructor !== Array && (m = [m]);
+      for (var r = [], x = 0, u = void 0; x < m.length; x++) {
+        u = m[x];
+        if (L(u)) {
+          throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
+        }
+        if (u.field && u.tag) {
+          var t = u.tag;
+          if (t.constructor === Array) {
+            for (var v = 0; v < t.length; v++) {
+              r.push(u.field, t[v]);
             }
           } else {
-            t = Object.keys(u);
-            v = 0;
-            for (var A = void 0, D = void 0; v < t.length; v++) {
-              if (A = t[v], D = u[A], D.constructor === Array) {
-                for (var B = 0; B < D.length; B++) {
-                  r.push(A, D[B]);
-                }
-              } else {
-                r.push(A, D);
+            r.push(u.field, t);
+          }
+        } else {
+          t = Object.keys(u);
+          v = 0;
+          for (var A = void 0, D = void 0; v < t.length; v++) {
+            if (A = t[v], D = u[A], D.constructor === Array) {
+              for (var B = 0; B < D.length; B++) {
+                r.push(A, D[B]);
               }
+            } else {
+              r.push(A, D);
             }
           }
-        }
-        if (!r.length) {
-          throw Error("Your tag definition within the search options is probably wrong. No valid tags found.");
-        }
-        m = r;
-        if (!a) {
-          g = [];
-          if (r.length) {
-            for (k = 0; k < r.length; k += 2) {
-              p = void 0;
-              if (this.db) {
-                p = this.index.get(r[k]);
-                if (!p) {
-                  console.warn("Tag '" + r[k] + ":" + r[k + 1] + "' will be skipped because there is no field '" + r[k] + "'.");
-                  continue;
-                }
-                g.push(p = p.db.tag(r[k + 1], b, q, n));
-              } else {
-                p = vb.call(this, r[k], r[k + 1], b, q, n);
-              }
-              e.push({field:r[k], tag:r[k + 1], result:p});
-            }
-          }
-          return g.length ? Promise.all(g).then(function(O) {
-            for (var P = 0; P < O.length; P++) {
-              e[P].result = O[P];
-            }
-            return e;
-          }) : e;
         }
       }
-      L(h) && (h = [h]);
+      if (!r.length) {
+        throw Error("Your tag definition within the search options is probably wrong. No valid tags found.");
+      }
+      m = r;
+      if (!a) {
+        g = [];
+        if (r.length) {
+          for (h = 0; h < r.length; h += 2) {
+            p = void 0;
+            if (this.db) {
+              p = this.index.get(r[h]);
+              if (!p) {
+                console.warn("Tag '" + r[h] + ":" + r[h + 1] + "' will be skipped because there is no field '" + r[h] + "'.");
+                continue;
+              }
+              g.push(p = p.db.tag(r[h + 1], b, q, n));
+            } else {
+              p = vb.call(this, r[h], r[h + 1], b, q, n);
+            }
+            e.push({field:r[h], tag:r[h + 1], result:p});
+          }
+        }
+        return g.length ? Promise.all(g).then(function(O) {
+          for (var P = 0; P < O.length; P++) {
+            e[P].result = O[P];
+          }
+          return e;
+        }) : e;
+      }
     }
+    L(l) && (l = [l]);
   }
-  h || (h = this.field);
+  l || (l = this.field);
   r = !d && (this.worker || this.async) && [];
   x = 0;
-  for (v = u = t = void 0; x < h.length; x++) {
-    if (u = h[x], !this.db || !this.tag || this.O[x]) {
+  for (v = u = t = void 0; x < l.length; x++) {
+    if (u = l[x], !this.db || !this.tag || this.O[x]) {
       t = void 0;
       L(u) || (t = u, u = t.field, a = t.query || a, b = t.limit || b, p = t.suggest || p);
       if (d) {
@@ -2588,7 +2584,7 @@ function tb(a, b, c, d, e, g, f, h) {
           if (this.db) {
             v.tag = m;
             var E = t.db.sa;
-            v.field = h;
+            v.field = l;
           }
           E || (v.enrich = !1);
         }
@@ -2606,7 +2602,7 @@ function tb(a, b, c, d, e, g, f, h) {
         D = 0;
         if (this.db && d) {
           if (!E) {
-            for (B = h.length; B < d.length; B++) {
+            for (B = l.length; B < d.length; B++) {
               var J = d[B];
               if (J && J.length) {
                 D++, A.push(J);
@@ -2644,7 +2640,7 @@ function tb(a, b, c, d, e, g, f, h) {
       }
       if (v) {
         g[f] = u, e.push(t), f++;
-      } else if (1 === h.length) {
+      } else if (1 === l.length) {
         return e;
       }
     }
@@ -2671,7 +2667,7 @@ function tb(a, b, c, d, e, g, f, h) {
   if (!f) {
     return e;
   }
-  if (k && (!n || !this.store)) {
+  if (h && (!n || !this.store)) {
     return e[0];
   }
   r = [];
@@ -2679,7 +2675,7 @@ function tb(a, b, c, d, e, g, f, h) {
   for (p = void 0; q < g.length; q++) {
     p = e[q];
     n && p.length && !p[0].doc && (this.db ? r.push(p = this.index.get(this.field[0]).db.enrich(p)) : p.length && (p = wb.call(this, p)));
-    if (k) {
+    if (h) {
       return p;
     }
     e[q] = {field:g[q], result:p};
@@ -2688,8 +2684,8 @@ function tb(a, b, c, d, e, g, f, h) {
     for (var P = 0; P < O.length; P++) {
       e[P].result = O[P];
     }
-    return l ? xb(e, b) : e;
-  }) : l ? xb(e, b) : e;
+    return k ? xb(e, b) : e;
+  }) : k ? xb(e, b) : e;
 };
 function xb(a, b) {
   for (var c = [], d = K(), e = 0, g, f; e < a.length; e++) {

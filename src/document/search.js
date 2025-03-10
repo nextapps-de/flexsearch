@@ -44,125 +44,123 @@ Document.prototype.search = function(query, limit, options, _resolve){
 
     if(options){
 
-        // todo remove support?
         if(is_array(options)){
-            field = options;
-            options = null;
+            options = {
+                index: options
+            };
         }
-        else{
 
-            query = options.query || query;
-            pluck = options.pluck;
-            merge = options.merge;
-            field = pluck || options.field || options.index;
-            tag = SUPPORT_TAGS && this.tag && options.tag;
-            enrich = SUPPORT_STORE && this.store && options.enrich;
-            suggest = SUPPORT_SUGGESTION && options.suggest;
-            limit = options.limit || limit;
-            offset = options.offset || 0;
-            limit || (limit = 100);
+        query = options.query || query;
+        pluck = options.pluck;
+        merge = options.merge;
+        field = pluck || options.field || options.index;
+        tag = SUPPORT_TAGS && this.tag && options.tag;
+        enrich = SUPPORT_STORE && this.store && options.enrich;
+        suggest = SUPPORT_SUGGESTION && options.suggest;
+        limit = options.limit || limit;
+        offset = options.offset || 0;
+        limit || (limit = 100);
 
-            if(tag && (!SUPPORT_PERSISTENT || !this.db || !_resolve)){
+        if(tag && (!SUPPORT_PERSISTENT || !this.db || !_resolve)){
 
-                // Tag-Search
-                // -----------------------------
+            // Tag-Search
+            // -----------------------------
 
-                debug && console.log("checkoint:search:tag");
+            debug && console.log("checkoint:search:tag");
 
-                if(tag.constructor !== Array){
-                    tag = [tag];
+            if(tag.constructor !== Array){
+                tag = [tag];
+            }
+
+            let pairs = [];
+
+            for(let i = 0, field; i < tag.length; i++){
+                field = tag[i];
+                if(DEBUG && is_string(field)){
+                    throw new Error("A tag option can't be a string, instead it needs a { field: tag } format.");
                 }
-
-                let pairs = [];
-
-                for(let i = 0, field; i < tag.length; i++){
-                    field = tag[i];
-                    if(DEBUG && is_string(field)){
-                        throw new Error("A tag option can't be a string, instead it needs a { field: tag } format.");
+                // default array notation
+                if(field.field && field.tag){
+                    const value = field.tag;
+                    if(value.constructor === Array){
+                        for(let k = 0; k < value.length; k++){
+                            pairs.push(field.field, value[k]);
+                        }
                     }
-                    // default array notation
-                    if(field.field && field.tag){
-                        const value = field.tag;
+                    else{
+                        pairs.push(field.field, value);
+                    }
+                }
+                // shorter object notation
+                else{
+                    const keys = Object.keys(field);
+                    for(let j = 0, key, value; j < keys.length; j++){
+                        key = keys[j];
+                        value = field[key];
                         if(value.constructor === Array){
                             for(let k = 0; k < value.length; k++){
-                                pairs.push(field.field, value[k]);
+                                pairs.push(key, value[k]);
                             }
                         }
                         else{
-                            pairs.push(field.field, value);
+                            pairs.push(key, value);
                         }
                     }
-                    // shorter object notation
+                }
+            }
+
+            if(DEBUG && !pairs.length){
+                throw new Error("Your tag definition within the search options is probably wrong. No valid tags found.");
+            }
+
+            // tag used as pairs from this point
+            tag = pairs;
+
+            // when tags is used and no query was set,
+            // then just return the tag indexes
+            if(!query){
+
+                let promises = [];
+                if(pairs.length) for(let j = 0; j < pairs.length; j+=2){
+                    let ids;
+                    if(SUPPORT_PERSISTENT && this.db){
+                        const index = this.index.get(pairs[j]);
+                        if(!index){
+                            if(DEBUG){
+                                console.warn("Tag '" + pairs[j] + ":" + pairs[j + 1] + "' will be skipped because there is no field '" + pairs[j] + "'.");
+                            }
+                            continue;
+                        }
+                        debug && console.log("checkoint:search:tag:get", pairs[j + 1]);
+                        promises.push(ids = index.db.tag(pairs[j + 1], limit, offset, enrich));
+                    }
                     else{
-                        const keys = Object.keys(field);
-                        for(let j = 0, key, value; j < keys.length; j++){
-                            key = keys[j];
-                            value = field[key];
-                            if(value.constructor === Array){
-                                for(let k = 0; k < value.length; k++){
-                                    pairs.push(key, value[k]);
-                                }
-                            }
-                            else{
-                                pairs.push(key, value);
-                            }
-                        }
+                        debug && console.log("checkoint:search:tag:get", pairs[j + 1]);
+                        ids = get_tag.call(this, pairs[j], pairs[j + 1], limit, offset, enrich);
                     }
+                    result.push({
+                        "field": pairs[j],
+                        "tag": pairs[j + 1],
+                        "result": ids
+                    });
                 }
 
-                if(DEBUG && !pairs.length){
-                    throw new Error("Your tag definition within the search options is probably wrong. No valid tags found.");
+                if(promises.length){
+                    return Promise.all(promises).then(function(promises){
+                        for(let j = 0; j < promises.length; j++){
+                            result[j].result = promises[j];
+                        }
+                        return result;
+                    });
                 }
 
-                // tag used as pairs from this point
-                tag = pairs;
-
-                // when tags is used and no query was set,
-                // then just return the tag indexes
-                if(!query){
-
-                    let promises = [];
-                    if(pairs.length) for(let j = 0; j < pairs.length; j+=2){
-                        let ids;
-                        if(SUPPORT_PERSISTENT && this.db){
-                            const index = this.index.get(pairs[j]);
-                            if(!index){
-                                if(DEBUG){
-                                    console.warn("Tag '" + pairs[j] + ":" + pairs[j + 1] + "' will be skipped because there is no field '" + pairs[j] + "'.");
-                                }
-                                continue;
-                            }
-                            debug && console.log("checkoint:search:tag:get", pairs[j + 1]);
-                            promises.push(ids = index.db.tag(pairs[j + 1], limit, offset, enrich));
-                        }
-                        else{
-                            debug && console.log("checkoint:search:tag:get", pairs[j + 1]);
-                            ids = get_tag.call(this, pairs[j], pairs[j + 1], limit, offset, enrich);
-                        }
-                        result.push({
-                            "field": pairs[j],
-                            "tag": pairs[j + 1],
-                            "result": ids
-                        });
-                    }
-
-                    if(promises.length){
-                        return Promise.all(promises).then(function(promises){
-                            for(let j = 0; j < promises.length; j++){
-                                result[j].result = promises[j];
-                            }
-                            return result;
-                        });
-                    }
-
-                    return result;
-                }
+                return result;
             }
+        }
 
-            // extend to multi field search by default
-            if(is_string(field)){
-                field = [field];
-            }
+        // extend to multi field search by default
+        if(is_string(field)){
+            field = [field];
         }
     }
 
