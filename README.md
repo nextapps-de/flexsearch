@@ -43,7 +43,7 @@ Supported:
 - [Redis](src/db/redis/)
 - [SQLite](src/db/sqlite/)
 - [Postgres](src/db/postgres/)
-- [MongoDB](src/db/mongo/)
+- [MongoDB](src/db/mongodb/)
 - [Clickhouse](src/db/clickhouse/)
 
 The `.export()` and `.import()` methods are still available for non-persistent In-Memory indexes.
@@ -1982,7 +1982,7 @@ Persistent Connectors are accessible via:
 ```js
 const Postgres = require("flexsearch/db/postgres");
 const Sqlite = require("flexsearch/db/sqlite");
-const MongoDB = require("flexsearch/db/mongo");
+const MongoDB = require("flexsearch/db/mongodb");
 const Redis = require("flexsearch/db/redis");
 const Clickhouse = require("flexsearch/db/clickhouse");
 ```

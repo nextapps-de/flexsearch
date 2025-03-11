@@ -8,7 +8,6 @@ const defaults = {
 const VERSION = 1;
 const fields = ["map", "ctx", "tag", "reg", "cfg"];
 import StorageInterface from "../interface.js";
-import Document from "../../document.js";
 import { toArray } from "../../common.js";
 
 function sanitize(str) {
@@ -49,7 +48,8 @@ export default function MongoDB(name, config = {}){
 // };
 
 MongoDB.prototype.mount = function(flexsearch){
-    if(flexsearch.constructor === Document){
+    //if(flexsearch.constructor === Document){
+    if(!flexsearch.encoder){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

@@ -15,9 +15,11 @@ const data = JSON.parse(fs.readFileSync(dirname + "/../data.json", "utf8"));
             store: true,
             index: [{
                 field: "primaryTitle",
+                tokenize: "forward",
                 config: dirname + "/config.primaryTitle.js"
             },{
                 field: "originalTitle",
+                tokenize: "forward",
                 config: dirname + "/config.originalTitle.js"
             }],
             tag: [{

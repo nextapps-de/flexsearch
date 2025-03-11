@@ -1,8 +1,7 @@
 const { Document } = require("flexsearch");
-const fs = require("fs");
 
 // loading test data
-const data = JSON.parse(fs.readFileSync(__dirname + "/../data.json", "utf8"));
+const data = require(__dirname + "/../data.json");
 
 (async function(){
 
@@ -14,9 +13,11 @@ const data = JSON.parse(fs.readFileSync(__dirname + "/../data.json", "utf8"));
             store: true,
             index: [{
                 field: "primaryTitle",
+                tokenize: "forward",
                 config: __dirname + "/config.primaryTitle.js"
             },{
                 field: "originalTitle",
+                tokenize: "forward",
                 config: __dirname + "/config.originalTitle.js"
             }],
             tag: [{

@@ -11,7 +11,6 @@ const defaults = {
       fields = ["map", "ctx", "reg", "tag", "doc", "cfg"];
 
 import StorageInterface from "../interface.js";
-import Document from "../../document.js";
 import { toArray } from "../../common.js";
 
 function sanitize(str) {
@@ -52,7 +51,8 @@ export default function RedisDB(name, config = {}) {
 // };
 
 RedisDB.prototype.mount = function (flexsearch) {
-    if (flexsearch.constructor === Document) {
+    //if(flexsearch.constructor === Document){
+    if (!flexsearch.encoder) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

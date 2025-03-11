@@ -1,5 +1,4 @@
 
-import Document from "../../document.js";
 import { PersistentOptions } from "../../type.js";
 
 const VERSION = 1,
@@ -41,7 +40,8 @@ export default function IdxDB(name, config = {}) {
 }
 
 IdxDB.prototype.mount = function (flexsearch) {
-    if (flexsearch.constructor === Document) {
+    //if(flexsearch.constructor === Document){
+    if (!flexsearch.encoder) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

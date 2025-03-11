@@ -3036,7 +3036,7 @@ function Bb(a, b) {
 }
 u = Bb.prototype;
 u.mount = function(a) {
-  if (a.constructor === Z) {
+  if (!a.encoder) {
     return a.mount(this);
   }
   a.db = this;

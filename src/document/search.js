@@ -165,7 +165,7 @@ Document.prototype.search = function(query, limit, options, _resolve){
     }
 
     field || (field = this.field);
-    let promises = !_resolve && (this.worker || this.db) && [];
+    let promises = !_resolve && (this.worker || this.db /*|| this.async*/) && [];
     let db_tag_search;
 
     // multi field search

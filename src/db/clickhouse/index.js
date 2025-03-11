@@ -3,7 +3,6 @@ import { DEBUG } from "../../config.js";
 // <-- COMPILER BLOCK
 import { ClickHouse } from "clickhouse";
 import StorageInterface from "../interface.js";
-import Document from "../../document.js";
 import { concat, toArray } from "../../common.js";
 const defaults = {
     host: "http://localhost",
@@ -85,7 +84,8 @@ export default function ClickhouseDB(name, config = {}){
 };
 
 ClickhouseDB.prototype.mount = function(flexsearch){
-    if(flexsearch.constructor === Document){
+    //if(flexsearch.constructor === Document){
+    if(!flexsearch.encoder){
         return flexsearch.mount(this);
     }
     defaults.resolution = Math.max(flexsearch.resolution, flexsearch.resolution_ctx);

@@ -1,7 +1,7 @@
 {
   "public": true,
   "preferGlobal": false,
-  "name": "flexsearch-mongo",
+  "name": "flexsearch-mongodb",
   "version": "0.1.0",
   "main": "index.js",
   "scripts": {},

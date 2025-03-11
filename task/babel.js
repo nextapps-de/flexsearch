@@ -28,7 +28,7 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
     ["db/",
      "db/clickhouse",
      "db/indexeddb",
-     "db/mongo",
+     "db/mongodb",
      "db/postgres",
      "db/redis",
      "db/sqlite",

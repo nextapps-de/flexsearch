@@ -80,8 +80,7 @@ Encoder.prototype.assign = function (options) {
      * @type {Function|boolean}
      */
     this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */
-    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
-    /*await rows.hasNext()*/, this.normalize);
+    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -420,7 +419,7 @@ Encoder.prototype.encode = function (str) {
             //
             //     // const position = word.length - key.length;
             //     // if(position > 0 && word.substring(position) === key){
-
+            //     //     word = word.substring(0, position) + value;
             //     //     break;
             //     // }
             // }

@@ -2,7 +2,6 @@
 
 import pg_promise from "pg-promise";
 import StorageInterface from "../interface.js";
-import Document from "../../document.js";
 import { concat, toArray } from "../../common.js";
 const defaults = {
     schema: "flexsearch",
@@ -72,7 +71,8 @@ export default function PostgresDB(name, config = {}) {
 }
 
 PostgresDB.prototype.mount = function (flexsearch) {
-    if (flexsearch.constructor === Document) {
+    //if(flexsearch.constructor === Document){
+    if (!flexsearch.encoder) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

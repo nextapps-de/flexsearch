@@ -2121,7 +2121,7 @@ function Ya(a, b = {}) {
 }
 u = Ya.prototype;
 u.mount = function(a) {
-  if (a.constructor === Y) {
+  if (!a.encoder) {
     return a.mount(this);
   }
   a.db = this;

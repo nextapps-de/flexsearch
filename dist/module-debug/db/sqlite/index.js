@@ -5,7 +5,6 @@ import sqlite3 from "sqlite3";
 import path from "path";
 import StorageInterface from "../interface.js";
 import { concat, toArray } from "../../common.js";
-import Document from "../../document.js";
 
 const VERSION = 1,
       MAXIMUM_QUERY_VARS = 16000,
@@ -68,7 +67,8 @@ export default function SqliteDB(name, config = {}) {
 }
 
 SqliteDB.prototype.mount = function (flexsearch) {
-    if (flexsearch.constructor === Document) {
+    //if(flexsearch.constructor === Document){
+    if (!flexsearch.encoder) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

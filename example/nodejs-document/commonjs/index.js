@@ -1,8 +1,7 @@
 const { Document, Charset } = require("flexsearch");
-const fs = require("fs");
 
 // loading test data
-const data = JSON.parse(fs.readFileSync(__dirname + "/../data.json", "utf8"));
+const data = require(__dirname + "/../data.json");
 
 // create the document index
 const document = new Document({
