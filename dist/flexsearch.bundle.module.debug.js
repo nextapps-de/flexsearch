@@ -137,12 +137,12 @@ G.prototype.assign = function(a) {
   this.minlength = y(a.minlength, 1, this.minlength);
   this.maxlength = y(a.maxlength, 0, this.maxlength);
   if (this.cache = c = y(a.cache, !0, this.cache)) {
-    this.L = null, this.S = "number" === typeof c ? c : 2e5, this.H = new Map(), this.J = new Map(), this.A = this.h = 128;
+    this.L = null, this.T = "number" === typeof c ? c : 2e5, this.H = new Map(), this.J = new Map(), this.A = this.h = 128;
   }
   this.B = "";
-  this.O = null;
-  this.M = "";
   this.P = null;
+  this.M = "";
+  this.R = null;
   if (this.matcher) {
     for (const d of this.matcher.keys()) {
       this.B += (this.B ? "|" : "") + d;
@@ -196,8 +196,8 @@ G.prototype.encode = function(a) {
       }
     }
     let k;
-    this.stemmer && 2 < g.length && (this.P || (this.P = new RegExp("(?!^)(" + this.M + ")$")), g = g.replace(this.P, l => this.stemmer.get(l)), k = 1);
-    this.matcher && 1 < g.length && (this.O || (this.O = new RegExp("(" + this.B + ")", "g")), g = g.replace(this.O, l => this.matcher.get(l)), k = 1);
+    this.stemmer && 2 < g.length && (this.R || (this.R = new RegExp("(?!^)(" + this.M + ")$")), g = g.replace(this.R, l => this.stemmer.get(l)), k = 1);
+    this.matcher && 1 < g.length && (this.P || (this.P = new RegExp("(" + this.B + ")", "g")), g = g.replace(this.P, l => this.matcher.get(l)), k = 1);
     g && k && (g.length < this.minlength || this.filter && this.filter.has(g)) && (g = "");
     if (g && (this.mapper || this.dedupe && 1 < g.length)) {
       e = "";
@@ -211,11 +211,11 @@ G.prototype.encode = function(a) {
         g = g.replace(this.replacer[e], this.replacer[e + 1]);
       }
     }
-    this.cache && h.length <= this.A && (this.J.set(h, g), this.J.size > this.S && (this.J.clear(), this.A = this.A / 1.1 | 0));
+    this.cache && h.length <= this.A && (this.J.set(h, g), this.J.size > this.T && (this.J.clear(), this.A = this.A / 1.1 | 0));
     g && c.push(g);
   }
   this.finalize && (c = this.finalize(c) || c);
-  this.cache && a.length <= this.h && (this.H.set(a, c), this.H.size > this.S && (this.H.clear(), this.h = this.h / 1.1 | 0));
+  this.cache && a.length <= this.h && (this.H.set(a, c), this.H.size > this.T && (this.H.clear(), this.h = this.h / 1.1 | 0));
   return c;
 };
 function la(a) {
@@ -494,9 +494,7 @@ function N(a) {
     const c = b[b.length - 1];
     let d;
     "function" === typeof c && (d = c, delete b[b.length - 1]);
-    this.async = !0;
     b = this[a].apply(this, b);
-    this.async = !1;
     d && (b.then ? b.then(d) : d(b));
     return b;
   };
@@ -543,7 +541,7 @@ O.prototype.add = function(a, b, c, d) {
               }
             default:
               if (Q(this, m, p, f, a, c), n && 1 < d && r < d - 1) {
-                for (e = z(), g = this.R, f = p, h = Math.min(n + 1, d - r), e[f] = 1, k = 1; k < h; k++) {
+                for (e = z(), g = this.S, f = p, h = Math.min(n + 1, d - r), e[f] = 1, k = 1; k < h; k++) {
                   if ((p = b[this.rtl ? d - 1 - r - k : r + k]) && !e[p]) {
                     e[p] = 1;
                     const t = this.score ? this.score(b, f, r, p, k) : P(g + (d / 2 > g ? 0 : 1), d, r, h - 1, k - 1), x = this.bidirectional && p > f;
@@ -559,7 +557,7 @@ O.prototype.add = function(a, b, c, d) {
       b = "";
     }
   }
-  this.db && (b || this.commit_task.push({del:a}), this.T && Ca(this));
+  this.db && (b || this.commit_task.push({del:a}), this.U && Ca(this));
   return this;
 };
 function Q(a, b, c, d, e, f, g) {
@@ -1133,7 +1131,7 @@ O.prototype.search = function(a, b, c) {
     return async function() {
       for (let t, x; q < e; q++) {
         x = a[q];
-        r ? (t = await V(p, x, r), t = Ka(t, d, f, p.R, b, g, 2 === e), f && !1 === t && d.length || (r = x)) : (t = await V(p, x), t = Ka(t, d, f, p.resolution, b, g, 1 === e));
+        r ? (t = await V(p, x, r), t = Ka(t, d, f, p.S, b, g, 2 === e), f && !1 === t && d.length || (r = x)) : (t = await V(p, x), t = Ka(t, d, f, p.resolution, b, g, 1 === e));
         if (t) {
           return t;
         }
@@ -1157,7 +1155,7 @@ O.prototype.search = function(a, b, c) {
   }
   for (let p, t; q < e; q++) {
     t = a[q];
-    r ? (p = V(this, t, r), p = Ka(p, d, f, this.R, b, g, 2 === e), f && !1 === p && d.length || (r = t)) : (p = V(this, t), p = Ka(p, d, f, this.resolution, b, g, 1 === e));
+    r ? (p = V(this, t, r), p = Ka(p, d, f, this.S, b, g, 2 === e), f && !1 === p && d.length || (r = t)) : (p = V(this, t), p = Ka(p, d, f, this.resolution, b, g, 1 === e));
     if (p) {
       return p;
     }
@@ -1234,7 +1232,7 @@ function V(a, b, c, d, e, f, g, h) {
     }
     b || this.reg.delete(a);
   }
-  this.db && (this.commit_task.push({del:a}), this.T && Ca(this));
+  this.db && (this.commit_task.push({del:a}), this.U && Ca(this));
   this.cache && this.cache.remove(a);
   return this;
 };
@@ -1283,14 +1281,14 @@ function La(a, b) {
   this.map = e ? new L(e) : new Map();
   this.ctx = e ? new L(e) : new Map();
   this.reg = b || (this.fastupdate ? e ? new L(e) : new Map() : e ? new M(e) : new Set());
-  this.R = c.resolution || 1;
+  this.S = c.resolution || 1;
   this.rtl = d.rtl || a.rtl || !1;
   this.cache = (e = a.cache || null) && new H(e);
   this.resolve = !1 !== a.resolve;
   if (e = a.db) {
     this.db = e.mount(this);
   }
-  this.T = !1 !== a.commit;
+  this.U = !1 !== a.commit;
   this.commit_task = [];
   this.commit_timer = null;
 }
@@ -1302,6 +1300,10 @@ u.mount = function(a) {
 u.commit = function(a, b) {
   this.commit_timer && (clearTimeout(this.commit_timer), this.commit_timer = null);
   return this.db.commit(this, a, b);
+};
+u.destroy = function() {
+  this.commit_timer && (clearTimeout(this.commit_timer), this.commit_timer = null);
+  return this.db.destroy();
 };
 function Ca(a) {
   a.commit_timer || (a.commit_timer = setTimeout(function() {
@@ -1324,11 +1326,8 @@ u.contain = function(a) {
   return this.db ? this.db.has(a) : this.reg.has(a);
 };
 u.update = function(a, b) {
-  if (this.async) {
-    const c = this, d = this.remove(a);
-    return d.then ? d.then(() => c.add(a, b)) : this.add(a, b);
-  }
-  return this.remove(a).add(a, b);
+  const c = this, d = this.remove(a);
+  return d && d.then ? d.then(() => c.add(a, b)) : this.add(a, b);
 };
 function Ma(a) {
   let b = 0;
@@ -1477,32 +1476,34 @@ async function Na(a) {
 }
 ;let Oa = 0;
 function W(a) {
-  function b(f) {
-    f = f.data || f;
-    const g = f.id, h = g && e.h[g];
-    h && (h(f.msg), delete e.h[g]);
-  }
   if (!this) {
     return new W(a);
   }
   a || (a = {});
-  let c = (self || window)._factory;
-  c && (c = c.toString());
-  const d = "undefined" === typeof window && self.exports, e = this;
-  this.worker = Pa(c, d, a.worker);
-  this.h = z();
-  if (this.worker) {
-    d ? this.worker.on("message", b) : this.worker.onmessage = b;
-    if (a.config) {
-      return new Promise(function(f) {
-        e.h[++Oa] = function() {
-          f(e);
-        };
-        e.worker.postMessage({id:Oa, task:"init", factory:c, options:a});
-      });
+  let b = "undefined" !== typeof self && (self || window)._factory;
+  b && (b = b.toString());
+  const c = "undefined" === typeof window, d = this;
+  (async function() {
+    function e(f) {
+      f = f.data || f;
+      const g = f.id, h = g && d.N[g];
+      h && (h(f.msg), delete d.N[g]);
     }
-    this.worker.postMessage({task:"init", factory:c, options:a});
-  }
+    this.worker = await Pa(b, c, a.worker);
+    this.N = z();
+    if (this.worker) {
+      c ? this.worker.on("message", e) : this.worker.onmessage = e;
+      if (a.config) {
+        return delete a.db, new Promise(function(f) {
+          d.N[++Oa] = function() {
+            f(d);
+          };
+          d.worker.postMessage({id:Oa, task:"init", factory:b, options:a});
+        });
+      }
+      this.worker.postMessage({task:"init", factory:b, options:a});
+    }
+  }).call(this);
 }
 X("add");
 X("append");
@@ -1516,14 +1517,14 @@ function X(a) {
     let e;
     "function" === typeof d && (e = d, c.splice(c.length - 1, 1));
     d = new Promise(function(f) {
-      b.h[++Oa] = f;
+      b.N[++Oa] = f;
       b.worker.postMessage({task:a, id:Oa, args:c});
     });
     return e ? (d.then(e), this) : d;
   };
 }
-function Pa(a, b, c) {
-  return b ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Na.toString()], {type:"text/javascript"}))) : new window.Worker(B(c) ? c : "worker/worker.js", {type:"module"});
+async function Pa(a, b, c) {
+  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : new ((await import("worker_threads"))["Worker"])(import.meta.dirname + "/node/node.mjs") : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Na.toString()], {type:"text/javascript"}))) : new window.Worker(B(c) ? c : "worker/worker.js", {type:"module"});
 }
 ;Y.prototype.add = function(a, b, c) {
   C(a) && (b = a, a = ca(b, this.key));
@@ -1545,7 +1546,7 @@ function Pa(a, b, c) {
     }
     if (this.tag) {
       for (d = 0; d < this.F.length; d++) {
-        var f = this.F[d], g = this.N[d];
+        var f = this.F[d], g = this.O[d];
         e = this.tag.get(g);
         let h = z();
         if ("function" === typeof f) {
@@ -1597,7 +1598,7 @@ function Pa(a, b, c) {
             if (!m) {
               continue;
             }
-            l = [l.U];
+            l = [l.V];
           } else if (B(l) || l.constructor === String) {
             h[l] = b[l];
             continue;
@@ -1730,7 +1731,7 @@ function Qa(a, b, c, d, e, f, g, h) {
     B(k) && (k = [k]);
   }
   k || (k = this.field);
-  p = !d && (this.worker || this.async) && [];
+  p = !d && (this.worker || this.db) && [];
   let A;
   for (let w = 0, v, I, J; w < k.length; w++) {
     I = k[w];
@@ -1894,7 +1895,6 @@ function Ta(a) {
   this.cache = (c = a.cache || null) && new H(c);
   a.cache = !1;
   this.worker = a.worker;
-  this.async = !1;
   c = new Map();
   d = b.index || b.field || b;
   B(d) && (d = [d]);
@@ -1915,7 +1915,7 @@ function Ta(a) {
     d = b.store;
     B(d) && (d = [d]);
     for (let e = 0, f, g; e < d.length; e++) {
-      f = d[e], g = f.field || f, f.custom ? (this.C[e] = f.custom, f.custom.U = g) : (this.C[e] = Va(g, this.K), f.filter && ("string" === typeof this.C[e] && (this.C[e] = new String(this.C[e])), this.C[e].I = f.filter));
+      f = d[e], g = f.field || f, f.custom ? (this.C[e] = f.custom, f.custom.V = g) : (this.C[e] = Va(g, this.K), f.filter && ("string" === typeof this.C[e] && (this.C[e] = new String(this.C[e])), this.C[e].I = f.filter));
     }
   }
   this.index = c;
@@ -1924,7 +1924,7 @@ function Ta(a) {
     if ("string" === typeof c && (c = [c]), c.length) {
       this.tag = new Map();
       this.F = [];
-      this.N = [];
+      this.O = [];
       for (let e = 0, f, g; e < c.length; e++) {
         f = c[e];
         g = f.field || f;
@@ -1932,7 +1932,7 @@ function Ta(a) {
           throw Error("The tag field from the document descriptor is undefined.");
         }
         f.custom ? this.F[e] = f.custom : (this.F[e] = Va(g, this.K), f.filter && ("string" === typeof this.F[e] && (this.F[e] = new String(this.F[e])), this.F[e].I = f.filter));
-        this.N[e] = g;
+        this.O[e] = g;
         this.tag.set(g, new Map());
       }
     }
@@ -1943,10 +1943,12 @@ u = Y.prototype;
 u.mount = function(a) {
   let b = this.field;
   if (this.tag) {
-    for (let e = 0, f; e < this.N.length; e++) {
-      f = this.N[e];
-      var c = this.index.get(f);
-      c || (this.index.set(f, c = new O({}, this.reg)), b === this.field && (b = b.slice(0)), b.push(f));
+    for (let e = 0, f; e < this.O.length; e++) {
+      f = this.O[e];
+      var c = void 0;
+      this.index.set(f, c = new O({}, this.reg));
+      b === this.field && (b = b.slice(0));
+      b.push(f);
       c.tag = this.tag.get(f);
     }
   }
@@ -1961,7 +1963,7 @@ u.mount = function(a) {
     f.document = !0;
     e ? f.bypass = !0 : f.store = this.store;
   }
-  this.db = this.async = !0;
+  this.db = !0;
   return Promise.all(c);
 };
 u.commit = async function(a, b) {
@@ -1971,6 +1973,13 @@ u.commit = async function(a, b) {
   }
   await Promise.all(c);
   this.reg.clear();
+};
+u.destroy = function() {
+  const a = [];
+  for (const b of this.index.values()) {
+    a.push(b.destroy());
+  }
+  return Promise.all(a);
 };
 function Va(a, b) {
   const c = a.split(":");
@@ -2150,7 +2159,6 @@ u.close = function() {
   this.db = null;
 };
 u.destroy = function() {
-  this.db && this.close();
   return Wa.deleteDatabase(this.id + (this.field ? ":" + this.field : ""));
 };
 u.clear = function() {
@@ -2260,7 +2268,7 @@ u.commit = async function(a, b, c) {
         b = !0;
         break;
       } else {
-        d[e] = f.V;
+        d[e] = f.W;
       }
     }
     b || (c || (d = d.concat(ba(a.reg))), d.length && await this.remove(d));

@@ -61,9 +61,9 @@ function register(key){
             delete args[args.length - 1];
         }
 
-        this.async = true;
+        //this.async = true;
         const res = this[key].apply(this, args);
-        this.async = false;
+        //this.async = false;
         if(callback){
             res.then
                 ? res.then(callback)

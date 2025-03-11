@@ -205,18 +205,19 @@ SqliteDB.prototype.open = async function(){
 SqliteDB.prototype.close = function(){
     this.db.close();
     this.db = null;
+    DB[this.id] = null;
+    TRX[this.id] = null;
     return this;
 };
 
-SqliteDB.prototype.destroy = async function(){
-    await this.transaction(function(){
+SqliteDB.prototype.destroy = function(){
+    return this.transaction(function(){
         this.db.run("DROP TABLE IF EXISTS main.map" + this.field + ";");
         this.db.run("DROP TABLE IF EXISTS main.ctx" + this.field + ";");
         this.db.run("DROP TABLE IF EXISTS main.tag" + this.field + ";");
         this.db.run("DROP TABLE IF EXISTS main.cfg" + this.field + ";");
         this.db.run("DROP TABLE IF EXISTS main.reg;");
     });
-    this.close();
 };
 
 SqliteDB.prototype.clear = function(){

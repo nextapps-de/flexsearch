@@ -28,6 +28,7 @@ import Charset from "./charset.js";
 /** @export */Index.prototype.serialize;
 /** @export */Index.prototype.mount;
 /** @export */Index.prototype.commit;
+/** @export */Index.prototype.destroy;
 
 /** @export */Index.prototype.reg;
 /** @export */Index.prototype.map;
@@ -59,6 +60,7 @@ import Charset from "./charset.js";
 /** @export */Document.prototype.removeAsync;
 /** @export */Document.prototype.mount;
 /** @export */Document.prototype.commit;
+/** @export */Document.prototype.destroy;
 /** @export */Document.prototype.export;
 /** @export */Document.prototype.import;
 /** @export */Document.prototype.searchCache;

@@ -70,7 +70,22 @@ All search capabilities are available on persistent indexes like:
 
 All persistent variants are optimized for larger sized indexes under heavy workload. Almost every task will be streamlined to run in batch/parallel, getting the most out of the selected database engine. Whereas the InMemory index can't share their data between different nodes when running in a cluster, every persistent storage can handle this by default.
 
-### Example
+### Example Node.js
+
+- [nodejs-document](example/nodejs-document)
+  - [commonjs](example/nodejs-document/commonjs)
+  - [esm](example/nodejs-document/esm)
+- [nodejs-persistent](example/nodejs-persistent)
+  - [commonjs](example/nodejs-persistent/commonjs)
+  - [esm](example/nodejs-persistent/esm)
+- [nodejs-worker](example/nodejs-worker)
+  - [commonjs](example/nodejs-worker/commonjs)
+  - [esm](example/nodejs-worker/esm)
+- [nodejs-worker-persistent](example/nodejs-worker-persistent)
+  - [commonjs](example/nodejs-worker-persistent/commonjs)
+  - [esm](example/nodejs-worker-persistent/esm)
+
+### Example Browser
 
 ```js
 import FlexSearchIndex from "./index.js";
@@ -1499,6 +1514,12 @@ The used index configuration has 2 fields (using bidirectional context of `depth
 A non-Worker Document index requires 181 seconds to index all contents.<br>
 The Worker index just takes 32 seconds to index them all, by processing every field and tag in parallel. For such large content it is a quite impressive result.
 
+### CSP-friendly Worker (Browser)
+
+When just using worker by passing the option `worker: true`, the worker will be created by code generation under the hood. This might have issues when using strict CSP settings.
+
+You can overcome this issue by passing the filepath to the worker file like `worker: "./worker.js"`. The original worker file is located at `src/worker/worker.js`.
+
 ## Fuzzy-Search
 
 Fuzzysearch describes a basic concept of how making queries more tolerant. FlexSearch provides several methods to achieve fuzziness:
@@ -1664,14 +1685,18 @@ function inject(index){
 }
 ```
 
+You could store this function by e.g. `fs.writeFileSync("inject.js", fn_string);` or place it as string in your markup.
+
 After creating the index on client side just call the inject method like:
 
 ```js
-const index = new Index();
+const index = new Index({/* use same configuration! */});
 inject(index);
 ```
 
 That's it.
+
+> You'll need to use the same configuration as you used before the export. Any changes on the configuration needs to be re-indexed.
 
 ### 2. Create just a function body as string
 
@@ -1704,7 +1729,9 @@ inject(index);
 
 ## Load Library (Node.js, ESM, Legacy Browser)
 
+<!--
 > Please do not use the `/src/` folder of this repo. It isn't meant to be used directly, instead it needs [conditional compilation](https://en.wikipedia.org/wiki/Conditional_compilation). You can easily perform a <a href="#builds">custom build</a>, but you shouldn't use the source folder for production. You will need at least any kind of compiler which resolve the compiler flags within the code like [Closure Compiler](https://github.com/google/closure-compiler) (Advanced Compilation) or with [Babel conditional-compile](https://github.com/brianZeng/babel-plugin-conditional-compile) plugin. The `/dist/` folder is containing every version which you probably need including unminified ESM modules.
+-->
 
 ```bash
 npm install flexsearch
@@ -2137,8 +2164,15 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
     </tr>
 </table>
 
+### Misc
+
+A formula to determine a well balanced value for the `resolution` is: $2*floor(\sqrt{content.length})$ where content is the value pushed by `index.add()`. Here the maximum length of all contents should be used.
+
 ## Migration
 
+<!--
+- Using the `async` variants like `.searchAsync` is now deprecated, asynchronous responses will always return from Worker-Index and from Persistent-Index, everything else will return a non-promised result. Having both types of methods looks like the developers can choose between them, but they can't.
+-->
 - The index option property "minlength" has moved to the Encoder Class
 - The index option flag "optimize" was removed
 - The index option flag "lang" was replaced by the Encoder Class `.assign()`
@@ -2152,3 +2186,4 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
 - The static methods `FlexSearch.registerCharset()` and `FlexSearch.registerLanguage()` was removed, those collections are now exported to `FlexSearch.Charset` which can be accessed as module `import { Charset } from "flexsearch"` and language packs are now applied by `encoder.assign()`
 - Instead of e.g. "latin:simple" the Charset collection is exported as a module and has to be imported by e.g. `import LatinSimple from "./charset.js"` and then assigned to an existing Encoder by `encoder.assign(LatinSimple)` or by creation `encoder = new Encoder(LatinSimple)`
 - You can import language packs by `dist/module/lang/*` when using ESM and by `const EnglishPreset = require("flexsearch/lang/en");` when using CommonJS (Node.js)
+- The method `index.append()` is now deprecated and will be removed in the near future, because it isn't consistent and leads into unexpected behavior when not used properly. You should only use `index.add()` which also supports an Array of contents.

@@ -307,7 +307,7 @@ else (async function(){
                        process.platform === "darwin" ? "\"node_modules/google-closure-compiler-osx/compiler\"" :
                                                        "java -jar node_modules/google-closure-compiler-java/compiler.jar";
 
-    exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
+    exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js' --js='!tmp/**/node.mjs'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
 
         let build = fs.readFileSync(filename);
         let preserve = fs.readFileSync("src/index.js", "utf8");
@@ -355,21 +355,26 @@ else (async function(){
             //build = build.substring(0, pos_start) + part + build.substring(pos_end);
             build = build.replace(/window\.FlexSearch(\s+)?=(\s+)?/, "export default ") + part;
             //build = build.replace(/self\.FlexSearch(\s+)?=(\s+)?/, "export default ");
+
+            // replace the eval wrapper
+            build = build.replace('(1,eval)("import.meta.dirname")', "import.meta.dirname");
         }
 
         // fix closure compiler dynamic import
         build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=await import($4))");
 
         if(release === "bundle"){
-            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;self._factory=_f;");
+            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");
         }
 
         // replace the eval wrapper
-        build = build.replace(/\(0,eval\)\('([^']+)'\)/, "$1");
+        build = build.replace(/\(0,eval\)\('([^']+)'\)/g, "$1");
+
 
         fs.writeFileSync(filename, build);
         fs.existsSync("dist/node/") || fs.mkdirSync("dist/node/");
         fs.copyFileSync("src/worker/node.js", "dist/node/node.js");
+        fs.copyFileSync("src/worker/node.mjs", "dist/node/node.mjs");
 
         console.log("Saved to " + filename);
         console.log("Build Complete.");

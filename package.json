@@ -34,7 +34,14 @@
     "./lang/*.js": "./dist/lang/*.min.js",
     "./db/*": "./dist/db/*/index.cjs",
     "./db/*/index": "./dist/db/*/index.cjs",
-    "./db/*/index.js": "./dist/db/*/index.cjs"
+    "./db/*/index.js": "./dist/db/*/index.cjs",
+    "./esm": "./dist/flexsearch.bundle.module.min.js",
+    "./esm/": "./dist/flexsearch.bundle.module.min.js",
+    "./esm/lang/*": "./dist/module/lang/*.js",
+    "./esm/lang/*.js": "./dist/module/lang/*.js",
+    "./esm/db/*": "./dist/module/db/*/index.js",
+    "./esm/db/*/index": "./dist/module/db/*/index.js",
+    "./esm/db/*/index.js": "./dist/module/db/*/index.js"
   },
   "module": "dist/flexsearch.bundle.module.min.js",
   "browser": {
@@ -103,5 +110,24 @@
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
     "google-closure-compiler": "^20240317.0.0",
     "rollup": "^4.35.0"
-  }
+  },
+  "funding": [{
+    "type": "github",
+    "url": "https://github.com/ts-thomas"
+  },{
+    "type": "opencollective",
+    "url": "https://opencollective.com/flexsearch"
+  },{
+    "type": "patreon",
+    "url": "https://patreon.com/user?u=96245532"
+  },{
+    "type": "liberapay",
+    "url": "https://liberapay.com/ts-thomas"
+  },{
+    "type": "paypal",
+    "url": "https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW"
+  },{
+    "type": "bountysource",
+    "url": "https://salt.bountysource.com/teams/ts-thomas"
+  }]
 }

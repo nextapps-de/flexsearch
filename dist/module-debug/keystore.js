@@ -39,8 +39,7 @@ export function KeystoreObj(bitlength = 8) {
                 obj[key] = value;
                 return (/* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */
                     // splice:
-                    !0 /*await rows.hasNext()*/
-                    /*await rows.hasNext()*/ /*await rows.hasNext()*/
+                    !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
                 );
             },
             delete(target, key) {

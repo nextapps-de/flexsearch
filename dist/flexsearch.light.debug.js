@@ -555,11 +555,8 @@ H.prototype.contain = function(a) {
   return this.reg.has(a);
 };
 H.prototype.update = function(a, c) {
-  if (this.async) {
-    const b = this, d = this.remove(a);
-    return d.then ? d.then(() => b.add(a, c)) : this.add(a, c);
-  }
-  return this.remove(a).add(a, c);
+  const b = this, d = this.remove(a);
+  return d && d.then ? d.then(() => b.add(a, c)) : this.add(a, c);
 };
 function Q(a) {
   let c = 0;

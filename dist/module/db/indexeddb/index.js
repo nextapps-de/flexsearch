@@ -113,7 +113,6 @@ IdxDB.prototype.close = function () {
 };
 
 IdxDB.prototype.destroy = function () {
-    this.db && this.close();
     return IndexedDB.deleteDatabase(this.id + (this.field ? ":" + this.field : ""));
 };
 

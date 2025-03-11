@@ -52,6 +52,7 @@ import Charset from "./charset.js";
 /** @export */ Index.prototype.serialize;
 /** @export */ Index.prototype.mount;
 /** @export */ Index.prototype.commit;
+/** @export */ Index.prototype.destroy;
 
 if(SUPPORT_SERIALIZE || SUPPORT_PERSISTENT){
 /** @export */ Index.prototype.reg;
@@ -87,6 +88,7 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Document.prototype.removeAsync;
 /** @export */ Document.prototype.mount;
 /** @export */ Document.prototype.commit;
+/** @export */ Document.prototype.destroy;
 /** @export */ Document.prototype.export;
 /** @export */ Document.prototype.import;
 /** @export */ Document.prototype.searchCache;

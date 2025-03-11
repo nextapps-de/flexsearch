@@ -1,0 +1,6 @@
+{
+  "name": "nodejs-document",
+  "dependencies": {
+    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
+  }
+}

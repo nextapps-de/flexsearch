@@ -79,9 +79,9 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */
-    /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */
-    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
+    this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */
+    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
+    /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -165,8 +165,7 @@ Encoder.prototype.assign = function (options) {
 
     // options
 
-    this.rtl = options.rtl ||
-    /* suggest */ /* append: */ /* enrich */!1;
+    this.rtl = options.rtl || /* suggest */ /* append: */ /* enrich */!1;
     this.dedupe = parse_option(options.dedupe, !0, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
@@ -421,7 +420,7 @@ Encoder.prototype.encode = function (str) {
             //
             //     // const position = word.length - key.length;
             //     // if(position > 0 && word.substring(position) === key){
-            //     //     word = word.substring(0, position) + value;
+
             //     //     break;
             //     // }
             // }

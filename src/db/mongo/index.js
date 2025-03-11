@@ -128,15 +128,14 @@ MongoDB.prototype.close = function(){
     return this;
 };
 
-MongoDB.prototype.destroy = async function(){
-    await Promise.all([
+MongoDB.prototype.destroy = function(){
+    return Promise.all([
         this.db.dropCollection("map" + this.field),
         this.db.dropCollection("ctx" + this.field),
         this.db.dropCollection("tag" + this.field),
         this.db.dropCollection("cfg" + this.field),
         this.db.dropCollection("reg")
     ]);
-    this.close();
 };
 
 async function clear(ref){

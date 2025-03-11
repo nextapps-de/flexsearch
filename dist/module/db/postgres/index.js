@@ -12,7 +12,7 @@ const defaults = {
     host: "localhost",
     port: "5432"
 },
-      pgp = pg_promise(),
+      pgp = pg_promise({ noWarnings: !!1 }),
       VERSION = 1,
       MAXIMUM_QUERY_VARS = 16000,
       fields = ["map", "ctx", "reg", "tag", "cfg"],
@@ -183,15 +183,14 @@ PostgresDB.prototype.close = function () {
     return this;
 };
 
-PostgresDB.prototype.destroy = async function () {
-    await this.db.none(`
+PostgresDB.prototype.destroy = function () {
+    return this.db.none(`
         DROP TABLE IF EXISTS ${this.id}.map${this.field};
         DROP TABLE IF EXISTS ${this.id}.ctx${this.field};
         DROP TABLE IF EXISTS ${this.id}.tag${this.field};
         DROP TABLE IF EXISTS ${this.id}.cfg${this.field};
         DROP TABLE IF EXISTS ${this.id}.reg;
     `);
-    this.close();
 };
 
 PostgresDB.prototype.clear = function () {

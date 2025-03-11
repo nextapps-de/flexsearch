@@ -88,12 +88,13 @@ Index.prototype.commit = function (replace, append) {
     }
     return this.db.commit(this, replace, append);
 };
-
-// if(SUPPORT_RESOLVER){
-//     Index.prototype.resolve = function(params){
-//         return new Resolver(params);
-//     };
-// }
+Index.prototype.destroy = function () {
+    if (this.commit_timer) {
+        clearTimeout(this.commit_timer);
+        this.commit_timer = null;
+    }
+    return this.db.destroy();
+};
 
 /**
  * @param {!Index} self
@@ -112,9 +113,6 @@ export function autoCommit(self, replace, append) {
 
 Index.prototype.clear = function () {
 
-    //this.map = new Map();
-    //this.ctx = new Map();
-    //this.reg = this.fastupdate ? new Map() : new Set();
     this.map.clear();
     this.ctx.clear();
     this.reg.clear();
@@ -126,13 +124,10 @@ Index.prototype.clear = function () {
         this.commit_timer && clearTimeout(this.commit_timer);
         this.commit_timer = null;
         this.commit_task = [{ clear: !0 }];
-        //return this.db.clear();
     }
 
     return this;
 };
-
-//Index.prototype.pipeline = pipeline;
 
 /**
  * @param {!number|string} id
@@ -144,25 +139,14 @@ Index.prototype.append = function (id, content) {
 };
 
 Index.prototype.contain = function (id) {
-
-    if (this.db) {
-        return this.db.has(id);
-    }
-
-    return this.reg.has(id);
+    return this.db ? this.db.has(id) : this.reg.has(id);
 };
 
 Index.prototype.update = function (id, content) {
+    const self = this,
+          res = this.remove(id);
 
-    // todo check the async part
-    if (this.async /*|| (SUPPORT_PERSISTENT && this.db)*/) {
-            const self = this,
-                  res = this.remove(id);
-
-            return res.then ? res.then(() => self.add(id, content)) : this.add(id, content);
-        }
-
-    return this.remove(id).add(id, content);
+    return res && res.then ? res.then(() => self.add(id, content)) : this.add(id, content);
 };
 
 /**

@@ -12,7 +12,7 @@ const defaults = {
     host: "localhost",
     port: "5432"
 },
-      pgp = pg_promise(),
+      pgp = pg_promise({ noWarnings: ! /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ }),
       VERSION = 1,
       MAXIMUM_QUERY_VARS = 16000,
       fields = ["map", "ctx", "reg", "tag", "cfg"],
@@ -64,7 +64,7 @@ export default function PostgresDB(name, config = {}) {
     this.id = (config.schema ? sanitize(config.schema) : defaults.schema) + (name ? "_" + sanitize(name) : "");
     this.field = config.field ? "_" + sanitize(config.field) : "";
     this.type = config.type ? types[config.type.toLowerCase()] : "text";
-    this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search = !0;
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
     this.db = DB || (DB = config.db || null);
     Object.assign(defaults, config);
@@ -183,15 +183,14 @@ PostgresDB.prototype.close = function () {
     return this;
 };
 
-PostgresDB.prototype.destroy = async function () {
-    await this.db.none(`
+PostgresDB.prototype.destroy = function () {
+    return this.db.none(`
         DROP TABLE IF EXISTS ${this.id}.map${this.field};
         DROP TABLE IF EXISTS ${this.id}.ctx${this.field};
         DROP TABLE IF EXISTS ${this.id}.tag${this.field};
         DROP TABLE IF EXISTS ${this.id}.cfg${this.field};
         DROP TABLE IF EXISTS ${this.id}.reg;
     `);
-    this.close();
 };
 
 PostgresDB.prototype.clear = function () {

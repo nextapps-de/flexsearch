@@ -1,0 +1,7 @@
+{
+  "name": "nodejs-persistent",
+  "dependencies": {
+    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview",
+    "pg-promise": "^11.11.0"
+  }
+}

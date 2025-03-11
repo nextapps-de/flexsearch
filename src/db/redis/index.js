@@ -87,6 +87,10 @@ RedisDB.prototype.close = async function(){
     return this;
 };
 
+RedisDB.prototype.destroy = function(){
+    return this.clear();
+};
+
 RedisDB.prototype.clear = function(){
     return this.db.unlink([
         this.id + "map" + this.field,

@@ -79,6 +79,10 @@ RedisDB.prototype.close = async function () {
     return this;
 };
 
+RedisDB.prototype.destroy = function () {
+    return this.clear();
+};
+
 RedisDB.prototype.clear = function () {
     return this.db.unlink([this.id + "map" + this.field, this.id + "ctx" + this.field, this.id + "tag" + this.field, this.id + "cfg" + this.field, this.id + "doc", this.id + "reg"]);
 };

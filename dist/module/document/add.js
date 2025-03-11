@@ -34,8 +34,7 @@ Document.prototype.add = function (id, content, _append) {
             if ("function" == typeof tree) {
                 const tmp = tree(content);
                 if (tmp) {
-                    index.add(id, tmp, /* suggest */ /* append: */!1, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/
-                    /*await rows.hasNext()*/ /*await rows.hasNext()*/);
+                    index.add(id, tmp, /* suggest */ /* append: */!1, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/);
                 }
             } else {
                 const filter = tree._filter;

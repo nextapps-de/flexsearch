@@ -53,10 +53,15 @@ export default function Document(options) {
 
     this.worker = options.worker;
 
-    // this switch is used by recall of promise callbacks
-    this.async = !1;
+    // if(SUPPORT_ASYNC){
+    //     // this switch is used by recall of promise callbacks
+    //     this.async = false;
+    // }
 
-    /** @export */
+    /**
+     * @type {Map<Index>}
+     * @export
+     */
     this.index = parse_descriptor.call(this, options, document);
 
     this.tag = null;
@@ -106,17 +111,17 @@ Document.prototype.mount = function (db) {
         // move tags to their field indexes respectively
         for (let i = 0, field; i < this.tagfield.length; i++) {
             field = this.tagfield[i];
-            let index = this.index.get(field);
-            if (!index) {
-                // create raw index when not exists
-                this.index.set(field, index = new Index({}, this.reg));
-                // copy and push to the field selection
-                if (fields === this.field) {
-                    fields = fields.slice(0);
-                }
-                // tag indexes also needs to be upgraded to db instances
-                fields.push(field);
+            let index; // = this.index.get(field);
+            //if(!index){
+            // create raw index when not exists
+            this.index.set(field, index = new Index({}, this.reg));
+            // copy and push to the field selection
+            if (fields === this.field) {
+                fields = fields.slice(0);
             }
+            // tag indexes also needs to be upgraded to db instances
+            fields.push(field);
+            //}
             // assign reference
             index.tag = this.tag.get(field);
         }
@@ -150,7 +155,7 @@ Document.prototype.mount = function (db) {
         }
     }
 
-    this.async = !0;
+    //this.async = true;
     this.db = !0;
     return Promise.all(promises);
 };
@@ -168,6 +173,14 @@ Document.prototype.commit = async function (replace, append) {
     //     await index.db.commit(index, replace, append);
     // }
     // this.reg.clear();
+};
+
+Document.prototype.destroy = function () {
+    const promises = [];
+    for (const idx of this.index.values()) {
+        promises.push(idx.destroy());
+    }
+    return Promise.all(promises);
 };
 
 /**

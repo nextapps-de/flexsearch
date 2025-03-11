@@ -41,8 +41,7 @@ export default function MongoDB(name, config = {}) {
     this.type = config.type || "";
     this.db = config.db || DB[this.id] || CLIENT || null;
     this.trx = !1;
-    this.support_tag_search =
-    /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
     Object.assign(defaults, config);
     this.db && delete defaults.db;
 }
@@ -130,9 +129,8 @@ MongoDB.prototype.close = function () {
     return this;
 };
 
-MongoDB.prototype.destroy = async function () {
-    await Promise.all([this.db.dropCollection("map" + this.field), this.db.dropCollection("ctx" + this.field), this.db.dropCollection("tag" + this.field), this.db.dropCollection("cfg" + this.field), this.db.dropCollection("reg")]);
-    this.close();
+MongoDB.prototype.destroy = function () {
+    return Promise.all([this.db.dropCollection("map" + this.field), this.db.dropCollection("ctx" + this.field), this.db.dropCollection("tag" + this.field), this.db.dropCollection("cfg" + this.field), this.db.dropCollection("reg")]);
 };
 
 async function clear(ref) {
@@ -548,7 +546,8 @@ MongoDB.prototype.commit = async function (flexsearch, _replace, _append) {
     }
     if (data.length) {
         await this.db.collection("reg").insertMany(data);
-        flexsearch.store && flexsearch.store.clear();flexsearch.document || flexsearch.reg.clear();
+        flexsearch.store && flexsearch.store.clear();
+        flexsearch.document || flexsearch.reg.clear();
     }
 
     // TODO

@@ -183,15 +183,14 @@ ClickhouseDB.prototype.close = function(){
     return this;
 };
 
-ClickhouseDB.prototype.destroy = async function(){
-    await Promise.all([
+ClickhouseDB.prototype.destroy = function(){
+    return Promise.all([
         this.db.query(`DROP TABLE ${this.id}.map${this.field};`).toPromise(),
         this.db.query(`DROP TABLE ${this.id}.ctx${this.field};`).toPromise(),
         this.db.query(`DROP TABLE ${this.id}.tag${this.field};`).toPromise(),
         this.db.query(`DROP TABLE ${this.id}.cfg${this.field};`).toPromise(),
         this.db.query(`DROP TABLE ${this.id}.reg;`).toPromise()
     ]);
-    this.close();
 };
 
 ClickhouseDB.prototype.clear = function(){

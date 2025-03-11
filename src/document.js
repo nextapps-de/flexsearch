@@ -79,12 +79,15 @@ export default function Document(options){
         this.worker = options.worker;
     }
 
-    if(SUPPORT_ASYNC){
-        // this switch is used by recall of promise callbacks
-        this.async = false;
-    }
+    // if(SUPPORT_ASYNC){
+    //     // this switch is used by recall of promise callbacks
+    //     this.async = false;
+    // }
 
-    /** @export */
+    /**
+     * @type {Map<Index>}
+     * @export
+     */
     this.index = parse_descriptor.call(this, options, document);
 
     if(SUPPORT_TAGS){
@@ -141,8 +144,8 @@ if(SUPPORT_PERSISTENT){
             // move tags to their field indexes respectively
             for(let i = 0, field; i < this.tagfield.length; i++){
                 field = this.tagfield[i];
-                let index = this.index.get(field);
-                if(!index){
+                let index;// = this.index.get(field);
+                //if(!index){
                     // create raw index when not exists
                     this.index.set(field, index = new Index({}, this.reg));
                     // copy and push to the field selection
@@ -151,7 +154,7 @@ if(SUPPORT_PERSISTENT){
                     }
                     // tag indexes also needs to be upgraded to db instances
                     fields.push(field);
-                }
+                //}
                 // assign reference
                 index.tag = this.tag.get(field);
             }
@@ -185,7 +188,7 @@ if(SUPPORT_PERSISTENT){
             }
         }
 
-        this.async = true;
+        //this.async = true;
         this.db = true;
         return Promise.all(promises);
     };
@@ -204,6 +207,14 @@ if(SUPPORT_PERSISTENT){
         // }
         // this.reg.clear();
     };
+
+    Document.prototype.destroy = function(){
+        const promises = [];
+        for(const idx of this.index.values()){
+            promises.push(idx.destroy());
+        }
+        return Promise.all(promises);
+    }
 }
 
 /**

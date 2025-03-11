@@ -7,6 +7,11 @@ export default function (prototype) {
     register.call(prototype, "search");
     register.call(prototype, "update");
     register.call(prototype, "remove");
+    // prototype.addAsync = prototype.add;
+    // prototype.appendAsync = prototype.append;
+    // prototype.searchAsync = prototype.search;
+    // prototype.updateAsync = prototype.update;
+    // prototype.removeAsync = prototype.remove;
 }
 
 // let cycle;
@@ -17,6 +22,11 @@ export default function (prototype) {
 //     budget = 0;
 //     resolve();
 // }
+
+/*
+
+automatisch
+ */
 
 /**
  * @param {!string} key
@@ -62,9 +72,9 @@ function register(key) {
             delete args[args.length - 1];
         }
 
-        this.async = !0;
+        //this.async = true;
         const res = this[key].apply(this, args);
-        this.async = !1;
+        //this.async = false;
         if (callback) {
             res.then ? res.then(callback) : callback(res);
         }

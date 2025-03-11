@@ -293,9 +293,7 @@ function M(a) {
     const b = c[c.length - 1];
     let e;
     "function" === typeof b && (e = b, delete c[c.length - 1]);
-    this.async = !0;
     c = this[a].apply(this, c);
-    this.async = !1;
     e && (c.then ? c.then(e) : e(c));
     return c;
   };
@@ -657,11 +655,8 @@ u.contain = function(a) {
   return this.reg.has(a);
 };
 u.update = function(a, c) {
-  if (this.async) {
-    const b = this, e = this.remove(a);
-    return e.then ? e.then(() => b.add(a, c)) : this.add(a, c);
-  }
-  return this.remove(a).add(a, c);
+  const b = this, e = this.remove(a);
+  return e && e.then ? e.then(() => b.add(a, c)) : this.add(a, c);
 };
 function U(a) {
   let c = 0;
@@ -973,7 +968,7 @@ function W(a, c, b, e, d, f, g, h) {
     z(l) && (l = [l]);
   }
   l || (l = this.field);
-  p = !e && (this.worker || this.async) && [];
+  p = !e && (this.worker || this.db) && [];
   for (let v = 0, r, C, D; v < l.length; v++) {
     C = l[v];
     let A;
@@ -1099,7 +1094,7 @@ function xa(a) {
   this.A = (b = c.store || null) && !0 !== b && [];
   this.store = b && new Map();
   this.cache = (b = a.cache || null) && new K(b);
-  this.async = a.cache = !1;
+  a.cache = !1;
   b = new Map();
   let e = c.index || c.field || c;
   z(e) && (e = [e]);
