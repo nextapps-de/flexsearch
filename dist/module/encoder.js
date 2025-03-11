@@ -79,7 +79,9 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
+    this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */
+    /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */
+    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -121,15 +123,26 @@ Encoder.prototype.assign = function (options) {
             regex += "object" == typeof tmp ? tmp.join("") : tmp;
         }
 
-        this.split = new RegExp("[" + (include ? "^" : "") + regex + "]+", "u");
+        try {
+            // https://github.com/nextapps-de/flexsearch/issues/410
+            /**
+             * split string input into terms
+             * @type {string|RegExp|boolean|null}
+             */
+            this.split = new RegExp("[" + (include ? "^" : "") + regex + "]+", "u");
+        } catch (e) {
+            // fallback to a simple whitespace splitter
+            this.split = /\s+/;
+        }
         this.numeric = numeric;
     } else {
-
-        /**
-         * split string input into terms
-         * @type {string|RegExp|boolean|null}
-         */
-        this.split = /** @type {string|RegExp|boolean} */parse_option(tmp, whitespace, this.split);
+        try {
+            // https://github.com/nextapps-de/flexsearch/issues/410
+            this.split = /** @type {string|RegExp|boolean} */parse_option(tmp, whitespace, this.split);
+        } catch (e) {
+            // fallback to a simple whitespace splitter
+            this.split = /\s+/;
+        }
         this.numeric = parse_option(this.numeric, !0);
     }
 
@@ -152,7 +165,8 @@ Encoder.prototype.assign = function (options) {
 
     // options
 
-    this.rtl = options.rtl || /* suggest */ /* append: */ /* enrich */!1;
+    this.rtl = options.rtl ||
+    /* suggest */ /* append: */ /* enrich */!1;
     this.dedupe = parse_option(options.dedupe, !0, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
@@ -216,7 +230,6 @@ Encoder.prototype.assign = function (options) {
 };
 
 Encoder.prototype.addMatcher = function (match, replace) {
-    // regex:
     if ("object" == typeof match) {
         return this.addReplacer(match, replace);
     }

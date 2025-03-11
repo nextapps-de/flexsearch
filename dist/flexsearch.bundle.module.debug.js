@@ -110,10 +110,19 @@ G.prototype.assign = function(a) {
     if (c = c.char) {
       e += "object" === typeof c ? c.join("") : c;
     }
-    this.split = new RegExp("[" + (b ? "^" : "") + e + "]+", "u");
+    try {
+      this.split = new RegExp("[" + (b ? "^" : "") + e + "]+", "u");
+    } catch (f) {
+      this.split = /\s+/;
+    }
     this.numeric = d;
   } else {
-    this.split = y(c, fa, this.split), this.numeric = y(this.numeric, !0);
+    try {
+      this.split = y(c, fa, this.split);
+    } catch (d) {
+      this.split = /\s+/;
+    }
+    this.numeric = y(this.numeric, !0);
   }
   this.prepare = y(a.prepare, null, this.prepare);
   this.finalize = y(a.finalize, null, this.finalize);
@@ -1048,17 +1057,17 @@ function Ia(a, b, c, d, e) {
   return g;
 }
 function Ja(a, b) {
-  const c = z(), d = z(), e = [];
-  for (let f = 0; f < a.length; f++) {
-    c[a[f]] = 1;
-  }
-  for (let f = 0, g; f < b.length; f++) {
-    g = b[f];
-    for (let h = 0, k; h < g.length; h++) {
-      k = g[h], c[k] && !d[k] && (d[k] = 1, e.push(k));
+  const c = z(), d = [];
+  for (let e = 0, f; e < b.length; e++) {
+    f = b[e];
+    for (let g = 0; g < f.length; g++) {
+      c[f[g]] = 1;
     }
   }
-  return e;
+  for (let e = 0, f; e < a.length; e++) {
+    f = a[e], 1 === c[f] && (d.push(f), c[f] = 2);
+  }
+  return d;
 }
 ;let T = 1;
 O.prototype.search = function(a, b, c) {

@@ -72,10 +72,19 @@ C.prototype.assign = function(a) {
     if (b = b.char) {
       e += "object" === typeof b ? b.join("") : b;
     }
-    this.split = new RegExp("[" + (c ? "^" : "") + e + "]+", "u");
+    try {
+      this.split = new RegExp("[" + (c ? "^" : "") + e + "]+", "u");
+    } catch (g) {
+      this.split = /\s+/;
+    }
     this.numeric = d;
   } else {
-    this.split = t(b, w, this.split), this.numeric = t(this.numeric, !0);
+    try {
+      this.split = t(b, w, this.split);
+    } catch (d) {
+      this.split = /\s+/;
+    }
+    this.numeric = t(this.numeric, !0);
   }
   this.prepare = t(a.prepare, null, this.prepare);
   this.finalize = t(a.finalize, null, this.finalize);

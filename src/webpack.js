@@ -102,8 +102,8 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Resolver.prototype.xor;
 /** @export */ Resolver.prototype.not;
 
-/** @export */ StorageInterface.id;
 /** @export */ StorageInterface.db;
+/** @export */ StorageInterface.id;
 /** @export */ StorageInterface.support_tag_search;
 /** @export */ StorageInterface.prototype.mount;
 /** @export */ StorageInterface.prototype.open;

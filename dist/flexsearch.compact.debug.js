@@ -97,10 +97,19 @@ J.prototype.assign = function(a) {
     if (b = b.char) {
       d += "object" === typeof b ? b.join("") : b;
     }
-    this.split = new RegExp("[" + (c ? "^" : "") + d + "]+", "u");
+    try {
+      this.split = new RegExp("[" + (c ? "^" : "") + d + "]+", "u");
+    } catch (f) {
+      this.split = /\s+/;
+    }
     this.numeric = e;
   } else {
-    this.split = x(b, ca, this.split), this.numeric = x(this.numeric, !0);
+    try {
+      this.split = x(b, ca, this.split);
+    } catch (e) {
+      this.split = /\s+/;
+    }
+    this.numeric = x(this.numeric, !0);
   }
   this.prepare = x(a.prepare, null, this.prepare);
   this.finalize = x(a.finalize, null, this.finalize);
@@ -387,17 +396,17 @@ function O(a, c, b, e, d) {
   return e.length ? e = 1 < e.length ? [].concat.apply([], e) : e[0] : e;
 }
 ;function ua(a, c) {
-  const b = y(), e = y(), d = [];
-  for (let f = 0; f < a.length; f++) {
-    b[a[f]] = 1;
-  }
-  for (let f = 0, g; f < c.length; f++) {
-    g = c[f];
-    for (let h = 0, k; h < g.length; h++) {
-      k = g[h], b[k] && !e[k] && (e[k] = 1, d.push(k));
+  const b = y(), e = [];
+  for (let d = 0, f; d < c.length; d++) {
+    f = c[d];
+    for (let g = 0; g < f.length; g++) {
+      b[f[g]] = 1;
     }
   }
-  return d;
+  for (let d = 0, f; d < a.length; d++) {
+    f = a[d], 1 === b[f] && (e.push(f), b[f] = 2);
+  }
+  return e;
 }
 ;N.prototype.search = function(a, c, b) {
   b || (!c && E(a) ? (b = a, a = "") : E(c) && (b = c, c = 0));

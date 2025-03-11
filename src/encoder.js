@@ -125,16 +125,29 @@ Encoder.prototype.assign = function(options){
             regex += typeof tmp === "object" ? tmp.join("") : tmp;
         }
 
-        this.split = new RegExp("[" + (include ? "^" : "") + regex + "]+", "u");
+        try{
+            // https://github.com/nextapps-de/flexsearch/issues/410
+            /**
+             * split string input into terms
+             * @type {string|RegExp|boolean|null}
+             */
+            this.split = new RegExp("[" + (include ? "^" : "") + regex + "]+", "u");
+        }
+        catch(e){
+            // fallback to a simple whitespace splitter
+            this.split = /\s+/;
+        }
         this.numeric = numeric;
     }
     else{
-
-        /**
-         * split string input into terms
-         * @type {string|RegExp|boolean|null}
-         */
-        this.split = /** @type {string|RegExp|boolean} */ (parse_option(tmp, whitespace, this.split));
+        try{
+            // https://github.com/nextapps-de/flexsearch/issues/410
+            this.split = /** @type {string|RegExp|boolean} */ (parse_option(tmp, whitespace, this.split));
+        }
+        catch(e){
+            // fallback to a simple whitespace splitter
+            this.split = /\s+/;
+        }
         this.numeric = parse_option(this.numeric, true);
     }
 

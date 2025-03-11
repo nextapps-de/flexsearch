@@ -41,7 +41,12 @@
     "dist/flexsearch.bundle.min.js": "./dist/flexsearch.bundle.min.js",
     "dist/flexsearch.bundle.module.min.js": "./dist/flexsearch.bundle.module.min.js",
     "worker_threads": false,
-    "path": false
+    "path": false,
+    "clickhouse": false,
+    "mongodb": false,
+    "pg-promise": false,
+    "redis": false,
+    "sqlite3": false
   },
   "types": "./index.d.ts",
   "scripts": {

@@ -133,6 +133,70 @@ function union(arrays, offset, limit){
     return result;
 }
 
+/**
+ * @param {Array<number|string>} mandatory
+ * @param {Array<Array<number|string>>} arrays
+ * @returns {Array<number|string>}
+ */
+
+export function intersect_union(mandatory, arrays) {
+
+    const check = create_object();
+    const result = [];
+
+    for(let x = 0, ids; x < arrays.length; x++){
+        ids = arrays[x];
+        for(let i = 0; i < ids.length; i++){
+            check[ids[i]] = 1;
+        }
+    }
+
+    for(let i = 0, id; i < mandatory.length; i++){
+        id = mandatory[i];
+        if(check[id] === 1){
+            result.push(id);
+            check[id] = 2;
+        }
+    }
+
+    return result;
+}
+
+// export function intersect_union(mandatory, arrays, resolution) {
+//
+//     const check = create_object();
+//     const union = create_object();
+//     const result = [];
+//
+//     for(let x = 0; x < mandatory.length; x++){
+//         check[mandatory[x]] = 1;
+//     }
+//
+//
+//     for(let y = 0, ids, id; y < resolution; y++){
+//         for(let x = 0; x < arrays.length; x++){
+//
+//             ids = arrays[x];
+//
+//             if(y < ids.length){
+//
+//                 id = ids[y];
+//
+//                 if(check[id]){
+//
+//                     if(!union[id]){
+//
+//                         union[id] = 1;
+//                         result.push(id);
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//
+//     return result;
+// }
+
 //
 // /**
 //  * Implementation based on Object[key] provides better suggestions
@@ -313,46 +377,6 @@ function union(arrays, offset, limit){
 //
 //     return result;
 // }
-
-/**
- * @param mandatory
- * @param arrays
- * @returns {Array}
- */
-
-export function intersect_union(mandatory, arrays) {
-
-    const check = create_object();
-    const union = create_object();
-    const result = [];
-
-    for(let x = 0; x < mandatory.length; x++){
-
-        check[mandatory[x]] = 1;
-    }
-
-    for(let x = 0, arr; x < arrays.length; x++){
-
-        arr = arrays[x];
-
-        for(let y = 0, id; y < arr.length; y++){
-
-            id = arr[y];
-
-            if(check[id]){
-
-                if(!union[id]){
-
-                    union[id] = 1;
-                    result.push(id);
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
 
 /**
  * Implementation based on Array.includes() provides better performance,
