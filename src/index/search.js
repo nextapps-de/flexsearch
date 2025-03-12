@@ -209,6 +209,8 @@ Index.prototype.search = function(query, limit, options){
         }
     }
 
+    // from this point there are just multi-term queries
+
     if(SUPPORT_PERSISTENT && this.db){
 
         if(this.db.search){
@@ -226,16 +228,16 @@ Index.prototype.search = function(query, limit, options){
 
                 if(keyword){
 
-                    arr = await self.get_array(term, keyword);
+                    arr = await self.get_array(term, keyword, 0, 0, false, false);
                     arr = add_result(
                         arr,
                         result,
                         suggest,
                         self.resolution_ctx,
-                        /** @type {!number} */ (limit),
-                        offset,
-                        length === 2
-                        /*, term, keyword*/
+                        // 0, // /** @type {!number} */ (limit),
+                        // 0, // offset,
+                        // length === 2
+                        // /*, term, keyword*/
                     );
 
                     // the context is a moving window where the keyword is going forward like a cursor
@@ -247,16 +249,16 @@ Index.prototype.search = function(query, limit, options){
                 }
                 else{
 
-                    arr = await self.get_array(term);
+                    arr = await self.get_array(term, "", 0, 0, false, false);
                     arr = add_result(
                         arr,
                         result,
                         suggest,
                         self.resolution,
-                        /** @type {!number} */ (limit),
-                        offset,
-                        length === 1
-                        /*, term*/
+                        // 0, // /** @type {!number} */ (limit),
+                        // 0, // offset,
+                        // length === 1
+                        // /*, term*/
                     );
                 }
 
@@ -297,16 +299,16 @@ Index.prototype.search = function(query, limit, options){
 
         if(keyword){
 
-            arr = this.get_array(term, keyword);
+            arr = this.get_array(term, keyword, 0, 0, false, false);
             arr = /*this.*/add_result(
                 arr,
                 result,
                 suggest,
                 this.resolution_ctx,
-                /** @type {!number} */ (limit),
-                offset,
-                length === 2
-                /*, term, keyword*/
+                // 0, // /** @type {!number} */ (limit),
+                // 0, // offset,
+                // length === 2
+                // /*, term, keyword*/
             );
 
             // 1. when suggestion enabled just forward keyword if term was found
@@ -317,16 +319,16 @@ Index.prototype.search = function(query, limit, options){
         }
         else{
 
-            arr = this.get_array(term);
+            arr = this.get_array(term, "", 0, 0, false, false);
             arr = /*this.*/add_result(
                 arr,
                 result,
                 suggest,
                 this.resolution,
-                /** @type {!number} */ (limit),
-                offset,
-                length === 1
-                /*, term*/
+                // 0, // /** @type {!number} */ (limit),
+                // 0, // offset,
+                // length === 1
+                // /*, term*/
             );
         }
 
@@ -402,13 +404,10 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
  * @param {Array} result
  * @param {Array} suggest
  * @param {number} resolution
- * @param {number} limit
- * @param {number} offset
- * @param {boolean} single_term
  * @return {Array|boolean|undefined}
  */
 
-function add_result(arr, result, suggest, resolution, limit, offset, single_term/*, term, keyword*/){
+function add_result(arr, result, suggest, resolution/*, limit, offset single_term, term, keyword*/){
 
     let word_arr = [];
     //let arr;// = keyword ? this.ctx : this.map;
@@ -423,19 +422,19 @@ function add_result(arr, result, suggest, resolution, limit, offset, single_term
         for(let x = 0, size = 0, tmp; x < resolution; x++){
             if((tmp = arr[x])){
 
-                if(offset){
-                    // apply offset right here on single terms
-                    if(tmp && single_term){
-                        if(tmp.length <= offset){
-                            offset -= tmp.length;
-                            tmp = null;
-                        }
-                        else{
-                            tmp = tmp.slice(offset);
-                            offset = 0;
-                        }
-                    }
-                }
+                // if(offset){
+                //     // apply offset right here on single terms
+                //     if(tmp && single_term){
+                //         if(tmp.length <= offset){
+                //             offset -= tmp.length;
+                //             tmp = null;
+                //         }
+                //         else{
+                //             tmp = tmp.slice(offset);
+                //             offset = 0;
+                //         }
+                //     }
+                // }
 
                 if(tmp){
 
@@ -444,25 +443,25 @@ function add_result(arr, result, suggest, resolution, limit, offset, single_term
                     // simplified score order:
                     //word_arr.push(tmp);
 
-                    if(single_term){
-                        size += tmp.length;
-                        if(size >= limit){
-                            // fast path:
-                            // a single term does not need to pre-collect results
-                            break;
-                        }
-                    }
+                    // if(single_term){
+                    //     size += tmp.length;
+                    //     if(size >= limit){
+                    //         // fast path:
+                    //         // a single term does not need to pre-collect results
+                    //         break;
+                    //     }
+                    // }
                 }
             }
         }
 
         if(word_arr.length){
-            if(single_term){
-                // fast path optimization
-                // offset was already applied at this point
-                // return an array will stop the query process immediately
-                return resolve_default(word_arr, limit, 0);
-            }
+            // if(single_term){
+            //     // fast path optimization
+            //     // offset was already applied at this point
+            //     // return an array will stop the query process immediately
+            //     return resolve_default(word_arr, limit, 0);
+            // }
 
             result.push(word_arr);
             // return nothing will continue the query

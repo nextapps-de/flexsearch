@@ -49,7 +49,8 @@ export default function Document(options) {
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache = /* suggest */ /* append: */ /* enrich */!1;
+    options.cache = /* suggest */ /* append: */
+    /* enrich */!1;
 
     this.worker = options.worker;
 
@@ -99,7 +100,21 @@ export default function Document(options) {
         }
     }
 
-    options.db && this.mount(options.db);
+
+    if (this.worker) {
+        const promises = [];
+        for (const index of this.index.values()) {
+            index.worker.then && promises.push(index.worker);
+        }
+        if (promises.length) {
+            const self = this;
+            return Promise.all(promises).then(function () {
+                return self;
+            });
+        }
+    } else {
+        options.db && this.mount(options.db);
+    }
 }
 
 Document.prototype.mount = function (db) {
@@ -209,8 +224,9 @@ function parse_descriptor(options, document) {
 
         if (this.worker) {
             const worker = new WorkerIndex(opt);
-            index.set(key, worker);
-            if (!worker.worker) {
+            if (worker.worker) {
+                index.set(key, worker);
+            } else {
                 // fallback when not supported
                 this.worker = !1;
             }

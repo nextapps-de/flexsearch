@@ -44,6 +44,7 @@ import Charset from "./charset.js";
 /** @export */Index.prototype.cache;
 /** @export */Index.prototype.bypass;
 /** @export */Index.prototype.document;
+/** @export */Index.prototype.encoder;
 
 /** @export */Document.prototype.add;
 /** @export */Document.prototype.append;

@@ -11,7 +11,8 @@ const defaults = {
     host: "localhost",
     port: "5432"
 },
-      pgp = pg_promise({ noWarnings: ! /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ }),
+      pgp = pg_promise({ noWarnings: !
+    /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ }),
       VERSION = 1,
       MAXIMUM_QUERY_VARS = 16000,
       fields = ["map", "ctx", "reg", "tag", "cfg"],

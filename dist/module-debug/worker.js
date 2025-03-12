@@ -1,4 +1,3 @@
-//import { promise as Promise } from "../polyfill.js";
 import { IndexOptions } from "./type.js";
 import { create_object, is_function, is_object, is_string } from "./common.js";
 import handler from "./worker/handler.js";
@@ -10,20 +9,15 @@ let pid = 0;
  * @constructor
  */
 
-export default function WorkerIndex(options) {
+export default function WorkerIndex(options = {}) {
 
     if (!this) {
         return new WorkerIndex(options);
     }
 
-    if (!options) {
-        options = {};
-    }
-
     // the factory is the outer wrapper from the build
-    // we use "self" as a trap for node.js
-
-    let factory = "undefined" != typeof self && (self || window)._factory;
+    // it uses "self" as a trap for node.js
+    let factory = "undefined" != typeof self ? self._factory : "undefined" != typeof window ? window._factory : null;
     if (factory) {
         factory = factory.toString();
     }
@@ -31,9 +25,18 @@ export default function WorkerIndex(options) {
     const is_node_js = "undefined" == typeof window /*&& self["exports"]*/,
           _self = this;
 
-    (async function () {
+    /**
+     * @param {Worker=} _worker
+     * @this {WorkerIndex}
+     */
+    function init(_worker) {
 
-        this.worker = await create(factory, is_node_js, options.worker);
+        this.worker = _worker || create(factory, is_node_js, options.worker);
+
+        if (this.worker.then) {
+            return this.worker.then(init);
+        }
+
         this.resolver = create_object();
 
         if (!this.worker) {
@@ -55,14 +58,16 @@ export default function WorkerIndex(options) {
 
         if (options.config) {
 
-            delete options.db;
+            //delete options.db;
 
             // when extern configuration needs to be loaded
             // it needs to return a promise to await for
             return new Promise(function (resolve) {
+
                 _self.resolver[++pid] = function () {
                     resolve(_self);
                 };
+
                 _self.worker.postMessage({
                     id: pid,
                     task: "init",
@@ -77,7 +82,11 @@ export default function WorkerIndex(options) {
             factory: factory,
             options: options
         });
-    }).call(this);
+
+        return this.worker;
+    }
+
+    this.worker = init.call(this);
 }
 
 register("add");
@@ -88,7 +97,7 @@ register("remove");
 
 function register(key) {
 
-    WorkerIndex.prototype[key] = WorkerIndex.prototype[key + "Async"] = function () {
+    WorkerIndex.prototype[key] = WorkerIndex.prototype[key + "Async"] = async function () {
         const self = this,
               args = [].slice.call(arguments),
               arg = args[args.length - 1];
@@ -121,14 +130,16 @@ function register(key) {
     };
 }
 
-async function create(factory, is_node_js, worker_path) {
+function create(factory, is_node_js, worker_path) {
 
     let worker = is_node_js ?
     // This eval will be removed when compiling, it isn't there in final build
 
     "undefined" != typeof module ? (0, eval)('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
     //: (0,eval)('new ((await import("worker_threads"))["Worker"])(import.meta.dirname + "/worker/node.mjs")')
-    : (0, eval)('new ((await import("worker_threads"))["Worker"])((1,eval)(\"import.meta.dirname\") + "/node/node.mjs")')
+    //: (0,eval)('new ((await import("worker_threads"))["Worker"])((1,eval)(\"import.meta.dirname\") + "/node/node.mjs")')
+    : (0, eval)('import("worker_threads").then(function(worker){ return new worker["Worker"]((1,eval)(\"import.meta.dirname\") + "/node/node.mjs"); })')
+    //: import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/worker/node.mjs"); })
 
     //eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
     : factory ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new window.Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" });

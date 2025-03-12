@@ -24,12 +24,6 @@ export default async function(data) {
                 //options = await import(filepath);
             }
 
-            // deprecated:
-            // const encode = options.encode;
-            // if(encode && (encode.indexOf("function") === 0)){
-            //     options.encode = Function("return " + encode)();
-            // }
-
             const factory = data["factory"];
 
             if(factory){
@@ -55,6 +49,10 @@ export default async function(data) {
 
             const id = data["id"];
             const message = index[task].apply(index, args);
-            postMessage(task === "search" ? { "id": id, "msg": message } : { "id": id });
+            postMessage(
+                task === "search"
+                    ? { "id": id, "msg": message }
+                    : { "id": id }
+            );
     }
 };

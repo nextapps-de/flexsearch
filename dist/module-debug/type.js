@@ -19,10 +19,11 @@ import StorageInterface from "./db/interface.js";
  *   resolve: [boolean=true],
  *   db: StorageInterface|undefined,
  *   commit: boolean=true,
+ *   worker: boolean|string|undefined,
  *   config: string|undefined
  * }}
  */
-export let IndexOptions;
+export let IndexOptions = {};
 
 /**
  * @typedef DocumentIndexOptions {{
@@ -40,13 +41,12 @@ export let IndexOptions;
  *   db: StorageInterface|undefined,
  *   commit: boolean=true,
  *   config: string|undefined,
- *
  *   field: string,
  *   filter: Function|undefined,
  *   custom: Function|undefined
  * }}
  */
-export let DocumentIndexOptions;
+export let DocumentIndexOptions = {};
 
 /**
  * @typedef DocumentOptions {{
@@ -66,7 +66,7 @@ export let DocumentIndexOptions;
  *   worker: boolean|string|undefined
  * }}
  */
-export let DocumentOptions;
+export let DocumentOptions = {};
 
 /**
  * @typedef ContextOptions {{
@@ -75,7 +75,7 @@ export let DocumentOptions;
  *   resolution: number|undefined
  * }}
  */
-export let ContextOptions;
+export let ContextOptions = {};
 
 /**
  * @typedef DocumentDescriptor {{
@@ -86,7 +86,7 @@ export let ContextOptions;
  *   store: StoreOptions|Array<StoreOptions>|undefined
  * }}
  */
-export let DocumentDescriptor;
+export let DocumentDescriptor = {};
 
 /**
  * @typedef TagOptions {{
@@ -99,7 +99,7 @@ export let DocumentDescriptor;
  *   config: string|undefined
  * }}
  */
-export let TagOptions;
+export let TagOptions = {};
 
 /**
  * @typedef StoreOptions {{
@@ -109,7 +109,7 @@ export let TagOptions;
  *   config: string|undefined
  * }}
  */
-export let StoreOptions;
+export let StoreOptions = {};
 
 /**
  * @typedef SearchOptions {{
@@ -122,7 +122,7 @@ export let StoreOptions;
  *   enrich: [boolean=false],
  * }}
  */
-export let SearchOptions;
+export let SearchOptions = {};
 // tag: Array|undefined
 
 /**
@@ -140,7 +140,7 @@ export let SearchOptions;
  *   merge: [boolean=false]
  * }}
  */
-export let DocumentSearchOptions;
+export let DocumentSearchOptions = {};
 
 /**
  * @typedef EncoderOptions {{
@@ -161,7 +161,7 @@ export let DocumentSearchOptions;
  *   cache: boolean=true,
  * }}
  */
-export let EncoderOptions;
+export let EncoderOptions = {};
 
 /**
  * @typedef EncoderSplitOptions {{
@@ -173,7 +173,7 @@ export let EncoderOptions;
  *   char: string|Array<string>|undefined,
  * }}
  */
-export let EncoderSplitOptions;
+export let EncoderSplitOptions = {};
 
 /**
  * @typedef PersistentOptions {{
@@ -183,4 +183,4 @@ export let EncoderSplitOptions;
  *   db: *|undefined
  * }}
  */
-export let PersistentOptions;
+export let PersistentOptions = {};

@@ -7,43 +7,35 @@ const { parentPort } = require("worker_threads"),
 
 let index;
 
-parentPort.on("message", function (data) {
+parentPort.on("message", async function (data) {
 
-            /** @type Index */
-            const args = data.args,
-                  task = data.task,
-                  id = data.id;
+    /** @type Index */
+    const args = data.args,
+          task = data.task,
+          id = data.id;
 
 
-            switch (task) {
+    switch (task) {
 
-                        case "init":
-                                    let options = data.options || {},
-                                        filepath = options.config;
+        case "init":
+            let options = data.options || {},
+                filepath = options.config;
+            // load extern field configuration
 
-                                    // load extern field configuration
-
-                                    // if(filepath && filepath[0] !== "/" && filepath[0] !== "\\"){
-                                    //     // current working directory
-                                    //     const dir = process.cwd();
-                                    //     filepath = join(dir, filepath);
-                                    // }
-                                    if (filepath) {
-                                                options = require(filepath);
-                                    }
-
-                                    // deprecated:
-                                    // const encode = options["encode"];
-                                    // if(encode && (encode.indexOf("function") === 0)){
-                                    //     options["encode"] = new Function("return " + encode)();
-                                    // }
-
-                                    index = new Index(options);
-                                    break;
-
-                        default:
-
-                                    const message = index[task].apply(index, args);
-                                    parentPort.postMessage("search" === task ? { id: id, msg: message } : { id: id });
+            if (filepath) {
+                options = Object.assign({}, options, require(filepath));
+                delete options.worker;
             }
+
+            index = new Index(options);
+            //index.db && await index.db;
+            parentPort.postMessage({ id: id });
+
+            break;
+
+        default:
+
+            const message = index[task].apply(index, args);
+            parentPort.postMessage("search" === task ? { id: id, msg: message } : { id: id });
+    }
 });

@@ -59,10 +59,12 @@ export default function Index(options, _register){
 
     /** @type ContextOptions */
     const context = options.context || {};
-    const encoder = options.encode || options.encoder || (
-        SUPPORT_ENCODER ? default_encoder : function(str){
-            return str.toLowerCase().trim().split(/\s+/);
-        }
+    const encoder = SUPPORT_CHARSET && is_string(options.encoder)
+        ? Charset[options.encoder]
+        : options.encode || options.encoder || (
+          SUPPORT_ENCODER ? default_encoder : function(str){
+              return str.toLowerCase().trim().split(/\s+/);
+          }
     );
     /** @type Encoder */
     this.encoder = encoder.encode
@@ -109,7 +111,7 @@ export default function Index(options, _register){
 
     if(SUPPORT_PERSISTENT){
         if((tmp = options.db)){
-            this.db = tmp.mount(this);
+            this.db = this.mount(tmp);
         }
         this.commit_auto = options.commit !== false;
         this.commit_task = [];

@@ -6,7 +6,7 @@ const { Index } = require("../flexsearch.bundle.min.js");
 
 let index;
 
-parentPort.on("message", function(data){
+parentPort.on("message", async function(data){
 
     /** @type Index */
     const args = data["args"];
@@ -18,30 +18,26 @@ parentPort.on("message", function(data){
         case "init":
 
             let options = data["options"] || {};
-
             // load extern field configuration
             let filepath = options["config"];
-            // if(filepath && filepath[0] !== "/" && filepath[0] !== "\\"){
-            //     // current working directory
-            //     const dir = process.cwd();
-            //     filepath = join(dir, filepath);
-            // }
             if(filepath){
-                options = require(filepath);
+                options = Object.assign({}, options, require(filepath));
+                delete options.worker;
             }
 
-            // deprecated:
-            // const encode = options["encode"];
-            // if(encode && (encode.indexOf("function") === 0)){
-            //     options["encode"] = new Function("return " + encode)();
-            // }
-
             index = new Index(options);
+            //index.db && await index.db;
+            parentPort.postMessage({ "id": id });
+
             break;
 
         default:
 
             const message = index[task].apply(index, args);
-            parentPort.postMessage(task === "search" ? { "id": id, "msg": message } : { "id": id });
+            parentPort.postMessage(
+                task === "search"
+                    ? { "id": id, "msg": message }
+                    : { "id": id }
+            );
     }
 });

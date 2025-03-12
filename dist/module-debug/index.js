@@ -37,7 +37,7 @@ export default function Index(options, _register) {
 
     /** @type ContextOptions */
     const context = options.context || {},
-          encoder = options.encode || options.encoder || default_encoder;
+          encoder = is_string(options.encoder) ? Charset[options.encoder] : options.encode || options.encoder || default_encoder;
 
     /** @type Encoder */
     this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder(encoder) : { encode: encoder };
@@ -67,7 +67,7 @@ export default function Index(options, _register) {
     this.resolve = !1 !== options.resolve;
 
     if (tmp = options.db) {
-        this.db = tmp.mount(this);
+        this.db = this.mount(tmp);
     }
     this.commit_auto = !1 !== options.commit;
     this.commit_task = [];

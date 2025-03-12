@@ -128,7 +128,19 @@ export default function Document(options){
         }
     }
 
-    if(SUPPORT_PERSISTENT){
+    if(SUPPORT_WORKER && this.worker){
+        const promises = [];
+        for(const index of this.index.values()){
+            index.worker.then && promises.push(index.worker);
+        }
+        if(promises.length){
+            const self = this;
+            return Promise.all(promises).then(function(){
+                return self;
+            });
+        }
+    }
+    else if(SUPPORT_PERSISTENT){
         options.db && this.mount(options.db);
     }
 }
@@ -247,8 +259,10 @@ function parse_descriptor(options, document){
 
         if(SUPPORT_WORKER && this.worker){
             const worker = new WorkerIndex(opt);
-            index.set(key, worker);
-            if(!worker.worker){
+            if(worker.worker){
+                index.set(key, worker);
+            }
+            else{
                 // fallback when not supported
                 this.worker = false;
             }

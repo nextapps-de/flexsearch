@@ -72,20 +72,20 @@ H.prototype.add = function(a, c, b, d) {
     }
     c = this.encoder.encode(c);
     if (d = c.length) {
-      const p = t(), m = t(), q = this.depth, r = this.resolution;
+      const p = t(), q = t(), n = this.depth, r = this.resolution;
       for (let l = 0; l < d; l++) {
-        let n = c[this.rtl ? d - 1 - l : l];
-        var e = n.length;
-        if (e && (q || !m[n])) {
-          var f = this.score ? this.score(c, n, l, null, 0) : I(r, d, l), g = "";
+        let m = c[this.rtl ? d - 1 - l : l];
+        var e = m.length;
+        if (e && (n || !q[m])) {
+          var f = this.score ? this.score(c, m, l, null, 0) : I(r, d, l), g = "";
           switch(this.tokenize) {
             case "full":
               if (2 < e) {
                 for (f = 0; f < e; f++) {
                   for (var h = e; h > f; h--) {
-                    g = n.substring(f, h);
-                    var k = this.score ? this.score(c, n, l, g, f) : I(r, d, l, e, f);
-                    K(this, m, g, k, a, b);
+                    g = m.substring(f, h);
+                    var k = this.score ? this.score(c, m, l, g, f) : I(r, d, l, e, f);
+                    K(this, q, g, k, a, b);
                   }
                 }
                 break;
@@ -93,24 +93,24 @@ H.prototype.add = function(a, c, b, d) {
             case "reverse":
               if (1 < e) {
                 for (h = e - 1; 0 < h; h--) {
-                  g = n[h] + g, k = this.score ? this.score(c, n, l, g, h) : I(r, d, l, e, h), K(this, m, g, k, a, b);
+                  g = m[h] + g, k = this.score ? this.score(c, m, l, g, h) : I(r, d, l, e, h), K(this, q, g, k, a, b);
                 }
                 g = "";
               }
             case "forward":
               if (1 < e) {
                 for (h = 0; h < e; h++) {
-                  g += n[h], K(this, m, g, f, a, b);
+                  g += m[h], K(this, q, g, f, a, b);
                 }
                 break;
               }
             default:
-              if (K(this, m, n, f, a, b), q && 1 < d && l < d - 1) {
-                for (e = t(), g = this.A, f = n, h = Math.min(q + 1, d - l), e[f] = 1, k = 1; k < h; k++) {
-                  if ((n = c[this.rtl ? d - 1 - l - k : l + k]) && !e[n]) {
-                    e[n] = 1;
-                    const y = this.score ? this.score(c, f, l, n, k) : I(g + (d / 2 > g ? 0 : 1), d, l, h - 1, k - 1), J = this.bidirectional && n > f;
-                    K(this, p, J ? f : n, y, a, b, J ? n : f);
+              if (K(this, q, m, f, a, b), n && 1 < d && l < d - 1) {
+                for (e = t(), g = this.A, f = m, h = Math.min(n + 1, d - l), e[f] = 1, k = 1; k < h; k++) {
+                  if ((m = c[this.rtl ? d - 1 - l - k : l + k]) && !e[m]) {
+                    e[m] = 1;
+                    const y = this.score ? this.score(c, f, l, m, k) : I(g + (d / 2 > g ? 0 : 1), d, l, h - 1, k - 1), J = this.bidirectional && m > f;
+                    K(this, p, J ? f : m, y, a, b, J ? m : f);
                   }
                 }
               }
@@ -167,7 +167,7 @@ function I(a, c, b, d, e) {
     c = b.limit || c;
     e = b.offset || 0;
     var f = b.context;
-    var g = !1;
+    var g = b.suggest;
   }
   a = this.encoder.encode(a);
   b = a.length;
@@ -182,20 +182,20 @@ function I(a, c, b, d, e) {
   var h = 0, k = 0;
   if (1 < b) {
     var p = t();
-    const q = [];
+    const n = [];
     for (let r = 0, l; r < b; r++) {
       if ((l = a[r]) && !p[l]) {
         if (g || N(this, l)) {
-          q.push(l), p[l] = 1;
+          n.push(l), p[l] = 1;
         } else {
           return d;
         }
-        const n = l.length;
-        h = Math.max(h, n);
-        k = k ? Math.min(k, n) : n;
+        const m = l.length;
+        h = Math.max(h, m);
+        k = k ? Math.min(k, m) : m;
       }
     }
-    a = q;
+    a = n;
     b = a.length;
   }
   if (!b) {
@@ -210,23 +210,23 @@ function I(a, c, b, d, e) {
   }
   if (1 < b) {
     if (f) {
-      var m = a[0];
+      var q = a[0];
       p = 1;
     } else {
       9 < h && 3 < h / k && a.sort(u);
     }
   }
-  for (let q, r; p < b; p++) {
+  for (let n, r; p < b; p++) {
     r = a[p];
-    m ? (q = N(this, r, m), q = O(q, d, g, this.A, c, e, 2 === b), g && !1 === q && d.length || (m = r)) : (q = N(this, r), q = O(q, d, g, this.resolution, c, e, 1 === b));
-    if (q) {
-      return q;
+    q ? (n = N(this, r, q), n = O(n, d, g, this.A), g && !1 === n && d.length || (q = r)) : (n = N(this, r, ""), n = O(n, d, g, this.resolution));
+    if (n) {
+      return n;
     }
     if (g && p === b - 1) {
       f = d.length;
       if (!f) {
-        if (m) {
-          m = "";
+        if (q) {
+          q = "";
           p = -1;
           continue;
         }
@@ -240,12 +240,12 @@ function I(a, c, b, d, e) {
   a: {
     a = d;
     d = this.resolution;
-    m = a.length;
+    q = a.length;
     b = [];
     f = t();
-    for (let q = 0, r, l, n, y; q < d; q++) {
-      for (k = 0; k < m; k++) {
-        if (n = a[k], q < n.length && (r = n[q])) {
+    for (let n = 0, r, l, m, y; n < d; n++) {
+      for (k = 0; k < q; k++) {
+        if (m = a[k], n < m.length && (r = m[n])) {
           for (p = 0; p < r.length; p++) {
             l = r[p], (h = f[l]) ? f[l]++ : (h = 0, f[l] = 1), y = b[h] || (b[h] = []), y.push(l);
           }
@@ -260,8 +260,8 @@ function I(a, c, b, d, e) {
           d = t();
           f = g.length;
           for (k = 0; k < f; k++) {
-            for (m = g[k], h = m.length, p = 0; p < h; p++) {
-              if (b = m[p], !d[b]) {
+            for (q = g[k], h = q.length, p = 0; p < h; p++) {
+              if (b = q[p], !d[b]) {
                 if (d[b] = 1, e) {
                   e--;
                 } else {
@@ -278,7 +278,7 @@ function I(a, c, b, d, e) {
         }
         b = c;
       } else {
-        if (a < m) {
+        if (a < q) {
           d = [];
           break a;
         }
@@ -295,26 +295,19 @@ function I(a, c, b, d, e) {
 function M(a, c, b, d) {
   return (a = N(this, a, c)) && a.length ? L(a, b, d) : [];
 }
-function O(a, c, b, d, e, f, g) {
-  let h = [];
+function O(a, c, b, d) {
+  let e = [];
   if (a) {
     d = Math.min(a.length, d);
-    for (let k = 0, p = 0, m; k < d; k++) {
-      if (m = a[k]) {
-        if (f && m && g && (m.length <= f ? (f -= m.length, m = null) : (m = m.slice(f), f = 0)), m && (h[k] = m, g && (p += m.length, p >= e))) {
-          break;
-        }
-      }
+    for (let f = 0, g; f < d; f++) {
+      (g = a[f]) && g && (e[f] = g);
     }
-    if (h.length) {
-      if (g) {
-        return L(h, e, 0);
-      }
-      c.push(h);
+    if (e.length) {
+      c.push(e);
       return;
     }
   }
-  return !b && h;
+  return !b && e;
 }
 function N(a, c, b) {
   let d;
@@ -370,7 +363,7 @@ function P(a, c) {
     return new H(a);
   }
   a = a ? G(a) : {};
-  const b = a.context || {}, d = a.encode || a.encoder || function(f) {
+  const b = a.context || {}, d = "string" === typeof a.encoder ? E[a.encoder] : a.encode || a.encoder || function(f) {
     return f.toLowerCase().trim().split(/\s+/);
   };
   this.encoder = d.encode ? d : "object" === typeof d ? d : {encode:d};

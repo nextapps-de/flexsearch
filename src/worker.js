@@ -1,4 +1,3 @@
-//import { promise as Promise } from "../polyfill.js";
 import { IndexOptions } from "./type.js";
 import { create_object, is_function, is_object, is_string } from "./common.js";
 import handler from "./worker/handler.js";
@@ -10,27 +9,19 @@ let pid = 0;
  * @constructor
  */
 
-export default function WorkerIndex(options){
+export default function WorkerIndex(options = {}){
 
     if(!this) {
         return new WorkerIndex(options);
     }
 
-    if(options){
-        // deprecated:
-        // was replaced by dynamic config loading
-        // if(is_function(options.encode)){
-        //     options.encode = options.encode.toString();
-        // }
-    }
-    else{
-        options = {};
-    }
-
     // the factory is the outer wrapper from the build
-    // we use "self" as a trap for node.js
-
-    let factory = typeof self !== "undefined" && (self||window)["_factory"];
+    // it uses "self" as a trap for node.js
+    let factory = typeof self !== "undefined"
+        ? self["_factory"]
+        : typeof window !== "undefined"
+            ? window["_factory"]
+            : null;
     if(factory){
         factory = factory.toString();
     }
@@ -38,9 +29,18 @@ export default function WorkerIndex(options){
     const is_node_js = typeof window === "undefined" /*&& self["exports"]*/;
     const _self = this;
 
-    (async function(){
+    /**
+     * @param {Worker=} _worker
+     * @this {WorkerIndex}
+     */
+    function init(_worker){
 
-        this.worker = await create(factory, is_node_js, options.worker);
+        this.worker = _worker || create(factory, is_node_js, options.worker);
+
+        if(this.worker.then){
+            return this.worker.then(init);
+        }
+
         this.resolver = create_object();
 
         if(!this.worker){
@@ -63,14 +63,16 @@ export default function WorkerIndex(options){
 
         if(options.config){
 
-            delete options.db;
+            //delete options.db;
 
             // when extern configuration needs to be loaded
             // it needs to return a promise to await for
             return new Promise(function(resolve){
+
                 _self.resolver[++pid] = function(){
                     resolve(_self);
                 };
+
                 _self.worker.postMessage({
                     "id": pid,
                     "task": "init",
@@ -86,7 +88,10 @@ export default function WorkerIndex(options){
             "options": options
         });
 
-    }.call(this));
+        return this.worker;
+    }
+
+    this.worker = init.call(this);
 }
 
 register("add");
@@ -98,7 +103,7 @@ register("remove");
 function register(key){
 
     WorkerIndex.prototype[key] =
-    WorkerIndex.prototype[key + "Async"] = function(){
+    WorkerIndex.prototype[key + "Async"] = async function(){
 
         const self = this;
         const args = [].slice.call(arguments);
@@ -132,7 +137,7 @@ function register(key){
     };
 }
 
-async function create(factory, is_node_js, worker_path){
+function create(factory, is_node_js, worker_path){
 
     let worker
 
@@ -142,7 +147,9 @@ async function create(factory, is_node_js, worker_path){
             typeof module !== "undefined"
                 ? (0,eval)('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
                 //: (0,eval)('new ((await import("worker_threads"))["Worker"])(import.meta.dirname + "/worker/node.mjs")')
-                : (0,eval)('new ((await import("worker_threads"))["Worker"])((1,eval)(\"import.meta.dirname\") + "/node/node.mjs")')
+                //: (0,eval)('new ((await import("worker_threads"))["Worker"])((1,eval)(\"import.meta.dirname\") + "/node/node.mjs")')
+                : (0,eval)('import("worker_threads").then(function(worker){ return new worker["Worker"]((1,eval)(\"import.meta.dirname\") + "/node/node.mjs"); })')
+                //: import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/worker/node.mjs"); })
 
         //eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
     :(
