@@ -17,6 +17,10 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
         if(file.endsWith(".js")){
             let src = fs.readFileSync("src/" + file, "utf8");
             src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
+            if(file === "worker.js"){
+                // add the eval wrapper
+                src = src.replace("import.meta.url", '(1,eval)("import.meta.url")');
+            }
             fs.writeFileSync("tmp/" + file, src);
         }
     });
@@ -25,24 +29,28 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
     fs.existsSync("./tmp/lang") || fs.mkdirSync("./tmp/lang/");
     fs.existsSync("./tmp/charset") || fs.mkdirSync("./tmp/charset/");
 
-    ["db/",
-     "db/clickhouse",
-     "db/indexeddb",
-     "db/mongodb",
-     "db/postgres",
-     "db/redis",
-     "db/sqlite",
-     "document",
-     "index",
-     "resolve",
-     "worker",
-     "lang",
-     "charset/",
-     "charset/latin",
-     "charset/arabic",
-     "charset/cjk",
-     "charset/cyrillic"
-    ].forEach(await async function(path){
+    const dirs = [
+        "db/",
+        "db/clickhouse",
+        "db/indexeddb",
+        "db/mongodb",
+        "db/postgres",
+        "db/redis",
+        "db/sqlite",
+        "document",
+        "index",
+        "resolve",
+        "worker",
+        "lang",
+        "charset/",
+        "charset/latin",
+        "charset/arabic",
+        "charset/cjk",
+        "charset/cyrillic"
+    ];
+
+    for(let i = 0, path; i < dirs.length; i++){
+        path = dirs[i];
         fs.existsSync("./tmp/" + path + "/") || fs.mkdirSync("./tmp/" + path + "/");
         files = await fs.promises.readdir("./src/" + path + "/");
         files.forEach(function(file){
@@ -51,10 +59,14 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
             if(file.endsWith(".js")){
                 let src = fs.readFileSync("src/" + path + "/" + file, "utf8");
                 src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
+                if(file === "handler.js"){
+                    // add the eval wrapper
+                    src = src.replace('options = (await import(filepath))["default"];', '//options = (await import(filepath))["default"];');
+                }
                 fs.writeFileSync("tmp/" + path + "/" + file, src);
             }
         });
-    });
+    }
 
     //fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
     fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");
@@ -63,6 +75,16 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
 
     exec("npx babel tmp -d dist/module" + (debug ? "-debug" : (minify ? "-min --minified --compact true" : "")) + " --config-file tmp/.babelrc && exit 0", function(){
         console.log("Build Complete.");
+
+        // fix babel compiler dynamic import
+        let content = fs.readFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker/handler.js", "utf8");
+        content = content.replace('//options = (await import(filepath))["default"];', 'options = (await import(filepath))["default"];');
+        fs.writeFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker/handler.js", content);
+
+        // fix babel compiler dynamic import
+        content = fs.readFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker.js", "utf8");
+        content = content.replace('(1, eval)("import.meta.url")', 'import.meta.url');
+        fs.writeFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker.js", content);
     });
 }());
 

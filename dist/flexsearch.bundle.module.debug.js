@@ -1469,29 +1469,26 @@ async function Na(a) {
 }
 ;let Oa = 0;
 function W(a = {}) {
-  function b(f) {
-    function g(h) {
-      h = h.data || h;
-      const k = h.id, l = k && e.h[k];
-      l && (l(h.msg), delete e.h[k]);
+  function b(g) {
+    function h(k) {
+      k = k.data || k;
+      const l = k.id, m = l && e.h[l];
+      m && (m(k.msg), delete e.h[l]);
     }
-    this.worker = f || Pa(c, d, a.worker);
-    if (this.worker.then) {
-      return this.worker.then(b);
-    }
+    this.worker = g;
     this.h = z();
     if (this.worker) {
-      d ? this.worker.on("message", g) : this.worker.onmessage = g;
+      d ? this.worker.on("message", h) : this.worker.onmessage = h;
       if (a.config) {
-        return new Promise(function(h) {
+        return new Promise(function(k) {
           e.h[++Oa] = function() {
-            h(e);
+            k(e);
           };
           e.worker.postMessage({id:Oa, task:"init", factory:c, options:a});
         });
       }
       this.worker.postMessage({task:"init", factory:c, options:a});
-      return this.worker;
+      return this;
     }
   }
   if (!this) {
@@ -1499,8 +1496,11 @@ function W(a = {}) {
   }
   let c = "undefined" !== typeof self ? self._factory : "undefined" !== typeof window ? window._factory : null;
   c && (c = c.toString());
-  const d = "undefined" === typeof window, e = this;
-  this.worker = b.call(this);
+  const d = "undefined" === typeof window, e = this, f = Pa(c, d, a.worker);
+  f.worker = !0;
+  return f.then ? f.then(function(g) {
+    return b.call(e, g);
+  }) : b.call(this, f);
 }
 X("add");
 X("append");
@@ -1521,7 +1521,7 @@ function X(a) {
   };
 }
 function Pa(a, b, c) {
-  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"]($1 + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Na.toString()], {type:"text/javascript"}))) : new window.Worker(B(c) ? c : "worker/worker.js", {type:"module"});
+  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Na.toString()], {type:"text/javascript"}))) : new window.Worker(B(c) ? c : import.meta.url.replace("/worker.js", "/worker/worker.js"), {type:"module"});
 }
 ;Y.prototype.add = function(a, b, c) {
   C(a) && (b = a, a = ca(b, this.key));
@@ -1914,11 +1914,16 @@ function Ta(a) {
   if (this.worker) {
     a = [];
     for (const e of this.index.values()) {
-      e.worker.then && a.push(e.worker);
+      e.then && a.push(e);
     }
     if (a.length) {
       const e = this;
-      return Promise.all(a).then(function() {
+      return Promise.all(a).then(function(f) {
+        let g = 0;
+        for (const h of e.index.entries()) {
+          const k = h[0];
+          h[1].then && e.index.set(k, f[g++]);
+        }
         return e;
       });
     }
@@ -1978,7 +1983,7 @@ function Wa(a, b) {
     g = C(g) ? Object.assign({}, a, g) : a;
     if (this.worker) {
       const h = new W(g);
-      h.worker ? c.set(f, h) : this.worker = !1;
+      c.set(f, h);
     }
     this.worker || c.set(f, new O(g, this.reg));
     g.custom ? this.G[e] = g.custom : (this.G[e] = Va(f, this.K), g.filter && ("string" === typeof this.G[e] && (this.G[e] = new String(this.G[e])), this.G[e].I = g.filter));
@@ -2181,7 +2186,6 @@ u.clear = function() {
   return Z(a);
 };
 u.get = function(a, b, c = 0, d = 0, e = !0, f = !1) {
-  console.log("!!!!!!!!!!!");
   a = this.db.transaction(b ? "ctx" : "map", "readonly").objectStore(b ? "ctx" : "map").get(b ? b + ":" + a : a);
   const g = this;
   return Z(a).then(function(h) {

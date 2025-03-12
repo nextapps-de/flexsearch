@@ -80,7 +80,8 @@ Encoder.prototype.assign = function (options) {
      * @type {Function|boolean}
      */
     this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */
-    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
+    /* skip_update: */
+    /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -336,7 +337,7 @@ Encoder.prototype.encode = function (str) {
     //         this.matcher_test = new RegExp("(" + this.matcher_str + ")", "g")
     //     );
     //     str = str.replace(this.matcher_test, match => this.matcher.get(match));
-    // }
+
     // if(this.stemmer){
     //     this.stemmer_test || (
     //         this.stemmer_test = new RegExp("(?!\\b)(" + this.stemmer_str + ")(\\b|_)", "g")

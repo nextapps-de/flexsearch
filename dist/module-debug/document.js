@@ -40,7 +40,9 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */
+
+    /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
     this.storetree = (tmp = document.store || null) && !0 !== tmp && [];
@@ -49,8 +51,7 @@ export default function Document(options) {
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache = /* suggest */ /* append: */
-    /* enrich */!1;
+    options.cache = /* suggest */ /* append: */ /* enrich */!1;
 
     this.worker = options.worker;
 
@@ -100,15 +101,22 @@ export default function Document(options) {
         }
     }
 
-
+    // resolve worker promises and swap instances
     if (this.worker) {
         const promises = [];
         for (const index of this.index.values()) {
-            index.worker.then && promises.push(index.worker);
+            index.then && promises.push(index);
         }
         if (promises.length) {
             const self = this;
-            return Promise.all(promises).then(function () {
+            return Promise.all(promises).then(function (promises) {
+                let count = 0;
+                for (const item of self.index.entries()) {
+                    const key = item[0],
+                          index = item[1];
+
+                    index.then && self.index.set(key, promises[count++]);
+                }
                 return self;
             });
         }
@@ -188,9 +196,7 @@ Document.prototype.commit = async function (replace, append) {
     //     await index.db.commit(index, replace, append);
     // }
     // this.reg.clear();
-};
-
-Document.prototype.destroy = function () {
+};Document.prototype.destroy = function () {
     const promises = [];
     for (const idx of this.index.values()) {
         promises.push(idx.destroy());
@@ -224,7 +230,9 @@ function parse_descriptor(options, document) {
 
         if (this.worker) {
             const worker = new WorkerIndex(opt);
-            if (worker.worker) {
+            if (worker) {
+                // worker could be a promise
+                // it needs to be resolved and swapped later
                 index.set(key, worker);
             } else {
                 // fallback when not supported

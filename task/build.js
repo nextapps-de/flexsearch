@@ -274,8 +274,8 @@ else (async function(){
 
             if(file.endsWith(".js")){
                 if(language_out === "ECMASCRIPT5_STRICT" && file === "keystore.js"){
-                    let content = fs.readFileSync("src/" + file, "utf8");
 
+                    let content = fs.readFileSync("src/" + file, "utf8");
                     content = content.substring(0, content.indexOf("function lcg64"));
                     content += "function lcg64(str){ throw new Error('The keystore is limited to 32 for EcmaScript5'); }";
                     fs.writeFileSync("tmp/keystore.js",
@@ -285,7 +285,15 @@ else (async function(){
                         // "/** @constructor */ export function KeystoreArray(arg){}; KeystoreArray.prototype.push = function(arg){};"
                     );
                 }
+                else if(file === "worker.js"){
+
+                    let content = fs.readFileSync("src/" + file, "utf8");
+                    // add the eval wrapper
+                    content = content.replace("import.meta.url", '(1,eval)("import.meta.url")');
+                    fs.writeFileSync("tmp/worker.js", content);
+                }
                 else{
+
                     fs.copyFileSync("src/" + file, "tmp/" + file);
                 }
             }
@@ -301,6 +309,11 @@ else (async function(){
     fs.cpSync("src/document/", "tmp/document/", { recursive: true });
     fs.cpSync("src/resolve/", "tmp/resolve/", { recursive: true });
     fs.cpSync("src/charset/", "tmp/charset/", { recursive: true });
+
+    // add the eval wrapper
+    let content = fs.readFileSync("tmp/worker/handler.js", "utf8");
+    content = content.replace('options = (await import(filepath))["default"];', '//options = (await import(filepath))["default"];');
+    fs.writeFileSync("tmp/worker/handler.js", content);
 
     const filename = "dist/flexsearch." + (release + (custom ? "." + custom : "")) + (options["DEBUG"] ?  ".debug" : ".min") + ".js";
     const executable = process.platform === "win32" ?  "\"node_modules/google-closure-compiler-windows/compiler.exe\"" :
@@ -357,11 +370,13 @@ else (async function(){
             //build = build.replace(/self\.FlexSearch(\s+)?=(\s+)?/, "export default ");
 
             // replace the eval wrapper
-            build = build.replace('(1,eval)("import.meta.dirname")', "import.meta.dirname");
+            build = build.replace(/\(1,eval\)\('([^']+)'\)/g, "import.meta.dirname");
+            build = build.replace('(0,eval)("import.meta.url")', 'import.meta.url');
+            build = build.replace('(1,eval)("import.meta.dirname")', 'import.meta.dirname');
         }
 
         // fix closure compiler dynamic import
-        build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=await import($4))");
+        build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=(await import($4))[\"default\"])");
 
         if(release === "bundle"){
             build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");

@@ -128,14 +128,21 @@ export default function Document(options){
         }
     }
 
+    // resolve worker promises and swap instances
     if(SUPPORT_WORKER && this.worker){
         const promises = [];
         for(const index of this.index.values()){
-            index.worker.then && promises.push(index.worker);
+            index.then && promises.push(index);
         }
         if(promises.length){
             const self = this;
-            return Promise.all(promises).then(function(){
+            return Promise.all(promises).then(function(promises){
+                let count = 0;
+                for(const item of self.index.entries()){
+                    const key = item[0];
+                    const index = item[1];
+                    index.then && self.index.set(key, promises[count++]);
+                }
                 return self;
             });
         }
@@ -259,7 +266,9 @@ function parse_descriptor(options, document){
 
         if(SUPPORT_WORKER && this.worker){
             const worker = new WorkerIndex(opt);
-            if(worker.worker){
+            if(worker){
+                // worker could be a promise
+                // it needs to be resolved and swapped later
                 index.set(key, worker);
             }
             else{

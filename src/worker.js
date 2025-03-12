@@ -30,17 +30,11 @@ export default function WorkerIndex(options = {}){
     const _self = this;
 
     /**
-     * @param {Worker=} _worker
      * @this {WorkerIndex}
      */
-    function init(_worker){
+    function init(worker){
 
-        this.worker = _worker || create(factory, is_node_js, options.worker);
-
-        if(this.worker.then){
-            return this.worker.then(init);
-        }
-
+        this.worker = worker;
         this.resolver = create_object();
 
         if(!this.worker){
@@ -62,8 +56,6 @@ export default function WorkerIndex(options = {}){
             : this.worker.onmessage = onmessage;
 
         if(options.config){
-
-            //delete options.db;
 
             // when extern configuration needs to be loaded
             // it needs to return a promise to await for
@@ -88,10 +80,16 @@ export default function WorkerIndex(options = {}){
             "options": options
         });
 
-        return this.worker;
+        return this;
     }
 
-    this.worker = init.call(this);
+    const worker = create(factory, is_node_js, options.worker);
+    worker.worker = true;
+    return worker.then
+        ? worker.then(function(worker){
+            return init.call(_self, worker);
+        })
+        : init.call(this, worker);
 }
 
 register("add");
@@ -161,7 +159,7 @@ function create(factory, is_node_js, worker_path){
                 )
             ))
         :
-            new window.Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" })
+            new window.Worker(is_string(worker_path) ? worker_path : import.meta.url.replace("/worker.js", "/worker/worker.js") /*"worker/worker.js"*/, { type: "module" })
     );
 
     return worker;

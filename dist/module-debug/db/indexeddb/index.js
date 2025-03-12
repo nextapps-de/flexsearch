@@ -139,7 +139,6 @@ IdxDB.prototype.clear = function () {
 };
 
 IdxDB.prototype.get = function (key, ctx, limit = 0, offset = 0, resolve = /* tag? */!0, enrich = !1) {
-    console.log("!!!!!!!!!!!");
     const transaction = this.db.transaction(ctx ? "ctx" : "map", "readonly"),
           map = transaction.objectStore(ctx ? "ctx" : "map"),
           req = map.get(ctx ? ctx + ":" + key : key),
