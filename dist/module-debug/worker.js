@@ -79,8 +79,7 @@ export default function WorkerIndex(options = {}) {
     }
 
     const worker = create(factory, is_node_js, options.worker);
-    worker.worker = /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
-    !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    //worker.worker = true;
     return worker.then ? worker.then(function (worker) {
         return init.call(_self, worker);
     }) : init.call(this, worker);
@@ -139,7 +138,7 @@ function create(factory, is_node_js, worker_path) {
     //: import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/worker/node.mjs"); })
 
     //eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
-    : factory ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new window.Worker(is_string(worker_path) ? worker_path : import.meta.url.replace("/worker.js", "/worker/worker.js") /*"worker/worker.js"*/, { type: "module" });
+    : factory ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new window.Worker(is_string(worker_path) ? worker_path : import.meta.url.replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", "module/worker/worker.js") /*"worker/worker.js"*/, { type: "module" });
 
     return worker;
 }

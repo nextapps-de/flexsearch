@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height">
+  <title>Example: browser-basic-worker</title>
+</head>
+<body style="white-space: pre">
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.min.js"></script>
+<script>
+(async function(){
+
+  // create a simple index which can store id-content-pairs
+  const index = new FlexSearch.Worker({
+    tokenize: "forward"
+  });
+
+  // some test data
+  const data = [
+    'cats abcd efgh ijkl mnop qrst uvwx cute',
+    'cats abcd efgh ijkl mnop qrst cute',
+    'cats abcd efgh ijkl mnop cute',
+    'cats abcd efgh ijkl cute',
+    'cats abcd efgh cute',
+    'cats abcd cute',
+    'cats cute'
+  ];
+
+  for(let i = 0; i < data.length; i++){
+    await index.add(i, data[i]);
+  }
+
+  // perform query
+  const result = await index.search({
+    query: "cute cat",
+    suggest: true
+  });
+
+  // display results
+  result.forEach(i => {
+    console.log(data[i]);
+    log(data[i]);
+  });
+
+  function log(str){
+    document.body.appendChild(
+      document.createTextNode(str + "\n")
+    );
+  }
+}());
+</script>
+</body>
+</html>

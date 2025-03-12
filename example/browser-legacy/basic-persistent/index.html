@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height">
+  <title>Example: browser-basic-persistent</title>
+</head>
+<body style="white-space: pre">
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.min.js"></script>
+<script>
+(async function(){
+
+  // create DB instance with namespace
+  const db = new FlexSearch.IndexedDB("my-store");
+
+  // create a simple index which can store id-content-pairs
+  const index = new FlexSearch.Index({
+    tokenize: "forward"
+  });
+
+  // mount database to the index
+  await index.mount(db);
+  // await document.destroy();
+  // await document.mount(db);
+
+  // some test data
+  const data = [
+    'cats abcd efgh ijkl mnop qrst uvwx cute',
+    'cats abcd efgh ijkl mnop qrst cute',
+    'cats abcd efgh ijkl mnop cute',
+    'cats abcd efgh ijkl cute',
+    'cats abcd efgh cute',
+    'cats abcd cute',
+    'cute cat '
+  ];
+
+  data.forEach((item, id) => {
+    index.add(id, item);
+  });
+
+  // transfer changes (bulk)
+  await index.commit();
+
+  // perform query
+  const result = await index.search({
+    query: "cute cat",
+    suggest: true
+  });
+
+  // display results
+  result.forEach(i => {
+    console.log(data[i]);
+    log(data[i]);
+  });
+
+  function log(str){
+    document.body.appendChild(
+      document.createTextNode(str + "\n")
+    );
+  }
+}());
+</script>
+</body>
+</html>

@@ -84,7 +84,7 @@ export default function WorkerIndex(options = {}){
     }
 
     const worker = create(factory, is_node_js, options.worker);
-    worker.worker = true;
+    //worker.worker = true;
     return worker.then
         ? worker.then(function(worker){
             return init.call(_self, worker);
@@ -159,7 +159,7 @@ function create(factory, is_node_js, worker_path){
                 )
             ))
         :
-            new window.Worker(is_string(worker_path) ? worker_path : import.meta.url.replace("/worker.js", "/worker/worker.js") /*"worker/worker.js"*/, { type: "module" })
+            new window.Worker(is_string(worker_path) ? worker_path : import.meta.url.replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", "module/worker/worker.js") /*"worker/worker.js"*/, { type: "module" })
     );
 
     return worker;

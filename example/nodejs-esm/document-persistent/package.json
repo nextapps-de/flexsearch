@@ -1,0 +1,8 @@
+{
+  "name": "nodejs-esm-document-persistent",
+  "type": "module",
+  "dependencies": {
+    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview",
+    "sqlite3": "^5.1.7"
+  }
+}

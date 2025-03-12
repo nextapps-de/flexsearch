@@ -1,0 +1,6 @@
+{
+  "name": "nodejs-commonjs-document-worker-extern-config",
+  "dependencies": {
+    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
+  }
+}

@@ -1498,7 +1498,6 @@ function W(a = {}) {
   let c = "undefined" !== typeof self ? self._factory : "undefined" !== typeof window ? window._factory : null;
   c && (c = c.toString());
   const d = "undefined" === typeof window, e = this, f = Pa(c, d, a.worker);
-  f.worker = !0;
   return f.then ? f.then(function(g) {
     return b.call(e, g);
   }) : b.call(this, f);
@@ -1522,7 +1521,8 @@ function X(a) {
   };
 }
 function Pa(a, b, c) {
-  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"]((1,eval)("import.meta.dirname") + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Na.toString()], {type:"text/javascript"}))) : new window.Worker(B(c) ? c : (0,eval)("import.meta.url").replace("/worker.js", "/worker/worker.js"), {type:"module"});
+  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"]((1,eval)("import.meta.dirname") + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Na.toString()], {type:"text/javascript"}))) : new window.Worker(B(c) ? c : (0,eval)("import.meta.url").replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
+  "module/worker/worker.js"), {type:"module"});
 }
 ;Y.prototype.add = function(a, b, c) {
   C(a) && (b = a, a = ca(b, this.key));

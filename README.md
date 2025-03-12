@@ -72,20 +72,38 @@ All persistent variants are optimized for larger sized indexes under heavy workl
 
 ### Example Node.js
 
-- [nodejs-document](example/nodejs-document)
-  - [commonjs](example/nodejs-document/commonjs)
-  - [esm](example/nodejs-document/esm)
-- [nodejs-persistent](example/nodejs-persistent)
-  - [commonjs](example/nodejs-persistent/commonjs)
-  - [esm](example/nodejs-persistent/esm)
-- [nodejs-worker](example/nodejs-worker)
-  - [commonjs](example/nodejs-worker/commonjs)
-  - [esm](example/nodejs-worker/esm)
-- [nodejs-worker-persistent](example/nodejs-worker-persistent)
-  - [commonjs](example/nodejs-worker-persistent/commonjs)
-  - [esm](example/nodejs-worker-persistent/esm)
+- [nodejs-commonjs](example/nodejs-commonjs):
+  - [document](example/nodejs-commonjs/document)
+  - [document-persistent](example/nodejs-commonjs/document-persistent)
+  - [document-worker](example/nodejs-commonjs/document-worker)
+  - [document-worker-extern-config](example/nodejs-commonjs/document-worker-extern-config)
+- [nodejs-esm](example/nodejs-esm):
+  - [document](example/nodejs-esm/document)
+  - [document-persistent](example/nodejs-esm/document-persistent)
+  - [document-worker](example/nodejs-esm/document-worker)
+  - [document-worker-extern-config](example/nodejs-esm/document-worker-extern-config)
+  - [language-packs](example/nodejs-esm/language-packs)
 
 ### Example Browser
+
+- [browser-legacy](example/browser-legacy):
+  - [basic](example/browser-legacy/basic)
+  - [basic-persistent](example/browser-legacy/basic-persistent)
+  - [basic-suggestion](example/browser-legacy/basic-suggestion)
+  - [basic-worker](example/browser-legacy/basic-worker)
+  - [document](example/browser-legacy/document)
+  - [document-persistent](example/browser-legacy/document-persistent)
+  - [document-worker](example/browser-legacy/document-worker)
+- [browser-module](example/browser-module):
+  - [basic](example/browser-module/basic)
+  - [basic-persistent](example/browser-module/basic-persistent)
+  - [basic-suggestion](example/browser-module/basic-suggestion)
+  - [basic-worker](example/browser-module/basic-worker)
+  - [basic-worker-extern-config](example/browser-module/basic-worker-extern-config)
+  - [document](example/browser-module/document)
+  - [document-persistent](example/browser-module/document-persistent)
+  - [document-worker](example/browser-module/document-worker)
+  - [document-worker-extern-config](example/browser-module/document-worker-extern-config)
 
 ```js
 import FlexSearchIndex from "./index.js";

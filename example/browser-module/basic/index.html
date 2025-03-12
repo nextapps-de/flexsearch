@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height">
+  <title>Example: browser-basic</title>
+</head>
+<body style="white-space: pre">
+<script type="module">
+
+  import { Index } from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.module.min.js";
+
+  // create a simple index which can store id-content-pairs
+  const index = new Index({
+    tokenize: "forward"
+  });
+
+  // some test data
+  const data = [
+    'cats abcd efgh ijkl mnop qrst uvwx cute',
+    'cats abcd efgh ijkl mnop qrst cute',
+    'cats abcd efgh ijkl mnop cute',
+    'cats abcd efgh ijkl cute',
+    'cats abcd efgh cute',
+    'cats abcd cute',
+    'cats cute'
+  ];
+
+  data.forEach((item, id) => {
+    index.add(id, item);
+  });
+
+  index.search("cute cats").forEach(i => {
+    const result = data[i];
+    log(result);
+  });
+
+  log("\n----------------------\n");
+
+  index.search({
+    query: "black or cute or yellow cats",
+    suggest: true
+  }).forEach(i => {
+    const result = data[i];
+    log(result);
+  });
+
+  function log(str){
+    document.body.appendChild(
+      document.createTextNode(str + "\n")
+    );
+  }
+</script>
+</body>
+</html>
