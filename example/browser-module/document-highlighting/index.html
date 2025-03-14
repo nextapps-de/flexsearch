@@ -8,7 +8,7 @@
 <body style="white-space: pre">
 <script type="module">
 
-  import { Document, Charset } from "https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/flexsearch.compact.module.min.js";
+  import { Document, Charset } from "https://rawcdn.githack.com/nextapps-de/flexsearch/9e1b24a124c3d0065b4ddf5cea9d109aca2fb7d2/dist/flexsearch.compact.module.min.js";
 
   // some test data
   const data = [{
@@ -22,7 +22,6 @@
   // create the document index
   const index = new Document({
     document: {
-      id: "tconst",
       store: true,
       index: [{
         field: "title",
@@ -49,8 +48,8 @@
   });
 
   // display results
-  console.log(suggestions);
-  log(JSON.stringify(suggestions, null, 2));
+  console.log(result);
+  log(JSON.stringify(result, null, 2));
 
   function log(str){
     document.body.appendChild(

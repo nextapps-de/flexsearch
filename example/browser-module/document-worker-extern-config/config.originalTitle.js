@@ -1,5 +1,5 @@
-import { Encoder, Charset } from "https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/flexsearch.bundle.module.min.js";
-import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/module/lang/en.js";
+import { Encoder, Charset } from "https://rawcdn.githack.com/nextapps-de/flexsearch/9e1b24a124c3d0065b4ddf5cea9d109aca2fb7d2/dist/flexsearch.bundle.module.min.js";
+import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/9e1b24a124c3d0065b4ddf5cea9d109aca2fb7d2/dist/module/lang/en.js";
 
 export default {
     tokenize: "forward",

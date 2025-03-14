@@ -8,6 +8,7 @@ npm install git+https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
 
 - Persistent indexes support for: `IndexedDB` (Browser), `Redis`, `SQLite`, `Postgres`, `MongoDB`, `Clickhouse`
 - Enhanced language customization via the new `Encoder` class
+- Result Highlighting
 - Query performance achieve results up to 4.5 times faster compared to the previous generation v0.7.x by also improving the quality of results
 - Enhanced support for larger indexes or larger result sets
 - Improved offset and limit processing achieve up to 100 times faster traversal performance through large datasets
