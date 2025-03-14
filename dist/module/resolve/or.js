@@ -1,9 +1,7 @@
 import Resolver from "../resolver.js";
 import default_resolver from "./default.js";
 import { create_object, get_max_len } from "../common.js";
-// import xor from "./xor.js";
-// import and from "./and.js";
-// import not from "./not.js";
+import { union as _union } from "../intersect.js";
 
 Resolver.prototype.or = function () {
 
@@ -61,6 +59,11 @@ Resolver.prototype.or = function () {
     for (let i = 0, query; i < args.length; i++) {
         if (query = args[i]) {
 
+            limit = query.limit || 0;
+            offset = query.offset || 0;
+            enrich = query.enrich;
+            resolve = query.resolve;
+
             let result;
             if (query.constructor === Resolver) {
                 result = query.result;
@@ -76,10 +79,6 @@ Resolver.prototype.or = function () {
             } else if (query.not) {
                 result = this.not(query.not);
             } else {
-                limit = query.limit || 0;
-                offset = query.offset || 0;
-                enrich = query.enrich;
-                resolve = query.resolve;
                 continue;
             }
 
@@ -93,14 +92,20 @@ Resolver.prototype.or = function () {
 
     if (promises.length) {
         return Promise.all(promises).then(function () {
-            self.result.length && (final = [self.result].concat(final));
-            self.result = resolver(final, limit, offset, enrich, resolve, self.boostval);
+            //self.result.length && (final = [self.result].concat(final));
+            // the suggest-union was re-used from but there it needs reversed order
+            self.result.length && (final = final.concat([self.result]));
+            self.result = union(final, limit, offset, enrich, resolve, self.boostval);
             return resolve ? self.result : self;
         });
     }
 
-    this.result.length && (final = [this.result].concat(final));
-    this.result = resolver(final, limit, offset, enrich, resolve, self.boostval);
+    if (final.length) {
+        //this.result.length && (final = [this.result].concat(final));
+        // the suggest-union was re-used but there it needs reversed order
+        this.result.length && (final = final.concat([this.result]));
+        this.result = union(final, limit, offset, enrich, resolve, this.boostval);
+    }
     return resolve ? this.result : this;
 };
 
@@ -115,7 +120,7 @@ Resolver.prototype.or = function () {
  * @return {Array}
  */
 
-function resolver(result, limit, offset, enrich, resolve, boost) {
+function union(result, limit, offset, enrich, resolve, boost) {
 
     if (!result.length) {
         // todo remove
@@ -139,44 +144,47 @@ function resolver(result, limit, offset, enrich, resolve, boost) {
         }
     }
 
-    let final = [],
-        count = 0,
-        dupe = create_object(),
-        maxres = get_max_len(result);
+    // the suggest-union
+    return _union(result /*.reverse()*/, offset, limit, resolve, boost);
 
-
-    for (let j = 0, ids; j < maxres; j++) {
-        for (let i = 0, res; i < result.length; i++) {
-            res = result[i];
-            if (!res) continue;
-            ids = res[j];
-            if (!ids) continue;
-
-            for (let k = 0, id; k < ids.length; k++) {
-                id = ids[k];
-                if (!dupe[id]) {
-                    dupe[id] = 1;
-                    if (offset) {
-                        offset--;
-                        continue;
-                    }
-                    if (resolve) {
-                        final.push(id);
-                    } else {
-                        // shift resolution by boost (inverse)
-                        const index = j + (i ? boost : 0);
-                        final[index] || (final[index] = []);
-                        final[index].push(id);
-                    }
-                    if (limit && ++count === limit) {
-                        //this.boost = 0;
-                        return final;
-                    }
-                }
-            }
-        }
-    }
-
-    //this.boost = 0;
-    return final;
+    // let final = [];
+    // let count = 0;
+    // let dupe = create_object();
+    // let maxres = get_max_len(result);
+    //
+    // for(let j = 0, ids; j < maxres; j++){
+    //     for(let i = 0, res; i < result.length; i++){
+    //         res = result[i];
+    //         if(!res) continue;
+    //         ids = res[j];
+    //         if(!ids) continue;
+    //
+    //         for(let k = 0, id; k < ids.length; k++){
+    //             id = ids[k];
+    //             if(!dupe[id]){
+    //                 dupe[id] = 1;
+    //                 if(offset){
+    //                     offset--;
+    //                     continue;
+    //                 }
+    //                 if(resolve){
+    //                     final.push(id);
+    //                 }
+    //                 else{
+    //                     // shift resolution by boost (inverse)
+    //                     const index = j + (boost || 0);
+    //                     final[index] || (final[index] = []);
+    //                     final[index].push(id);
+    //                 }
+    //                 if(limit && ++count === limit){
+    //                     //this.boost = 0;
+    //                     return final;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    //
+    // //this.boost = 0;
+    // return final;
 }

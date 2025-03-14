@@ -60,7 +60,7 @@ export default function SqliteDB(name, config = {}) {
     //field = "Test-456";
     this.id = config.path || (":memory:" === name ? name : "flexsearch" + (name ? "-" + sanitize(name) : "") + ".sqlite");
     this.field = config.field ? "_" + sanitize(config.field) : "";
-    this.support_tag_search = /* tag? */ /* stringify */ /* stringify */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search = /* tag? */ /* stringify */ /* stringify */ /* single param */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
     this.db = config.db || DB[this.id] || null;
     this.type = config.type ? types[config.type.toLowerCase()] : "string";
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
@@ -325,15 +325,15 @@ SqliteDB.prototype.tag = function (tag, limit = 0, offset = 0, enrich = !1) {
     return promise;
 };
 
-function build_params(length) {
+function build_params(length, single_param) {
 
-    let stmt = ",?";
+    let stmt = single_param ? ",(?)" : ",?";
     for (let i = 1; i < length;) {
         if (i <= length - i) {
             stmt += stmt;
             i *= 2;
         } else {
-            stmt += stmt.substring(0, 2 * (length - i));
+            stmt += stmt.substring(0, (length - i) * (single_param ? 4 : 2));
             break;
         }
     }
@@ -641,6 +641,7 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 }
             }
         }
+
         //});
         //await this.transaction(function(){
 
@@ -701,8 +702,8 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
             for (let count = 0; count < ids.length;) {
                 const chunk = ids.length - count > MAXIMUM_QUERY_VARS ? ids.slice(count, count + MAXIMUM_QUERY_VARS) : count ? ids.slice(count) : ids;
                 count += chunk.length;
-                const stmt = build_params(chunk.length);
-                this.db.run("INSERT INTO main.reg (id) VALUES (" + stmt + ")", chunk);
+                const stmt = build_params(chunk.length, !0);
+                this.db.run("INSERT INTO main.reg (id) VALUES " + stmt, chunk);
             }
         }
         //});

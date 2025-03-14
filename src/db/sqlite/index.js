@@ -335,16 +335,18 @@ SqliteDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
     return promise;
 };
 
-function build_params(length){
+function build_params(length, single_param){
 
-    let stmt = ",?";
+    let stmt = single_param
+        ? ",(?)"
+        : ",?";
     for(let i = 1; i < length;){
         if(i <= (length - i)){
             stmt += stmt;
             i *= 2;
         }
         else{
-            stmt += stmt.substring(0, (length - i) * 2);
+            stmt += stmt.substring(0, (length - i) * (single_param ? 4 : 2));
             break;
         }
     }
@@ -659,6 +661,7 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
                 }
             }
         }
+
     //});
     //await this.transaction(function(){
 
@@ -720,8 +723,8 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
                     ? ids.slice(count, count + MAXIMUM_QUERY_VARS)
                     : count ? ids.slice(count) : ids;
                 count += chunk.length;
-                const stmt = build_params(chunk.length);
-                this.db.run("INSERT INTO main.reg (id) VALUES (" + stmt + ")", chunk);
+                const stmt = build_params(chunk.length, /* single param */ true);
+                this.db.run("INSERT INTO main.reg (id) VALUES " + stmt, chunk);
             }
         }
     //});

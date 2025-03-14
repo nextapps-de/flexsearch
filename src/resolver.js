@@ -17,7 +17,9 @@ export default function Resolver(result){
     if(result && result.index){
         result.resolve = false;
         this.index = result.index;
-        return result.index.search(result);
+        this.boostval = result.boost || 0;
+        this.result = result.index.search(result).result;
+        return this;
     }
     if(result.constructor === Resolver){
         // todo test this branch

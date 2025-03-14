@@ -40,7 +40,7 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */
+    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */
 
     /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 

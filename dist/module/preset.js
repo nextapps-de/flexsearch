@@ -15,7 +15,7 @@ const presets = {
 
     performance: {
         resolution: 6,
-        fastupdate: /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
+        fastupdate: /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
         !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/,
         context: {
             depth: 1,

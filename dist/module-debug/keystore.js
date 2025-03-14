@@ -37,7 +37,7 @@ export function KeystoreObj(bitlength = 8) {
                     target.keys.push(address);
                 }
                 obj[key] = value;
-                return (/* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */
+                return (/* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */
                     // splice:
                     !0 /*await rows.hasNext()*/
                     /*await rows.hasNext()*/ /*await rows.hasNext()*/

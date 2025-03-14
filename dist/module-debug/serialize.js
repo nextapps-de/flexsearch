@@ -37,7 +37,7 @@ function async(callback, self, field, key, index_doc, index, data, on_done) {
 
 export function exportIndex(callback, self, field, index_doc, index, on_done) {
 
-    let return_value = /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
+    let return_value = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
     !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
     if ('undefined' == typeof on_done) {
         return_value = new Promise(resolve => {

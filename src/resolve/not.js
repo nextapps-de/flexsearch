@@ -30,6 +30,11 @@ Resolver.prototype.not = function(){
     for(let i = 0, query; i < args.length; i++){
         if((query = args[i])){
 
+            limit = query.limit || 0;
+            offset = query.offset || 0;
+            enrich = query.enrich;
+            resolve = query.resolve;
+
             let result;
             if(query.constructor === Resolver){
                 result = query.result;
@@ -51,10 +56,6 @@ Resolver.prototype.not = function(){
                 result = this.xor(query.xor);
             }
             else{
-                limit = query.limit || 0;
-                offset = query.offset || 0;
-                enrich = query.enrich;
-                resolve = query.resolve;
                 continue;
             }
 
@@ -73,7 +74,10 @@ Resolver.prototype.not = function(){
         });
     }
 
-    this.result = exclusion.call(this, final, limit, offset, resolve);
+    if(final.length){
+        this.result = exclusion.call(this, final, limit, offset, resolve);
+    }
+
     return resolve ? this.result : this;
 }
 
@@ -95,19 +99,29 @@ function exclusion(result, limit, offset, resolve){
     const final = [];
     const exclude = new Set(result.flat().flat());
 
-    for(let j = 0, ids; j < this.result.length; j++){
+    for(let j = 0, ids, count = 0; j < this.result.length; j++){
         ids = this.result[j];
         if(!ids) continue;
 
         for(let k = 0, id; k < ids.length; k++){
             id = ids[k];
             if(!exclude.has(id)){
+                if(offset){
+                    offset--;
+                    continue;
+                }
                 if(resolve){
                     final.push(id);
+                    if(final.length === limit){
+                        return final;
+                    }
                 }
                 else{
                     final[j] || (final[j] = []);
                     final[j].push(id);
+                    if(++count === limit){
+                        return final;
+                    }
                 }
             }
         }

@@ -56,7 +56,7 @@ export default function Index(options, _register) {
     tmp = options.keystore || 0;
     tmp && (this.keystore = tmp);
 
-    this.map = tmp && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(tmp) : new Map();
+    this.map = tmp && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(tmp) : new Map();
     this.ctx = tmp && !0 ? new KeystoreMap(tmp) : new Map();
     this.reg = _register || (this.fastupdate ? tmp && !0 ? new KeystoreMap(tmp) : new Map() : tmp && !0 ? new KeystoreSet(tmp) : new Set());
     this.resolution_ctx = context.resolution || 1;

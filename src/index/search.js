@@ -45,7 +45,7 @@ Index.prototype.search = function(query, limit, options){
 
     let result = [];
     let length;
-    let context, suggest, offset = 0, resolve, enrich, tag, cache;
+    let context, suggest, offset = 0, resolve, enrich, tag, cache, boost;
 
     if(options){
         query = options.query || query;
@@ -56,6 +56,7 @@ Index.prototype.search = function(query, limit, options){
         resolve = !SUPPORT_RESOLVER || (global_resolve && options.resolve !== false);
         resolve || (global_resolve = 0);
         enrich = resolve && options.enrich;
+        boost = options.boost;
         tag = SUPPORT_PERSISTENT && SUPPORT_DOCUMENT && SUPPORT_TAGS && this.db && options.tag;
     }
     else{
@@ -288,7 +289,7 @@ Index.prototype.search = function(query, limit, options){
             }
 
             return !SUPPORT_RESOLVER || resolve
-                ? intersect(result, self.resolution, /** @type {number} */ (limit), offset, suggest)
+                ? intersect(result, self.resolution, /** @type {number} */ (limit), offset, suggest, boost, resolve)
                 : new Resolver(result[0])
         }());
     }
@@ -357,7 +358,7 @@ Index.prototype.search = function(query, limit, options){
         }
     }
 
-    result = intersect(result, this.resolution, limit, offset, suggest);
+    result = intersect(result, this.resolution, limit, offset, suggest, boost, resolve);
 
     return !SUPPORT_RESOLVER || resolve
         ? result

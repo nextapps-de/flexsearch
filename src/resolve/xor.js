@@ -30,6 +30,11 @@ Resolver.prototype.xor = function(){
     for(let i = 0, query; i < args.length; i++){
         if((query = args[i])){
 
+            limit = query.limit || 0;
+            offset = query.offset || 0;
+            enrich = query.enrich;
+            resolve = query.resolve;
+
             let result;
             if(query.constructor === Resolver){
                 result = query.result;
@@ -51,10 +56,6 @@ Resolver.prototype.xor = function(){
                 result = this.not(query.not);
             }
             else{
-                limit = query.limit || 0;
-                offset = query.offset || 0;
-                enrich = query.enrich;
-                resolve = query.resolve;
                 continue;
             }
 
@@ -74,8 +75,10 @@ Resolver.prototype.xor = function(){
         });
     }
 
-    this.result.length && (final = [this.result].concat(final));
-    this.result = exclusive(final, limit, offset, enrich, !resolve, self.boostval);
+    if(final.length){
+        this.result.length && (final = [this.result].concat(final));
+        this.result = exclusive(final, limit, offset, enrich, !resolve, self.boostval);
+    }
     return resolve ? this.result : this;
 }
 
@@ -109,7 +112,8 @@ function exclusive(result, limit, offset, enrich, resolve, boost){
     }
 
     const final = [];
-    const check = create_object()
+    const check = create_object();
+    let maxres = 0;
 
     for(let i = 0, res; i < result.length; i++){
         res = result[i];
@@ -117,7 +121,9 @@ function exclusive(result, limit, offset, enrich, resolve, boost){
 
         for(let j = 0, ids; j < res.length; j++){
             ids = res[j];
-            if(!ids) continue;
+            if(!ids) continue
+
+            if(maxres < ids.length) maxres = ids.length;
 
             for(let k = 0, id; k < ids.length; k++){
                 id = ids[k];
@@ -128,25 +134,36 @@ function exclusive(result, limit, offset, enrich, resolve, boost){
         }
     }
 
-    for(let i = 0, res; i < result.length; i++){
-        res = result[i];
-        if(!res) continue;
+    for(let j = 0, ids, count = 0; j < maxres; j++){
 
-        for(let j = 0, ids; j < res.length; j++){
+        for(let i = 0, res; i < result.length; i++){
+            res = result[i];
+            if(!res) continue;
+
             ids = res[j];
             if(!ids) continue;
 
             for(let k = 0, id; k < ids.length; k++){
                 id = ids[k];
                 if(check[id] === 1){
+                    if(offset){
+                        offset--;
+                        continue;
+                    }
                     if(resolve){
                         final.push(id);
+                        if(final.length === limit){
+                            return final;
+                        }
                     }
                     else{
                         // shift resolution by boost (inverse)
                         const index = j + (i ? boost : 0);
                         final[index] || (final[index] = []);
                         final[index].push(id);
+                        if(++count === limit){
+                            return final;
+                        }
                     }
                 }
             }

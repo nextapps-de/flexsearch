@@ -119,7 +119,7 @@ export let StoreOptions = {};
  *   context: boolean|undefined,
  *   suggest: [boolean=false],
  *   resolve: [boolean=true],
- *   enrich: [boolean=false],
+ *   enrich: [boolean=false]
  * }}
  */
 export let SearchOptions = {};
@@ -141,6 +141,36 @@ export let SearchOptions = {};
  * }}
  */
 export let DocumentSearchOptions = {};
+
+/**
+ * @typedef DocumentSearchResults Array<{{
+ *   field: string|undefined,
+ *   tag: string|undefined,
+ *   result: Array<number|string>
+ * }}>
+ */
+export let DocumentSearchResults = {};
+
+/**
+ * @typedef EnrichedDocumentSearchResults Array<{{
+ *   field: string|undefined,
+ *   tag: string|undefined,
+ *   result: Array<{{
+ *      id: number|string,
+ *      doc: Object
+ *   }}>
+ * }}>
+ */
+export let EnrichedDocumentSearchResults = {};
+
+/**
+ * @typedef MergedDocumentSearchResults Array<{{
+ *   id: number|string,
+ *   doc: Object|undefined,
+ *   field: Array<string>
+ * }}>
+ */
+export let MergedDocumentSearchResults = {};
 
 /**
  * @typedef EncoderOptions {{

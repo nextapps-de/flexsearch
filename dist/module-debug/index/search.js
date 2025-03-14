@@ -39,7 +39,8 @@ Index.prototype.search = function (query, limit, options) {
         offset = 0,
         resolve,
         enrich,
-        tag;
+        tag,
+        boost;
 
 
     if (options) {
@@ -51,6 +52,7 @@ Index.prototype.search = function (query, limit, options) {
         resolve = global_resolve && /* suggest */ /* append: */ /* enrich */!1 !== options.resolve;
         resolve || (global_resolve = 0);
         enrich = resolve && options.enrich;
+        boost = options.boost;
         tag = this.db && options.tag;
     } else {
         resolve = this.resolve || global_resolve;
@@ -239,7 +241,7 @@ Index.prototype.search = function (query, limit, options) {
                 }
             }
 
-            return resolve ? intersect(result, self.resolution, /** @type {number} */limit, offset, suggest) : new Resolver(result[0]);
+            return resolve ? intersect(result, self.resolution, /** @type {number} */limit, offset, suggest, boost, resolve) : new Resolver(result[0]);
         }();
     }
 
@@ -296,7 +298,7 @@ Index.prototype.search = function (query, limit, options) {
         }
     }
 
-    result = intersect(result, this.resolution, limit, offset, suggest);
+    result = intersect(result, this.resolution, limit, offset, suggest, boost, resolve);
 
     return resolve ? result : new Resolver(result);
 };

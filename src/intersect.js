@@ -1,3 +1,6 @@
+// COMPILER BLOCK -->
+import { SUPPORT_RESOLVER } from "./config.js";
+// <-- COMPILER BLOCK
 import { create_object, concat, sort_by_length_up, get_max_len } from "./common.js";
 
 /*
@@ -17,17 +20,14 @@ import { create_object, concat, sort_by_length_up, get_max_len } from "./common.
  * @param limit
  * @param offset
  * @param suggest
+ * @param {number=} boost
+ * @param {boolean=} resolve
  * @returns {Array}
  */
 
-export function intersect(arrays, resolution, limit, offset, suggest) {
+export function intersect(arrays, resolution, limit, offset, suggest, boost, resolve) {
 
     const length = arrays.length;
-
-    // todo remove
-    // if(length < 2){
-    //     throw new Error("Not optimized intersect");
-    // }
 
     let result = [];
     let check;
@@ -65,6 +65,13 @@ export function intersect(arrays, resolution, limit, offset, suggest) {
                     }
 
                     tmp = result[count] || (result[count] = []);
+
+                    if(SUPPORT_RESOLVER && !resolve){
+                        // boost everything after first result
+                        let score = y + (x ? 0 : boost || 0);
+                        tmp = tmp[score] || (tmp[score] = []);
+                    }
+
                     tmp.push(id);
                 }
             }
@@ -87,14 +94,40 @@ export function intersect(arrays, resolution, limit, offset, suggest) {
 
             result = result[result_len - 1];
 
-            if(result.length > limit || offset){
-                result = result.slice(offset, limit + offset);
+            if(limit || offset){
+                if(!SUPPORT_RESOLVER || resolve){
+                    if((result.length > limit) || offset){
+                        result = result.slice(offset, limit + offset);
+                    }
+                }
+                else{
+                    const final = [];
+                    for(let i = 0, arr; i < result.length; i++){
+                        arr = result[i];
+                        if(arr.length > offset){
+                            offset -= arr.length;
+                            continue;
+                        }
+                        if((arr.length > limit) || offset){
+                            arr = arr.slice(offset, limit + offset);
+                            limit -= arr.length;
+                            if(offset) offset -= arr.length;
+                        }
+                        final.push(arr);
+                        if(!limit){
+                            break;
+                        }
+                    }
+                    return final.length > 1
+                        ? concat(final)
+                        : final[0];
+                }
             }
         }
         else{
 
             result = result.length > 1
-                ? union(result, offset, limit)
+                ? union(result, offset, limit, resolve, 0)
                 : result[0];
         }
     }
@@ -102,28 +135,66 @@ export function intersect(arrays, resolution, limit, offset, suggest) {
     return result;
 }
 
-function union(arrays, offset, limit){
+export function union(arrays, offset, limit, resolve, boost){
 
     const result = [];
     const check = create_object();
-    let ids, id, arr_len = arrays.length, ids_len;
+    let ids, id, arr_len = arrays.length, ids_len, count = 0;
 
-    for(let i = 0; i < arr_len; i++){
+    if(SUPPORT_RESOLVER && !resolve){
 
-        ids = arrays[i];
-        ids_len = ids.length;
+        let maxres = get_max_len(arrays);
 
-        for(let j = 0; j < ids_len; j++){
-            id = ids[j];
-            if(!check[id]){
-                check[id] = 1;
-                if(offset){
-                    offset--;
+        for(let k = 0; k < maxres; k++){
+
+            for(let i = arr_len - 1; i >= 0; i--){
+
+                ids = arrays[i][k];
+                ids_len = ids && ids.length;
+
+                if(ids_len) for(let j = 0; j < ids_len; j++){
+
+                    id = ids[j];
+
+                    if(!check[id]){
+                        check[id] = 1;
+                        if(offset){
+                            offset--;
+                        }
+                        else{
+                            let score = k + (i < arr_len - 1 ? boost || 0 : 0);
+                            const arr = result[score] || (result[score] = []);
+                            arr.push(id);
+                            if(++count === limit){
+                                return result;
+                            }
+                        }
+                    }
                 }
-                else{
-                    result.push(id);
-                    if(result.length === limit){
-                        break;
+            }
+        }
+    }
+    else{
+
+        for(let i = arr_len - 1; i >= 0; i--){
+
+            ids = arrays[i];
+            ids_len = ids.length;
+
+            for(let j = 0; j < ids_len; j++){
+
+                id = ids[j];
+
+                if(!check[id]){
+                    check[id] = 1;
+                    if(offset){
+                        offset--;
+                    }
+                    else{
+                        result.push(id);
+                        if(result.length === limit){
+                            return result;
+                        }
                     }
                 }
             }
