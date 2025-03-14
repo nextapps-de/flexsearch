@@ -148,7 +148,7 @@ K.prototype.encode = function(a) {
         return this.F.get(a);
       }
     } else {
-      this.J = setTimeout(L, 0, this);
+      this.J = setTimeout(L, 50, this);
     }
   }
   this.normalize && (a = "function" === typeof this.normalize ? this.normalize(a) : J ? a.normalize("NFKD").replace(J, "").toLowerCase() : a.toLowerCase());
@@ -178,12 +178,11 @@ K.prototype.encode = function(a) {
           continue;
         }
       } else {
-        this.J = setTimeout(L, 0, this);
+        this.J = setTimeout(L, 50, this);
       }
     }
     let k;
     this.stemmer && 2 < g.length && (this.N || (this.N = new RegExp("(?!^)(" + this.L + ")$")), g = g.replace(this.N, l => this.stemmer.get(l)), k = 1);
-    this.matcher && 1 < g.length && (this.M || (this.M = new RegExp("(" + this.K + ")", "g")), g = g.replace(this.M, l => this.matcher.get(l)), k = 1);
     g && k && (g.length < this.minlength || this.filter && this.filter.has(g)) && (g = "");
     if (g && (this.mapper || this.dedupe && 1 < g.length)) {
       d = "";
@@ -192,6 +191,7 @@ K.prototype.encode = function(a) {
       }
       g = d;
     }
+    this.matcher && 1 < g.length && (this.M || (this.M = new RegExp("(" + this.K + ")", "g")), g = g.replace(this.M, l => this.matcher.get(l)));
     if (g && this.replacer) {
       for (d = 0; g && d < this.replacer.length; d += 2) {
         g = g.replace(this.replacer[d], this.replacer[d + 1]);
@@ -772,12 +772,12 @@ const pa = {normalize:function(a) {
   return a.toLowerCase();
 }, dedupe:!1};
 const T = new Map([["b", "p"], ["v", "f"], ["w", "f"], ["z", "s"], ["x", "s"], ["d", "t"], ["n", "m"], ["c", "k"], ["g", "k"], ["j", "k"], ["q", "k"], ["i", "e"], ["y", "e"], ["u", "o"]]);
-const qa = new Map([["ai", "ei"], ["ae", "a"], ["oe", "o"], ["ue", "u"], ["sh", "s"], ["ch", "c"], ["th", "t"], ["ph", "f"], ["pf", "f"]]), ra = [/([^aeo])h([aeo$])/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2"];
+const qa = new Map([["ae", "a"], ["oe", "o"], ["sh", "s"], ["kh", "k"], ["th", "t"], ["pf", "f"]]), ra = [/([^aeo])h(.)/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2", /([^0-9])\1+/g, "$1"];
 const sa = {a:"", e:"", i:"", o:"", u:"", y:"", b:1, f:1, p:1, v:1, c:2, g:2, j:2, k:2, q:2, s:2, x:2, z:2, "\u00df":2, d:3, t:3, l:4, m:5, n:5, r:6};
 const ta = /[\x00-\x7F]+/g;
 const ua = /[\x00-\x7F]+/g;
 const wa = /[\x00-\x7F]+/g;
-var xa = {LatinExact:{normalize:!1, dedupe:!1}, LatinDefault:pa, LatinSimple:{normalize:!0, dedupe:!0}, LatinBalance:{normalize:!0, dedupe:!0, mapper:T}, LatinAdvanced:{normalize:!0, dedupe:!0, mapper:T, replacer:ra, matcher:qa}, LatinExtra:{normalize:!0, dedupe:!0, mapper:T, replacer:ra.concat([/(?!^)[aeoy]/g, ""]), matcher:qa}, LatinSoundex:{normalize:!0, dedupe:!1, include:{letter:!0}, finalize:function(a) {
+var xa = {LatinExact:{normalize:!1, dedupe:!1}, LatinDefault:pa, LatinSimple:{normalize:!0, dedupe:!0}, LatinBalance:{normalize:!0, dedupe:!0, mapper:T}, LatinAdvanced:{normalize:!0, dedupe:!0, mapper:T, matcher:qa, replacer:ra}, LatinExtra:{normalize:!0, dedupe:!0, mapper:T, replacer:ra.concat([/(?!^)[aeo]/g, ""]), matcher:qa}, LatinSoundex:{normalize:!0, dedupe:!1, include:{letter:!0}, finalize:function(a) {
   for (let b = 0; b < a.length; b++) {
     var c = a[b];
     let e = c.charAt(0), d = sa[e];

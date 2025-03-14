@@ -1,7 +1,7 @@
 import Resolver from "../resolver.js";
 import default_resolver from "./default.js";
-import { create_object, get_max_len } from "../common.js";
 import { union as _union } from "../intersect.js";
+import { ResolverOptions } from "../type.js";
 
 Resolver.prototype.or = function(){
 
@@ -22,37 +22,17 @@ Resolver.prototype.or = function(){
         }
     }
 
-    // for(let i = 0; i < args.length; i++){
-    //     if(args[i].result instanceof Promise){
-    //         return;
-    //     }
-    // }
-
-    // if(args.length < 2){
-    //     if(first_argument.index){
-    //         first_argument.resolve = false;
-    //         const result = first_argument.index.search(first_argument);
-    //         if(result instanceof Promise){
-    //             result.then(function(result){
-    //                 final = self.result.concat(result);
-    //                 self.result = resolver(final, limit, offset, enrich, !resolve);
-    //                 return resolve ? self.result : self;
-    //             });
-    //         }
-    //         else{
-    //             final = this.result.concat(result);
-    //             this.result = resolver(final, limit, offset, enrich, !resolve);
-    //             return resolve ? this.result : this;
-    //         }
-    //     }
-    // }
-
     let final = [];
     let promises = [];
     let limit = 0, offset = 0, enrich, resolve;
 
     for(let i = 0, query; i < args.length; i++){
-        if((query = args[i])){
+
+        query = /** @type {string|ResolverOptions} */ (
+            args[i]
+        );
+
+        if(query){
 
             limit = query.limit || 0;
             offset = query.offset || 0;

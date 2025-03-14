@@ -993,7 +993,7 @@ Fa.prototype.encode = function(a) {
         return this.N.get(a);
       }
     } else {
-      this.U = setTimeout(Ga, 0, this);
+      this.U = setTimeout(Ga, 50, this);
     }
   }
   this.normalize && (a = "function" === typeof this.normalize ? this.normalize(a) : Ea ? a.normalize("NFKD").replace(Ea, "").toLowerCase() : a.toLowerCase());
@@ -1013,15 +1013,12 @@ Fa.prototype.encode = function(a) {
                 continue;
               }
             } else {
-              this.U = setTimeout(Ga, 0, this);
+              this.U = setTimeout(Ga, 50, this);
             }
           }
           k = void 0;
           this.stemmer && 2 < f.length && (this.G || (this.G = new RegExp("(?!^)(" + this.C + ")$")), f = f.replace(this.G, function(q) {
             return b.stemmer.get(q);
-          }), k = 1);
-          this.matcher && 1 < f.length && (this.F || (this.F = new RegExp("(" + this.B + ")", "g")), f = f.replace(this.F, function(q) {
-            return b.matcher.get(q);
           }), k = 1);
           f && k && (f.length < this.minlength || this.filter && this.filter.has(f)) && (f = "");
           if (f && (this.mapper || this.dedupe && 1 < f.length)) {
@@ -1031,6 +1028,9 @@ Fa.prototype.encode = function(a) {
             }
             f = k;
           }
+          this.matcher && 1 < f.length && (this.F || (this.F = new RegExp("(" + this.B + ")", "g")), f = f.replace(this.F, function(q) {
+            return b.matcher.get(q);
+          }));
           if (f && this.replacer) {
             for (k = 0; f && k < this.replacer.length; k += 2) {
               f = f.replace(this.replacer[k], this.replacer[k + 1]);
@@ -2167,12 +2167,12 @@ var hb = {normalize:function(a) {
   return a.toLowerCase();
 }, dedupe:!1};
 var ib = new Map([["b", "p"], ["v", "f"], ["w", "f"], ["z", "s"], ["x", "s"], ["d", "t"], ["n", "m"], ["c", "k"], ["g", "k"], ["j", "k"], ["q", "k"], ["i", "e"], ["y", "e"], ["u", "o"]]);
-var jb = new Map([["ai", "ei"], ["ae", "a"], ["oe", "o"], ["ue", "u"], ["sh", "s"], ["ch", "c"], ["th", "t"], ["ph", "f"], ["pf", "f"]]), kb = [/([^aeo])h([aeo$])/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2"];
+var jb = new Map([["ae", "a"], ["oe", "o"], ["sh", "s"], ["kh", "k"], ["th", "t"], ["pf", "f"]]), kb = [/([^aeo])h(.)/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2", /([^0-9])\1+/g, "$1"];
 var lb = {a:"", e:"", i:"", o:"", u:"", y:"", b:1, f:1, p:1, v:1, c:2, g:2, j:2, k:2, q:2, s:2, x:2, z:2, "\u00df":2, d:3, t:3, l:4, m:5, n:5, r:6};
 var mb = /[\x00-\x7F]+/g;
 var nb = /[\x00-\x7F]+/g;
 var ob = /[\x00-\x7F]+/g;
-var pb = {LatinExact:{normalize:!1, dedupe:!1}, LatinDefault:hb, LatinSimple:{normalize:!0, dedupe:!0}, LatinBalance:{normalize:!0, dedupe:!0, mapper:ib}, LatinAdvanced:{normalize:!0, dedupe:!0, mapper:ib, replacer:kb, matcher:jb}, LatinExtra:{normalize:!0, dedupe:!0, mapper:ib, replacer:kb.concat([/(?!^)[aeoy]/g, ""]), matcher:jb}, LatinSoundex:{normalize:!0, dedupe:!1, include:{letter:!0}, finalize:function(a) {
+var pb = {LatinExact:{normalize:!1, dedupe:!1}, LatinDefault:hb, LatinSimple:{normalize:!0, dedupe:!0}, LatinBalance:{normalize:!0, dedupe:!0, mapper:ib}, LatinAdvanced:{normalize:!0, dedupe:!0, mapper:ib, matcher:jb, replacer:kb}, LatinExtra:{normalize:!0, dedupe:!0, mapper:ib, replacer:kb.concat([/(?!^)[aeo]/g, ""]), matcher:jb}, LatinSoundex:{normalize:!0, dedupe:!1, include:{letter:!0}, finalize:function(a) {
   for (var b = 0; b < a.length; b++) {
     for (var c = a[b], d = c.charAt(0), e = lb[d], g = 1, f; g < c.length && (f = c.charAt(g), "h" === f || "w" === f || !(f = lb[f]) || f === e || (d += f, e = f, 4 !== d.length)); g++) {
     }

@@ -3,7 +3,7 @@ import { soundex } from "./balance.js";
 import { matcher, replacer } from "./advanced.js";
 
 export const compact = [
-    /(?!^)[aeoy]/g, "" // old: aioy
+    /(?!^)[aeo]/g, "" // before soundex: aeoy, old: aioy
 ];
 
 /** @type EncoderOptions */

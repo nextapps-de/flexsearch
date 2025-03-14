@@ -563,9 +563,9 @@ Encoder.prototype.assign = function(options){
             this.timer = null;
             this.cache_size = typeof tmp === "number" ? tmp : 2e5;
             this.cache_enc = new Map();
-            this.cache_prt = new Map();
+            this.cache_term = new Map();
             this.cache_enc_length = 128;
-            this.cache_prt_length = 128;
+            this.cache_term_length = 128;
         }
     }
 
@@ -667,7 +667,7 @@ Encoder.prototype.addReplacer = function(match, replace){
 {
     Encoder.prototype.invalidate = function(){
         this.cache_enc.clear();
-        this.cache_prt.clear();
+        this.cache_term.clear();
     };
 }
 
@@ -683,7 +683,7 @@ Encoder.prototype.encode = function(str){
             }
         }
         else {
-            this.timer = setTimeout(clear$1, 0, this);
+            this.timer = setTimeout(clear$1, 50, this);
         }
     }
 
@@ -756,19 +756,19 @@ Encoder.prototype.encode = function(str){
             continue;
         }
 
-        if(this.cache && word.length <= this.cache_prt_length){
+        if(this.cache && word.length <= this.cache_term_length){
             if(this.timer){
-                const tmp = this.cache_prt.get(word);
-                //if(this.cache_prt.has(word)){
+                const tmp = this.cache_term.get(word);
+                //if(this.cache_term.has(word)){
                 if(tmp || tmp === ""){
-                    //word = this.cache_prt.get(word);
+                    //word = this.cache_term.get(word);
                     tmp && final.push(tmp);
                     //word ? words[i] = word : words.splice(i--, 1);
                     continue;
                 }
             }
             else {
-                this.timer = setTimeout(clear$1, 0, this);
+                this.timer = setTimeout(clear$1, 50, this);
             }
         }
 
@@ -820,15 +820,6 @@ Encoder.prototype.encode = function(str){
             postfilter = 1;
         }
 
-        // 3. apply matcher
-        if(this.matcher && (word.length > 1)){
-            this.matcher_test || (
-                this.matcher_test = new RegExp("(" + this.matcher_str + ")", "g")
-            );
-            word = word.replace(this.matcher_test, match => this.matcher.get(match));
-            postfilter = 1;
-        }
-
         // 4. post-filter after matcher and stemmer was applied
         if(word && postfilter && (word.length < this.minlength || (this.filter && this.filter.has(word)))){
             word = "";
@@ -852,6 +843,15 @@ Encoder.prototype.encode = function(str){
             word = final;
         }
 
+        // 3. apply matcher
+        if(this.matcher && (word.length > 1)){
+            this.matcher_test || (
+                this.matcher_test = new RegExp("(" + this.matcher_str + ")", "g")
+            );
+            word = word.replace(this.matcher_test, match => this.matcher.get(match));
+            //postfilter = 1;
+        }
+
         // apply custom regex
         if(word && this.replacer){
             for(let i = 0; word && (i < this.replacer.length); i+=2){
@@ -868,11 +868,11 @@ Encoder.prototype.encode = function(str){
         //     words[i] = word;
         // }
 
-        if(this.cache && base.length <= this.cache_prt_length){
-            this.cache_prt.set(base, word);
-            if(this.cache_prt.size > this.cache_size){
-                this.cache_prt.clear();
-                this.cache_prt_length = this.cache_prt_length / 1.1 | 0;
+        if(this.cache && base.length <= this.cache_term_length){
+            this.cache_term.set(base, word);
+            if(this.cache_term.size > this.cache_size){
+                this.cache_term.clear();
+                this.cache_term_length = this.cache_term_length / 1.1 | 0;
             }
         }
 
@@ -910,7 +910,7 @@ Encoder.prototype.encode = function(str){
 //     //return str;
 //     //if(!str) return str;
 //
-//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
+//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_term_length){
 //         if(this.timer){
 //             if(this.cache_cmp.has(str)){
 //                 return this.cache_cmp.get(str);
@@ -925,7 +925,7 @@ Encoder.prototype.encode = function(str){
 //         ? this.compression(str)
 //         : hash(str); //window.hash(str);
 //
-//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_prt_length){
+//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_term_length){
 //         this.cache_cmp.set(str, result);
 //         this.cache_cmp.size > this.cache_size &&
 //         this.cache_cmp.clear();
@@ -941,7 +941,7 @@ Encoder.prototype.encode = function(str){
 function clear$1(self){
     self.timer = null;
     self.cache_enc.clear();
-    self.cache_prt.clear();
+    self.cache_term.clear();
 }
 
 async function handler(data) {
@@ -4039,20 +4039,22 @@ const options$6 = {
 };
 
 const matcher = new Map([
-    ["ai", "ei"],
+    //["ai", "ei"], // before soundex
     ["ae", "a"],
     ["oe", "o"],
-    ["ue", "u"],
-    ["sh", "s"],
-    ["ch", "c"],
-    ["th", "t"],
-    ["ph", "f"],
+    //["ue", "u"], // soundex map
+    ["sh", "s"], // replacer "h"
+    //["ch", "c"], // before soundex
+    ["kh", "k"], // after soundex
+    ["th", "t"], // replacer "h"
+    //["ph", "f"],
     ["pf", "f"]
 ]);
 
 const replacer = [
-    /([^aeo])h([aeo$])/g, "$1$2",
+    /([^aeo])h(.)/g, "$1$2",
     /([aeo])h([^aeo]|$)/g, "$1$2",
+    /([^0-9])\1+/g, "$1"
 ];
 
 /** @type EncoderOptions */
@@ -4060,12 +4062,12 @@ const options$5 = {
     normalize: true,
     dedupe: true,
     mapper: soundex$1,
-    replacer: replacer,
-    matcher: matcher
+    matcher: matcher,
+    replacer: replacer
 };
 
 const compact = [
-    /(?!^)[aeoy]/g, "" // old: aioy
+    /(?!^)[aeo]/g, "" // before soundex: aeoy, old: aioy
 ];
 
 /** @type EncoderOptions */

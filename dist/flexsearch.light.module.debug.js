@@ -122,7 +122,7 @@ C.prototype.encode = function(a) {
         return this.h.get(a);
       }
     } else {
-      this.j = setTimeout(D, 0, this);
+      this.j = setTimeout(D, 50, this);
     }
   }
   this.normalize && (a = "function" === typeof this.normalize ? this.normalize(a) : B ? a.normalize("NFKD").replace(B, "").toLowerCase() : a.toLowerCase());
@@ -152,12 +152,11 @@ C.prototype.encode = function(a) {
           continue;
         }
       } else {
-        this.j = setTimeout(D, 0, this);
+        this.j = setTimeout(D, 50, this);
       }
     }
     let k;
     this.stemmer && 2 < f.length && (this.u || (this.u = new RegExp("(?!^)(" + this.o + ")$")), f = f.replace(this.u, q => this.stemmer.get(q)), k = 1);
-    this.matcher && 1 < f.length && (this.s || (this.s = new RegExp("(" + this.m + ")", "g")), f = f.replace(this.s, q => this.matcher.get(q)), k = 1);
     f && k && (f.length < this.minlength || this.filter && this.filter.has(f)) && (f = "");
     if (f && (this.mapper || this.dedupe && 1 < f.length)) {
       e = "";
@@ -166,6 +165,7 @@ C.prototype.encode = function(a) {
       }
       f = e;
     }
+    this.matcher && 1 < f.length && (this.s || (this.s = new RegExp("(" + this.m + ")", "g")), f = f.replace(this.s, q => this.matcher.get(q)));
     if (f && this.replacer) {
       for (e = 0; f && e < this.replacer.length; e += 2) {
         f = f.replace(this.replacer[e], this.replacer[e + 1]);
