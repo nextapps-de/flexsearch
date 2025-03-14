@@ -1,6 +1,7 @@
 import Resolver from "../resolver.js";
 import { create_object, get_max_len } from "../common.js";
 import { intersect as _intersect } from "../intersect.js";
+import { ResolverOptions } from "../type.js";
 
 Resolver.prototype.and = function () {
     if (this.result.length) {
@@ -33,7 +34,10 @@ Resolver.prototype.and = function () {
 
 
         for (let i = 0, query; i < args.length; i++) {
-            if (query = args[i]) {
+
+            query = /** @type {string|ResolverOptions} */args[i];
+
+            if (query) {
 
                 limit = query.limit || 0;
                 offset = query.offset || 0;

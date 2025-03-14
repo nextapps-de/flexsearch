@@ -1,9 +1,5 @@
 import Resolver from "../resolver.js";
-import default_resolver from "./default.js";
-import { create_object } from "../common.js";
-// import or from "./or.js";
-// import and from "./and.js";
-// import xor from "./xor.js";
+import { ResolverOptions } from "../type.js";
 
 Resolver.prototype.not = function(){
     const self = this;
@@ -28,7 +24,12 @@ Resolver.prototype.not = function(){
     let limit = 0, offset = 0, enrich, resolve;
 
     for(let i = 0, query; i < args.length; i++){
-        if((query = args[i])){
+
+        query = /** @type {string|ResolverOptions} */ (
+            args[i]
+        );
+
+        if(query){
 
             limit = query.limit || 0;
             offset = query.offset || 0;

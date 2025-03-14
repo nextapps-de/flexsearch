@@ -1,12 +1,13 @@
 import default_resolver from "./resolve/default.js";
 import { set_resolve } from "./index/search.js";
+import { ResolverOptions } from "./type.js";
 import "./resolve/or.js";
 import "./resolve/and.js";
 import "./resolve/xor.js";
 import "./resolve/not.js";
 
 /**
- * @param result
+ * @param {Array|ResolverOptions=} result
  * @constructor
  */
 
@@ -72,6 +73,12 @@ Resolver.prototype.boost = function (boost) {
     this.boostval += boost;
     return this;
 };
+
+/**
+ * @param {number|ResolverOptions=} limit
+ * @param {number=} offset
+ * @param {boolean=} enrich
+ */
 
 Resolver.prototype.resolve = function (limit, offset, enrich) {
     set_resolve(1);

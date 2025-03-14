@@ -1,5 +1,6 @@
 // When you are looking for type definitions which fully describes the usage take a look into the index.d.ts file.
 // Some of the types here aren't supposed to be used as public, they might be defined just for internal state.
+import Index from "./index.js";
 import Encoder from "./encoder.js";
 import StorageInterface from "./db/interface.js";
 
@@ -23,7 +24,7 @@ import StorageInterface from "./db/interface.js";
  *   config: string|undefined
  * }}
  */
-export let IndexOptions = {};
+export const IndexOptions = {};
 
 /**
  * @typedef DocumentIndexOptions {{
@@ -46,7 +47,7 @@ export let IndexOptions = {};
  *   custom: Function|undefined
  * }}
  */
-export let DocumentIndexOptions = {};
+export const DocumentIndexOptions = {};
 
 /**
  * @typedef DocumentOptions {{
@@ -66,7 +67,7 @@ export let DocumentIndexOptions = {};
  *   worker: boolean|string|undefined
  * }}
  */
-export let DocumentOptions = {};
+export const DocumentOptions = {};
 
 /**
  * @typedef ContextOptions {{
@@ -75,7 +76,7 @@ export let DocumentOptions = {};
  *   resolution: number|undefined
  * }}
  */
-export let ContextOptions = {};
+export const ContextOptions = {};
 
 /**
  * @typedef DocumentDescriptor {{
@@ -86,7 +87,7 @@ export let ContextOptions = {};
  *   store: StoreOptions|Array<StoreOptions>|undefined
  * }}
  */
-export let DocumentDescriptor = {};
+export const DocumentDescriptor = {};
 
 /**
  * @typedef TagOptions {{
@@ -99,7 +100,7 @@ export let DocumentDescriptor = {};
  *   config: string|undefined
  * }}
  */
-export let TagOptions = {};
+export const TagOptions = {};
 
 /**
  * @typedef StoreOptions {{
@@ -109,7 +110,7 @@ export let TagOptions = {};
  *   config: string|undefined
  * }}
  */
-export let StoreOptions = {};
+export const StoreOptions = {};
 
 /**
  * @typedef SearchOptions {{
@@ -122,7 +123,7 @@ export let StoreOptions = {};
  *   enrich: [boolean=false]
  * }}
  */
-export let SearchOptions = {};
+export const SearchOptions = {};
 // tag: Array|undefined
 
 /**
@@ -140,7 +141,7 @@ export let SearchOptions = {};
  *   merge: [boolean=false]
  * }}
  */
-export let DocumentSearchOptions = {};
+export const DocumentSearchOptions = {};
 
 /**
  * @typedef DocumentSearchResults Array<{{
@@ -149,7 +150,7 @@ export let DocumentSearchOptions = {};
  *   result: Array<number|string>
  * }}>
  */
-export let DocumentSearchResults = {};
+export const DocumentSearchResults = {};
 
 /**
  * @typedef EnrichedDocumentSearchResults Array<{{
@@ -161,7 +162,7 @@ export let DocumentSearchResults = {};
  *   }}>
  * }}>
  */
-export let EnrichedDocumentSearchResults = {};
+export const EnrichedDocumentSearchResults = {};
 
 /**
  * @typedef MergedDocumentSearchResults Array<{{
@@ -170,7 +171,7 @@ export let EnrichedDocumentSearchResults = {};
  *   field: Array<string>
  * }}>
  */
-export let MergedDocumentSearchResults = {};
+export const MergedDocumentSearchResults = {};
 
 /**
  * @typedef EncoderOptions {{
@@ -191,7 +192,7 @@ export let MergedDocumentSearchResults = {};
  *   cache: boolean=true,
  * }}
  */
-export let EncoderOptions = {};
+export const EncoderOptions = {};
 
 /**
  * @typedef EncoderSplitOptions {{
@@ -203,7 +204,7 @@ export let EncoderOptions = {};
  *   char: string|Array<string>|undefined,
  * }}
  */
-export let EncoderSplitOptions = {};
+export const EncoderSplitOptions = {};
 
 /**
  * @typedef PersistentOptions {{
@@ -213,4 +214,17 @@ export let EncoderSplitOptions = {};
  *   db: *|undefined
  * }}
  */
-export let PersistentOptions = {};
+export const PersistentOptions = {};
+
+/**
+ * @typedef ResolverOptions {{
+ *   index: Index|undefined,
+ *   query: string,
+ *   limit: [number=0],
+ *   offset: [number=0],
+ *   enrich: boolean=false,
+ *   resolve: boolean=false,
+ *   suggest: boolean=false
+ * }}
+ */
+export const ResolverOptions = {};

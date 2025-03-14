@@ -186,7 +186,7 @@ Index.prototype.push_index = function(dupes, term, score, id, append, keyword){
     let arr = keyword ? this.ctx : this.map;
     let tmp;
 
-    if(!dupes[term] || !keyword || !(tmp = dupes[term])[keyword]){
+    if(!dupes[term] || (keyword && !(tmp = dupes[term])[keyword])){
 
         if(keyword){
 

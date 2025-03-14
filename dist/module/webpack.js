@@ -1,5 +1,5 @@
 
-import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, DocumentIndexOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions, PersistentOptions } from "./type.js";
+import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, DocumentIndexOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions, PersistentOptions, ResolverOptions } from "./type.js";
 import StorageInterface from "./db/interface.js";
 import Document from "./document.js";
 import Index from "./index.js";
@@ -222,6 +222,14 @@ import Charset from "./charset.js";
 /** @export */PersistentOptions.field;
 /** @export */PersistentOptions.type;
 /** @export */PersistentOptions.db;
+
+/** @export */ResolverOptions.index;
+/** @export */ResolverOptions.query;
+/** @export */ResolverOptions.limit;
+/** @export */ResolverOptions.offset;
+/** @export */ResolverOptions.enrich;
+/** @export */ResolverOptions.resolve;
+/** @export */ResolverOptions.suggest;
 
 const FlexSearch = {
     Index: Index,

@@ -22,7 +22,8 @@ import {
     StoreOptions,
     EncoderOptions,
     EncoderSplitOptions,
-    PersistentOptions
+    PersistentOptions,
+    ResolverOptions
 } from "./type.js";
 import StorageInterface from "./db/interface.js";
 import Document from "./document.js";
@@ -250,6 +251,14 @@ if(SUPPORT_PERSISTENT){
 /** @export */ PersistentOptions.field;
 /** @export */ PersistentOptions.type;
 /** @export */ PersistentOptions.db;
+
+/** @export */ ResolverOptions.index;
+/** @export */ ResolverOptions.query;
+/** @export */ ResolverOptions.limit;
+/** @export */ ResolverOptions.offset;
+/** @export */ ResolverOptions.enrich;
+/** @export */ ResolverOptions.resolve;
+/** @export */ ResolverOptions.suggest;
 
 const FlexSearch = {
     "Index": Index,

@@ -1,9 +1,7 @@
 import Resolver from "../resolver.js";
 import default_resolver from "./default.js";
 import { create_object } from "../common.js";
-// import or from "./or.js";
-// import and from "./and.js";
-// import not from "./not.js";
+import { ResolverOptions } from "../type.js";
 
 Resolver.prototype.xor = function () {
     const self = this;
@@ -33,7 +31,10 @@ Resolver.prototype.xor = function () {
 
 
     for (let i = 0, query; i < args.length; i++) {
-        if (query = args[i]) {
+
+        query = /** @type {string|ResolverOptions} */args[i];
+
+        if (query) {
 
             limit = query.limit || 0;
             offset = query.offset || 0;

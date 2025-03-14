@@ -174,7 +174,7 @@ Index.prototype.push_index = function (dupes, term, score, id, append, keyword) 
         tmp;
 
 
-    if (!dupes[term] || !keyword || !(tmp = dupes[term])[keyword]) {
+    if (!dupes[term] || keyword && !(tmp = dupes[term])[keyword]) {
 
         if (keyword) {
 
