@@ -81,7 +81,7 @@ await do_test("test-7", "bignes of splaknuk", [781]);
 // balance transformation, original text: mathematical and musical instruments
 await do_test("test-8", "matematikal musikal instruments", [1480]);
 // relevance on missing term, original text:
-await do_test("test-9", "minerals gums juices vegetables", [2337]); // 1676 does not include "vegetables"
+await do_test("test-9", "mineral fish gum juice", [2337]);
 // advanced transformation, original text: Chamberlain
 await do_test("test-10", "camperlayhn", [1903,520,535]);
 // original text: Houyhnhnms
