@@ -10,9 +10,8 @@
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
 <script type="module">
 
-    import Index from "../../../src/index.js";
-    //import Document from "../../../src/document.js";
-    import { encode } from "../../../src/lang/latin/advanced.js";
+    import Index from "https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.31/src/index.js";
+    import { encode } from "https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.31/src/lang/latin/advanced.js";
     import { suite } from "../../bench.js";
 
     let lib;
@@ -20,35 +19,19 @@
     suite["flexsearch-0.7.0-match"] = {
 
         init: function(){
-
             lib = new Index({
-
                 encode: encode,
                 tokenize: "reverse",
                 resolution: 20
             });
         },
         add: function(data){
-
             for(let i = 0, len = data.length; i < len; i++){
-
                 lib.add(i, data[i]);
             }
         },
         query: function(query){
-
-            return lib.search(query, 10, { suggest: true });
-        },
-        update: function(id){
-
-            for(let i = 0, len = data.length; i < len; i++){
-
-                lib.update(i, data[i]);
-            }
-        },
-        remove: function(id){
-
-            lib.remove(id);
+            return lib.search(query, { suggest: true });
         }
     };
 

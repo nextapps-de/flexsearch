@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height">
+    <title>Benchmark: ufuzzy-1.0.18</title>
+</head>
+<body>
+<h2>Benchmark: ufuzzy-1.0.18</h2><hr/>
+<h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
+<div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
+<script src="https://rawcdn.githack.com/leeoniya/uFuzzy/main/dist/uFuzzy.iife.min.js"></script>
+<script type="module">
+
+    import { suite } from "../../bench.js";
+    let uf, content;
+
+    suite["ufuzzy"] = {
+
+        init: function(){
+            let opts = {
+                alpha: "a-z",
+                intraMode: 9,
+                intraIns: 9,
+                intraSub: 9,
+                intraTrn: 9,
+                intraDel: 9
+            };
+            uf = new window.uFuzzy(opts);
+        },
+        add: function(data){
+            content = data;
+        },
+        query: function(query){
+            return uf.search(content, query)[0];
+        }
+    };
+
+</script>
+</body>
+</html>

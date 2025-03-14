@@ -223,7 +223,7 @@ function check_test(test){
     if(test.init) test.init();
     if(test.start) test.start();
     if(test.prepare) test.prepare();
-    test.fn();
+    //test.fn();
     const results = lib.query("gulliver");
     if(test.end) test.end();
     if(test.complete) test.complete();
