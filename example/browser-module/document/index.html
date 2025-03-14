@@ -66,7 +66,7 @@
     index.add(data[i]);
   }
 
-  // perform a query
+  // perform a query + enrich results
   const result = index.search({
     query: "karmen",
     tag: {
@@ -77,7 +77,6 @@
       ]
     },
     enrich: true,
-    highlight: "<b>$1</b>"
   });
 
   // display results

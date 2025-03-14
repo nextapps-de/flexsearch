@@ -138,7 +138,8 @@ export const SearchOptions = {};
  *   field: Array<DocumentSearchOptions>|undefined,
  *   index: Array<DocumentSearchOptions>|undefined,
  *   pluck: boolean|undefined,
- *   merge: [boolean=false]
+ *   merge: [boolean=false],
+ *   highlight: string|undefined
  * }}
  */
 export const DocumentSearchOptions = {};
@@ -147,7 +148,8 @@ export const DocumentSearchOptions = {};
  * @typedef DocumentSearchResults Array<{{
  *   field: string|undefined,
  *   tag: string|undefined,
- *   result: Array<number|string>
+ *   result: Array<number|string>,
+ *   highlight: string|undefined
  * }}>
  */
 export const DocumentSearchResults = {};
@@ -159,7 +161,8 @@ export const DocumentSearchResults = {};
  *   result: Array<{{
  *      id: number|string,
  *      doc: Object
- *   }}>
+ *   }}>,
+ *   highlight: string|undefined
  * }}>
  */
 export const EnrichedDocumentSearchResults = {};
@@ -168,7 +171,8 @@ export const EnrichedDocumentSearchResults = {};
  * @typedef MergedDocumentSearchResults Array<{{
  *   id: number|string,
  *   doc: Object|undefined,
- *   field: Array<string>
+ *   field: Array<string>,
+ *   highlight: string|undefined
  * }}>
  */
 export const MergedDocumentSearchResults = {};

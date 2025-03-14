@@ -106,6 +106,7 @@ All persistent variants are optimized for larger sized indexes under heavy workl
   - [basic-resolver](example/browser-legacy/basic-resolver)
   - [basic-worker](example/browser-legacy/basic-worker)
   - [document](example/browser-legacy/document)
+  - [document-highlighting](example/browser-legacy/document-highlighting)
   - [document-persistent](example/browser-legacy/document-persistent)
   - [document-worker](example/browser-legacy/document-worker)
   - [language-pack](example/browser-legacy/language-pack)
@@ -117,6 +118,7 @@ All persistent variants are optimized for larger sized indexes under heavy workl
   - [basic-worker](example/browser-module/basic-worker)
   - [basic-worker-extern-config](example/browser-module/basic-worker-extern-config)
   - [document](example/browser-module/document)
+  - [document-highlighting](example/browser-module/document-highlighting)
   - [document-persistent](example/browser-module/document-persistent)
   - [document-worker](example/browser-module/document-worker)
   - [document-worker-extern-config](example/browser-module/document-worker-extern-config)
@@ -1101,6 +1103,69 @@ const result = index.search("a short query", {
 });
 ```
 
+## Result Highlighting
+
+Result highlighting could be just enabled when using Document-Index with enabled Data-Store. Also when you just want to add id-content-pairs you'll need to use a DocumentIndex for this feature (just define a simple document descriptor as shown below).
+
+```js
+// create the document index
+const index = new Document({
+  document: {
+    store: true,
+    index: [{
+      field: "title",
+      tokenize: "forward",
+      encoder: Charset.LatinBalance
+    }]
+  }
+});
+
+// add data
+index.add({
+  "id": 1,
+  "title": "Carmencita"
+});
+index.add({
+  "id": 2,
+  "title": "Le clown et ses chiens"
+});
+
+// perform a query
+const result = index.search({
+  query: "karmen or clown or not found",
+  suggest: true,
+  // set enrich to true (required)
+  enrich: true,
+  // highlight template
+  // $1 is a placeholder for the matched partial
+  highlight: "<b>$1</b>"
+});
+```
+
+The result will look like:
+
+```js
+[{
+  "field": "title",
+  "result": [{
+      "id": 1,
+      "doc": {
+        "id": 1,
+        "title": "Carmencita"
+      },
+      "highlight": "<b>Carmen</b>cita"
+    },{
+      "id": 2,
+      "doc": {
+        "id": 2,
+        "title": "Le clown et ses chiens"
+      },
+      "highlight": "Le <b>clown</b> et ses chiens"
+    }
+  ]
+}]
+```
+
 ## Big In-Memory Keystores
 
 The default maximum keystore limit for the In-Memory index is 2^24 of distinct terms/partials being stored (so-called "cardinality"). An additional register could be enabled and is dividing the index into self-balanced partitions.
@@ -1560,7 +1625,7 @@ You can overcome this issue by passing the filepath to the worker file like `wor
 Fuzzysearch describes a basic concept of how making queries more tolerant. FlexSearch provides several methods to achieve fuzziness:
 
 1. Use a tokenizer: `forward`, `reverse` or `full`
-2. Don't forget to use any of the builtin encoder `simple` > `balanced` > `advanced` > `extra` > `soundex` (sorted by fuzziness)
+2. Don't forget to use any of the builtin encoder `simple` > `balance` > `advanced` > `extra` > `soundex` (sorted by fuzziness)
 3. Use one of the language specific presets e.g. `/lang/en.js` for en-US specific content
 4. Enable suggestions by passing the search option `suggest: true`
 
@@ -1573,13 +1638,13 @@ Original term which was indexed: "Struldbrugs"
 <table>
     <tr>
         <th align="left">Encoder:</th>
-        <th><code>exact</code></th>
-        <th><code>default</code></th>
-        <th><code>simple</code></th>
-        <th><code>balance</code></th>
-        <th><code>advanced</code></th>
-        <th><code>extra</code></th>
-        <th><code>soundex</code></th>
+        <th><code>LatinExact</code></th>
+        <th><code>LatinDefault</code></th>
+        <th><code>LatinSimple</code></th>
+        <th><code>LatinBalance</code></th>
+        <th><code>LatinAdvanced</code></th>
+        <th><code>LatinExtra</code></th>
+        <th><code>LatinSoundex</code></th>
     </tr>
     <tr>
         <th align="left">Index Size</th>
@@ -1694,7 +1759,7 @@ If you get some good results please feel free to share your encoder.
 
 > This is an experimental feature with limited support which probably might drop in future release. You're welcome to give some feedback.
 
-When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore a __static__ index on page load. Document-Indexes aren't supported yet for this method.
+When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore a __<u>static</u>__ index on page load. Document-Indexes aren't supported yet for this method.
 
 > When your index is too large you should use the default export/import mechanism.
 
@@ -1720,7 +1785,7 @@ function inject(index){
 }
 ```
 
-You could store this function by e.g. `fs.writeFileSync("inject.js", fn_string);` or place it as string in your markup.
+You can save this function by e.g. `fs.writeFileSync("inject.js", fn_string);` or place it as string in your SSR-generated markup.
 
 After creating the index on client side just call the inject method like:
 
@@ -2201,7 +2266,7 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
 
 ### Misc
 
-A formula to determine a well balanced value for the `resolution` is: $2*floor(\sqrt{content.length})$ where content is the value pushed by `index.add()`. Here the maximum length of all contents should be used.
+A formula to determine a well-balanced value for the `resolution` is: $2*floor(\sqrt{content.length})$ where content is the value pushed by `index.add()`. Here the maximum length of all contents should be used.
 
 ## Migration
 

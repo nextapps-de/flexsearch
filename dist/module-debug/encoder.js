@@ -163,8 +163,7 @@ Encoder.prototype.assign = function (options) {
 
     // options
 
-    this.rtl = options.rtl || /* suggest */ /* append: */
-    /* enrich */!1;
+    this.rtl = options.rtl || /* suggest */ /* append: */ /* enrich */!1;
     this.dedupe = parse_option(options.dedupe, !0, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);

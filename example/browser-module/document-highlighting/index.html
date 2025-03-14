@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height">
+  <title>Example: browser-module-document-highlighting</title>
+</head>
+<body style="white-space: pre">
+<script type="module">
+
+  import { Document, Charset } from "https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/flexsearch.compact.module.min.js";
+
+  // some test data
+  const data = [{
+    "id": 1,
+    "title": "Carmencita"
+  },{
+    "id": 2,
+    "title": "Le clown et ses chiens"
+  }];
+
+  // create the document index
+  const index = new Document({
+    document: {
+      id: "tconst",
+      store: true,
+      index: [{
+        field: "title",
+        tokenize: "forward",
+        encoder: Charset.LatinBalance
+      }]
+    }
+  });
+
+  // add test data
+  for(let i = 0; i < data.length; i++){
+    index.add(data[i]);
+  }
+
+  // perform a query
+  const result = index.search({
+    query: "karmen or clown or not found",
+    suggest: true,
+    // set enrich to true (required)
+    enrich: true,
+    // highlight template
+    // $1 is a placeholder for the matched partial
+    highlight: "<b>$1</b>"
+  });
+
+  // display results
+  console.log(suggestions);
+  log(JSON.stringify(suggestions, null, 2));
+
+  function log(str){
+    document.body.appendChild(
+      document.createTextNode(str + "\n")
+    );
+  }
+</script>
+</body>
+</html>

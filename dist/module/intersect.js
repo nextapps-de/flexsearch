@@ -49,6 +49,11 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
 
                     id = ids[z];
 
+                    // todo the persistent implementation will count term matches
+                    //      and also aggregate the score (group by id)
+                    //      min(score): suggestions off (already covered)
+                    //      sum(score): suggestions on (actually not covered)
+
                     if (count = check[id]) {
                         check[id]++;
                         // tmp.count++;
@@ -115,12 +120,14 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                             break;
                         }
                     }
-                    return 1 < final.length ? concat(final) : final[0];
+                    result = 1 < final.length ? concat(final) : final[0];
                 }
+
+                return result;
             }
         } else {
 
-            result = 1 < result.length ? union(result, offset, limit, resolve, 0) : result[0];
+            result = 1 < result.length ? union(result, offset, limit, resolve, 0) : (result = result[0]).length > limit || offset ? result.slice(offset, limit + offset) : result;
         }
     }
 

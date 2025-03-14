@@ -117,7 +117,7 @@ if(options["DEBUG"]){
 
 if(!release.endsWith(".module")){
     //parameter += ' --isolation_mode=IIFE';
-    parameter += ' --output_wrapper=\"(function(self){%output%}(this));\"';
+    parameter += ' --output_wrapper=\"(function(self){%output%}(this||self));\"';
     parameter += ' --emit_use_strict=true';
 }
 
@@ -363,6 +363,16 @@ else (async function(){
             part = part.split(",");
             part = part.map(entry => "export const " + entry.replace(":", "="));
             part = part.join(";") + ";";
+            // part = "export const Index=FlexSearch.Index;" +
+            //        "export const Charset=FlexSearch.Charset;" +
+            //        "export const Encoder=FlexSearch.Encoder;" +
+            //        "export const Document=FlexSearch.Document;" +
+            //        "export const Worker=FlexSearch.Worker;" +
+            //        "export const Resolver=FlexSearch.Resolver;" +
+            //        "export const IndexedDB=FlexSearch.IndexedDB;" +
+            //        "export const Language={};";
+            // part = "export default FlexSearch;" + part;
+
             //console.log(build.substring(pos_start - 50, pos_start) + part + build.substring(pos_end))
 
             //build = build.substring(0, pos_start) + part + build.substring(pos_end);
@@ -373,14 +383,17 @@ else (async function(){
             build = build.replace(/\(1,eval\)\('([^']+)'\)/g, "import.meta.dirname");
             build = build.replace('(0,eval)("import.meta.url")', 'import.meta.url');
             build = build.replace('(1,eval)("import.meta.dirname")', 'import.meta.dirname');
+
+            //build = build.replace(/\(function\(self\)\{/, "const FlexSearch=(function(self){");
         }
 
         // fix closure compiler dynamic import
         build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=(await import($4))[\"default\"])");
 
-        if(release === "bundle"){
+        //if(release === "bundle"){
             build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");
-        }
+            //build = build.replace("(function(self){", "(function _f(self){if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");
+        //}
 
         // replace the eval wrapper
         build = build.replace(/\(0,eval\)\('([^']+)'\)/g, "$1");

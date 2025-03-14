@@ -204,6 +204,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                 // just collect and continue
                 continue;
             } else {
+
                 res = index.search(query, limit, opt);
                 // restore enrich state
                 opt && enrich && (opt.enrich = enrich);
@@ -350,7 +351,9 @@ Document.prototype.search = function (query, limit, options, _promises) {
         };
     }
 
-    if (enrich && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ && this.db && promises.length) {
+    if (enrich && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
+    /*await rows.hasNext()*/
+    && this.db && promises.length) {
         const self = this;
         return Promise.all(promises).then(function (promises) {
             for (let j = 0; j < promises.length; j++) {
@@ -365,8 +368,9 @@ Document.prototype.search = function (query, limit, options, _promises) {
 
 /*
 
- some matching term
-
+ karmen or clown or not found
+[Carmen]cita
+       Le [clown] et ses chiens
 
  */
 
@@ -374,34 +378,65 @@ function highlight_fields(result, query, index, field, tree, template) {
 
     // if(typeof template === "string"){
     //     template = new RegExp(template, "g");
-    // }
-
-    let encoder;
+    let encoder, query_enc, tokenize;
 
 
-    for (let i = 0, res, field, enc, path; i < result.length; i++) {
+    for (let i = 0, res, res_field, enc, idx, path; i < result.length; i++) {
 
         res = result[i].result;
-        field = result[i].field;
-        enc = index.get(field).encoder;
-        path = tree[field.indexOf(field)];
+        res_field = result[i].field;
+        idx = index.get(res_field);
+        enc = idx.encoder;
+        tokenize = idx.tokenize;
+        path = tree[field.indexOf(res_field)];
 
         if (enc !== encoder) {
             encoder = enc;
-            encoder.encode(query);
+            query_enc = encoder.encode(query);
         }
 
         for (let j = 0; j < res.length; j++) {
             let str = "",
                 content = parse_simple(res[j].doc, path),
-                split = encoder.encode(content);
+                doc_enc = encoder.encode(content),
+                doc_org = content.split(encoder.split);
 
 
-            for (let k = 0; k < split.length; k++) {
-                str += split[k].replace(new RegExp("(" + split[k] + ")", "g"), template.replace("$1", content));
+            for (let k = 0, doc_enc_cur, doc_org_cur; k < doc_enc.length; k++) {
+                doc_enc_cur = doc_enc[k];
+                doc_org_cur = doc_org[k];
+                let found;
+                for (let l = 0, query_enc_cur; l < query_enc.length; l++) {
+                    query_enc_cur = query_enc[l];
+                    // todo tokenize could be custom also when "strict" was used
+                    if ("strict" === tokenize) {
+                        if (doc_enc_cur === query_enc_cur) {
+                            str += (str ? " " : "") + template.replace("$1", doc_org_cur);
+                            found = !0;
+                            break;
+                        }
+                    } else {
+                        const position = doc_enc_cur.indexOf(query_enc_cur);
+                        if (-1 < position) {
+                            str += (str ? " " : "") +
+                            // prefix
+                            doc_org_cur.substring(0, position) +
+                            // match
+                            template.replace("$1", doc_org_cur.substring(position, query_enc_cur.length)) +
+                            // suffix
+                            doc_org_cur.substring(position + query_enc_cur.length);
+                            found = !0;
+                            break;
+                        }
+                    }
+
+                    //str += doc_enc[k].replace(new RegExp("(" + doc_enc[k] + ")", "g"), template.replace("$1", content))
+                }
+
+                if (!found) {
+                    str += (str ? " " : "") + doc_org[k];
+                }
             }
-
-            console.log(result, index, template);
 
             res[j].highlight = str;
         }

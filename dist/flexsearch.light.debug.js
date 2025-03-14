@@ -157,16 +157,16 @@ C.prototype.encode = function(a) {
       }
     }
     let k;
-    this.stemmer && 2 < f.length && (this.u || (this.u = new RegExp("(?!^)(" + this.o + ")$")), f = f.replace(this.u, q => this.stemmer.get(q)), k = 1);
+    this.stemmer && 2 < f.length && (this.u || (this.u = new RegExp("(?!^)(" + this.o + ")$")), f = f.replace(this.u, p => this.stemmer.get(p)), k = 1);
     f && k && (f.length < this.minlength || this.filter && this.filter.has(f)) && (f = "");
     if (f && (this.mapper || this.dedupe && 1 < f.length)) {
       e = "";
-      for (let q = 0, p = "", m, r; q < f.length; q++) {
-        m = f.charAt(q), m === p && this.dedupe || ((r = this.mapper && this.mapper.get(m)) || "" === r ? r === p && this.dedupe || !(p = r) || (e += r) : e += p = m);
+      for (let p = 0, q = "", m, r; p < f.length; p++) {
+        m = f.charAt(p), m === q && this.dedupe || ((r = this.mapper && this.mapper.get(m)) || "" === r ? r === q && this.dedupe || !(q = r) || (e += r) : e += q = m);
       }
       f = e;
     }
-    this.matcher && 1 < f.length && (this.s || (this.s = new RegExp("(" + this.m + ")", "g")), f = f.replace(this.s, q => this.matcher.get(q)));
+    this.matcher && 1 < f.length && (this.s || (this.s = new RegExp("(" + this.m + ")", "g")), f = f.replace(this.s, p => this.matcher.get(p)));
     if (f && this.replacer) {
       for (e = 0; f && e < this.replacer.length; e += 2) {
         f = f.replace(this.replacer[e], this.replacer[e + 1]);
@@ -220,11 +220,11 @@ H.prototype.add = function(a, c, b, d) {
     }
     c = this.encoder.encode(c);
     if (d = c.length) {
-      const q = u(), p = u(), m = this.depth, r = this.resolution;
+      const p = u(), q = u(), m = this.depth, r = this.resolution;
       for (let l = 0; l < d; l++) {
         let n = c[this.rtl ? d - 1 - l : l];
         var e = n.length;
-        if (e && (m || !p[n])) {
+        if (e && (m || !q[n])) {
           var g = this.score ? this.score(c, n, l, null, 0) : I(r, d, l), f = "";
           switch(this.tokenize) {
             case "full":
@@ -233,7 +233,7 @@ H.prototype.add = function(a, c, b, d) {
                   for (var h = e; h > g; h--) {
                     f = n.substring(g, h);
                     var k = this.score ? this.score(c, n, l, f, g) : I(r, d, l, e, g);
-                    J(this, p, f, k, a, b);
+                    J(this, q, f, k, a, b);
                   }
                 }
                 break;
@@ -241,24 +241,24 @@ H.prototype.add = function(a, c, b, d) {
             case "reverse":
               if (1 < e) {
                 for (h = e - 1; 0 < h; h--) {
-                  f = n[h] + f, k = this.score ? this.score(c, n, l, f, h) : I(r, d, l, e, h), J(this, p, f, k, a, b);
+                  f = n[h] + f, k = this.score ? this.score(c, n, l, f, h) : I(r, d, l, e, h), J(this, q, f, k, a, b);
                 }
                 f = "";
               }
             case "forward":
               if (1 < e) {
                 for (h = 0; h < e; h++) {
-                  f += n[h], J(this, p, f, g, a, b);
+                  f += n[h], J(this, q, f, g, a, b);
                 }
                 break;
               }
             default:
-              if (J(this, p, n, g, a, b), m && 1 < d && l < d - 1) {
+              if (J(this, q, n, g, a, b), m && 1 < d && l < d - 1) {
                 for (e = u(), f = this.A, g = n, h = Math.min(m + 1, d - l), e[g] = 1, k = 1; k < h; k++) {
                   if ((n = c[this.rtl ? d - 1 - l - k : l + k]) && !e[n]) {
                     e[n] = 1;
                     const A = this.score ? this.score(c, g, l, n, k) : I(f + (d / 2 > f ? 0 : 1), d, l, h - 1, k - 1), L = this.bidirectional && n > g;
-                    J(this, q, L ? g : n, A, a, b, L ? n : g);
+                    J(this, p, L ? g : n, A, a, b, L ? n : g);
                   }
                 }
               }
@@ -331,12 +331,12 @@ function I(a, c, b, d, e) {
   }
   var h = 0, k = 0;
   if (1 < b) {
-    var q = u();
+    var p = u();
     const m = [];
     for (let r = 0, l; r < b; r++) {
-      if ((l = a[r]) && !q[l]) {
+      if ((l = a[r]) && !p[l]) {
         if (f || N(this, l)) {
-          m.push(l), q[l] = 1;
+          m.push(l), p[l] = 1;
         } else {
           return d;
         }
@@ -351,7 +351,7 @@ function I(a, c, b, d, e) {
   if (!b) {
     return d;
   }
-  q = 0;
+  p = 0;
   if (1 === b) {
     return M.call(this, a[0], "", c, e);
   }
@@ -360,24 +360,24 @@ function I(a, c, b, d, e) {
   }
   if (1 < b) {
     if (g) {
-      var p = a[0];
-      q = 1;
+      var q = a[0];
+      p = 1;
     } else {
       9 < h && 3 < h / k && a.sort(v);
     }
   }
-  for (let m, r; q < b; q++) {
-    r = a[q];
-    p ? (m = N(this, r, p), m = O(m, d, f, this.A), f && !1 === m && d.length || (p = r)) : (m = N(this, r, ""), m = O(m, d, f, this.resolution));
+  for (let m, r; p < b; p++) {
+    r = a[p];
+    q ? (m = N(this, r, q), m = O(m, d, f, this.A), f && !1 === m && d.length || (q = r)) : (m = N(this, r, ""), m = O(m, d, f, this.resolution));
     if (m) {
       return m;
     }
-    if (f && q === b - 1) {
+    if (f && p === b - 1) {
       g = d.length;
       if (!g) {
-        if (p) {
-          p = "";
-          q = -1;
+        if (q) {
+          q = "";
+          p = -1;
           continue;
         }
         return d;
@@ -390,60 +390,55 @@ function I(a, c, b, d, e) {
   a: {
     a = d;
     d = this.resolution;
-    p = a.length;
-    b = [];
+    q = f;
+    b = a.length;
+    f = [];
     g = u();
     for (let m = 0, r, l, n, A; m < d; m++) {
-      for (k = 0; k < p; k++) {
+      for (k = 0; k < b; k++) {
         if (n = a[k], m < n.length && (r = n[m])) {
-          for (q = 0; q < r.length; q++) {
-            l = r[q], (h = g[l]) ? g[l]++ : (h = 0, g[l] = 1), A = b[h] || (b[h] = []), A.push(l);
+          for (p = 0; p < r.length; p++) {
+            l = r[p], (h = g[l]) ? g[l]++ : (h = 0, g[l] = 1), A = f[h] || (f[h] = []), A.push(l);
           }
         }
       }
     }
-    if (a = b.length) {
-      if (f) {
-        if (1 < b.length) {
+    if (a = f.length) {
+      if (q) {
+        if (1 < f.length) {
           b: {
-            f = b;
-            a = [];
-            d = u();
-            p = f.length;
-            for (h = p - 1; 0 <= h; h--) {
-              for (p = f[h], g = p.length, k = 0; k < g; k++) {
-                if (b = p[k], !d[b]) {
+            for (a = [], d = u(), q = f.length, h = q - 1; 0 <= h; h--) {
+              for (q = f[h], g = q.length, k = 0; k < g; k++) {
+                if (b = q[k], !d[b]) {
                   if (d[b] = 1, e) {
                     e--;
                   } else {
                     if (a.push(b), a.length === c) {
-                      c = a;
                       break b;
                     }
                   }
                 }
               }
             }
-            c = a;
           }
         } else {
-          c = b[0];
+          a = (f = f[0]).length > c || e ? f.slice(e, c + e) : f;
         }
-        b = c;
+        f = a;
       } else {
-        if (a < p) {
+        if (a < b) {
           d = [];
           break a;
         }
-        b = b[a - 1];
+        f = f[a - 1];
         if (c || e) {
-          if (b.length > c || e) {
-            b = b.slice(e, c + e);
+          if (f.length > c || e) {
+            f = f.slice(e, c + e);
           }
         }
       }
     }
-    d = b;
+    d = f;
   }
   return d;
 };
