@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height">
-  <title>Example: browser-document</title>
+  <title>Example: browser-module-document</title>
 </head>
 <body style="white-space: pre">
 <script type="module">
 
-  import { Document, Charset } from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.compact.module.min.js";
+  import { Document, Charset } from "https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/flexsearch.compact.module.min.js";
 
   // some test data
   const data = [{
@@ -76,7 +76,8 @@
         "Short"
       ]
     },
-    enrich: true
+    enrich: true,
+    highlight: "<b>$1</b>"
   });
 
   // display results

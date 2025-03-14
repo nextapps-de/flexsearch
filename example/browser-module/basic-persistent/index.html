@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height">
-  <title>Example: browser-basic-persistent</title>
+  <title>Example: browser-module-basic-persistent</title>
 </head>
 <body style="white-space: pre">
 <script type="module">
 
-  import { Index, IndexedDB } from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.min.js";
+  import { Index, IndexedDB } from "https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/flexsearch.bundle.module.min.js";
 
   // create DB instance with namespace
   const db = new IndexedDB("my-store");
@@ -34,6 +34,7 @@
     'cats cute'
   ];
 
+  // add data to the index
   data.forEach((item, id) => {
     index.add(id, item);
   });
@@ -41,14 +42,14 @@
   // transfer changes (bulk)
   await index.commit();
 
+  // perform query
   const result = await index.search({
     query: "cute cat",
     suggest: true
   });
 
-  console.log(result);
-
   result.forEach(i => {
+    console.log(data[i]);
     log(data[i]);
   });
 

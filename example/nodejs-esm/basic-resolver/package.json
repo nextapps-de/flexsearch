@@ -1,0 +1,7 @@
+{
+  "name": "nodejs-commonjs-document",
+  "type": "module",
+  "dependencies": {
+    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
+  }
+}

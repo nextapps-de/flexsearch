@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height">
-  <title>Example: browser-document-worker-extern-config</title>
+  <title>Example: browser-module-document-worker-extern-config</title>
 </head>
 <body style="white-space: pre">
 <script type="module">
 
-  import { Document } from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.min.js";
+  // you can't load from CDN because of Same-Origin-Policy
+  import { Document } from "../../../dist/flexsearch.bundle.module.min.js";
   const dirname = import.meta.url.replace("/index.html", "");
 
   // some test data

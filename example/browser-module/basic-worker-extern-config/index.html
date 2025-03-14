@@ -3,16 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height">
-  <title>Example: browser-basic-worker-extern-config</title>
+  <title>Example: browser-module-basic-worker-extern-config</title>
 </head>
 <body style="white-space: pre">
 <script type="module">
 
-  import { Index } from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.min.js";
+  // you can't load from CDN because of Same-Origin-Policy
+  import { Worker as WorkerIndex } from "../../../dist/flexsearch.bundle.module.min.js";
+  const dirname = import.meta.url.replace("/index.html", "");
 
   // create a simple index which can store id-content-pairs
-  const index = new Index({
-    tokenize: "forward"
+  const index = await new WorkerIndex({
+    config: dirname + "/config.js"
   });
 
   // some test data
@@ -26,14 +28,14 @@
     'cats cute'
   ];
 
+  // add data to the index
   data.forEach((item, id) => {
     index.add(id, item);
   });
 
   // perform query
   const result = await index.search({
-    query: "cute cat",
-    suggest: true
+    query: "cute cat"
   });
 
   // display results

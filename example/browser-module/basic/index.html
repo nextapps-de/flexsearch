@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height">
-  <title>Example: browser-basic</title>
+  <title>Example: browser-module-basic</title>
 </head>
 <body style="white-space: pre">
 <script type="module">
 
-  import { Index } from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.module.min.js";
+  import { Index } from "https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/flexsearch.light.module.min.js";
 
   // create a simple index which can store id-content-pairs
   const index = new Index({
+    // use forward when you want to match partials
+    // e.g. match "flexsearch" when query "flex"
     tokenize: "forward"
   });
 
@@ -26,21 +28,13 @@
     'cats cute'
   ];
 
+  // add data to the index
   data.forEach((item, id) => {
     index.add(id, item);
   });
 
-  index.search("cute cats").forEach(i => {
-    const result = data[i];
-    log(result);
-  });
-
-  log("\n----------------------\n");
-
-  index.search({
-    query: "black or cute or yellow cats",
-    suggest: true
-  }).forEach(i => {
+  // perform query
+  index.search("cute cat").forEach(i => {
     const result = data[i];
     log(result);
   });

@@ -3,14 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height">
-  <title>Example: browser-basic</title>
+  <title>Example: browser-legacy-basic</title>
 </head>
 <body style="white-space: pre">
-<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.min.js"></script>
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/aff94f2b1d830e21463b237070f7e6f7eb556b82/dist/flexsearch.light.min.js"></script>
 <script>
 
   // create a simple index which can store id-content-pairs
   const index = new FlexSearch.Index({
+    // use forward when you want to match partials
+    // e.g. match "flexsearch" when query "flex"
     tokenize: "forward"
   });
 

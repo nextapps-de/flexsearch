@@ -8,7 +8,7 @@ npm install git+https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
 
 - Persistent indexes support for: `IndexedDB` (Browser), `Redis`, `SQLite`, `Postgres`, `MongoDB`, `Clickhouse`
 - Enhanced language customization via the new `Encoder` class
-- Query performance achieve results up to 7 times faster compared to the previous generation v0.7.x
+- Query performance achieve results up to 4.5 times faster compared to the previous generation v0.7.x by also improving the quality of results
 - Enhanced support for larger indexes or larger result sets
 - Improved offset and limit processing achieve up to 100 times faster traversal performance through large datasets
 - Support for larger In-Memory index with extended key size (the defaults maximum keystore limit is: 2^24)
@@ -70,40 +70,57 @@ All search capabilities are available on persistent indexes like:
 
 All persistent variants are optimized for larger sized indexes under heavy workload. Almost every task will be streamlined to run in batch/parallel, getting the most out of the selected database engine. Whereas the InMemory index can't share their data between different nodes when running in a cluster, every persistent storage can handle this by default.
 
-### Example Node.js
+### Examples Node.js
 
 - [nodejs-commonjs](example/nodejs-commonjs):
+  - [basic](example/nodejs-commonjs/basic)
+  - [basic-suggestion](example/nodejs-commonjs/basic-suggestion)
+  - [basic-persistent](example/nodejs-commonjs/basic-persistent)
+  - [basic-resolver](example/nodejs-commonjs/basic-resolver)
+  - [basic-worker](example/nodejs-commonjs/basic-worker)
+  - [basic-worker-extern-config](example/nodejs-commonjs/basic-worker-extern-config)
   - [document](example/nodejs-commonjs/document)
   - [document-persistent](example/nodejs-commonjs/document-persistent)
   - [document-worker](example/nodejs-commonjs/document-worker)
   - [document-worker-extern-config](example/nodejs-commonjs/document-worker-extern-config)
+  - [language-pack](example/nodejs-commonjs/language-pack)
 - [nodejs-esm](example/nodejs-esm):
+  - [basic](example/nodejs-esm/basic)
+  - [basic-suggestion](example/nodejs-esm/basic-suggestion)
+  - [basic-persistent](example/nodejs-esm/basic-persistent)
+  - [basic-resolver](example/nodejs-esm/basic-resolver)
+  - [basic-worker](example/nodejs-esm/basic-worker)
+  - [basic-worker-extern-config](example/nodejs-esm/basic-worker-extern-config)
   - [document](example/nodejs-esm/document)
   - [document-persistent](example/nodejs-esm/document-persistent)
   - [document-worker](example/nodejs-esm/document-worker)
   - [document-worker-extern-config](example/nodejs-esm/document-worker-extern-config)
-  - [language-packs](example/nodejs-esm/language-packs)
+  - [language-pack](example/nodejs-esm/language-pack)
 
-### Example Browser
+### Examples Browser
 
 - [browser-legacy](example/browser-legacy):
   - [basic](example/browser-legacy/basic)
-  - [basic-persistent](example/browser-legacy/basic-persistent)
   - [basic-suggestion](example/browser-legacy/basic-suggestion)
+  - [basic-persistent](example/browser-legacy/basic-persistent)
+  - [basic-resolver](example/browser-legacy/basic-resolver)
   - [basic-worker](example/browser-legacy/basic-worker)
   - [document](example/browser-legacy/document)
   - [document-persistent](example/browser-legacy/document-persistent)
   - [document-worker](example/browser-legacy/document-worker)
+  - [language-pack](example/browser-legacy/language-pack)
 - [browser-module](example/browser-module):
   - [basic](example/browser-module/basic)
-  - [basic-persistent](example/browser-module/basic-persistent)
   - [basic-suggestion](example/browser-module/basic-suggestion)
+  - [basic-persistent](example/browser-module/basic-persistent)
+  - [basic-resolver](example/browser-module/basic-resolver)
   - [basic-worker](example/browser-module/basic-worker)
   - [basic-worker-extern-config](example/browser-module/basic-worker-extern-config)
   - [document](example/browser-module/document)
   - [document-persistent](example/browser-module/document-persistent)
   - [document-worker](example/browser-module/document-worker)
   - [document-worker-extern-config](example/browser-module/document-worker-extern-config)
+  - [language-pack](example/browser-module/language-pack)
 
 ```js
 import FlexSearchIndex from "./index.js";
@@ -2188,9 +2205,6 @@ A formula to determine a well balanced value for the `resolution` is: $2*floor(\
 
 ## Migration
 
-<!--
-- Using the `async` variants like `.searchAsync` is now deprecated, asynchronous responses will always return from Worker-Index and from Persistent-Index, everything else will return a non-promised result. Having both types of methods looks like the developers can choose between them, but they can't.
--->
 - The index option property "minlength" has moved to the Encoder Class
 - The index option flag "optimize" was removed
 - The index option flag "lang" was replaced by the Encoder Class `.assign()`
@@ -2204,4 +2218,13 @@ A formula to determine a well balanced value for the `resolution` is: $2*floor(\
 - The static methods `FlexSearch.registerCharset()` and `FlexSearch.registerLanguage()` was removed, those collections are now exported to `FlexSearch.Charset` which can be accessed as module `import { Charset } from "flexsearch"` and language packs are now applied by `encoder.assign()`
 - Instead of e.g. "latin:simple" the Charset collection is exported as a module and has to be imported by e.g. `import LatinSimple from "./charset.js"` and then assigned to an existing Encoder by `encoder.assign(LatinSimple)` or by creation `encoder = new Encoder(LatinSimple)`
 - You can import language packs by `dist/module/lang/*` when using ESM and by `const EnglishPreset = require("flexsearch/lang/en");` when using CommonJS (Node.js)
-- The method `index.append()` is now deprecated and will be removed in the near future, because it isn't consistent and leads into unexpected behavior when not used properly. You should only use `index.add()` which also supports an Array of contents.
+- The method `index.append()` is now deprecated and will be removed in the near future, because it isn't consistent and leads into unexpected behavior when not used properly. You should only use `index.add()` to push contents to the index.
+- Using the `async` variants like `.searchAsync` is now deprecated (but still works), asynchronous responses will always return from Worker-Index and from Persistent-Index, everything else will return a non-promised result. Having both types of methods looks like the developers can choose between them, but they can't.
+
+## Not finished yet
+
+Unfortunately, not everything could be finished and needs to be done in the upcoming version.
+
+- The `Resolver` does not support Document-Indexes, there is still some work to do.
+- Config serialization for persistent indexes (store configuration, check migrations, import and restore field configurations)
+- Tooling for persistent indexes (list all tables, remove tables)

@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height">
-  <title>Example: browser-basic-worker</title>
+  <title>Example: browser-module-basic-worker</title>
 </head>
 <body style="white-space: pre">
 <script type="module">
 
-  import { Worker as WorkerIndex } from "https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.min.js";
+  // you can't load from CDN because of Same-Origin-Policy
+  import { Worker as WorkerIndex } from "../../../dist/flexsearch.bundle.module.min.js";
 
   // create a simple index which can store id-content-pairs
   const index = new WorkerIndex({
@@ -26,6 +27,7 @@
     'cats cute'
   ];
 
+  // add test data
   data.forEach((item, id) => {
     index.add(id, item);
   });
