@@ -38,7 +38,7 @@ import "./document/search.js";
 
 export default function Document(options){
 
-    if(this.constructor !== Document) {
+    if(!this || this.constructor !== Document) {
         return new Document(options);
     }
 

@@ -1,81 +1,154 @@
 import Index from "./index.js";
 import Document from "./document.js";
-import { create_object, is_string } from "./common.js";
+import { is_string } from "./common.js";
 
-function map_to_json(map) {
-    const json = [];
+const chunk_size_reg = 250000,
+      chunk_size_map = 5000,
+      chunk_size_ctx = 1000;
+
+
+function map_to_json(map, size = 0) {
+    let chunk = [],
+        json = [];
+
+    if (size) {
+        size = 0 | chunk_size_map * (chunk_size_reg / size);
+    }
     for (const item of map.entries()) {
         json.push(item);
+        if (json.length === size) {
+            chunk.push(json);
+            json = [];
+        }
     }
-    return json;
+    json.length && chunk.push(json);
+    return chunk;
 }
 
-function ctx_to_json(ctx) {
-    const json = [];
-    for (const item of ctx.entries()) {
-        json.push(map_to_json(item));
+function json_to_map(json, map) {
+    map || (map = new Map());
+    for (let i = 0, entry; i < json.length; i++) {
+        entry = json[i];
+        map.set(entry[0], entry[1]);
     }
-    return json;
+    return map;
+}
+
+function ctx_to_json(ctx, size = 0) {
+    let chunk = [],
+        json = [];
+
+    if (size) {
+        size = 0 | chunk_size_ctx * (chunk_size_reg / size);
+    }
+    for (const item of ctx.entries()) {
+        const key = item[0],
+              value = item[1];
+
+        json.push([key, map_to_json(value)[0]]);
+        if (json.length === size) {
+            chunk.push(json);
+            json = [];
+        }
+    }
+    json.length && chunk.push(json);
+    return chunk;
+}
+
+function json_to_ctx(json, ctx) {
+    ctx || (ctx = new Map());
+    for (let i = 0, entry, map; i < json.length; i++) {
+        entry = json[i];
+        map = ctx.get(entry[0]);
+        ctx.set(entry[0], json_to_map(entry[1], map));
+    }
+    return ctx;
 }
 
 function reg_to_json(reg) {
-    const json = [];
+    let chunk = [],
+        json = [];
+
     for (const key of reg.keys()) {
         json.push(key);
+        if (json.length === chunk_size_reg) {
+            chunk.push(json);
+            json = [];
+        }
     }
-    return json;
+    json.length && chunk.push(json);
+    return chunk;
 }
 
-function save(callback, field, key, index_doc, index, data) {
+function json_to_reg(json, reg) {
+    reg || (reg = new Set());
+    for (let i = 0; i < json.length; i++) {
+        reg.add(json[i]);
+    }
+    return reg;
+}
 
-    const res = callback(field ? field + "." + key : key, JSON.stringify(data));
+/**
+ * @this {Index|Document}
+ */
+
+function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0) {
+    const is_arr = chunk && chunk.constructor === Array,
+          data = is_arr ? chunk.shift() : chunk;
+
+    if (!data) {
+        return this.export(callback, field, index_doc, index_obj + 1);
+    }
+
+    const res = callback((field ? field + "." : "") + (index_prt + 1) + "." + key, JSON.stringify(data));
 
     if (res && res.then) {
         const self = this;
         return res.then(function () {
-            return self.export(callback, field, index_doc, index + 1);
+            return save.call(self, callback, field, key, is_arr ? chunk : null, index_doc, index_obj, index_prt + 1);
         });
     }
 
-    return this.export(callback, field, index_doc, index + 1);
+    return save.call(this, callback, field, key, is_arr ? chunk : null, index_doc, index_obj, index_prt + 1);
 }
 
 /**
  * @param callback
  * @param field
  * @param index_doc
- * @param index
- * @this {Index|Document}
+ * @param index_obj
+ * @this {Index}
  */
 
-export function exportIndex(callback, field, index_doc, index = 0) {
+export function exportIndex(callback, field, index_doc, index_obj = 0) {
 
-    let key, data;
+    let key, chunk;
 
-    switch (index) {
+    switch (index_obj) {
 
         case 0:
 
             key = "reg";
-            data = reg_to_json(this.reg);
+            chunk = reg_to_json(this.reg);
             break;
 
         case 1:
 
+            // todo
             key = "cfg";
-            data = {};
+            chunk = {};
             break;
 
         case 2:
 
             key = "map";
-            data = map_to_json(this.map);
+            chunk = map_to_json(this.map, this.reg.size);
             break;
 
         case 3:
 
             key = "ctx";
-            data = ctx_to_json(this.ctx);
+            chunk = ctx_to_json(this.ctx, this.reg.size);
             break;
 
         default:
@@ -83,11 +156,11 @@ export function exportIndex(callback, field, index_doc, index = 0) {
             return;
     }
 
-    return save.call(this, callback, field, key, index_doc, index, data);
+    return save.call(this, callback, field, key, chunk, index_doc, index_obj);
 }
 
 /**
- * @this Index
+ * @this {Index}
  */
 
 export function importIndex(key, data) {
@@ -99,81 +172,88 @@ export function importIndex(key, data) {
         data = JSON.parse(data);
     }
 
+    key = key.split(".");
+    if ("json" === key[key.length - 1]) {
+        key.pop();
+    }
+    key = 1 < key.length ? key[1] : key[0];
+
     switch (key) {
 
         case "cfg":
+            // todo
             break;
 
         case "reg":
 
             // fast update isn't supported by export/import
             this.fastupdate = /* suggest */ /* append: */ /* enrich */!1;
-            this.reg = new Set(data);
+            this.reg = json_to_reg(data, this.reg);
             break;
 
         case "map":
 
-            this.map = new Map(data);
+            this.map = json_to_map(data, this.map);
             break;
 
         case "ctx":
 
-            this.ctx = new Map(data);
+            this.ctx = json_to_ctx(data, this.ctx);
             break;
     }
 }
 
 /**
- * @this Document
+ * @this {Document}
  */
 
-export function exportDocument(callback, field, index_doc = 0, index = 0) {
+export function exportDocument(callback, field, index_doc = 0, index_obj = 0) {
 
     if (index_doc < this.field.length) {
         const field = this.field[index_doc],
               idx = this.index.get(field),
-              res = idx.export(callback, field, index_doc, index = 1);
+              res = idx.export(callback, field, index_doc, index_obj = 1);
         // start from index 1, because document indexes does not additionally store register
 
         if (res && res.then) {
             const self = this;
             return res.then(function () {
-                return self.export(callback, field, index_doc + 1, index = 0);
+                return self.export(callback, field, index_doc + 1);
             });
         }
 
-        return this.export(callback, field, index_doc + 1, index = 0);
+        return this.export(callback, field, index_doc + 1);
     } else {
 
-        let key, data;
+        let key, chunk;
 
-        switch (index) {
+        switch (index_obj) {
 
             case 0:
 
                 key = "reg";
-                data = reg_to_json(this.reg);
+                chunk = reg_to_json(this.reg);
                 field = null;
                 break;
 
             case 1:
 
                 key = "tag";
-                data = ctx_to_json(this.tag);
+                chunk = ctx_to_json(this.tag, this.reg.size);
                 field = null;
                 break;
 
             case 2:
 
                 key = "doc";
-                data = map_to_json(this.store);
+                chunk = map_to_json(this.store);
                 field = null;
                 break;
 
             case 3:
 
                 key = "cfg";
-                data = {};
+                chunk = {};
                 field = null;
                 break;
 
@@ -182,12 +262,12 @@ export function exportDocument(callback, field, index_doc = 0, index = 0) {
                 return;
         }
 
-        return save.call(this, callback, field, key, index_doc, index, data);
+        return save.call(this, callback, field, key, chunk, index_doc, index_obj);
     }
 }
 
 /**
- * @this Document
+ * @this {Document}
  */
 
 export function importDocument(key, data) {
@@ -199,41 +279,49 @@ export function importDocument(key, data) {
         data = JSON.parse(data);
     }
 
-    switch (key) {
+    key = key.split(".");
+    if ("json" === key[key.length - 1]) {
+        key.pop();
+    }
+    const field = 2 < key.length ? key[0] : "";
+    key = 2 < key.length ? key[2] : key[1];
 
-        case "tag":
+    if (!field) {
 
-            this.tagindex = new Map(data);
-            break;
+        switch (key) {
 
-        case "reg":
+            case "reg":
 
-            // fast update isn't supported by export/import
-            this.fastupdate = !1;
-            this.reg = new Set(data);
+                // fast update isn't supported by export/import
+                this.fastupdate = !1;
+                this.reg = json_to_reg(data, this.reg);
 
-            for (let i = 0, idx; i < this.field.length; i++) {
-                idx = this.index.get(this.field[i]);
-                idx.fastupdate = !1;
-                idx.reg = this.reg;
-            }
+                for (let i = 0, idx; i < this.field.length; i++) {
+                    idx = this.index.get(this.field[i]);
+                    idx.fastupdate = !1;
+                    idx.reg = this.reg;
+                }
 
-            break;
+                break;
 
-        case "doc":
+            case "tag":
 
-            this.store = new Map(data);
-            break;
+                this.tag = json_to_ctx(data, this.tag);
+                break;
 
-        default:
+            case "doc":
 
-            key = key.split(".");
-            const field = key[0];
-            key = key[1];
+                this.store = json_to_map(data, this.store);
+                break;
 
-            if (field && key) {
-                this.index.get(field).import(key, data);
-            }
+            case "cfg":
+
+                break;
+
+        }
+    } else {
+
+        return this.index.get(field).import(key, data);
     }
 }
 
@@ -313,88 +401,3 @@ export function serialize(withFunctionWrapper = /* tag? */ /* stringify */ /* st
 
     return withFunctionWrapper ? "function inject(index){" + reg + map + ctx + "}" : reg + map + ctx;
 }
-
-// export function exportSnapshot(flexsearch){
-//
-//     if(!flexsearch.reg.size) return;
-//
-//     let reg = '';
-//     let type = "";
-//     for(const key of flexsearch.reg.keys()){
-//         type || (type = typeof key);
-//         reg += (reg ? ',' : '') + (type === "string" ? '"' + key + '"' : key);
-//     }
-//     reg = "f.reg=[" + reg + "];";
-//
-//     let map = '';
-//     for(const item of flexsearch.map.entries()){
-//         const key = item[0];
-//         const value = item[1];
-//         let res = '';
-//         for(let i = 0, ids; i < value.length; i++){
-//             ids = value[i] || [''];
-//             let str = '';
-//             for(let j = 0; j < ids.length; j++){
-//                 str += (str ? ',' : '') + (type === "string" ? '"' + ids[j] + '"' : ids[j]);
-//             }
-//             str = "[
-//             res += (res ? '|' : '') + str;
-//         }
-//         map += (map ? ';' : '') + key + ':' + res;
-//     }
-//
-//
-//     let ctx = '';
-//     for(const context of flexsearch.ctx.entries()){
-//         const key_ctx = context[0];
-//         const value_ctx = context[1];
-//
-//         for(const item of value_ctx.entries()){
-//             const key = item[0];
-//             const value = item[1];
-//
-//             let res = '';
-//             for(let i = 0, ids; i < value.length; i++){
-//                 ids = value[i] || [''];
-//                 let str = '';
-//                 for(let j = 0; j < ids.length; j++){
-//                     str += (str ? ',' : '') + (type === "string" ? '"' + ids[j] + '"' : ids[j]);
-//                 }
-//                 res += (res ? '|' : '') + str;
-//             }
-//             ctx += (ctx ? ';' : '') + key_ctx + '+' + key + ':' + res;
-//         }
-//     }
-//
-//     return reg + '#' + map + '#' + ctx;
-// }
-//
-// export function importSnapshot(flexsearch, input){
-//
-//     if(!input) return;
-//
-//     let pos_reg = input.indexOf("#");
-//     const reg = input.substring(0, pos_reg).split(",");
-//     flexsearch.reg = new Set(reg);
-//
-//     let pos_map = input.indexOf("#", pos_reg + 1);
-//     const map = input.substring(pos_reg + 1, pos_map).split(";").map(res => {
-//         const split = res.split(":");
-//         split[1] = split[1].split("|").map(ids => ids ? ids.split(",") : null);
-//         return split;
-//     });
-//     flexsearch.map = new Map(map);
-//
-//     input = input.substring(pos_map + 1);
-//     if(input){
-//         const ctx = input.split(";").map(res => {
-//             const split = res.split(":");
-//             const context = split[0].split("+");
-//             const map = new Map([
-//                 [context[1], split[1].split("|").map(ids => ids ? ids.split(",") : null)]
-//             ]);
-//             return [context[0], map]
-//         });
-//         flexsearch.ctx = new Map(ctx);
-//     }
-// }

@@ -11,7 +11,7 @@ let pid = 0;
 
 export default function WorkerIndex(options = {}) {
 
-    if (this.constructor !== WorkerIndex) {
+    if (!this || this.constructor !== WorkerIndex) {
         return new WorkerIndex(options);
     }
 

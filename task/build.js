@@ -136,6 +136,16 @@ if(release === "lang"){
     fs.cpSync("src/", "tmp/", { recursive: true });
     fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
 
+    // add the eval wrapper
+    let content = fs.readFileSync("tmp/worker/handler.js", "utf8");
+    content = content.replace('options = (await import(filepath))["default"];', '//options = (await import(filepath))["default"];');
+    fs.writeFileSync("tmp/worker/handler.js", content);
+
+    // add the eval wrapper
+    content = fs.readFileSync("tmp/worker.js", "utf8");
+    content = content.replace("import.meta.url", '(1,eval)("import.meta.url")');
+    fs.writeFileSync("tmp/worker.js", content);
+
     (function next(x, y, z){
 
         if(x < supported_lang.length){
@@ -143,7 +153,6 @@ if(release === "lang"){
             (function(lang){
 
                 //fs.copyFileSync("src/lang/" + lang + ".js", "tmp/lang/" + lang + ".js");
-
                 //console.log(lang)
 
                 fs.writeFileSync("tmp/lang.js", `

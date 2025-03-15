@@ -61,7 +61,7 @@ const whitespace = /[^\p{L}\p{N}]+/u,
 
 export default function Encoder() {
 
-    if (this.constructor !== Encoder) {
+    if (!this || this.constructor !== Encoder) {
         return new Encoder(...arguments);
     }
 

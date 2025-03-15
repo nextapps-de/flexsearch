@@ -28,6 +28,7 @@ npm install git+https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
 - Custom Score Function
 - Added French language preset (stop-word filter, stemmer)
 - Enhanced Worker Support
+- Export / Import index in chunks
 - Improved Build System + Bundler (Supported: CommonJS, ESM, Global Namespace), also the import of language packs are now supported for Node.js
 - Full covering index.d.ts type definitions
 - Fast-Boot Serialization optimized for Server-Side-Rendering (PHP, Python, Ruby, Rust, Java, Go, Node.js, ...)
@@ -2273,7 +2274,7 @@ A formula to determine a well-balanced value for the `resolution` is: $2*floor(\
 
 > Persistent-Indexes and Worker-Indexes don't support Import/Export.
 
-Export a simple `Index` to the folder `/export/`:
+Export an `Index` or `Document-Index` to the folder `/export/`:
 
 ```js
 import { promises as fs } from "fs";
@@ -2283,7 +2284,7 @@ await index.export(async function(key, data){
 });
 ```
 
-Import from folder `/export/` into a simple `Index`:
+Import from folder `/export/` into an `Index` or `Document-Index`:
 
 ```js
 const index = new Index({/* keep old config and place it here */});
@@ -2295,29 +2296,7 @@ for(let i = 0; i < files.length; i++){
 }
 ```
 
-This is very similar for document indexes.
-
-Export a `Document-Index` to the folder `/export/`:
-
-```js
-import { promises as fs } from "fs";
-
-await index.export(async function(key, data){
-  await fs.writeFile("./export/" + key, data, "utf8");
-});
-```
-
-Import from folder `/export/` into a `Document-Index`:
-
-```js
-const index = new Document({/* keep old config and place it here */});
-
-const files = await fs.readdir("./export/");
-for(let i = 0; i < files.length; i++){
-  const data = await fs.readFile("./export/" + files[i], "utf8");
-  await index.import(files[i], data);
-}
-```
+> You'll need to use the same configuration as you used before the export. Any changes on the configuration needs to be re-indexed.
 
 ## Migration
 

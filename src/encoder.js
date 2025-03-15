@@ -63,7 +63,7 @@ const normalize = "".normalize && /[\u0300-\u036f]/g; // '´`’ʼ.,
 
 export default function Encoder(options){
 
-    if(this.constructor !== Encoder){
+    if(!this || this.constructor !== Encoder){
         return new Encoder(...arguments);
     }
 

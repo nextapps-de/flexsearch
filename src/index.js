@@ -47,7 +47,7 @@ import "./index/remove.js";
 
 export default function Index(options, _register){
 
-    if(this.constructor !== Index){
+    if(!this || this.constructor !== Index){
         return new Index(options);
     }
 
