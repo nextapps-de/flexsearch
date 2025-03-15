@@ -132,10 +132,10 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
 }
 
 /**
- * @param callback
- * @param field
- * @param index_doc
- * @param index_obj
+ * @param {function(string,string):Promise|void} callback
+ * @param {string|null=} field
+ * @param {number=} index_doc
+ * @param {number=} index_obj
  * @this {Index}
  */
 
@@ -186,6 +186,8 @@ export function exportIndex(callback, field, index_doc, index_obj = 0){
 }
 
 /**
+ * @param {string} key
+ * @param {string|*} data
  * @this {Index}
  */
 
@@ -195,14 +197,14 @@ export function importIndex(key, data){
         return;
     }
     if(is_string(data)){
-        data = JSON.parse(data);
+        data = JSON.parse(/** @type {string} */(data));
     }
 
-    key = key.split(".");
-    if(key[key.length - 1] === "json"){
-        key.pop();
+    const split = key.split(".");
+    if(split[split.length - 1] === "json"){
+        split.pop();
     }
-    key = key.length > 1 ? key[1] : key[0];
+    key = split.length > 1 ? split[1] : split[0];
 
     switch(key){
 
@@ -230,6 +232,10 @@ export function importIndex(key, data){
 }
 
 /**
+ * @param {function(string,string):Promise|void} callback
+ * @param {string|null=} field
+ * @param {number=} index_doc
+ * @param {number=} index_obj
  * @this {Document}
  */
 
@@ -302,6 +308,8 @@ export function exportDocument(callback, field, index_doc = 0, index_obj = 0){
 }
 
 /**
+ * @param key
+ * @param {string|*} data
  * @this {Document}
  */
 
@@ -311,15 +319,15 @@ export function importDocument(key, data){
         return;
     }
     if(is_string(data)){
-        data = JSON.parse(data);
+        data = JSON.parse(/** @type {string} */(data));
     }
 
-    key = key.split(".");
-    if(key[key.length - 1] === "json"){
-        key.pop();
+    const split = key.split(".");
+    if(split[split.length - 1] === "json"){
+        split.pop();
     }
-    const field = key.length > 2 ? key[0] : "";
-    key = key.length > 2 ? key[2] : key[1];
+    const field = split.length > 2 ? split[0] : "";
+    key = split.length > 2 ? split[2] : split[1];
 
     if(!field){
 

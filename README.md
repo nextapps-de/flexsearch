@@ -16,7 +16,7 @@ npm install git+https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
 - Greatly enhanced performance of the whole text encoding pipeline
 - Improved indexing of numeric content (Triplets)
 - Intermediate result sets and `Resolver`
-- Basic Resolver: `and`, `or`, `xor`, `not`, `limit`, `offset`, `enrich`, `resolve`, Output formatter
+- Basic Resolver: `and`, `or`, `xor`, `not`, `limit`, `offset`, `boost`, `resolve`
 - Improved charset collection
 - New charset preset `soundex` which further reduces memory consumption by also increasing "fuzziness"
 - Performance gain when polling tasks to the index by using "Event-Loop-Caches"
@@ -81,10 +81,12 @@ All persistent variants are optimized for larger sized indexes under heavy workl
   - [basic-resolver](example/nodejs-commonjs/basic-resolver)
   - [basic-worker](example/nodejs-commonjs/basic-worker)
   - [basic-worker-extern-config](example/nodejs-commonjs/basic-worker-extern-config)
+  - [basic-export-import](example/nodejs-commonjs/basic-export-import)
   - [document](example/nodejs-commonjs/document)
   - [document-persistent](example/nodejs-commonjs/document-persistent)
   - [document-worker](example/nodejs-commonjs/document-worker)
   - [document-worker-extern-config](example/nodejs-commonjs/document-worker-extern-config)
+  - [document-export-import](example/nodejs-commonjs/document-export-import)
   - [language-pack](example/nodejs-commonjs/language-pack)
 - [nodejs-esm](example/nodejs-esm):
   - [basic](example/nodejs-esm/basic)
@@ -93,10 +95,12 @@ All persistent variants are optimized for larger sized indexes under heavy workl
   - [basic-resolver](example/nodejs-esm/basic-resolver)
   - [basic-worker](example/nodejs-esm/basic-worker)
   - [basic-worker-extern-config](example/nodejs-esm/basic-worker-extern-config)
+  - [basic-export-import](example/nodejs-esm/basic-export-import)
   - [document](example/nodejs-esm/document)
   - [document-persistent](example/nodejs-esm/document-persistent)
   - [document-worker](example/nodejs-esm/document-worker)
   - [document-worker-extern-config](example/nodejs-esm/document-worker-extern-config)
+  - [document-export-import](example/nodejs-esm/document-export-import)
   - [language-pack](example/nodejs-esm/language-pack)
 
 ### Examples Browser
@@ -2315,6 +2319,7 @@ for(let i = 0; i < files.length; i++){
 - You can import language packs by `dist/module/lang/*` when using ESM and by `const EnglishPreset = require("flexsearch/lang/en");` when using CommonJS (Node.js)
 - The method `index.append()` is now deprecated and will be removed in the near future, because it isn't consistent and leads into unexpected behavior when not used properly. You should only use `index.add()` to push contents to the index.
 - Using the `async` variants like `.searchAsync` is now deprecated (but still works), asynchronous responses will always return from Worker-Index and from Persistent-Index, everything else will return a non-promised result. Having both types of methods looks like the developers can choose between them, but they can't.
+- Any of your exports from versions below v0.8 are not compatible to import into v0.8
 
 ## Not finished yet
 

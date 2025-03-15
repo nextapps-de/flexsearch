@@ -1,0 +1,6 @@
+{
+  "name": "nodejs-commonjs-document-export-import",
+  "dependencies": {
+    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
+  }
+}

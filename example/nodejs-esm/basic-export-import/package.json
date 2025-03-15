@@ -1,0 +1,7 @@
+{
+  "name": "nodejs-esm-basic-export-import",
+  "type": "module",
+  "dependencies": {
+    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
+  }
+}
