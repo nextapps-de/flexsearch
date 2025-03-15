@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-commonjs-document",
+  "name": "nodejs-commonjs-basic-persistent",
   "dependencies": {
     "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview",
     "sqlite3": "^5.1.7"

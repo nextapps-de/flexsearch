@@ -2269,6 +2269,56 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
 
 A formula to determine a well-balanced value for the `resolution` is: $2*floor(\sqrt{content.length})$ where content is the value pushed by `index.add()`. Here the maximum length of all contents should be used.
 
+## Import / Export (In-Memory)
+
+> Persistent-Indexes and Worker-Indexes don't support Import/Export.
+
+Export a simple `Index` to the folder `/export/`:
+
+```js
+import { promises as fs } from "fs";
+
+await index.export(async function(key, data){
+  await fs.writeFile("./export/" + key, data, "utf8");
+});
+```
+
+Import from folder `/export/` into a simple `Index`:
+
+```js
+const index = new Index({/* keep old config and place it here */});
+
+const files = await fs.readdir("./export/");
+for(let i = 0; i < files.length; i++){
+  const data = await fs.readFile("./export/" + files[i], "utf8");
+  await index.import(files[i], data);
+}
+```
+
+This is very similar for document indexes.
+
+Export a `Document-Index` to the folder `/export/`:
+
+```js
+import { promises as fs } from "fs";
+
+await index.export(async function(key, data){
+  await fs.writeFile("./export/" + key, data, "utf8");
+});
+```
+
+Import from folder `/export/` into a `Document-Index`:
+
+```js
+const index = new Document({/* keep old config and place it here */});
+
+const files = await fs.readdir("./export/");
+for(let i = 0; i < files.length; i++){
+  const data = await fs.readFile("./export/" + files[i], "utf8");
+  await index.import(files[i], data);
+}
+```
+
 ## Migration
 
 - The index option property "minlength" has moved to the Encoder Class

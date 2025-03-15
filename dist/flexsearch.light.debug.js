@@ -51,7 +51,7 @@ function v(a, c) {
 }
 ;const w = /[^\p{L}\p{N}]+/u, x = /(\d{3})/g, y = /(\D)(\d{3})/g, z = /(\d{3})(\D)/g, B = "".normalize && /[\u0300-\u036f]/g;
 function C(a) {
-  if (!this) {
+  if (this.constructor !== C) {
     return new C(...arguments);
   }
   for (let c = 0; c < arguments.length; c++) {
@@ -509,7 +509,7 @@ function P(a, c) {
   return b;
 }
 ;function H(a, c) {
-  if (!this) {
+  if (this.constructor !== H) {
     return new H(a);
   }
   if (a) {

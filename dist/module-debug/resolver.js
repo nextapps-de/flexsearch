@@ -12,7 +12,7 @@ import "./resolve/not.js";
  */
 
 export default function Resolver(result) {
-    if (!this) {
+    if (this.constructor !== Resolver) {
         return new Resolver(result);
     }
     if (result && result.index) {

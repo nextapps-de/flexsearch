@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-esm-document-worker",
+  "name": "nodejs-esm-basic-worker",
   "type": "module",
   "dependencies": {
     "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"

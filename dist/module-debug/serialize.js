@@ -1,110 +1,89 @@
-// TODO return promises instead of inner await
-
 import Index from "./index.js";
 import Document from "./document.js";
 import { create_object, is_string } from "./common.js";
 
-function async(callback, self, field, key, index_doc, index, data, on_done) {
+function map_to_json(map) {
+    const json = [];
+    for (const item of map.entries()) {
+        json.push(item);
+    }
+    return json;
+}
 
-    //setTimeout(function(){
+function ctx_to_json(ctx) {
+    const json = [];
+    for (const item of ctx.entries()) {
+        json.push(map_to_json(item));
+    }
+    return json;
+}
+
+function reg_to_json(reg) {
+    const json = [];
+    for (const key of reg.keys()) {
+        json.push(key);
+    }
+    return json;
+}
+
+function save(callback, field, key, index_doc, index, data) {
 
     const res = callback(field ? field + "." + key : key, JSON.stringify(data));
 
-    // await isn't supported by ES5
-
     if (res && res.then) {
-
-        res.then(function () {
-
-            self.export(callback, self, field, index_doc, index + 1, on_done);
+        const self = this;
+        return res.then(function () {
+            return self.export(callback, field, index_doc, index + 1);
         });
-    } else {
-
-        self.export(callback, self, field, index_doc, index + 1, on_done);
     }
-    //});
+
+    return this.export(callback, field, index_doc, index + 1);
 }
 
 /**
  * @param callback
- * @param self
  * @param field
  * @param index_doc
  * @param index
- * @param on_done
  * @this {Index|Document}
  */
 
-export function exportIndex(callback, self, field, index_doc, index, on_done) {
-
-    let return_value = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
-    !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
-    if ('undefined' == typeof on_done) {
-        return_value = new Promise(resolve => {
-            on_done = resolve;
-        });
-    }
+export function exportIndex(callback, field, index_doc, index = 0) {
 
     let key, data;
 
-    switch (index || (index = 0)) {
+    switch (index) {
 
         case 0:
 
             key = "reg";
-
-            // fastupdate isn't supported by export
-
-            if (this.fastupdate) {
-
-                data = create_object();
-
-                for (let key of this.reg.keys()) {
-
-                    data[key] = 1;
-                }
-            } else {
-
-                data = this.reg;
-            }
-
+            data = reg_to_json(this.reg);
             break;
 
         case 1:
 
             key = "cfg";
-            data = {
-                doc: 0,
-                opt: this.optimize ? 1 : 0
-            };
-
+            data = {};
             break;
 
         case 2:
 
             key = "map";
-            data = this.map;
+            data = map_to_json(this.map);
             break;
 
         case 3:
 
             key = "ctx";
-            data = this.ctx;
+            data = ctx_to_json(this.ctx);
             break;
 
         default:
 
-            if ('undefined' == typeof field && on_done) {
-
-                on_done();
-            }
-
             return;
     }
 
-    async(callback, self || this, field, key, index_doc, index, data, on_done);
-
-    return return_value;
+    return save.call(this, callback, field, key, index_doc, index, data);
 }
 
 /**
@@ -114,38 +93,32 @@ export function exportIndex(callback, self, field, index_doc, index, on_done) {
 export function importIndex(key, data) {
 
     if (!data) {
-
         return;
     }
-
     if (is_string(data)) {
-
         data = JSON.parse(data);
     }
 
     switch (key) {
 
         case "cfg":
-
-            this.optimize = !!data.opt;
             break;
 
         case "reg":
 
-            // fastupdate isn't supported by import
-
+            // fast update isn't supported by export/import
             this.fastupdate = /* suggest */ /* append: */ /* enrich */!1;
-            this.reg = data;
+            this.reg = new Set(data);
             break;
 
         case "map":
 
-            this.map = data;
+            this.map = new Map(data);
             break;
 
         case "ctx":
 
-            this.ctx = data;
+            this.ctx = new Map(data);
             break;
     }
 }
@@ -154,71 +127,63 @@ export function importIndex(key, data) {
  * @this Document
  */
 
-export function exportDocument(callback, self, field, index_doc, index, on_done) {
-
-    let return_value;
-    if ('undefined' == typeof on_done) {
-        return_value = new Promise(resolve => {
-            on_done = resolve;
-        });
-    }
-
-    index || (index = 0);
-    index_doc || (index_doc = 0);
+export function exportDocument(callback, field, index_doc = 0, index = 0) {
 
     if (index_doc < this.field.length) {
         const field = this.field[index_doc],
-              idx = this.index[field];
+              idx = this.index.get(field),
+              res = idx.export(callback, field, index_doc, index = 1);
+        // start from index 1, because document indexes does not additionally store register
 
-
-        self = this;
-
-        //setTimeout(function(){
-
-        if (!idx.export(callback, self, index ? field /*.replace(":", "-")*/ : "", index_doc, index++, on_done)) {
-
-            index_doc++;
-            index = 1;
-
-            self.export(callback, self, field, index_doc, index, on_done);
+        if (res && res.then) {
+            const self = this;
+            return res.then(function () {
+                return self.export(callback, field, index_doc + 1, index = 0);
+            });
         }
-        //});
+
+        return this.export(callback, field, index_doc + 1, index = 0);
     } else {
 
         let key, data;
 
         switch (index) {
 
+            case 0:
+
+                key = "reg";
+                data = reg_to_json(this.reg);
+                field = null;
+                break;
+
             case 1:
 
                 key = "tag";
-                data = this.tagindex;
+                data = ctx_to_json(this.tag);
                 field = null;
                 break;
 
             case 2:
 
-                key = "store";
-                data = this.store;
+                key = "doc";
+                data = map_to_json(this.store);
                 field = null;
                 break;
 
-            // case 3:
-            //
-            //     key = "reg";
-            //     data = this.register;
-            //     break;
+            case 3:
+
+                key = "cfg";
+                data = {};
+                field = null;
+                break;
 
             default:
 
-                on_done();
                 return;
         }
 
-        async(callback, this, field, key, index_doc, index, data, on_done);
+        return save.call(this, callback, field, key, index_doc, index, data);
     }
-
-    return return_value;
 }
 
 /**
@@ -228,12 +193,9 @@ export function exportDocument(callback, self, field, index_doc, index, on_done)
 export function importDocument(key, data) {
 
     if (!data) {
-
         return;
     }
-
     if (is_string(data)) {
-
         data = JSON.parse(data);
     }
 
@@ -241,28 +203,26 @@ export function importDocument(key, data) {
 
         case "tag":
 
-            this.tagindex = data;
+            this.tagindex = new Map(data);
             break;
 
         case "reg":
 
-            // fastupdate isn't supported by import
-
+            // fast update isn't supported by export/import
             this.fastupdate = !1;
-            this.reg = data;
+            this.reg = new Set(data);
 
-            for (let i = 0, index; i < this.field.length; i++) {
-
-                index = this.index[this.field[i]];
-                index.reg = data;
-                index.fastupdate = !1;
+            for (let i = 0, idx; i < this.field.length; i++) {
+                idx = this.index.get(this.field[i]);
+                idx.fastupdate = !1;
+                idx.reg = this.reg;
             }
 
             break;
 
-        case "store":
+        case "doc":
 
-            this.store = data;
+            this.store = new Map(data);
             break;
 
         default:
@@ -272,8 +232,7 @@ export function importDocument(key, data) {
             key = key[1];
 
             if (field && key) {
-
-                this.index[field].import(key, data);
+                this.index.get(field).import(key, data);
             }
     }
 }
@@ -290,7 +249,8 @@ ctx: "gulliver+travel:1,2,3|4,5,6|7,8,9;"
  * @return {string}
  */
 
-export function serialize(withFunctionWrapper = !0) {
+export function serialize(withFunctionWrapper = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
+!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/) {
 
     if (!this.reg.size) return "";
 

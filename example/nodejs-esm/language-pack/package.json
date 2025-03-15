@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-commonjs-document",
+  "name": "nodejs-esm-language-pack",
   "dependencies": {
     "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
   }
