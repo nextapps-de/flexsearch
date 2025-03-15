@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
     <title>Demo: Auto-Complete</title>
-    <script src="../dist/flexsearch.compact.js"></script>
     <style>
         body{
             padding:0;
@@ -52,6 +51,9 @@
             white-space: nowrap;
             text-overflow: ellipsis;
         }
+        #suggestions b{
+            color: blue;
+        }
         @media only screen and (max-width: 600px) {
             table,
             td,
@@ -74,20 +76,29 @@
 <div id="suggestions"></div>
 <script type="module">
 
+    import { Document, Charset } from "../dist/flexsearch.bundle.module.min.js";
     import data from "./data/movies.js";
 
     (function(){
 
-        const index = new FlexSearch.Index({
-
-            charset: "latin:advanced",
-            tokenize: "reverse",
-            cache: true
+        const index = new Document({
+            cache: true,
+            document: {
+                store: true,
+                id: "id",
+                index: [{
+                    field: "title",
+                    charset: Charset.LatinSimple,
+                    tokenize: "forward"
+                }]
+            }
         });
 
         for(var i = 0; i < data.length; i++){
-
-            index.add(i, data[i]);
+            index.add({
+                id: i,
+                title: data[i]
+            });
         }
 
         var suggestions = document.getElementById("suggestions");
@@ -101,7 +112,16 @@
         function show_results(){
 
             var value = this.value;
-            var results = index.search(value, 25, { suggest: true });
+            var results = index.search({
+                query: value,
+                limit: 25,
+                suggest: true,
+                enrich: true,
+                highlight: "<b>$1</b>"
+            });
+            results = results[0] || results;
+            results = results.result || results;
+
             var entry, childs = suggestions.childNodes;
             var i = 0, len = results.length;
 
@@ -110,16 +130,14 @@
                 entry = childs[i];
 
                 if(!entry){
-
                     entry = document.createElement("div");
                     suggestions.appendChild(entry);
                 }
 
-                entry.textContent = data[results[i]];
+                entry.innerHTML = results[i].highlight; //data[results[i]];
             }
 
             while(childs.length > len){
-
                 suggestions.removeChild(childs[i])
             }
 
@@ -127,7 +145,6 @@
             var match = first_result && first_result.toLowerCase().indexOf(value.toLowerCase());
 
             if(first_result && (match !== -1)){
-
                 autocomplete.value = value + first_result.substring(match + value.length);
                 autocomplete.current = first_result;
             }

@@ -427,7 +427,7 @@ function R(a, c, b, e, d, f, g, h) {
     m = this.tag && b.tag;
     g = this.store && b.enrich;
     k = b.suggest;
-    p = b.T;
+    p = b.highlight;
     c = b.limit || c;
     n = b.offset || 0;
     c || (c = 100);
@@ -593,7 +593,7 @@ function sa(a, c, b, e, d, f) {
         }
         z || (y += (y ? " " : "") + l[q]);
       }
-      n[v].T = y;
+      n[v].highlight = y;
     }
   }
   return a;

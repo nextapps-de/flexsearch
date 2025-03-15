@@ -34,6 +34,7 @@ import "./document/search.js";
 /**
  * @constructor
  * @param {!DocumentOptions} options
+ * @return {Document|Promise<Document>}
  */
 
 export default function Document(options){
@@ -237,7 +238,7 @@ if(SUPPORT_PERSISTENT){
 }
 
 /**
- * @this Document
+ * @this {Document}
  */
 
 function parse_descriptor(options, document){

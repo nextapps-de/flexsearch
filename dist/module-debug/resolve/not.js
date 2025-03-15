@@ -83,7 +83,7 @@ Resolver.prototype.not = function () {
  * @param limit
  * @param offset
  * @param resolve
- * @this Resolver
+ * @this {Resolver}
  * @return {Array}
  */
 

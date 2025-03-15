@@ -311,7 +311,7 @@ Index.prototype.search = function (query, limit, options) {
  * @param resolve
  * @param enrich
  * @param tag
- * @this Index
+ * @this {Index}
  * @return {Array|Resolver}
  */
 

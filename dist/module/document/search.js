@@ -483,7 +483,7 @@ function merge_fields(fields, limit) {
 }
 
 /**
- * @this Document
+ * @this {Document}
  */
 
 function get_tag(tag, key, limit, offset) {
@@ -496,7 +496,7 @@ function get_tag(tag, key, limit, offset) {
 }
 
 /**
- * @this Document
+ * @this {Document}
  */
 
 function apply_enrich(res) {

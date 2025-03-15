@@ -102,7 +102,7 @@ ja.prototype.G = function(a) {
   this.F = a;
 };
 function la(a, b) {
-  a.B = {ma:b, oa:!0};
+  a.B = {ma:b, na:!0};
   a.h = a.L;
 }
 ja.prototype.return = function(a) {
@@ -160,7 +160,7 @@ function pa(a) {
   if (a.h.B) {
     b = a.h.B;
     a.h.B = null;
-    if (b.oa) {
+    if (b.na) {
       throw b.ma;
     }
     return {value:b.return, done:!0};
@@ -1694,7 +1694,7 @@ function fb(a, b) {
     var m = this.tag && c.tag;
     var n = this.store && c.enrich;
     var p = c.suggest;
-    var q = c.na;
+    var q = c.highlight;
     b = c.limit || b;
     var r = c.offset || 0;
     b || (b = 100);
@@ -1909,7 +1909,7 @@ function jb(a, b, c, d, e, g) {
         }
         z || (q += (q ? " " : "") + r[w]);
       }
-      m[p].na = q;
+      m[p].highlight = q;
     }
   }
   return a;
@@ -2200,8 +2200,8 @@ v.import = function(a, b) {
       case "reg":
         this.fastupdate = !1;
         this.reg = Ua(b, this.reg);
-        for (a = 0; a < this.field.length; a++) {
-          b = this.index.get(this.field[a]), b.fastupdate = !1, b.reg = this.reg;
+        for (b = 0; b < this.field.length; b++) {
+          c = this.index.get(this.field[b]), c.fastupdate = !1, c.reg = this.reg;
         }
         break;
       case "tag":
@@ -3312,7 +3312,7 @@ v.commit = function(a, b, c) {
         }
         f = e[g];
         if (!f.clear) {
-          e[g] = f.pa;
+          e[g] = f.oa;
           h.h = 5;
           break;
         }

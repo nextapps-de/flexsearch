@@ -113,10 +113,10 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0) 
 }
 
 /**
- * @param callback
- * @param field
- * @param index_doc
- * @param index_obj
+ * @param {function(string,string):Promise|void} callback
+ * @param {string|null=} field
+ * @param {number=} index_doc
+ * @param {number=} index_obj
  * @this {Index}
  */
 
@@ -160,7 +160,9 @@ export function exportIndex(callback, field, index_doc, index_obj = 0) {
 }
 
 /**
- * @this {Index}
+ * @param {string} key
+ * @param {string|*} data
+ * @this Index
  */
 
 export function importIndex(key, data) {
@@ -169,14 +171,14 @@ export function importIndex(key, data) {
         return;
     }
     if (is_string(data)) {
-        data = JSON.parse(data);
+        data = JSON.parse( /** @type {string} */data);
     }
 
-    key = key.split(".");
-    if ("json" === key[key.length - 1]) {
-        key.pop();
+    const split = key.split(".");
+    if ("json" === split[split.length - 1]) {
+        split.pop();
     }
-    key = 1 < key.length ? key[1] : key[0];
+    key = 1 < split.length ? split[1] : split[0];
 
     switch (key) {
 
@@ -204,6 +206,10 @@ export function importIndex(key, data) {
 }
 
 /**
+ * @param {function(string,string):Promise|void} callback
+ * @param {string|null=} field
+ * @param {number=} index_doc
+ * @param {number=} index_obj
  * @this {Document}
  */
 
@@ -267,6 +273,8 @@ export function exportDocument(callback, field, index_doc = 0, index_obj = 0) {
 }
 
 /**
+ * @param key
+ * @param {string|*} data
  * @this {Document}
  */
 
@@ -276,15 +284,15 @@ export function importDocument(key, data) {
         return;
     }
     if (is_string(data)) {
-        data = JSON.parse(data);
+        data = JSON.parse( /** @type {string} */data);
     }
 
-    key = key.split(".");
-    if ("json" === key[key.length - 1]) {
-        key.pop();
+    const split = key.split(".");
+    if ("json" === split[split.length - 1]) {
+        split.pop();
     }
-    const field = 2 < key.length ? key[0] : "";
-    key = 2 < key.length ? key[2] : key[1];
+    const field = 2 < split.length ? split[0] : "";
+    key = 2 < split.length ? split[2] : split[1];
 
     if (!field) {
 
@@ -332,7 +340,7 @@ ctx: "gulliver+travel:1,2,3|4,5,6|7,8,9;"
 */
 
 /**
- * @this Index
+ * @this {Index}
  * @param {boolean} withFunctionWrapper
  * @return {string}
  */

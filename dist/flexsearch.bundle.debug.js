@@ -808,7 +808,7 @@ function Ca(a, b) {
     var n = this.tag && c.tag;
     var q = this.store && c.enrich;
     var t = c.suggest;
-    p = c.V;
+    p = c.highlight;
     b = c.limit || b;
     l = c.offset || 0;
     b || (b = 100);
@@ -1023,7 +1023,7 @@ function Ga(a, b, c, d, e, f) {
         }
         I || (x += (x ? " " : "") + l[y]);
       }
-      p[u].V = x;
+      p[u].highlight = x;
     }
   }
   return a;
@@ -2398,7 +2398,7 @@ v.commit = async function(a, b, c) {
         b = !0;
         break;
       } else {
-        d[e] = f.W;
+        d[e] = f.V;
       }
     }
     b || (c || (d = d.concat(ba(a.reg))), d.length && await this.remove(d));

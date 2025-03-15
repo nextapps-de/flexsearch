@@ -188,7 +188,7 @@ export function exportIndex(callback, field, index_doc, index_obj = 0){
 /**
  * @param {string} key
  * @param {string|*} data
- * @this {Index}
+ * @this Index
  */
 
 export function importIndex(key, data){
@@ -376,7 +376,7 @@ ctx: "gulliver+travel:1,2,3|4,5,6|7,8,9;"
 */
 
 /**
- * @this Index
+ * @this {Index}
  * @param {boolean} withFunctionWrapper
  * @return {string}
  */

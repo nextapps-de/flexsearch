@@ -194,6 +194,7 @@ import Charset from "./charset.js";
 /** @export */DocumentSearchOptions.index;
 /** @export */DocumentSearchOptions.pluck;
 /** @export */DocumentSearchOptions.merge;
+/** @export */DocumentSearchOptions.highlight;
 
 /** @export */EncoderOptions.rtl;
 /** @export */EncoderOptions.dedupe;

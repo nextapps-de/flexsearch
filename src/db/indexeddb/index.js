@@ -617,12 +617,12 @@ IdxDB.prototype.remove = function(ids){
 
 function promisfy(req, callback){
     return new Promise((resolve, reject) => {
-        /** @this IDBRequest */
+        /** @this {IDBRequest} */
         req.onsuccess = function(){
             callback && callback(this.result);
             resolve(this.result);
         };
-        /** @this IDBRequest */
+        /** @this {IDBRequest} */
         req.oncomplete = function(){
             callback && callback(this.result);
             resolve(this.result);

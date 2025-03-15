@@ -529,7 +529,7 @@ function merge_fields(fields, limit, offset){
 }
 
 /**
- * @this Document
+ * @this {Document}
  */
 
 function get_tag(tag, key, limit, offset, enrich){
@@ -555,7 +555,7 @@ function get_tag(tag, key, limit, offset, enrich){
 }
 
 /**
- * @this Document
+ * @this {Document}
  */
 
 function apply_enrich(res){

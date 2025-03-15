@@ -20,6 +20,7 @@ import "./document/search.js";
 /**
  * @constructor
  * @param {!DocumentOptions} options
+ * @return {Document|Promise<Document>}
  */
 
 export default function Document(options) {
@@ -49,8 +50,7 @@ export default function Document(options) {
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache =
-    /* suggest */ /* append: */ /* enrich */!1;
+    options.cache = /* suggest */ /* append: */ /* enrich */!1;
 
     this.worker = options.worker;
 
@@ -206,7 +206,7 @@ Document.prototype.destroy = function () {
 };
 
 /**
- * @this Document
+ * @this {Document}
  */
 
 function parse_descriptor(options, document) {
