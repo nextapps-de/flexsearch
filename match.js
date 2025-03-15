@@ -137,32 +137,34 @@ async function do_test(id, query, ref){
             }
         }
 
+        // everything above 25 is likely garbage
+        results = results.slice(0, 25);
+        node.firstChild.nodeValue = results[0] || "-";
+        style.color = "#fff";
+        style.backgroundColor = "";
+
+        let found_on_first_place;
+
         for(let a = 0; a < ref.length; a++){
 
-            const current = ref[a];
-
-            node.firstChild.nodeValue = results[0] || "-";
-            style.color = "#fff";
-            style.backgroundColor = "";
-
-            if(((ref.includes(results[a]) /*results[a] === current*/) ||
-               (ref.includes(parseInt(results[a], 10)) /*results[a] === ("" + current)*/)) && results.length >= ref.length){
-                //if(style.backgroundColor !== "orange"){
-                    style.backgroundColor = "#0a0";
-               // }
-                break;
-            }
-            else if(!results.length ||
-                   ((results.indexOf(current) === -1) &&
-                    (results.indexOf(("" + current)) === -1))){
-
+            if(!results.includes(ref[a]) &&
+               !results.includes("" + ref[a]) &&
+               !found_on_first_place){
                 style.backgroundColor = "#f00";
                 break;
             }
-            else{
 
-                style.backgroundColor = "orange";
-                break;
+            if(results[0] === ref[a]){
+                found_on_first_place = true;
+            }
+
+            if(a === 24 || (a === ref.length - 1)){
+                if(found_on_first_place){
+                    style.backgroundColor = "#0a0";
+                }
+                else{
+                    style.backgroundColor = "orange";
+                }
             }
         }
     }
