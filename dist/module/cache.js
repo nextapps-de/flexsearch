@@ -1,10 +1,11 @@
 import Index from "./index.js";
 import Document from "./document.js";
+import { SearchOptions, DocumentSearchOptions } from "./type.js";
 
 /**
- * @param {string|Object} query
- * @param {number|Object=} limit
- * @param {Object=} options
+ * @param {string|SearchOptions|DocumentSearchOptions} query
+ * @param {number|SearchOptions|DocumentSearchOptions=} limit
+ * @param {SearchOptions|DocumentSearchOptions=} options
  * @this {Index|Document}
  * @returns {Array<number|string>|Promise}
  */

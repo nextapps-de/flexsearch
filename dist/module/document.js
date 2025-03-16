@@ -6,7 +6,7 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { DocumentOptions, DocumentDescriptor, DocumentIndexOptions, StoreOptions } from "./type.js";
+import { IndexOptions, DocumentOptions, DocumentDescriptor, FieldOptions, StoreOptions } from "./type.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
 import Cache, { searchCache } from "./cache.js";
@@ -29,8 +29,7 @@ export default function Document(options) {
         return new Document(options);
     }
 
-    /** @type DocumentDescriptor */
-    const document = options.document || options.doc || options;
+    const document = /** @type DocumentDescriptor */options.document || options.doc || options;
     let tmp, keystore;
 
     this.tree = [];
@@ -44,13 +43,14 @@ export default function Document(options) {
     this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
-    this.storetree = (tmp = document.store || null) && !0 !== tmp && [];
+    this.storetree = (tmp = document.store || null) && tmp && !0 !== tmp && [];
     this.store = tmp && (keystore && !0 ? new KeystoreMap(keystore) : new Map());
 
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache = /* suggest */ /* append: */ /* enrich */!1;
+    options.cache =
+    /* suggest */ /* append: */ /* enrich */!1;
 
     this.worker = options.worker;
 
@@ -93,7 +93,6 @@ export default function Document(options) {
                         this.tagtree[i]._filter = params.filter;
                     }
                 }
-                // the tag fields needs to be hold by indices
                 this.tagfield[i] = field;
                 this.tag.set(field, new Map());
             }
@@ -136,7 +135,7 @@ Document.prototype.mount = function (db) {
             let index; // = this.index.get(field);
             //if(!index){
             // create raw index when not exists
-            this.index.set(field, index = new Index({}, this.reg));
+            this.index.set(field, index = new Index( /** @type IndexOptions */{}, this.reg));
             // copy and push to the field selection
             if (fields === this.field) {
                 fields = fields.slice(0);
@@ -227,7 +226,7 @@ function parse_descriptor(options, document) {
             key = key.field;
         }
 
-        opt = /** @type DocumentIndexOptions */is_object(opt) ? Object.assign({}, options, opt) : options;
+        opt = /** @type IndexOptions */is_object(opt) ? Object.assign({}, options, opt) : options;
 
         if (this.worker) {
             const worker = new WorkerIndex(opt);
@@ -242,7 +241,7 @@ function parse_descriptor(options, document) {
         }
 
         if (!this.worker) {
-            index.set(key, new Index(opt, this.reg));
+            index.set(key, new Index( /** @type IndexOptions */opt, this.reg));
         }
 
         if (opt.custom) {

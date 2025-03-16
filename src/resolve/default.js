@@ -106,8 +106,8 @@ export default function(result, limit, offset, enrich){
 function enrich_result(ids){
     for(let i = 0; i < ids.length; i++){
         ids[i] = {
-            score: i,
-            id: ids[i]
+            "score": i,
+            "id": ids[i]
         };
     }
     return ids;

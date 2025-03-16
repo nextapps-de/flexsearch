@@ -957,11 +957,11 @@ async function handler(data) {
 
         case "init":
 
-            /** @type IndexOptions */
+            /** @type {IndexOptions} */
             let options = data["options"] || {};
             let filepath = options.config;
             if(filepath){
-                options = filepath;
+                options = options;
                 // will be replaced after build with the line below because
                 // there is an issue with closure compiler dynamic import
                 options = (await import(filepath))["default"];
@@ -1007,7 +1007,7 @@ let pid = 0;
  * @constructor
  */
 
-function WorkerIndex(options = {}){
+function WorkerIndex(options = /** @type IndexOptions */ ({})){
 
     if(!this || this.constructor !== WorkerIndex) {
         return new WorkerIndex(options);
@@ -2939,7 +2939,7 @@ function intersect_union(mandatory, arrays) {
  * @param {number|DocumentSearchOptions=} limit
  * @param {DocumentSearchOptions=} options
  * @param {Array<Array>=} _promises For internal use only.
- * @returns {Promise|Array}
+ * @returns {DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults|Promise<DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults>}
  */
 
 Document.prototype.search = function(query, limit, options, _promises){
@@ -2955,16 +2955,17 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
     }
 
-    let result = [], result_field = [];
+    let result = [];
+    let result_field = [];
     let pluck, enrich, merge, suggest;
     let field, tag, offset, count = 0, highlight;
 
     if(options){
 
         if(is_array(options)){
-            options = {
+            options = /** @type DocumentSearchOptions */ ({
                 index: options
-            };
+            });
         }
 
         query = options.query || query;
@@ -3496,8 +3497,9 @@ function Document(options){
         return new Document(options);
     }
 
-    /** @type DocumentDescriptor */
-    const document = options.document || options.doc || options;
+    const document = /** @type DocumentDescriptor */ (
+        options.document || options.doc || options
+    );
     let tmp, keystore;
 
     this.tree = [];
@@ -3514,7 +3516,7 @@ function Document(options){
 
     {
         // todo support custom filter function
-        this.storetree = (tmp = document.store || null) && tmp !== true && [];
+        this.storetree = (tmp = document.store || null) && tmp && tmp !== true && [];
         this.store = tmp && (
             keystore && SUPPORT_KEYSTORE
                 ? new KeystoreMap(keystore)
@@ -3620,7 +3622,7 @@ function Document(options){
                 let index;// = this.index.get(field);
                 //if(!index){
                     // create raw index when not exists
-                    this.index.set(field, index = new Index({}, this.reg));
+                    this.index.set(field, index = new Index(/** @type IndexOptions */ ({}), this.reg));
                     // copy and push to the field selection
                     if(fields === this.field){
                         fields = fields.slice(0);
@@ -3712,7 +3714,7 @@ function parse_descriptor(options, document){
             key = key.field;
         }
 
-        opt = /** @type DocumentIndexOptions */ (
+        opt = /** @type IndexOptions */ (
             is_object(opt)
                 ? Object.assign({}, options, opt)
                 : options
@@ -3732,7 +3734,7 @@ function parse_descriptor(options, document){
         }
 
         if(!this.worker){
-            index.set(key, new Index(opt, this.reg));
+            index.set(key, new Index(/** @type IndexOptions */ (opt), this.reg));
         }
 
         if(opt.custom){
@@ -3942,9 +3944,9 @@ Document.prototype.cleanup = function(){
 }
 
 /**
- * @param {string|Object} query
- * @param {number|Object=} limit
- * @param {Object=} options
+ * @param {string|SearchOptions|DocumentSearchOptions} query
+ * @param {number|SearchOptions|DocumentSearchOptions=} limit
+ * @param {SearchOptions|DocumentSearchOptions=} options
  * @this {Index|Document}
  * @returns {Array<number|string>|Promise}
  */
@@ -4125,7 +4127,7 @@ const options$4 = {
     matcher: matcher
 };
 
-/** @type EncoderOptions */
+/** @type {EncoderOptions} */
 const options$3 = {
     normalize: true,
     dedupe: false,
@@ -4259,7 +4261,7 @@ var Charset = {
 // COMPILER BLOCK -->
 
 /**
- * @enum {Object}
+ * @type {Object<string, IndexOptions>}
  * @const
  */
 
@@ -4293,24 +4295,28 @@ const presets = {
 
 /**
  *
- * @param {!IndexOptions|string} options
+ * @param {IndexOptions|string} options
  * @return {IndexOptions}
  */
 
 function apply_preset(options){
 
-    const preset = is_string(options)
-        ? options
-        : options["preset"];
+    const preset = /** @type string */ (
+        is_string(options)
+            ? options
+            : options.preset
+    );
 
     if(preset){
         if(!presets[preset]){
             console.warn("Preset not found: " + preset);
         }
-        options = Object.assign({}, presets[preset], /** @type {Object} */ (options));
+        options = /** @type IndexOptions */ (
+            Object.assign({}, presets[preset], /** @type {Object} */ (options))
+        );
     }
 
-    return options;
+    return /** @type IndexOptions */ (options);
 }
 
 const data = create_object();
@@ -4788,8 +4794,8 @@ function resolve_default(result, limit, offset, enrich){
 function enrich_result(ids){
     for(let i = 0; i < ids.length; i++){
         ids[i] = {
-            score: i,
-            id: ids[i]
+            "score": i,
+            "id": ids[i]
         };
     }
     return ids;
@@ -5571,7 +5577,7 @@ function set_resolve(resolve){
  * @param {string|SearchOptions} query
  * @param {number|SearchOptions=} limit
  * @param {SearchOptions=} options
- * @returns {Array|Resolver|Promise<Array|Resolver>}
+ * @returns {SearchResults|EnrichedSearchResults|Resolver|Promise<SearchResults|EnrichedSearchResults|Resolver>}
  */
 
 Index.prototype.search = function(query, limit, options){
@@ -5589,7 +5595,7 @@ Index.prototype.search = function(query, limit, options){
 
     let result = [];
     let length;
-    let context, suggest, offset = 0, resolve, enrich, tag, boost;
+    let context, suggest, offset = 0, resolve, enrich, tag, boost, resolution;
 
     if(options){
         query = options.query || query;
@@ -5601,6 +5607,7 @@ Index.prototype.search = function(query, limit, options){
         resolve || (global_resolve = 0);
         enrich = resolve && options.enrich;
         boost = options.boost;
+        resolution = options.resolution;
         tag = this.db && options.tag;
     }
     else {
@@ -5611,15 +5618,16 @@ Index.prototype.search = function(query, limit, options){
 
     // do not force a string as input
     // https://github.com/nextapps-de/flexsearch/issues/432
-    query = /** @type {Array<string>} */ (this.encoder.encode(query));
-    length = query.length;
+    /** @type {Array<string>} */
+    let query_terms = this.encoder.encode(query);
+    length = query_terms.length;
     limit || !resolve || (limit = 100);
 
     // fast path single term
     if(length === 1){
         return single_term_query.call(
             this,
-            query[0], // term
+            query_terms[0], // term
             "",       // ctx
             limit,
             offset,
@@ -5638,8 +5646,8 @@ Index.prototype.search = function(query, limit, options){
     if(length === 2 && context && !suggest){
         return single_term_query.call(
             this,
-            query[0], // term
-            query[1], // ctx
+            query_terms[0], // term
+            query_terms[1], // ctx
             limit,
             offset,
             resolve,
@@ -5659,7 +5667,7 @@ Index.prototype.search = function(query, limit, options){
         const query_new = [];
 
         // if(context){
-        //     keyword = query[0];
+        //     keyword = query_terms[0];
         //     dupes[keyword] = 1;
         //     query_new.push(keyword);
         //     maxlength = minlength = keyword.length;
@@ -5668,7 +5676,7 @@ Index.prototype.search = function(query, limit, options){
 
         for(let i = 0, term; i < length; i++){
 
-            term = query[i];
+            term = query_terms[i];
 
             if(term && !dupes[term]){
 
@@ -5696,7 +5704,7 @@ Index.prototype.search = function(query, limit, options){
             // }
         }
 
-        query = query_new;
+        query_terms = query_new;
         length = query.length;
     }
 
@@ -5714,7 +5722,7 @@ Index.prototype.search = function(query, limit, options){
     if(length === 1){
         return single_term_query.call(
             this,
-            query[0], // term
+            query_terms[0], // term
             "",       // ctx
             limit,
             offset,
@@ -5728,8 +5736,8 @@ Index.prototype.search = function(query, limit, options){
     if(length === 2 && context && !suggest){
         return single_term_query.call(
             this,
-            query[0], // term
-            query[1], // ctx
+            query_terms[0], // term
+            query_terms[1], // ctx
             limit,
             offset,
             resolve,
@@ -5741,7 +5749,7 @@ Index.prototype.search = function(query, limit, options){
     if(length > 1){
         if(context){
             // start with context right away
-            keyword = query[0];
+            keyword = query_terms[0];
             index = 1;
         }
         // todo
@@ -5750,8 +5758,12 @@ Index.prototype.search = function(query, limit, options){
             // bigger terms has less occurrence
             // this might also reduce the intersection task
             // todo check intersection order
-            query.sort(sort_by_length_down);
+            query_terms.sort(sort_by_length_down);
         }
+    }
+
+    if(!resolution && resolution !== 0){
+        resolution = this.resolution;
     }
 
     // from this point there are just multi-term queries
@@ -5760,7 +5772,7 @@ Index.prototype.search = function(query, limit, options){
 
         if(this.db.search){
             // when the configuration is not supported it returns false
-            const result = this.db.search(this, query, limit, offset, suggest, resolve, enrich, tag);
+            const result = this.db.search(this, query_terms, limit, offset, suggest, resolve, enrich, tag);
             if(result !== false) return result;
         }
 
@@ -5769,7 +5781,7 @@ Index.prototype.search = function(query, limit, options){
 
             for(let arr, term; index < length; index++){
 
-                term = query[index];
+                term = query_terms[index];
 
                 if(keyword){
 
@@ -5799,7 +5811,7 @@ Index.prototype.search = function(query, limit, options){
                         arr,
                         result,
                         suggest,
-                        self.resolution,
+                        resolution,
                         // 0, // /** @type {!number} */ (limit),
                         // 0, // offset,
                         // length === 1
@@ -5833,14 +5845,14 @@ Index.prototype.search = function(query, limit, options){
             }
 
             return resolve
-                ? intersect$1(result, self.resolution, /** @type {number} */ (limit), offset, suggest, boost, resolve)
+                ? intersect$1(result, resolution, /** @type {number} */ (limit), offset, suggest, boost, resolve)
                 : new Resolver(result[0])
         }());
     }
 
     for(let arr, term; index < length; index++){
 
-        term = query[index];
+        term = query_terms[index];
 
         if(keyword){
 
@@ -5869,7 +5881,7 @@ Index.prototype.search = function(query, limit, options){
                 arr,
                 result,
                 suggest,
-                this.resolution,
+                resolution,
                 // 0, // /** @type {!number} */ (limit),
                 // 0, // offset,
                 // length === 1
@@ -5896,13 +5908,13 @@ Index.prototype.search = function(query, limit, options){
             }
             else if(length === 1){
                 return resolve
-                    ? resolve_default(result[0], limit, offset)
+                    ? resolve_default(result[0], /** @type {number} */ (limit), offset)
                     : new Resolver(result[0]);
             }
         }
     }
 
-    result = intersect$1(result, this.resolution, limit, offset, suggest, boost, resolve);
+    result = intersect$1(result, resolution, limit, offset, suggest, boost, resolve);
 
     return resolve
         ? result
@@ -5947,8 +5959,8 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
  * @private
  * @param {Array} arr
  * @param {Array} result
- * @param {Array} suggest
- * @param {number} resolution
+ * @param {boolean|null=} suggest
+ * @param {number=} resolution
  * @return {Array|boolean|undefined}
  */
 
@@ -6238,12 +6250,16 @@ function Index(options, _register){
 
     tick("Index.create");
 
-    options = options
-        ? apply_preset(options)
-        : {};
+    options = /** @type IndexOptions */ (
+        options
+            ? apply_preset(options)
+            : {}
+    );
 
+    let tmp = options.context;
     /** @type ContextOptions */
-    const context = options.context || {};
+    const context = tmp === true
+        ? { depth: 1 } : tmp || {};
     const encoder = is_string(options.encoder)
         ? Charset[options.encoder]
         : options.encode || options.encoder || (
@@ -6253,7 +6269,7 @@ function Index(options, _register){
     this.encoder = encoder.encode
         ? encoder
         : typeof encoder === "object"
-            ? (new Encoder(encoder)
+            ? (new Encoder(/** @type {EncoderOptions} */ (encoder))
                 
             )
             : { encode: encoder };
@@ -6262,7 +6278,6 @@ function Index(options, _register){
         this.compress = options.compress || options.compression || false;
     }
 
-    let tmp;
     this.resolution = options.resolution || 9;
     this.tokenize = tmp = options.tokenize || "strict";
     this.depth = (tmp === "strict" && context.depth) || 0;
@@ -6280,7 +6295,7 @@ function Index(options, _register){
             ? (tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map())
             : (tmp && SUPPORT_KEYSTORE ? new KeystoreSet(tmp) : new Set())
     );
-    this.resolution_ctx = context.resolution || 1;
+    this.resolution_ctx = context.resolution || 3;
     this.rtl = (encoder.rtl) || options.rtl || false;
 
     {
@@ -6469,7 +6484,7 @@ function IdxDB(name, config = {}){
     }
     if(typeof name === "object"){
         name = name.name;
-        config = name;
+        config = /** @type PersistentOptions */ (name);
     }
     if(!name){
         console.info("Default storage space was used, because a name was not passed.");

@@ -1,6 +1,5 @@
 
-
-import { DocumentSearchOptions } from "../type.js";
+import { DocumentSearchOptions, DocumentSearchResults, EnrichedDocumentSearchResults, MergedDocumentSearchResults } from "../type.js";
 import { create_object, is_array, is_object, is_string, parse_simple } from "../common.js";
 import { intersect_union } from "../intersect.js";
 import Document from "../document.js";
@@ -12,7 +11,7 @@ let debug = /* suggest */ /* append: */ /* enrich */!1;
  * @param {number|DocumentSearchOptions=} limit
  * @param {DocumentSearchOptions=} options
  * @param {Array<Array>=} _promises For internal use only.
- * @returns {Promise|Array}
+ * @returns {DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults|Promise<DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults>}
  */
 
 Document.prototype.search = function (query, limit, options, _promises) {
@@ -43,7 +42,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
     if (options) {
 
         if (is_array(options)) {
-            options = {
+            options = /** @type DocumentSearchOptions */{
                 index: options
             };
         }
@@ -363,9 +362,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         };
     }
 
-    if (enrich && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
-    /*await rows.hasNext()*/
-    && this.db && promises.length) {
+    if (enrich && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ && this.db && promises.length) {
         const self = this;
         return Promise.all(promises).then(function (promises) {
             for (let j = 0; j < promises.length; j++) {
@@ -390,6 +387,8 @@ function highlight_fields(result, query, index, field, tree, template) {
 
     // if(typeof template === "string"){
     //     template = new RegExp(template, "g");
+    // }
+
     let encoder, query_enc, tokenize;
 
 

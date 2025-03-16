@@ -14,7 +14,7 @@ export const filter = new Set(["aber", "als", "am", "an", "auch", "auf", "aus", 
  * Example: The word "correct" and "correctness" could be the same word, so you can define {"ness": ""} to normalize the ending.
  * Object Definition: the key represents the word ending, the value contains the replacement (or empty string for removal).
  * http://snowball.tartarus.org/algorithms/german/stemmer.html
- * @type {Map<string>}
+ * @type {Map<string, string>}
  */
 
 export const stemmer = new Map([["niss", ""], ["isch", ""], ["lich", ""], ["heit", ""], ["keit", ""], ["ell", ""], ["bar", ""], ["end", ""], ["ung", ""], ["est", ""], ["ern", ""], ["em", ""], ["er", ""], ["en", ""], ["es", ""], ["st", ""], ["ig", ""], ["ik", ""], ["e", ""], ["s", ""]]);
@@ -22,7 +22,7 @@ export const stemmer = new Map([["niss", ""], ["isch", ""], ["lich", ""], ["heit
 /**
  * Matcher replaces all occurrences of a given string regardless of its position and is also a kind of "partial normalization".
  * Object Definition: the key represents the target term, the value contains the search string which should be replaced (could also be an array of multiple terms).
- * @type {Map<string>}
+ * @type {Map<string, string>}
  */
 const map = new Map([["_", " "], ["ä", "ae"], ["ö", "oe"], ["ü", "ue"], ["ß", "ss"], ["&", " und "], ["€", " EUR "]]),
       options = {

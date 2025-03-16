@@ -9,7 +9,7 @@ let pid = 0;
  * @constructor
  */
 
-export default function WorkerIndex(options = {}) {
+export default function WorkerIndex(options = /** @type IndexOptions */{}) {
 
     if (!this || this.constructor !== WorkerIndex) {
         return new WorkerIndex(options);

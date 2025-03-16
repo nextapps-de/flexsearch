@@ -8,7 +8,6 @@
 
 // COMPILER BLOCK -->
 import {
-
     DEBUG,
     PROFILER,
     SUPPORT_ENCODER,
@@ -20,11 +19,10 @@ import {
     SUPPORT_KEYSTORE,
     SUPPORT_RESOLVER,
     SUPPORT_CHARSET
-
 } from "./config.js";
 // <-- COMPILER BLOCK
 
-import { IndexOptions, ContextOptions } from "./type.js";
+import { IndexOptions, ContextOptions, EncoderOptions } from "./type.js";
 import Encoder from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import Charset from "./charset.js";
@@ -53,12 +51,16 @@ export default function Index(options, _register){
 
     PROFILER && tick("Index.create");
 
-    options = options
-        ? apply_preset(options)
-        : {};
+    options = /** @type IndexOptions */ (
+        options
+            ? apply_preset(options)
+            : {}
+    );
 
+    let tmp = options.context;
     /** @type ContextOptions */
-    const context = options.context || {};
+    const context = tmp === true
+        ? { depth: 1 } : tmp || {};
     const encoder = SUPPORT_CHARSET && is_string(options.encoder)
         ? Charset[options.encoder]
         : options.encode || options.encoder || (
@@ -71,7 +73,7 @@ export default function Index(options, _register){
         ? encoder
         : typeof encoder === "object"
             ? (SUPPORT_ENCODER
-                ? new Encoder(encoder)
+                ? new Encoder(/** @type {EncoderOptions} */ (encoder))
                 : encoder
             )
             : { encode: encoder };
@@ -80,7 +82,6 @@ export default function Index(options, _register){
         this.compress = options.compress || options.compression || false;
     }
 
-    let tmp;
     this.resolution = options.resolution || 9;
     this.tokenize = tmp = options.tokenize || "strict";
     this.depth = (tmp === "strict" && context.depth) || 0;
@@ -98,7 +99,7 @@ export default function Index(options, _register){
             ? (tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map())
             : (tmp && SUPPORT_KEYSTORE ? new KeystoreSet(tmp) : new Set())
     );
-    this.resolution_ctx = context.resolution || 1;
+    this.resolution_ctx = context.resolution || 3;
     this.rtl = (encoder.rtl) || options.rtl || false;
 
     if(SUPPORT_CACHE){

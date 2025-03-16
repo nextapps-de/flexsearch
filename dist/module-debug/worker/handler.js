@@ -15,12 +15,12 @@ export default (async function (data) {
 
         case "init":
 
-            /** @type IndexOptions */
+            /** @type {IndexOptions} */
             let options = data.options || {},
                 filepath = options.config;
 
             if (filepath) {
-                options = filepath;
+                options = options;
                 // will be replaced after build with the line below because
                 // there is an issue with closure compiler dynamic import
                 options = (await import(filepath))["default"];

@@ -1,5 +1,5 @@
 
-import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, DocumentIndexOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions, PersistentOptions, ResolverOptions } from "./type.js";
+import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, FieldOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions, PersistentOptions, ResolverOptions } from "./type.js";
 import StorageInterface from "./db/interface.js";
 import Document from "./document.js";
 import Index from "./index.js";
@@ -46,6 +46,14 @@ import Charset from "./charset.js";
 /** @export */Index.prototype.document;
 /** @export */Index.prototype.encoder;
 
+/** @export */Encoder.prototype.assign;
+/** @export */Encoder.prototype.encode;
+/** @export */Encoder.prototype.addMatcher;
+/** @export */Encoder.prototype.addStemmer;
+/** @export */Encoder.prototype.addFilter;
+/** @export */Encoder.prototype.addMapper;
+/** @export */Encoder.prototype.addReplacer;
+
 /** @export */Document.prototype.add;
 /** @export */Document.prototype.append;
 /** @export */Document.prototype.search;
@@ -76,6 +84,7 @@ import Charset from "./charset.js";
 /** @export */Resolver.prototype.and;
 /** @export */Resolver.prototype.xor;
 /** @export */Resolver.prototype.not;
+/** @export */Resolver.prototype.result;
 
 /** @export */StorageInterface.db;
 /** @export */StorageInterface.id;
@@ -118,25 +127,27 @@ import Charset from "./charset.js";
 /** @export */IndexOptions.cache;
 /** @export */IndexOptions.resolve;
 /** @export */IndexOptions.db;
-/** @export */IndexOptions.config;
+/** @export */IndexOptions.worker; // worker url
+/** @export */IndexOptions.config; // config url
 
-/** @export */DocumentIndexOptions.preset;
-/** @export */DocumentIndexOptions.context;
-/** @export */DocumentIndexOptions.encoder;
-/** @export */DocumentIndexOptions.encode;
-/** @export */DocumentIndexOptions.resolution;
-/** @export */DocumentIndexOptions.tokenize;
-/** @export */DocumentIndexOptions.fastupdate;
-/** @export */DocumentIndexOptions.score;
-/** @export */DocumentIndexOptions.keystore;
-/** @export */DocumentIndexOptions.rtl;
-/** @export */DocumentIndexOptions.cache;
-/** @export */DocumentIndexOptions.db;
-/** @export */DocumentIndexOptions.config;
-// /** @export */ DocumentIndexOptions.resolve;
-/** @export */DocumentIndexOptions.field;
-/** @export */DocumentIndexOptions.filter;
-/** @export */DocumentIndexOptions.custom;
+/** @export */FieldOptions.preset;
+/** @export */FieldOptions.context;
+/** @export */FieldOptions.encoder;
+/** @export */FieldOptions.encode;
+/** @export */FieldOptions.resolution;
+/** @export */FieldOptions.tokenize;
+/** @export */FieldOptions.fastupdate;
+/** @export */FieldOptions.score;
+/** @export */FieldOptions.keystore;
+/** @export */FieldOptions.rtl;
+/** @export */FieldOptions.cache;
+/** @export */FieldOptions.db;
+/** @export */FieldOptions.config;
+/** @export */FieldOptions.resolve;
+/** @export */FieldOptions.field;
+/** @export */FieldOptions.filter;
+/** @export */FieldOptions.custom;
+/** @export */FieldOptions.worker;
 
 /** @export */DocumentOptions.context;
 /** @export */DocumentOptions.encoder;
@@ -182,6 +193,7 @@ import Charset from "./charset.js";
 /** @export */SearchOptions.suggest;
 /** @export */SearchOptions.resolve;
 /** @export */SearchOptions.enrich;
+/** @export */SearchOptions.resolution;
 
 /** @export */DocumentSearchOptions.query;
 /** @export */DocumentSearchOptions.limit;
@@ -231,6 +243,10 @@ import Charset from "./charset.js";
 /** @export */ResolverOptions.enrich;
 /** @export */ResolverOptions.resolve;
 /** @export */ResolverOptions.suggest;
+/** @export */ResolverOptions.and;
+/** @export */ResolverOptions.or;
+/** @export */ResolverOptions.xor;
+/** @export */ResolverOptions.not;
 
 const FlexSearch = {
     Index: Index,
@@ -269,3 +285,7 @@ const FlexSearch = {
                 root.FlexSearch = FlexSearch;
             }
 }
+
+
+export default FlexSearch;
+export { Index, Document, Encoder, Charset, WorkerIndex as Worker, Resolver, IdxDB as IndexedDB };

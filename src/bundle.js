@@ -15,7 +15,7 @@ import {
     ContextOptions,
     DocumentDescriptor,
     DocumentSearchOptions,
-    DocumentIndexOptions,
+    FieldOptions,
     IndexOptions,
     DocumentOptions,
     TagOptions,
@@ -75,6 +75,14 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Index.prototype.encoder;
 }
 
+/** @export */ Encoder.prototype.assign;
+/** @export */ Encoder.prototype.encode;
+/** @export */ Encoder.prototype.addMatcher;
+/** @export */ Encoder.prototype.addStemmer;
+/** @export */ Encoder.prototype.addFilter;
+/** @export */ Encoder.prototype.addMapper;
+/** @export */ Encoder.prototype.addReplacer;
+
 /** @export */ Document.prototype.add;
 /** @export */ Document.prototype.append;
 /** @export */ Document.prototype.search;
@@ -105,6 +113,7 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Resolver.prototype.and;
 /** @export */ Resolver.prototype.xor;
 /** @export */ Resolver.prototype.not;
+/** @export */ Resolver.prototype.result;
 
 /** @export */ StorageInterface.db;
 /** @export */ StorageInterface.id;
@@ -147,25 +156,27 @@ if(SUPPORT_PERSISTENT){
 /** @export */ IndexOptions.cache;
 /** @export */ IndexOptions.resolve;
 /** @export */ IndexOptions.db;
-/** @export */ IndexOptions.config;
+/** @export */ IndexOptions.worker; // worker url
+/** @export */ IndexOptions.config; // config url
 
-/** @export */ DocumentIndexOptions.preset;
-/** @export */ DocumentIndexOptions.context;
-/** @export */ DocumentIndexOptions.encoder;
-/** @export */ DocumentIndexOptions.encode;
-/** @export */ DocumentIndexOptions.resolution;
-/** @export */ DocumentIndexOptions.tokenize;
-/** @export */ DocumentIndexOptions.fastupdate;
-/** @export */ DocumentIndexOptions.score;
-/** @export */ DocumentIndexOptions.keystore;
-/** @export */ DocumentIndexOptions.rtl;
-/** @export */ DocumentIndexOptions.cache;
-/** @export */ DocumentIndexOptions.db;
-/** @export */ DocumentIndexOptions.config;
-// /** @export */ DocumentIndexOptions.resolve;
-/** @export */ DocumentIndexOptions.field;
-/** @export */ DocumentIndexOptions.filter;
-/** @export */ DocumentIndexOptions.custom;
+/** @export */ FieldOptions.preset;
+/** @export */ FieldOptions.context;
+/** @export */ FieldOptions.encoder;
+/** @export */ FieldOptions.encode;
+/** @export */ FieldOptions.resolution;
+/** @export */ FieldOptions.tokenize;
+/** @export */ FieldOptions.fastupdate;
+/** @export */ FieldOptions.score;
+/** @export */ FieldOptions.keystore;
+/** @export */ FieldOptions.rtl;
+/** @export */ FieldOptions.cache;
+/** @export */ FieldOptions.db;
+/** @export */ FieldOptions.config;
+/** @export */ FieldOptions.resolve;
+/** @export */ FieldOptions.field;
+/** @export */ FieldOptions.filter;
+/** @export */ FieldOptions.custom;
+/** @export */ FieldOptions.worker;
 
 /** @export */ DocumentOptions.context;
 /** @export */ DocumentOptions.encoder;
@@ -211,6 +222,7 @@ if(SUPPORT_PERSISTENT){
 /** @export */ SearchOptions.suggest;
 /** @export */ SearchOptions.resolve;
 /** @export */ SearchOptions.enrich;
+/** @export */ SearchOptions.resolution;
 
 /** @export */ DocumentSearchOptions.query;
 /** @export */ DocumentSearchOptions.limit;
@@ -260,6 +272,10 @@ if(SUPPORT_PERSISTENT){
 /** @export */ ResolverOptions.enrich;
 /** @export */ ResolverOptions.resolve;
 /** @export */ ResolverOptions.suggest;
+/** @export */ ResolverOptions.and;
+/** @export */ ResolverOptions.or;
+/** @export */ ResolverOptions.xor;
+/** @export */ ResolverOptions.not;
 
 const FlexSearch = {
     "Index": Index,
@@ -302,6 +318,18 @@ if(RELEASE !== "bundle.module" &&
     }
 }
 else{
+
     /** @export */
     window.FlexSearch = FlexSearch;
 }
+
+export default FlexSearch;
+export {
+    Index,
+    Document,
+    Encoder,
+    Charset,
+    WorkerIndex as Worker,
+    Resolver,
+    IdxDB as IndexedDB
+};

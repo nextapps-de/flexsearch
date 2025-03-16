@@ -10,7 +10,7 @@ import {
 } from "../config.js";
 // <-- COMPILER BLOCK
 
-import { SearchOptions } from "../type.js";
+import { SearchOptions, SearchResults, EnrichedSearchResults } from "../type.js";
 import { create_object, is_object, sort_by_length_down } from "../common.js";
 import Index from "../index.js";
 import default_compress from "../compress.js";
@@ -27,7 +27,7 @@ export function set_resolve(resolve){
  * @param {string|SearchOptions} query
  * @param {number|SearchOptions=} limit
  * @param {SearchOptions=} options
- * @returns {Array|Resolver|Promise<Array|Resolver>}
+ * @returns {SearchResults|EnrichedSearchResults|Resolver|Promise<SearchResults|EnrichedSearchResults|Resolver>}
  */
 
 Index.prototype.search = function(query, limit, options){
@@ -45,7 +45,7 @@ Index.prototype.search = function(query, limit, options){
 
     let result = [];
     let length;
-    let context, suggest, offset = 0, resolve, enrich, tag, cache, boost;
+    let context, suggest, offset = 0, resolve, enrich, tag, cache, boost, resolution;
 
     if(options){
         query = options.query || query;
@@ -57,6 +57,7 @@ Index.prototype.search = function(query, limit, options){
         resolve || (global_resolve = 0);
         enrich = resolve && options.enrich;
         boost = options.boost;
+        resolution = options.resolution;
         tag = SUPPORT_PERSISTENT && SUPPORT_DOCUMENT && SUPPORT_TAGS && this.db && options.tag;
     }
     else{
@@ -67,15 +68,16 @@ Index.prototype.search = function(query, limit, options){
 
     // do not force a string as input
     // https://github.com/nextapps-de/flexsearch/issues/432
-    query = /** @type {Array<string>} */ (this.encoder.encode(query));
-    length = query.length;
+    /** @type {Array<string>} */
+    let query_terms = this.encoder.encode(query);
+    length = query_terms.length;
     limit || !resolve || (limit = 100);
 
     // fast path single term
     if(length === 1){
         return single_term_query.call(
             this,
-            query[0], // term
+            query_terms[0], // term
             "",       // ctx
             limit,
             offset,
@@ -94,8 +96,8 @@ Index.prototype.search = function(query, limit, options){
     if(length === 2 && context && !suggest){
         return single_term_query.call(
             this,
-            query[0], // term
-            query[1], // ctx
+            query_terms[0], // term
+            query_terms[1], // ctx
             limit,
             offset,
             resolve,
@@ -115,7 +117,7 @@ Index.prototype.search = function(query, limit, options){
         const query_new = [];
 
         // if(context){
-        //     keyword = query[0];
+        //     keyword = query_terms[0];
         //     dupes[keyword] = 1;
         //     query_new.push(keyword);
         //     maxlength = minlength = keyword.length;
@@ -124,7 +126,7 @@ Index.prototype.search = function(query, limit, options){
 
         for(let i = 0, term; i < length; i++){
 
-            term = query[i];
+            term = query_terms[i];
 
             if(term && !dupes[term]){
 
@@ -152,7 +154,7 @@ Index.prototype.search = function(query, limit, options){
             // }
         }
 
-        query = query_new;
+        query_terms = query_new;
         length = query.length;
     }
 
@@ -170,7 +172,7 @@ Index.prototype.search = function(query, limit, options){
     if(length === 1){
         return single_term_query.call(
             this,
-            query[0], // term
+            query_terms[0], // term
             "",       // ctx
             limit,
             offset,
@@ -184,8 +186,8 @@ Index.prototype.search = function(query, limit, options){
     if(length === 2 && context && !suggest){
         return single_term_query.call(
             this,
-            query[0], // term
-            query[1], // ctx
+            query_terms[0], // term
+            query_terms[1], // ctx
             limit,
             offset,
             resolve,
@@ -197,7 +199,7 @@ Index.prototype.search = function(query, limit, options){
     if(length > 1){
         if(context){
             // start with context right away
-            keyword = query[0];
+            keyword = query_terms[0];
             index = 1;
         }
         // todo
@@ -206,8 +208,12 @@ Index.prototype.search = function(query, limit, options){
             // bigger terms has less occurrence
             // this might also reduce the intersection task
             // todo check intersection order
-            query.sort(sort_by_length_down);
+            query_terms.sort(sort_by_length_down);
         }
+    }
+
+    if(!resolution && resolution !== 0){
+        resolution = this.resolution;
     }
 
     // from this point there are just multi-term queries
@@ -216,7 +222,7 @@ Index.prototype.search = function(query, limit, options){
 
         if(this.db.search){
             // when the configuration is not supported it returns false
-            const result = this.db.search(this, query, limit, offset, suggest, resolve, enrich, tag);
+            const result = this.db.search(this, query_terms, limit, offset, suggest, resolve, enrich, tag);
             if(result !== false) return result;
         }
 
@@ -225,7 +231,7 @@ Index.prototype.search = function(query, limit, options){
 
             for(let arr, term; index < length; index++){
 
-                term = query[index];
+                term = query_terms[index];
 
                 if(keyword){
 
@@ -255,7 +261,7 @@ Index.prototype.search = function(query, limit, options){
                         arr,
                         result,
                         suggest,
-                        self.resolution,
+                        resolution,
                         // 0, // /** @type {!number} */ (limit),
                         // 0, // offset,
                         // length === 1
@@ -289,14 +295,14 @@ Index.prototype.search = function(query, limit, options){
             }
 
             return !SUPPORT_RESOLVER || resolve
-                ? intersect(result, self.resolution, /** @type {number} */ (limit), offset, suggest, boost, resolve)
+                ? intersect(result, resolution, /** @type {number} */ (limit), offset, suggest, boost, resolve)
                 : new Resolver(result[0])
         }());
     }
 
     for(let arr, term; index < length; index++){
 
-        term = query[index];
+        term = query_terms[index];
 
         if(keyword){
 
@@ -325,7 +331,7 @@ Index.prototype.search = function(query, limit, options){
                 arr,
                 result,
                 suggest,
-                this.resolution,
+                resolution,
                 // 0, // /** @type {!number} */ (limit),
                 // 0, // offset,
                 // length === 1
@@ -352,13 +358,13 @@ Index.prototype.search = function(query, limit, options){
             }
             else if(length === 1){
                 return !SUPPORT_RESOLVER || resolve
-                    ? resolve_default(result[0], limit, offset)
+                    ? resolve_default(result[0], /** @type {number} */ (limit), offset)
                     : new Resolver(result[0]);
             }
         }
     }
 
-    result = intersect(result, this.resolution, limit, offset, suggest, boost, resolve);
+    result = intersect(result, resolution, limit, offset, suggest, boost, resolve);
 
     return !SUPPORT_RESOLVER || resolve
         ? result
@@ -403,8 +409,8 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
  * @private
  * @param {Array} arr
  * @param {Array} result
- * @param {Array} suggest
- * @param {number} resolution
+ * @param {boolean|null=} suggest
+ * @param {number=} resolution
  * @return {Array|boolean|undefined}
  */
 

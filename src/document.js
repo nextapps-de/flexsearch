@@ -20,7 +20,7 @@ import {
 } from "./config.js";
 // <-- COMPILER BLOCK
 
-import { DocumentOptions, DocumentDescriptor, DocumentIndexOptions, StoreOptions } from "./type.js";
+import { IndexOptions, DocumentOptions, DocumentDescriptor, FieldOptions, StoreOptions } from "./type.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
 import Cache, { searchCache } from "./cache.js";
@@ -43,8 +43,9 @@ export default function Document(options){
         return new Document(options);
     }
 
-    /** @type DocumentDescriptor */
-    const document = options.document || options.doc || options;
+    const document = /** @type DocumentDescriptor */ (
+        options.document || options.doc || options
+    );
     let tmp, keystore;
 
     this.tree = [];
@@ -61,7 +62,7 @@ export default function Document(options){
 
     if(SUPPORT_STORE){
         // todo support custom filter function
-        this.storetree = (tmp = document.store || null) && tmp !== true && [];
+        this.storetree = (tmp = document.store || null) && tmp && tmp !== true && [];
         this.store = tmp && (
             keystore && SUPPORT_KEYSTORE
                 ? new KeystoreMap(keystore)
@@ -167,7 +168,7 @@ if(SUPPORT_PERSISTENT){
                 let index;// = this.index.get(field);
                 //if(!index){
                     // create raw index when not exists
-                    this.index.set(field, index = new Index({}, this.reg));
+                    this.index.set(field, index = new Index(/** @type IndexOptions */ ({}), this.reg));
                     // copy and push to the field selection
                     if(fields === this.field){
                         fields = fields.slice(0);
@@ -259,7 +260,7 @@ function parse_descriptor(options, document){
             key = key.field;
         }
 
-        opt = /** @type DocumentIndexOptions */ (
+        opt = /** @type IndexOptions */ (
             is_object(opt)
                 ? Object.assign({}, options, opt)
                 : options
@@ -279,7 +280,7 @@ function parse_descriptor(options, document){
         }
 
         if(!SUPPORT_WORKER || !this.worker){
-            index.set(key, new Index(opt, this.reg));
+            index.set(key, new Index(/** @type IndexOptions */ (opt), this.reg));
         }
 
         if(opt.custom){

@@ -5,7 +5,7 @@ import { is_string } from "./common.js";
 import { IndexOptions } from "./type.js";
 
 /**
- * @enum {Object}
+ * @type {Object<string, IndexOptions>}
  * @const
  */
 
@@ -39,22 +39,26 @@ const presets = {
 
 /**
  *
- * @param {!IndexOptions|string} options
+ * @param {IndexOptions|string} options
  * @return {IndexOptions}
  */
 
 export default function apply_preset(options){
 
-    const preset = is_string(options)
-        ? options
-        : options["preset"];
+    const preset = /** @type string */ (
+        is_string(options)
+            ? options
+            : options.preset
+    );
 
     if(preset){
         if(DEBUG && !presets[preset]){
             console.warn("Preset not found: " + preset);
         }
-        options = Object.assign({}, presets[preset], /** @type {Object} */ (options));
+        options = /** @type IndexOptions */ (
+            Object.assign({}, presets[preset], /** @type {Object} */ (options))
+        );
     }
 
-    return options;
+    return /** @type IndexOptions */ (options);
 }

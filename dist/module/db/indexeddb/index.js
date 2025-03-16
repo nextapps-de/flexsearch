@@ -27,7 +27,7 @@ export default function IdxDB(name, config = {}) {
     }
     if ("object" == typeof name) {
         name = name.name;
-        config = name;
+        config = /** @type PersistentOptions */name;
     }
     if (!name) {
         console.info("Default storage space was used, because a name was not passed.");

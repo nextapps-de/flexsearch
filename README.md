@@ -2321,10 +2321,10 @@ for(let i = 0; i < files.length; i++){
 - Using the `async` variants like `.searchAsync` is now deprecated (but still works), asynchronous responses will always return from Worker-Index and from Persistent-Index, everything else will return a non-promised result. Having both types of methods looks like the developers can choose between them, but they can't.
 - Any of your exports from versions below v0.8 are not compatible to import into v0.8
 
-## Not finished yet
+## What's next?
 
 Unfortunately, not everything could be finished and needs to be done in the upcoming version.
 
-- The `Resolver` does not support Document-Indexes, there is still some work to do.
+- The `Resolver` currently does not support Document-Indexes, there is still some work to do.
 - Config serialization for persistent indexes (store configuration, check migrations, import and restore field configurations)
 - Tooling for persistent indexes (list all tables, remove tables)

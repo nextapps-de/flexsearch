@@ -5,230 +5,243 @@ import Encoder from "./encoder.js";
 import StorageInterface from "./db/interface.js";
 
 /**
- * @typedef IndexOptions {{
- *   preset: string|undefined,
+ * @typedef {{
+ *   preset: (string|undefined),
  *   context: (IndexOptions|undefined),
- *   encoder: Encoder|Function|Object|undefined,
- *   encode: Function|undefined,
- *   resolution: [number=9],
- *   tokenize: [string="strict"],
- *   fastupdate: [boolean:false],
- *   score: Function]|undefined,
- *   keystore: [number=0],
- *   rtl: [boolean=false],
- *   cache: [number=null],
- *   resolve: [boolean=true],
- *   db: StorageInterface|undefined,
- *   commit: boolean=true,
- *   worker: boolean|string|undefined,
- *   config: string|undefined
+ *   encoder: (Encoder|Function|Object|undefined),
+ *   encode: (Function|undefined),
+ *   resolution: (number|undefined),
+ *   tokenize: (string|undefined),
+ *   fastupdate: (boolean|undefined),
+ *   score: (function():number|undefined),
+ *   keystore: (number|undefined),
+ *   rtl: (boolean|undefined),
+ *   cache: (number|boolean|undefined),
+ *   resolve: (boolean|undefined),
+ *   db: (StorageInterface|undefined),
+ *   commit: (boolean|undefined),
+ *   worker: (string|undefined),
+ *   config: (string|undefined)
  * }}
  */
-export const IndexOptions = {};
+export let IndexOptions = {};
 
 /**
- * @typedef DocumentIndexOptions {{
- *   preset: string|undefined,
+ * @typedef {{
+ *   preset: (string|undefined),
  *   context: (IndexOptions|undefined),
- *   encoder: Encoder|Function|Object|undefined,
- *   encode: Function|undefined,
- *   resolution: [number=9],
- *   tokenize: [string="strict"],
- *   fastupdate: [boolean:false],
- *   score: Function]|undefined,
- *   keystore: [number=0],
- *   rtl: [boolean=false],
- *   cache: [number=null],
- *   db: StorageInterface|undefined,
- *   commit: boolean=true,
- *   config: string|undefined,
- *   field: string,
- *   filter: Function|undefined,
- *   custom: Function|undefined
+ *   encoder: (Encoder|Function|Object|undefined),
+ *   encode: (Function|undefined),
+ *   resolution: (number|undefined),
+ *   tokenize: (string|undefined),
+ *   fastupdate: (boolean|undefined),
+ *   score: (Function|undefined),
+ *   keystore: (number|undefined),
+ *   rtl: (boolean|undefined),
+ *   cache: (number|undefined),
+ *   db: (StorageInterface|undefined),
+ *   commit: (boolean|undefined),
+ *   config: (string|undefined),
+ *   field: (string|undefined),
+ *   filter: (Function|undefined),
+ *   custom: (Function|undefined)
  * }}
  */
-export const DocumentIndexOptions = {};
+export let FieldOptions = {};
 
 /**
- * @typedef DocumentOptions {{
+ * @typedef {{
  *   context: (IndexOptions|undefined),
- *   encoder: Encoder|Function|Object|undefined,
- *   encode: Function|undefined,
- *   resolution: [number=9],
- *   tokenize: [string="strict"],
- *   fastupdate: [boolean:false],
- *   score: Function]|undefined,
- *   keystore: [number=0],
- *   rtl: [boolean=false],
- *   cache: [number=null],
- *   db: StorageInterface|undefined,
- *   doc: DocumentDescriptor|Array<DocumentDescriptor>|undefined,
- *   document: DocumentDescriptor|Array<DocumentDescriptor>|undefined,
- *   worker: boolean|string|undefined
+ *   encoder: (Encoder|Function|Object|undefined),
+ *   encode: (Function|undefined),
+ *   resolution: (number|undefined),
+ *   tokenize: (string|undefined),
+ *   fastupdate: (boolean|undefined),
+ *   score: (Function|undefined),
+ *   keystore: (number|undefined),
+ *   rtl: (boolean|undefined),
+ *   cache: (number|boolean|undefined),
+ *   db: (StorageInterface|undefined),
+ *   doc: (DocumentDescriptor|Array<DocumentDescriptor>|undefined),
+ *   document: (DocumentDescriptor|Array<DocumentDescriptor>|undefined),
+ *   worker: (boolean|string|undefined),
  * }}
  */
-export const DocumentOptions = {};
+export let DocumentOptions = {};
 
 /**
- * @typedef ContextOptions {{
- *   depth: number,
- *   bidirectional: boolean|undefined,
- *   resolution: number|undefined
+ * @typedef {{
+ *   depth: (number|undefined),
+ *   bidirectional: (boolean|undefined),
+ *   resolution: (number|undefined),
  * }}
  */
-export const ContextOptions = {};
+export let ContextOptions = {};
 
 /**
- * @typedef DocumentDescriptor {{
- *   id: string="id",
- *   field: FieldOptions|Array<FieldOptions>|undefined,
- *   index: FieldOptions|Array<FieldOptions>|undefined,
- *   tag: TagOptions|Array<TagOptions>|undefined,
- *   store: StoreOptions|Array<StoreOptions>|undefined
+ * @typedef {{
+ *   id: (string|undefined),
+ *   field: (string|Array<string>|FieldOptions|Array<FieldOptions>|undefined),
+ *   index: (string|Array<string>|FieldOptions|Array<FieldOptions>|undefined),
+ *   tag: (string|Array<string>|TagOptions|Array<TagOptions>|undefined),
+ *   store: (string|Array<string>|StoreOptions|Array<StoreOptions>|boolean|undefined),
  * }}
  */
-export const DocumentDescriptor = {};
+export let DocumentDescriptor = {};
 
 /**
- * @typedef TagOptions {{
+ * @typedef {{
  *   field: string,
- *   tag: Object<string, string|Array<string>>|Array<string>|string,
- *   filter: Function|undefined,
- *   custom: Function|undefined,
- *   keystore: [number=0],
- *   db: StorageInterface|undefined,
- *   config: string|undefined
+ *   filter: ((function(string):boolean)|undefined),
+ *   custom: ((function(string):string)|undefined),
+ *   db: (StorageInterface|undefined),
  * }}
  */
-export const TagOptions = {};
+export let TagOptions = {};
 
 /**
- * @typedef StoreOptions {{
+ * @typedef {{
  *   field: string,
- *   filter: Function|undefined,
- *   custom: Function|undefined,
- *   config: string|undefined
+ *   filter: ((function(string):boolean)|undefined),
+ *   custom: ((function(string):string)|undefined)
  * }}
  */
-export const StoreOptions = {};
+export let StoreOptions = {};
 
 /**
- * @typedef SearchOptions {{
- *   query: string=,
- *   limit: [number=100],
- *   offset: [number=0],
- *   context: boolean|undefined,
- *   suggest: [boolean=false],
- *   resolve: [boolean=true],
- *   enrich: [boolean=false]
+ * @typedef {{
+ *   query: (string|undefined),
+ *   limit: (number|undefined),
+ *   offset: (number|undefined),
+ *   resolution: (number|undefined),
+ *   context: (boolean|undefined),
+ *   suggest: (boolean|undefined),
+ *   resolve: (boolean|undefined),
+ *   enrich: (boolean|undefined),
  * }}
  */
-export const SearchOptions = {};
-// tag: Array|undefined
+export let SearchOptions = {};
 
 /**
- * @typedef DocumentSearchOptions {{
- *   query: string=,
- *   limit: [number=100],
- *   offset: [number=0],
- *   context: boolean|undefined,
- *   suggest: [boolean=false],
- *   enrich: [boolean=false],
- *   tag: Object|Array<Object>|undefined,
- *   field: Array<DocumentSearchOptions>|undefined,
- *   index: Array<DocumentSearchOptions>|undefined,
- *   pluck: boolean|undefined,
- *   merge: [boolean=false],
- *   highlight: string|undefined
+ * @typedef {{
+ *   query: (string|undefined),
+ *   limit: (number|undefined),
+ *   offset: (number|undefined),
+ *   context: (boolean|undefined),
+ *   suggest: (boolean|undefined),
+ *   enrich: (boolean|undefined),
+ *   tag: (Object|Array<Object>|undefined),
+ *   field: (Array<string>|Array<DocumentSearchOptions>|string|undefined),
+ *   index: (Array<string>|Array<DocumentSearchOptions>|undefined),
+ *   pluck: (string|undefined),
+ *   merge: (boolean|undefined),
+ *   highlight: (string|undefined),
  * }}
  */
-export const DocumentSearchOptions = {};
+export let DocumentSearchOptions = {};
 
 /**
- * @typedef DocumentSearchResults Array<{{
- *   field: string|undefined,
- *   tag: string|undefined,
- *   result: Array<number|string>,
- *   highlight: string|undefined
- * }}>
+ * @typedef Array<number|string>
  */
-export const DocumentSearchResults = {};
+export let SearchResults = {};
 
 /**
- * @typedef EnrichedDocumentSearchResults Array<{{
- *   field: string|undefined,
- *   tag: string|undefined,
- *   result: Array<{{
- *      id: number|string,
- *      doc: Object
- *   }}>,
- *   highlight: string|undefined
- * }}>
+ * @typedef Array<{
+ *   id: (number|string),
+ *   res: number
+ * }>
  */
-export const EnrichedDocumentSearchResults = {};
+export let EnrichedSearchResults = {};
 
 /**
- * @typedef MergedDocumentSearchResults Array<{{
- *   id: number|string,
- *   doc: Object|undefined,
- *   field: Array<string>,
- *   highlight: string|undefined
- * }}>
+ * @typedef Array<{
+ *   field: (string|undefined),
+ *   tag: (string|undefined),
+ *   result: SearchResults
+ * }>
  */
-export const MergedDocumentSearchResults = {};
+export let DocumentSearchResults = {};
 
 /**
- * @typedef EncoderOptions {{
- *   rtl: boolean=false,
- *   dedupe: boolean=true,
- *   split: string|undefined,
- *   include: EncoderSplitOptions|undefined,
- *   exclude: EncoderSplitOptions|undefined,
- *   prepare: function(string):string|undefined,
- *   finalize: function(Array<>string>):Array<string>|undefined,
- *   filter: Set|undefined,
- *   matcher: Map|undefined,
- *   mapper: Map|undefined,
- *   stemmer: Map|undefined,
- *   replacer: Array<string|RegExp>|undefined,
- *   minlength: number=1,
- *   maxlength: number|undefined,
- *   cache: boolean=true,
+ * @typedef Array<{
+ *   field: (string|undefined),
+ *   tag: (string|undefined),
+ *   highlight: (string|undefined),
+ *   result: Array<{
+ *      id: (number|string),
+ *      doc: (Object|null)
+ *   }>
+ * }>
+ */
+export let EnrichedDocumentSearchResults = {};
+
+/**
+ * @typedef Array<{
+ *   id: (number|string),
+ *   doc: (Object|null),
+ *   field: (Array<string>|undefined),
+ *   tag: (Array<string>|undefined)
+ * }>
+ */
+export let MergedDocumentSearchResults = {};
+
+/**
+ * @typedef {{
+ *   letter: (boolean|undefined),
+ *   number: (boolean|undefined),
+ *   symbol: (boolean|undefined),
+ *   punctuation: (boolean|undefined),
+ *   control: (boolean|undefined),
+ *   char: (string|Array<string>|undefined)
  * }}
  */
-export const EncoderOptions = {};
+export let EncoderSplitOptions = {};
 
 /**
- * @typedef EncoderSplitOptions {{
- *   letter: boolean=false,
- *   number: boolean=false,
- *   symbol: boolean=false,
- *   punctuation: boolean=false,
- *   control: boolean=false,
- *   char: string|Array<string>|undefined,
+ * @typedef {{
+ *   rtl: (boolean|undefined),
+ *   dedupe: (boolean|undefined),
+ *   include: (EncoderSplitOptions|undefined),
+ *   exclude: (EncoderSplitOptions|undefined),
+ *   split: (string|boolean|undefined),
+ *   normalize: (boolean|(function(string):string)|undefined),
+ *   prepare: ((function(string):string)|undefined),
+ *   finalize: ((function(Array<string>):(Array<string>|void))|undefined),
+ *   filter: (Set<string>|undefined),
+ *   matcher: (Map<string, string>|undefined),
+ *   mapper: (Map<string, string>|undefined),
+ *   stemmer: (Map<string, string>|undefined),
+ *   replacer: (Array<string|RegExp, string>|undefined),
+ *   minlength: (number|undefined),
+ *   maxlength: (number|undefined),
+ *   cache: (boolean|undefined)
  * }}
  */
-export const EncoderSplitOptions = {};
+export let EncoderOptions = {};
 
 /**
- * @typedef PersistentOptions {{
- *   name: string="flexsearch",
- *   field: string|undefined,
- *   type: string|undefined,
- *   db: *|undefined
+ * @typedef {{
+ *   name: (string|undefined),
+ *   field: (string|undefined),
+ *   type: (string|undefined),
+ *   db: (StorageInterface|undefined)
  * }}
  */
-export const PersistentOptions = {};
+export let PersistentOptions = {};
 
 /**
- * @typedef ResolverOptions {{
- *   index: Index|undefined,
- *   query: string,
- *   limit: [number=0],
- *   offset: [number=0],
- *   enrich: boolean=false,
- *   resolve: boolean=false,
- *   suggest: boolean=false
+ * @typedef {{
+ *   index: (Index|undefined),
+ *   query: (string|undefined),
+ *   limit: (number|undefined),
+ *   offset: (number|undefined),
+ *   enrich: (boolean|undefined),
+ *   resolve: (boolean|undefined),
+ *   suggest: (boolean|undefined),
+ *   and: (ResolverOptions|Array<ResolverOptions>|undefined),
+ *   or: (ResolverOptions|Array<ResolverOptions>|undefined),
+ *   xor: (ResolverOptions|Array<ResolverOptions>|undefined),
+ *   not: (ResolverOptions|Array<ResolverOptions>|undefined)
  * }}
  */
-export const ResolverOptions = {};
+export let ResolverOptions = {};

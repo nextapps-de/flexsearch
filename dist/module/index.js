@@ -6,7 +6,7 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { IndexOptions, ContextOptions } from "./type.js";
+import { IndexOptions, ContextOptions, EncoderOptions } from "./type.js";
 import Encoder from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import Charset from "./charset.js";
@@ -33,19 +33,19 @@ export default function Index(options, _register) {
         return new Index(options);
     }
 
-    options = options ? apply_preset(options) : {};
+    options = /** @type IndexOptions */options ? apply_preset(options) : {};
 
+    let tmp = options.context;
     /** @type ContextOptions */
-    const context = options.context || {},
+    const context = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ === tmp ? { depth: 1 } : tmp || {},
           encoder = is_string(options.encoder) ? Charset[options.encoder] : options.encode || options.encoder || default_encoder;
 
     /** @type Encoder */
-    this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder(encoder) : { encode: encoder };
+    this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder( /** @type {EncoderOptions} */encoder) : { encode: encoder };
 
     this.compress = options.compress || options.compression || /* suggest */ /* append: */ /* enrich */!1;
 
 
-    let tmp;
     this.resolution = options.resolution || 9;
     this.tokenize = tmp = options.tokenize || "strict";
     this.depth = "strict" === tmp && context.depth || 0;
@@ -56,10 +56,10 @@ export default function Index(options, _register) {
     tmp = options.keystore || 0;
     tmp && (this.keystore = tmp);
 
-    this.map = tmp && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(tmp) : new Map();
+    this.map = tmp && !0 ? new KeystoreMap(tmp) : new Map();
     this.ctx = tmp && !0 ? new KeystoreMap(tmp) : new Map();
     this.reg = _register || (this.fastupdate ? tmp && !0 ? new KeystoreMap(tmp) : new Map() : tmp && !0 ? new KeystoreSet(tmp) : new Set());
-    this.resolution_ctx = context.resolution || 1;
+    this.resolution_ctx = context.resolution || 3;
     this.rtl = encoder.rtl || options.rtl || !1;
 
     this.cache = (tmp = options.cache || null) && new Cache(tmp);

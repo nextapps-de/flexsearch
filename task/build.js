@@ -101,7 +101,7 @@ let parameter = (function(opt){
     module_resolution: "BROWSER",
     //dependency_mode: "SORT_ONLY",
     //js_module_root: "./",
-    entry_point: release === "lang" ? "./tmp/lang.js" : "./tmp/webpack.js",
+    entry_point: release === "lang" ? "./tmp/lang.js" : "./tmp/bundle.js",
     //manage_closure_dependencies: true,
     dependency_mode: "PRUNE", // PRUNE_LEGACY
     rewrite_polyfills: use_polyfill || false,
@@ -250,7 +250,7 @@ else (async function(){
     //     "resolver.js",
     //     "serialize.js",
     //     "type.js",
-    //     "webpack.js"
+    //     "bundle.js"
     // ];
 
     files.forEach(function(file){
@@ -372,6 +372,7 @@ else (async function(){
             part = part.split(",");
             part = part.map(entry => "export const " + entry.replace(":", "="));
             part = part.join(";") + ";";
+
             // part = "export const Index=FlexSearch.Index;" +
             //        "export const Charset=FlexSearch.Charset;" +
             //        "export const Encoder=FlexSearch.Encoder;" +
@@ -406,7 +407,6 @@ else (async function(){
 
         // replace the eval wrapper
         build = build.replace(/\(0,eval\)\('([^']+)'\)/g, "$1");
-
 
         fs.writeFileSync(filename, build);
         fs.existsSync("dist/node/") || fs.mkdirSync("dist/node/");

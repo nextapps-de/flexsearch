@@ -1,14 +1,19 @@
 // COMPILER BLOCK -->
 import {
     DEBUG,
-    SUPPORT_PERSISTENT, SUPPORT_RESOLVER,
+    SUPPORT_PERSISTENT,
+    SUPPORT_RESOLVER,
     SUPPORT_STORE,
     SUPPORT_SUGGESTION,
     SUPPORT_TAGS
 } from "../config.js";
 // <-- COMPILER BLOCK
-
-import { DocumentSearchOptions } from "../type.js";
+import {
+    DocumentSearchOptions,
+    DocumentSearchResults,
+    EnrichedDocumentSearchResults,
+    MergedDocumentSearchResults
+} from "../type.js";
 import { create_object, is_array, is_object, is_string, parse_simple } from "../common.js";
 import { intersect_union } from "../intersect.js";
 import Document from "../document.js";
@@ -20,7 +25,7 @@ let debug = false;
  * @param {number|DocumentSearchOptions=} limit
  * @param {DocumentSearchOptions=} options
  * @param {Array<Array>=} _promises For internal use only.
- * @returns {Promise|Array}
+ * @returns {DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults|Promise<DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults>}
  */
 
 Document.prototype.search = function(query, limit, options, _promises){
@@ -38,16 +43,17 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
     }
 
-    let result = [], result_field = [];
+    let result = [];
+    let result_field = [];
     let pluck, enrich, merge, suggest;
     let field, tag, offset, count = 0, resolve, highlight;
 
     if(options){
 
         if(is_array(options)){
-            options = {
+            options = /** @type DocumentSearchOptions */ ({
                 index: options
-            };
+            });
         }
 
         query = options.query || query;

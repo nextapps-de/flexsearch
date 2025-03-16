@@ -178,7 +178,7 @@ export const filter = new Set([
 ]);
 
 /**
- * @type {Object<string, string>}
+ * @type {Map<string, string>}
  */
 
 export const stemmer = new Map([

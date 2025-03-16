@@ -1,6 +1,6 @@
 import { EncoderOptions } from "../../type.js";
 
-/** @type EncoderOptions */
+/** @type {EncoderOptions} */
 const options = {
     normalize: true,
     dedupe: false,
