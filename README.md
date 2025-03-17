@@ -49,7 +49,7 @@ You can help me by making a personal donation to keep this project alive and als
 FlexSearch introduce a new scoring algorithm called <a href="#contextual">"contextual index"</a>, based on a <a href="#dictionary">pre-scored lexical dictionary</a> architecture which actually performs queries up to 1,000,000 times faster compared to other libraries.
 -->
 
-FlexSearch performs queries up to 1,000,000 times faster <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">compared to other libraries</a> by also providing <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">powerful search capabilities</a> like multi-field search (document search), phonetic transformations, partial matching, tag-search or suggestions.
+FlexSearch performs queries up to 1,000,000 times faster <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">compared to other libraries</a> by also providing <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">powerful search capabilities</a> like multi-field search (document search), phonetic transformations, partial matching, tag-search or suggestions.
 
 Bigger workloads are scalable through workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
 
@@ -74,8 +74,8 @@ Demos:
 - <a href="https://raw.githack.com/nextapps-de/flexsearch/master/demo/autocomplete.html" target="_blank">Auto-Complete</a>
 
 Library Comparison:
-- <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark</a>
-- <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">Scoring Benchmark</a>
+- <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">Performance Benchmark</a>
+- <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">Scoring Benchmark</a>
 
 Extern Projects & Plugins:
 - React: https://github.com/angeloashmore/react-use-flexsearch
@@ -353,7 +353,7 @@ The abbreviations used at the end of the filenames indicates:
 <a name="compare" id="compare"></a>
 ## Performance Benchmark (Ranking)
 
-Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
+Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
 
 Operation per seconds, higher is better, except the test "Memory" on which lower is better.
 The memory value refers to the amount of memory which was additionally allocated during search.
@@ -2394,9 +2394,9 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 
 > __Note:__ This feature is disabled by default because of its extended memory usage. Read <a href="#contextual_enable">here</a> get more information about and how to enable.
 
-FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/bench/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
+FlexSearch introduce a new scoring mechanism called __Contextual Search__ which was invented by <a href="https://github.com/ts-thomas" target="_blank">Thomas Wilkerling</a>, the author of this library. A Contextual Search <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">incredibly boost up queries to a complete new level</a> but also requires some additional memory (depending on ___depth___).
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document.
-This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/bench/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
+This way contextual search also <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">improves the results of relevance-based queries</a> on a large amount of text data.
 
 <p align="center">
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4" width="100%">
@@ -3408,13 +3408,7 @@ enable the option "fastupdate" will increase memory allocation:<br>
 
 These profiles are covering standard use cases. It is recommended to apply custom configuration instead of using profiles to get the best out for your situation. Every profile could be optimized further to its specific task, e.g. extreme performance optimized configuration or extreme memory and so on.
 
-You can pass a preset during creation/initialization of the index. 
-
-<!--
-Compare these presets:
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/matching-presets.html" target="_blank">Relevance Scoring</a><br>
-- <a href="https://raw.githack.com/nextapps-de/flexsearch/master/test/benchmark-presets.html" target="_blank">Benchmarks</a>
--->
+You can pass a preset during creation/initialization of the index.
 
 ## Best Practices
 
