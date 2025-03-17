@@ -37,6 +37,8 @@ By passing the search option `merge: true` the result set will be merged into (g
 }]
 ```
 
+<a name="tag-search"></a>
+
 ## Multi-Tag-Search
 
 Assume this document schema (a dataset from IMDB):

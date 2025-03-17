@@ -1,4 +1,4 @@
-import { Encoder } from "https://rawcdn.githack.com/nextapps-de/flexsearch/a006c24bbb6f77ad491fa81c1c30481efa2431de/dist/flexsearch.bundle.module.min.js";
+import { Encoder } from "https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.module.min.js";
 
 export default {
     tokenize: "forward",

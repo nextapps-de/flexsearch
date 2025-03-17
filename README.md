@@ -16,10 +16,10 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 <a href="#installation">Basic Start</a> &ensp;&bull;&ensp; 
 <a href="#api">API Reference</a> &ensp;&bull;&ensp;
 <a href="doc/encoder.md">Encoder</a> &ensp;&bull;&ensp;
-<a href="doc/custom-builds.md">Document Search</a> &ensp;&bull;&ensp;
+<a href="doc/document-search.md">Document Search</a> &ensp;&bull;&ensp;
 <a href="doc/persistent.md">Persistent Indexes</a> &ensp;&bull;&ensp;
 <a href="doc/worker.md">Using Worker</a> &ensp;&bull;&ensp;
-<a href="doc/document-search.md">Tag Search</a> &ensp;&bull;&ensp;
+<a href="doc/document-search#tag-search">Tag Search</a> &ensp;&bull;&ensp;
 <a href="doc/resolver.md">Resolver</a> &ensp;&bull;&ensp;
 <a href="doc/customization.md">Customization</a> &ensp;&bull;&ensp;
 <a href="CHANGELOG.md">Changelog</a>
@@ -102,80 +102,80 @@ The **_dist_** folder are located in: `node_modules/flexsearch/dist/`
     </tr>
     <tr>
         <td>flexsearch.bundle.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.bundle.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.bundle.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.bundle.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.bundle.min.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.bundle.min.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.bundle.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.bundle.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.bundle.module.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.module.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.module.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.bundle.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.bundle.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.bundle.module.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.bundle.module.min.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.module.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.bundle.module.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.es5.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.es5.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.es5.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.es5.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.es5.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.es5.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.es5.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.es5.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.es5.min.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.es5.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.es5.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.es5.min.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.es5.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.es5.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.light.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.light.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.light.min.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.light.min.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.light.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.module.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.module.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.light.module.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.module.debug.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.module.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/flexsearch.light.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.module.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/v0.8-preview/dist/flexsearch.light.module.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/flexsearch.light.module.min.js" target="_blank">Download</a></td>
+        <td><a href="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.module.min.js" target="_blank">https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.module.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules (ESM)</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/module/" target="_blank">Download</a></td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module" target="_blank">https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/module/" target="_blank">Download</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/tree/0.8.0/dist/module" target="_blank">https://github.com/nextapps-de/flexsearch/tree/0.8.0/dist/module</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules Minified (ESM)</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/module-min/" target="_blank">Download</a></td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-min" target="_blank">https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-min</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/module-min/" target="_blank">Download</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/tree/0.8.0/dist/module-min" target="_blank">https://github.com/nextapps-de/flexsearch/tree/0.8.0/dist/module-min</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules Debug (ESM)</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/v0.8-preview/dist/module-debug/" target="_blank">Download</a></td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-debug" target="_blank">https://github.com/nextapps-de/flexsearch/tree/v0.8-preview/dist/module-debug</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.0/dist/module-debug/" target="_blank">Download</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/tree/0.8.0/dist/module-debug" target="_blank">https://github.com/nextapps-de/flexsearch/tree/0.8.0/dist/module-debug</a></td>
     </tr>
     <tr></tr>
     <tr>
@@ -593,7 +593,7 @@ You can also load modules via CDN:
 
 ```html
 <script type="module">
-    import Index from "https://unpkg.com/flexsearch@v0.8-preview/dist/module/index.js";
+    import Index from "https://unpkg.com/flexsearch@0.8.0/dist/module/index.js";
     const index = new Index(/* ... */);
 </script>
 ```
