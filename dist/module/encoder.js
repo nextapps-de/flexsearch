@@ -1,5 +1,7 @@
 
 import { parse_option } from "./common.js";
+import normalize_polyfill from "./charset/normalize.js";
+import { EncoderOptions } from "./type.js";
 
 /*
 
@@ -42,51 +44,24 @@ const whitespace = /[^\p{L}\p{N}]+/u,
       numeric_split_length = /(\d{3})/g,
       numeric_split_prev_char = /(\D)(\d{3})/g,
       numeric_split_next_char = /(\d{3})(\D)/g,
-      normalize = /[\u0300-\u036f]/g,
-      normalize_mapper = !normalize && [
-
-// Charset Normalization
-
-["ª", "a"], ["²", "2"], ["³", "3"], ["¹", "1"], ["º", "o"], ["¼", "1⁄4"], ["½", "1⁄2"], ["¾", "3⁄4"], ["à", "a"], ["á", "a"], ["â", "a"], ["ã", "a"], ["ä", "a"], ["å", "a"], ["ç", "c"], ["è", "e"], ["é", "e"], ["ê", "e"], ["ë", "e"], ["ì", "i"], ["í", "i"], ["î", "i"], ["ï", "i"], ["ñ", "n"], ["ò", "o"], ["ó", "o"], ["ô", "o"], ["õ", "o"], ["ö", "o"], ["ù", "u"], ["ú", "u"], ["û", "u"], ["ü", "u"], ["ý", "y"], ["ÿ", "y"], ["ā", "a"], ["ă", "a"], ["ą", "a"], ["ć", "c"], ["ĉ", "c"], ["ċ", "c"], ["č", "c"], ["ď", "d"], ["ē", "e"], ["ĕ", "e"], ["ė", "e"], ["ę", "e"], ["ě", "e"], ["ĝ", "g"], ["ğ", "g"], ["ġ", "g"], ["ģ", "g"], ["ĥ", "h"], ["ĩ", "i"], ["ī", "i"], ["ĭ", "i"], ["į", "i"], ["ĳ", "ij"], ["ĵ", "j"], ["ķ", "k"], ["ĺ", "l"], ["ļ", "l"], ["ľ", "l"], ["ŀ", "l"], ["ń", "n"], ["ņ", "n"], ["ň", "n"], ["ŉ", "n"], ["ō", "o"], ["ŏ", "o"], ["ő", "o"], ["ŕ", "r"], ["ŗ", "r"], ["ř", "r"], ["ś", "s"], ["ŝ", "s"], ["ş", "s"], ["š", "s"], ["ţ", "t"], ["ť", "t"], ["ũ", "u"], ["ū", "u"], ["ŭ", "u"], ["ů", "u"], ["ű", "u"], ["ų", "u"], ["ŵ", "w"], ["ŷ", "y"], ["ź", "z"], ["ż", "z"], ["ž", "z"], ["ſ", "s"], ["ơ", "o"], ["ư", "u"], ["ǆ", "dz"], ["ǉ", "lj"], ["ǌ", "nj"], ["ǎ", "a"], ["ǐ", "i"], ["ǒ", "o"], ["ǔ", "u"], ["ǖ", "u"], ["ǘ", "u"], ["ǚ", "u"], ["ǜ", "u"], ["ǟ", "a"], ["ǡ", "a"], ["ǣ", "ae"], ["æ", "ae"], ["ǽ", "ae"], ["ǧ", "g"], ["ǩ", "k"], ["ǫ", "o"], ["ǭ", "o"], ["ǯ", "ʒ"], ["ǰ", "j"], ["ǳ", "dz"], ["ǵ", "g"], ["ǹ", "n"], ["ǻ", "a"], ["ǿ", "ø"], ["ȁ", "a"], ["ȃ", "a"], ["ȅ", "e"], ["ȇ", "e"], ["ȉ", "i"], ["ȋ", "i"], ["ȍ", "o"], ["ȏ", "o"], ["ȑ", "r"], ["ȓ", "r"], ["ȕ", "u"], ["ȗ", "u"], ["ș", "s"], ["ț", "t"], ["ȟ", "h"], ["ȧ", "a"], ["ȩ", "e"], ["ȫ", "o"], ["ȭ", "o"], ["ȯ", "o"], ["ȱ", "o"], ["ȳ", "y"], ["ʰ", "h"], ["ʱ", "h"], ["ɦ", "h"], ["ʲ", "j"], ["ʳ", "r"], ["ʴ", "ɹ"], ["ʵ", "ɻ"], ["ʶ", "ʁ"], ["ʷ", "w"], ["ʸ", "y"], ["ˠ", "ɣ"], ["ˡ", "l"], ["ˢ", "s"], ["ˣ", "x"], ["ˤ", "ʕ"], ["ΐ", "ι"], ["ά", "α"], ["έ", "ε"], ["ή", "η"], ["ί", "ι"], ["ΰ", "υ"], ["ϊ", "ι"], ["ϋ", "υ"], ["ό", "ο"], ["ύ", "υ"], ["ώ", "ω"], ["ϐ", "β"], ["ϑ", "θ"], ["ϒ", "Υ"], ["ϓ", "Υ"], ["ϔ", "Υ"], ["ϕ", "φ"], ["ϖ", "π"], ["ϰ", "κ"], ["ϱ", "ρ"], ["ϲ", "ς"], ["ϵ", "ε"], ["й", "и"], ["ѐ", "е"], ["ё", "е"], ["ѓ", "г"], ["ї", "і"], ["ќ", "к"], ["ѝ", "и"], ["ў", "у"], ["ѷ", "ѵ"], ["ӂ", "ж"], ["ӑ", "а"], ["ӓ", "а"], ["ӗ", "е"], ["ӛ", "ә"], ["ӝ", "ж"], ["ӟ", "з"], ["ӣ", "и"], ["ӥ", "и"], ["ӧ", "о"], ["ӫ", "ө"], ["ӭ", "э"], ["ӯ", "у"], ["ӱ", "у"], ["ӳ", "у"], ["ӵ", "ч"]
-
-// Term Separators
-
-// ["'", ""], // it's -> its
-// ["´", ""],
-// ["`", ""],
-// ["’", ""],
-// ["ʼ", ""],
-
-// Numeric-Separators Chars Removal
-
-// [",", ""],
-// [".", ""]
-
-// Non-Whitespace Separators
-
-// already was split by default via p{P}
-// ["-", " "],
-// [":", " "],
-// ["_", " "],
-// ["|", " "],
-// ["/", " "],
-// ["\\", " "]
-]; // /[\p{Z}\p{S}\p{P}\p{C}]+/u;
+      normalize = /[\u0300-\u036f]/g; // /[\p{Z}\p{S}\p{P}\p{C}]+/u;
 //const numeric_split = /(\d{3})/g;
 
 //.replace(/(\d{3})/g, "$1 ")
 //.replace(/([^\d])([\d])/g, "$1 $2")
 //.replace(/([\d])([^\d])/g, "$1 $2")
+
 // '´`’ʼ.,
+//const normalize_mapper = SUPPORT_CHARSET && !normalize && normalize_polyfill;
 
 /**
- * @param options
+ * @param {EncoderOptions=} options
  * @constructor
  */
 
-export default function Encoder(options = {}) {
+export default function Encoder() {
 
-    if (!(this instanceof Encoder)) {
+    if (!this) {
         return new Encoder(...arguments);
     }
 
@@ -95,24 +70,10 @@ export default function Encoder(options = {}) {
     }
 }
 
+/**
+ * @param {!EncoderOptions} options
+ */
 Encoder.prototype.assign = function (options) {
-
-    // if(options.assign){
-    //     //options = Object.assign({}, options.assign, options);
-    //     this.assign(options.assign);
-    // }
-
-    // let tmp = options["normalize"];
-    // if(typeof tmp === "function"){
-    //     const old = this.normalize;
-    //     if(typeof old === "function"){
-    //         const current = tmp;
-    //         tmp = function(){
-    //             old();
-    //             current();
-    //         }
-    //     }
-    // }
 
     /**
      * pre-processing string input
@@ -183,16 +144,15 @@ Encoder.prototype.assign = function (options) {
      */
     this.finalize = /** @type {Function|null} */parse_option(options.finalize, null, this.finalize);
 
-    // move the normalization fallback to the mapper
-    if (normalize_mapper) {
+    // assign the normalization fallback to the mapper
+    if (!normalize) {
         this.mapper = new Map(
-        /** @type {Array<Array<string, string>>} */normalize_mapper);
+        /** @type {Array<Array<string, string>>} */normalize_polyfill);
     }
 
     // options
 
-    this.rtl = options.rtl ||
-    /* suggest */ /* append: */ /* enrich */!1;
+    this.rtl = options.rtl || /* suggest */ /* append: */ /* enrich */!1;
     this.dedupe = parse_option(options.dedupe, !0, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);

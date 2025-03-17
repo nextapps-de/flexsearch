@@ -1,3 +1,5 @@
+import { EncoderOptions } from "../type.js";
+
 /**
  * Filter are also known as "stopwords", they completely filter out words from being indexed.
  * Source: http://www.ranks.nl/stopwords
@@ -22,18 +24,20 @@ export const stemmer = new Map([["niss", ""], ["isch", ""], ["lich", ""], ["heit
  * Object Definition: the key represents the target term, the value contains the search string which should be replaced (could also be an array of multiple terms).
  * @type {Map<string>}
  */
-const map = new Map([["_", " "], ["ä", "ae"], ["ö", "oe"], ["ü", "ue"], ["ß", "ss"], ["&", " und "], ["€", " EUR "]]);
-
-export default {
-    normalize: function (str) {
-        return str.toLowerCase();
-    },
+const map = new Map([["_", " "], ["ä", "ae"], ["ö", "oe"], ["ü", "ue"], ["ß", "ss"], ["&", " und "], ["€", " EUR "]]),
+      options = {
     prepare: function (str) {
         // normalization
         if (/[_äöüß&€]/.test(str)) str = str.replace(/[_äöüß&€]/g, match => map.get(match));
         // street names
-        return str.replace(/str\b/g, "strasse").replace(/(?!\b)strasse\b/g, " strasse").replace(/\bst\b/g, "sankt");
+        return str.replace(/str\b/g, "strasse").replace(/(?!\b)strasse\b/g, " strasse");
     },
     filter: filter,
     stemmer: stemmer
 };
+
+/**
+ * @type EncoderOptions
+ */
+
+export default options;

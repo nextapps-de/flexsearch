@@ -26,7 +26,7 @@ let DB, TRX;
  */
 
 export default function RedisDB(name, config = {}) {
-    if (!(this instanceof RedisDB)) {
+    if (!this) {
         return new RedisDB(name, config);
     }
     if ("object" == typeof name) {
@@ -52,7 +52,7 @@ export default function RedisDB(name, config = {}) {
 // };
 
 RedisDB.prototype.mount = function (flexsearch) {
-    if (flexsearch instanceof Document) {
+    if (flexsearch.constructor === Document) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

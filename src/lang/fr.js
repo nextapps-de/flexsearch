@@ -1,3 +1,5 @@
+import { EncoderOptions } from "../type.js";
+
 /**
  * http://www.ranks.nl/stopwords
  * http://snowball.tartarus.org/algorithms/french/stop.txt
@@ -202,25 +204,30 @@ export const stemmer = new Map([
     ["e", ""]
 ]);
 
-export default {
+/**
+ * @type EncoderOptions
+ */
+const options = {
     prepare: function(str){
-        return str.replace(/´`’ʼ/g, "'")
-                  .replace(/_+/g, " ")
-                  .replace(/&/g, " et ")
-                  .replace(/€/g, " EUR ")
-                  .replace(/\bl'([^\b])/g, "la le $1")
-                  .replace(/\bt'([^\b])/g, "ta te $1")
-                  .replace(/\bc'([^\b])/g, "ca ce $1")
-                  .replace(/\bd'([^\b])/g, "da de $1")
-                  .replace(/\bj'([^\b])/g, "ja je $1")
-                  .replace(/\bn'([^\b])/g, "na ne $1")
-                  .replace(/\bm'([^\b])/g, "ma me $1")
-                  .replace(/\bs'([^\b])/g, "sa se $1")
-                  .replace(/\bau\b/g, "a le")
-                  .replace(/\baux\b/g, "a les")
-                  .replace(/\bdu\b/g, "de le")
-                  .replace(/\bdes\b/g, "de les")
+        return str
+        .replace(/´`’ʼ/g, "'")
+        .replace(/_+/g, " ")
+        .replace(/&/g, " et ")
+        .replace(/€/g, " EUR ")
+        .replace(/\bl'([^\b])/g, "la le $1")
+        .replace(/\bt'([^\b])/g, "ta te $1")
+        .replace(/\bc'([^\b])/g, "ca ce $1")
+        .replace(/\bd'([^\b])/g, "da de $1")
+        .replace(/\bj'([^\b])/g, "ja je $1")
+        .replace(/\bn'([^\b])/g, "na ne $1")
+        .replace(/\bm'([^\b])/g, "ma me $1")
+        .replace(/\bs'([^\b])/g, "sa se $1")
+        .replace(/\bau\b/g, "a le")
+        .replace(/\baux\b/g, "a les")
+        .replace(/\bdu\b/g, "de le")
+        .replace(/\bdes\b/g, "de les")
     },
     filter: filter,
     stemmer: stemmer
 };
+export default options;

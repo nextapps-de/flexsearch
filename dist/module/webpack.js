@@ -1,19 +1,12 @@
 
-import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, FieldOptions, IndexOptions, DocumentOptions } from "./type.js";
+import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, DocumentIndexOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions } from "./type.js";
 import Document from "./document.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker/index.js";
 import Resolver from "./resolver.js";
 import Encoder from "./encoder.js";
 import IdxDB from "./db/indexeddb/index.js";
-import { global_charset } from "./charset.js";
-import charset_exact from "./lang/latin/exact.js";
-import charset_default from "./lang/latin/default.js";
-import charset_simple from "./lang/latin/simple.js";
-import charset_balance from "./lang/latin/balance.js";
-import charset_advanced from "./lang/latin/advanced.js";
-import charset_extra from "./lang/latin/extra.js";
-import charset_soundex from "./lang/latin/soundex.js";
+import Charset from "./charset.js";
 
 /** @export */Index.prototype.add;
 /** @export */Index.prototype.append;
@@ -23,6 +16,17 @@ import charset_soundex from "./lang/latin/soundex.js";
 /** @export */Index.prototype.contain;
 /** @export */Index.prototype.clear;
 /** @export */Index.prototype.cleanup;
+/** @export */Index.prototype.searchCache;
+/** @export */Index.prototype.addAsync;
+/** @export */Index.prototype.appendAsync;
+/** @export */Index.prototype.searchAsync;
+/** @export */Index.prototype.updateAsync;
+/** @export */Index.prototype.removeAsync;
+/** @export */Index.prototype.export;
+/** @export */Index.prototype.import;
+/** @export */Index.prototype.mount;
+/** @export */Index.prototype.commit;
+/** @export */Index.db;
 
 /** @export */Document.prototype.add;
 /** @export */Document.prototype.append;
@@ -32,39 +36,39 @@ import charset_soundex from "./lang/latin/soundex.js";
 /** @export */Document.prototype.contain;
 /** @export */Document.prototype.clear;
 /** @export */Document.prototype.cleanup;
-
-/** @export */Document.prototype.get;
-/** @export */Document.prototype.set;
-
-/** @export */Index.prototype.searchCache;
-
-/** @export */Document.prototype.searchCache;
-
-/** @export */Index.prototype.addAsync;
-/** @export */Index.prototype.appendAsync;
-/** @export */Index.prototype.searchAsync;
-/** @export */Index.prototype.updateAsync;
-/** @export */Index.prototype.removeAsync;
-
 /** @export */Document.prototype.addAsync;
 /** @export */Document.prototype.appendAsync;
 /** @export */Document.prototype.searchAsync;
 /** @export */Document.prototype.updateAsync;
 /** @export */Document.prototype.removeAsync;
-
-/** @export */Index.prototype.export;
-/** @export */Index.prototype.import;
-
-/** @export */Document.prototype.export;
-/** @export */Document.prototype.import;
-
-/** @export */Index.prototype.mount;
-/** @export */Index.prototype.commit;
-/** @export */Index.db;
-
 /** @export */Document.prototype.mount;
 /** @export */Document.prototype.commit;
 /** @export */Document.db;
+/** @export */Document.prototype.export;
+/** @export */Document.prototype.import;
+/** @export */Document.prototype.searchCache;
+/** @export */Document.prototype.get;
+/** @export */Document.prototype.set;
+
+/** @export */Resolver.prototype.limit;
+/** @export */Resolver.prototype.offset;
+/** @export */Resolver.prototype.boost;
+/** @export */Resolver.prototype.resolve;
+/** @export */Resolver.prototype.or;
+/** @export */Resolver.prototype.and;
+/** @export */Resolver.prototype.xor;
+/** @export */Resolver.prototype.not;
+
+/** @export */Charset.LatinExact;
+/** @export */Charset.LatinDefault;
+/** @export */Charset.LatinSimple;
+/** @export */Charset.LatinBalance;
+/** @export */Charset.LatinAdvanced;
+/** @export */Charset.LatinExtra;
+/** @export */Charset.LatinSoundex;
+/** @export */Charset.ArabicDefault;
+/** @export */Charset.CjkDefault;
+/** @export */Charset.CyrillicDefault;
 
 /** @export */IndexOptions.preset;
 /** @export */IndexOptions.context;
@@ -79,6 +83,25 @@ import charset_soundex from "./lang/latin/soundex.js";
 /** @export */IndexOptions.cache;
 /** @export */IndexOptions.resolve;
 /** @export */IndexOptions.db;
+/** @export */IndexOptions.config;
+
+/** @export */DocumentIndexOptions.preset;
+/** @export */DocumentIndexOptions.context;
+/** @export */DocumentIndexOptions.encoder;
+/** @export */DocumentIndexOptions.encode;
+/** @export */DocumentIndexOptions.resolution;
+/** @export */DocumentIndexOptions.tokenize;
+/** @export */DocumentIndexOptions.fastupdate;
+/** @export */DocumentIndexOptions.score;
+/** @export */DocumentIndexOptions.keystore;
+/** @export */DocumentIndexOptions.rtl;
+/** @export */DocumentIndexOptions.cache;
+/** @export */DocumentIndexOptions.db;
+/** @export */DocumentIndexOptions.config;
+// /** @export */ DocumentIndexOptions.resolve;
+/** @export */DocumentIndexOptions.field;
+/** @export */DocumentIndexOptions.filter;
+/** @export */DocumentIndexOptions.custom;
 
 /** @export */DocumentOptions.context;
 /** @export */DocumentOptions.encoder;
@@ -95,14 +118,27 @@ import charset_soundex from "./lang/latin/soundex.js";
 /** @export */DocumentOptions.document;
 /** @export */DocumentOptions.worker;
 
+/** @export */ContextOptions.depth;
+/** @export */ContextOptions.bidirectional;
+/** @export */ContextOptions.resolution;
+
 /** @export */DocumentDescriptor.field;
 /** @export */DocumentDescriptor.index;
 /** @export */DocumentDescriptor.tag;
 /** @export */DocumentDescriptor.store;
 
-/** @export */ContextOptions.depth;
-/** @export */ContextOptions.bidirectional;
-/** @export */ContextOptions.resolution;
+/** @export */TagOptions.field;
+/** @export */TagOptions.tag;
+/** @export */TagOptions.filter;
+/** @export */TagOptions.custom;
+/** @export */TagOptions.keystore;
+/** @export */TagOptions.db;
+/** @export */TagOptions.config;
+
+/** @export */StoreOptions.field;
+/** @export */StoreOptions.filter;
+/** @export */StoreOptions.custom;
+/** @export */StoreOptions.config;
 
 /** @export */SearchOptions.query;
 /** @export */SearchOptions.limit;
@@ -111,7 +147,6 @@ import charset_soundex from "./lang/latin/soundex.js";
 /** @export */SearchOptions.suggest;
 /** @export */SearchOptions.resolve;
 /** @export */SearchOptions.enrich;
-/** @export */SearchOptions.tag;
 
 /** @export */DocumentSearchOptions.query;
 /** @export */DocumentSearchOptions.limit;
@@ -125,31 +160,46 @@ import charset_soundex from "./lang/latin/soundex.js";
 /** @export */DocumentSearchOptions.pluck;
 /** @export */DocumentSearchOptions.merge;
 
-global_charset["latin:exact"] = charset_exact;
-global_charset["latin:default"] = charset_default;
-global_charset["latin:simple"] = charset_simple;
-global_charset["latin:balance"] = charset_balance;
-global_charset["latin:advanced"] = charset_advanced;
-global_charset["latin:extra"] = charset_extra;
-global_charset["latin:soundex"] = charset_soundex;
+/** @export */EncoderOptions.rtl;
+/** @export */EncoderOptions.dedupe;
+/** @export */EncoderOptions.split;
+/** @export */EncoderOptions.include;
+/** @export */EncoderOptions.exclude;
+/** @export */EncoderOptions.prepare;
+/** @export */EncoderOptions.finalize;
+/** @export */EncoderOptions.filter;
+/** @export */EncoderOptions.matcher;
+/** @export */EncoderOptions.mapper;
+/** @export */EncoderOptions.stemmer;
+/** @export */EncoderOptions.replacer;
+/** @export */EncoderOptions.minlength;
+/** @export */EncoderOptions.maxlength;
+/** @export */EncoderOptions.cache;
 
+/** @export */EncoderSplitOptions.letter;
+/** @export */EncoderSplitOptions.number;
+/** @export */EncoderSplitOptions.symbol;
+/** @export */EncoderSplitOptions.punctuation;
+/** @export */EncoderSplitOptions.control;
+/** @export */EncoderSplitOptions.char;
 
 const FlexSearch = {
     Index: Index,
-    Charset: global_charset,
+    Charset: Charset,
     Encoder: Encoder,
     Document: Document,
     Worker: WorkerIndex,
     Resolver: Resolver,
-    IndexedDB: IdxDB
-    //"registerCharset": registerCharset,
-    //"registerLanguage": registerLanguage
+    IndexedDB: IdxDB,
+    Language: {}
 };
 
 // Export as library (Bundle)
 // --------------------------------
 
 {
+
+    FlexSearch.Language = {};
 
     const root = self;
     let prop;

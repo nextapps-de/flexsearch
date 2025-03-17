@@ -23,8 +23,10 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
 
     fs.existsSync("./tmp/db") || fs.mkdirSync("./tmp/db/");
     fs.existsSync("./tmp/lang") || fs.mkdirSync("./tmp/lang/");
+    fs.existsSync("./tmp/charset") || fs.mkdirSync("./tmp/charset/");
 
-    ["db/clickhouse",
+    ["db/",
+     "db/clickhouse",
      "db/indexeddb",
      "db/mongo",
      "db/postgres",
@@ -35,7 +37,11 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
      "resolve",
      "worker",
      "lang",
-     "lang/latin",
+     "charset/",
+     "charset/latin",
+     "charset/arabic",
+     "charset/cjk",
+     "charset/cyrillic"
     ].forEach(await async function(path){
         fs.existsSync("./tmp/" + path + "/") || fs.mkdirSync("./tmp/" + path + "/");
         files = await fs.promises.readdir("./src/" + path + "/");
@@ -50,9 +56,9 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
         });
     });
 
-    fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
+    //fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
     fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");
-    fs.rmSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")), { recursive: true });
+    fs.existsSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : ""))) && fs.rmSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")), { recursive: true });
     fs.mkdirSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")));
 
     exec("npx babel tmp -d dist/module" + (debug ? "-debug" : (minify ? "-min --minified --compact true" : "")) + " --config-file tmp/.babelrc && exit 0", function(){

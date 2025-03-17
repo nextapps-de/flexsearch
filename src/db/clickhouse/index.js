@@ -59,7 +59,7 @@ let DB;
  */
 
 export default function ClickhouseDB(name, config = {}){
-    if(!(this instanceof ClickhouseDB)){
+    if(!this){
         return new ClickhouseDB(name, config);
     }
     if(typeof name === "object"){
@@ -85,7 +85,7 @@ export default function ClickhouseDB(name, config = {}){
 };
 
 ClickhouseDB.prototype.mount = function(flexsearch){
-    if(flexsearch instanceof Document){
+    if(flexsearch.constructor === Document){
         return flexsearch.mount(this);
     }
     defaults.resolution = Math.max(flexsearch.resolution, flexsearch.resolution_ctx);

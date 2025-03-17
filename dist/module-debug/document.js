@@ -6,7 +6,7 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { DocumentOptions } from "./type.js";
+import { DocumentOptions, DocumentDescriptor, DocumentIndexOptions, StoreOptions } from "./type.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker/index.js";
 import Cache, { searchCache } from "./cache.js";
@@ -19,15 +19,16 @@ import "./document/search.js";
 
 /**
  * @constructor
- * @param {DocumentOptions=} options
+ * @param {!DocumentOptions} options
  */
 
 export default function Document(options) {
 
-    if (!(this instanceof Document)) {
+    if (!this) {
         return new Document(options);
     }
 
+    /** @type DocumentDescriptor */
     const document = options.document || options.doc || options;
     let tmp, keystore;
 
@@ -39,8 +40,8 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0
-    /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */
+    /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
     this.storetree = (tmp = document.store || null) && !0 !== tmp && [];
@@ -192,12 +193,11 @@ function parse_descriptor(options, document) {
             key = key.field;
         }
 
-        opt = is_object(opt) ? Object.assign({}, options, opt) : options;
+        opt = /** @type DocumentIndexOptions */is_object(opt) ? Object.assign({}, options, opt) : options;
 
         if (this.worker) {
             const worker = new WorkerIndex(opt);
-            index.set(key, worker);
-            if (!worker.worker) {
+            index.set(key, worker);if (!worker.worker) {
                 // fallback when not supported
                 this.worker = !1;
             }
@@ -229,7 +229,7 @@ function parse_descriptor(options, document) {
         if (is_string(stores)) stores = [stores];
 
         for (let i = 0, store, field; i < stores.length; i++) {
-            store = stores[i];
+            store = /** @type Array<StoreOptions> */stores[i];
             field = store.field || store;
             if (store.custom) {
                 this.storetree[i] = store.custom;

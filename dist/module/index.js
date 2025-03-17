@@ -6,13 +6,14 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { IndexOptions } from "./type.js";
+import { IndexOptions, ContextOptions } from "./type.js";
 import Encoder from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
+import Charset from "./charset.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex } from "./serialize.js";
-import default_encoder from "./lang/latin/default.js";
+import default_encoder from "./charset/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
 import tick from "./profiler.js";
@@ -22,21 +23,23 @@ import "./index/remove.js";
 
 /**
  * @constructor
- * @param {IndexOptions|string=} options
+ * @param {IndexOptions|string=} options Options or preset as string
  * @param {Map|Set|KeystoreSet|KeystoreMap=} _register
  */
 
 export default function Index(options, _register) {
 
-    if (!(this instanceof Index)) {
+    if (!this) {
         return new Index(options);
     }
 
     options = options ? apply_preset(options) : {};
 
+    /** @type ContextOptions */
     const context = options.context || {},
           encoder = options.encode || options.encoder || default_encoder;
 
+    /** @type Encoder */
     this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder(encoder) : { encode: encoder };
 
     this.compress = options.compress || options.compression || /* suggest */ /* append: */ /* enrich */!1;

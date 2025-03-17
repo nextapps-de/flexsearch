@@ -34,14 +34,15 @@ Document.prototype.add = function (id, content, _append) {
             if ("function" == typeof tree) {
                 const tmp = tree(content);
                 if (tmp) {
-                    index.add(id, tmp, /* suggest */ /* append: */!1, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/);
+                    index.add(id, tmp, /* suggest */ /* append: */!1, /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/
+                    /*await rows.hasNext()*/ /*await rows.hasNext()*/);
                 }
             } else {
                 const filter = tree._filter;
                 if (filter && !filter(content)) {
                     continue;
                 }
-                if (tree instanceof String) {
+                if (tree.constructor === String) {
                     tree = ["" + tree];
                 } else if (is_string(tree)) {
                     tree = [tree];
@@ -70,7 +71,7 @@ Document.prototype.add = function (id, content, _append) {
                     if (filter && !filter(content)) {
                         continue;
                     }
-                    if (tree instanceof String) {
+                    if (tree.constructor === String) {
                         tree = "" + tree;
                     }
                     tags = parse_simple(content, tree);
@@ -145,7 +146,7 @@ Document.prototype.add = function (id, content, _append) {
                         custom = tree(content);
                         if (!custom) continue;
                         tree = [tree._field];
-                    } else if (is_string(tree) || tree instanceof String) {
+                    } else if (is_string(tree) || tree.constructor === String) {
                         payload[tree] = content[tree];
                         continue;
                     }

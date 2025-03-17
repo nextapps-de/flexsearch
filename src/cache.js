@@ -20,10 +20,11 @@ export function searchCache(query, limit, options){
     let cache = this.cache.get(query);
     if(!cache){
         cache = this.search(query, limit, options);
-        if(cache instanceof Promise){
+        if(cache.then){
             const self = this;
             cache.then(function(cache){
                 self.cache.set(query, cache);
+                return cache;
             });
         }
         this.cache.set(query, cache);
@@ -46,17 +47,17 @@ export default function CacheClass(limit){
 }
 
 CacheClass.prototype.set = function(key, value){
-    if(!this.cache.has(key)){
+    //if(!this.cache.has(key)){
         this.cache.set(this.last = key, value);
-        if(this.limit && this.cache.size > this.limit){
+        if(this.cache.size > this.limit){
             this.cache.delete(this.cache.keys().next().value);
         }
-    }
+    //}
 };
 
 CacheClass.prototype.get = function(key){
     const cache = this.cache.get(key);
-    if(cache && this.limit && this.last !== key){
+    if(cache && this.last !== key){
         this.cache.delete(key);
         this.cache.set(this.last = key, cache);
     }

@@ -50,7 +50,7 @@ Document.prototype.add = function(id, content, _append){
                 if(filter && !filter(content)){
                     continue;
                 }
-                if(tree instanceof String){
+                if(tree.constructor === String){
                     tree = ["" + tree];
                 }
                 else if(is_string(tree)){
@@ -81,7 +81,7 @@ Document.prototype.add = function(id, content, _append){
                     if(filter && !filter(content)){
                         continue;
                     }
-                    if(tree instanceof String){
+                    if(tree.constructor === String){
                         tree = "" + tree;
                     }
                     tags = parse_simple(content, tree);
@@ -160,7 +160,7 @@ Document.prototype.add = function(id, content, _append){
                         if(!custom) continue;
                         tree = [tree._field];
                     }
-                    else if(is_string(tree) || tree instanceof String){
+                    else if(is_string(tree) || tree.constructor === String){
                         payload[tree] = content[tree];
                         continue;
                     }

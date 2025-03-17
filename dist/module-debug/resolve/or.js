@@ -12,7 +12,7 @@ Resolver.prototype.or = function () {
         first_argument = args[0];
 
 
-    if (first_argument instanceof Promise) {
+    if (first_argument.then) {
         return first_argument.then(function () {
             return self.or.apply(self, args);
         });
@@ -62,7 +62,7 @@ Resolver.prototype.or = function () {
         if (query = args[i]) {
 
             let result;
-            if (query instanceof Resolver) {
+            if (query.constructor === Resolver) {
                 result = query.result;
             } else if (query.constructor === Array) {
                 result = query;
@@ -85,7 +85,7 @@ Resolver.prototype.or = function () {
 
             final[i] = result;
 
-            if (result instanceof Promise) {
+            if (result.then) {
                 promises.push(result); //{ query, result };
             }
         }

@@ -12,7 +12,7 @@ let pid = 0;
 
 function WorkerIndex(options) {
 
-    if (!(this instanceof WorkerIndex)) {
+    if (!this) {
         return new WorkerIndex(options);
     }
 

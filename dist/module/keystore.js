@@ -7,7 +7,7 @@ import { create_object } from "./common.js";
 
 export function KeystoreObj(bitlength = 8) {
 
-    if (!(this instanceof KeystoreObj)) {
+    if (!this) {
         return new KeystoreObj(bitlength);
     }
 
@@ -37,10 +37,10 @@ export function KeystoreObj(bitlength = 8) {
                     target.keys.push(address);
                 }
                 obj[key] = value;
-                return (/* tag? */ /* stringify */
-                    /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */
+                return (/* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */
                     // splice:
-                    !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
+                    !0 /*await rows.hasNext()*/
+                    /*await rows.hasNext()*/ /*await rows.hasNext()*/
                 );
             },
             delete(target, key) {
@@ -94,7 +94,7 @@ function _slice(self, start, end, splice) {
 
 export function KeystoreArray(arr) {
 
-    if (!(this instanceof KeystoreArray)) {
+    if (!this) {
         return new KeystoreArray(arr);
     }
 
@@ -196,7 +196,7 @@ KeystoreArray.prototype.push = function () {};
 
 export function KeystoreMap(bitlength = 8) {
 
-    if (!(this instanceof KeystoreMap)) {
+    if (!this) {
         return new KeystoreMap(bitlength);
     }
 
@@ -241,7 +241,7 @@ KeystoreMap.prototype.set = function (key, value) {
 
 export function KeystoreSet(bitlength = 8) {
 
-    if (!(this instanceof KeystoreSet)) {
+    if (!this) {
         return new KeystoreSet(bitlength);
     }
 
@@ -372,6 +372,7 @@ function lcg(str) {
 function lcg64(str) {
     let range = BigInt(2) ** /** @type {!BigInt} */this.bit - BigInt(1),
         type = typeof str;
+
     if ("bigint" == type) {
         return (/** @type {!BigInt} */str & range
         );

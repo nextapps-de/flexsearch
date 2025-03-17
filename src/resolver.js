@@ -1,9 +1,5 @@
 import default_resolver from "./resolve/default.js";
 import { set_resolve } from "./index/search.js";
-// import or from "./resolve/or.js";
-// import and from "./resolve/and.js";
-// import xor from "./resolve/xor.js";
-// import not from "./resolve/not.js";
 import "./resolve/or.js";
 import "./resolve/and.js";
 import "./resolve/xor.js";
@@ -15,16 +11,16 @@ import "./resolve/not.js";
  */
 
 export default function Resolver(result){
+    if(!this){
+        return new Resolver(result);
+    }
     if(result && result.index){
         result.resolve = false;
         this.index = result.index;
         return result.index.search(result);
     }
-    if(!(this instanceof Resolver)){
-        return new Resolver(result);
-    }
-    if(result instanceof Resolver){
-        // todo remove
+    if(result.constructor === Resolver){
+        // todo test this branch
         //console.log("Resolver Loopback")
         return result;
     }
@@ -32,11 +28,6 @@ export default function Resolver(result){
     this.result = result || [];
     this.boostval = 0;
 }
-
-// Resolver.prototype.or = or;
-// Resolver.prototype.and = and;
-// Resolver.prototype.not = not;
-// Resolver.prototype.xor = xor;
 
 Resolver.prototype.limit = function(limit){
     if(this.result.length){

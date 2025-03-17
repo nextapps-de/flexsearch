@@ -24,6 +24,29 @@ import StorageInterface from "./db/interface.js";
 export let IndexOptions;
 
 /**
+ * @typedef DocumentIndexOptions {{
+ *   preset: string|undefined,
+ *   context: (IndexOptions|undefined),
+ *   encoder: Encoder|Function|Object|undefined,
+ *   encode: Function|undefined,
+ *   resolution: [number=9],
+ *   tokenize: [string="strict"],
+ *   fastupdate: [boolean:false],
+ *   score: Function]|undefined,
+ *   keystore: [number=0],
+ *   rtl: [boolean=false],
+ *   cache: [number=null],
+ *   db: StorageInterface|undefined,
+ *   config: string|undefined,
+ *
+ *   field: string,
+ *   filter: Function|undefined,
+ *   custom: Function|undefined
+ * }}
+ */
+export let DocumentIndexOptions;
+
+/**
  * @typedef DocumentOptions {{
  *   context: (IndexOptions|undefined),
  *   encoder: Encoder|Function|Object|undefined,
@@ -57,32 +80,10 @@ export let ContextOptions;
  *   field: FieldOptions|Array<FieldOptions>|undefined,
  *   index: FieldOptions|Array<FieldOptions>|undefined,
  *   tag: TagOptions|Array<TagOptions>|undefined,
- *   store: StoreOptions|Array<StoreOptions>|undefined,
- *   config: string|undefined
+ *   store: StoreOptions|Array<StoreOptions>|undefined
  * }}
  */
 export let DocumentDescriptor;
-
-/**
- * @typedef FieldOptions {{
- *   field: string,
- *   filter: Function|undefined,
- *   custom: Function|undefined,
- *   context: (IndexOptions|undefined),
- *   encoder: Encoder|Function|Object|undefined,
- *   encode: Function|undefined,
- *   resolution: [number=9],
- *   tokenize: [string="strict"],
- *   fastupdate: [boolean:false],
- *   score: Function]|undefined,
- *   keystore: [number=0],
- *   rtl: [boolean=false],
- *   cache: [number=null],
- *   db: StorageInterface|undefined,
- *   config: string|undefined
- * }}
- */
-export let FieldOptions;
 
 /**
  * @typedef TagOptions {{
@@ -102,8 +103,6 @@ export let TagOptions;
  *   field: string,
  *   filter: Function|undefined,
  *   custom: Function|undefined,
- *   keystore: [number=0],
- *   db: StorageInterface|undefined,
  *   config: string|undefined
  * }}
  */
@@ -118,10 +117,10 @@ export let StoreOptions;
  *   suggest: [boolean=false],
  *   resolve: [boolean=true],
  *   enrich: [boolean=false],
- *   tag: Array|undefined
  * }}
  */
 export let SearchOptions;
+// tag: Array|undefined
 
 /**
  * @typedef DocumentSearchOptions {{
@@ -131,14 +130,44 @@ export let SearchOptions;
  *   context: boolean|undefined,
  *   suggest: [boolean=false],
  *   enrich: [boolean=false],
- *   tag: Array|undefined,
- *   field: FieldOptions|Array<FieldOptions>|undefined,
- *   index: FieldOptions|Array<FieldOptions>|undefined,
+ *   tag: Object|Array<Object>|undefined,
+ *   field: Array<DocumentSearchOptions>|undefined,
+ *   index: Array<DocumentSearchOptions>|undefined,
  *   pluck: boolean|undefined,
  *   merge: [boolean=false]
  * }}
  */
 export let DocumentSearchOptions;
 
+/**
+ * @typedef EncoderOptions {{
+ *   rtl: boolean=false,
+ *   dedupe: boolean=true,
+ *   split: string|undefined,
+ *   include: EncoderSplitOptions|undefined,
+ *   exclude: EncoderSplitOptions|undefined,
+ *   prepare: function(string):string|undefined,
+ *   finalize: function(Array<>string>):Array<string>|undefined,
+ *   filter: Set|undefined,
+ *   matcher: Map|undefined,
+ *   mapper: Map|undefined,
+ *   stemmer: Map|undefined,
+ *   replacer: Array<string|RegExp>|undefined,
+ *   minlength: number=1,
+ *   maxlength: number|undefined,
+ *   cache: boolean=true,
+ * }}
+ */
 export let EncoderOptions;
-export let ResolverOptions;
+
+/**
+ * @typedef EncoderSplitOptions {{
+ *   letter: boolean=false,
+ *   number: boolean=false,
+ *   symbol: boolean=false,
+ *   punctuation: boolean=false,
+ *   control: boolean=false,
+ *   char: string|Array<string>|undefined,
+ * }}
+ */
+export let EncoderSplitOptions;

@@ -27,7 +27,7 @@ npm install git+https://github.com/nextapps-de/flexsearch/tree/v0.8-preview
 - Custom Score Function
 - Added French language preset (stop-word filter, stemmer)
 - Enhanced Worker Support
-- Improved Build System + Bundler (Supported: CommonJS, ESM, Global Namespace)
+- Improved Build System + Bundler (Supported: CommonJS, ESM, Global Namespace), also the import of language packs are now supported for Node.js
 - Full covering index.d.ts type definitions
 
 Compare Benchmark: [0.7.0](https://nextapps-de.github.io/flexsearch/test/flexsearch-0.7.0/) vs. [0.8.0](https://nextapps-de.github.io/flexsearch/test/flexsearch-0.8.0/)
@@ -269,6 +269,32 @@ const encoder = new Encoder({
 });
 ```
 
+You can use an `include` __instead__ of an `exclude` definition:
+
+```js
+const encoder = new Encoder({
+    exclude: {
+        letter: false,
+        number: false,
+        symbol: true,
+        punctuation: true,
+        control: true
+    }
+});
+```
+
+Instead of using `include` or `exclude` you can pass a regular expression to the field `split`:
+
+```js
+const encoder = new Encoder({
+    split: /\s+/
+});
+```
+
+> The definitions `include` and `exclude` is a replacement for `split`. You can just define one of those 3.
+
+Adding custom functions to the encoder pipeline:
+
 ```js
 const encoder = new Encoder({
     normalize: function(str){
@@ -277,13 +303,17 @@ const encoder = new Encoder({
     prepare: function(str){
         return str.replace(/&/g, " and ");
     },
-    exclude: {
-        letter: false,
-        number: false,
-        symbol: true,
-        punctuation: true,
-        control: true
+    finalize: function(arr){
+        return arr.filter(term => term.length > 2);
     }
+});
+```
+
+Assign encoder to an index:
+
+```js
+const index = new Index({ 
+    encoder: encoder
 });
 ```
 
@@ -309,12 +339,11 @@ const encoder = new Encoder({
 });
 ```
 
-Or use predefined language and add custom options:
+Or use predefined language and extend it with custom options:
 
 ```js
 import EnglishBookPreset from "./lang/en.js";
-const encoder = new Encoder({
-    assign: EnglishBookPreset,
+const encoder = new Encoder(EnglishBookPreset, {
     filter: false
 });
 ```
@@ -330,27 +359,38 @@ encoder.assign({ filter: false });
 Assign extensions to the encoder instance:
 
 ```js
-import LatinEncoder from "./lang/latin/simple.js";
+import LatinEncoderPreset from "./charset/latin/simple.js";
 import EnglishBookPreset from "./lang/en.js";
 // stack definitions to the encoder instance
 const encoder = new Encoder()
-    .assign(LatinEncoder)
+    .assign(LatinEncoderPreset)
     .assign(EnglishBookPreset)
 // override preset options ...
     .assign({ minlength: 3 });
 // assign further presets ...
 ```
 
+> When adding extension to the encoder every previously assigned configuration is still intact, very much like Mixins, also when assigning custom functions.
+
 Add custom transformations to an existing index:
 
 ```js
-import LatinEncoder from "./lang/latin/default.js";
-const encoder = new Encoder(LatinEncoder);
+import LatinEncoderPreset from "./charset/latin/default.js";
+const encoder = new Encoder(LatinEncoderPreset);
 encoder.addReplacer(/[´`’ʼ]/g, "'");
 encoder.addFilter("and");
 encoder.addMatcher("xvi", "16");
 encoder.addStemmer("ly", "");
 encoder.addMapper("é", "e");
+```
+
+Shortcut for just assigning one encoder configuration to an index:
+
+```js
+import LatinEncoderPreset from "./charset/latin/default.js";
+const index = new Index({ 
+    encoder: LatinEncoderPreset
+});
 ```
 
 ## Resolver
@@ -363,6 +403,7 @@ const raw = index.search("a short query", {
 });
 ```
 
+<<<<<<< HEAD
 <!--
 Example of an intermediate raw result set:
 
@@ -811,6 +852,8 @@ npm install flexsearch
 
 In your code include as follows:
 =======
+=======
+>>>>>>> 06878b8 (re-bundle)
 You can apply and chain different resolver methods to the raw result, e.g.:
 >>>>>>> 7755e7d (bundle pre-release)
 
@@ -832,15 +875,6 @@ raw.and( ... )
 
 The default resolver:
 
-<!--
-```js
-import resolve from "./resolve/resolve.js";
-const raw = index.search("a short query", { 
-    resolve: false
-});
-const result = resolve(raw);
-```
--->
 ```js
 const raw = index.search("a short query", { 
     resolve: false
@@ -863,31 +897,6 @@ const result = raw.resolve();
 
 The basic concept explained:
 
-<!--
-```js
-import and from "./resolve/and.js";
-import resolve from "./resolve/resolve.js";
-
-// 1. get multiple unresolved results
-const raw1 = index.search("a short query", { 
-    resolve: false
-});
-const raw2 = index.search("another query", {
-    resolve: false,
-    boost: 2
-});
-
-// 2. apply boolean operations
-const raw3 = and(raw1, raw2, /* ... */);
-// when raw3.length is 0 then no result was found
-
-// 3. resolve final result
-const result = resolve(raw3, {
-    limit: 100,
-    offset: 0
-});
-```
--->
 ```js
 // 1. get one or multiple unresolved results
 const raw1 = index.search("a short query", { 
@@ -914,39 +923,6 @@ console.log("The final result is:", result)
 
 Use inline queries:
 
-<!--
-Run at parallel (e.g. when using WorkerIndex):
-```js
-import and from "./resolve/and.js";
-import or from "./resolve/or.js";
-import resolve from "./resolve/resolve.js";
-// apply boolean operations (execute all immediately)
-const result =
-// resolve the result
-resolve(
-    or( // union
-        and( // intersection
-            index.search("a query", {
-                resolve: false
-            }),
-            index.search("another query", {
-                resolve: false,
-                boost: 2
-            })
-        ),
-        index.search("further query", {
-            resolve: false,
-            boost: 2
-        })
-    ),
-    not( // exclusion
-        index.search("some query", {
-            resolve: false
-        })
-    )
-);
-```
--->
 ```js
 const result = index.search("further query", {
     // set resolve to false on the first query
@@ -971,43 +947,6 @@ const result = index.search("further query", {
 });
 ```
 
-<!--
-Chained injection (recommended for most use cases):
--->
-Or use a fully declarative style (also recommended when run in parallel):
-
-<!--
-```js
-import and from "./resolve/and.js"; 
-import or from "./resolve/or.js"; 
-import collapse from "./resolve/collapse.js";
-// define boolean operations (execute continually)
-const result = collapse(
-    or( // union
-        and({ // intersection
-            index: index,
-            query: "a query",
-        },{
-            index: index,
-            query: "another query",
-            boost: 2
-        }),
-        {
-            index: index,
-            query: "further query",
-            boost: 2
-        },{
-            // optionally apply resolve
-            // in the outer last stage
-            limit: 100,
-            offset: 0,
-            resolve: true,
-            enrich: true
-        }
-    )
-);
-```
--->
 ```js
 import Resolver from "./resolver.js";
 const result = new Resolver({
@@ -1049,6 +988,7 @@ const result = new Resolver({
 .resolve(100);
 ```
 
+<!--
 ### Custom Result Decoration
 
 ```js
@@ -1093,6 +1033,7 @@ const template = highlight(raw, {
 });
 document.body.appendChild(template);
 ```
+-->
 
 ### Custom Resolver
 
@@ -1127,46 +1068,6 @@ The internal ID arrays scales automatically when limit of 2^31 has reached by us
 
 > Persistent storages has no keystore limit by default. You should not enable keystore when using persistent indexes, as long as you do not stress the buffer too hard before calling `index.commit()`.
 
-<!--
-## Index Compression
-
-You can reduce the memory footprint of stored terms by enable compression:
-
-```js
-const index = new FlexSearchIndex({
-    compress: true 
-});
-```
-
-The basic idea is to transform terms into a number and then applying a radix with a high base to it. A maximum radix of 2^16-1 is covered by the UTF-8 Standard.
-
-Take this example of a long term `ExtraLongTermsCanIncreaseTheIndexSize` will reduce to `#oPG`, from 37 chars to just 4 by using a radix of 2^8. The minimum length I could achieve was `⎐珗` 2 chars with a radix of 2^16-1 but without further memory reduction.
-
-```js
-// Compression Off:
-"ExtraLongTermsCanIncreaseTheIndexSize"
-// Compression On: (radix of 2^8)
-"#oPG" // 4 chars
-// Compression Max: (radix of 2^16)
-"⎐珗"  // 2 chars
-```
-
-Indexing 2,000,000 created unique tokens with a length of 32 letters:
-
-<table>
-    <tr>
-        <td>Compression Off</td>
-        <td>878 Mb</td>
-    </tr>
-    <tr>
-        <td>Compression On</td>
-        <td>62 Mb (93% ratio)</td>
-    </tr>
-</table>
-
-There is a small chance, usually with less than 0.01%, that hash collision will occur. In this case you will get a "false-positive" entry in the search result. A collision does not occur on usual term length but might happen on longer term length of e.g. 32 chars.
--->
-
 ## Multi-Tag-Search
 
 Assume this document schema (a dataset from IMDB):
@@ -1189,10 +1090,10 @@ Assume this document schema (a dataset from IMDB):
 
 An appropriate document descriptor could look like:
 ```js
-import LatinEncoder from "./lang/latin/simple.js";
+import LatinEncoder from "./charset/latin/simple.js";
 
 const flexsearch = new Document({
-    encoder: new Encoder(LatinEncoder),
+    encoder: LatinEncoder,
     resolution: 3,
     document: {
         id: "tconst",
@@ -1212,16 +1113,6 @@ const flexsearch = new Document({
 });
 ```
 The field contents of `primaryTitle` and `originalTitle` are encoded by the forward tokenizer. The field contents of `startYear` and `genres` are added as tags.
-
-<!--
-Get all entries of all tags by document field: 
-```js
-const result = flexsearch.search({
-    //enrich: true, // enrich documents
-    tag: "genres"
-});
-```
--->
 
 Get all entries of a specific tag:
 ```js
@@ -1400,7 +1291,7 @@ const index = new FlexSearchIndex({
 
 A common situation is you have some predefined labels which are related to some kind of order, e.g. the importance or priority. A priority label could be `high`, `moderate`, `low` so you can derive the scoring from those properties. Another example is when you have something already ordered and you would like to keep this order as relevance.
 
-The parameters from the score function explained:
+Probably you won't need the parameters passed to the score function. But when needed here are the parameters from the score function explained:
 
 1. `content` is the whole content as an array of terms (encoded) 
 2. `term` is the current term which is actually processed (encoded)
@@ -1448,7 +1339,7 @@ By default, the result set of Field-Search has a structure grouped by field name
 }]
 ```
 
-By passing the search option `merge: true` the result set will be merged into:
+By passing the search option `merge: true` the result set will be merged into (group by id):
 ```js
 [{
     id: 1001,
@@ -1530,10 +1421,10 @@ You're welcome to make some suggestions how to improve the handling of extern co
 An extern configuration for one WorkerIndex, let's assume it is located in `./custom_field.js`:
 ```js
 const { Charset } = require("flexsearch");
-const EncoderPreset = Charset["latin:simple"];
+const { LatinSimple } = Charset;
 // it requires a default export:
 module.exports = {
-    encoder: EncoderPreset,
+    encoder: LatinSimple,
     tokenize: "forward",
     // custom function:
     custom: function(data){
@@ -1563,10 +1454,10 @@ const flexsearch = new Document({
 An extern configuration for one WorkerIndex, let's assume it is located in `./custom_field.js`:
 ```js
 import { Charset } from "./dist/flexsearch.bundle.module.min.js";
-const EncoderPreset = Charset["latin:simple"];
+const { LatinSimple } = Charset;
 // it requires a default export:
 export default {
-    encoder: EncoderPreset,
+    encoder: LatinSimple,
     tokenize: "forward",
     // custom function:
     custom: function(data){
@@ -1616,7 +1507,7 @@ Fuzzysearch describes a basic concept of how making queries more tolerant. Somet
 3. Use one of the language specific presets e.g. `/lang/en.js` for en-US specific content
 4. Enable suggestions by passing the search option `suggest: true`
 
-Additionally, you can apply custom `Mapper`, `Replacer`, `Stemmer`, `Filter` or by assigning a custom `normalize` or `prepare` function to the Encoder.
+Additionally, you can apply custom `Mapper`, `Replacer`, `Stemmer`, `Filter` or by assigning a custom `normalize(str)`, `prepare(str)` or `finalize(arr)` function to the Encoder.
 
 ### Compare Fuzzy-Search Encoding
 
@@ -1944,3 +1835,5 @@ When you are using ESM in Node.js then just use the Modules explained one sectio
 - Every charset collection (files in folder `/lang/**.js`) is now exported as a config object (instead of a function). This config needs to be created by passing to the constructor `new Encoder(config)` or can be added to an existing instance via `encoder.assign(config)`. The reason was to keep the default encoder configuration when having multiple document indexes.
 - The property `bool` from DocumentOptions was removed (replaced by `Resolver`)
 - The static methods `FlexSearch.registerCharset()` and `FlexSearch.registerLanguage()` was removed, those collections are now exported to `FlexSearch.Charset` which can be accessed as module `import { Charset } from "flexsearch"` and language packs are now applied by `encoder.assign()`
+- Instead of e.g. "latin:simple" the Charset collection is exported as a module and has to be imported by e.g. `import LatinSimple from "./charset.js"` and then assigned to an existing Encoder by `encoder.assign(LatinSimple)` or by creation `encoder = new Encoder(LatinSimple)`
+- You can import language packs by `dist/module/lang/*` when using ESM and by `const EnglishPreset = require("flexsearch/lang/en");` when using CommonJS (Node.js)

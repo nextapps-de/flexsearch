@@ -1,3 +1,5 @@
+import { EncoderOptions } from "../type.js";
+
 /**
  * Filter are also known as "stopwords", they completely filter out words from being indexed.
  * Source: http://www.ranks.nl/stopwords
@@ -187,19 +189,19 @@ const map = new Map([
     ["€", " EUR "]
 ]);
 
-export default {
-    normalize: function(str){
-        return str.toLowerCase();
-    },
+/**
+ * @type EncoderOptions
+ */
+const options = {
     prepare: function(str){
         // normalization
         if(/[_äöüß&€]/.test(str))
             str = str.replace(/[_äöüß&€]/g, match => map.get(match));
         // street names
         return str.replace(/str\b/g, "strasse")
-                  .replace(/(?!\b)strasse\b/g, " strasse")
-                  .replace(/\bst\b/g, "sankt");
+                  .replace(/(?!\b)strasse\b/g, " strasse");
     },
     filter: filter,
     stemmer: stemmer
 };
+export default options;

@@ -38,7 +38,7 @@ function sanitize(str) {
  */
 
 export default function IdxDB(name, config = {}){
-    if(!(this instanceof IdxDB)){
+    if(!this){
         return new IdxDB(name, config);
     }
     if(typeof name === "object"){
@@ -56,7 +56,7 @@ export default function IdxDB(name, config = {}){
 };
 
 IdxDB.prototype.mount = function(flexsearch){
-    if(flexsearch instanceof Document){
+    if(flexsearch.constructor === Document){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

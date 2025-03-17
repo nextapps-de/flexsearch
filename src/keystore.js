@@ -7,7 +7,7 @@ import { create_object } from "./common.js";
 
 export function KeystoreObj(bitlength = 8){
 
-    if(!(this instanceof KeystoreObj)){
+    if(!this){
         return new KeystoreObj(bitlength);
     }
 
@@ -90,7 +90,7 @@ function _slice(self, start, end, splice){
 
 export function KeystoreArray(arr){
 
-    if(!(this instanceof KeystoreArray)){
+    if(!this){
         return new KeystoreArray(arr);
     }
 
@@ -200,7 +200,7 @@ KeystoreArray.prototype.push = function(val){};
 
 export function KeystoreMap(bitlength = 8){
 
-    if(!(this instanceof KeystoreMap)){
+    if(!this){
         return new KeystoreMap(bitlength);
     }
 
@@ -246,7 +246,7 @@ KeystoreMap.prototype.set = function(key, value){
 
 export function KeystoreSet(bitlength = 8){
 
-    if(!(this instanceof KeystoreSet)){
+    if(!this){
         return new KeystoreSet(bitlength);
     }
 

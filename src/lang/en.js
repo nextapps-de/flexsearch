@@ -1,10 +1,11 @@
+import { EncoderOptions } from "../type.js";
+
+// todo filter out minlength
+
 /**
  * http://www.ranks.nl/stopwords
  * @type {Set<string>}
  */
-
-
-// todo filter out minlength
 export const filter = new Set([
     "a",
     "about",
@@ -218,7 +219,7 @@ export const filter = new Set([
 ]);
 
 /**
- * @type {Object<string, string>}
+ * @type {Map<string, string>}
  */
 
 export const stemmer = new Map([
@@ -271,10 +272,6 @@ export const stemmer = new Map([
     ["ly", ""]
 ]);
 
-// export const replacer = new Map([
-//     ["&", " and "],
-// ]);
-
 /*
     he’s (= he is / he has)
     she’s (= she is / she has)
@@ -303,82 +300,30 @@ export const stemmer = new Map([
 //     ["'d$", " would had"],
 // ]);
 
-// const pairs = [
-//     /´`’ʼ/, /´`’ʼ/g, "'",
-//     /_/, /_+/g, " ",
-//     /&/, /&/g, " and ",
-//     /\bi'm\b/, /\bi'm\b/g, "i am",
-//     /\b(can't|cannot)\b/, /\b(can't|cannot)\b/g, "can not",
-//     /\bwon't\b/, /\bwon't\b/g, "will not",
-//     /[a-z]n't\b/, /[a-z]n't\b/g, "$1 not",
-//     /[a-z]'s\b/, /([a-z])'s\b/g, "$1 is has",
-//     /[a-z]'ll\b/, /[a-z]'ll\b/g, "$1 will",
-//     /[a-z]'re\b/, /[a-z]'re\b/g, "$1 are",
-//     /[a-z]'ve\b/, /[a-z]'ve\b/g, "$1 have",
-//     /[a-z]'d\b/, /[a-z]'d\b/g, "$1 is has"
-// ];
-
-// const map = new Map([
-//     ["´", "'"],
-//     ["`", "'"],
-//     ["’", "'"],
-//     ["ʼ", "'"],
-//     ["_", " "],
-//     ["&", " and "]
-// ]);
-
-export default {
+/**
+ * @type EncoderOptions
+ */
+const options = {
     prepare: function(str){
-        // if(/[´`’ʼ_&]/.test(str))
-        //     str = str.replace(/[´`’ʼ_&]/g, match => map.get(match));
-
-        // if(/´`’ʼ/.test(str))
-        //     str = str.replace(/´`’ʼ/g, "'");
-        // if(/_/.test(str))
-        //     str = str.replace(/_+/g, " ");
-        // if(/&/.test(str))
-        //     str = str.replace(/&/g, " and ");
-
-        // if(/\bi'm\b/.test(str))
-        //     str = str.replace(/\bi'm\b/g, "i am");
-        // if(/\b(can't|cannot)\b/.test(str))
-        //     str = str.replace(/\b(can't|cannot)\b/g, "can not");
-        // if(/\bwon't\b/.test(str))
-        //     str = str.replace(/\bwon't\b/g, "will not");
-        // if(/[a-z]n't\b/.test(str))
-        //     str = str.replace(/([a-z])n't\b/g, "$1 not");
-        // if(/[a-z]'s\b/.test(str))
-        //     str = str.replace(/([a-z])'s\b/g, "$1 is has");
-        // if(/[a-z]'ll\b/.test(str))
-        //     str = str.replace(/([a-z])'ll\b/g, "$1 will");
-        // if(/[a-z]'re\b/.test(str))
-        //     str = str.replace(/([a-z])'re\b/g, "$1 are");
-        // if(/[a-z]'ve\b/.test(str))
-        //     str = str.replace(/([a-z])'ve\b/g, "$1 have");
-        // if(/[a-z]'d\b/.test(str))
-        //     str = str.replace(/([a-z])'d\b/g, "$1 would had");
-        // return str;
-
-        return str//.replace(/[´`’ʼ_&]/g, match => map.get(match))
-                  // normalization
-                  .replace(/´`’ʼ/g, "'")
-                  .replace(/_+/g, " ")
-                  .replace(/&/g, " and ")
-                  //.replace(/([0-9 ]|^)\$([0-9 ]|$)/g, "$1 USD $2")
-                  //.replace(/([0-9 ]|^)£([0-9 ]|$)/g, "$1 GBP $2")
-                  .replace(/\$/g, " USD ")
-                  .replace(/£/g, " GBP ")
-                  // explode short forms
-                  .replace(/([a-z])'s\b/g, "$1 is")
-                  .replace(/\bi'm\b/g, "i am")
-                  .replace(/\b(can't|cannot)\b/g, "can not")
-                  .replace(/\bwon't\b/g, "will not")
-                  .replace(/([a-z])n't\b/g, "$1 not")
-                  .replace(/([a-z])'ll\b/g, "$1 will")
-                  .replace(/([a-z])'re\b/g, "$1 are")
-                  .replace(/([a-z])'ve\b/g, "$1 have")
-                  .replace(/([a-z])'d\b/g, "$1 would");
+        return str
+        // normalization
+        .replace(/´`’ʼ/g, "'")
+        .replace(/_+/g, " ")
+        .replace(/&/g, " and ")
+        .replace(/\$/g, " USD ")
+        .replace(/£/g, " GBP ")
+        // explode short forms
+        .replace(/([a-z])'s\b/g, "$1 is")
+        .replace(/\bi'm\b/g, "i am")
+        .replace(/\b(can't|cannot)\b/g, "can not")
+        .replace(/\bwon't\b/g, "will not")
+        .replace(/([a-z])n't\b/g, "$1 not")
+        .replace(/([a-z])'ll\b/g, "$1 will")
+        .replace(/([a-z])'re\b/g, "$1 are")
+        .replace(/([a-z])'ve\b/g, "$1 have")
+        .replace(/([a-z])'d\b/g, "$1 would");
     },
     filter: filter,
     stemmer: stemmer
 };
+export default options;

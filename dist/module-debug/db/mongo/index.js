@@ -26,7 +26,7 @@ let CLIENT,
  */
 
 export default function MongoDB(name, config = {}) {
-    if (!(this instanceof MongoDB)) {
+    if (!this) {
         return new MongoDB(name, config);
     }
     if ("object" == typeof name) {
@@ -51,7 +51,7 @@ export default function MongoDB(name, config = {}) {
 // };
 
 MongoDB.prototype.mount = function (flexsearch) {
-    if (flexsearch instanceof Document) {
+    if (flexsearch.constructor === Document) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

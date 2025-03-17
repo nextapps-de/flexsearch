@@ -18,18 +18,20 @@ import {
     SUPPORT_PERSISTENT,
     SUPPORT_COMPRESSION,
     SUPPORT_KEYSTORE,
-    SUPPORT_RESOLVER
+    SUPPORT_RESOLVER,
+    SUPPORT_CHARSET
 
 } from "./config.js";
 // <-- COMPILER BLOCK
 
-import { IndexOptions } from "./type.js";
+import { IndexOptions, ContextOptions } from "./type.js";
 import Encoder from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
+import Charset from "./charset.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex } from "./serialize.js";
-import default_encoder from "./lang/latin/default.js";
+import default_encoder from "./charset/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
 import tick from "./profiler.js";
@@ -39,13 +41,13 @@ import "./index/remove.js";
 
 /**
  * @constructor
- * @param {IndexOptions|string=} options
+ * @param {IndexOptions|string=} options Options or preset as string
  * @param {Map|Set|KeystoreSet|KeystoreMap=} _register
  */
 
 export default function Index(options, _register){
 
-    if(!(this instanceof Index)){
+    if(!this){
         return new Index(options);
     }
 
@@ -55,12 +57,14 @@ export default function Index(options, _register){
         ? apply_preset(options)
         : {};
 
+    /** @type ContextOptions */
     const context = options.context || {};
     const encoder = options.encode || options.encoder || (
         SUPPORT_ENCODER ? default_encoder : function(str){
             return str.toLowerCase().trim().split(/\s+/);
         }
     );
+    /** @type Encoder */
     this.encoder = encoder.encode
         ? encoder
         : typeof encoder === "object"

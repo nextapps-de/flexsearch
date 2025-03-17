@@ -103,7 +103,8 @@ export function intersect(arrays, limit, offset, suggest) {
                             check_new[id] = 1;
                         }
 
-                        found = /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+                        found = /* tag? */ /* stringify */ /* stringify */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/
+                        /*await rows.hasNext()*/ /*await rows.hasNext()*/;
                     }
 
                     if (suggest) {

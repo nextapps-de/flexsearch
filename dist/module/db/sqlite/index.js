@@ -48,7 +48,7 @@ const TRX = Object.create(null),
  */
 
 export default function SqliteDB(name, config = {}) {
-    if (!(this instanceof SqliteDB)) {
+    if (!this) {
         return new SqliteDB(name, config);
     }
     if ("object" == typeof name) {
@@ -68,7 +68,7 @@ export default function SqliteDB(name, config = {}) {
 }
 
 SqliteDB.prototype.mount = function (flexsearch) {
-    if (flexsearch instanceof Document) {
+    if (flexsearch.constructor === Document) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

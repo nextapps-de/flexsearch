@@ -1,16 +1,12 @@
 // COMPILER BLOCK -->
 import {
     RELEASE,
-    SUPPORT_ASYNC,
     SUPPORT_DOCUMENT,
-    SUPPORT_CACHE,
-    SUPPORT_SERIALIZE,
     SUPPORT_WORKER,
     SUPPORT_ENCODER,
     SUPPORT_CHARSET,
     SUPPORT_PERSISTENT,
-    SUPPORT_RESOLVER,
-    SUPPORT_STORE
+    SUPPORT_RESOLVER
 } from "./config.js";
 // <-- COMPILER BLOCK
 import {
@@ -18,9 +14,13 @@ import {
     ContextOptions,
     DocumentDescriptor,
     DocumentSearchOptions,
-    FieldOptions,
+    DocumentIndexOptions,
     IndexOptions,
-    DocumentOptions
+    DocumentOptions,
+    TagOptions,
+    StoreOptions,
+    EncoderOptions,
+    EncoderSplitOptions
 } from "./type.js";
 import Document from "./document.js";
 import Index from "./index.js";
@@ -28,14 +28,7 @@ import WorkerIndex from "./worker/index.js";
 import Resolver from "./resolver.js";
 import Encoder from "./encoder.js";
 import IdxDB from "./db/indexeddb/index.js";
-import { global_charset } from "./charset.js";
-import charset_exact from "./lang/latin/exact.js"
-import charset_default from "./lang/latin/default.js"
-import charset_simple from "./lang/latin/simple.js"
-import charset_balance from "./lang/latin/balance.js"
-import charset_advanced from "./lang/latin/advanced.js"
-import charset_extra from "./lang/latin/extra.js"
-import charset_soundex from "./lang/latin/soundex.js"
+import Charset from "./charset.js";
 
 /** @export */ Index.prototype.add;
 /** @export */ Index.prototype.append;
@@ -45,8 +38,18 @@ import charset_soundex from "./lang/latin/soundex.js"
 /** @export */ Index.prototype.contain;
 /** @export */ Index.prototype.clear;
 /** @export */ Index.prototype.cleanup;
+/** @export */ Index.prototype.searchCache;
+/** @export */ Index.prototype.addAsync;
+/** @export */ Index.prototype.appendAsync;
+/** @export */ Index.prototype.searchAsync;
+/** @export */ Index.prototype.updateAsync;
+/** @export */ Index.prototype.removeAsync;
+/** @export */ Index.prototype.export;
+/** @export */ Index.prototype.import;
+/** @export */ Index.prototype.mount;
+/** @export */ Index.prototype.commit;
+/** @export */ Index.db;
 
-if(SUPPORT_DOCUMENT){
 /** @export */ Document.prototype.add;
 /** @export */ Document.prototype.append;
 /** @export */ Document.prototype.search;
@@ -55,53 +58,39 @@ if(SUPPORT_DOCUMENT){
 /** @export */ Document.prototype.contain;
 /** @export */ Document.prototype.clear;
 /** @export */ Document.prototype.cleanup;
-}
-if(SUPPORT_DOCUMENT && SUPPORT_STORE){
-/** @export */ Document.prototype.get;
-/** @export */ Document.prototype.set;
-}
-
-if(SUPPORT_CACHE){
-/** @export */ Index.prototype.searchCache;
-}
-if(SUPPORT_CACHE && SUPPORT_DOCUMENT){
-/** @export */ Document.prototype.searchCache;
-}
-
-if(SUPPORT_ASYNC){
-/** @export */ Index.prototype.addAsync;
-/** @export */ Index.prototype.appendAsync;
-/** @export */ Index.prototype.searchAsync;
-/** @export */ Index.prototype.updateAsync;
-/** @export */ Index.prototype.removeAsync;
-}
-if(SUPPORT_ASYNC && SUPPORT_DOCUMENT){
 /** @export */ Document.prototype.addAsync;
 /** @export */ Document.prototype.appendAsync;
 /** @export */ Document.prototype.searchAsync;
 /** @export */ Document.prototype.updateAsync;
 /** @export */ Document.prototype.removeAsync;
-}
-
-if(SUPPORT_SERIALIZE){
-/** @export */ Index.prototype.export;
-/** @export */ Index.prototype.import;
-}
-if(SUPPORT_SERIALIZE && SUPPORT_DOCUMENT){
-/** @export */ Document.prototype.export;
-/** @export */ Document.prototype.import;
-}
-
-if(SUPPORT_PERSISTENT){
-/** @export */ Index.prototype.mount;
-/** @export */ Index.prototype.commit;
-/** @export */ Index.db;
-}
-if(SUPPORT_PERSISTENT && SUPPORT_DOCUMENT){
 /** @export */ Document.prototype.mount;
 /** @export */ Document.prototype.commit;
 /** @export */ Document.db;
-}
+/** @export */ Document.prototype.export;
+/** @export */ Document.prototype.import;
+/** @export */ Document.prototype.searchCache;
+/** @export */ Document.prototype.get;
+/** @export */ Document.prototype.set;
+
+/** @export */ Resolver.prototype.limit;
+/** @export */ Resolver.prototype.offset;
+/** @export */ Resolver.prototype.boost;
+/** @export */ Resolver.prototype.resolve;
+/** @export */ Resolver.prototype.or;
+/** @export */ Resolver.prototype.and;
+/** @export */ Resolver.prototype.xor;
+/** @export */ Resolver.prototype.not;
+
+/** @export */ Charset.LatinExact;
+/** @export */ Charset.LatinDefault;
+/** @export */ Charset.LatinSimple;
+/** @export */ Charset.LatinBalance;
+/** @export */ Charset.LatinAdvanced;
+/** @export */ Charset.LatinExtra;
+/** @export */ Charset.LatinSoundex;
+/** @export */ Charset.ArabicDefault;
+/** @export */ Charset.CjkDefault;
+/** @export */ Charset.CyrillicDefault;
 
 /** @export */ IndexOptions.preset;
 /** @export */ IndexOptions.context;
@@ -116,6 +105,25 @@ if(SUPPORT_PERSISTENT && SUPPORT_DOCUMENT){
 /** @export */ IndexOptions.cache;
 /** @export */ IndexOptions.resolve;
 /** @export */ IndexOptions.db;
+/** @export */ IndexOptions.config;
+
+/** @export */ DocumentIndexOptions.preset;
+/** @export */ DocumentIndexOptions.context;
+/** @export */ DocumentIndexOptions.encoder;
+/** @export */ DocumentIndexOptions.encode;
+/** @export */ DocumentIndexOptions.resolution;
+/** @export */ DocumentIndexOptions.tokenize;
+/** @export */ DocumentIndexOptions.fastupdate;
+/** @export */ DocumentIndexOptions.score;
+/** @export */ DocumentIndexOptions.keystore;
+/** @export */ DocumentIndexOptions.rtl;
+/** @export */ DocumentIndexOptions.cache;
+/** @export */ DocumentIndexOptions.db;
+/** @export */ DocumentIndexOptions.config;
+// /** @export */ DocumentIndexOptions.resolve;
+/** @export */ DocumentIndexOptions.field;
+/** @export */ DocumentIndexOptions.filter;
+/** @export */ DocumentIndexOptions.custom;
 
 /** @export */ DocumentOptions.context;
 /** @export */ DocumentOptions.encoder;
@@ -132,14 +140,27 @@ if(SUPPORT_PERSISTENT && SUPPORT_DOCUMENT){
 /** @export */ DocumentOptions.document;
 /** @export */ DocumentOptions.worker;
 
+/** @export */ ContextOptions.depth;
+/** @export */ ContextOptions.bidirectional;
+/** @export */ ContextOptions.resolution;
+
 /** @export */ DocumentDescriptor.field;
 /** @export */ DocumentDescriptor.index;
 /** @export */ DocumentDescriptor.tag;
 /** @export */ DocumentDescriptor.store;
 
-/** @export */ ContextOptions.depth;
-/** @export */ ContextOptions.bidirectional;
-/** @export */ ContextOptions.resolution;
+/** @export */ TagOptions.field;
+/** @export */ TagOptions.tag;
+/** @export */ TagOptions.filter;
+/** @export */ TagOptions.custom;
+/** @export */ TagOptions.keystore;
+/** @export */ TagOptions.db;
+/** @export */ TagOptions.config;
+
+/** @export */ StoreOptions.field;
+/** @export */ StoreOptions.filter;
+/** @export */ StoreOptions.custom;
+/** @export */ StoreOptions.config;
 
 /** @export */ SearchOptions.query;
 /** @export */ SearchOptions.limit;
@@ -148,7 +169,6 @@ if(SUPPORT_PERSISTENT && SUPPORT_DOCUMENT){
 /** @export */ SearchOptions.suggest;
 /** @export */ SearchOptions.resolve;
 /** @export */ SearchOptions.enrich;
-/** @export */ SearchOptions.tag;
 
 /** @export */ DocumentSearchOptions.query;
 /** @export */ DocumentSearchOptions.limit;
@@ -162,26 +182,38 @@ if(SUPPORT_PERSISTENT && SUPPORT_DOCUMENT){
 /** @export */ DocumentSearchOptions.pluck;
 /** @export */ DocumentSearchOptions.merge;
 
-if(SUPPORT_CHARSET){
-    global_charset["latin:exact"] = charset_exact;
-    global_charset["latin:default"] = charset_default;
-    global_charset["latin:simple"] = charset_simple;
-    global_charset["latin:balance"] = charset_balance;
-    global_charset["latin:advanced"] = charset_advanced;
-    global_charset["latin:extra"] = charset_extra;
-    global_charset["latin:soundex"] = charset_soundex;
-}
+/** @export */ EncoderOptions.rtl;
+/** @export */ EncoderOptions.dedupe;
+/** @export */ EncoderOptions.split;
+/** @export */ EncoderOptions.include;
+/** @export */ EncoderOptions.exclude;
+/** @export */ EncoderOptions.prepare;
+/** @export */ EncoderOptions.finalize;
+/** @export */ EncoderOptions.filter;
+/** @export */ EncoderOptions.matcher;
+/** @export */ EncoderOptions.mapper;
+/** @export */ EncoderOptions.stemmer;
+/** @export */ EncoderOptions.replacer;
+/** @export */ EncoderOptions.minlength;
+/** @export */ EncoderOptions.maxlength;
+/** @export */ EncoderOptions.cache;
+
+/** @export */ EncoderSplitOptions.letter;
+/** @export */ EncoderSplitOptions.number;
+/** @export */ EncoderSplitOptions.symbol;
+/** @export */ EncoderSplitOptions.punctuation;
+/** @export */ EncoderSplitOptions.control;
+/** @export */ EncoderSplitOptions.char;
 
 const FlexSearch = {
     "Index": Index,
-    "Charset": global_charset,
+    "Charset": SUPPORT_CHARSET ? Charset : null,
     "Encoder": SUPPORT_ENCODER ? Encoder : null,
     "Document": SUPPORT_DOCUMENT ? Document : null,
     "Worker": SUPPORT_WORKER ? WorkerIndex : null,
     "Resolver": SUPPORT_RESOLVER ? Resolver : null,
     "IndexedDB": SUPPORT_PERSISTENT ? IdxDB : null,
-    //"registerCharset": registerCharset,
-    //"registerLanguage": registerLanguage
+    "Language": {}
 };
 
 // Export as library (Bundle)
@@ -191,6 +223,8 @@ if(RELEASE !== "bundle.module" &&
    RELEASE !== "light.module" &&
    RELEASE !== "compact.module" &&
    RELEASE !== "custom.module"){
+
+    FlexSearch["Language"] = {};
 
     const root = self;
     let prop;

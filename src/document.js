@@ -20,7 +20,7 @@ import {
 } from "./config.js";
 // <-- COMPILER BLOCK
 
-import { DocumentOptions } from "./type.js";
+import { DocumentOptions, DocumentDescriptor, DocumentIndexOptions, StoreOptions } from "./type.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker/index.js";
 import Cache, { searchCache } from "./cache.js";
@@ -33,15 +33,16 @@ import "./document/search.js";
 
 /**
  * @constructor
- * @param {DocumentOptions=} options
+ * @param {!DocumentOptions} options
  */
 
 export default function Document(options){
 
-    if(!(this instanceof Document)) {
+    if(!this) {
         return new Document(options);
     }
 
+    /** @type DocumentDescriptor */
     const document = options.document || options.doc || options;
     let tmp, keystore;
 
@@ -227,7 +228,11 @@ function parse_descriptor(options, document){
             key = key.field;
         }
 
-        opt = is_object(opt) ? Object.assign({}, options, opt) : options;
+        opt = /** @type DocumentIndexOptions */ (
+            is_object(opt)
+                ? Object.assign({}, options, opt)
+                : options
+        );
 
         if(SUPPORT_WORKER && this.worker){
             const worker = new WorkerIndex(opt);
@@ -265,7 +270,7 @@ function parse_descriptor(options, document){
         if(is_string(stores)) stores = [stores];
 
         for(let i = 0, store, field; i < stores.length; i++){
-            store = stores[i];
+            store = /** @type Array<StoreOptions> */ (stores[i]);
             field = store.field || store;
             if(store.custom){
                 this.storetree[i] = store.custom;
