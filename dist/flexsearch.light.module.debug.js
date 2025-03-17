@@ -1,11 +1,11 @@
 /**!
- * FlexSearch.js v0.8.102 (Bundle/Debug)
+ * FlexSearch.js v0.8.103 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
-var r;
+var t;
 function u(a, c, b) {
   const e = typeof b, d = typeof a;
   if ("undefined" !== e) {
@@ -43,13 +43,13 @@ function u(a, c, b) {
   }
   return "undefined" === d ? c : a;
 }
-function x() {
+function w() {
   return Object.create(null);
 }
-function y(a, c) {
+function x(a, c) {
   return c.length - a.length;
 }
-;const z = /[^\p{L}\p{N}]+/u, A = /(\d{3})/g, B = /(\D)(\d{3})/g, C = /(\d{3})(\D)/g, D = "".normalize && /[\u0300-\u036f]/g;
+;const y = /[^\p{L}\p{N}]+/u, z = /(\d{3})/g, A = /(\D)(\d{3})/g, B = /(\d{3})(\D)/g, D = "".normalize && /[\u0300-\u036f]/g;
 function E(a) {
   if (!this || this.constructor !== E) {
     return new E(...arguments);
@@ -58,8 +58,8 @@ function E(a) {
     this.assign(arguments[c]);
   }
 }
-r = E.prototype;
-r.assign = function(a) {
+t = E.prototype;
+t.assign = function(a) {
   this.normalize = u(a.normalize, !0, this.normalize);
   let c = a.include, b = c || a.exclude || a.split;
   if ("object" === typeof b) {
@@ -81,7 +81,7 @@ r.assign = function(a) {
     this.numeric = e;
   } else {
     try {
-      this.split = u(b, z, this.split);
+      this.split = u(b, y, this.split);
     } catch (e) {
       this.split = /\s+/;
     }
@@ -117,7 +117,7 @@ r.assign = function(a) {
   }
   return this;
 };
-r.addMatcher = function(a, c) {
+t.addMatcher = function(a, c) {
   if ("object" === typeof a) {
     return this.addReplacer(a, c);
   }
@@ -131,7 +131,7 @@ r.addMatcher = function(a, c) {
   this.cache && F(this);
   return this;
 };
-r.addStemmer = function(a, c) {
+t.addStemmer = function(a, c) {
   this.stemmer || (this.stemmer = new Map());
   this.stemmer.set(a, c);
   this.i += (this.i ? "|" : "") + a;
@@ -139,13 +139,13 @@ r.addStemmer = function(a, c) {
   this.cache && F(this);
   return this;
 };
-r.addFilter = function(a) {
+t.addFilter = function(a) {
   this.filter || (this.filter = new Set());
   this.filter.add(a);
   this.cache && F(this);
   return this;
 };
-r.addMapper = function(a, c) {
+t.addMapper = function(a, c) {
   if ("object" === typeof a) {
     return this.addReplacer(a, c);
   }
@@ -157,7 +157,7 @@ r.addMapper = function(a, c) {
   this.cache && F(this);
   return this;
 };
-r.addReplacer = function(a, c) {
+t.addReplacer = function(a, c) {
   "string" === typeof a && (a = new RegExp(a, "g"));
   this.replacer || (this.replacer = []);
   this.replacer.push(a, c || "");
@@ -168,7 +168,7 @@ function F(a) {
   a.h.clear();
   a.j.clear();
 }
-r.encode = function(a) {
+t.encode = function(a) {
   if (this.cache && a.length <= this.m) {
     if (this.l) {
       if (this.h.has(a)) {
@@ -180,7 +180,7 @@ r.encode = function(a) {
   }
   this.normalize && (a = "function" === typeof this.normalize ? this.normalize(a) : D ? a.normalize("NFKD").replace(D, "").toLowerCase() : a.toLowerCase());
   this.prepare && (a = this.prepare(a));
-  this.numeric && 3 < a.length && (a = a.replace(B, "$1 $2").replace(C, "$1 $2").replace(A, "$1 "));
+  this.numeric && 3 < a.length && (a = a.replace(A, "$1 $2").replace(B, "$1 $2").replace(z, "$1 "));
   const c = !(this.dedupe || this.mapper || this.filter || this.matcher || this.stemmer || this.replacer);
   let b = [], e = this.split || "" === this.split ? a.split(this.split) : a;
   for (let g = 0, f, h; g < e.length; g++) {
@@ -209,16 +209,16 @@ r.encode = function(a) {
       }
     }
     let k;
-    this.stemmer && 2 < f.length && (this.u || (this.u = new RegExp("(?!^)(" + this.i + ")$")), f = f.replace(this.u, l => this.stemmer.get(l)), k = 1);
+    this.stemmer && 2 < f.length && (this.u || (this.u = new RegExp("(?!^)(" + this.i + ")$")), f = f.replace(this.u, r => this.stemmer.get(r)), k = 1);
     f && k && (f.length < this.minlength || this.filter && this.filter.has(f)) && (f = "");
     if (f && (this.mapper || this.dedupe && 1 < f.length)) {
       d = "";
-      for (let l = 0, t = "", q, n; l < f.length; l++) {
-        q = f.charAt(l), q === t && this.dedupe || ((n = this.mapper && this.mapper.get(q)) || "" === n ? n === t && this.dedupe || !(t = n) || (d += n) : d += t = q);
+      for (let r = 0, q = "", p, n; r < f.length; r++) {
+        p = f.charAt(r), p === q && this.dedupe || ((n = this.mapper && this.mapper.get(p)) || "" === n ? n === q && this.dedupe || !(q = n) || (d += n) : d += q = p);
       }
       f = d;
     }
-    this.matcher && 1 < f.length && (this.s || (this.s = new RegExp("(" + this.g + ")", "g")), f = f.replace(this.s, l => this.matcher.get(l)));
+    this.matcher && 1 < f.length && (this.s || (this.s = new RegExp("(" + this.g + ")", "g")), f = f.replace(this.s, r => this.matcher.get(r)));
     if (f && this.replacer) {
       for (d = 0; f && d < this.replacer.length; d += 2) {
         f = f.replace(this.replacer[d], this.replacer[d + 1]);
@@ -264,7 +264,7 @@ const I = {normalize:function(a) {
   return a.toLowerCase();
 }, dedupe:!1};
 const J = {memory:{resolution:1}, performance:{resolution:6, fastupdate:!0, context:{depth:1, resolution:3}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:9}}};
-x();
+w();
 K.prototype.add = function(a, c, b, e) {
   if (c && (a || 0 === a)) {
     if (!e && !b && this.reg.has(a)) {
@@ -272,20 +272,20 @@ K.prototype.add = function(a, c, b, e) {
     }
     c = this.encoder.encode(c);
     if (e = c.length) {
-      const l = x(), t = x(), q = this.depth, n = this.resolution;
+      const r = w(), q = w(), p = this.depth, n = this.resolution;
       for (let m = 0; m < e; m++) {
-        let p = c[this.rtl ? e - 1 - m : m];
-        var d = p.length;
-        if (d && (q || !t[p])) {
-          var g = this.score ? this.score(c, p, m, null, 0) : L(n, e, m), f = "";
+        let l = c[this.rtl ? e - 1 - m : m];
+        var d = l.length;
+        if (d && (p || !q[l])) {
+          var g = this.score ? this.score(c, l, m, null, 0) : L(n, e, m), f = "";
           switch(this.tokenize) {
             case "full":
               if (2 < d) {
                 for (g = 0; g < d; g++) {
                   for (var h = d; h > g; h--) {
-                    f = p.substring(g, h);
-                    var k = this.score ? this.score(c, p, m, f, g) : L(n, e, m, d, g);
-                    M(this, t, f, k, a, b);
+                    f = l.substring(g, h);
+                    var k = this.score ? this.score(c, l, m, f, g) : L(n, e, m, d, g);
+                    M(this, q, f, k, a, b);
                   }
                 }
                 break;
@@ -293,24 +293,24 @@ K.prototype.add = function(a, c, b, e) {
             case "reverse":
               if (1 < d) {
                 for (h = d - 1; 0 < h; h--) {
-                  f = p[h] + f, k = this.score ? this.score(c, p, m, f, h) : L(n, e, m, d, h), M(this, t, f, k, a, b);
+                  f = l[h] + f, k = this.score ? this.score(c, l, m, f, h) : L(n, e, m, d, h), M(this, q, f, k, a, b);
                 }
                 f = "";
               }
             case "forward":
               if (1 < d) {
                 for (h = 0; h < d; h++) {
-                  f += p[h], M(this, t, f, g, a, b);
+                  f += l[h], M(this, q, f, g, a, b);
                 }
                 break;
               }
             default:
-              if (M(this, t, p, g, a, b), q && 1 < e && m < e - 1) {
-                for (d = x(), f = this.A, g = p, h = Math.min(q + 1, e - m), d[g] = 1, k = 1; k < h; k++) {
-                  if ((p = c[this.rtl ? e - 1 - m - k : m + k]) && !d[p]) {
-                    d[p] = 1;
-                    const v = this.score ? this.score(c, g, m, p, k) : L(f + (e / 2 > f ? 0 : 1), e, m, h - 1, k - 1), w = this.bidirectional && p > g;
-                    M(this, l, w ? g : p, v, a, b, w ? p : g);
+              if (M(this, q, l, g, a, b), p && 1 < e && m < e - 1) {
+                for (d = w(), f = this.A, g = l, h = Math.min(p + 1, e - m), d[g] = 1, k = 1; k < h; k++) {
+                  if ((l = c[this.rtl ? e - 1 - m - k : m + k]) && !d[l]) {
+                    d[l] = 1;
+                    const v = this.score ? this.score(c, g, m, l, k) : L(f + (e / 2 > f ? 0 : 1), e, m, h - 1, k - 1), C = this.bidirectional && l > g;
+                    M(this, r, C ? g : l, v, a, b, C ? l : g);
                   }
                 }
               }
@@ -325,7 +325,7 @@ K.prototype.add = function(a, c, b, e) {
 function M(a, c, b, e, d, g, f) {
   let h = f ? a.ctx : a.map, k;
   if (!c[b] || f && !(k = c[b])[f]) {
-    f ? (c = k || (c[b] = x()), c[f] = 1, (k = h.get(f)) ? h = k : h.set(f, h = new Map())) : c[b] = 1, (k = h.get(b)) ? h = k : h.set(b, h = []), h = h[e] || (h[e] = []), g && h.includes(d) || (h.push(d), a.fastupdate && ((c = a.reg.get(d)) ? c.push(h) : a.reg.set(d, [h])));
+    f ? (c = k || (c[b] = w()), c[f] = 1, (k = h.get(f)) ? h = k : h.set(f, h = new Map())) : c[b] = 1, (k = h.get(b)) ? h = k : h.set(b, h = []), h = h[e] || (h[e] = []), g && h.includes(d) || (h.push(d), a.fastupdate && ((c = a.reg.get(d)) ? c.push(h) : a.reg.set(d, [h])));
   }
 }
 function L(a, c, b, e, d) {
@@ -375,65 +375,66 @@ function L(a, c, b, e, d) {
   } else {
     h = !0;
   }
-  var l = this.encoder.encode(a);
-  b = l.length;
+  b = this.encoder.encode(a);
+  a = b.length;
   c || !h || (c = 100);
-  if (1 === b) {
-    return O.call(this, l[0], "", c, d);
+  if (1 === a) {
+    return O.call(this, b[0], "", c, d);
   }
   g = this.depth && !1 !== g;
-  if (2 === b && g && !f) {
-    return O.call(this, l[0], l[1], c, d);
+  if (2 === a && g && !f) {
+    return O.call(this, b[0], b[1], c, d);
   }
-  let t = h = 0;
-  if (1 < b) {
-    const n = x(), m = [];
-    for (let p = 0, v; p < b; p++) {
-      if ((v = l[p]) && !n[v]) {
-        if (f || P(this, v)) {
-          m.push(v), n[v] = 1;
+  var r = h = 0;
+  if (1 < a) {
+    var q = w();
+    const n = [];
+    for (let m = 0, l; m < a; m++) {
+      if ((l = b[m]) && !q[l]) {
+        if (f || P(this, l)) {
+          n.push(l), q[l] = 1;
         } else {
           return e;
         }
-        const w = v.length;
-        h = Math.max(h, w);
-        t = t ? Math.min(t, w) : w;
+        const v = l.length;
+        h = Math.max(h, v);
+        r = r ? Math.min(r, v) : v;
       }
     }
-    l = m;
-    b = a.length;
+    b = n;
+    a = b.length;
   }
-  if (!b) {
+  if (!a) {
     return e;
   }
-  a = 0;
-  if (1 === b) {
-    return O.call(this, l[0], "", c, d);
+  q = 0;
+  if (1 === a) {
+    return O.call(this, b[0], "", c, d);
   }
-  if (2 === b && g && !f) {
-    return O.call(this, l[0], l[1], c, d);
+  if (2 === a && g && !f) {
+    return O.call(this, b[0], b[1], c, d);
   }
-  if (1 < b) {
+  if (1 < a) {
     if (g) {
-      var q = l[0];
-      a = 1;
+      var p = b[0];
+      q = 1;
     } else {
-      9 < h && 3 < h / t && l.sort(y);
+      9 < h && 3 < h / r && b.sort(x);
     }
   }
   k || 0 === k || (k = this.resolution);
-  for (let n, m; a < b; a++) {
-    m = l[a];
-    q ? (n = P(this, m, q), n = Q(n, e, f, this.A), f && !1 === n && e.length || (q = m)) : (n = P(this, m, ""), n = Q(n, e, f, k));
+  for (let n, m; q < a; q++) {
+    m = b[q];
+    p ? (n = P(this, m, p), n = Q(n, e, f, this.A), f && !1 === n && e.length || (p = m)) : (n = P(this, m, ""), n = Q(n, e, f, k));
     if (n) {
       return n;
     }
-    if (f && a === b - 1) {
+    if (f && q === a - 1) {
       g = e.length;
       if (!g) {
-        if (q) {
-          q = "";
-          a = -1;
+        if (p) {
+          p = "";
+          q = -1;
           continue;
         }
         return e;
@@ -444,30 +445,30 @@ function L(a, c, b, e, d) {
     }
   }
   a: {
-    q = f;
-    b = e.length;
+    p = f;
+    g = e.length;
     f = [];
-    g = x();
-    for (let n = 0, m, p, v, w; n < k; n++) {
-      for (a = 0; a < b; a++) {
-        if (v = e[a], n < v.length && (m = v[n])) {
-          for (h = 0; h < m.length; h++) {
-            p = m[h], (l = g[p]) ? g[p]++ : (l = 0, g[p] = 1), w = f[l] || (f[l] = []), w.push(p);
+    a = w();
+    for (let n = 0, m, l, v, C; n < k; n++) {
+      for (h = 0; h < g; h++) {
+        if (v = e[h], n < v.length && (m = v[n])) {
+          for (r = 0; r < m.length; r++) {
+            l = m[r], (b = a[l]) ? a[l]++ : (b = 0, a[l] = 1), C = f[b] || (f[b] = []), C.push(l);
           }
         }
       }
     }
     if (k = f.length) {
-      if (q) {
+      if (p) {
         if (1 < f.length) {
           b: {
-            for (k = [], e = x(), q = f.length, l = q - 1; 0 <= l; l--) {
-              for (q = f[l], g = q.length, a = 0; a < g; a++) {
-                if (b = q[a], !e[b]) {
-                  if (e[b] = 1, d) {
+            for (k = [], e = w(), p = f.length, b = p - 1; 0 <= b; b--) {
+              for (p = f[b], a = p.length, h = 0; h < a; h++) {
+                if (g = p[h], !e[g]) {
+                  if (e[g] = 1, d) {
                     d--;
                   } else {
-                    if (k.push(b), k.length === c) {
+                    if (k.push(g), k.length === c) {
                       break b;
                     }
                   }
@@ -480,7 +481,7 @@ function L(a, c, b, e, d) {
         }
         f = k;
       } else {
-        if (k < b) {
+        if (k < g) {
           e = [];
           break a;
         }
@@ -589,21 +590,21 @@ function R(a, c) {
   this.rtl = d.rtl || a.rtl || !1;
   this.cache = (b = a.cache || null) && new H(b);
 }
-r = K.prototype;
-r.clear = function() {
+t = K.prototype;
+t.clear = function() {
   this.map.clear();
   this.ctx.clear();
   this.reg.clear();
   this.cache && this.cache.clear();
   return this;
 };
-r.append = function(a, c) {
+t.append = function(a, c) {
   return this.add(a, c, !0);
 };
-r.contain = function(a) {
+t.contain = function(a) {
   return this.reg.has(a);
 };
-r.update = function(a, c) {
+t.update = function(a, c) {
   const b = this, e = this.remove(a);
   return e && e.then ? e.then(() => b.add(a, c)) : this.add(a, c);
 };
@@ -621,7 +622,7 @@ function S(a) {
   }
   return c;
 }
-r.cleanup = function() {
+t.cleanup = function() {
   if (!this.fastupdate) {
     return console.info('Cleanup the index isn\'t required when not using "fastupdate".'), this;
   }
@@ -629,8 +630,9 @@ r.cleanup = function() {
   this.depth && S(this.ctx);
   return this;
 };
-r.searchCache = function(a, c, b) {
+t.searchCache = function(a, c, b) {
   a = ("object" === typeof a ? "" + a.query : a).toLowerCase();
+  this.cache || (this.cache = new H());
   let e = this.cache.get(a);
   if (!e) {
     e = this.search(a, c, b);

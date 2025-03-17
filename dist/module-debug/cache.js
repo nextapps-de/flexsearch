@@ -14,6 +14,10 @@ export function searchCache(query, limit, options) {
 
     query = ("object" == typeof query ? "" + query.query : "" + query).toLowerCase();
 
+    if (!this.cache) {
+        this.cache = new CacheClass();
+    }
+
     //let encoded = this.encoder.encode(query).join(" ");
     let cache = this.cache.get(query);
     if (!cache) {
@@ -44,6 +48,11 @@ export default function CacheClass(limit) {
     this.last = "";
 }
 
+/**
+ * @param {string} key
+ * @param value
+ */
+
 CacheClass.prototype.set = function (key, value) {
     //if(!this.cache.has(key)){
     this.cache.set(this.last = key, value);
@@ -53,6 +62,10 @@ CacheClass.prototype.set = function (key, value) {
     //}
 };
 
+/**
+ * @param {string} key
+ */
+
 CacheClass.prototype.get = function (key) {
     const cache = this.cache.get(key);
     if (cache && this.last !== key) {
@@ -61,6 +74,10 @@ CacheClass.prototype.get = function (key) {
     }
     return cache;
 };
+
+/**
+ * @param {string|number} id
+ */
 
 CacheClass.prototype.remove = function (id) {
     for (const item of this.cache) {

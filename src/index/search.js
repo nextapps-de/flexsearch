@@ -155,7 +155,7 @@ Index.prototype.search = function(query, limit, options){
         }
 
         query_terms = query_new;
-        length = query.length;
+        length = query_terms.length;
     }
 
     // the term length could be changed after deduplication
