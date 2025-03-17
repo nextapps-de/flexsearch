@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.0 (Bundle/Debug)
+ * FlexSearch.js v0.8.001 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2278,7 +2278,7 @@ function ib(a, b = {}) {
   if (!this) {
     return new ib(a, b);
   }
-  "object" === typeof a && (b = a = a.name);
+  "object" === typeof a && (b = a, a = a.name);
   a || console.info("Default storage space was used, because a name was not passed.");
   this.id = "flexsearch" + (a ? ":" + a.toLowerCase().replace(/[^a-z0-9_\-]/g, "") : "");
   this.field = b.field ? b.field.toLowerCase().replace(/[^a-z0-9_\-]/g, "") : "";

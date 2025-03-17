@@ -27,8 +27,8 @@ export default function MongoDB(name, config = {}){
         return new MongoDB(name, config);
     }
     if(typeof name === "object"){
-        name = name.name;
         config = name;
+        name = name.name;
     }
     if(!name){
         console.info("Default storage space was used, because a name was not passed.");

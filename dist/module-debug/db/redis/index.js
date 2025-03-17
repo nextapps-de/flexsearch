@@ -29,8 +29,8 @@ export default function RedisDB(name, config = {}) {
         return new RedisDB(name, config);
     }
     if ("object" == typeof name) {
-        name = name.name;
         config = name;
+        name = name.name;
     }
     if (!name) {
         console.info("Default storage space was used, because a name was not passed.");

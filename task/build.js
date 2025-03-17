@@ -115,7 +115,7 @@ if(options["DEBUG"]){
     parameter += ' --formatting=PRETTY_PRINT';
 }
 
-if(!release.endsWith(".module")){
+if(!release.endsWith(".module") || release === "lang"){
     //parameter += ' --isolation_mode=IIFE';
     parameter += ' --output_wrapper=\"(function(self){%output%}(this||self));\"';
     parameter += ' --emit_use_strict=true';
@@ -155,6 +155,13 @@ if(release === "lang"){
                 //fs.copyFileSync("src/lang/" + lang + ".js", "tmp/lang/" + lang + ".js");
                 //console.log(lang)
 
+                content = fs.readFileSync("tmp/type.js", "utf8");
+                content = content.replace('import Index from "./index.js";', '')
+                                 .replace('import Encoder from "./encoder.js";', '')
+                                 .replace('import StorageInterface from "./db/interface.js";', '');
+                fs.writeFileSync("tmp/type.js", content);
+
+
                 fs.writeFileSync("tmp/lang.js", `
                     import { EncoderOptions, EncoderSplitOptions } from "./type.js";
                     import lang from "./lang/${lang}.js";
@@ -173,7 +180,6 @@ if(release === "lang"){
                     /** @export */ EncoderOptions.minlength;
                     /** @export */ EncoderOptions.maxlength;
                     /** @export */ EncoderOptions.cache;
-                    
                     /** @export */ EncoderSplitOptions.letter;
                     /** @export */ EncoderSplitOptions.number;
                     /** @export */ EncoderSplitOptions.symbol;
@@ -188,7 +194,7 @@ if(release === "lang"){
                                    process.platform === "darwin" ? "\"node_modules/google-closure-compiler-osx/compiler\"" :
                                                                    "java -jar node_modules/google-closure-compiler-java/compiler.jar";
 
-                exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/db/**.js' --js='tmp/db/interface.js'" + flag_str + " --js_output_file='dist/lang/" + lang + ".min.js' && exit 0", function(){
+                exec(executable + parameter + " --js='tmp/lang.js' --js='tmp/lang/*.js' --js='tmp/type.js'" + flag_str + " --js_output_file='dist/lang/" + lang + ".min.js' && exit 0", function(){
 
                     console.log("Build Complete: " + lang + ".min.js");
                     next(++x, y, z);
