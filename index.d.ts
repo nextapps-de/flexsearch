@@ -209,8 +209,8 @@ declare module "flexsearch" {
     }>;
     type SearchResults =
         DefaultSearchResults |
-        IntermediateSearchResults |
         EnrichedSearchResults |
+        Resolver |
         Promise<SearchResults>;
 
     /**

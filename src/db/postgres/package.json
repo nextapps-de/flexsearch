@@ -4,12 +4,6 @@
   "name": "flexsearch-postgres",
   "version": "0.1.0",
   "main": "index.js",
-  "scripts": {},
-  "files": [
-    "index.js",
-    "README.md",
-    "LICENSE"
-  ],
   "dependencies": {
     "pg-promise": "^11.10.2"
   }

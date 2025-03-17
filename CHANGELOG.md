@@ -1,5 +1,34 @@
 # Changelog
 
+### v0.8.0
+
+- Persistent indexes support for: `IndexedDB` (Browser), `Redis`, `SQLite`, `Postgres`, `MongoDB`, `Clickhouse`
+- Enhanced language customization via the new `Encoder` class
+- Result Highlighting
+- Query performance achieve results up to 4.5 times faster compared to the previous generation v0.7.x by also improving the quality of results
+- Enhanced support for larger indexes or larger result sets
+- Improved offset and limit processing achieve up to 100 times faster traversal performance through large datasets
+- Support for larger In-Memory index with extended key size (the defaults maximum keystore limit is: 2^24)
+- Greatly enhanced performance of the whole text encoding pipeline
+- Improved indexing of numeric content (Triplets)
+- Intermediate result sets and `Resolver`
+- Basic Resolver: `and`, `or`, `xor`, `not`, `limit`, `offset`, `boost`, `resolve`
+- Improved charset collection
+- New charset preset `soundex` which further reduces memory consumption by also increasing "fuzziness"
+- Performance gain when polling tasks to the index by using "Event-Loop-Caches"
+- Up to 100 times faster deletion/replacement when not using the additional "fastupdate" register
+- Regex Pre-Compilation (transforms hundreds of regex rules into just a few)
+- Extended support for multiple tags (DocumentIndex)
+- Custom Fields ("Virtual Fields")
+- Custom Filter
+- Custom Score Function
+- Added French language preset (stop-word filter, stemmer)
+- Enhanced Worker Support
+- Export / Import index in chunks
+- Improved Build System + Bundler (Supported: CommonJS, ESM, Global Namespace), also the import of language packs are now supported for Node.js
+- Full covering index.d.ts type definitions
+- Fast-Boot Serialization optimized for Server-Side-Rendering (PHP, Python, Ruby, Rust, Java, Go, Node.js, ...)
+
 ### v0.7.0
 
 - Bidirectional Context (the order of words can now vary, does not increase memory when using bidirectional context)

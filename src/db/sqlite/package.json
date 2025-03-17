@@ -4,12 +4,6 @@
   "name": "flexsearch-sqlite",
   "version": "0.1.0",
   "main": "index.js",
-  "scripts": {},
-  "files": [
-    "index.js",
-    "README.md",
-    "LICENSE"
-  ],
   "dependencies": {
     "sqlite3": "^5.1.7"
   }
