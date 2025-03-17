@@ -19,7 +19,7 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 <a href="doc/document-search.md">Document Search</a> &ensp;&bull;&ensp;
 <a href="doc/persistent.md">Persistent Indexes</a> &ensp;&bull;&ensp;
 <a href="doc/worker.md">Using Worker</a> &ensp;&bull;&ensp;
-<a href="doc/document-search#tag-search">Tag Search</a> &ensp;&bull;&ensp;
+<a href="doc/document-search.md#tag-search">Tag Search</a> &ensp;&bull;&ensp;
 <a href="doc/resolver.md">Resolver</a> &ensp;&bull;&ensp;
 <a href="doc/customization.md">Customization</a> &ensp;&bull;&ensp;
 <a href="CHANGELOG.md">Changelog</a>
