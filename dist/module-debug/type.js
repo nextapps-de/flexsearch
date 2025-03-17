@@ -38,7 +38,7 @@ export let IndexOptions = {};
  *   score: (Function|undefined),
  *   keystore: (number|undefined),
  *   rtl: (boolean|undefined),
- *   cache: (number|undefined),
+ *   cache: (number|boolean|undefined),
  *   db: (StorageInterface|undefined),
  *   commit: (boolean|undefined),
  *   config: (string|undefined),

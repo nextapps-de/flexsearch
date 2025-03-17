@@ -178,7 +178,7 @@ Encoder.prototype.assign = function(options){
     // options
 
     this.rtl = options.rtl || false;
-    this.dedupe = parse_option(options.dedupe, true, this.dedupe);
+    this.dedupe = parse_option(options.dedupe, false, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
     this.mapper = parse_option((tmp = options.mapper) && new Map(tmp), null, this.mapper);
@@ -331,14 +331,7 @@ Encoder.prototype.encode = function(str){
         }
         else{
             str = str.toLowerCase();
-            // if(SUPPORT_CHARSET){
-            //     this.mapper = this.mapper
-            //         // todo replace spread
-            //         ? new Map([.../** @type {!Iterable} */(normalize_mapper), ...this.mapper])
-            //         : new Map(/** @type {Map<string,string>} */ (normalize_mapper));
-            // }
         }
-        //if(!str) return str;
     }
 
     // 2. apply custom encoder (can replace split)
@@ -407,28 +400,6 @@ Encoder.prototype.encode = function(str){
         }
 
         let postfilter;
-
-        // if(this.normalize === true && normalize){
-        //     word = word.normalize("NFKD").replace(normalize, "");
-        //     postfilter = 1;
-        // }
-
-        // if(this.normalize){
-        //     if(typeof this.normalize === "function"){
-        //         word = this.normalize(word);
-        //     }
-        //     else if(normalize){
-        //         word = word.normalize("NFKD").replace(normalize, "").toLowerCase();
-        //     }
-        //     else{
-        //         word = word.toLowerCase();
-        //         this.mapper = this.mapper
-        //             ? new Map([...normalize_mapper, ...this.mapper])
-        //             : new Map(/** @type {Map<string, string>} */ normalize_mapper);
-        //     }
-        //     postfilter = 1;
-        //     //if(!str) return str;
-        // }
 
         // 2. apply stemmer after matcher
         if(this.stemmer && (word.length > 2)){

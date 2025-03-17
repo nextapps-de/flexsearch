@@ -2,7 +2,7 @@
   "public": true,
   "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.8.001",
+  "version": "0.8.102",
   "description": "Next-Generation full-text search library for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -77,7 +77,7 @@
     "build:module:compact:debug": "node task/build RELEASE=compact.module DEBUG=true PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT",
     "build:module:light": "node task/build RELEASE=light.module DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=false SUPPORT_CACHE=true SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false",
     "build:module:light:debug": "node task/build RELEASE=light.module DEBUG=true PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=false SUPPORT_CACHE=true SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT",
-    "build:all": "npm run build:bundle && npm run build:bundle:debug && npm run build:light && npm run build:light:debug && npm run build:compact && npm run build:compact:debug && npm run build:module && npm run build:module:debug && npm run build:module:min && npm run build:module:bundle && npm run build:module:bundle:debug && npm run build:module:light && npm run build:module:light:debug && npm run build:module:compact && npm run build:module:compact:debug && npm run build:es5 && npm run build:es5:debug && npm run build:lang && npm run build:db",
+    "build:all": "npm version --no-git-tag-version patch && npm run build:bundle && npm run build:bundle:debug && npm run build:light && npm run build:light:debug && npm run build:compact && npm run build:compact:debug && npm run build:module && npm run build:module:debug && npm run build:module:min && npm run build:module:bundle && npm run build:module:bundle:debug && npm run build:module:light && npm run build:module:light:debug && npm run build:module:compact && npm run build:module:compact:debug && npm run build:es5 && npm run build:es5:debug && npm run build:lang && npm run build:db",
     "build:custom": "node task/build RELEASE=custom",
     "test": "cd test && npm install && npm run test"
   },
@@ -111,23 +111,30 @@
     "google-closure-compiler": "^20240317.0.0",
     "rollup": "^4.35.0"
   },
-  "funding": [{
-    "type": "github",
-    "url": "https://github.com/ts-thomas"
-  },{
-    "type": "opencollective",
-    "url": "https://opencollective.com/flexsearch"
-  },{
-    "type": "patreon",
-    "url": "https://patreon.com/user?u=96245532"
-  },{
-    "type": "liberapay",
-    "url": "https://liberapay.com/ts-thomas"
-  },{
-    "type": "paypal",
-    "url": "https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW"
-  },{
-    "type": "bountysource",
-    "url": "https://salt.bountysource.com/teams/ts-thomas"
-  }]
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/ts-thomas"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/flexsearch"
+    },
+    {
+      "type": "patreon",
+      "url": "https://patreon.com/user?u=96245532"
+    },
+    {
+      "type": "liberapay",
+      "url": "https://liberapay.com/ts-thomas"
+    },
+    {
+      "type": "paypal",
+      "url": "https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW"
+    },
+    {
+      "type": "bountysource",
+      "url": "https://salt.bountysource.com/teams/ts-thomas"
+    }
+  ]
 }

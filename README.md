@@ -200,7 +200,7 @@ The abbreviations used at the end of the filenames indicates:
 > The Node.js package includes all features from `flexsearch.bundle.js`.
 
 <table>
-    <tr><td colspan="4"></td></tr>
+    <tr></tr>
     <tr>
         <td>Feature</td>
         <td>flexsearch.bundle.js</td>
@@ -355,130 +355,125 @@ The abbreviations used at the end of the filenames indicates:
 
 Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
 
-Operation per seconds, higher is better, except the test "Memory" on which lower is better.
+The benchmark was measured in terms per seconds, higher values are better (except the test "Memory").
 The memory value refers to the amount of memory which was additionally allocated during search.
 
 <table>
-    <tr><td colspan="8"></td></tr>
+    <tr></tr>
     <tr>
-        <td>Rank</td>
-        <td>Library</td>
-        <td>Memory</td>
-        <td>Query: Single</td>
-        <td>Query: Multi</td>
-        <td>Query: Large</td>
-        <td>Query: Not Found</td>	
+        <th>Library</th>
+        <th>Memory</th>
+        <th>Query: Single</th>
+        <th>Query: Multi</th>
+        <th>Query: Large</th>
+        <th>Query: Not Found</th>
     </tr>
     <tr>
-        <td>1</td>
-        <td>FlexSearch</td>
-        <td><b>4</b></td>
-        <td><b>60129740</b></td>
-        <td><b>26512159</b></td>
-        <td><b>17737877</b></td>
-        <td><b>66410956</b></td>
+        <td style="">flexsearch</td>
+        <td style="" align="right">6</td>
+        <td style="" align="right">58517675</td>
+        <td style="" align="right">43198115</td>
+        <td style="" align="right">51027989</td>
+        <td style="" align="right">62833661</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>2</td>
-        <td>JSii</td>
-        <td>27</td>
-        <td>6564</td>
-        <td>158149</td>
-        <td>61290</td>
-        <td>534109</td>
+        <td style="">jsii</td>
+        <td style="" align="right">1433</td>
+        <td style="" align="right">13588</td>
+        <td style="" align="right">881007</td>
+        <td style="" align="right">1567895</td>
+        <td style="" align="right">3474710</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>3</td>
-        <td>Wade</td>
-        <td>424</td>
-        <td>20471</td>
-        <td>78780</td>
-        <td>16693</td>
-        <td>213754</td>
+        <td style="">wade</td>
+        <td style="" align="right">717</td>
+        <td style="" align="right">60598</td>
+        <td style="" align="right">439914</td>
+        <td style="" align="right">424209</td>
+        <td style="" align="right">1287136</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>4</td>
-        <td>JS Search</td>
-        <td>193</td>
-        <td>8221</td>
-        <td>64034</td>
-        <td>10377</td>
-        <td>167605</td>
+        <td style="">js-search</td>
+        <td style="" align="right">2100</td>
+        <td style="" align="right">22562</td>
+        <td style="" align="right">372234</td>
+        <td style="" align="right">417775</td>
+        <td style="" align="right">963609</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>5</td>
-        <td>Elasticlunr.js</td>
-        <td>646</td>
-        <td>5412</td>
-        <td>7573</td>
-        <td>2865</td>
-        <td>13982</td>
-    </tr>
-    <!--
-    <tr></tr>
-    <tr>
-        <td>6</td>
-        <td>BulkSearch</td>
-        <td>1021</td>
-        <td>3069</td>
-        <td>3141</td>
-        <td>3333</td>
-        <td><b>21825569</b></td>
-    </tr>
-    -->
-    <tr></tr>
-    <tr>
-        <td>7</td>
-        <td>MiniSearch</td>
-        <td>24348</td>
-        <td>4406</td>
-        <td>10945</td>
-        <td>72</td>
-        <td>17624</td>
+        <td style="">minisearch</td>
+        <td style="" align="right">4126</td>
+        <td style="" align="right">29360</td>
+        <td style="" align="right">186900</td>
+        <td style="" align="right">5695</td>
+        <td style="" align="right">297981</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>8</td>
-        <td>bm25</td>
-        <td>15719</td>
-        <td>1429</td>
-        <td>789</td>
-        <td>366</td>
-        <td>1823</td>
+        <td style="">elasticlunr</td>
+        <td style="" align="right">681</td>
+        <td style="" align="right">13913</td>
+        <td style="" align="right">46548</td>
+        <td style="" align="right">96998</td>
+        <td style="" align="right">93732</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>9</td>
-        <td>Lunr.js</td>
-        <td>2219</td>
-        <td>255</td>
-        <td>271</td>
-        <td>272</td>
-        <td>267</td>
+        <td style="">orama</td>
+        <td style="" align="right">12881</td>
+        <td style="" align="right">27918</td>
+        <td style="" align="right">167979</td>
+        <td style="" align="right">4327</td>
+        <td style="" align="right">221231</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>10</td>
-        <td>FuzzySearch</td>
-        <td>157373</td>
-        <td>53</td>
-        <td>38</td>
-        <td>15</td>
-        <td>43</td>
+        <td style="">lunr</td>
+        <td style="" align="right">2495</td>
+        <td style="" align="right">11178</td>
+        <td style="" align="right">49087</td>
+        <td style="" align="right">85513</td>
+        <td style="" align="right">100487</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>11</td>
-        <td>Fuse</td>
-        <td>7641904</td>
-        <td>6</td>
-        <td>2</td>
-        <td>1</td>
-        <td>3</td>
+        <td style="">ufuzzy</td>
+        <td style="" align="right">24802</td>
+        <td style="" align="right">2720</td>
+        <td style="" align="right">7569</td>
+        <td style="" align="right">57027</td>
+        <td style="" align="right">9413</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td style="">bm25</td>
+        <td style="" align="right">33502</td>
+        <td style="" align="right">3681</td>
+        <td style="" align="right">4781</td>
+        <td style="" align="right">12923</td>
+        <td style="" align="right">12804</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td style="">fuzzysearch</td>
+        <td style="" align="right">142915</td>
+        <td style="" align="right">145</td>
+        <td style="" align="right">221</td>
+        <td style="" align="right">436</td>
+        <td style="" align="right">266</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td style="">fuse</td>
+        <td style="" align="right">363722</td>
+        <td style="" align="right">410</td>
+        <td style="" align="right">312</td>
+        <td style="" align="right">330</td>
+        <td style="" align="right">319</td>
     </tr>
 </table>
 

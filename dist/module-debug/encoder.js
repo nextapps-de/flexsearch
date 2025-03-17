@@ -79,7 +79,8 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
+    this.normalize = /** @type {Function|boolean} */parse_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
+    /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -164,7 +165,7 @@ Encoder.prototype.assign = function (options) {
     // options
 
     this.rtl = options.rtl || /* suggest */ /* append: */ /* enrich */!1;
-    this.dedupe = parse_option(options.dedupe, !0, this.dedupe);
+    this.dedupe = parse_option(options.dedupe, !1, this.dedupe);
     this.filter = parse_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = parse_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
     this.mapper = parse_option((tmp = options.mapper) && new Map(tmp), null, this.mapper);
@@ -311,14 +312,7 @@ Encoder.prototype.encode = function (str) {
             str = str.normalize("NFKD").replace(normalize, "").toLowerCase();
         } else {
             str = str.toLowerCase();
-            // if(SUPPORT_CHARSET){
-            //     this.mapper = this.mapper
-            //         // todo replace spread
-            //         ? new Map([.../** @type {!Iterable} */(normalize_mapper), ...this.mapper])
-            //         : new Map(/** @type {Map<string,string>} */ (normalize_mapper));
-            // }
         }
-        //if(!str) return str;
     }
 
     // 2. apply custom encoder (can replace split)
@@ -383,28 +377,6 @@ Encoder.prototype.encode = function (str) {
         }
 
         let postfilter;
-
-        // if(this.normalize === true && normalize){
-        //     word = word.normalize("NFKD").replace(normalize, "");
-        //     postfilter = 1;
-        // }
-
-        // if(this.normalize){
-        //     if(typeof this.normalize === "function"){
-        //         word = this.normalize(word);
-        //     }
-        //     else if(normalize){
-        //         word = word.normalize("NFKD").replace(normalize, "").toLowerCase();
-        //     }
-        //     else{
-        //         word = word.toLowerCase();
-        //         this.mapper = this.mapper
-        //             ? new Map([...normalize_mapper, ...this.mapper])
-        //             : new Map(/** @type {Map<string, string>} */ normalize_mapper);
-        //     }
-        //     postfilter = 1;
-        //     //if(!str) return str;
-        // }
 
         // 2. apply stemmer after matcher
         if (this.stemmer && 2 < word.length) {

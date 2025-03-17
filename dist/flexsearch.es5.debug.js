@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.001 (ES5/Debug)
+ * FlexSearch.js v0.8.102 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -959,7 +959,7 @@ t.assign = function(a) {
   this.finalize = J(a.finalize, null, this.finalize);
   Ga || (this.mapper = new Map(Ba));
   this.rtl = a.rtl || !1;
-  this.dedupe = J(a.dedupe, !0, this.dedupe);
+  this.dedupe = J(a.dedupe, !1, this.dedupe);
   this.filter = J((c = a.filter) && new Set(c), null, this.filter);
   this.matcher = J((c = a.matcher) && new Map(c), null, this.matcher);
   this.mapper = J((c = a.mapper) && new Map(c), null, this.mapper);
@@ -2422,13 +2422,13 @@ function zb(a, b, c, d, e) {
         c < h && (f = b ? f.slice(c, c + b) : f.slice(c), h = f.length, c = 0);
       }
       if (e.length) {
-        h > b && (f = f.slice(0, b), h = f.length), e.push(f);
+        h > b && (f = f.slice(0, b), h = f.length);
       } else {
         if (h >= b) {
           return h > b && (f = f.slice(0, b)), d ? Cb(f) : f;
         }
-        e = [f];
       }
+      e.push(f);
       b -= h;
       if (!b) {
         break;

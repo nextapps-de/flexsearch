@@ -30,10 +30,30 @@ export default function(result, limit, offset, enrich){
             : result;
     }
 
+    let final = [];
+
+    // this is a workaround without using arr.concat.apply
+
+    // for(let i = 0, arr, len; i < result.length; i++){
+    //     if((arr = result[i])){
+    //         if((len = arr.length)){
+    //             for(let j = offset; j < len; j++){
+    //                 final.push(arr[j]);
+    //                 if(final.length === limit){
+    //                     return enrich
+    //                         ? enrich_result(final)
+    //                         : final;
+    //                 }
+    //             }
+    //             if((offset -= len) < 0){
+    //                 offset = 0;
+    //             }
+    //         }
+    //     }
+    // }
+
     // this is an optimized workaround instead of
     // just doing result = concat(result)
-
-    let final = [];
 
     for(let i = 0, arr, len; i < result.length; i++){
         if(!(arr = result[i]) || !(len = arr.length)) continue;
@@ -64,17 +84,15 @@ export default function(result, limit, offset, enrich){
                     ? enrich_result(arr)
                     : arr;
             }
-            final = [arr];
         }
         else{
             if(len > limit){
                 arr = arr.slice(0, limit);
                 len = arr.length;
             }
-            final.push(arr);
         }
 
-        // reduce limit
+        final.push(arr);
         limit -= len;
 
         // todo remove

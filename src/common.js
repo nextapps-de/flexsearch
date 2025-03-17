@@ -124,6 +124,17 @@ export function concat(arrays){
     return [].concat.apply([], arrays);
 }
 
+// export function concat(arrays){
+//     const final = [];
+//     for(let i = 0, arr; i < arrays.length; i++){
+//         arr = arrays[i];
+//         for(let j = 0; j < arr.length; j++){
+//             final.push(arr[j])
+//         }
+//     }
+//     return final;
+// }
+
 export function sort_by_length_down(a, b){
     return b.length - a.length;
 }
