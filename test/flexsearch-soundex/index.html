@@ -9,12 +9,11 @@
 <h2>Benchmark: flexsearch-0.8.0-soundex</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
-<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.compact.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.compact.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/lang/en.min.js"></script>
 <script type="module">
 
-    import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/module-min/lang/en.js";
     import { suite } from "../../bench.js";
-
     let lib;
 
     suite["flexsearch-0.8.0-soundex"] = {
@@ -23,7 +22,7 @@
             lib = new FlexSearch.Index({
                 encoder: new FlexSearch.Encoder(
                     FlexSearch.Charset.LatinSoundex,
-                    EnglishPreset
+                    FlexSearch.Language["en"]
                 ),
                 tokenize: "strict",
                 resolution: 1,

@@ -10,7 +10,7 @@ const lib = encode ? [
 ]:[
     /*"flexsearch-0.6.2", "flexsearch-0.6.3",*/
     //"flexsearch-0.7.0-match",
-    "flexsearch-0.8.0-match",
+    "flexsearch-match",
     "bm25",
     "elasticlunr",
     "fuzzysearch",

@@ -3,29 +3,29 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, height=device-height">
-    <title>Benchmark: flexsearch-0.8.0-cache</title>
+    <title>Benchmark: flexsearch-0.8.0</title>
 </head>
 <body>
-<h2>Benchmark: flexsearch-0.8.0-cache</h2><hr/>
+<h2>Benchmark: flexsearch-0.8.0</h2><hr/>
 <h4>Indexed Text: "Gulliver's Travels" (Swift Jonathan 1726)</h4>
-<p style="color: #f00">This test is using query cache and is outside the competition! It is just there for completion.</p>
 <div id="result" style="white-space: pre; font-family: Monospaced, monospace"></div>
-<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/flexsearch.light.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.light.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/lang/en.min.js"></script>
 <script type="module">
 
-    import EnglishPreset from "https://rawcdn.githack.com/nextapps-de/flexsearch/0.8.0/dist/module-min/lang/en.js";
     import { suite } from "../../bench.js";
-
     let lib;
 
-    suite["flexsearch-0.8.0-cache"] = {
+    suite["flexsearch-0.8.0"] = {
 
         init: function(){
             lib = new FlexSearch.Index({
-                encoder: EnglishPreset,
+                encoder: FlexSearch.Language["en"],
                 tokenize: "strict",
+                // just when using context search a resolution of 1
+                // will still return relevant results
                 resolution: 1,
-                cache: true,
+                cache: false,
                 context: {
                     depth: 1,
                     bidirectional: false,
@@ -39,7 +39,7 @@
             }
         },
         query: function(query){
-            return lib.searchCache(query, 9999);
+            return lib.search(query, 9999);
         },
         update: function(data){
             for(let i = 0, len = data.length; i < len; i++){

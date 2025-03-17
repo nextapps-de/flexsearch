@@ -22,8 +22,8 @@
         "flexsearch-speed"
     ]:[
         //"flexsearch-0.6.2", "flexsearch-0.6.3", /*"bulksearch",*/
-        "flexsearch-0.7.0",
-        "flexsearch-0.8.0",
+        //"flexsearch-0.7.0",
+        "flexsearch",
         "bm25",
         "elasticlunr",
         "fuzzysearch",
