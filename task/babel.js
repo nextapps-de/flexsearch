@@ -68,6 +68,11 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
         });
     }
 
+    let content = fs.readFileSync("tmp/db/interface.js", "utf8");
+    content = content.replace(/import \{([^}]+)} from "\.\.\/type\.js";/, '');
+    fs.writeFileSync("tmp/db/interface.js", content);
+
+
     //fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
     fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");
     fs.existsSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : ""))) && fs.rmSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")), { recursive: true });

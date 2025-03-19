@@ -1,168 +1,73 @@
 import Resolver from "../resolver.js";
-import default_resolver from "./default.js";
-import { union as _union } from "../intersect.js";
-import { ResolverOptions } from "../type.js";
+import { union } from "../intersect.js";
+import { SearchResults, EnrichedSearchResults, IntermediateSearchResults } from "../type.js";
 
+/** @this {Resolver} */
 Resolver.prototype.or = function () {
 
-    const self = this;
-    let args = arguments,
-        first_argument = args[0];
-
-
-    if (first_argument.then) {
-        return first_argument.then(function () {
-            return self.or.apply(self, args);
-        });
-    }
-
-    if (first_argument[0]) {
-        // fix false passed parameter style
-        if (first_argument[0].index) {
-            return this.or.apply(this, first_argument);
-        }
-    }
-
-    let final = [],
-        promises = [],
-        limit = 0,
-        offset = 0,
+    const {
+        final,
+        promises,
+        limit,
+        offset,
         enrich,
-        resolve;
+        resolve
+    } = this.handler("or", arguments);
 
+    return return_result.call(this, final, promises, limit, offset, enrich, resolve);
+};
 
-    for (let i = 0, query; i < args.length; i++) {
+/**
+ * Aggregate the intersection of N raw results
+ * @param {!Array<IntermediateSearchResults>} final
+ * @param {!Array<Promise<IntermediateSearchResults>>} promises
+ * @param {number} limit
+ * @param {number=} offset
+ * @param {boolean=} enrich
+ * @param {boolean=} resolve
+ * @this {Resolver}
+ * @return {
+ *   SearchResults |
+ *   EnrichedSearchResults |
+ *   IntermediateSearchResults |
+ *   Promise<SearchResults | EnrichedSearchResults | IntermediateSearchResults> |
+ *   Resolver
+ * }
+ */
 
-        query = /** @type {string|ResolverOptions} */args[i];
-
-        if (query) {
-
-            limit = query.limit || 0;
-            offset = query.offset || 0;
-            enrich = query.enrich;
-            resolve = query.resolve;
-
-            let result;
-            if (query.constructor === Resolver) {
-                result = query.result;
-            } else if (query.constructor === Array) {
-                result = query;
-            } else if (query.index) {
-                query.resolve = /* suggest */ /* append: */ /* enrich */!1;
-                result = query.index.search(query).result;
-            } else if (query.and) {
-                result = this.and(query.and);
-            } else if (query.xor) {
-                result = this.xor(query.xor);
-            } else if (query.not) {
-                result = this.not(query.not);
-            } else {
-                continue;
-            }
-
-            final[i] = result;
-
-            if (result.then) {
-                promises.push(result); //{ query, result };
-            }
-        }
-    }
+function return_result(final, promises, limit, offset, enrich, resolve) {
 
     if (promises.length) {
-        return Promise.all(promises).then(function () {
-            //self.result.length && (final = [self.result].concat(final));
-            // the suggest-union was re-used from but there it needs reversed order
-            self.result.length && (final = final.concat([self.result]));
-            self.result = union(final, limit, offset, enrich, resolve, self.boostval);
-            return resolve ? self.result : self;
+        const self = this;
+        return Promise.all(promises).then(function (result) {
+
+            final = [];
+            for (let i = 0, tmp; i < result.length; i++) {
+                if ((tmp = result[i]).length) {
+                    final[i] = tmp;
+                }
+            }
+
+            return return_result.call(self, final, [], limit, offset, enrich, resolve);
         });
     }
 
     if (final.length) {
-        //this.result.length && (final = [this.result].concat(final));
-        // the suggest-union was re-used but there it needs reversed order
-        this.result.length && (final = final.concat([this.result]));
-        this.result = union(final, limit, offset, enrich, resolve, this.boostval);
-    }
-    return resolve ? this.result : this;
-};
+        //this.result.length && (final = final.concat([this.result]));
+        this.result.length && final.push(this.result);
 
-/**
- * Aggregate the union of N raw results
- * @param result
- * @param limit
- * @param offset
- * @param enrich
- * @param resolve
- * @param boost
- * @return {Array}
- */
-
-function union(result, limit, offset, enrich, resolve, boost) {
-
-    if (!result.length) {
-        // todo remove
-        //console.log("Empty Result")
-        return result;
-    }
-
-    if ("object" == typeof limit) {
-        offset = limit.offset || 0;
-        enrich = limit.enrich || !1;
-        limit = limit.limit || 0;
-    }
-
-    if (2 > result.length) {
-        // todo remove
-        //console.log("Single Result")
-        if (resolve) {
-            return default_resolver(result[0], limit, offset, enrich);
+        if (2 > final.length) {
+            this.result = final[0];
         } else {
-            return result[0];
+            // the suggest-union (reversed processing, resolve needs to be disabled)
+            this.result = union(final /*.reverse()*/
+            , limit, offset, /* suggest */ /* append: */ /* enrich */
+            /* resolve: */!1, this.boostval);
+
+            // offset was already applied
+            offset = 0;
         }
     }
 
-    // the suggest-union
-    return _union(result /*.reverse()*/, offset, limit, resolve, boost);
-
-    // let final = [];
-    // let count = 0;
-    // let dupe = create_object();
-    // let maxres = get_max_len(result);
-    //
-    // for(let j = 0, ids; j < maxres; j++){
-    //     for(let i = 0, res; i < result.length; i++){
-    //         res = result[i];
-    //         if(!res) continue;
-    //         ids = res[j];
-    //         if(!ids) continue;
-    //
-    //         for(let k = 0, id; k < ids.length; k++){
-    //             id = ids[k];
-    //             if(!dupe[id]){
-    //                 dupe[id] = 1;
-    //                 if(offset){
-    //                     offset--;
-    //                     continue;
-    //                 }
-    //                 if(resolve){
-    //                     final.push(id);
-    //                 }
-    //                 else{
-    //                     // shift resolution by boost (inverse)
-    //                     const index = j + (boost || 0);
-    //                     final[index] || (final[index] = []);
-    //                     final[index].push(id);
-    //                 }
-    //                 if(limit && ++count === limit){
-    //                     //this.boost = 0;
-    //                     return final;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // //this.boost = 0;
-    // return final;
+    return resolve ? this.resolve(limit, offset, enrich) : this;
 }

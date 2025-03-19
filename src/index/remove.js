@@ -1,19 +1,16 @@
 // COMPILER BLOCK -->
 import {
     SUPPORT_CACHE,
-    SUPPORT_COMPRESSION,
-    SUPPORT_KEYSTORE,
     SUPPORT_PERSISTENT
 } from "../config.js";
 // <-- COMPILER BLOCK
-import { create_object, is_array } from "../common.js";
+import { is_array } from "../common.js";
 import Index, { autoCommit } from "../index.js";
-import default_compress from "../compress.js";
 
 /**
+ * @param {!number|string} id
  * @param {boolean=} _skip_deletion
  */
-
 Index.prototype.remove = function(id, _skip_deletion){
 
     const refs = this.reg.size && (
@@ -26,7 +23,7 @@ Index.prototype.remove = function(id, _skip_deletion){
 
         if(this.fastupdate){
 
-            // fast updates did not fully cleanup the key entries
+            // fast updates did not fully clean up the key entries
 
             for(let i = 0, tmp; i < refs.length; i++){
                 if((tmp = refs[i])){
@@ -114,8 +111,8 @@ Index.prototype.remove = function(id, _skip_deletion){
 };
 
 /**
- * @param map
- * @param id
+ * @param {!Map|Array<number|string|Array<number|string>>} map
+ * @param {!number|string} id
  * @return {number}
  */
 
@@ -147,7 +144,7 @@ function remove_index(map, id){
             }
         }
     }
-    else for(let item of map){
+    else for(let item of map.entries()){
         const key = item[0];
         const value = item[1];
         const tmp = remove_index(value, id);

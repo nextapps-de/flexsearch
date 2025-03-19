@@ -1,4 +1,8 @@
 import { concat } from "../common.js";
+import { IntermediateSearchResults, SearchResults, EnrichedSearchResults } from "../type.js";
+import { apply_enrich } from "../document/search.js";
+import Document from "../document.js";
+import Index from "../index.js";
 
 /*
  from -> res[score][id]
@@ -7,50 +11,35 @@ import { concat } from "../common.js";
 
 /**
  * Aggregate the union of a single raw result
- * @param {!Array} result
+ * @param {IntermediateSearchResults} result
  * @param {!number} limit
  * @param {number=} offset
  * @param {boolean=} enrich
- * @return Array<string|number>
+ * @return {SearchResults|EnrichedSearchResults}
+ * @this {Document|Index}
  */
 
 export default function(result, limit, offset, enrich){
 
+    if(!result.length){
+        return result;
+    }
+
     // fast path: when there is just one slot in the result
     if(result.length === 1){
-        result = result[0];
-        result = offset || (result.length > limit)
+        let final = result[0];
+        final = offset || (final.length > limit)
             ? (limit
-                ? result.slice(offset, offset + limit)
-                : result.slice(offset)
+                ? final.slice(offset, offset + limit)
+                : final.slice(offset)
             )
-            : result;
+            : final;
         return enrich
-            ? enrich_result(result)
-            : result;
+            ? apply_enrich.call(this, final)
+            : final;
     }
 
     let final = [];
-
-    // this is a workaround without using arr.concat.apply
-
-    // for(let i = 0, arr, len; i < result.length; i++){
-    //     if((arr = result[i])){
-    //         if((len = arr.length)){
-    //             for(let j = offset; j < len; j++){
-    //                 final.push(arr[j]);
-    //                 if(final.length === limit){
-    //                     return enrich
-    //                         ? enrich_result(final)
-    //                         : final;
-    //                 }
-    //             }
-    //             if((offset -= len) < 0){
-    //                 offset = 0;
-    //             }
-    //         }
-    //     }
-    // }
 
     // this is an optimized workaround instead of
     // just doing result = concat(result)
@@ -74,31 +63,22 @@ export default function(result, limit, offset, enrich){
             }
         }
 
+        if(len > limit){
+            arr = arr.slice(0, limit);
+            len = limit;
+        }
+
         if(!final.length){
             // fast path: when limit was reached in first slot
             if(len >= limit){
-                if(len > limit){
-                    arr = arr.slice(0, limit);
-                }
                 return enrich
-                    ? enrich_result(arr)
+                    ? apply_enrich.call(this, arr)
                     : arr;
-            }
-        }
-        else{
-            if(len > limit){
-                arr = arr.slice(0, limit);
-                len = arr.length;
             }
         }
 
         final.push(arr);
         limit -= len;
-
-        // todo remove
-        // if(limit < 0){
-        //     throw new Error("Impl.Error");
-        // }
 
         // break if limit was reached
         if(!limit){
@@ -106,27 +86,30 @@ export default function(result, limit, offset, enrich){
         }
     }
 
-    // todo remove
-    if(!final.length){
-        //throw new Error("No results found");
-        return final;
-    }
-
     final = final.length > 1
         ? concat(final)
         : final[0];
 
     return enrich
-        ? enrich_result(final)
+        ? apply_enrich.call(this, final)
         : final;
 }
 
-function enrich_result(ids){
-    for(let i = 0; i < ids.length; i++){
-        ids[i] = {
-            "score": i,
-            "id": ids[i]
-        };
-    }
-    return ids;
-}
+// /**
+//  * @param {SearchResults} ids
+//  * @return {EnrichedSearchResults}
+//  */
+//
+// export function enrich_result(ids){
+//     // ids could be the original reference to an index value
+//     /** @type {EnrichedSearchResults} */
+//     const result = new Array(ids.length);
+//     for(let i = 0, id; i < ids.length; i++){
+//         id = ids[i];
+//         result[i] = {
+//             "id": id,
+//             "doc": this.store.get(id)
+//         };
+//     }
+//     return result;
+// }

@@ -7,6 +7,7 @@
  */
 
 import { IndexOptions, DocumentOptions, DocumentDescriptor, FieldOptions, StoreOptions } from "./type.js";
+import StorageInterface from "./db/interface.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
 import Cache, { searchCache } from "./cache.js";
@@ -21,6 +22,7 @@ import "./document/search.js";
  * @constructor
  * @param {!DocumentOptions} options
  * @return {Document|Promise<Document>}
+ * @this {Document}
  */
 
 export default function Document(options) {
@@ -40,7 +42,8 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */
+    /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
     this.storetree = (tmp = document.store || null) && tmp && !0 !== tmp && [];
@@ -49,8 +52,8 @@ export default function Document(options) {
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache =
-    /* suggest */ /* append: */ /* enrich */!1;
+    options.cache = /* suggest */ /* append: */
+    /* enrich */!1;
 
     this.worker = options.worker;
 
@@ -60,7 +63,7 @@ export default function Document(options) {
     // }
 
     /**
-     * @type {Map<Index>}
+     * @type {Map<string, Index>}
      * @export
      */
     this.index = parse_descriptor.call(this, options, document);
@@ -93,6 +96,7 @@ export default function Document(options) {
                         this.tagtree[i]._filter = params.filter;
                     }
                 }
+                // the tag fields needs to be hold by indices
                 this.tagfield[i] = field;
                 this.tag.set(field, new Map());
             }
@@ -110,7 +114,7 @@ export default function Document(options) {
             return Promise.all(promises).then(function (promises) {
                 let count = 0;
                 for (const item of self.index.entries()) {
-                    const key = item[0],
+                    const key = /** @type {string} */item[0],
                           index = item[1];
 
                     index.then && self.index.set(key, promises[count++]);
@@ -123,6 +127,10 @@ export default function Document(options) {
     }
 }
 
+/**
+ * @param {!StorageInterface} db
+ * @return {Promise<Array<?>>}
+ */
 Document.prototype.mount = function (db) {
 
     let fields = this.field;
@@ -313,14 +321,28 @@ function parse_tree(key, marker) {
     return 1 < count ? tree : tree[0];
 }
 
+/**
+ * @param {!number|Object} id
+ * @param {!Object} content
+ * @return {Document|Promise<Document>}
+ */
 Document.prototype.append = function (id, content) {
     return this.add(id, content, !0);
 };
 
+/**
+ * @param {!number|Object} id
+ * @param {!Object} content
+ * @return {Document|Promise<Document>}
+ */
 Document.prototype.update = function (id, content) {
     return this.remove(id).add(id, content);
 };
 
+/**
+ * @param {!number|Object} id
+ * @return {Document|Promise<Document>}
+ */
 Document.prototype.remove = function (id) {
 
     if (is_object(id)) {
@@ -393,6 +415,10 @@ Document.prototype.clear = function () {
                  :*/
 };
 
+/**
+ * @param {number|string} id
+ * @return {boolean|Promise<boolean>}
+ */
 Document.prototype.contain = function (id) {
 
     if (this.db) {
@@ -411,6 +437,10 @@ Document.prototype.cleanup = function () {
     return this;
 };
 
+/**
+ * @param {number|string} id
+ * @return {Object}
+ */
 Document.prototype.get = function (id) {
 
     if (this.db) {
@@ -422,9 +452,14 @@ Document.prototype.get = function (id) {
     return this.store.get(id);
 };
 
-Document.prototype.set = function (id, store) {
+/**
+ * @param {number|string} id
+ * @param {Object} data
+ * @return {Document}
+ */
+Document.prototype.set = function (id, data) {
 
-    this.store.set(id, store);
+    this.store.set(id, data);
     return this;
 };
 

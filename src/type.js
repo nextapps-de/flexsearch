@@ -17,7 +17,6 @@ import StorageInterface from "./db/interface.js";
  *   keystore: (number|undefined),
  *   rtl: (boolean|undefined),
  *   cache: (number|boolean|undefined),
- *   resolve: (boolean|undefined),
  *   db: (StorageInterface|undefined),
  *   commit: (boolean|undefined),
  *   worker: (string|undefined),
@@ -131,9 +130,9 @@ export let SearchOptions = {};
  *   suggest: (boolean|undefined),
  *   enrich: (boolean|undefined),
  *   tag: (Object|Array<Object>|undefined),
- *   field: (Array<string>|Array<DocumentSearchOptions>|string|undefined),
- *   index: (Array<string>|Array<DocumentSearchOptions>|undefined),
- *   pluck: (string|undefined),
+ *   field: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
+ *   index: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
+ *   pluck: (string|DocumentSearchOptions|undefined),
  *   merge: (boolean|undefined),
  *   highlight: (string|undefined),
  * }}
@@ -142,16 +141,23 @@ export let DocumentSearchOptions = {};
 
 /**
  * @typedef Array<number|string>
+ * @global
  */
-export let SearchResults = {};
+export let SearchResults = [];
+
+/**
+ * @typedef Array<Array<number|string>>
+ * @global
+ */
+export let IntermediateSearchResults = [];
 
 /**
  * @typedef Array<{
  *   id: (number|string),
- *   res: number
+ *   doc: (Object|null)
  * }>
  */
-export let EnrichedSearchResults = {};
+export let EnrichedSearchResults = [];
 
 /**
  * @typedef Array<{
@@ -160,20 +166,17 @@ export let EnrichedSearchResults = {};
  *   result: SearchResults
  * }>
  */
-export let DocumentSearchResults = {};
+export let DocumentSearchResults = [];
 
 /**
  * @typedef Array<{
  *   field: (string|undefined),
  *   tag: (string|undefined),
  *   highlight: (string|undefined),
- *   result: Array<{
- *      id: (number|string),
- *      doc: (Object|null)
- *   }>
+ *   result: {EnrichedSearchResults}
  * }>
  */
-export let EnrichedDocumentSearchResults = {};
+export let EnrichedDocumentSearchResults = [];
 
 /**
  * @typedef Array<{
@@ -183,7 +186,7 @@ export let EnrichedDocumentSearchResults = {};
  *   tag: (Array<string>|undefined)
  * }>
  */
-export let MergedDocumentSearchResults = {};
+export let MergedDocumentSearchResults = [];
 
 /**
  * @typedef {{
@@ -204,6 +207,7 @@ export let EncoderSplitOptions = {};
  *   include: (EncoderSplitOptions|undefined),
  *   exclude: (EncoderSplitOptions|undefined),
  *   split: (string|boolean|undefined),
+ *   numeric: (boolean|undefined),
  *   normalize: (boolean|(function(string):string)|undefined),
  *   prepare: ((function(string):string)|undefined),
  *   finalize: ((function(Array<string>):(Array<string>|void))|undefined),

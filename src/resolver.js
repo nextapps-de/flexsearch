@@ -1,13 +1,18 @@
+import Index from "./index.js";
 import default_resolver from "./resolve/default.js";
-import { set_resolve } from "./index/search.js";
-import { ResolverOptions } from "./type.js";
+//import { set_resolve } from "./index/search.js";
+import { apply_enrich } from "./document/search.js";
+import { ResolverOptions, IntermediateSearchResults } from "./type.js";
+import "./resolve/handler.js";
 import "./resolve/or.js";
 import "./resolve/and.js";
 import "./resolve/xor.js";
 import "./resolve/not.js";
 
+
 /**
- * @param {Array|ResolverOptions=} result
+ * @param {IntermediateSearchResults|ResolverOptions=} result
+ * @return {Resolver}
  * @constructor
  */
 
@@ -15,23 +20,30 @@ export default function Resolver(result){
     if(!this || this.constructor !== Resolver){
         return new Resolver(result);
     }
+    // if(result && result.constructor === Resolver){
+    //     // todo test this branch
+    //     //console.log("Resolver Loopback")
+    //     return /** @type {Resolver} */ (result);
+    // }
     if(result && result.index){
+        // result = /** @type {ResolverOptions} */ (result);
         result.resolve = false;
-        this.index = result.index;
+        this.index = /** @type {Index} */ (result.index);
         this.boostval = result.boost || 0;
         this.result = result.index.search(result).result;
         return this;
     }
-    if(result.constructor === Resolver){
-        // todo test this branch
-        //console.log("Resolver Loopback")
-        return result;
-    }
+    /** @type {Index|null} */
     this.index = null;
-    this.result = result || [];
+    /** @type {IntermediateSearchResults} */
+    this.result =  /** @type {IntermediateSearchResults} */ (result) || [];
+    /** @type {number} */
     this.boostval = 0;
 }
 
+/**
+ * @param {number} limit
+ */
 Resolver.prototype.limit = function(limit){
     if(this.result.length){
         const final = [];
@@ -52,6 +64,9 @@ Resolver.prototype.limit = function(limit){
     return this;
 };
 
+/**
+ * @param {number} offset
+ */
 Resolver.prototype.offset = function(offset){
     if(this.result.length){
         const final = [];
@@ -71,6 +86,9 @@ Resolver.prototype.offset = function(offset){
     return this;
 };
 
+/**
+ * @param {number} boost
+ */
 Resolver.prototype.boost = function(boost){
     this.boostval += boost;
     return this;
@@ -81,10 +99,11 @@ Resolver.prototype.boost = function(boost){
  * @param {number=} offset
  * @param {boolean=} enrich
  */
-
 Resolver.prototype.resolve = function(limit, offset, enrich){
-    set_resolve(1);
+
+    //set_resolve(1);
     const result = this.result;
+    const index = this.index;
     this.index = null;
     this.result = null;
 
@@ -94,7 +113,16 @@ Resolver.prototype.resolve = function(limit, offset, enrich){
             offset = limit.offset;
             limit = limit.limit;
         }
-        return default_resolver(result, limit || 100, offset, enrich);
+        // const document = this.index;
+        // if(document.index){
+        //     result = default_resolver(result, limit || 100, offset, false);
+        //     return enrich
+        //         ? apply_enrich.call(document, result)
+        //         : result;
+        // }
+        // else{
+            return default_resolver.call(index, result, limit || 100, offset, enrich);
+        // }
     }
 
     return result;

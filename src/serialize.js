@@ -6,6 +6,11 @@ const chunk_size_reg = 250000;
 const chunk_size_map = 5000;
 const chunk_size_ctx = 1000;
 
+/**
+ * @param {Map} map
+ * @param {number=} size
+ * @return {Array<Object>}
+ */
 function map_to_json(map, size = 0){
     let chunk = [];
     let json = [];
@@ -23,13 +28,18 @@ function map_to_json(map, size = 0){
     return chunk;
 }
 
+/**
+ * @param {Array<Object>} json
+ * @param {Map=} map
+ * @return {Map}
+ */
 function json_to_map(json, map){
     map || (map = new Map());
     for(let i = 0, entry; i < json.length; i++) {
         entry = json[i];
         map.set(entry[0], entry[1]);
     }
-    return map;
+    return /** @type {Map} */ (map);
 }
 
 function ctx_to_json(ctx, size = 0){
@@ -84,9 +94,17 @@ function json_to_reg(json, reg){
 }
 
 /**
+ *
+ * @param {function(string, string):Promise|void} callback
+ * @param {string|null|void} field
+ * @param {string} key
+ * @param {Array|null} chunk
+ * @param {number} index_doc
+ * @param {number} index_obj
+ * @param {number=} index_prt
  * @this {Index|Document}
+ * @return {Promise}
  */
-
 function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
 
     const is_arr = chunk && chunk.constructor === Array;
@@ -133,17 +151,17 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
 
 /**
  * @param {function(string,string):Promise|void} callback
- * @param {string|null=} field
- * @param {number=} index_doc
- * @param {number=} index_obj
+ * @param {!string|null=} _field
+ * @param {number=} _index_doc
+ * @param {number=} _index_obj
  * @this {Index}
  */
 
-export function exportIndex(callback, field, index_doc, index_obj = 0){
+export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0){
 
     let key, chunk;
 
-    switch(index_obj){
+    switch(_index_obj){
 
         case 0:
 
@@ -177,17 +195,17 @@ export function exportIndex(callback, field, index_doc, index_obj = 0){
 
     return save.call(this,
         callback,
-        field,
+        _field,
         key,
         chunk,
-        index_doc,
-        index_obj
+        _index_doc,
+        _index_obj
     );
 }
 
 /**
  * @param {string} key
- * @param {string|*} data
+ * @param {string|Array<Object>} data
  * @this Index
  */
 
@@ -196,8 +214,10 @@ export function importIndex(key, data){
     if(!data){
         return;
     }
-    if(is_string(data)){
-        data = JSON.parse(/** @type {string} */(data));
+    if(typeof data === "string"){
+        data = /** @type {Array<Object>} */(
+            JSON.parse(/** @type {string} */(data))
+        );
     }
 
     const split = key.split(".");
@@ -233,62 +253,62 @@ export function importIndex(key, data){
 
 /**
  * @param {function(string,string):Promise|void} callback
- * @param {string|null=} field
- * @param {number=} index_doc
- * @param {number=} index_obj
+ * @param {string|null=} _field
+ * @param {number=} _index_doc
+ * @param {number=} _index_obj
  * @this {Document}
  */
 
-export function exportDocument(callback, field, index_doc = 0, index_obj = 0){
+export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0){
 
-    if(index_doc < this.field.length){
+    if(_index_doc < this.field.length){
 
-        const field = this.field[index_doc];
+        const field = this.field[_index_doc];
         const idx = this.index.get(field);
         // start from index 1, because document indexes does not additionally store register
-        const res = idx.export(callback, field, index_doc, index_obj = 1);
+        const res = idx.export(callback, field, _index_doc, _index_obj = 1);
 
         if(res && res["then"]){
             const self = this;
             return res["then"](function(){
-                return self.export(callback, field, index_doc + 1);
+                return self.export(callback, field, _index_doc + 1);
             });
         }
 
-        return this.export(callback, field, index_doc + 1);
+        return this.export(callback, field, _index_doc + 1);
     }
     else{
 
         let key, chunk;
 
-        switch(index_obj){
+        switch(_index_obj){
 
             case 0:
 
                 key = "reg";
                 chunk = reg_to_json(this.reg);
-                field = null;
+                _field = null;
                 break;
 
             case 1:
 
                 key = "tag";
                 chunk = ctx_to_json(this.tag, this.reg.size);
-                field = null;
+                _field = null;
                 break;
 
             case 2:
 
                 key = "doc";
                 chunk = map_to_json(this.store);
-                field = null;
+                _field = null;
                 break;
 
             case 3:
 
                 key = "cfg";
                 chunk = {};
-                field = null;
+                _field = null;
                 break;
 
             default:
@@ -298,18 +318,18 @@ export function exportDocument(callback, field, index_doc = 0, index_obj = 0){
 
         return save.call(this,
             callback,
-            field,
+            _field,
             key,
             chunk,
-            index_doc,
-            index_obj
+            _index_doc,
+            _index_obj
         );
     }
 }
 
 /**
- * @param key
- * @param {string|*} data
+ * @param {!string} key
+ * @param {string|Array<Object>} data
  * @this {Document}
  */
 
@@ -318,8 +338,10 @@ export function importDocument(key, data){
     if(!data){
         return;
     }
-    if(is_string(data)){
-        data = JSON.parse(/** @type {string} */(data));
+    if(typeof data === "string"){
+        data = /** @type {Array<Object>} */(
+            JSON.parse(/** @type {string} */(data))
+        );
     }
 
     const split = key.split(".");

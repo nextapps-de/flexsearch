@@ -1,17 +1,35 @@
 
-import { DocumentSearchOptions, DocumentSearchResults, EnrichedDocumentSearchResults, MergedDocumentSearchResults } from "../type.js";
+import { DocumentSearchOptions, DocumentSearchResults, EnrichedDocumentSearchResults, MergedDocumentSearchResults, EnrichedSearchResults, SearchResults, IntermediateSearchResults } from "../type.js";
 import { create_object, is_array, is_object, is_string, parse_simple } from "../common.js";
 import { intersect_union } from "../intersect.js";
 import Document from "../document.js";
-
-let debug = /* suggest */ /* append: */ /* enrich */!1;
+import Index from "../index.js";
+import Resolver from "../resolver.js";
+import tick from "../profiler.js";
 
 /**
  * @param {!string|DocumentSearchOptions} query
  * @param {number|DocumentSearchOptions=} limit
  * @param {DocumentSearchOptions=} options
- * @param {Array<Array>=} _promises For internal use only.
- * @returns {DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults|Promise<DocumentSearchResults|EnrichedDocumentSearchResults|MergedDocumentSearchResults>}
+ * @param {Array<Array>=} _promises async recursion
+ * @returns {
+ *   DocumentSearchResults|
+ *   EnrichedDocumentSearchResults|
+ *   MergedDocumentSearchResults|
+ *   SearchResults|
+ *   IntermediateSearchResults|
+ *   EnrichedSearchResults|
+ *   Resolver |
+ *   Promise<
+ *     DocumentSearchResults|
+ *     EnrichedDocumentSearchResults|
+ *     MergedDocumentSearchResults|
+ *     SearchResults|
+ *     IntermediateSearchResults|
+ *     EnrichedSearchResults|
+ *     Resolver
+ *   >
+ * }
  */
 
 Document.prototype.search = function (query, limit, options, _promises) {
@@ -26,6 +44,13 @@ Document.prototype.search = function (query, limit, options, _promises) {
         }
     }
 
+    /** @type {
+     *   DocumentSearchResults|
+     *   EnrichedDocumentSearchResults|
+     *   SearchResults|
+     *   IntermediateSearchResults|
+     *   EnrichedSearchResults
+     * } */
     let result = [],
         result_field = [],
         pluck,
@@ -36,6 +61,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         tag,
         offset,
         count = 0,
+        resolve,
         highlight;
 
 
@@ -50,12 +76,28 @@ Document.prototype.search = function (query, limit, options, _promises) {
         query = options.query || query;
         pluck = options.pluck;
         merge = options.merge;
-        field = pluck || options.field || options.index;
+        field = pluck || options.field || (field = options.index) && (field.index ? null : field);
         tag = this.tag && options.tag;
-        enrich = this.store && options.enrich;
         suggest = options.suggest;
-        highlight = options.highlight;
-        //resolve = !SUPPORT_RESOLVER || (options.resolve !== false);
+        resolve = /* suggest */ /* append: */ /* enrich */!1 !== options.resolve;
+
+        // upgrade pluck when missing
+        if (!resolve && !pluck) {
+            field = field || this.field;
+            if (field) {
+                if (is_string(field)) {
+                    pluck = field;
+                } else {
+                    if (is_array(field) && 1 === field.length) {
+                        field = field[0];
+                    }
+                    pluck = field.field || field.index;
+                }
+            }
+        }
+
+        enrich = this.store && options.enrich && resolve;
+        highlight = options.highlight && enrich;
         limit = options.limit || limit;
         offset = options.offset || 0;
         limit || (limit = 100);
@@ -66,6 +108,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                 tag = [tag];
             }
 
+            // -----------------------------
             // Tag-Search
             // -----------------------------
 
@@ -143,7 +186,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         }
 
         // extend to multi field search by default
-        if (is_string(field)) {
+        if (field && field.constructor !== Array) {
             field = [field];
         }
     }
@@ -203,14 +246,13 @@ Document.prototype.search = function (query, limit, options, _promises) {
                 // just collect and continue
                 continue;
             } else {
-
                 res = index.search(query, limit, opt);
                 // restore enrich state
                 opt && enrich && (opt.enrich = enrich);
             }
         }
 
-        len = res && res.length;
+        len = res && (resolve ? res.length : res.result.length);
 
         // todo when no term was matched but tag was retrieved extend suggestion to tags
         // every field has to intersect against all selected tag fields
@@ -234,7 +276,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                             arr.push(ids);
                         } else if (!suggest) {
                             // no tags found
-                            return result;
+                            return resolve ? result : new Resolver(result);
                         }
                     }
                 }
@@ -248,7 +290,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                         if (suggest) {
                             continue;
                         } else {
-                            return result;
+                            return resolve ? result : new Resolver(result);
                         }
                     }
 
@@ -260,17 +302,17 @@ Document.prototype.search = function (query, limit, options, _promises) {
                         arr.push(ids);
                     } else if (!suggest) {
                         // no tags found
-                        return result;
+                        return resolve ? result : new Resolver(result);
                     }
                 }
             }
 
             if (count) {
-                res = intersect_union(res, arr); // intersect(arr, limit, offset)
+                res = intersect_union(res, arr, resolve); // intersect(arr, limit, offset)
                 len = res.length;
                 if (!len && !suggest) {
                     // nothing matched
-                    return result;
+                    return resolve ? res : new Resolver( /** @type {IntermediateSearchResults} */res);
                 }
                 // move counter back by 1
                 count--;
@@ -283,7 +325,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
             count++;
         } else if (1 === field.length) {
             // fast path: nothing matched
-            return result;
+            return resolve ? result : new Resolver(result);
         }
     }
 
@@ -299,7 +341,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                         if (suggest) {
                             continue;
                         } else {
-                            return result;
+                            return resolve ? result : new Resolver(result);
                         }
                     }
 
@@ -317,7 +359,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
     }
 
     if (!count) {
-        return result;
+        return resolve ? result : new Resolver(result);
     }
     if (pluck && (!enrich || !this.store)) {
         return result[0];
@@ -331,9 +373,9 @@ Document.prototype.search = function (query, limit, options, _promises) {
 
         if (enrich && res.length && !res[0].doc) {
             if (!this.db) {
-                if (res.length) {
-                    res = apply_enrich.call(this, res);
-                }
+                // if(res.length){
+                res = apply_enrich.call(this, res);
+                // }
             } else {
                 // the documents are stored on the first field
                 promises.push(res = this.index.get(this.field[0]).db.enrich(res));
@@ -341,7 +383,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         }
 
         if (pluck) {
-            return res;
+            return resolve ? res : new Resolver(res);
         }
 
         result[i] = {
@@ -495,20 +537,25 @@ function get_tag(tag, key, limit, offset) {
 }
 
 /**
- * @this {Document}
+ * @param {SearchResults} ids
+ * @return {EnrichedSearchResults|SearchResults}
+ * @this {Document|Index|null}
  */
 
-function apply_enrich(res) {
+export function apply_enrich(ids) {
 
-    const arr = Array(res.length);
+    if (!this || !this.store) return ids;
 
-    for (let x = 0, id; x < res.length; x++) {
-        id = res[x];
-        arr[x] = {
+    /** @type {EnrichedSearchResults} */
+    const result = Array(ids.length);
+
+    for (let x = 0, id; x < ids.length; x++) {
+        id = ids[x];
+        result[x] = {
             id: id,
             doc: this.store.get(id)
         };
     }
 
-    return arr;
+    return result;
 }

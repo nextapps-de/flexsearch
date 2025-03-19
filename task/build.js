@@ -128,6 +128,18 @@ if(custom){
     release || (options["RELEASE"] = release = "custom");
 }
 
+if(release === "custom"){
+    if(typeof options["DEBUG"] === "undefined"){
+        options["DEBUG"] = false;
+    }
+    if(typeof options["PROFILER"] === "undefined"){
+        options["PROFILER"] = false;
+    }
+    if(typeof options["POLYFILL"] === "undefined"){
+        options["POLYFILL"] = false;
+    }
+}
+
 if(release === "lang"){
 
     //const charsets = Object.keys(supported_charset);
@@ -160,7 +172,6 @@ if(release === "lang"){
                                  .replace('import Encoder from "./encoder.js";', '')
                                  .replace('import StorageInterface from "./db/interface.js";', '');
                 fs.writeFileSync("tmp/type.js", content);
-
 
                 fs.writeFileSync("tmp/lang.js", `
                     import { EncoderOptions, EncoderSplitOptions } from "./type.js";
@@ -406,10 +417,10 @@ else (async function(){
         // fix closure compiler dynamic import
         build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=(await import($4))[\"default\"])");
 
-        //if(release === "bundle"){
+        if(options["SUPPORT_WORKER"]){
             build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");
             //build = build.replace("(function(self){", "(function _f(self){if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");
-        //}
+        }
 
         // replace the eval wrapper
         build = build.replace(/\(0,eval\)\('([^']+)'\)/g, "$1");

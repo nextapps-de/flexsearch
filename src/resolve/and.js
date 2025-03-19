@@ -1,205 +1,141 @@
 import Resolver from "../resolver.js";
-import { create_object, get_max_len } from "../common.js";
-import { intersect as _intersect } from "../intersect.js";
-import { ResolverOptions } from "../type.js";
+import { get_max_len } from "../common.js";
+import { intersect } from "../intersect.js";
+import { SearchResults, EnrichedSearchResults, IntermediateSearchResults, ResolverOptions } from "../type.js";
+import { apply_enrich } from "../document/search.js";
 
-Resolver.prototype.and = function(){
-    if(this.result.length){
+/** @this {Resolver} */
+Resolver.prototype["and"] = function(){
 
-        const self = this;
-        let args = arguments;
-        let first_argument = args[0];
+    let execute = this.result.length;
+    let limit, offset, enrich;
+    let resolve;
 
-        if(first_argument.then){
-            return first_argument.then(function(){
-                return self.and.apply(self, args);
-            });
+    if(!execute){
+        /** @type {ResolverOptions} */
+        const arg = arguments[0];
+        if(arg){
+            execute = !!arg.suggest;
+            resolve = arg.resolve;
+            limit = arg.limit;
+            offset = arg.offset;
+            enrich = arg.enrich && resolve;
         }
-
-        if(first_argument[0]){
-            // fix false passed parameter style
-            if(first_argument[0].index){
-                return this.and.apply(this, first_argument);
-            }
-        }
-
-        let final = [];
-        let promises = [];
-        let limit = 0, offset = 0, enrich, resolve, suggest;
-
-        for(let i = 0, query; i < args.length; i++){
-
-            query = /** @type {string|ResolverOptions} */ (
-                args[i]
-            );
-
-            if(query){
-
-                limit = query.limit || 0;
-                offset = query.offset || 0;
-                enrich = query.enrich;
-                resolve = query.resolve;
-                suggest = query.suggest;
-
-                let result;
-                if(query.constructor === Resolver){
-                    result = query.result;
-                }
-                else if(query.constructor === Array){
-                    result = query;
-                }
-                else if(query.index){
-                    query.resolve = false;
-                    result = query.index.search(query).result;
-                }
-                else if(query.or){
-                    result = this.or(query.or);
-                }
-                else if(query.xor){
-                    result = this.xor(query.xor);
-                }
-                else if(query.not){
-                    result = this.not(query.not);
-                }
-                else{
-                    continue;
-                }
-
-                final[i] = result;
-
-                if(result.then){
-                    promises.push(result); //{ query, result };
-                }
-            }
-        }
-
-        if(!final.length){
-            this.result = final;
-            return resolve ? this.result : this;
-        }
-
-        if(promises.length){
-            return Promise.all(promises).then(function(){
-                final = [self.result].concat(final);
-                self.result = intersect(final, limit, offset, enrich, resolve, self.boostval, suggest);
-                return resolve ? self.result : self;
-            });
-        }
-
-        final = [this.result].concat(final);
-        this.result = intersect(final, limit, offset, enrich, resolve, this.boostval, suggest);
-        return resolve ? this.result : this;
     }
-    return this;
+
+    if(execute){
+
+        const {
+            final,
+            promises,
+            limit,
+            offset,
+            enrich,
+            resolve,
+            suggest
+        } = this.handler("and", arguments);
+
+        return return_result.call(this,
+            final,
+            promises,
+            limit,
+            offset,
+            enrich,
+            resolve,
+            suggest
+        );
+    }
+
+    return resolve
+        ? this.resolve(limit, offset, enrich)
+        : this;
 }
 
 /**
  * Aggregate the intersection of N raw results
- * @param result
- * @param limit
- * @param offset
- * @param enrich
- * @param resolve
- * @param boost
- * @param suggest
- * @return {Array}
+ * @param {!Array<IntermediateSearchResults>} final
+ * @param {!Array<Promise<IntermediateSearchResults>>} promises
+ * @param {number} limit
+ * @param {number=} offset
+ * @param {boolean=} enrich
+ * @param {boolean=} resolve
+ * @param {boolean=} suggest
+ * @this {Resolver}
+ * @return {
+ *   SearchResults |
+ *   EnrichedSearchResults |
+ *   IntermediateSearchResults |
+ *   Promise<SearchResults | EnrichedSearchResults | IntermediateSearchResults> |
+ *   Resolver
+ * }
  */
 
-function intersect(result, limit, offset, enrich, resolve, boost, suggest){
+function return_result(final, promises, limit, offset, enrich, resolve, suggest){
 
-    // if(!result.length){
-    //     // todo remove
-    //     console.log("Empty Result")
-    //     return result;
-    // }
+    if(promises.length){
+        const self = this;
+        return Promise.all(promises).then(function(result){
 
-    if(result.length < 2){
-        return [];
+            final = [];
+            for(let i = 0, tmp; i < result.length; i++){
+                if((tmp = result[i]).length){
+                    final[i] = tmp;
+                }
+            }
+
+            return return_result.call(self,
+                final,
+                [],
+                limit,
+                offset,
+                enrich,
+                resolve,
+                suggest
+            );
+        });
     }
 
-    let final = [];
-    let count = 0;
-    let contain = create_object();
-    let maxres = get_max_len(result);
-    if(!maxres) return final;
+    if(!final.length){
+        if(!suggest){
+            this.result = /** @type {SearchResults|IntermediateSearchResults} */ (
+                final
+            );
+        }
+    }
+    else{
+        //final = [this.result].concat(final);
+        this.result.length && final.unshift(this.result);
 
-    //console.log(result)
+        if(final.length < 2){
+            this.result = final[0];
+        }
+        else{
+            const resolution = get_max_len(final);
+            if(!resolution){
+                this.result = [];
+            }
+            else{
+                this.result = intersect(
+                    final,
+                    resolution,
+                    limit,
+                    offset,
+                    suggest,
+                    this.boostval,
+                    resolve
+                );
 
-    return _intersect(result, maxres, limit, offset, suggest, boost, resolve);
+                return resolve
+                    ? (enrich
+                        ? apply_enrich.call(this.index, /** @type {SearchResults} */ (this.result))
+                        : this.result
+                    )
+                    : this;
+            }
+        }
+    }
 
-    // for(let j = 0, ids, res = result[0]; j < res.length; j++){
-    //     ids = res[j];
-    //     for(let k = 0; k < ids.length; k++){
-    //         contain[ids[k]] = 1;
-    //     }
-    // }
-
-    // for(let i = 0, res; i < result.length; i++){
-    //     res = result[i];
-    //     if(!res || !res.length) return [];
-    //     let contain_new = create_object();
-    //     let match = 0;
-    //     let last_round = i === result.length - 1;
-    //
-    //     for(let j = 0, ids; j < maxres; j++){
-    //         ids = res[j];
-    //         if(!ids) continue;
-    //
-    //         for(let k = 0, id, min; k < ids.length; k++){
-    //             id = ids[k];
-    //             // fill in first round
-    //             if(!i){
-    //                 // shift resolution +1
-    //                 // shift resolution by boost (inverse)
-    //                 contain_new[id] = j + 1 + (i ? boost : 0);
-    //                 match = 1;
-    //             }
-    //             // result in last round
-    //             else if(last_round){
-    //                 if((min = contain[id])){
-    //                     match = 1;
-    //                     //if(!contain_new[id]){
-    //                     if(offset){
-    //                         offset--;
-    //                         continue;
-    //                     }
-    //                     if(resolve){
-    //                         final.push(id);
-    //                     }
-    //                     else{
-    //                         // reduce resolution -1
-    //                         min--;
-    //                         if(j < min) min = j;
-    //                         final[min] || (final[min] = []);
-    //                         final[min].push(id);
-    //                     }
-    //                     if(limit && ++count === limit){
-    //                         //this.boost = 0;
-    //                         return final;
-    //                     }
-    //                     // shift resolution +1
-    //                     //contain_new[id] = min + 1;
-    //                     //}
-    //                 }
-    //             }
-    //             // check for intersection
-    //             else if((min = contain[id])){
-    //                 // shift resolution +1
-    //                 if(j + 1 < min) min = j + 1;
-    //                 contain_new[id] = min;
-    //                 match = 1;
-    //             }
-    //         }
-    //     }
-    //
-    //     if(!match){
-    //         //this.boost = 0;
-    //         return [];
-    //     }
-    //
-    //     contain = contain_new;
-    // }
-    //
-    // //this.boost = 0;
-    // return final;
+    return resolve
+        ? this.resolve(limit, offset, enrich)
+        : this;
 }

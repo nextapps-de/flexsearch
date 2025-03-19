@@ -1,98 +1,83 @@
 import Resolver from "../resolver.js";
-import { ResolverOptions } from "../type.js";
+import { SearchResults, EnrichedSearchResults, IntermediateSearchResults } from "../type.js";
+import { apply_enrich } from "../document/search.js";
 
+/** @this {Resolver} */
 Resolver.prototype.not = function () {
-    const self = this;
-    let args = arguments,
-        first_argument = args[0];
 
+    const {
+        final,
+        promises,
+        limit,
+        offset,
+        enrich,
+        resolve,
+        suggest
+    } = this.handler("not", arguments);
 
-    if (first_argument.then) {
-        return first_argument.then(function () {
-            return self.not.apply(self, args);
-        });
-    }
-
-    if (first_argument[0]) {
-        // fix false passed parameter style
-        if (first_argument[0].index) {
-            return this.not.apply(this, first_argument);
-        }
-    }
-
-    let final = [],
-        promises = [],
-        limit = 0,
-        offset = 0,
-        resolve;
-
-
-    for (let i = 0, query; i < args.length; i++) {
-
-        query = /** @type {string|ResolverOptions} */args[i];
-
-        if (query) {
-
-            limit = query.limit || 0;
-            offset = query.offset || 0;
-            query.enrich;
-            resolve = query.resolve;
-
-            let result;
-            if (query.constructor === Resolver) {
-                result = query.result;
-            } else if (query.constructor === Array) {
-                result = query;
-            } else if (query.index) {
-                query.resolve = /* suggest */ /* append: */ /* enrich */!1;
-                result = query.index.search(query).result;
-            } else if (query.or) {
-                result = this.or(query.or);
-            } else if (query.and) {
-                result = this.and(query.and);
-            } else if (query.xor) {
-                result = this.xor(query.xor);
-            } else {
-                continue;
-            }
-
-            final[i] = result;
-
-            if (result.then) {
-                promises.push(result); //{ query, result };
-            }
-        }
-    }
-
-    if (promises.length) {
-        return Promise.all(promises).then(function () {
-            self.result = exclusion.call(self, final, limit, offset, resolve);
-            return resolve ? self.result : self;
-        });
-    }
-
-    if (final.length) {
-        this.result = exclusion.call(this, final, limit, offset, resolve);
-    }
-
-    return resolve ? this.result : this;
+    return return_result.call(this, final, promises, limit, offset, enrich, resolve, suggest);
 };
 
 /**
- * @param result
- * @param limit
- * @param offset
- * @param resolve
+ * @param {!Array<IntermediateSearchResults>} final
+ * @param {!Array<Promise<IntermediateSearchResults>>} promises
+ * @param {number} limit
+ * @param {number=} offset
+ * @param {boolean=} enrich
+ * @param {boolean=} resolve
+ * @param {boolean=} suggest
  * @this {Resolver}
- * @return {Array}
+ * @return {
+ *   SearchResults |
+ *   EnrichedSearchResults |
+ *   IntermediateSearchResults |
+ *   Promise<SearchResults | EnrichedSearchResults | IntermediateSearchResults> |
+ *   Resolver
+ * }
+ */
+
+function return_result(final, promises, limit, offset, enrich, resolve, suggest) {
+
+    if (promises.length) {
+        const self = this;
+        return Promise.all(promises).then(function (result) {
+
+            final = [];
+            for (let i = 0, tmp; i < result.length; i++) {
+                if ((tmp = result[i]).length) {
+                    final[i] = tmp;
+                }
+            }
+
+            return return_result.call(self, final, [], limit, offset, enrich, resolve, suggest);
+        });
+    }
+
+    if (final.length && this.result.length) {
+        this.result = exclusion.call(this, final, limit, offset, resolve);
+    } else if (resolve) {
+        return this.resolve(limit, offset, enrich);
+    }
+
+    return resolve ? enrich ? apply_enrich.call(this.index, this.result) : this.result : this;
+}
+
+/**
+ * @param {!Array<IntermediateSearchResults>} result
+ * @param {number} limit
+ * @param {number=} offset
+ * @param {boolean=} resolve
+ * @this {Resolver}
+ * @return {SearchResults|IntermediateSearchResults}
  */
 
 function exclusion(result, limit, offset, resolve) {
 
-    if (!result.length) {
-        return this.result;
-    }
+    // if(!result.length){
+    //     return this.result;
+    // }
 
+    /** @type {SearchResults|IntermediateSearchResults} */
     const final = [],
           exclude = new Set(result.flat().flat());
 

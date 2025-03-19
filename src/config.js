@@ -8,7 +8,7 @@ export const DEBUG = true;
 export const PROFILER = true;
 
 /** @define {boolean} */
-export const POLYFILL = true;
+export const POLYFILL = false;
 
 /** @define {boolean} */
 export const SUPPORT_WORKER = true;

@@ -5,7 +5,11 @@ import {
     SUPPORT_TAGS
 } from "../../config.js";
 // <-- COMPILER BLOCK
-import { PersistentOptions } from "../../type.js";
+import {
+    PersistentOptions,
+    SearchResults,
+    EnrichedSearchResults
+} from "../../type.js";
 
 const VERSION = 1;
 const IndexedDB = typeof window !== "undefined" && (
@@ -28,6 +32,10 @@ const fields = ["map", "ctx", "tag", "reg", "cfg"];
 import StorageInterface from "../interface.js";
 import { toArray } from "../../common.js";
 
+/**
+ * @param {!string} str
+ * @return {string}
+ */
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
 }
@@ -52,7 +60,9 @@ export default function IdxDB(name, config = {}){
     }
     this.id = "flexsearch" + (name ? ":" + sanitize(name) : "");
     this.field = config.field ? sanitize(config.field) : "";
+    this.type = config.type;
     this.support_tag_search = false;
+    this.fastupdate = false;
     this.db = null;
     this.trx = {};
 };
@@ -132,8 +142,12 @@ IdxDB.prototype.close = function(){
     this.db = null;
 };
 
+/**
+ * @return {!Promise<undefined>}
+ */
 IdxDB.prototype.destroy = function(){
-    return IndexedDB.deleteDatabase(this.id + (this.field ? ":" + this.field : ""));
+    const req = IndexedDB.deleteDatabase(this.id + (this.field ? ":" + this.field : ""));
+    return promisfy(req);
 };
 
 // IdxDB.prototype.set = function(ref, key, ctx, data){
@@ -150,6 +164,9 @@ IdxDB.prototype.destroy = function(){
 //     return transaction;//promisfy(req, callback);
 // };
 
+/**
+ * @return {!Promise<undefined>}
+ */
 IdxDB.prototype.clear = function(){
     const transaction = this.db.transaction(fields, "readwrite");
     for(let i = 0; i < fields.length; i++){
@@ -158,6 +175,15 @@ IdxDB.prototype.clear = function(){
     return promisfy(transaction);
 };
 
+/**
+ * @param {!string} key
+ * @param {string=} ctx
+ * @param {number=} limit
+ * @param {number=} offset
+ * @param {boolean=} resolve
+ * @param {boolean=} enrich
+ * @return {!Promise<SearchResults|EnrichedSearchResults>}
+ */
 IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
     const transaction = this.db.transaction(ctx ? "ctx" : "map", "readonly");
     const map = transaction.objectStore(ctx ? "ctx" : "map");
@@ -200,6 +226,13 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
 
 if(SUPPORT_TAGS){
 
+    /**
+     * @param {!string} tag
+     * @param {number=} limit
+     * @param {number=} offset
+     * @param {boolean=} enrich
+     * @return {!Promise<SearchResults|EnrichedSearchResults>}
+     */
     IdxDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
         const transaction = this.db.transaction("tag", "readonly");
         const map = transaction.objectStore("tag");
@@ -218,6 +251,10 @@ if(SUPPORT_TAGS){
 
 if(SUPPORT_STORE){
 
+    /**
+     * @param {SearchResults} ids
+     * @return {!Promise<EnrichedSearchResults>}
+     */
     IdxDB.prototype.enrich = function(ids){
         if(typeof ids !== "object"){
             ids = [ids];
@@ -240,6 +277,10 @@ if(SUPPORT_STORE){
     };
 }
 
+/**
+ * @param {number|string} id
+ * @return {!Promise<undefined>}
+ */
 IdxDB.prototype.has = function(id){
     const transaction = this.db.transaction("reg", "readonly");
     const map = transaction.objectStore("reg");
@@ -505,7 +546,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
 
 /**
  * @param {IDBCursorWithValue} cursor
- * @param {Array} ids
+ * @param {Array<number|string>} ids
  * @param {boolean=} _tag
  */
 
@@ -558,6 +599,10 @@ function handle(cursor, ids, _tag){
     cursor.continue();
 }
 
+/**
+ * @param {Array<number|string>} ids
+ * @return {!Promise<undefined>}
+ */
 IdxDB.prototype.remove = function(ids){
 
     if(typeof ids !== "object"){

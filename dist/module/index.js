@@ -133,11 +133,14 @@ Index.prototype.clear = function () {
  * @param {!number|string} id
  * @param {!string} content
  */
-
 Index.prototype.append = function (id, content) {
     return this.add(id, content, !0);
 };
 
+/**
+ * @param {number|string} id
+ * @return {boolean|Promise<boolean>}
+ */
 Index.prototype.contain = function (id) {
     return this.db ? this.db.has(id) : this.reg.has(id);
 };

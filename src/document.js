@@ -21,6 +21,7 @@ import {
 // <-- COMPILER BLOCK
 
 import { IndexOptions, DocumentOptions, DocumentDescriptor, FieldOptions, StoreOptions } from "./type.js";
+import StorageInterface from "./db/interface.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
 import Cache, { searchCache } from "./cache.js";
@@ -35,6 +36,7 @@ import "./document/search.js";
  * @constructor
  * @param {!DocumentOptions} options
  * @return {Document|Promise<Document>}
+ * @this {Document}
  */
 
 export default function Document(options){
@@ -87,7 +89,7 @@ export default function Document(options){
     // }
 
     /**
-     * @type {Map<Index>}
+     * @type {Map<string, Index>}
      * @export
      */
     this.index = parse_descriptor.call(this, options, document);
@@ -141,7 +143,7 @@ export default function Document(options){
             return Promise.all(promises).then(function(promises){
                 let count = 0;
                 for(const item of self.index.entries()){
-                    const key = item[0];
+                    const key = /** @type {string} */ (item[0]);
                     const index = item[1];
                     index.then && self.index.set(key, promises[count++]);
                 }
@@ -156,6 +158,10 @@ export default function Document(options){
 
 if(SUPPORT_PERSISTENT){
 
+    /**
+     * @param {!StorageInterface} db
+     * @return {Promise<Array<?>>}
+     */
     Document.prototype.mount = function(db){
 
         let fields = this.field;
@@ -354,14 +360,28 @@ function parse_tree(key, marker){
     return count > 1 ? tree : tree[0];
 }
 
+/**
+ * @param {!number|Object} id
+ * @param {!Object} content
+ * @return {Document|Promise<Document>}
+ */
 Document.prototype.append = function(id, content){
     return this.add(id, content, true);
 };
 
+/**
+ * @param {!number|Object} id
+ * @param {!Object} content
+ * @return {Document|Promise<Document>}
+ */
 Document.prototype.update = function(id, content){
    return this.remove(id).add(id, content);
 };
 
+/**
+ * @param {!number|Object} id
+ * @return {Document|Promise<Document>}
+ */
 Document.prototype.remove = function(id){
 
     if(is_object(id)){
@@ -435,6 +455,10 @@ Document.prototype.clear = function(){
         :*/
 };
 
+/**
+ * @param {number|string} id
+ * @return {boolean|Promise<boolean>}
+ */
 Document.prototype.contain = function(id){
 
     if(SUPPORT_PERSISTENT && this.db){
@@ -455,6 +479,10 @@ Document.prototype.cleanup = function(){
 
 if(SUPPORT_STORE){
 
+    /**
+     * @param {number|string} id
+     * @return {Object}
+     */
     Document.prototype.get = function(id){
 
         if(SUPPORT_PERSISTENT && this.db){
@@ -466,9 +494,14 @@ if(SUPPORT_STORE){
         return this.store.get(id);
     };
 
-    Document.prototype.set = function(id, store){
+    /**
+     * @param {number|string} id
+     * @param {Object} data
+     * @return {Document}
+     */
+    Document.prototype.set = function(id, data){
 
-        this.store.set(id, store);
+        this.store.set(id, data);
         return this;
     };
 }

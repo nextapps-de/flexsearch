@@ -81,7 +81,6 @@ declare module "flexsearch" {
         resolution?: number;
         context?: boolean;
         resolve?: boolean;
-        enrich?: boolean;
     };
 
     /**
@@ -116,6 +115,7 @@ declare module "flexsearch" {
         include?: EncoderSplitOptions;
         exclude?: EncoderSplitOptions;
         split?: string|RegExp|""|false;
+        numeric?: boolean;
         prepare?: (str: string) => string;
         finalize?: (terms: string[]) => string[];
         filter?: Set<string>;
@@ -171,7 +171,6 @@ declare module "flexsearch" {
         resolution?: number;
         context?: ContextOptions | boolean;
         keystore?: number;
-        resolve?: boolean;
         fastupdate?: boolean;
         score?: (
             content: string[],
@@ -315,7 +314,6 @@ declare module "flexsearch" {
         filter?: (content: string) => boolean;
         custom?: (content: string) => string;
         config?: WorkerConfigURL | WorkerConfigPath;
-        resolve: true;
     };
 
     type TagOptions = {
@@ -323,7 +321,6 @@ declare module "flexsearch" {
         filter?: (content: string) => boolean;
         custom?: (content: string) => string;
         db?: StorageInterface;
-        resolve: true;
     };
 
     type StoreOptions = {
@@ -331,7 +328,6 @@ declare module "flexsearch" {
         filter?: (content: string) => boolean;
         custom?: (content: string) => string;
         db?: StorageInterface;
-        resolve: true;
     };
 
     /*
@@ -343,7 +339,6 @@ declare module "flexsearch" {
         worker?: boolean | WorkerURL | WorkerPath;
         doc?: DocumentDescriptor | DocumentDescriptor[];
         document?: DocumentDescriptor | DocumentDescriptor[];
-        resolve: true;
     };
 
     type DefaultDocumentSearchResults = Array<{
@@ -392,11 +387,12 @@ declare module "flexsearch" {
 
     type DocumentSearchOptions = SearchOptions & {
         tag?: Object | Array<Object>;
-        field?: Array<DocumentSearchOptions> | Array<string> | string;
-        index?: Array<DocumentSearchOptions> | Array<string>;
-        pluck?: FieldName;
+        field?: Array<DocumentSearchOptions> | DocumentSearchOptions | string[] | string;
+        index?: Array<DocumentSearchOptions> | DocumentSearchOptions | string[] | string;
+        pluck?: FieldName | DocumentSearchOptions;
+        enrich?: boolean;
         merge?: boolean;
-        hightlight?: TemplateResultHighlighting;
+        highlight?: TemplateResultHighlighting;
     };
 
     type DocumentValue =
@@ -552,7 +548,7 @@ declare module "flexsearch" {
     };
 
     type ResolverOptions = DefaultResolve & {
-        index?: Index;
+        index?: Index | Document;
         resolve?: boolean;
         suggest?: boolean;
         and?: ResolverOptions | Array<ResolverOptions>;

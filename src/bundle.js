@@ -118,6 +118,7 @@ if(SUPPORT_PERSISTENT){
 /** @export */ StorageInterface.db;
 /** @export */ StorageInterface.id;
 /** @export */ StorageInterface.support_tag_search;
+/** @export */ StorageInterface.fastupdate;
 /** @export */ StorageInterface.prototype.mount;
 /** @export */ StorageInterface.prototype.open;
 /** @export */ StorageInterface.prototype.close;
