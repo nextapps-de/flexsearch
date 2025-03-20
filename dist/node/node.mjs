@@ -3,22 +3,24 @@ import { join } from "path";
 // Test Path
 //import Index from "../../src/index.js";
 //import { Index } from "../../dist/flexsearch.bundle.module.min.js";
-import { Index } from "../flexsearch.bundle.module.min.js";
+import { Index } from "flexsearch/esm";
 
+/** @type Index */
 let index;
+/** @type {IndexOptions} */
+let options;
 
 parentPort.on("message", async function(data){
 
-    /** @type Index */
-    const args = data["args"];
     const task = data["task"];
     const id = data["id"];
+    let args = data["args"];
 
     switch(task){
 
         case "init":
 
-            let options = data["options"] || {};
+            options = data["options"] || {};
             // load extern field configuration
             let filepath = options["config"];
             if(filepath){
@@ -35,7 +37,19 @@ parentPort.on("message", async function(data){
 
         default:
 
-            const message = index[task].apply(index, args);
+            let message;
+
+            if(task === "export"){
+                args = [options.export];
+            }
+            if(task === "import"){
+                await options.import.call(index, index);
+                //args = [options.import];
+            }
+            else{
+                message = index[task].apply(index, args);
+            }
+
             parentPort.postMessage(
                 task === "search"
                     ? { "id": id, "msg": message }

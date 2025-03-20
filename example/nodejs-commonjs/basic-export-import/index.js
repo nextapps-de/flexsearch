@@ -36,6 +36,7 @@ const { Index } = require("flexsearch");
         console.log(data[i]);
     });
 
+    // -----------------------
     // EXPORT
     // -----------------------
 
@@ -46,6 +47,7 @@ const { Index } = require("flexsearch");
         await fs.writeFile("./export/" + key, data, "utf8");
     });
 
+    // -----------------------
     // IMPORT
     // -----------------------
 

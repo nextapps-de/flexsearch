@@ -1,0 +1,7 @@
+{
+  "name": "nodejs-esm-basic-worker-extern-config",
+  "type": "module",
+  "dependencies": {
+    "flexsearch": "^0.8.105"
+  }
+}

@@ -1,6 +1,6 @@
-import { Encoder } from "flexsearch/esm";
+const { Encoder } = require("flexsearch");
 
-export default {
+module.exports = {
     tokenize: "forward",
     encoder: new Encoder({
         normalize: function(str){

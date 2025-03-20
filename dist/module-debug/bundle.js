@@ -276,7 +276,7 @@ const FlexSearch = {
 
     FlexSearch.Language = {};
 
-    const root = self;
+    const root = "undefined" != typeof self ? self : "undefined" != typeof global ? global : "undefined" != typeof window ? window : {};
     let prop;
 
     // AMD (RequireJS)

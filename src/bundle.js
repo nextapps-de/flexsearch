@@ -310,7 +310,9 @@ if(RELEASE !== "bundle.module" &&
 
     FlexSearch["Language"] = {};
 
-    const root = self;
+    const root = typeof self !== "undefined" ? self :
+                 typeof global !== "undefined" ? global :
+                 typeof window !== "undefined" ? window : {};
     let prop;
 
     // AMD (RequireJS)

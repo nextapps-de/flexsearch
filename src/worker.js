@@ -1,6 +1,7 @@
 import { IndexOptions } from "./type.js";
 import { create_object, is_function, is_object, is_string } from "./common.js";
 import handler from "./worker/handler.js";
+import apply_async from "./async.js";
 
 let pid = 0;
 
@@ -97,11 +98,16 @@ register("append");
 register("search");
 register("update");
 register("remove");
+register("clear");
+register("export");
+register("import");
+
+apply_async(WorkerIndex.prototype);
 
 function register(key){
 
     WorkerIndex.prototype[key] =
-    WorkerIndex.prototype[key + "Async"] = async function(){
+    /*WorkerIndex.prototype[key + "Async"] =*/ async function(){
 
         const self = this;
         const args = [].slice.call(arguments);

@@ -1,21 +1,24 @@
 import Index from "../index.js";
 import { IndexOptions } from "../type.js";
 
+/** @type Index */
+let index;
+/** @type {IndexOptions} */
+let options;
+
 export default async function(data) {
 
     data = data["data"];
 
-    /** @type Index */
-    const index = self["_index"];
-    const args = data["args"];
     const task = data["task"];
+    const id = data["id"];
+    let args = data["args"];
 
     switch(task){
 
         case "init":
 
-            /** @type {IndexOptions} */
-            let options = data["options"] || {};
+            options = data["options"] || {};
             let filepath = options.config;
             if(filepath){
                 options = options;
@@ -31,24 +34,34 @@ export default async function(data) {
                 // export the FlexSearch global payload to "self"
                 Function("return " + factory)()(self);
 
-                /** @type Index */
-                self["_index"] = new self["FlexSearch"]["Index"](options);
+                index = new self["FlexSearch"]["Index"](options);
 
                 // destroy the exported payload
                 delete self["FlexSearch"];
             }
             else{
 
-                self["_index"] = new Index(options);
+                index = new Index(options);
             }
 
-            postMessage({ "id": data["id"] });
+            postMessage({ "id": id });
             break;
 
         default:
 
-            const id = data["id"];
-            const message = index[task].apply(index, args);
+            let message;
+
+            if(task === "export"){
+                args = [options.export];
+            }
+            if(task === "import"){
+                await options.import.call(index, index);
+                //args = [options.import];
+            }
+            else{
+                message = index[task].apply(index, args);
+            }
+
             postMessage(
                 task === "search"
                     ? { "id": id, "msg": message }

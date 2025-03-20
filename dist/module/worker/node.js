@@ -1,27 +1,27 @@
 const { parentPort } = require("worker_threads"),
-      { join } = require("path"),
-      { Index } = require("../flexsearch.bundle.min.js");
+      { Index } = require("flexsearch");
+//const { join } = require("path");
 // Test Path
 //const { Index } = require("../../dist/flexsearch.bundle.min.js");
 
 
-let index;
+/** @type Index */
+let index, options;
+/** @type {IndexOptions} */
 
 parentPort.on("message", async function (data) {
-
-    /** @type Index */
-    const args = data.args,
-          task = data.task,
+    const task = data.task,
           id = data.id;
 
+    let args = data.args;
 
     switch (task) {
 
         case "init":
-            let options = data.options || {},
-                filepath = options.config;
-            // load extern field configuration
 
+            options = data.options || {};
+            // load extern field configuration
+            let filepath = options.config;
             if (filepath) {
                 options = Object.assign({}, options, require(filepath));
                 delete options.worker;
@@ -35,7 +35,18 @@ parentPort.on("message", async function (data) {
 
         default:
 
-            const message = index[task].apply(index, args);
+            let message;
+
+            if ("export" === task) {
+                args = [options.export];
+            }
+            if ("import" === task) {
+                await options.import.call(index, index);
+                //args = [options.import];
+            } else {
+                message = index[task].apply(index, args);
+            }
+
             parentPort.postMessage("search" === task ? { id: id, msg: message } : { id: id });
     }
 });
