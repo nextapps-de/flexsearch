@@ -686,6 +686,7 @@ The `worker` inherits from type `Index` and does not inherit from type `Document
     - [document-worker](example/nodejs-commonjs/document-worker)
     - [document-worker-extern-config](example/nodejs-commonjs/document-worker-extern-config)
     - [document-export-import](example/nodejs-commonjs/document-export-import)
+    - [document-worker-export-import](example/nodejs-commonjs/document-worker-export-import)
     - [language-pack](example/nodejs-commonjs/language-pack)
 - [nodejs-esm](example/nodejs-esm):
     - [basic](example/nodejs-esm/basic)
@@ -701,6 +702,7 @@ The `worker` inherits from type `Index` and does not inherit from type `Document
     - [document-worker](example/nodejs-esm/document-worker)
     - [document-worker-extern-config](example/nodejs-esm/document-worker-extern-config)
     - [document-export-import](example/nodejs-esm/document-export-import)
+    - [document-worker-export-import](example/nodejs-esm/document-worker-export-import)
     - [language-pack](example/nodejs-esm/language-pack)
 
 ### Examples Browser
