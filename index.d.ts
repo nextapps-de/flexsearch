@@ -172,6 +172,7 @@ declare module "flexsearch" {
         context?: ContextOptions | boolean;
         keystore?: number;
         fastupdate?: boolean;
+        priority?: number;
         score?: (
             content: string[],
             term: string,
@@ -251,43 +252,36 @@ declare module "flexsearch" {
         destroy(): Promise<void>;
 
         // Async Methods
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         addAsync(
             id: Id,
             content: string,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         appendAsync(
             id: Id,
             content: string,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         updateAsync(
             id: Id,
             content: string,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         removeAsync(
             id: Id,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         searchAsync(
             query: string,
             options?: Limit | SearchOptions,
             callback?: AsyncCallback<SearchResults>
         ): Promise<SearchResults>
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         searchAsync(
             query: string,
             limit: Limit,
             options?: SearchOptions,
             callback?: AsyncCallback<SearchResults>
         ): Promise<SearchResults>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         searchAsync(
             options: SearchOptions,
             callback?: AsyncCallback<SearchResults>
@@ -449,63 +443,52 @@ declare module "flexsearch" {
         destroy(): Promise<void>;
 
         // Async Methods
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         addAsync(
             id: Id,
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         addAsync(
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         appendAsync(
             id: Id,
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         appendAsync(
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         updateAsync(
             id: Id,
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         updateAsync(
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         removeAsync(
             id: Id,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         removeAsync(
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         searchAsync(
             query: string,
             options?: Limit | DocumentSearchOptions,
             callback?: AsyncCallback<DocumentSearchResults>
         ): Promise<DocumentSearchResults>
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         searchAsync(
             query: string,
             limit: number,
             options?: DocumentSearchOptions,
             callback?: AsyncCallback<DocumentSearchResults>
         ): Promise<DocumentSearchResults>;
-        /** @deprecated The "async" variants are deprecated, instead use the default variant */
         searchAsync(
             options: DocumentSearchOptions,
             callback?: AsyncCallback<DocumentSearchResults>

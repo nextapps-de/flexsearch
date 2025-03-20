@@ -118,6 +118,10 @@ export default function Index(options, _register){
         this.commit_task = [];
         this.commit_timer = null;
     }
+
+    if(SUPPORT_ASYNC){
+        this.priority = options.priority || 4;
+    }
 }
 
 if(SUPPORT_PERSISTENT){

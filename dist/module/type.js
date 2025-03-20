@@ -20,7 +20,8 @@ import StorageInterface from "./db/interface.js";
  *   db: (StorageInterface|undefined),
  *   commit: (boolean|undefined),
  *   worker: (string|undefined),
- *   config: (string|undefined)
+ *   config: (string|undefined),
+ *   priority: (number|undefined)
  * }}
  */
 export let IndexOptions = {};
@@ -64,6 +65,7 @@ export let FieldOptions = {};
  *   doc: (DocumentDescriptor|Array<DocumentDescriptor>|undefined),
  *   document: (DocumentDescriptor|Array<DocumentDescriptor>|undefined),
  *   worker: (boolean|string|undefined),
+ *   priority: (number|undefined)
  * }}
  */
 export let DocumentOptions = {};

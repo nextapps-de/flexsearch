@@ -2,7 +2,7 @@
   "public": true,
   "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.8.105",
+  "version": "0.8.107",
   "description": "Next-Generation full-text search library for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -37,6 +37,7 @@
     "./esm/lang/*": "./dist/module/lang/*.js",
     "./esm/db/*": "./dist/module/db/*/index.js",
     "./debug": "./dist/flexsearch.bundle.debug.js",
+    "./debug/": "./dist/flexsearch.bundle.debug.js",
     "./debug/lang/*": "./dist/lang/*.min.js",
     "./debug/db/*": "./dist/db/*/index.cjs",
     "./esm/debug": "./dist/flexsearch.bundle.module.debug.js",
@@ -82,7 +83,8 @@
     "build:module:light:debug": "node task/build RELEASE=light.module DEBUG=true PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=false SUPPORT_CACHE=true SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT",
     "build:all": "npm version --no-git-tag-version patch && npm run build:bundle && npm run build:bundle:debug && npm run build:light && npm run build:light:debug && npm run build:compact && npm run build:compact:debug && npm run build:module && npm run build:module:debug && npm run build:module:min && npm run build:module:bundle && npm run build:module:bundle:debug && npm run build:module:light && npm run build:module:light:debug && npm run build:module:compact && npm run build:module:compact:debug && npm run build:es5 && npm run build:es5:debug && npm run build:lang && npm run build:db",
     "build:custom": "node task/build RELEASE=custom",
-    "test": "cd test && npm install && npm run test"
+    "test": "cd test && npm install && npm run test && cd ..",
+    "test:all": "npm run test && cd test && npm run test:all && cd .."
   },
   "files": [
     "dist/**",

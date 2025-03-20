@@ -105,6 +105,15 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Document.prototype.get;
 /** @export */ Document.prototype.set;
 
+if(SUPPORT_SERIALIZE){
+/** @export */ Document.prototype.field;
+/** @export */ Document.prototype.index;
+/** @export */ Document.prototype.reg;
+/** @export */ Document.prototype.tag;
+/** @export */ Document.prototype.store;
+/** @export */ Document.prototype.fastupdate;
+}
+
 /** @export */ Resolver.prototype.limit;
 /** @export */ Resolver.prototype.offset;
 /** @export */ Resolver.prototype.boost;
@@ -159,6 +168,7 @@ if(SUPPORT_PERSISTENT){
 /** @export */ IndexOptions.db;
 /** @export */ IndexOptions.worker; // worker url
 /** @export */ IndexOptions.config; // config url
+/** @export */ IndexOptions.priority;
 
 /** @export */ FieldOptions.preset;
 /** @export */ FieldOptions.context;
@@ -193,6 +203,7 @@ if(SUPPORT_PERSISTENT){
 /** @export */ DocumentOptions.doc;
 /** @export */ DocumentOptions.document;
 /** @export */ DocumentOptions.worker;
+/** @export */ DocumentOptions.priority;
 
 /** @export */ ContextOptions.depth;
 /** @export */ ContextOptions.bidirectional;

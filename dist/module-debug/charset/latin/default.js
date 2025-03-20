@@ -4,8 +4,8 @@ import { EncoderOptions } from "../../type.js";
 const options = {
     normalize: function (str) {
         return str.toLowerCase();
-    },
-    numeric: !1,
-    dedupe: !1
+    }
+    //numeric: false,
+    //dedupe: false
 };
 export default options;

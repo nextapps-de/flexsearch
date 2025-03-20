@@ -45,19 +45,21 @@ export default function Resolver(result) {
  */
 Resolver.prototype.limit = function (limit) {
     if (this.result.length) {
+        /** @type {IntermediateSearchResults} */
         const final = [];
-        let count = 0;
         for (let j = 0, ids; j < this.result.length; j++) {
-            ids = this.result[j];
-            if (ids.length + count < limit) {
-                final[j] = ids;
-                count += ids.length;
-            } else {
-                final[j] = ids.slice(0, limit - count);
-                this.result = final;
-                break;
+            if (ids = this.result[j]) {
+                if (ids.length <= limit) {
+                    final[j] = ids;
+                    limit -= ids.length;
+                    if (!limit) break;
+                } else {
+                    final[j] = ids.slice(0, limit);
+                    break;
+                }
             }
         }
+        this.result = final;
     }
     return this;
 };
@@ -67,15 +69,16 @@ Resolver.prototype.limit = function (limit) {
  */
 Resolver.prototype.offset = function (offset) {
     if (this.result.length) {
+        /** @type {IntermediateSearchResults} */
         const final = [];
-        let count = 0;
         for (let j = 0, ids; j < this.result.length; j++) {
-            ids = this.result[j];
-            if (ids.length + count < offset) {
-                count += ids.length;
-            } else {
-                final[j] = ids.slice(offset - count);
-                count = offset;
+            if (ids = this.result[j]) {
+                if (ids.length <= offset) {
+                    offset -= ids.length;
+                } else {
+                    final[j] = ids.slice(offset);
+                    offset = 0;
+                }
             }
         }
         this.result = final;

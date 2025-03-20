@@ -9,14 +9,15 @@ export default function (prototype) {
     register.call(prototype, "remove");
 }
 
-// let cycle;
-// let budget = 0;
-//
-// function tick(resolve){
-//     cycle = null;
-//     budget = 0;
-//     resolve();
-// }
+let timer, timestamp;
+const current = {},
+      limit = {};
+
+
+function tick(key) {
+    timer = 0;
+    current[key] = limit[key];
+}
 
 /**
  * @param {!string} key
@@ -25,33 +26,6 @@ export default function (prototype) {
 
 function register(key) {
     this[key + "Async"] = function () {
-
-        // // prevent stack overflow of adding too much tasks to the same event loop
-        // // actually limit stack to 1,000,000 tasks every ~4ms
-        // cycle || (
-        //     cycle = new Promise(resolve => setTimeout(tick, 0, resolve))
-        // );
-        //
-        // // apply different performance budgets
-        // if(key === "update" || key === "remove" && this.fastupdate === false){
-        //     budget += 1000 * this.resolution;
-        //     if(this.depth)
-        //         budget += 1000 * this.resolution_ctx;
-        // }
-        // else if(key === "search"){
-        //     budget++;
-        // }
-        // else{
-        //     budget += 20 * this.resolution;
-        //     if(this.depth)
-        //         budget += 20 * this.resolution_ctx;
-        // }
-        //
-        // // wait for the event loop cycle
-        // if(budget >= 1e6){
-        //     await cycle;
-        // }
-
         const args = /*[].slice.call*/arguments,
               arg = args[args.length - 1];
 
@@ -62,12 +36,37 @@ function register(key) {
             delete args[args.length - 1];
         }
 
+        // balance when polling the event loop
+        if (!timer) {
+            timer = setTimeout(tick, 0, key);
+            timestamp = Date.now();
+        }
+        if (!limit[key]) {
+            limit[key] = current[key] = 1000;
+        }
+        if (! --current[key]) {
+            const now = Date.now(),
+                  duration = now - timestamp,
+                  target = 3 * (this.priority * this.priority);
+
+            current[key] = limit[key] = 0 | limit[key] * target / duration || 1;
+            timer = clearTimeout(timer);
+            const self = this;
+            return new Promise(resolve => {
+                setTimeout(function () {
+                    resolve(self[key + "Async"].apply(self, args));
+                }, 0);
+            });
+        }
+
         //this.async = true;
-        const res = this[key].apply(this, args);
+        const res = this[key].apply(this, args),
+              promise = res.then ? res : new Promise(resolve => resolve(res));
+
         //this.async = false;
         if (callback) {
-            res.then ? res.then(callback) : callback(res);
+            promise.then(callback);
         }
-        return res;
+        return promise;
     };
 }

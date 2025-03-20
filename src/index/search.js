@@ -297,6 +297,7 @@ Index.prototype.search = function(query, limit, options){
 
         term = query_terms[index];
 
+        // todo should the dupe check applied on [keyword:term]?
         if(term && !dupes[term]){
 
             dupes[term] = 1;
@@ -360,11 +361,23 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
     let final = result;
 
     if(length > 1){
-        final = intersect(result, resolution, /** @type {number} */ (limit), offset, suggest, boost, resolve);
+        final = intersect(
+            result,
+            resolution,
+            limit,
+            offset,
+            suggest,
+            boost,
+            resolve
+        );
     }
     else if(length === 1){
         return !SUPPORT_RESOLVER || resolve
-            ? resolve_default.call(null, result[0], /** @type {number} */ (limit), offset)
+            ? resolve_default.call(null,
+                result[0],
+                limit,
+                offset
+            )
             : new Resolver(result[0]);
     }
 
@@ -390,7 +403,16 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
 
 function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
 
-    const result = this.get_array(term, keyword, limit, offset, resolve, enrich, tag);
+    const result = this.get_array(
+        term,
+        keyword,
+        limit,
+        offset,
+        resolve,
+        enrich,
+        tag
+    );
+
     resolve = !SUPPORT_RESOLVER || resolve;
 
     if(SUPPORT_PERSISTENT && this.db){

@@ -5,6 +5,7 @@ const options = {
     normalize: function(str){
         return str.toLowerCase();
     },
-    dedupe: false
+    //numeric: false,
+    //dedupe: false
 };
 export default options;

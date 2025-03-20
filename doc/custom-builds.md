@@ -2,8 +2,8 @@
 
 The `/src/` folder of this repository requires some compilation to resolve the build flags. Those are your options:
 
-- Closure Compiler (Advanced Compilation) (used by this library <a href="task/build.js">here</a>)
-- Babel + Plugin `babel-plugin-conditional-compile` (used by this library <a href="task/babel.min.json">here</a>)
+- Closure Compiler (Advanced Compilation)
+- Babel + Plugin `babel-plugin-conditional-compile`
 
 You can't resolve build flags with:
 
@@ -18,7 +18,6 @@ These are some of the basic builds located in the `/dist/` folder:
 npm run build:bundle
 npm run build:light
 npm run build:module
-npm run build:es5
 ```
 
 Perform a custom build (UMD bundle) by passing build flags:
@@ -40,6 +39,12 @@ npm run build:custom DEBUG=true SUPPORT_DOCUMENT=true SUPPORT_TAGS=true
 ```
 
 > On custom builds each build flag will be set to `false` by default when not passed.
+
+Just build the core library:
+
+```bash
+npm run build:custom
+```
 
 The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when format is module to `dist/flexsearch.custom.module.xxxx.min.js` (the "xxxx" is a hash based on the used build flags).
 

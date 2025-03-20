@@ -1,13 +1,14 @@
 import Index from "./index.js";
 import Document from "./document.js";
 import { is_string } from "./common.js";
+import { IntermediateSearchResults } from "./type.js";
 
 const chunk_size_reg = 250000;
 const chunk_size_map = 5000;
 const chunk_size_ctx = 1000;
 
 /**
- * @param {Map} map
+ * @param {Map<IntermediateSearchResults>} map
  * @param {number=} size
  * @return {Array<Object>}
  */
@@ -30,8 +31,8 @@ function map_to_json(map, size = 0){
 
 /**
  * @param {Array<Object>} json
- * @param {Map=} map
- * @return {Map}
+ * @param {Map<IntermediateSearchResults>} map
+ * @return {Map<IntermediateSearchResults>}
  */
 function json_to_map(json, map){
     map || (map = new Map());
@@ -42,6 +43,11 @@ function json_to_map(json, map){
     return /** @type {Map} */ (map);
 }
 
+/**
+ * @param {Map<Map<IntermediateSearchResults>>} ctx
+ * @param {number=} size
+ * @return {Array<Object>}
+ */
 function ctx_to_json(ctx, size = 0){
     let chunk = [];
     let json = [];
@@ -61,6 +67,11 @@ function ctx_to_json(ctx, size = 0){
     return chunk;
 }
 
+/**
+ * @param {Array<Object>} json
+ * @param {Map<Map<IntermediateSearchResults>>} ctx
+ * @return {Map<Map<IntermediateSearchResults>>}
+ */
 function json_to_ctx(json, ctx){
     ctx || (ctx = new Map());
     for(let i = 0, entry, map; i < json.length; i++) {
@@ -71,6 +82,10 @@ function json_to_ctx(json, ctx){
     return ctx;
 }
 
+/**
+ * @param {Set<string|number>} reg
+ * @return {Array<Array<string|number>>}
+ */
 function reg_to_json(reg){
     let chunk = [];
     let json = [];
@@ -85,6 +100,11 @@ function reg_to_json(reg){
     return chunk;
 }
 
+/**
+ * @param {Array<string|number>} json
+ * @param {Set<string|number>} reg
+ * @return {Set<string|number>}
+ */
 function json_to_reg(json, reg){
     reg || (reg = new Set());
     for(let i = 0; i < json.length; i++) {
@@ -173,7 +193,7 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0){
 
             // todo
             key = "cfg";
-            chunk = {};
+            chunk = null;
             break;
 
         case 2:
@@ -236,7 +256,7 @@ export function importIndex(key, data){
 
             // fast update isn't supported by export/import
             this.fastupdate = false;
-            this.reg = json_to_reg(data, this.reg);
+            this.reg = json_to_reg(/** @type {Array<string|number>} */ (data), this.reg);
             break;
 
         case "map":
@@ -307,7 +327,7 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
             case 3:
 
                 key = "cfg";
-                chunk = {};
+                chunk = null;
                 _field = null;
                 break;
 
@@ -359,7 +379,7 @@ export function importDocument(key, data){
 
                 // fast update isn't supported by export/import
                 this.fastupdate = false;
-                this.reg = json_to_reg(data, this.reg);
+                this.reg = json_to_reg(/** @type {Array<string|number>} */ (data), this.reg);
 
                 for(let i = 0, idx; i < this.field.length; i++){
                     idx = this.index.get(this.field[i]);

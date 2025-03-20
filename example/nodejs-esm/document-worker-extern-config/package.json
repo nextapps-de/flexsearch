@@ -2,6 +2,6 @@
   "name": "nodejs-esm-document-worker-extern-config",
   "type": "module",
   "dependencies": {
-    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
+    "flexsearch": "^0.8.105"
   }
 }

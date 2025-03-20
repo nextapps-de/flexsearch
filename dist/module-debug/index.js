@@ -72,6 +72,8 @@ export default function Index(options, _register) {
     this.commit_auto = !1 !== options.commit;
     this.commit_task = [];
     this.commit_timer = null;
+
+    this.priority = options.priority || 4;
 }
 
 Index.prototype.mount = function (db) {

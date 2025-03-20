@@ -1,7 +1,6 @@
 {
-  "name": "nodejs-esm-basic-worker-extern-config",
-  "type": "module",
+  "name": "nodejs-commonjs-basic-worker-extern-config",
   "dependencies": {
-    "flexsearch": "github:nextapps-de/flexsearch#v0.8-preview"
+    "flexsearch": "^0.8.105"
   }
 }
