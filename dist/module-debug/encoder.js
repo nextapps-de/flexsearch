@@ -87,9 +87,7 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */
-    /* skip_update: */
-    /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
+    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -199,7 +197,8 @@ Encoder.prototype.assign = function (options) {
     // auto-balanced cache
     this.cache = tmp = merge_option(options.cache, !0, this.cache);
     if (tmp) {
-        this.timer = null;this.cache_size = "number" == typeof tmp ? tmp : 2e5;
+        this.timer = null;
+        this.cache_size = "number" == typeof tmp ? tmp : 2e5;
         this.cache_enc = new Map();
         this.cache_term = new Map();
         this.cache_enc_length = 128;

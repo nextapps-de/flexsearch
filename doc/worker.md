@@ -127,7 +127,169 @@ The used index configuration has 2 fields (using bidirectional context of `depth
 A non-Worker Document index requires 181 seconds to index all contents.<br>
 The Worker index just takes 32 seconds to index them all, by processing every field and tag in parallel. For such large content it is a quite impressive result.
 
-### CSP-friendly Worker (Browser)
+## Export / Import Worker Indexes (Node.js)
+
+Worker will save/load their data dedicated and does not need the message channel for the data transfer.
+
+### Basic Worker Index
+
+> This feature follows the strategy of using [Extern Worker Configuration](#extern-worker-configuration) in combination with [Basic Export Import](../example/nodejs-commonjs/basic-export-import).
+
+Example (CommonJS): [basic-worker-export-import](../example/nodejs-commonjs/basic-worker-export-import)<br>
+Example (ESM): [basic-worker-export-import](../example/nodejs-esm/basic-worker-export-import)
+
+Provide the index configuration and keep it, because it isn't stored. Provide a parameter `config` which is including the filepath to the extern configuration file:
+
+```js
+const dirname = import.meta.dirname;
+const config = {
+    tokenize: "forward",
+    config: dirname + "/config.js"
+};
+```
+
+> Any changes you made to the configuration will almost require a full re-index.
+
+Provide the extern configuration file e.g. `/config.js` as a default export including the methods `export` and `import`:
+
+```js
+import { promises as fs } from "fs";
+
+export default {
+    tokenize: "forward",
+    export: async function(key, data){
+        // like the usual export write files by key + data
+        await fs.writeFile("./export/" + key, data, "utf8");
+    },
+    import: async function(index){
+        // get the file contents of the export directory
+        let files = await fs.readdir("./export/");
+        files = await Promise.all(files);
+        // loop through the files and push their contents to the index
+        // by also passing the filename as the first parameter
+        for(let i = 0; i < files.length; i++){
+            const data = await fs.readFile("./export/" + files[i], "utf8");
+            index.import(files[i], data);
+        }
+    }
+};
+```
+
+Create your index by assigning the configuration file from above:
+
+```js
+import { Worker as WorkerIndex } from "flexsearch/esm";
+const index = await new WorkerIndex(config);
+// add data to the index
+// ...
+```
+
+Export the index:
+
+```js
+await index.export();
+```
+
+Import the index:
+
+```js
+// create the same type of index you have used by .export()
+// along with the same configuration
+const index = await new WorkerIndex(config);
+await index.import();
+```
+
+### Document Worker Index
+
+> This feature follows the strategy of using [Extern Worker Configuration](#extern-worker-configuration) in combination with [Document Export Import](../example/nodejs-esm/document-export-import).
+
+Document Worker exports all their feature including:
+
+- Multi-Tag Indexes
+- Context-Search Indexes
+- Document-Store
+
+Example (CommonJS): [document-worker-export-import](../example/nodejs-commonjs/document-worker-export-import)<br>
+Example (ESM): [document-worker-export-import](../example/nodejs-esm/document-worker-export-import)
+
+Provide the index configuration and keep it, because it isn't stored. Provide a parameter `config` which is including the filepath to the extern configuration file:
+
+```js
+const dirname = import.meta.dirname;
+const config = {
+    worker: true,
+    document: {
+        id: "tconst",
+        store: true,
+        index: [{
+            field: "primaryTitle",
+            config: dirname + "/config.primaryTitle.js"
+        },{
+            field: "originalTitle",
+            config: dirname + "/config.originalTitle.js"
+        }],
+        tag: [{
+            field: "startYear"
+        },{
+            field: "genres"
+        }]
+    }
+};
+```
+
+> Any changes you made to the configuration will almost require a full re-index.
+
+Provide the extern configuration file as a default export including the methods `export` and `import`:
+
+```js
+import { promises as fs } from "fs";
+
+export default {
+    tokenize: "forward",
+    export: async function(key, data){
+        // like the usual export write files by key + data
+        await fs.writeFile("./export/" + key, data, "utf8");
+    },
+    import: async function(file){
+        // instead of looping you will get the filename as 2nd paramter
+        // just return the loaded contents as a string
+        return await fs.readFile("./export/" + file, "utf8");
+    }
+};
+```
+
+Create your index by assigning the configuration file from above:
+
+```js
+import { Document } from "flexsearch/esm";
+const document = await new Document(config);
+// add data to the index
+// ...
+```
+
+Export the index by providing a key-data handler:
+
+```js
+await document.export(async function(key, data){
+    await fs.writeFile("./export/" + key, data, "utf8");
+});
+```
+
+Import the index:
+
+```js
+const files = await fs.readdir("./export/");
+// create the same type of index you have used by .export()
+// along with the same configuration
+const document = await new Document(config);
+await Promise.all(files.map(async file => {
+    const data = await fs.readFile("./export/" + file, "utf8");
+    // call import (async)
+    await document.import(file, data);
+}));
+```
+
+## CSP-friendly Worker (Browser)
 
 When just using worker by passing the option `worker: true`, the worker will be created by code generation under the hood. This might have issues when using strict CSP settings.
 

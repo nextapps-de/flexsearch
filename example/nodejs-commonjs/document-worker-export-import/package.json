@@ -1,6 +1,5 @@
 {
-  "name": "nodejs-esm-document-worker",
-  "type": "module",
+  "name": "nodejs-commonjs-document-worker-export-import",
   "dependencies": {
     "flexsearch": "github:nextapps-de/flexsearch"
   }

@@ -59,6 +59,7 @@ console.log(result);
 // -----------------------
 
 await fs.mkdir("./export/").catch(e => {});
+// call export
 await document.export(async function(key, data){
     await fs.writeFile("./export/" + key, data, "utf8");
 });
@@ -74,8 +75,9 @@ document = new Document(config);
 const files = await fs.readdir("./export/");
 await Promise.all(files.map(async file => {
     const data = await fs.readFile("./export/" + file, "utf8");
-    await document.import(file, data);
-}))
+    // call import
+    document.import(file, data);
+}));
 
 // perform query
 result = document.search({

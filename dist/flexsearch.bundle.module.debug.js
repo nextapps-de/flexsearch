@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.111 (Bundle/Module/Debug)
+ * FlexSearch.js v0.8.113 (Bundle/Module/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -271,12 +271,13 @@ function L(a) {
 ;let M, N;
 async function ka(a) {
   a = a.data;
-  const b = a.task, c = a.id;
+  var b = a.task;
+  const c = a.id;
   let e = a.args;
   switch(b) {
     case "init":
       N = a.options || {};
-      (a = a.factory) ? (Function("return " + a)()(self), M = new self.FlexSearch.Index(N), delete self.FlexSearch) : M = new O(N);
+      (b = a.factory) ? (Function("return " + b)()(self), M = new self.FlexSearch.Index(N), delete self.FlexSearch) : M = new O(N);
       postMessage({id:c});
       break;
     default:
@@ -285,15 +286,15 @@ async function ka(a) {
         if (!N.export || "function" !== typeof N.export) {
           throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "export".');
         }
-        e = [N.export];
+        e[1] ? (e[0] = N.export, e[2] = 0, e[3] = 1) : e = null;
       }
       if ("import" === b) {
         if (!N.import || "function" !== typeof N.import) {
           throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "import".');
         }
-        await N.import.call(M, M);
+        e[0] && (a = await N.import.call(M, e[0]), M.import(e[0], a));
       } else {
-        d = M[b].apply(M, e), d.then && (d = await d);
+        (d = e && M[b].apply(M, e)) && d.then && (d = await d);
       }
       postMessage("search" === b ? {id:c, msg:d} : {id:c});
   }
@@ -377,13 +378,15 @@ R("remove");
 R("clear");
 R("export");
 R("import");
+la(Q.prototype);
 function R(a) {
-  Q.prototype[a] = Q.prototype[a + "Async"] = async function() {
+  Q.prototype[a] = function() {
     const b = this, c = [].slice.call(arguments);
     var e = c[c.length - 1];
     let d;
-    "function" === typeof e && (d = e, c.splice(c.length - 1, 1));
+    "function" === typeof e && (d = e, c.pop());
     e = new Promise(function(f) {
+      "export" === a && "function" === typeof c[0] && (c[0] = null);
       b.h[++ra] = f;
       b.worker.postMessage({task:a, id:ra, args:c});
     });
@@ -391,7 +394,7 @@ function R(a) {
   };
 }
 function sa(a, b, c) {
-  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + ka.toString()], {type:"text/javascript"}))) : new window.Worker(E(c) ? c : import.meta.url.replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
+  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + ka.toString()], {type:"text/javascript"}))) : new window.Worker("string" === typeof c ? c : import.meta.url.replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
   "module/worker/worker.js"), {type:"module"});
 }
 ;function ta(a, b = 0) {
@@ -725,6 +728,7 @@ function Ba(a) {
       }
       this.store.set(a, k || b);
     }
+    this.worker && (this.fastupdate || this.reg.add(a));
   }
   return this;
 };
@@ -1707,21 +1711,31 @@ t.export = function(a, b, c = 0, e = 0) {
   return za.call(this, a, b, d, f, c, e);
 };
 t.import = function(a, b) {
+  var c = a.split(".");
+  "json" === c[c.length - 1] && c.pop();
+  const e = 2 < c.length ? c[0] : "";
+  c = 2 < c.length ? c[2] : c[1];
+  if (this.worker && e) {
+    return this.index.get(e).import(a);
+  }
   if (b) {
     "string" === typeof b && (b = JSON.parse(b));
-    a = a.split(".");
-    "json" === a[a.length - 1] && a.pop();
-    var c = 2 < a.length ? a[0] : "";
-    a = 2 < a.length ? a[2] : a[1];
-    if (c) {
-      return this.index.get(c).import(a, b);
+    if (e) {
+      return this.index.get(e).import(c, b);
     }
-    switch(a) {
+    switch(c) {
       case "reg":
         this.fastupdate = !1;
         this.reg = ya(b, this.reg);
-        for (let e = 0, d; e < this.field.length; e++) {
-          d = this.index.get(this.field[e]), d.fastupdate = !1, d.reg = this.reg;
+        for (let d = 0, f; d < this.field.length; d++) {
+          f = this.index.get(this.field[d]), f.fastupdate = !1, f.reg = this.reg;
+        }
+        if (this.worker) {
+          b = [];
+          for (const d of this.index.values()) {
+            b.push(d.import(a));
+          }
+          return Promise.all(b);
         }
         break;
       case "tag":
@@ -2142,7 +2156,7 @@ t.export = function(a, b, c = 0, e = 0) {
 };
 t.import = function(a, b) {
   if (b) {
-    switch("string" === typeof b && (b = JSON.parse(b)), a = a.split("."), "json" === a[a.length - 1] && a.pop(), a = 1 < a.length ? a[1] : a[0], a) {
+    switch("string" === typeof b && (b = JSON.parse(b)), a = a.split("."), "json" === a[a.length - 1] && a.pop(), 3 === a.length && a.shift(), a = 1 < a.length ? a[1] : a[0], a) {
       case "reg":
         this.fastupdate = !1;
         this.reg = ya(b, this.reg);

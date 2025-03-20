@@ -1,6 +1,6 @@
 
 import { IndexOptions } from "./type.js";
-import { create_object, is_function, is_object, is_string } from "./common.js";
+import { create_object } from "./common.js";
 import handler from "./worker/handler.js";
 import apply_async from "./async.js";
 
@@ -81,7 +81,6 @@ export default function WorkerIndex(options = /** @type IndexOptions */{}) {
     }
 
     const worker = create(factory, is_node_js, options.worker);
-    //worker.worker = true;
     return worker.then ? worker.then(function (worker) {
         return init.call(_self, worker);
     }) : init.call(this, worker);
@@ -96,36 +95,40 @@ register("clear");
 register("export");
 register("import");
 
+apply_async(WorkerIndex.prototype);
+
+
 function register(key) {
 
-    WorkerIndex.prototype[key] = WorkerIndex.prototype[key + "Async"] = async function () {
+    WorkerIndex.prototype[key] = function () {
         const self = this,
               args = [].slice.call(arguments),
               arg = args[args.length - 1];
 
         let callback;
 
-        if (is_function(arg)) {
+        if ("function" == typeof arg) {
             callback = arg;
-            args.splice(args.length - 1, 1);
+            args.pop();
         }
 
         const promise = new Promise(function (resolve) {
-            //setTimeout(function(){
+            if ("export" === key && "function" == typeof args[0]) {
+                // remove function handler
+                args[0] = null;
+            }
             self.resolver[++pid] = resolve;
             self.worker.postMessage({
                 task: key,
                 id: pid,
                 args: args
             });
-            //});
         });
 
         if (callback) {
             promise.then(callback);
             return this;
         } else {
-
             return promise;
         }
     };
@@ -134,8 +137,7 @@ function register(key) {
 function create(factory, is_node_js, worker_path) {
 
     let worker = is_node_js ?
-    // This eval will be removed when compiling, it isn't there in final build
-
+    // This eval will be removed when compiling
     "undefined" != typeof module ? (0, eval)('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
     //: (0,eval)('new ((await import("worker_threads"))["Worker"])(import.meta.dirname + "/worker/node.mjs")')
     //: (0,eval)('new ((await import("worker_threads"))["Worker"])((1,eval)(\"import.meta.dirname\") + "/node/node.mjs")')
@@ -143,7 +145,8 @@ function create(factory, is_node_js, worker_path) {
     //: import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/worker/node.mjs"); })
 
     //eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
-    : factory ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new window.Worker(is_string(worker_path) ? worker_path : import.meta.url.replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", "module/worker/worker.js") /*"worker/worker.js"*/, { type: "module" });
+    : factory ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new window.Worker("string" == typeof worker_path ? worker_path : import.meta.url.replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", "module/worker/worker.js") /*"worker/worker.js"*/
+    , { type: "module" });
 
     return worker;
 }

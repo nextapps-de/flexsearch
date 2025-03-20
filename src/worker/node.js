@@ -1,3 +1,7 @@
+/*
+ * Node.js Worker (CommonJS)
+ * This file is a standalone file and isn't being a part of the build/bundle
+ */
 const { parentPort } = require("worker_threads");
 //const { join } = require("path");
 // Test Path
@@ -41,17 +45,26 @@ parentPort.on("message", async function(data){
                 if(!options.export || typeof options.export !== "function"){
                     throw new Error("Either no extern configuration provided for the Worker-Index or no method was defined on the config property \"export\".");
                 }
-                args = [options.export];
+                // skip non-field indexes
+                if(!args[1]) args = null;
+                else{
+                    args[0] = options.export;
+                    args[2] = 0;
+                    args[3] = 1; // skip reg
+                }
             }
             if(task === "import"){
                 if(!options.import || typeof options.import !== "function"){
                     throw new Error("Either no extern configuration provided for the Worker-Index or no method was defined on the config property \"import\".");
                 }
-                await options.import.call(index, index);
+                if(args[0]){
+                    const data = await options.import.call(index, args[0]);
+                    index.import(args[0], data);
+                }
             }
             else{
-                message = index[task].apply(index, args);
-                if(message.then){
+                message = args && index[task].apply(index, args);
+                if(message && message.then){
                     message = await message;
                 }
             }

@@ -43,8 +43,7 @@ export default function Index(options, _register) {
     /** @type Encoder */
     this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder( /** @type {EncoderOptions} */encoder) : { encode: encoder };
 
-    this.compress = options.compress || options.compression ||
-    /* suggest */ /* append: */ /* enrich */!1;
+    this.compress = options.compress || options.compression || /* suggest */ /* append: */ /* enrich */!1;
 
 
     this.resolution = options.resolution || 9;

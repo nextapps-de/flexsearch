@@ -4,7 +4,7 @@ import {
     SUPPORT_KEYSTORE,
     SUPPORT_PERSISTENT,
     SUPPORT_STORE,
-    SUPPORT_TAGS
+    SUPPORT_TAGS, SUPPORT_WORKER
 } from "../config.js";
 // <-- COMPILER BLOCK
 import { create_object, is_array, is_object, is_string, parse_simple } from "../common.js";
@@ -170,6 +170,10 @@ Document.prototype.add = function(id, content, _append){
             }
 
             this.store.set(id, payload || content);
+        }
+
+        if(SUPPORT_WORKER && this.worker){
+            this.fastupdate || this.reg.add(id);
         }
     }
 

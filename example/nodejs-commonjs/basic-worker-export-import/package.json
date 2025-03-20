@@ -1,6 +1,6 @@
 {
   "name": "nodejs-commonjs-basic-worker-extern-config",
   "dependencies": {
-    "flexsearch": "^0.8.105"
+    "flexsearch": "github:nextapps-de/flexsearch"
   }
 }

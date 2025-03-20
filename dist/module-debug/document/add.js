@@ -157,6 +157,10 @@ Document.prototype.add = function (id, content, _append) {
 
             this.store.set(id, payload || content);
         }
+
+        if (this.worker) {
+            this.fastupdate || this.reg.add(id);
+        }
     }
 
     return this;

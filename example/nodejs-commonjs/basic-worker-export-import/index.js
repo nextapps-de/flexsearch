@@ -26,9 +26,9 @@ const config = {
     ];
 
     // add test data
-    data.forEach((item, id) => {
-        index.add(id, item);
-    });
+    for(let i = 0; i < data.length; i++){
+        await index.addAsync(i, data[i]);
+    }
 
     // perform query
     let result = await index.search({

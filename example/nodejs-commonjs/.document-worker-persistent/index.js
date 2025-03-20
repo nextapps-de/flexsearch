@@ -24,7 +24,7 @@ const data = require(__dirname + "/data.json");
                 config: __dirname + "/config.primaryTitle.js"
             },{
                 field: "originalTitle",
-                config: __dirname + "/config.primaryTitle.js"
+                config: __dirname + "/config.originalTitle.js"
             }],
             tag: [{
                 field: "startYear"

@@ -1,3 +1,6 @@
+// COMPILER BLOCK -->
+import { SUPPORT_WORKER } from "./config.js";
+// <-- COMPILER BLOCK
 import Index from "./index.js";
 import Document from "./document.js";
 import { is_string } from "./common.js";
@@ -83,7 +86,7 @@ function json_to_ctx(json, ctx){
 }
 
 /**
- * @param {Set<string|number>} reg
+ * @param {Set<string|number>|Map<Array<string|number>>} reg
  * @return {Array<Array<string|number>>}
  */
 function reg_to_json(reg){
@@ -244,6 +247,9 @@ export function importIndex(key, data){
     if(split[split.length - 1] === "json"){
         split.pop();
     }
+    if(split.length === 3){
+        split.shift();
+    }
     key = split.length > 1 ? split[1] : split[0];
 
     switch(key){
@@ -355,6 +361,18 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
 
 export function importDocument(key, data){
 
+    const split = key.split(".");
+    if(split[split.length - 1] === "json"){
+        split.pop();
+    }
+    const field = split.length > 2 ? split[0] : "";
+    const ref = split.length > 2 ? split[2] : split[1];
+
+    // trigger the import for worker field indexes
+    if(SUPPORT_WORKER && this.worker && field){
+        return this.index.get(field).import(key);
+    }
+
     if(!data){
         return;
     }
@@ -364,16 +382,9 @@ export function importDocument(key, data){
         );
     }
 
-    const split = key.split(".");
-    if(split[split.length - 1] === "json"){
-        split.pop();
-    }
-    const field = split.length > 2 ? split[0] : "";
-    key = split.length > 2 ? split[2] : split[1];
-
     if(!field){
 
-        switch(key){
+        switch(ref){
 
             case "reg":
 
@@ -385,6 +396,22 @@ export function importDocument(key, data){
                     idx = this.index.get(this.field[i]);
                     idx.fastupdate = false;
                     idx.reg = this.reg;
+                }
+
+                // trigger the import for worker field indexes
+                if(SUPPORT_WORKER && this.worker){
+
+                    const promises = [];
+                    const self = this;
+
+                    for(const index of this.index.values()){
+                        // const ref = item[0];
+                        // const index = item[1];
+                        promises.push(index.import(key));
+                        //this.index.get(field).import(key);
+                    }
+
+                    return Promise.all(promises);
                 }
 
                 break;
@@ -407,7 +434,7 @@ export function importDocument(key, data){
     }
     else{
 
-        return this.index.get(field).import(key, data);
+        return this.index.get(field).import(ref, data);
     }
 }
 
