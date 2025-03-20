@@ -43,11 +43,12 @@ export default function Index(options, _register) {
     /** @type Encoder */
     this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder( /** @type {EncoderOptions} */encoder) : { encode: encoder };
 
-    this.compress = options.compress || options.compression || /* suggest */ /* append: */ /* enrich */!1;
+    this.compress = options.compress || options.compression ||
+    /* suggest */ /* append: */ /* enrich */!1;
 
 
     this.resolution = options.resolution || 9;
-    this.tokenize = (tmp = options.tokenize) && "default" !== tmp || "strict";
+    this.tokenize = (tmp = options.tokenize) && "default" !== tmp && tmp || "strict";
     this.depth = "strict" === tmp && context.depth || 0;
     this.bidirectional = !1 !== context.bidirectional;
     this.fastupdate = !!options.fastupdate;

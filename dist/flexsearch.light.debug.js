@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.109 (Light/Debug)
+ * FlexSearch.js v0.8.111 (Light/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -550,7 +550,7 @@ function P(a, c) {
   const f = !0 === b ? {depth:1} : b || {}, d = a.encode || a.encoder || J;
   this.encoder = d.encode ? d : "object" === typeof d ? new F(d) : {encode:d};
   this.resolution = a.resolution || 9;
-  this.tokenize = (b = a.tokenize) && "default" !== b || "strict";
+  this.tokenize = (b = a.tokenize) && "default" !== b && b || "strict";
   this.depth = "strict" === b && f.depth || 0;
   this.bidirectional = !1 !== f.bidirectional;
   this.fastupdate = !!a.fastupdate;

@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.109 (ES5/Debug)
+ * FlexSearch.js v0.8.111 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -87,7 +87,7 @@ var ia = da;
 function ja() {
   this.C = !1;
   this.A = null;
-  this.G = void 0;
+  this.D = void 0;
   this.h = 1;
   this.H = 0;
   this.B = null;
@@ -98,8 +98,8 @@ function ka(a) {
   }
   a.C = !0;
 }
-ja.prototype.D = function(a) {
-  this.G = a;
+ja.prototype.G = function(a) {
+  this.D = a;
 };
 function la(a, b) {
   a.B = {ka:b, la:!0};
@@ -153,7 +153,7 @@ function pa(a) {
         return a.h.C = !1, {value:b.value, done:!1};
       }
     } catch (c) {
-      a.h.G = void 0, la(a.h, c);
+      a.h.D = void 0, la(a.h, c);
     }
   }
   a.h.C = !1;
@@ -170,12 +170,12 @@ function pa(a) {
 function qa(a) {
   this.next = function(b) {
     ka(a.h);
-    a.h.A ? b = oa(a, a.h.A.next, b, a.h.D) : (a.h.D(b), b = pa(a));
+    a.h.A ? b = oa(a, a.h.A.next, b, a.h.G) : (a.h.G(b), b = pa(a));
     return b;
   };
   this.throw = function(b) {
     ka(a.h);
-    a.h.A ? b = oa(a, a.h.A["throw"], b, a.h.D) : (la(a.h, b), b = pa(a));
+    a.h.A ? b = oa(a, a.h.A["throw"], b, a.h.G) : (la(a.h, b), b = pa(a));
     return b;
   };
   this.return = function(b) {
@@ -496,7 +496,7 @@ C("Array.prototype.values", function(a) {
     });
   };
 });
-function H(a, b) {
+function F(a, b) {
   return Object.prototype.hasOwnProperty.call(a, b);
 }
 C("WeakMap", function(a) {
@@ -516,7 +516,7 @@ C("WeakMap", function(a) {
     return "object" === l && null !== k || "function" === l;
   }
   function e(k) {
-    if (!H(k, f)) {
+    if (!F(k, f)) {
       var l = new c();
       ba(k, f, {value:l});
     }
@@ -559,20 +559,20 @@ C("WeakMap", function(a) {
       throw Error("Invalid WeakMap key");
     }
     e(k);
-    if (!H(k, f)) {
+    if (!F(k, f)) {
       throw Error("WeakMap key fail: " + k);
     }
     k[f][this.h] = l;
     return this;
   };
   b.prototype.get = function(k) {
-    return d(k) && H(k, f) ? k[f][this.h] : void 0;
+    return d(k) && F(k, f) ? k[f][this.h] : void 0;
   };
   b.prototype.has = function(k) {
-    return d(k) && H(k, f) && H(k[f], this.h);
+    return d(k) && F(k, f) && F(k[f], this.h);
   };
   b.prototype.delete = function(k) {
-    return d(k) && H(k, f) && H(k[f], this.h) ? delete k[f][this.h] : !1;
+    return d(k) && F(k, f) && F(k[f], this.h) ? delete k[f][this.h] : !1;
   };
   return b;
 });
@@ -600,7 +600,7 @@ C("Map", function(a) {
     var l = k && typeof k;
     "object" == l || "function" == l ? g.has(k) ? l = g.get(k) : (l = "" + ++f, g.set(k, l)) : l = "p_" + k;
     var m = h[0][l];
-    if (m && H(h[0], l)) {
+    if (m && F(h[0], l)) {
       for (h = 0; h < m.length; h++) {
         var n = m[h];
         if (k !== k && n.key !== n.key || k === n.key) {
@@ -815,7 +815,7 @@ var wa = "function" == typeof Object.assign ? Object.assign : function(a, b) {
     var d = arguments[c];
     if (d) {
       for (var e in d) {
-        H(d, e) && (a[e] = d[e]);
+        F(d, e) && (a[e] = d[e]);
       }
     }
   }
@@ -1105,53 +1105,64 @@ function N(a) {
 function Ha(a) {
   var b, c, d, e, g;
   return ta(function(f) {
-    if (1 == f.h) {
-      switch(a = a.data, b = a.task, c = a.id, d = a.args, b) {
-        case "init":
-          P = a.options || {};
-          (e = a.factory) ? (Function("return " + e)()(self), O = new self.FlexSearch.Index(P), delete self.FlexSearch) : O = new S(P);
-          postMessage({id:c});
-          break;
-        default:
-          f.h = 2;
-          return;
-      }
-    } else {
-      if (4 != f.h) {
+    switch(f.h) {
+      case 1:
+        a = a.data;
+        b = a.task;
+        c = a.id;
+        d = a.args;
+        switch(b) {
+          case "init":
+            P = a.options || {};
+            (e = a.factory) ? (Function("return " + e)()(self), O = new self.FlexSearch.Index(P), delete self.FlexSearch) : O = new S(P);
+            postMessage({id:c});
+            break;
+          default:
+            f.h = 2;
+            return;
+        }f.h = 0;
+        break;
+      case 2:
         if ("export" === b) {
           if (!P.export || "function" !== typeof P.export) {
             throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "export".');
           }
           d = [P.export];
         }
-        if ("import" !== b) {
-          g = O[b].apply(O, d);
-          f.h = 4;
-          return;
+        if ("import" === b) {
+          if (!P.import || "function" !== typeof P.import) {
+            throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "import".');
+          }
+          return E(f, P.import.call(O, O), 5);
         }
-        if (!P.import || "function" !== typeof P.import) {
-          throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "import".');
+        g = O[b].apply(O, d);
+        if (!g.then) {
+          f.h = 5;
+          break;
         }
-        return E(f, P.import.call(O, O), 4);
-      }
-      postMessage("search" === b ? {id:c, msg:g} : {id:c});
+        return E(f, g, 7);
+      case 7:
+        g = f.D;
+        f.h = 5;
+        break;
+      case 5:
+        postMessage("search" === b ? {id:c, msg:g} : {id:c}), f.h = 0;
     }
-    f.h = 0;
   });
 }
 ;function Ia(a) {
-  Ja.call(a, "add");
-  Ja.call(a, "append");
-  Ja.call(a, "search");
-  Ja.call(a, "update");
-  Ja.call(a, "remove");
+  La.call(a, "add");
+  La.call(a, "append");
+  La.call(a, "search");
+  La.call(a, "update");
+  La.call(a, "remove");
 }
 var Ma, Na, Oa = {}, Pa = {};
 function Qa(a) {
   Ma = 0;
   Oa[a] = Pa[a];
 }
-function Ja(a) {
+function La(a) {
   this[a + "Async"] = function() {
     var b = arguments, c = b[b.length - 1];
     if ("function" === typeof c) {
@@ -1221,9 +1232,8 @@ T("remove");
 T("clear");
 T("export");
 T("import");
-Ia(Sa.prototype);
 function T(a) {
-  Sa.prototype[a] = function() {
+  Sa.prototype[a] = Sa.prototype[a + "Async"] = function() {
     var b = this, c = arguments, d, e, g, f, h;
     return ta(function(k) {
       d = b;
@@ -2127,13 +2137,13 @@ W.prototype.search = function(a, b, c, d) {
         } else {
           v = Object.keys(z);
           y = 0;
-          for (var D = void 0, F = void 0; y < v.length; y++) {
-            if (D = v[y], F = z[D], F.constructor === Array) {
-              for (var G = 0; G < F.length; G++) {
-                r.push(D, F[G]);
+          for (var D = void 0, G = void 0; y < v.length; y++) {
+            if (D = v[y], G = z[D], G.constructor === Array) {
+              for (var H = 0; H < G.length; H++) {
+                r.push(D, G[H]);
               }
             } else {
-              r.push(D, F);
+              r.push(D, G);
             }
           }
         }
@@ -2185,10 +2195,10 @@ W.prototype.search = function(a, b, c, d) {
         if (m) {
           if (this.db) {
             y.tag = m;
-            var Ka = v.db.support_tag_search;
+            var Ja = v.db.support_tag_search;
             y.field = l;
           }
-          Ka || (y.enrich = !1);
+          Ja || (y.enrich = !1);
         }
         if (r) {
           r[A] = v.search(a, b, y);
@@ -2201,43 +2211,43 @@ W.prototype.search = function(a, b, c, d) {
       y = v && (p ? v.length : v.result.length);
       if (m && y) {
         D = [];
-        F = 0;
+        G = 0;
         if (this.db && d) {
-          if (!Ka) {
-            for (G = l.length; G < d.length; G++) {
-              var L = d[G];
+          if (!Ja) {
+            for (H = l.length; H < d.length; H++) {
+              var L = d[H];
               if (L && L.length) {
-                F++, D.push(L);
+                G++, D.push(L);
               } else if (!n) {
                 return p ? e : new Y(e);
               }
             }
           }
         } else {
-          G = 0;
-          for (var Xb = L = void 0; G < m.length; G += 2) {
-            L = this.tag.get(m[G]);
+          H = 0;
+          for (var Xb = L = void 0; H < m.length; H += 2) {
+            L = this.tag.get(m[H]);
             if (!L) {
-              if (console.warn("Tag '" + m[G] + ":" + m[G + 1] + "' will be skipped because there is no field '" + m[G] + "'."), n) {
+              if (console.warn("Tag '" + m[H] + ":" + m[H + 1] + "' will be skipped because there is no field '" + m[H] + "'."), n) {
                 continue;
               } else {
                 return p ? e : new Y(e);
               }
             }
-            if (Xb = (L = L && L.get(m[G + 1])) && L.length) {
-              F++, D.push(L);
+            if (Xb = (L = L && L.get(m[H + 1])) && L.length) {
+              G++, D.push(L);
             } else if (!n) {
               return p ? e : new Y(e);
             }
           }
         }
-        if (F) {
+        if (G) {
           v = lb(v, D, p);
           y = v.length;
           if (!y && !n) {
             return p ? v : new Y(v);
           }
-          F--;
+          G--;
         }
       }
       if (y) {
@@ -2248,7 +2258,7 @@ W.prototype.search = function(a, b, c, d) {
     }
   }
   if (r) {
-    if (this.db && m && m.length && !Ka) {
+    if (this.db && m && m.length && !Ja) {
       for (q = 0; q < m.length; q += 2) {
         g = this.index.get(m[q]);
         if (!g) {
@@ -2283,12 +2293,12 @@ W.prototype.search = function(a, b, c, d) {
     e[x] = {field:g[x], result:n};
   }
   if (q && this.db && r.length) {
-    var La = this;
+    var Ka = this;
     return Promise.all(r).then(function(Q) {
       for (var R = 0; R < Q.length; R++) {
         e[R].result = Q[R];
       }
-      return k ? vb(e, b) : t ? wb(e, a, La.index, La.field, La.J, t) : e;
+      return k ? vb(e, b) : t ? wb(e, a, Ka.index, Ka.field, Ka.J, t) : e;
     });
   }
   return k ? vb(e, b) : t ? wb(e, a, this.index, this.field, this.J, t) : e;
@@ -2309,9 +2319,9 @@ function wb(a, b, c, d, e, g) {
               break;
             }
           } else {
-            var F = A.indexOf(D);
-            if (-1 < F) {
-              q += (q ? " " : "") + z.substring(0, F) + g.replace("$1", z.substring(F, D.length)) + z.substring(F + D.length);
+            var G = A.indexOf(D);
+            if (-1 < G) {
+              q += (q ? " " : "") + z.substring(0, G) + g.replace("$1", z.substring(G, D.length)) + z.substring(G + D.length);
               v = !0;
               break;
             }
@@ -2830,7 +2840,7 @@ function Kb(a, b, c, d, e) {
             t[v] = 1;
             return E(y, Ob(A, v, r, 0, 0, !1, !1), 6);
           case 6:
-            z = y.G;
+            z = y.D;
             if (z = Pb(z, d, h, m)) {
               d = z;
               y.h = 4;
@@ -2964,7 +2974,7 @@ function Rb(a, b) {
   var d = !0 === c ? {depth:1} : c || {}, e = K(a.encoder) ? Ib[a.encoder] : a.encode || a.encoder || Ab;
   this.encoder = e.encode ? e : "object" === typeof e ? new Ga(e) : {encode:e};
   this.resolution = a.resolution || 9;
-  this.tokenize = (c = a.tokenize) && "default" !== c || "strict";
+  this.tokenize = (c = a.tokenize) && "default" !== c && c || "strict";
   this.depth = "strict" === c && d.depth || 0;
   this.bidirectional = !1 !== d.bidirectional;
   this.fastupdate = !!a.fastupdate;

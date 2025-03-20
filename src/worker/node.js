@@ -51,6 +51,9 @@ parentPort.on("message", async function(data){
             }
             else{
                 message = index[task].apply(index, args);
+                if(message.then){
+                    message = await message;
+                }
             }
 
             parentPort.postMessage(

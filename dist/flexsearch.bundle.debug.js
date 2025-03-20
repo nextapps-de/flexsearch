@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.109 (Bundle/Debug)
+ * FlexSearch.js v0.8.111 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -294,7 +294,7 @@ async function ka(a) {
         }
         await N.import.call(M, M);
       } else {
-        d = M[b].apply(M, e);
+        d = M[b].apply(M, e), d.then && (d = await d);
       }
       postMessage("search" === b ? {id:c, msg:d} : {id:c});
   }
@@ -378,9 +378,8 @@ R("remove");
 R("clear");
 R("export");
 R("import");
-la(Q.prototype);
 function R(a) {
-  Q.prototype[a] = async function() {
+  Q.prototype[a] = Q.prototype[a + "Async"] = async function() {
     const b = this, c = [].slice.call(arguments);
     var e = c[c.length - 1];
     let d;
@@ -2037,7 +2036,7 @@ function mb(a, b) {
   const e = !0 === c ? {depth:1} : c || {}, d = E(a.encoder) ? db[a.encoder] : a.encode || a.encoder || Wa;
   this.encoder = d.encode ? d : "object" === typeof d ? new J(d) : {encode:d};
   this.resolution = a.resolution || 9;
-  this.tokenize = (c = a.tokenize) && "default" !== c || "strict";
+  this.tokenize = (c = a.tokenize) && "default" !== c && c || "strict";
   this.depth = "strict" === c && e.depth || 0;
   this.bidirectional = !1 !== e.bidirectional;
   this.fastupdate = !!a.fastupdate;

@@ -96,13 +96,9 @@ register("clear");
 register("export");
 register("import");
 
-apply_async(WorkerIndex.prototype);
-
-
 function register(key) {
 
-    WorkerIndex.prototype[key] =
-    /*WorkerIndex.prototype[key + "Async"] =*/async function () {
+    WorkerIndex.prototype[key] = WorkerIndex.prototype[key + "Async"] = async function () {
         const self = this,
               args = [].slice.call(arguments),
               arg = args[args.length - 1];

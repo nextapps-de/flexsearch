@@ -65,6 +65,9 @@ export default (async function (data) {
                 await options.import.call(index, index);
             } else {
                 message = index[task].apply(index, args);
+                if (message.then) {
+                    message = await message;
+                }
             }
 
             postMessage("search" === task ? { id: id, msg: message } : { id: id });
