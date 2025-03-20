@@ -1,13 +1,18 @@
 const { Worker: WorkerIndex } = require("flexsearch");
 
+// you will need to keep the index configuration
+// they will not export, also every change to the
+// configuration requires a full re-index
+const config = {
+    tokenize: "forward",
+    config: __dirname + "/config.js"
+};
+
 (async function(){
 
     // create a simple index which can store id-content-pairs
     // and await (!) for the worker response
-    let index = await new WorkerIndex({
-        tokenize: "forward",
-        config: __dirname + "/config.js"
-    });
+    let index = await new WorkerIndex(config);
 
     // some test data
     const data = [
@@ -39,18 +44,15 @@ const { Worker: WorkerIndex } = require("flexsearch");
     // EXPORT
     // -----------------------
 
-    await index.export(function(){
-        // do nothing here
-    });
-
-    index = await new WorkerIndex({
-        tokenize: "forward",
-        config: __dirname + "/config.js"
-    });
+    await index.export();
 
     // -----------------------
     // IMPORT
     // -----------------------
+
+    // create the same type of index you have used by .export()
+    // along with the same configuration
+    index = await new WorkerIndex(config);
 
     await index.import();
 

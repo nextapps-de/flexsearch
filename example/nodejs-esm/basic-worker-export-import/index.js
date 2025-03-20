@@ -1,14 +1,19 @@
 import { Worker as WorkerIndex } from "flexsearch/esm";
 const dirname = import.meta.dirname;
 
+// you will need to keep the index configuration
+// they will not export, also every change to the
+// configuration requires a full re-index
+const config = {
+    tokenize: "forward",
+    config: dirname + "/config.js"
+};
+
 (async function(){
 
     // create a simple index which can store id-content-pairs
     // and await (!) for the worker response
-    let index = await new WorkerIndex({
-        tokenize: "forward",
-        config: dirname + "/config.js"
-    });
+    let index = await new WorkerIndex(config);
 
     // some test data
     const data = [
@@ -44,14 +49,13 @@ const dirname = import.meta.dirname;
         // do nothing here
     });
 
-    index = await new WorkerIndex({
-        tokenize: "forward",
-        config: dirname + "/config.js"
-    });
-
     // -----------------------
     // IMPORT
     // -----------------------
+
+    // create the same type of index you have used by .export()
+    // along with the same configuration
+    index = await new WorkerIndex(config);
 
     await index.import();
 

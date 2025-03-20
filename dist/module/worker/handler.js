@@ -1,3 +1,4 @@
+
 import Index from "../index.js";
 import { IndexOptions } from "../type.js";
 
@@ -21,6 +22,7 @@ export default (async function (data) {
             options = data.options || {};
             let filepath = options.config;
             if (filepath) {
+                // compiler fix
                 options = options;
                 // will be replaced after build with the line below because
                 // there is an issue with closure compiler dynamic import
@@ -33,9 +35,7 @@ export default (async function (data) {
 
                 // export the FlexSearch global payload to "self"
                 Function("return " + factory)()(self);
-
                 index = new self.FlexSearch.Index(options);
-
                 // destroy the exported payload
                 delete self.FlexSearch;
             } else {
@@ -55,7 +55,6 @@ export default (async function (data) {
             }
             if ("import" === task) {
                 await options.import.call(index, index);
-                //args = [options.import];
             } else {
                 message = index[task].apply(index, args);
             }

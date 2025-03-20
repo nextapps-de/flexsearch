@@ -38,7 +38,8 @@ declare module "flexsearch" {
         | "strict"
         | "forward"
         | "reverse"
-        | "full";
+        | "full"
+        | "default";
 
     /**
      * **Document:**
@@ -187,12 +188,14 @@ declare module "flexsearch" {
 
         // Language-specific Options and Encoding
         encoder?: Charset | Encoders | EncoderOptions;
-        encode?: ((x: string) => string[]),
+        encode?: (text: string) => string[],
         rtl?: boolean;
     };
 
     type WorkerIndexOptions = IndexOptions & {
         config?: WorkerConfigURL | WorkerConfigPath,
+        export?: () => Promise<void>;
+        import?: () => Promise<void>;
         db: null,
         commit: null
     };
@@ -297,6 +300,8 @@ declare module "flexsearch" {
 
     export class Worker extends Index {
         constructor(options?: Preset | WorkerIndexOptions);
+        export(): Promise<void>;
+        import(): Promise<void>;
     }
 
     /************************************/
@@ -520,7 +525,7 @@ declare module "flexsearch" {
     type PersistentOptions = {
         name?: string;
         type?: IdType;
-        db?: StorageInterface;
+        db?: any;
     };
 
     type DefaultResolve = {
@@ -560,7 +565,7 @@ declare module "flexsearch" {
         result: IntermediateSearchResults
     }
 
-    export class StorageInterface {
+    class StorageInterface {
         constructor(name: string, config: PersistentOptions);
         constructor(config: string | PersistentOptions);
         mount(index: Index | Document) : Promise<void>;
@@ -569,5 +574,9 @@ declare module "flexsearch" {
         destroy() : Promise<void>;
         clear() : Promise<void>;
         db: any;
+    }
+
+    export class IndexedDB extends StorageInterface{
+        db: IDBDatabase
     }
 }

@@ -29,8 +29,8 @@ parentPort.on("message", async function (data) {
 
             index = new Index(options);
             //index.db && await index.db;
-            parentPort.postMessage({ id: id });
 
+            parentPort.postMessage({ id: id });
             break;
 
         default:
@@ -42,7 +42,6 @@ parentPort.on("message", async function (data) {
             }
             if ("import" === task) {
                 await options.import.call(index, index);
-                //args = [options.import];
             } else {
                 message = index[task].apply(index, args);
             }

@@ -1,3 +1,4 @@
+
 import { IndexOptions } from "./type.js";
 import { create_object, is_function, is_object, is_string } from "./common.js";
 import handler from "./worker/handler.js";
@@ -96,6 +97,7 @@ register("export");
 register("import");
 
 apply_async(WorkerIndex.prototype);
+
 
 function register(key) {
 

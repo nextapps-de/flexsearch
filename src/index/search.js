@@ -413,22 +413,20 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
         tag
     );
 
-    resolve = !SUPPORT_RESOLVER || resolve;
-
     if(SUPPORT_PERSISTENT && this.db){
         return result.then(function(result){
-            return resolve
+            return !SUPPORT_RESOLVER || resolve
                 ? result || []
                 : new Resolver(result);
         });
     }
 
     return result && result.length
-        ? (resolve
+        ? (!SUPPORT_RESOLVER || resolve
             ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */ (result), limit, offset)
             : new Resolver(result)
         )
-        : resolve
+        : !SUPPORT_RESOLVER || resolve
             ? []
             : new Resolver();
 }

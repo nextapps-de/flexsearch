@@ -138,6 +138,8 @@ import Charset from "./charset.js";
 /** @export */IndexOptions.worker; // worker url
 /** @export */IndexOptions.config; // config url
 /** @export */IndexOptions.priority;
+/** @export */IndexOptions.export;
+/** @export */IndexOptions.import;
 
 /** @export */FieldOptions.preset;
 /** @export */FieldOptions.context;
@@ -173,6 +175,8 @@ import Charset from "./charset.js";
 /** @export */DocumentOptions.document;
 /** @export */DocumentOptions.worker;
 /** @export */DocumentOptions.priority;
+/** @export */DocumentOptions.export;
+/** @export */DocumentOptions.import;
 
 /** @export */ContextOptions.depth;
 /** @export */ContextOptions.bidirectional;

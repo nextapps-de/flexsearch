@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.108 (Bundle/Module/Debug)
+ * FlexSearch.js v0.8.109 (Bundle/Module/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -281,8 +281,20 @@ async function ka(a) {
       break;
     default:
       let d;
-      "export" === b && (e = [N.export]);
-      "import" === b ? await N.import.call(M, M) : d = M[b].apply(M, e);
+      if ("export" === b) {
+        if (!N.export || "function" !== typeof N.export) {
+          throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "export".');
+        }
+        e = [N.export];
+      }
+      if ("import" === b) {
+        if (!N.import || "function" !== typeof N.import) {
+          throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "import".');
+        }
+        await N.import.call(M, M);
+      } else {
+        d = M[b].apply(M, e);
+      }
       postMessage("search" === b ? {id:c, msg:d} : {id:c});
   }
 }
@@ -1474,7 +1486,8 @@ function W(a) {
   this.J = [];
   this.key = (c = b.key || b.id) && Ta(c, this.J) || "id";
   (e = a.keystore || 0) && (this.keystore = e);
-  this.reg = (this.fastupdate = !!a.fastupdate) ? e ? new T(e) : new Map() : e ? new U(e) : new Set();
+  this.fastupdate = !!a.fastupdate;
+  this.reg = !this.fastupdate || a.worker || a.db ? e ? new U(e) : new Set() : e ? new T(e) : new Map();
   this.C = (c = b.store || null) && c && !0 !== c && [];
   this.store = c && (e ? new T(e) : new Map());
   this.cache = (c = a.cache || null) && new Y(c);
@@ -1500,6 +1513,7 @@ function W(a) {
     }
   }
   if (this.worker) {
+    this.fastupdate = !1;
     a = [];
     for (const d of this.index.values()) {
       d.then && a.push(d);
@@ -1516,11 +1530,14 @@ function W(a) {
       });
     }
   } else {
-    a.db && this.mount(a.db);
+    a.db && (this.fastupdate = !1, this.mount(a.db));
   }
 }
 t = V.prototype;
 t.mount = function(a) {
+  if (this.worker) {
+    throw Error("You can't use Worker-Indexes on a persistent model. That would be useless, since each of the persistent model acts like Worker-Index by default (Master/Slave).");
+  }
   let b = this.field;
   if (this.tag) {
     for (let d = 0, f; d < this.R.length; d++) {
@@ -2019,7 +2036,7 @@ function mb(a, b) {
   const e = !0 === c ? {depth:1} : c || {}, d = E(a.encoder) ? db[a.encoder] : a.encode || a.encoder || Wa;
   this.encoder = d.encode ? d : "object" === typeof d ? new J(d) : {encode:d};
   this.resolution = a.resolution || 9;
-  this.tokenize = c = a.tokenize || "strict";
+  this.tokenize = (c = a.tokenize) && "default" !== c || "strict";
   this.depth = "strict" === c && e.depth || 0;
   this.bidirectional = !1 !== e.bidirectional;
   this.fastupdate = !!a.fastupdate;

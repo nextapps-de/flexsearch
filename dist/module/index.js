@@ -47,7 +47,7 @@ export default function Index(options, _register) {
 
 
     this.resolution = options.resolution || 9;
-    this.tokenize = tmp = options.tokenize || "strict";
+    this.tokenize = (tmp = options.tokenize) && "default" !== tmp || "strict";
     this.depth = "strict" === tmp && context.depth || 0;
     this.bidirectional = !1 !== context.bidirectional;
     this.fastupdate = !!options.fastupdate;

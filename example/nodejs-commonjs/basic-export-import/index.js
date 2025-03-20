@@ -59,7 +59,7 @@ const { Index } = require("flexsearch");
     const files = await fs.readdir("./export/");
     await Promise.all(files.map(async file => {
         const data = await fs.readFile("./export/" + file, "utf8");
-        await index.import(file, data);
+        index.import(file, data);
     }));
 
     // perform query

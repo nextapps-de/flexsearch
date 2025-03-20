@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.108 (ES5/Debug)
+ * FlexSearch.js v0.8.109 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1101,15 +1101,15 @@ function N(a) {
   a.B.clear();
   a.C.clear();
 }
-;var O, Ha;
-function Ia(a) {
+;var O, P;
+function Ha(a) {
   var b, c, d, e, g;
   return ta(function(f) {
     if (1 == f.h) {
       switch(a = a.data, b = a.task, c = a.id, d = a.args, b) {
         case "init":
-          Ha = a.options || {};
-          (e = a.factory) ? (Function("return " + e)()(self), O = new self.FlexSearch.Index(Ha), delete self.FlexSearch) : O = new R(Ha);
+          P = a.options || {};
+          (e = a.factory) ? (Function("return " + e)()(self), O = new self.FlexSearch.Index(P), delete self.FlexSearch) : O = new S(P);
           postMessage({id:c});
           break;
         default:
@@ -1118,43 +1118,51 @@ function Ia(a) {
       }
     } else {
       if (4 != f.h) {
-        "export" === b && (d = [Ha.export]);
+        if ("export" === b) {
+          if (!P.export || "function" !== typeof P.export) {
+            throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "export".');
+          }
+          d = [P.export];
+        }
         if ("import" !== b) {
           g = O[b].apply(O, d);
           f.h = 4;
           return;
         }
-        return E(f, Ha.import.call(O, O), 4);
+        if (!P.import || "function" !== typeof P.import) {
+          throw Error('Either no extern configuration provided for the Worker-Index or no method was defined on the config property "import".');
+        }
+        return E(f, P.import.call(O, O), 4);
       }
       postMessage("search" === b ? {id:c, msg:g} : {id:c});
     }
     f.h = 0;
   });
 }
-;function Ja(a) {
-  Ma.call(a, "add");
-  Ma.call(a, "append");
-  Ma.call(a, "search");
-  Ma.call(a, "update");
-  Ma.call(a, "remove");
+;function Ia(a) {
+  Ja.call(a, "add");
+  Ja.call(a, "append");
+  Ja.call(a, "search");
+  Ja.call(a, "update");
+  Ja.call(a, "remove");
 }
-var Na, Oa, Pa = {}, Qa = {};
-function Ra(a) {
-  Na = 0;
-  Pa[a] = Qa[a];
+var Ma, Na, Oa = {}, Pa = {};
+function Qa(a) {
+  Ma = 0;
+  Oa[a] = Pa[a];
 }
-function Ma(a) {
+function Ja(a) {
   this[a + "Async"] = function() {
     var b = arguments, c = b[b.length - 1];
     if ("function" === typeof c) {
       var d = c;
       delete b[b.length - 1];
     }
-    Na || (Na = setTimeout(Ra, 0, a), Oa = Date.now());
-    Qa[a] || (Qa[a] = Pa[a] = 1000);
-    if (!--Pa[a]) {
-      Pa[a] = Qa[a] = Qa[a] * this.priority * this.priority * 3 / (Date.now() - Oa) | 0 || 1;
-      Na = clearTimeout(Na);
+    Ma || (Ma = setTimeout(Qa, 0, a), Na = Date.now());
+    Pa[a] || (Pa[a] = Oa[a] = 1000);
+    if (!--Oa[a]) {
+      Oa[a] = Pa[a] = Pa[a] * this.priority * this.priority * 3 / (Date.now() - Na) | 0 || 1;
+      Ma = clearTimeout(Ma);
       var e = this;
       return new Promise(function(f) {
         setTimeout(function() {
@@ -1170,8 +1178,8 @@ function Ma(a) {
     return c;
   };
 }
-;var Sa = 0;
-function S(a) {
+;var Ra = 0;
+function Sa(a) {
   function b(f) {
     function h(k) {
       k = k.data || k;
@@ -1184,10 +1192,10 @@ function S(a) {
       d ? this.worker.on("message", h) : this.worker.onmessage = h;
       if (a.config) {
         return new Promise(function(k) {
-          e.h[++Sa] = function() {
+          e.h[++Ra] = function() {
             k(e);
           };
-          e.worker.postMessage({id:Sa, task:"init", factory:c, options:a});
+          e.worker.postMessage({id:Ra, task:"init", factory:c, options:a});
         });
       }
       this.worker.postMessage({task:"init", factory:c, options:a});
@@ -1195,8 +1203,8 @@ function S(a) {
     }
   }
   a = void 0 === a ? {} : a;
-  if (!this || this.constructor !== S) {
-    return new S(a);
+  if (!this || this.constructor !== Sa) {
+    return new Sa(a);
   }
   var c = "undefined" !== typeof self ? self._factory : "undefined" !== typeof window ? window._factory : null;
   c && (c = c.toString());
@@ -1213,9 +1221,9 @@ T("remove");
 T("clear");
 T("export");
 T("import");
-Ja(S.prototype);
+Ia(Sa.prototype);
 function T(a) {
-  S.prototype[a] = function() {
+  Sa.prototype[a] = function() {
     var b = this, c = arguments, d, e, g, f, h;
     return ta(function(k) {
       d = b;
@@ -1223,15 +1231,15 @@ function T(a) {
       g = e[e.length - 1];
       "function" === typeof g && (f = g, e.splice(e.length - 1, 1));
       h = new Promise(function(l) {
-        d.h[++Sa] = l;
-        d.worker.postMessage({task:a, id:Sa, args:e});
+        d.h[++Ra] = l;
+        d.worker.postMessage({task:a, id:Ra, args:e});
       });
       return f ? (h.then(f), k.return(b)) : k.return(h);
     });
   };
 }
 function Ta(a, b, c) {
-  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"]((1,eval)("import.meta.dirname") + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Ia.toString()], {type:"text/javascript"}))) : new window.Worker(K(c) ? c : (0,eval)("import.meta.url").replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
+  return b ? "undefined" !== typeof module ? new (require("worker_threads")["Worker"])(__dirname + "/node/node.js") : import("worker_threads").then(function(worker){ return new worker["Worker"]((1,eval)("import.meta.dirname") + "/node/node.mjs"); }) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + Ha.toString()], {type:"text/javascript"}))) : new window.Worker(K(c) ? c : (0,eval)("import.meta.url").replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
   "module/worker/worker.js"), {type:"module"});
 }
 ;function Ua(a, b) {
@@ -2152,9 +2160,9 @@ W.prototype.search = function(a, b, c, d) {
             e.push({field:r[g], tag:r[g + 1], result:h});
           }
         }
-        return p.length ? Promise.all(p).then(function(P) {
-          for (var Q = 0; Q < P.length; Q++) {
-            e[Q].result = P[Q];
+        return p.length ? Promise.all(p).then(function(Q) {
+          for (var R = 0; R < Q.length; R++) {
+            e[R].result = Q[R];
           }
           return e;
         }) : e;
@@ -2254,8 +2262,8 @@ W.prototype.search = function(a, b, c, d) {
       }
     }
     var Yb = this;
-    return Promise.all(r).then(function(P) {
-      return P.length ? Yb.search(a, b, c, P) : P;
+    return Promise.all(r).then(function(Q) {
+      return Q.length ? Yb.search(a, b, c, Q) : Q;
     });
   }
   if (!f) {
@@ -2276,9 +2284,9 @@ W.prototype.search = function(a, b, c, d) {
   }
   if (q && this.db && r.length) {
     var La = this;
-    return Promise.all(r).then(function(P) {
-      for (var Q = 0; Q < P.length; Q++) {
-        e[Q].result = P[Q];
+    return Promise.all(r).then(function(Q) {
+      for (var R = 0; R < Q.length; R++) {
+        e[R].result = Q[R];
       }
       return k ? vb(e, b) : t ? wb(e, a, La.index, La.field, La.J, t) : e;
     });
@@ -2366,7 +2374,8 @@ function X(a) {
   this.S = [];
   this.key = (c = b.key || b.id) && xb(c, this.S) || "id";
   (d = a.keystore || 0) && (this.keystore = d);
-  this.reg = (this.fastupdate = !!a.fastupdate) ? d ? new U(d) : new Map() : d ? new V(d) : new Set();
+  this.fastupdate = !!a.fastupdate;
+  this.reg = !this.fastupdate || a.worker || a.db ? d ? new V(d) : new Set() : d ? new U(d) : new Map();
   this.I = (c = b.store || null) && c && !0 !== c && [];
   this.store = c && (d ? new U(d) : new Map());
   this.cache = (c = a.cache || null) && new Z(c);
@@ -2393,6 +2402,7 @@ function X(a) {
     }
   }
   if (this.worker) {
+    this.fastupdate = !1;
     a = [];
     c = w(this.index.values());
     for (b = c.next(); !b.done; b = c.next()) {
@@ -2410,17 +2420,20 @@ function X(a) {
       });
     }
   } else {
-    a.db && this.mount(a.db);
+    a.db && (this.fastupdate = !1, this.mount(a.db));
   }
 }
 u = W.prototype;
 u.mount = function(a) {
+  if (this.worker) {
+    throw Error("You can't use Worker-Indexes on a persistent model. That would be useless, since each of the persistent model acts like Worker-Index by default (Master/Slave).");
+  }
   var b = this.field;
   if (this.tag) {
     for (var c = 0, d; c < this.aa.length; c++) {
       d = this.aa[c];
       var e;
-      this.index.set(d, e = new R({}, this.reg));
+      this.index.set(d, e = new S({}, this.reg));
       b === this.field && (b = b.slice(0));
       b.push(d);
       e.tag = this.tag.get(d);
@@ -2470,10 +2483,10 @@ function yb(a, b) {
     K(g) || (f = g, g = g.field);
     f = M(f) ? Object.assign({}, a, f) : a;
     if (this.worker) {
-      var h = new S(f);
+      var h = new Sa(f);
       c.set(g, h);
     }
-    this.worker || c.set(g, new R(f, this.reg));
+    this.worker || c.set(g, new S(f, this.reg));
     f.custom ? this.J[e] = f.custom : (this.J[e] = xb(g, this.S), f.filter && ("string" === typeof this.J[e] && (this.J[e] = new String(this.J[e])), this.J[e].R = f.filter));
     this.field[e] = g;
   }
@@ -2616,7 +2629,7 @@ u.import = function(a, b) {
     }
   }
 };
-Ja(W.prototype);
+Ia(W.prototype);
 function zb(a, b, c) {
   a = ("object" === typeof a ? "" + a.query : a).toLowerCase();
   this.cache || (this.cache = new Z());
@@ -2682,7 +2695,7 @@ var Ib = {LatinExact:{normalize:!1, dedupe:!1}, LatinDefault:Ab, LatinSimple:{no
   return ("" + a).replace(Hb, " ");
 }}};
 var Jb = {memory:{resolution:1}, performance:{resolution:6, fastupdate:!0, context:{depth:1, resolution:3}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:9}}};
-R.prototype.add = function(a, b, c, d) {
+S.prototype.add = function(a, b, c, d) {
   if (b && (a || 0 === a)) {
     if (!d && !c && this.reg.has(a)) {
       return this.update(a, b);
@@ -2761,7 +2774,7 @@ function Lb(a, b, c, d, e, g, f) {
 function Kb(a, b, c, d, e) {
   return c && 1 < a ? b + (d || 0) <= a ? c + (e || 0) : (a - 1) / (b + (d || 0)) * (c + (e || 0)) + 1 | 0 : 0;
 }
-;R.prototype.search = function(a, b, c) {
+;S.prototype.search = function(a, b, c) {
   c || (!b && M(a) ? (c = a, a = "") : M(b) && (c = b, b = 0));
   var d = [], e = 0, g;
   if (c) {
@@ -2894,7 +2907,7 @@ function Ob(a, b, c, d, e, g, f, h) {
   a = c ? (a = a.ctx.get(c)) && a.get(b) : a.map.get(b);
   return a;
 }
-;R.prototype.remove = function(a, b) {
+;S.prototype.remove = function(a, b) {
   var c = this.reg.size && (this.fastupdate ? this.reg.get(a) : this.reg.has(a));
   if (c) {
     if (this.fastupdate) {
@@ -2937,9 +2950,9 @@ function Rb(a, b) {
   }
   return c;
 }
-;function R(a, b) {
-  if (!this || this.constructor !== R) {
-    return new R(a);
+;function S(a, b) {
+  if (!this || this.constructor !== S) {
+    return new S(a);
   }
   if (a) {
     var c = K(a) ? a : a.preset;
@@ -2951,7 +2964,7 @@ function Rb(a, b) {
   var d = !0 === c ? {depth:1} : c || {}, e = K(a.encoder) ? Ib[a.encoder] : a.encode || a.encoder || Ab;
   this.encoder = e.encode ? e : "object" === typeof e ? new Ga(e) : {encode:e};
   this.resolution = a.resolution || 9;
-  this.tokenize = c = a.tokenize || "strict";
+  this.tokenize = (c = a.tokenize) && "default" !== c || "strict";
   this.depth = "strict" === c && d.depth || 0;
   this.bidirectional = !1 !== d.bidirectional;
   this.fastupdate = !!a.fastupdate;
@@ -2972,7 +2985,7 @@ function Rb(a, b) {
   this.commit_timer = null;
   this.priority = a.priority || 4;
 }
-u = R.prototype;
+u = S.prototype;
 u.mount = function(a) {
   this.commit_timer && (clearTimeout(this.commit_timer), this.commit_timer = null);
   return a.mount(this);
@@ -3127,7 +3140,7 @@ u.serialize = function(a) {
   e = "index.ctx=new Map([" + e + "]);";
   return a ? "function inject(index){" + b + d + e + "}" : b + d + e;
 };
-Ja(R.prototype);
+Ia(S.prototype);
 var Tb = "undefined" !== typeof window && (window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB), Ub = ["map", "ctx", "tag", "reg", "cfg"];
 function Vb(a, b) {
   b = void 0 === b ? {} : b;
@@ -3492,7 +3505,7 @@ function Wb(a) {
     a = null;
   });
 }
-;var $b = {Index:R, Charset:Ib, Encoder:Ga, Document:W, Worker:S, Resolver:Y, IndexedDB:Vb, Language:{}}, ac = "undefined" !== typeof self ? self : "undefined" !== typeof global ? global : "undefined" !== typeof window ? window : {}, bc;
+;var $b = {Index:S, Charset:Ib, Encoder:Ga, Document:W, Worker:Sa, Resolver:Y, IndexedDB:Vb, Language:{}}, ac = "undefined" !== typeof self ? self : "undefined" !== typeof global ? global : "undefined" !== typeof window ? window : {}, bc;
 (bc = ac.define) && bc.amd ? bc([], function() {
   return $b;
 }) : "object" === typeof ac.exports ? ac.exports = $b : ac.FlexSearch = $b;

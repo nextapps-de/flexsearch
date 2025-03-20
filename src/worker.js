@@ -1,3 +1,6 @@
+// COMPILER BLOCK -->
+import { SUPPORT_ASYNC } from "./config.js";
+// <-- COMPILER BLOCK
 import { IndexOptions } from "./type.js";
 import { create_object, is_function, is_object, is_string } from "./common.js";
 import handler from "./worker/handler.js";
@@ -102,7 +105,9 @@ register("clear");
 register("export");
 register("import");
 
-apply_async(WorkerIndex.prototype);
+if(SUPPORT_ASYNC){
+    apply_async(WorkerIndex.prototype);
+}
 
 function register(key){
 

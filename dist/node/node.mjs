@@ -1,3 +1,6 @@
+// COMPILER BLOCK -->
+import { DEBUG } from "../config.js";
+// <-- COMPILER BLOCK
 import { parentPort } from "worker_threads";
 import { join } from "path";
 // Test Path
@@ -31,8 +34,8 @@ parentPort.on("message", async function(data){
 
             index = new Index(options);
             //index.db && await index.db;
-            parentPort.postMessage({ "id": id });
 
+            parentPort.postMessage({ "id": id });
             break;
 
         default:
@@ -40,11 +43,20 @@ parentPort.on("message", async function(data){
             let message;
 
             if(task === "export"){
+                if(DEBUG){
+                    if(!options.export || typeof options.export !== "function"){
+                        throw new Error("Either no extern configuration provided for the Worker-Index or no method was defined on the config property \"export\".");
+                    }
+                }
                 args = [options.export];
             }
             if(task === "import"){
+                if(DEBUG){
+                    if(!options.import || typeof options.import !== "function"){
+                        throw new Error("Either no extern configuration provided for the Worker-Index or no method was defined on the config property \"import\".");
+                    }
+                }
                 await options.import.call(index, index);
-                //args = [options.import];
             }
             else{
                 message = index[task].apply(index, args);

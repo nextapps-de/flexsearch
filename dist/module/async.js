@@ -1,5 +1,6 @@
 import Document from "./document.js";
 import Index from "./index.js";
+import WorkerIndex from "./worker.js";
 
 export default function (prototype) {
     register.call(prototype, "add");
@@ -21,7 +22,7 @@ function tick(key) {
 
 /**
  * @param {!string} key
- * @this {Index|Document}
+ * @this {Index|Document|WorkerIndex}
  */
 
 function register(key) {

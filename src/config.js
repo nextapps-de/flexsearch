@@ -5,7 +5,7 @@ export const RELEASE = "custom";
 export const DEBUG = true;
 
 /** @define {boolean} */
-export const PROFILER = true;
+export const PROFILER = false;
 
 /** @define {boolean} */
 export const POLYFILL = false;

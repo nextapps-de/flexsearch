@@ -252,7 +252,7 @@ export function intersect_union(arrays, mandatory, resolve) {
         }
     }
 
-    if(resolve){
+    if(!SUPPORT_RESOLVER || resolve){
         for(let i = 0, id; i < arrays.length; i++){
             id = arrays[i];
             if(check[id]){

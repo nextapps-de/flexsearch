@@ -350,8 +350,6 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag) {
 
     const result = this.get_array(term, keyword, limit, offset, resolve, enrich, tag);
 
-    resolve = resolve;
-
     if (this.db) {
         return result.then(function (result) {
             return resolve ? result || [] : new Resolver(result);

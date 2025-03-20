@@ -58,7 +58,7 @@ export default function Document(options){
     keystore = SUPPORT_KEYSTORE && (options.keystore || 0);
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate
+    this.reg = this.fastupdate && (!SUPPORT_WORKER || !options.worker) && (!SUPPORT_PERSISTENT || !options.db)
         ? (keystore && SUPPORT_KEYSTORE ? new KeystoreMap(keystore) : new Map())
         : (keystore && SUPPORT_KEYSTORE ? new KeystoreSet(keystore) : new Set());
 
@@ -134,6 +134,7 @@ export default function Document(options){
 
     // resolve worker promises and swap instances
     if(SUPPORT_WORKER && this.worker){
+        this.fastupdate = false;
         const promises = [];
         for(const index of this.index.values()){
             index.then && promises.push(index);
@@ -152,7 +153,10 @@ export default function Document(options){
         }
     }
     else if(SUPPORT_PERSISTENT){
-        options.db && this.mount(options.db);
+        if(options.db){
+            this.fastupdate = false;
+            this.mount(options.db);
+        }
     }
 }
 
@@ -163,6 +167,12 @@ if(SUPPORT_PERSISTENT){
      * @return {Promise<Array<?>>}
      */
     Document.prototype.mount = function(db){
+
+        if(DEBUG){
+            if(this.worker){
+                throw new Error("You can't use Worker-Indexes on a persistent model. That would be useless, since each of the persistent model acts like Worker-Index by default (Master/Slave).")
+            }
+        }
 
         let fields = this.field;
 

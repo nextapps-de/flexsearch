@@ -42,8 +42,7 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */
-    /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+    this.reg = this.fastupdate && !options.worker && !options.db ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
     this.storetree = (tmp = document.store || null) && tmp && !0 !== tmp && [];
@@ -52,8 +51,7 @@ export default function Document(options) {
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache = /* suggest */ /* append: */
-    /* enrich */!1;
+    options.cache = /* suggest */ /* append: */ /* enrich */!1;
 
     this.worker = options.worker;
 
@@ -105,6 +103,7 @@ export default function Document(options) {
 
     // resolve worker promises and swap instances
     if (this.worker) {
+        this.fastupdate = !1;
         const promises = [];
         for (const index of this.index.values()) {
             index.then && promises.push(index);
@@ -123,7 +122,10 @@ export default function Document(options) {
             });
         }
     } else {
-        options.db && this.mount(options.db);
+        if (options.db) {
+            this.fastupdate = !1;
+            this.mount(options.db);
+        }
     }
 }
 
@@ -132,6 +134,10 @@ export default function Document(options) {
  * @return {Promise<Array<?>>}
  */
 Document.prototype.mount = function (db) {
+    if (this.worker) {
+        throw new Error("You can't use Worker-Indexes on a persistent model. That would be useless, since each of the persistent model acts like Worker-Index by default (Master/Slave).");
+    }
+
 
     let fields = this.field;
 
