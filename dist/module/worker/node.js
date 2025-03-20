@@ -38,9 +38,15 @@ parentPort.on("message", async function (data) {
             let message;
 
             if ("export" === task) {
+                if (!options.export || "function" != typeof options.export) {
+                    throw new Error("Either no extern configuration provided for the Worker-Index or no method was defined on the config property \"export\".");
+                }
                 args = [options.export];
             }
             if ("import" === task) {
+                if (!options.import || "function" != typeof options.import) {
+                    throw new Error("Either no extern configuration provided for the Worker-Index or no method was defined on the config property \"import\".");
+                }
                 await options.import.call(index, index);
             } else {
                 message = index[task].apply(index, args);
