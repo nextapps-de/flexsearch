@@ -217,6 +217,7 @@ if(SUPPORT_SERIALIZE){
 /** @export */ DocumentDescriptor.index;
 /** @export */ DocumentDescriptor.tag;
 /** @export */ DocumentDescriptor.store;
+/** @export */ DocumentDescriptor.id;
 
 /** @export */ TagOptions.field;
 /** @export */ TagOptions.tag;

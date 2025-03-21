@@ -44,6 +44,7 @@ export let IndexOptions = {};
  *   db: (StorageInterface|undefined),
  *   commit: (boolean|undefined),
  *   config: (string|undefined),
+ *   priority: (number|undefined),
  *   field: (string|undefined),
  *   filter: (Function|undefined),
  *   custom: (Function|undefined)

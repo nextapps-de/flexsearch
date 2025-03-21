@@ -296,7 +296,8 @@ IdxDB.prototype.transaction = function (ref, modifier, task) {
             //db.close;
         };
         const promise = task.call(this, store);
-        //
+        // transactions can just be used within the same event loop
+        // the indexeddb is such a stupid tool :(
         this.trx[ref + ":" + modifier] = null;
         return promise;
     });

@@ -12,12 +12,10 @@ export default function(prototype){
 
 let timer;
 let timestamp;
-const current = {};
-const limit = {};
+let cycle;
 
-function tick(key){
-    timer = 0;
-    current[key] = limit[key];
+function tick(){
+    timer = cycle = 0;
 }
 
 /**
@@ -37,35 +35,38 @@ function register(key){
             delete args[args.length - 1];
         }
 
-        // balance when polling the event loop
+        // event loop runtime balancer
         if(!timer){
-            timer = setTimeout(tick, 0, key);
+            // when the next event loop occurs earlier than task completion
+            // it will reset the state immediately
+            timer = setTimeout(tick, 0);
             timestamp = Date.now();
         }
-        if(!limit[key]){
-            limit[key] = current[key] = 1000;
-        }
-        if(!--current[key]){
+        else if(!cycle){
             const now = Date.now();
             const duration = now - timestamp;
             const target = this.priority * this.priority * 3;
-            current[key] = limit[key] = (limit[key] * target / duration | 0) || 1;
-            timer = clearTimeout(timer);
+            cycle = duration >= target;
+        }
+
+        // cycle all instances from this point
+        if(cycle){
             const self = this;
+            // move the next microtask onto the next macrotask queue
             return new Promise(resolve => {
                 setTimeout(function(){
                     resolve(self[key + "Async"].apply(self, args));
-                }, 0)
-            })
+                }, 0);
+            });
         }
 
-        //this.async = true;
         const res = this[key].apply(this, args);
         const promise = res.then ? res : new Promise(resolve => resolve(res));
-        //this.async = false;
+
         if(callback){
             promise.then(callback);
         }
+
         return promise;
     };
 }

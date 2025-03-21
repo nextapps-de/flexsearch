@@ -83,6 +83,10 @@ export default function Document(options){
         this.worker = options.worker;
     }
 
+    if(SUPPORT_ASYNC){
+        this.priority = options.priority || 4;
+    }
+
     // if(SUPPORT_ASYNC){
     //     // this switch is used by recall of promise callbacks
     //     this.async = false;
@@ -155,6 +159,8 @@ export default function Document(options){
     else if(SUPPORT_PERSISTENT){
         if(options.db){
             this.fastupdate = false;
+            // think about to return the promise here
+            // actually it can be awaited on "await index.db"
             this.mount(options.db);
         }
     }

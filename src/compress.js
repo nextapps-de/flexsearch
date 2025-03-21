@@ -39,7 +39,7 @@ export default function(str){
             }
         }
         else{
-            timer = setTimeout(clear);
+            timer = setTimeout(clear, 1);
         }
     }
 

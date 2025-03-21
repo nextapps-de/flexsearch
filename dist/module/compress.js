@@ -32,7 +32,7 @@ export default function (str) {
             return cache.get(str);
         }
     } else {
-        timer = setTimeout(clear);
+        timer = setTimeout(clear, 1);
     }
 
     /* 2 ** ((level + 1.5) * 1.6 | 0) */

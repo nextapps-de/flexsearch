@@ -159,7 +159,7 @@ export function autoCommit(self, replace, append){
         self.commit_timer = setTimeout(function(){
             self.commit_timer = null;
             self.db.commit(self, replace, append);
-        }, 0);
+        }, 1);
     }
 }
 

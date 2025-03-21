@@ -67,6 +67,7 @@ export default function WorkerIndex(options = /** @type IndexOptions */ ({})){
 
                 _self.resolver[++pid] = function(){
                     resolve(_self);
+                    if(pid > 1e9) pid = 0;
                 };
 
                 _self.worker.postMessage({
@@ -83,6 +84,10 @@ export default function WorkerIndex(options = /** @type IndexOptions */ ({})){
             "factory": factory,
             "options": options
         });
+
+        if(SUPPORT_ASYNC){
+            this.priority = options.priority || 4;
+        }
 
         return this;
     }

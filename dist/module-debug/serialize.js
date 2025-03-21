@@ -288,23 +288,23 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
             case 1:
 
                 key = "tag";
-                chunk = ctx_to_json(this.tag, this.reg.size);
+                chunk = this.tag && ctx_to_json(this.tag, this.reg.size);
                 _field = null;
                 break;
 
             case 2:
 
                 key = "doc";
-                chunk = map_to_json(this.store);
+                chunk = this.store && map_to_json(this.store);
                 _field = null;
                 break;
 
-            case 3:
-
-                key = "cfg";
-                chunk = null;
-                _field = null;
-                break;
+            // case 3:
+            //
+            //     key = "cfg";
+            //     chunk = null;
+            //     _field = null;
+            //     break;
 
             default:
 

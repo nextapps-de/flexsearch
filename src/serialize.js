@@ -1,5 +1,5 @@
 // COMPILER BLOCK -->
-import { SUPPORT_WORKER } from "./config.js";
+import { SUPPORT_STORE, SUPPORT_TAGS, SUPPORT_WORKER } from "./config.js";
 // <-- COMPILER BLOCK
 import Index from "./index.js";
 import Document from "./document.js";
@@ -316,26 +316,26 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
                 _field = null;
                 break;
 
-            case 1:
+            case SUPPORT_TAGS && 1:
 
                 key = "tag";
-                chunk = ctx_to_json(this.tag, this.reg.size);
+                chunk = this.tag && ctx_to_json(this.tag, this.reg.size);
                 _field = null;
                 break;
 
-            case 2:
+            case SUPPORT_STORE && 2:
 
                 key = "doc";
-                chunk = map_to_json(this.store);
+                chunk = this.store && map_to_json(this.store);
                 _field = null;
                 break;
 
-            case 3:
-
-                key = "cfg";
-                chunk = null;
-                _field = null;
-                break;
+            // case 3:
+            //
+            //     key = "cfg";
+            //     chunk = null;
+            //     _field = null;
+            //     break;
 
             default:
 
