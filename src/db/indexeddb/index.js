@@ -317,19 +317,21 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
 
     return new Promise((resolve, reject) => {
         transaction.onerror = (err) => {
-            this.trx[ref+ ":" + modifier] = null;
             transaction.abort();
             transaction = store = null;
             reject(err);
             //db.close;
         };
         transaction.oncomplete = (res) => {
-            this.trx[ref+ ":" + modifier] = null;
             transaction = store = null;
             resolve(res || true);
             //db.close;
         };
-        return task.call(this, store);
+        const promise = task.call(this, store);
+        // transactions can just be used within the same event loop
+        // the indexeddb is such a stupid tool :(
+        this.trx[ref+ ":" + modifier] = null;
+        return promise;
     });
 };
 

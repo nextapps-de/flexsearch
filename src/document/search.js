@@ -75,7 +75,7 @@ Document.prototype.search = function(query, limit, options, _promises){
     let result = [];
     let result_field = [];
     let pluck, enrich, merge, suggest;
-    let field, tag, offset, count = 0, resolve, highlight;
+    let field, tag, offset, count = 0, resolve = true, highlight;
 
     if(options){
 

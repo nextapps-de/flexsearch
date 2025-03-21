@@ -61,7 +61,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         tag,
         offset,
         count = 0,
-        resolve,
+        resolve = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/,
         highlight;
 
 
@@ -412,7 +412,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         };
     }
 
-    if (enrich && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ && this.db && promises.length) {
+    if (enrich && !0 && this.db && promises.length) {
         const self = this;
         return Promise.all(promises).then(function (promises) {
             for (let j = 0; j < promises.length; j++) {

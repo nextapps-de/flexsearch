@@ -57,7 +57,8 @@ Index.prototype.search = function (query, limit, options) {
         offset = options.offset || 0;
         context = options.context;
         suggest = options.suggest;
-        resolve = /*global_resolve &&*/ /* suggest */ /* append: */ /* enrich */!1 !== options.resolve;
+        resolve = /*global_resolve &&*/ /* suggest */ /* append: */ /* enrich */
+        !1 !== options.resolve;
         //resolve || (global_resolve = 0);
         enrich = resolve && options.enrich;
         boost = options.boost;

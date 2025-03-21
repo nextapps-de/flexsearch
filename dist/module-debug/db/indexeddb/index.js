@@ -285,19 +285,20 @@ IdxDB.prototype.transaction = function (ref, modifier, task) {
 
     return new Promise((resolve, reject) => {
         transaction.onerror = err => {
-            this.trx[ref + ":" + modifier] = null;
             transaction.abort();
             transaction = store = null;
             reject(err);
             //db.close;
         };
         transaction.oncomplete = res => {
-            this.trx[ref + ":" + modifier] = null;
             transaction = store = null;
             resolve(res || !0);
             //db.close;
         };
-        return task.call(this, store);
+        const promise = task.call(this, store);
+        //
+        this.trx[ref + ":" + modifier] = null;
+        return promise;
     });
 };
 

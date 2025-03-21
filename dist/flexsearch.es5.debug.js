@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.113 (ES5/Debug)
+ * FlexSearch.js v0.8.115 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2101,34 +2101,34 @@ Y.prototype.resolve = function(a, b, c) {
 J();
 W.prototype.search = function(a, b, c, d) {
   c || (!b && M(a) ? (c = a, a = "") : M(b) && (c = b, b = 0));
-  var e = [], f = [], g = 0;
+  var e = [], f = [], g = 0, h = !0;
   if (c) {
     c.constructor === Array && (c = {index:c});
     a = c.query || a;
-    var h = c.pluck;
-    var k = c.merge;
-    var l = h || c.field || (l = c.index) && (l.index ? null : l);
-    var m = this.tag && c.tag;
-    var n = c.suggest;
-    var p = !1 !== c.resolve;
-    if (!p && !h) {
-      if (l = l || this.field) {
-        K(l) ? h = l : (l.constructor === Array && 1 === l.length && (l = l[0]), h = l.field || l.index);
+    var k = c.pluck;
+    var l = c.merge;
+    var m = k || c.field || (m = c.index) && (m.index ? null : m);
+    var n = this.tag && c.tag;
+    var p = c.suggest;
+    h = !1 !== c.resolve;
+    if (!h && !k) {
+      if (m = m || this.field) {
+        K(m) ? k = m : (m.constructor === Array && 1 === m.length && (m = m[0]), k = m.field || m.index);
       }
-      if (!h) {
+      if (!k) {
         throw Error("Apply resolver on document search requires either the option 'pluck' to be set or just select a single field name in your query.");
       }
     }
-    this.store && c.enrich && !p && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
-    var q = this.store && c.enrich && p;
+    this.store && c.enrich && !h && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
+    var q = this.store && c.enrich && h;
     var t = c.highlight && q;
     b = c.limit || b;
     var x = c.offset || 0;
     b || (b = 100);
-    if (m && (!this.db || !d)) {
-      m.constructor !== Array && (m = [m]);
-      for (var r = [], A = 0, z = void 0; A < m.length; A++) {
-        z = m[A];
+    if (n && (!this.db || !d)) {
+      n.constructor !== Array && (n = [n]);
+      for (var r = [], A = 0, z = void 0; A < n.length; A++) {
+        z = n[A];
         if (K(z)) {
           throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
         }
@@ -2158,26 +2158,26 @@ W.prototype.search = function(a, b, c, d) {
       if (!r.length) {
         throw Error("Your tag definition within the search options is probably wrong. No valid tags found.");
       }
-      m = r;
+      n = r;
       if (!a) {
-        p = [];
+        h = [];
         if (r.length) {
           for (f = 0; f < r.length; f += 2) {
-            h = void 0;
+            k = void 0;
             if (this.db) {
-              h = this.index.get(r[f]);
-              if (!h) {
+              k = this.index.get(r[f]);
+              if (!k) {
                 console.warn("Tag '" + r[f] + ":" + r[f + 1] + "' will be skipped because there is no field '" + r[f] + "'.");
                 continue;
               }
-              p.push(h = h.db.tag(r[f + 1], b, x, q));
+              h.push(k = k.db.tag(r[f + 1], b, x, q));
             } else {
-              h = ub.call(this, r[f], r[f + 1], b, x, q);
+              k = ub.call(this, r[f], r[f + 1], b, x, q);
             }
-            e.push({field:r[f], tag:r[f + 1], result:h});
+            e.push({field:r[f], tag:r[f + 1], result:k});
           }
         }
-        return p.length ? Promise.all(p).then(function(Q) {
+        return h.length ? Promise.all(h).then(function(Q) {
           for (var R = 0; R < Q.length; R++) {
             e[R].result = Q[R];
           }
@@ -2185,25 +2185,25 @@ W.prototype.search = function(a, b, c, d) {
         }) : e;
       }
     }
-    l && l.constructor !== Array && (l = [l]);
+    m && m.constructor !== Array && (m = [m]);
   }
-  l || (l = this.field);
+  m || (m = this.field);
   r = !d && (this.worker || this.db) && [];
   A = 0;
-  for (y = z = v = void 0; A < l.length; A++) {
-    if (z = l[A], !this.db || !this.tag || this.J[A]) {
+  for (y = z = v = void 0; A < m.length; A++) {
+    if (z = m[A], !this.db || !this.tag || this.J[A]) {
       v = void 0;
-      K(z) || (v = z, z = v.field, a = v.query || a, b = v.limit || b, x = v.offset || x, n = v.suggest || n, q = this.store && (v.enrich || q));
+      K(z) || (v = z, z = v.field, a = v.query || a, b = v.limit || b, x = v.offset || x, p = v.suggest || p, q = this.store && (v.enrich || q));
       if (d) {
         v = d[A];
       } else {
         y = v || c;
         v = this.index.get(z);
-        if (m) {
+        if (n) {
           if (this.db) {
-            y.tag = m;
+            y.tag = n;
             var Ka = v.db.support_tag_search;
-            y.field = l;
+            y.field = m;
           }
           Ka || (y.enrich = !1);
         }
@@ -2215,67 +2215,67 @@ W.prototype.search = function(a, b, c, d) {
           v = v.search(a, b, y), y && q && (y.enrich = q);
         }
       }
-      y = v && (p ? v.length : v.result.length);
-      if (m && y) {
+      y = v && (h ? v.length : v.result.length);
+      if (n && y) {
         D = [];
         G = 0;
         if (this.db && d) {
           if (!Ka) {
-            for (H = l.length; H < d.length; H++) {
+            for (H = m.length; H < d.length; H++) {
               var L = d[H];
               if (L && L.length) {
                 G++, D.push(L);
-              } else if (!n) {
-                return p ? e : new Y(e);
+              } else if (!p) {
+                return h ? e : new Y(e);
               }
             }
           }
         } else {
           H = 0;
-          for (var Xb = L = void 0; H < m.length; H += 2) {
-            L = this.tag.get(m[H]);
+          for (var Xb = L = void 0; H < n.length; H += 2) {
+            L = this.tag.get(n[H]);
             if (!L) {
-              if (console.warn("Tag '" + m[H] + ":" + m[H + 1] + "' will be skipped because there is no field '" + m[H] + "'."), n) {
+              if (console.warn("Tag '" + n[H] + ":" + n[H + 1] + "' will be skipped because there is no field '" + n[H] + "'."), p) {
                 continue;
               } else {
-                return p ? e : new Y(e);
+                return h ? e : new Y(e);
               }
             }
-            if (Xb = (L = L && L.get(m[H + 1])) && L.length) {
+            if (Xb = (L = L && L.get(n[H + 1])) && L.length) {
               G++, D.push(L);
-            } else if (!n) {
-              return p ? e : new Y(e);
+            } else if (!p) {
+              return h ? e : new Y(e);
             }
           }
         }
         if (G) {
-          v = lb(v, D, p);
+          v = lb(v, D, h);
           y = v.length;
-          if (!y && !n) {
-            return p ? v : new Y(v);
+          if (!y && !p) {
+            return h ? v : new Y(v);
           }
           G--;
         }
       }
       if (y) {
         f[g] = z, e.push(v), g++;
-      } else if (1 === l.length) {
-        return p ? e : new Y(e);
+      } else if (1 === m.length) {
+        return h ? e : new Y(e);
       }
     }
   }
   if (r) {
-    if (this.db && m && m.length && !Ka) {
-      for (q = 0; q < m.length; q += 2) {
-        f = this.index.get(m[q]);
+    if (this.db && n && n.length && !Ka) {
+      for (q = 0; q < n.length; q += 2) {
+        f = this.index.get(n[q]);
         if (!f) {
-          if (console.warn("Tag '" + m[q] + ":" + m[q + 1] + "' was not found because there is no field '" + m[q] + "'."), n) {
+          if (console.warn("Tag '" + n[q] + ":" + n[q + 1] + "' was not found because there is no field '" + n[q] + "'."), p) {
             continue;
           } else {
-            return p ? e : new Y(e);
+            return h ? e : new Y(e);
           }
         }
-        r.push(f.db.tag(m[q + 1], b, x, !1));
+        r.push(f.db.tag(n[q + 1], b, x, !1));
       }
     }
     var Yb = this;
@@ -2284,20 +2284,20 @@ W.prototype.search = function(a, b, c, d) {
     });
   }
   if (!g) {
-    return p ? e : new Y(e);
+    return h ? e : new Y(e);
   }
-  if (h && (!q || !this.store)) {
+  if (k && (!q || !this.store)) {
     return e[0];
   }
   r = [];
   x = 0;
-  for (n = void 0; x < f.length; x++) {
-    n = e[x];
-    q && n.length && !n[0].doc && (this.db ? r.push(n = this.index.get(this.field[0]).db.enrich(n)) : n = X.call(this, n));
-    if (h) {
-      return p ? n : new Y(n);
+  for (p = void 0; x < f.length; x++) {
+    p = e[x];
+    q && p.length && !p[0].doc && (this.db ? r.push(p = this.index.get(this.field[0]).db.enrich(p)) : p = X.call(this, p));
+    if (k) {
+      return h ? p : new Y(p);
     }
-    e[x] = {field:f[x], result:n};
+    e[x] = {field:f[x], result:p};
   }
   if (q && this.db && r.length) {
     var La = this;
@@ -2305,10 +2305,10 @@ W.prototype.search = function(a, b, c, d) {
       for (var R = 0; R < Q.length; R++) {
         e[R].result = Q[R];
       }
-      return k ? vb(e, b) : t ? wb(e, a, La.index, La.field, La.J, t) : e;
+      return l ? vb(e, b) : t ? wb(e, a, La.index, La.field, La.J, t) : e;
     });
   }
-  return k ? vb(e, b) : t ? wb(e, a, this.index, this.field, this.J, t) : e;
+  return l ? vb(e, b) : t ? wb(e, a, this.index, this.field, this.J, t) : e;
 };
 function wb(a, b, c, d, e, f) {
   for (var g, h, k, l = 0, m, n, p; l < a.length; l++) {
@@ -3314,17 +3314,18 @@ u.transaction = function(a, b, c) {
   var f = this.db.transaction(a, b);
   this.h[a + ":" + b] = e = f.objectStore(a);
   return new Promise(function(g, h) {
-    f.onerror = function(k) {
-      d.h[a + ":" + b] = null;
+    f.onerror = function(l) {
       f.abort();
       f = e = null;
-      h(k);
+      h(l);
     };
-    f.oncomplete = function(k) {
-      f = e = d.h[a + ":" + b] = null;
-      g(k || !0);
+    f.oncomplete = function(l) {
+      f = e = null;
+      g(l || !0);
     };
-    return c.call(d, e);
+    var k = c.call(d, e);
+    d.h[a + ":" + b] = null;
+    return k;
   });
 };
 u.commit = function(a, b, c) {

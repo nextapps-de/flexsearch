@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.113 (Bundle/Debug)
+ * FlexSearch.js v0.8.115 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -935,7 +935,7 @@ V.prototype.search = function(a, c, b, e) {
   b || (!c && I(a) ? (b = a, a = "") : I(c) && (b = c, c = 0));
   let d = [];
   var f = [];
-  let g, k, h, l, m, n, t = 0, p, q;
+  let g, k, h, l, m, n, t = 0, p = !0, q;
   if (b) {
     b.constructor === Array && (b = {index:b});
     a = b.query || a;
