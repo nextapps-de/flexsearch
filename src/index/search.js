@@ -274,6 +274,7 @@ Index.prototype.search = function(query, limit, options){
                 // fallback to non-contextual search when no result was found
                 if(suggest && keyword && (index === length - 1)){
                     if(!result.length){
+                        resolution = self.resolution;
                         keyword = "";
                         index = -1;
                         dupes = create_object();
@@ -323,6 +324,7 @@ Index.prototype.search = function(query, limit, options){
         // fallback to non-contextual search when no result was found
         if(suggest && keyword && (index === length - 1)){
             if(!result.length){
+                resolution = this.resolution;
                 keyword = "";
                 index = -1;
                 dupes = create_object();

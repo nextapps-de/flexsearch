@@ -117,6 +117,7 @@ declare module "flexsearch" {
         exclude?: EncoderSplitOptions;
         split?: string|RegExp|""|false;
         numeric?: boolean;
+        normalize?: boolean|((str: string) => string);
         prepare?: (str: string) => string;
         finalize?: (terms: string[]) => string[];
         filter?: Set<string>;

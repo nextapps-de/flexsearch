@@ -47,7 +47,7 @@ export const SUPPORT_PERSISTENT = true;
 export const SUPPORT_KEYSTORE = true;
 
 /** @define {boolean} */
-export const SUPPORT_COMPRESSION = true;
+export const SUPPORT_COMPRESSION = false;
 
 /** @define {boolean} */
 export const SUPPORT_RESOLVER = true;

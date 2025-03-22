@@ -10,14 +10,17 @@ export const matcher = new Map([
     //["ch", "c"], // before soundex
     ["kh", "k"], // after soundex
     ["th", "t"], // replacer "h"
-    //["ph", "f"],
-    ["pf", "f"]
+    ["ph", "f"], // replacer "h"
+    ["pf", "f"],
+    //["ps", "s"],
+    //["ts", "s"],
+
 ]);
 
 export const replacer = [
     /([^aeo])h(.)/g, "$1$2",
     /([aeo])h([^aeo]|$)/g, "$1$2",
-    /([^0-9])\1+/g, "$1"
+    /(.)\1+/g, "$1" // /([^0-9])\1+/g, "$1"
 ];
 
 /** @type EncoderOptions */

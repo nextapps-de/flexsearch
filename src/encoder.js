@@ -67,7 +67,7 @@ const normalize = "".normalize && /[\u0300-\u036f]/g; // '´`’ʼ.,
  * @constructor
  */
 
-export default function Encoder(options){
+export default function Encoder(options = {}){
 
     if(!this || this.constructor !== Encoder){
         // let args = Array.prototype.slice.call(arguments);
@@ -76,8 +76,13 @@ export default function Encoder(options){
         return new Encoder(...arguments);
     }
 
-    for(let i = 0; i < arguments.length; i++){
-        this.assign(arguments[i]);
+    if(arguments.length){
+        for(let i = 0; i < arguments.length; i++){
+            this.assign(arguments[i]);
+        }
+    }
+    else{
+        this.assign(options);
     }
 };
 

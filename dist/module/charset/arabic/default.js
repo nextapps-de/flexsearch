@@ -3,7 +3,8 @@ import { EncoderOptions } from "../../type.js";
 const regex = /[\x00-\x7F]+/g,
       split = /\s+/,
       options = {
-    rtl: !0,
+    // the string is already encoded as RTL by default
+    //rtl: true,
     normalize: !1,
     dedupe: !0,
     prepare: function (str) {

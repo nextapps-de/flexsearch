@@ -58,6 +58,7 @@ export default function Document(options){
     keystore = SUPPORT_KEYSTORE && (options.keystore || 0);
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
+    // Shared Registry
     this.reg = this.fastupdate && (!SUPPORT_WORKER || !options.worker) && (!SUPPORT_PERSISTENT || !options.db)
         ? (keystore && SUPPORT_KEYSTORE ? new KeystoreMap(keystore) : new Map())
         : (keystore && SUPPORT_KEYSTORE ? new KeystoreSet(keystore) : new Set());

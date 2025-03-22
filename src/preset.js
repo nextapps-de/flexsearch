@@ -8,7 +8,6 @@ import { IndexOptions } from "./type.js";
  * @type {Object<string, IndexOptions>}
  * @const
  */
-
 const presets = {
 
     "memory": {
@@ -16,11 +15,11 @@ const presets = {
     },
 
     "performance": {
-        resolution: 6,
+        resolution: 3,
         fastupdate: true,
         context: {
             depth: 1,
-            resolution: 3
+            resolution: 1
         }
     },
 
@@ -32,7 +31,7 @@ const presets = {
         resolution: 9,
         context: {
             depth: 2,
-            resolution: 9
+            resolution: 3
         }
     }
 };

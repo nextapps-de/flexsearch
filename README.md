@@ -11,7 +11,7 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 <img src="https://img.shields.io/badge/typed-73%25-yellow">
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
-<!--<img src="https://img.shields.io/badge/coverage-90%25-brightgreen">-->
+<img src="https://img.shields.io/badge/coverage-80%25-yellow">
 
 <a href="#installation">Basic Start</a> &ensp;&bull;&ensp; 
 <a href="#api">API Reference</a> &ensp;&bull;&ensp;

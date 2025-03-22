@@ -64,7 +64,7 @@ const whitespace = /[^\p{L}\p{N}]+/u,
  * @constructor
  */
 
-export default function Encoder() {
+export default function Encoder(options = {}) {
 
     if (!this || this.constructor !== Encoder) {
         // let args = Array.prototype.slice.call(arguments);
@@ -73,8 +73,12 @@ export default function Encoder() {
         return new Encoder(...arguments);
     }
 
-    for (let i = 0; i < arguments.length; i++) {
-        this.assign(arguments[i]);
+    if (arguments.length) {
+        for (let i = 0; i < arguments.length; i++) {
+            this.assign(arguments[i]);
+        }
+    } else {
+        this.assign(options);
     }
 }
 
@@ -87,7 +91,9 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
+    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
+
+    /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -408,8 +414,6 @@ Encoder.prototype.encode = function (str) {
                 this.timer = setTimeout(clear, 50, this);
             }
         }
-
-        // apply stemmer after matcher
         if (this.stemmer && 2 < word.length) {
             // for(const item of this.stemmer){
             //     const key = item[0];

@@ -1,1 +1,1 @@
-import{EncoderOptions}from"../../type.js";const options={normalize:!1,dedupe:!1};export default options;
+import{EncoderOptions}from"../../type.js";const options={split:/\s+/,normalize:!1};export default options;

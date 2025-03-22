@@ -279,9 +279,13 @@ const FlexSearch = {
 
 {
 
-    FlexSearch.Language = {};
+    // When it is not a module, the package is for Node.js or legacy Browser
+    // Here there exists this or self
+    // const root = typeof self !== "undefined" ? self :
+    //              typeof global !== "undefined" ? global :
+    //              typeof window !== "undefined" ? window : {};
 
-    const root = "undefined" != typeof self ? self : "undefined" != typeof global ? global : "undefined" != typeof window ? window : {};
+    const root = self;
     let prop;
 
     // AMD (RequireJS)

@@ -398,7 +398,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
             for (let j = 0; j < promises.length; j++) {
                 result[j].result = promises[j];
             }
-            return merge ? merge_fields(result, limit, offset) : highlight ? highlight_fields(result, query, self.index, self.field, self.tree, highlight, limit, offset) : result;
+            return merge ? merge_fields(result, /** @type {number} */limit, offset) : highlight ? highlight_fields(result, query, self.index, self.field, self.tree, highlight, limit, offset) : result;
         });
     }
 
@@ -491,7 +491,14 @@ function highlight_fields(result, query, index, field, tree, template) {
 //      be found at least by one field to get a valid match without
 //      using suggestion explicitly
 
+/**
+ * @param {DocumentSearchResults} fields
+ * @param {number=} limit
+ * @param {number=} offset
+ * @return {MergedDocumentSearchResults}
+ */
 function merge_fields(fields, limit) {
+    /** @type {MergedDocumentSearchResults} */
     const final = [],
           set = create_object();
 
@@ -500,6 +507,12 @@ function merge_fields(fields, limit) {
         res = field.result;
         for (let j = 0, id, entry, tmp; j < res.length; j++) {
             entry = res[j];
+            // upgrade flat results
+            if ("object" != typeof entry) {
+                entry = {
+                    id: entry
+                };
+            }
             id = entry.id;
             tmp = set[id];
             if (!tmp) {

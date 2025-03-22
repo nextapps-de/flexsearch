@@ -155,15 +155,17 @@ function create(factory, is_node_js, worker_path){
     let worker
 
     worker = is_node_js ?
-            // This eval will be removed when compiling
+            // if anyone would ask me what JS has delivered the past 10 years,
+            // those are the lines I definitively show up first ^^
             typeof module !== "undefined"
-                ? (0,eval)('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
-                //: (0,eval)('new ((await import("worker_threads"))["Worker"])(import.meta.dirname + "/worker/node.mjs")')
-                //: (0,eval)('new ((await import("worker_threads"))["Worker"])((1,eval)(\"import.meta.dirname\") + "/node/node.mjs")')
-                : (0,eval)('import("worker_threads").then(function(worker){ return new worker["Worker"]((1,eval)(\"import.meta.dirname\") + "/node/node.mjs"); })')
-                //: import("worker_threads").then(function(worker){ return new worker["Worker"](import.meta.dirname + "/worker/node.mjs"); })
-
-        //eval('new (require("worker_threads")["Worker"])(__dirname + "/node/node.js")')
+                // This eval will be removed when compiling
+                // The issue is that this will not build by Closure Compiler
+                ? (0,eval)('new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js")')
+                // this will need to remove in CommonJS builds,
+                // otherwise the module is treated as ESM by Node.js automatic detection
+                // the path src/worker/node.mjs is located at dist/node/node.mjs
+                // The issue is that this will not build by Babel Compiler
+                : import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/worker/node.mjs")})
     :(
         factory ?
             new window.Worker(URL.createObjectURL(
@@ -176,6 +178,7 @@ function create(factory, is_node_js, worker_path){
             new window.Worker(
                 typeof worker_path === "string"
                     ? worker_path
+                    // when loaded from /src/ folder the worker file is located at /worker/worker.js
                     : import.meta.url.replace("/worker.js", "/worker/worker.js")
                                      .replace("flexsearch.bundle.module.min.js", "module/worker/worker.js") /*"worker/worker.js"*/
                 , { type: "module" }

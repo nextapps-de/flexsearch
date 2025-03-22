@@ -314,9 +314,14 @@ else (async function(){
                 else if(file === "worker.js"){
 
                     let content = fs.readFileSync("src/" + file, "utf8");
-                    // add the eval wrapper
+                    // add the eval wrapper #1
                     content = content.replace("import.meta.url", '(1,eval)("import.meta.url")');
-                    fs.writeFileSync("tmp/worker.js", content);
+                    // add the eval wrapper #2
+                    content = content.replace(
+                        /[: ]+import\("worker_threads"\)[^}]+}\)/g,
+                        `: (0,eval)('import("worker_threads").then(function(worker){return new worker["Worker"]((1,eval)(\\"import.meta.dirname\\")+"/node/node.mjs")})')`
+                    );
+                    fs.writeFileSync("tmp/worker.js", content)
                 }
                 else{
 
@@ -338,7 +343,7 @@ else (async function(){
 
     // add the eval wrapper
     let content = fs.readFileSync("tmp/worker/handler.js", "utf8");
-    content = content.replace('options = (await import(filepath))["default"];', '//options = (await import(filepath))["default"];');
+    content = content.replace('options=(await import(filepath))["default"];', '//options=(await import(filepath))["default"];');
     fs.writeFileSync("tmp/worker/handler.js", content);
 
     const filename = "dist/flexsearch." + (release + (custom ? "." + custom : "")) + (options["DEBUG"] ?  ".debug" : ".min") + ".js";
@@ -409,9 +414,22 @@ else (async function(){
             // replace the eval wrapper
             build = build.replace(/\(1,eval\)\('([^']+)'\)/g, "import.meta.dirname");
             build = build.replace('(0,eval)("import.meta.url")', 'import.meta.url');
+            build = build.replace('(1,eval)("import.meta.url")', 'import.meta.url');
             build = build.replace('(1,eval)("import.meta.dirname")', 'import.meta.dirname');
+            build = build.replace(
+                `: (0,eval)('import("worker_threads").then(function(worker){return new worker["Worker"]((1,eval)(\\"import.meta.dirname\\")+"/node/node.mjs")})')`,
+                `: import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/node/node.mjs")})`
 
+            );
             //build = build.replace(/\(function\(self\)\{/, "const FlexSearch=(function(self){");
+        }
+        else{
+
+            // add the eval wrapper #3
+            build = build.replace(
+                `(0,eval)('new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js")')`,
+                `new(require("worker_threads")["Worker"])(__dirname+"/node/node.js")`
+            );
         }
 
         // fix closure compiler dynamic import

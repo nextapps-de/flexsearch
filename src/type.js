@@ -185,13 +185,19 @@ export let DocumentSearchResults = [];
  */
 export let EnrichedDocumentSearchResults = [];
 
+
 /**
- * @typedef Array<{
+ * @typedef {{
  *   id: (number|string),
  *   doc: (Object|null),
  *   field: (Array<string>|undefined),
  *   tag: (Array<string>|undefined)
- * }>
+ * }}
+ */
+export let MergedDocumentSearchEntry = {};
+
+/**
+ * @typedef Array<MergedDocumentSearchEntry>
  */
 export let MergedDocumentSearchResults = [];
 
@@ -213,7 +219,7 @@ export let EncoderSplitOptions = {};
  *   dedupe: (boolean|undefined),
  *   include: (EncoderSplitOptions|undefined),
  *   exclude: (EncoderSplitOptions|undefined),
- *   split: (string|boolean|undefined),
+ *   split: (string|boolean|RegExp|undefined),
  *   numeric: (boolean|undefined),
  *   normalize: (boolean|(function(string):string)|undefined),
  *   prepare: ((function(string):string)|undefined),

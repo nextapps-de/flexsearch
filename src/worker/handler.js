@@ -28,7 +28,7 @@ export default async function(data) {
                 options = options;
                 // will be replaced after build with the line below because
                 // there is an issue with closure compiler dynamic import
-                options = (await import(filepath))["default"];
+                options=(await import(filepath))["default"];
             }
 
             const factory = data["factory"];

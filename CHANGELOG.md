@@ -1,5 +1,12 @@
 # Changelog
 
+### v0.8.1
+
+- Resolver Support for Documents
+- Asynchronous Runtime Balancer, new option `priority`
+- Export/Import Worker Indexes + Document Worker
+- Improved interoperability of the different build packages, including source folder
+
 ### v0.8.0
 
 - Persistent indexes support for: `IndexedDB` (Browser), `Redis`, `SQLite`, `Postgres`, `MongoDB`, `Clickhouse`

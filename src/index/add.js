@@ -54,9 +54,10 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                 let term = content[this.rtl ? word_length - 1 - i : i];
                 let term_length = term.length;
 
+                // todo check context search
+                // this check also wasn't applied on search, so it's useless here
                 // skip dupes will break the context chain
-
-                if(term_length /*&& (term_length >= this.minlength)*/ && (depth || !dupes[term])){
+                if(term_length && (depth || !dupes[term])){
 
                     let score = this.score
                         ? this.score(content, term, i, null, 0)
@@ -67,16 +68,14 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                         case "full":
                             if(term_length > 2){
-                                for(let x = 0; x < term_length; x++){
+                                for(let x = 0, _x; x < term_length; x++){
                                     for(let y = term_length; y > x; y--){
-
-                                        //if((y - x) >= this.minlength){
                                         token = term.substring(x, y);
+                                        _x = this.rtl ? term_length - 1 - x : x;
                                         const partial_score = this.score
-                                            ? this.score(content, term, i, token, x)
-                                            : get_score(resolution, word_length, i, term_length, x);
+                                            ? this.score(content, term, i, token, _x)
+                                            : get_score(resolution, word_length, i, term_length, _x);
                                         this.push_index(dupes, token, partial_score, id, _append);
-                                        //}
                                     }
                                 }
                                 break;
@@ -86,13 +85,15 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                             // skip last round (this token exist already in "forward")
                             if(term_length > 1){
                                 for(let x = term_length - 1; x > 0; x--){
-                                    token = term[x] + token;
-                                    //if(token.length >= this.minlength){
+                                    token = term[
+                                        this.rtl
+                                            ? term_length - 1 - x
+                                            : x
+                                    ] + token;
                                     const partial_score = this.score
                                         ? this.score(content, term, i, token, x)
                                         : get_score(resolution, word_length, i, term_length, x);
                                     this.push_index(dupes, token, partial_score, id, _append);
-                                    //}
                                 }
                                 token = "";
                             }
@@ -101,25 +102,19 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                         case "forward":
                             if(term_length > 1){
                                 for(let x = 0; x < term_length; x++){
-                                    token += term[x];
-                                    //if(token.length >= this.minlength){
+                                    token += term[
+                                        this.rtl
+                                            ? term_length - 1 - x
+                                            : x
+                                    ];
                                     this.push_index(dupes, token, score, id, _append);
-                                    //}
                                 }
                                 break;
                             }
 
                         // fallthrough to next case when token has a length of 1
-                        default:
-                            // case "strict":
-
-                            // todo move boost to search
-                            // if(this.boost){
-                            //     score = Math.min((score / this.boost(content, term, i)) | 0, resolution - 1);
-                            // }
-
+                        default: // "strict":
                             this.push_index(dupes, term, score, id, _append);
-
                             // context is just supported by tokenizer "strict"
                             if(depth){
 
@@ -129,23 +124,38 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                     const dupes_inner = create_object();
                                     const resolution = this.resolution_ctx;
                                     const keyword = term;
-                                    const size = Math.min(depth + 1, word_length - i);
+                                    const size = Math.min(
+                                        depth + 1,
+                                        this.rtl
+                                            ? i + 1
+                                            : word_length - i
+                                    );
 
                                     dupes_inner[keyword] = 1;
 
                                     for(let x = 1; x < size; x++){
 
-                                        term = content[this.rtl ? word_length - 1 - i - x : i + x];
+                                        term = content[
+                                            this.rtl
+                                                ? word_length - 1 - i - x
+                                                : i + x
+                                        ];
 
-                                        if(term /*&& (term.length >= this.minlength)*/ && !dupes_inner[term]){
+                                        if(term && !dupes_inner[term]){
 
                                             dupes_inner[term] = 1;
-
                                             const context_score = this.score
-                                                ? this.score(content, keyword, i, term, x)
+                                                ? this.score(content, keyword, i, term, x - 1)
                                                 : get_score(resolution + ((word_length / 2) > resolution ? 0 : 1), word_length, i, size - 1, x - 1);
                                             const swap = this.bidirectional && (term > keyword);
-                                            this.push_index(dupes_ctx, swap ? keyword : term, context_score, id, _append, swap ? term : keyword);
+                                            this.push_index(
+                                                dupes_ctx,
+                                                swap ? keyword : term,
+                                                context_score,
+                                                id,
+                                                _append,
+                                                swap ? term : keyword
+                                            );
                                         }
                                     }
                                 }

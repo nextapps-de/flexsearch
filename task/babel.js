@@ -18,8 +18,13 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
             let src = fs.readFileSync("src/" + file, "utf8");
             src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
             if(file === "worker.js"){
-                // add the eval wrapper
+                // add the eval wrapper #1
                 src = src.replace("import.meta.url", '(1,eval)("import.meta.url")');
+                // add the eval wrapper #2
+                src = src.replace(
+                    /[: ]+import\("worker_threads"\)[^}]+}\)/g,
+                    `: (0,eval)('import("worker_threads").then(function(worker){return new worker["Worker"]((1,eval)(\\"import.meta.dirname\\")+"/worker/node.mjs")})')`
+                );
             }
             fs.writeFileSync("tmp/" + file, src);
         }
@@ -61,7 +66,7 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
                 src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
                 if(file === "handler.js"){
                     // add the eval wrapper
-                    src = src.replace('options = (await import(filepath))["default"];', '//options = (await import(filepath))["default"];');
+                    src = src.replace('options=(await import(filepath))["default"];', '//options=(await import(filepath))["default"];');
                 }
                 fs.writeFileSync("tmp/" + path + "/" + file, src);
             }
@@ -71,7 +76,6 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
     let content = fs.readFileSync("tmp/db/interface.js", "utf8");
     content = content.replace(/import \{([^}]+)} from "\.\.\/type\.js";/, '');
     fs.writeFileSync("tmp/db/interface.js", content);
-
 
     //fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
     fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");
@@ -83,12 +87,31 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
 
         // fix babel compiler dynamic import
         let content = fs.readFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker/handler.js", "utf8");
-        content = content.replace('//options = (await import(filepath))["default"];', 'options = (await import(filepath))["default"];');
+        content = content.replace('//options=(await import(filepath))["default"];', 'options=(await import(filepath))["default"];');
         fs.writeFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker/handler.js", content);
 
         // fix babel compiler dynamic import
         content = fs.readFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker.js", "utf8");
-        content = content.replace('(1, eval)("import.meta.url")', 'import.meta.url');
+        // replace the eval wrapper
+        content = content.replace(/\(0, eval\)/g, "(0,eval)");
+        content = content.replace(
+            `(0,eval)('import("worker_threads").then(function(worker){return new worker["Worker"]((1,eval)(\\"import.meta.dirname\\")+"/worker/node.mjs")})')`,
+            `import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/../node/node.mjs")})`
+        );
+        content = content.replace(
+            `(0,eval)("import(\\"worker_threads\\").then(function(worker){return new worker[\\"Worker\\"]((1,eval)(\\"import.meta.dirname\\")+\\"/worker/node.mjs\\")})")`,
+            `import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/../node/node.mjs")})`
+        );
+        content = content.replace(
+            `(0,eval)("new(require(\\"worker_threads\\")[\\"Worker\\"])(__dirname+\\"/worker/node.js\\")")`,
+            `new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js")`
+        );
+        //content = content.replace(/\(1,eval\)\('([^']+)'\)/g, "import.meta.dirname");
+        content = content.replace('(1,eval)("import.meta.url")', 'import.meta.url');
+        content = content.replace('(1,eval)("import.meta.url")', 'import.meta.url');
+        content = content.replace('(0,eval)("import.meta.url")', 'import.meta.url');
+        content = content.replace('(0,eval)("import.meta.url")', 'import.meta.url');
+        content = content.replace('(1,eval)("import.meta.dirname")', 'import.meta.dirname');
         fs.writeFileSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")) + "/worker.js", content);
     });
 }());

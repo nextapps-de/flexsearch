@@ -1,12 +1,12 @@
 /**!
- * FlexSearch.js v0.8.117 (Bundle/Debug)
+ * FlexSearch.js v0.8.123 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
-var q;
-function r(a, c, b) {
+var r;
+function u(a, c, b) {
   const f = typeof b, d = typeof a;
   if ("undefined" !== f) {
     if ("undefined" !== d) {
@@ -47,17 +47,21 @@ function w() {
   return Object.create(null);
 }
 ;const y = /[^\p{L}\p{N}]+/u, z = /(\d{3})/g, A = /(\D)(\d{3})/g, B = /(\d{3})(\D)/g, D = "".normalize && /[\u0300-\u036f]/g;
-function F(a) {
+function F(a = {}) {
   if (!this || this.constructor !== F) {
     return new F(...arguments);
   }
-  for (let c = 0; c < arguments.length; c++) {
-    this.assign(arguments[c]);
+  if (arguments.length) {
+    for (a = 0; a < arguments.length; a++) {
+      this.assign(arguments[a]);
+    }
+  } else {
+    this.assign(a);
   }
 }
-q = F.prototype;
-q.assign = function(a) {
-  this.normalize = r(a.normalize, !0, this.normalize);
+r = F.prototype;
+r.assign = function(a) {
+  this.normalize = u(a.normalize, !0, this.normalize);
   let c = a.include, b = c || a.exclude || a.split, f;
   if (b || "" === b) {
     if ("object" === typeof b && b.constructor !== RegExp) {
@@ -80,27 +84,27 @@ q.assign = function(a) {
     } else {
       this.split = b, f = !1 === b || 2 > "a1a".split(b).length;
     }
-    this.numeric = r(a.numeric, f);
+    this.numeric = u(a.numeric, f);
   } else {
     try {
-      this.split = r(this.split, y);
+      this.split = u(this.split, y);
     } catch (d) {
       console.warn("This platform does not support unicode regex. It falls back to using simple whitespace splitter instead: /s+/."), this.split = /\s+/;
     }
-    this.numeric = r(a.numeric, r(this.numeric, !0));
+    this.numeric = u(a.numeric, u(this.numeric, !0));
   }
-  this.prepare = r(a.prepare, null, this.prepare);
-  this.finalize = r(a.finalize, null, this.finalize);
-  this.rtl = r(a.rtl, !1, this.rtl);
-  this.dedupe = r(a.dedupe, !1, this.dedupe);
-  this.filter = r((b = a.filter) && new Set(b), null, this.filter);
-  this.matcher = r((b = a.matcher) && new Map(b), null, this.matcher);
-  this.mapper = r((b = a.mapper) && new Map(b), null, this.mapper);
-  this.stemmer = r((b = a.stemmer) && new Map(b), null, this.stemmer);
-  this.replacer = r(a.replacer, null, this.replacer);
-  this.minlength = r(a.minlength, 1, this.minlength);
-  this.maxlength = r(a.maxlength, 0, this.maxlength);
-  if (this.cache = b = r(a.cache, !0, this.cache)) {
+  this.prepare = u(a.prepare, null, this.prepare);
+  this.finalize = u(a.finalize, null, this.finalize);
+  this.rtl = u(a.rtl, !1, this.rtl);
+  this.dedupe = u(a.dedupe, !1, this.dedupe);
+  this.filter = u((b = a.filter) && new Set(b), null, this.filter);
+  this.matcher = u((b = a.matcher) && new Map(b), null, this.matcher);
+  this.mapper = u((b = a.mapper) && new Map(b), null, this.mapper);
+  this.stemmer = u((b = a.stemmer) && new Map(b), null, this.stemmer);
+  this.replacer = u(a.replacer, null, this.replacer);
+  this.minlength = u(a.minlength, 1, this.minlength);
+  this.maxlength = u(a.maxlength, 0, this.maxlength);
+  if (this.cache = b = u(a.cache, !0, this.cache)) {
     this.l = null, this.A = "number" === typeof b ? b : 2e5, this.i = new Map(), this.j = new Map(), this.o = this.m = 128;
   }
   this.g = "";
@@ -119,7 +123,7 @@ q.assign = function(a) {
   }
   return this;
 };
-q.addStemmer = function(a, c) {
+r.addStemmer = function(a, c) {
   this.stemmer || (this.stemmer = new Map());
   this.stemmer.set(a, c);
   this.h += (this.h ? "|" : "") + a;
@@ -127,13 +131,13 @@ q.addStemmer = function(a, c) {
   this.cache && G(this);
   return this;
 };
-q.addFilter = function(a) {
+r.addFilter = function(a) {
   this.filter || (this.filter = new Set());
   this.filter.add(a);
   this.cache && G(this);
   return this;
 };
-q.addMapper = function(a, c) {
+r.addMapper = function(a, c) {
   if ("object" === typeof a) {
     return this.addReplacer(a, c);
   }
@@ -145,7 +149,7 @@ q.addMapper = function(a, c) {
   this.cache && G(this);
   return this;
 };
-q.addMatcher = function(a, c) {
+r.addMatcher = function(a, c) {
   if ("object" === typeof a) {
     return this.addReplacer(a, c);
   }
@@ -159,7 +163,7 @@ q.addMatcher = function(a, c) {
   this.cache && G(this);
   return this;
 };
-q.addReplacer = function(a, c) {
+r.addReplacer = function(a, c) {
   if ("string" === typeof a) {
     return this.addMatcher(a, c);
   }
@@ -168,7 +172,7 @@ q.addReplacer = function(a, c) {
   this.cache && G(this);
   return this;
 };
-q.encode = function(a) {
+r.encode = function(a) {
   if (this.cache && a.length <= this.m) {
     if (this.l) {
       if (this.i.has(a)) {
@@ -203,8 +207,8 @@ q.encode = function(a) {
           this.stemmer && 2 < e.length && (this.u || (this.u = new RegExp("(?!^)(" + this.h + ")$")), e = e.replace(this.u, k => this.stemmer.get(k)), e.length < this.minlength || this.filter && this.filter.has(e)) && (e = "");
           if (e && (this.mapper || this.dedupe && 1 < e.length)) {
             d = "";
-            for (let k = 0, n = "", m, u; k < e.length; k++) {
-              m = e.charAt(k), m === n && this.dedupe || ((u = this.mapper && this.mapper.get(m)) || "" === u ? u === n && this.dedupe || !(n = u) || (d += u) : d += n = m);
+            for (let k = 0, n = "", m, v; k < e.length; k++) {
+              m = e.charAt(k), m === n && this.dedupe || ((v = this.mapper && this.mapper.get(m)) || "" === v ? v === n && this.dedupe || !(n = v) || (d += v) : d += n = m);
             }
             e = d;
           }
@@ -287,7 +291,7 @@ I.prototype.clear = function() {
 const J = {normalize:function(a) {
   return a.toLowerCase();
 }};
-const K = {memory:{resolution:1}, performance:{resolution:6, fastupdate:!0, context:{depth:1, resolution:3}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:9}}};
+const K = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
 L.prototype.add = function(a, c, b, f) {
   if (c && (a || 0 === a)) {
     if (!f && !b && this.reg.has(a)) {
@@ -295,20 +299,21 @@ L.prototype.add = function(a, c, b, f) {
     }
     c = this.encoder.encode(c);
     if (f = c.length) {
-      const n = w(), m = w(), u = this.depth, C = this.resolution;
+      const n = w(), m = w(), v = this.depth, C = this.resolution;
       for (let p = 0; p < f; p++) {
         let l = c[this.rtl ? f - 1 - p : p];
         var d = l.length;
-        if (d && (u || !m[l])) {
+        if (d && (v || !m[l])) {
           var g = this.score ? this.score(c, l, p, null, 0) : M(C, f, p), e = "";
           switch(this.tokenize) {
             case "full":
               if (2 < d) {
-                for (g = 0; g < d; g++) {
-                  for (var h = d; h > g; h--) {
-                    e = l.substring(g, h);
-                    var k = this.score ? this.score(c, l, p, e, g) : M(C, f, p, d, g);
-                    N(this, m, e, k, a, b);
+                for (let q = 0, t; q < d; q++) {
+                  for (g = d; g > q; g--) {
+                    e = l.substring(q, g);
+                    t = this.rtl ? d - 1 - q : q;
+                    var h = this.score ? this.score(c, l, p, e, t) : M(C, f, p, d, t);
+                    N(this, m, e, h, a, b);
                   }
                 }
                 break;
@@ -316,24 +321,26 @@ L.prototype.add = function(a, c, b, f) {
             case "reverse":
               if (1 < d) {
                 for (h = d - 1; 0 < h; h--) {
-                  e = l[h] + e, k = this.score ? this.score(c, l, p, e, h) : M(C, f, p, d, h), N(this, m, e, k, a, b);
+                  e = l[this.rtl ? d - 1 - h : h] + e;
+                  var k = this.score ? this.score(c, l, p, e, h) : M(C, f, p, d, h);
+                  N(this, m, e, k, a, b);
                 }
                 e = "";
               }
             case "forward":
               if (1 < d) {
                 for (h = 0; h < d; h++) {
-                  e += l[h], N(this, m, e, g, a, b);
+                  e += l[this.rtl ? d - 1 - h : h], N(this, m, e, g, a, b);
                 }
                 break;
               }
             default:
-              if (N(this, m, l, g, a, b), u && 1 < f && p < f - 1) {
-                for (d = w(), e = this.v, g = l, h = Math.min(u + 1, f - p), d[g] = 1, k = 1; k < h; k++) {
+              if (N(this, m, l, g, a, b), v && 1 < f && p < f - 1) {
+                for (d = w(), e = this.v, g = l, h = Math.min(v + 1, this.rtl ? p + 1 : f - p), d[g] = 1, k = 1; k < h; k++) {
                   if ((l = c[this.rtl ? f - 1 - p - k : p + k]) && !d[l]) {
                     d[l] = 1;
-                    const v = this.score ? this.score(c, g, p, l, k) : M(e + (f / 2 > e ? 0 : 1), f, p, h - 1, k - 1), t = this.bidirectional && l > g;
-                    N(this, n, t ? g : l, v, a, b, t ? l : g);
+                    const q = this.score ? this.score(c, g, p, l, k - 1) : M(e + (f / 2 > e ? 0 : 1), f, p, h - 1, k - 1), t = this.bidirectional && l > g;
+                    N(this, n, t ? g : l, q, a, b, t ? l : g);
                   }
                 }
               }
@@ -385,17 +392,17 @@ function M(a, c, b, f, d) {
     n = 1;
   }
   k || 0 === k || (k = m ? this.v : this.resolution);
-  for (let l, v; n < b; n++) {
-    if ((v = a[n]) && !h[v]) {
-      h[v] = 1;
-      l = O(this, v, m);
+  for (let l, q; n < b; n++) {
+    if ((q = a[n]) && !h[q]) {
+      h[q] = 1;
+      l = O(this, q, m);
       a: {
         g = l;
-        var u = f, C = e, p = k;
+        var v = f, C = e, p = k;
         let t = [];
         if (g && g.length) {
           if (g.length <= p) {
-            u.push(g);
+            v.push(g);
             l = void 0;
             break a;
           }
@@ -405,7 +412,7 @@ function M(a, c, b, f, d) {
             }
           }
           if (t.length) {
-            u.push(t);
+            v.push(t);
             l = void 0;
             break a;
           }
@@ -416,9 +423,9 @@ function M(a, c, b, f, d) {
         f = l;
         break;
       }
-      m && (e && l && f.length || (m = v));
+      m && (e && l && f.length || (m = q));
     }
-    e && m && n === b - 1 && !f.length && (m = "", n = -1, h = w());
+    e && m && n === b - 1 && !f.length && (k = this.resolution, m = "", n = -1, h = w());
   }
   a: {
     a = f;
@@ -430,11 +437,11 @@ function M(a, c, b, f, d) {
         m = a.length;
         e = [];
         b = w();
-        for (let l = 0, v, t, x, E; l < k; l++) {
+        for (let l = 0, q, t, x, E; l < k; l++) {
           for (n = 0; n < m; n++) {
-            if (x = a[n], l < x.length && (v = x[l])) {
-              for (g = 0; g < v.length; g++) {
-                t = v[g], (h = b[t]) ? b[t]++ : (h = 0, b[t] = 1), E = e[h] || (e[h] = []), E.push(t);
+            if (x = a[n], l < x.length && (q = x[l])) {
+              for (g = 0; g < q.length; g++) {
+                t = q[g], (h = b[t]) ? b[t]++ : (h = 0, b[t] = 1), E = e[h] || (e[h] = []), E.push(t);
               }
             }
           }
@@ -562,21 +569,21 @@ function P(a, c) {
   this.rtl = d.rtl || a.rtl || !1;
   this.cache = (b = a.cache || null) && new I(b);
 }
-q = L.prototype;
-q.clear = function() {
+r = L.prototype;
+r.clear = function() {
   this.map.clear();
   this.ctx.clear();
   this.reg.clear();
   this.cache && this.cache.clear();
   return this;
 };
-q.append = function(a, c) {
+r.append = function(a, c) {
   return this.add(a, c, !0);
 };
-q.contain = function(a) {
+r.contain = function(a) {
   return this.reg.has(a);
 };
-q.update = function(a, c) {
+r.update = function(a, c) {
   const b = this, f = this.remove(a);
   return f && f.then ? f.then(() => b.add(a, c)) : this.add(a, c);
 };
@@ -594,7 +601,7 @@ function Q(a) {
   }
   return c;
 }
-q.cleanup = function() {
+r.cleanup = function() {
   if (!this.fastupdate) {
     return console.info('Cleanup the index isn\'t required when not using "fastupdate".'), this;
   }
@@ -602,7 +609,7 @@ q.cleanup = function() {
   this.depth && Q(this.ctx);
   return this;
 };
-q.searchCache = function(a, c, b) {
+r.searchCache = function(a, c, b) {
   a = ("object" === typeof a ? "" + a.query : a).toLowerCase();
   this.cache || (this.cache = new I());
   let f = this.cache.get(a);

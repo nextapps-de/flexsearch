@@ -42,7 +42,10 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    this.reg = this.fastupdate && !options.worker && !options.db ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+    // Shared Registry
+    this.reg = this.fastupdate && !options.worker && !options.db ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
+
+    ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
     this.storetree = (tmp = document.store || null) && tmp && !0 !== tmp && [];
@@ -51,7 +54,9 @@ export default function Document(options) {
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache = /* suggest */ /* append: */ /* enrich */!1;
+    options.cache = /* suggest */ /* append: */ /* enrich */
+
+    !1;
 
     this.worker = options.worker;
 
@@ -430,7 +435,6 @@ Document.prototype.clear = function () {
  * @return {boolean|Promise<boolean>}
  */
 Document.prototype.contain = function (id) {
-
     if (this.db) {
         return this.index.get(this.field[0]).db.has(id);
     }

@@ -22,11 +22,11 @@ const index = new Index({
 });
 ```
 
-The lowest valid priority number is `1` and is typically known as `idle` (event loop cycles by native ~4ms). The default priority is `4` which is optimized for non-blocking user interfaces within a browser (event loop cycles every ~40ms).
+The lowest valid priority number is `1` and is typically known as `idle` (event loop cycles by native ~4ms). The default priority is `4` which is optimized for non-blocking user interfaces within a browser (event loop cycles every ~45ms).
 When you have some very smooth running animation you should use a priority of `2` to keep the animation running by 60 fps without any stutter. Targeting 120 fps or higher you should use `1`.
 
 On Node.js you can slightly increase this priority e.g. to `6`, because here there is no UI involved. 
-A priority value of `9` will cycle the event loop on every ~500ms which is the maximum recommended blocking time. You should not use a value higher than this.
+A priority value of `9` will cycle the event loop on every ~250ms which is the maximum recommended blocking time. You should not use a value higher than this.
 
 Do not forget to `await` on <u>every</u> async task you apply to the index:
 

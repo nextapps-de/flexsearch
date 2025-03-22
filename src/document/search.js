@@ -14,6 +14,7 @@ import {
     DocumentSearchResults,
     EnrichedDocumentSearchResults,
     MergedDocumentSearchResults,
+    MergedDocumentSearchEntry,
     EnrichedSearchResults,
     SearchResults,
     IntermediateSearchResults
@@ -472,7 +473,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                 result[j]["result"] = promises[j];
             }
             return merge
-                ? merge_fields(result, limit, offset)
+                ? merge_fields(result, /** @type {number} */ (limit), offset)
                 : highlight
                     ? highlight_fields(result, query, self.index, self.field, self.tree, highlight, limit, offset)
                     : result;
@@ -573,7 +574,14 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
 //      be found at least by one field to get a valid match without
 //      using suggestion explicitly
 
+/**
+ * @param {DocumentSearchResults} fields
+ * @param {number=} limit
+ * @param {number=} offset
+ * @return {MergedDocumentSearchResults}
+ */
 function merge_fields(fields, limit, offset){
+    /** @type {Array<MergedDocumentSearchEntry>} */
     const final = [];
     const set = create_object();
     for(let i = 0, field, res; i < fields.length; i++){
@@ -581,6 +589,12 @@ function merge_fields(fields, limit, offset){
         res = field.result;
         for(let j = 0, id, entry, tmp; j < res.length; j++){
             entry = res[j];
+            // upgrade flat results
+            if(typeof entry !== "object"){
+                entry = {
+                  "id": entry
+                };
+            }
             id = entry.id;
             tmp = set[id];
             if(!tmp){
@@ -595,7 +609,7 @@ function merge_fields(fields, limit, offset){
                     return final;
                 }
                 entry.field = set[id] = [field.field];
-                final.push(entry);
+                final.push(/** @type {MergedDocumentSearchEntry} */ (entry));
             }
             else{
                 tmp.push(field.field);

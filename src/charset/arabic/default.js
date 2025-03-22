@@ -5,7 +5,8 @@ const split = /\s+/;
 
 /** @type EncoderOptions */
 const options = {
-    rtl: true,
+    // the string is already encoded as RTL by default
+    //rtl: true,
     normalize: false,
     dedupe: true,
     prepare: function(str){
