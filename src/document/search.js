@@ -500,7 +500,7 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
     // if(typeof template === "string"){
     //     template = new RegExp(template, "g");
     // }
-    console.log("template", template)
+    //console.log("template", template)
     let encoder;
     let query_enc;
     let tokenize;

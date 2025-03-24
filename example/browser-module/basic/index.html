@@ -8,7 +8,10 @@
 <body style="white-space: pre">
 <script type="module">
 
-  import { Index } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.0/dist/flexsearch.light.module.min.js";
+  //import { Index } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.module.min.js";
+  import Index from "../../../src/index.js";
+  import Resolver from "../../../src/resolver.js";
+  import Encoder from "../../../src/encoder.js";
 
   // create a simple index which can store id-content-pairs
   const index = new Index({
@@ -19,8 +22,9 @@
 
   // some test data
   const data = [
+    'rats',
     'cats abcd efgh ijkl mnop qrst uvwx cute',
-    'cats abcd efgh ijkl mnop qrst cute',
+    'cats abcd efgh ijkl mnop dogs cute',
     'cats abcd efgh ijkl mnop cute',
     'cats abcd efgh ijkl cute',
     'cats abcd efgh cute',
@@ -33,11 +37,50 @@
     index.add(id, item);
   });
 
-  // perform query
-  index.search("cute cat").forEach(i => {
+  // console.log(index.encoder)
+  // console.log(index.encoder.encode("cute"))
+
+  // let test = Encoder({}, {}, {});
+  // console.log(test)
+
+  new Resolver({
+    index: index,
+    query: "dog"
+  })
+  .boost(2)
+  .or({
+    index: index,
+    query: "cut",
+    suggest: true,
+    limit: 10,
+    offset: 0,
+    resolve: true
+  })
+
+  // .not({
+  //   index: index,
+  //   query: "mnop",
+  //
+  // })
+  // .xor({
+  //   index: index,
+  //   query: "rats",
+  //   limit: 10,
+  //   offset: 0,
+  //   enrich: true,
+  //   resolve: true
+  // })
+
+  .forEach(i => {
     const result = data[i];
     log(result);
   });
+
+  // // perform query
+  // index.search("cute dog", { suggest: true }).forEach(i => {
+  //   const result = data[i];
+  //   log(result);
+  // });
 
   function log(str){
     document.body.appendChild(

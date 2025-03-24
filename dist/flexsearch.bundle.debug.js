@@ -1428,7 +1428,6 @@ V.prototype.search = function(a, c, b, e) {
   return k ? Ra(d, c) : r ? Sa(d, a, this.index, this.field, this.D, r) : d;
 };
 function Sa(a, c, b, e, d, f) {
-  console.log("template", f);
   let g, h, k;
   for (let m = 0, n, q, r, p, v; m < a.length; m++) {
     n = a[m].result;

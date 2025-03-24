@@ -438,7 +438,7 @@ function highlight_fields(result, query, index, field, tree, template) {
     // if(typeof template === "string"){
     //     template = new RegExp(template, "g");
     // }
-    console.log("template", template);
+    //console.log("template", template)
     let encoder, query_enc, tokenize;
 
 

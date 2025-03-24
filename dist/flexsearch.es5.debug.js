@@ -2338,7 +2338,6 @@ W.prototype.search = function(a, b, c, d) {
   return m ? vb(e, b) : t ? wb(e, a, this.index, this.field, this.J, t) : e;
 };
 function wb(a, b, c, d, e, g) {
-  console.log("template", g);
   for (var f, h, k, l = 0, m, n, p; l < a.length; l++) {
     for (m = a[l].result, n = a[l].field, k = c.get(n), p = k.encoder, k = k.tokenize, n = e[d.indexOf(n)], p !== f && (f = p, h = f.encode(b)), p = 0; p < m.length; p++) {
       var q = "", t = ya(m[p].doc, n), w = f.encode(t);

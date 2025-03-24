@@ -1099,7 +1099,6 @@ V.prototype.search = function(a, c, b, e) {
   return h ? Ja(d, c) : q ? Ka(d, a, this.index, this.field, this.C, q) : d;
 };
 function Ka(a, c, b, e, d, f) {
-  console.log("template", f);
   let g, h, k;
   for (let m = 0, n, t, p, q, v; m < a.length; m++) {
     n = a[m].result;
