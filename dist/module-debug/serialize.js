@@ -412,20 +412,41 @@ ctx: "gulliver+travel:1,2,3|4,5,6|7,8,9;"
 
 export function serialize(withFunctionWrapper = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
 !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/) {
-
-    if (!this.reg.size) return "";
-
     let reg = '',
-        type = "";
+        map = '',
+        ctx = '';
 
-    for (const key of this.reg.keys()) {
-        type || (type = typeof key);
-        reg += (reg ? ',' : '') + ("string" == type ? '"' + key + '"' : key);
+
+    if (this.reg.size) {
+
+        let type;
+        for (const key of this.reg.keys()) {
+            type || (type = typeof key);
+            reg += (reg ? ',' : '') + ("string" === type ? '"' + key + '"' : key);
+        }
+        reg = 'index.reg=new Set([' + reg + ']);';
+
+        map = parse_map(this.map, type);
+        map = "index.map=new Map([" + map + "]);";
+
+        for (const context of this.ctx.entries()) {
+            const key_ctx = context[0],
+                  value_ctx = context[1];
+
+            let ctx_map = parse_map(value_ctx, type);
+            ctx_map = "new Map([" + ctx_map + "])";
+            ctx_map = '["' + key_ctx + '",' + ctx_map + ']';
+            ctx += (ctx ? ',' : '') + ctx_map;
+        }
+        ctx = "index.ctx=new Map([" + ctx + "]);";
     }
-    reg = 'index.reg=new Set([' + reg + ']);';
 
-    let map = '';
-    for (const item of this.map.entries()) {
+    return withFunctionWrapper ? "function inject(index){" + reg + map + ctx + "}" : reg + map + ctx;
+}
+
+function parse_map(map, type) {
+    let result = '';
+    for (const item of map.entries()) {
         const key = item[0],
               value = item[1];
 
@@ -434,43 +455,13 @@ export function serialize(withFunctionWrapper = /* tag? */ /* stringify */ /* st
             ids = value[i] || [''];
             let str = '';
             for (let j = 0; j < ids.length; j++) {
-                str += (str ? ',' : '') + ("string" == type ? '"' + ids[j] + '"' : ids[j]);
+                str += (str ? ',' : '') + ("string" === type ? '"' + ids[j] + '"' : ids[j]);
             }
             str = '[' + str + ']';
             res += (res ? ',' : '') + str;
         }
         res = '["' + key + '",[' + res + ']]';
-        map += (map ? ',' : '') + res;
+        result += (result ? ',' : '') + res;
     }
-    map = "index.map=new Map([" + map + "]);";
-
-    let ctx = '';
-    for (const context of this.ctx.entries()) {
-        const key_ctx = context[0],
-              value_ctx = context[1];
-
-
-        for (const item of value_ctx.entries()) {
-            const key = item[0],
-                  value = item[1];
-
-
-            let res = '';
-            for (let i = 0, ids; i < value.length; i++) {
-                ids = value[i] || [''];
-                let str = '';
-                for (let j = 0; j < ids.length; j++) {
-                    str += (str ? ',' : '') + ("string" == type ? '"' + ids[j] + '"' : ids[j]);
-                }
-                str = '[' + str + ']';
-                res += (res ? ',' : '') + str;
-            }
-            res = 'new Map([["' + key + '",[' + res + ']]])';
-            res = '["' + key_ctx + '",' + res + ']';
-            ctx += (ctx ? ',' : '') + res;
-        }
-    }
-    ctx = "index.ctx=new Map([" + ctx + "]);";
-
-    return withFunctionWrapper ? "function inject(index){" + reg + map + ctx + "}" : reg + map + ctx;
+    return result;
 }

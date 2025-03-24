@@ -1,5 +1,5 @@
 global.self = global;
-const env = process.argv[3];
+const env = process.argv[3] && process.argv[3].startsWith("--") ? process.argv[4] : process.argv[3];
 import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
@@ -47,6 +47,8 @@ if(!build_light) describe("Document (Multi-Field Search)", function(){
         });
 
         const document_with_store = new Document({
+            keystore: 2,
+            fastupdate: true,
             document: {
                 store: true,
                 id: "id",
@@ -400,5 +402,36 @@ if(!build_light) describe("Document (Multi-Field Search)", function(){
             suggest: true,
             offset: 3
         })).to.eql([]);
+    });
+
+    it("Custom Document Store", function(){
+
+        const document = new Document({
+            document: {
+                store: [
+                    "data:title"
+                ],
+                id: "id",
+                field: [
+                    "data:title",
+                    "data:body"
+                ]
+            }
+        });
+
+        for(let i = 0; i < data.length; i++){
+            document.add(data[i]);
+        }
+
+        expect(document.search({
+            query: "title",
+            enrich: true,
+            suggest: true,
+            merge: true
+        }).map(res => res.doc)).to.eql([
+            { data: { title: data[0].data.title }},
+            { data: { title: data[1].data.title }},
+            { data: { title: data[2].data.title }}
+        ]);
     });
 });

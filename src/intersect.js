@@ -79,6 +79,19 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                     }
 
                     tmp.push(id);
+
+                    // fast path early result when limit was set
+                    if(!SUPPORT_RESOLVER || resolve){
+                        if(limit && (count === length - 1)){
+                            // if(tmp.length - offset > limit){
+                            //     return tmp.slice(offset, limit + offset);
+                            // }
+                            if(tmp.length - offset === limit){
+                                return tmp;
+                            }
+                        }
+                    }
+                    // todo break early on suggest: true
                 }
             }
         }
@@ -109,6 +122,8 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                     }
                 }
                 else{
+                    // todo this is doing the same as Resolver.resolve({limit}) ?
+                    // todo check limit + offset when resolve = false
                     const final = [];
                     for(let i = 0, arr; i < result.length; i++){
                         arr = result[i];

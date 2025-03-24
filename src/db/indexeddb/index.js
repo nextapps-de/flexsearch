@@ -138,7 +138,7 @@ IdxDB.prototype.open = function(){
 };
 
 IdxDB.prototype.close = function(){
-    this.db.close();
+    this.db && this.db.close();
     this.db = null;
 };
 
@@ -285,7 +285,9 @@ IdxDB.prototype.has = function(id){
     const transaction = this.db.transaction("reg", "readonly");
     const map = transaction.objectStore("reg");
     const req = map.getKey(id);
-    return promisfy(req);
+    return promisfy(req).then(function(result){
+        return !!result;
+    });
 };
 
 IdxDB.prototype.search = null;

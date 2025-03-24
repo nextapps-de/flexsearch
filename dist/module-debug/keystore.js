@@ -1,63 +1,57 @@
 import { create_object } from "./common.js";
 
-/**
- * @param bitlength
- * @constructor
- */
-
-export function KeystoreObj(bitlength = 8) {
-
-    if (!this) {
-        return new KeystoreObj(bitlength);
-    }
-
-    this.index = create_object();
-    this.keys = [];
-
-    if (32 < bitlength) {
-        this.crc = lcg64;
-        this.bit = BigInt(bitlength);
-    } else {
-        this.crc = lcg;
-        this.bit = bitlength;
-    }
-
-    return (/*this.proxy =*/new Proxy(this, {
-            get(target, key) {
-                const address = target.crc(key),
-                      obj = target.index[address];
-
-                return obj && obj[key];
-            },
-            set(target, key, value) {
-                const address = target.crc(key);
-                let obj = target.index[address];
-                if (!obj) {
-                    target.index[address] = obj = create_object();
-                    target.keys.push(address);
-                }
-                obj[key] = value;
-                return (/* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */
-                    // splice:
-                    !0 /*await rows.hasNext()*/
-                    /*await rows.hasNext()*/ /*await rows.hasNext()*/
-                );
-            },
-            delete(target, key) {
-                const address = target.crc(key),
-                      obj = target.index[address];
-
-                obj && delete obj[key];
-                return !0;
-            }
-        })
-    );
-}
-
-KeystoreObj.prototype.clear = function () {
-    this.index = create_object();
-    this.keys = [];
-};
+// /**
+//  * @param bitlength
+//  * @constructor
+//  */
+//
+// export function KeystoreObj(bitlength = 8){
+//
+//     if(!this || this.constructor !== KeystoreObj){
+//         return new KeystoreObj(bitlength);
+//     }
+//
+//     this.index = create_object();
+//     this.keys = [];
+//
+//     if(bitlength > 32){
+//         this.crc = lcg64;
+//         this.bit = BigInt(bitlength);
+//     }
+//     else {
+//         this.crc = lcg;
+//         this.bit = bitlength;
+//     }
+//
+//     return /*this.proxy =*/ new Proxy(this, {
+//         get(target, key) {
+//             const address = target.crc(key);
+//             const obj = target.index[address];
+//             return obj && obj[key];
+//         },
+//         set(target, key, value){
+//             const address = target.crc(key);
+//             let obj = target.index[address];
+//             if(!obj){
+//                 target.index[address] = obj = create_object();
+//                 target.keys.push(address);
+//             }
+//             obj[key] = value;
+//             return true;
+//         },
+//         delete(target, key){
+//             const address = target.crc(key);
+//             const obj = target.index[address];
+//             obj && delete obj[key];
+//             return true;
+//         }
+//     });
+// }
+//
+// KeystoreObj.prototype.clear = function(){
+//     this.index = create_object();
+//     this.keys = [];
+// };
 
 // KeystoreObj.prototype.destroy = function(){
 //     this.index = null;
@@ -94,7 +88,7 @@ function _slice(self, start, end, splice) {
 
 export function KeystoreArray(arr) {
 
-    if (!this) {
+    if (!this || this.constructor !== KeystoreArray) {
         return new KeystoreArray(arr);
     }
 
@@ -138,7 +132,11 @@ export function KeystoreArray(arr) {
                     return function (key) {
                         for (let i = 0; i < self.index.length; i++) {
                             if (self.index[i].includes(key)) {
-                                return !0;
+                                return (/* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */
+                                    /* skip update: */ /* skip_update: */ /* skip deletion */
+                                    // splice:
+                                    !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
+                                );
                             }
                         }
                         return (/* suggest */ /* append: */ /* enrich */!1
@@ -190,21 +188,42 @@ KeystoreArray.prototype.destroy = function () {
 KeystoreArray.prototype.push = function () {};
 
 /**
+ * @interface
+ */
+function Keystore() {
+    /** @type {Object<number, Map|Set>} */
+    this.index;
+    /** @type {Array<Map|Set>} */
+    this.refs;
+    /** @type {number} */
+    this.size;
+    /** @type {function((string|number)):number} */
+    this.crc;
+    /** @type {bigint|number} */
+    this.bit;
+}
+
+/**
  * @param bitlength
  * @constructor
+ * @implements {Keystore}
  */
 
 export function KeystoreMap(bitlength = 8) {
 
-    if (!this) {
+    if (!this || this.constructor !== KeystoreMap) {
         return new KeystoreMap(bitlength);
     }
 
+    /** @type {Object<number, Map>} */
     this.index = create_object();
+    /** @type {Array<Map>} */
     this.refs = [];
+    /** @type {number} */
     this.size = 0;
 
     if (32 < bitlength) {
+        /** @type {function((string|number)):number} */
         this.crc = lcg64;
         this.bit = BigInt(bitlength);
     } else {
@@ -231,26 +250,31 @@ KeystoreMap.prototype.set = function (key, value) {
     } else {
         this.index[address] = map = new Map([[key, value]]);
         this.refs.push(map);
+        this.size++;
     }
 };
 
 /**
  * @param bitlength
  * @constructor
+ * @implements {Keystore}
  */
 
 export function KeystoreSet(bitlength = 8) {
 
-    if (!this) {
+    if (!this || this.constructor !== KeystoreSet) {
         return new KeystoreSet(bitlength);
     }
 
-    // using plain Object with numeric key access
-    // just for max performance
+    /** @type {Object<number, Set>} */
     this.index = create_object();
+    /** @type {Array<Set>} */
     this.refs = [];
+    /** @type {number} */
+    this.size = 0;
 
     if (32 < bitlength) {
+        /** @type {function((string|number)):number} */
         this.crc = lcg64;
         this.bit = BigInt(bitlength);
     } else {
@@ -270,6 +294,7 @@ KeystoreSet.prototype.add = function (key) {
     } else {
         this.index[address] = set = new Set([key]);
         this.refs.push(set);
+        this.size++;
     }
 };
 

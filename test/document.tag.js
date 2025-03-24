@@ -1,5 +1,5 @@
 global.self = global;
-const env = process.argv[3];
+const env = process.argv[3] && process.argv[3].startsWith("--") ? process.argv[4] : process.argv[3];
 import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
@@ -200,5 +200,61 @@ if(!build_light) describe("Documents: Tag-Search", function(){
         expect(document_with_store.search({
             query: "bar"
         })).to.eql([]);
+    });
+
+    it("Should have been cleared everything properly", function(){
+
+        const document = new Document({
+            cache: true,
+            context: {
+                depth: 1
+            },
+            document: {
+                store: true,
+                id: "id",
+                field: [
+                    { field: "data:body",
+                      context: { depth: 1 }
+                    },
+                    { field: "data:title",
+                      context: { depth: 1 }
+                    }
+                ],
+                tag: "data:cat"
+            }
+        });
+
+        for(let i = 0; i < data.length; i++){
+            document.add(data[i]);
+            document.searchCache(data[i].data.title)
+        }
+
+        expect(document.reg.size).to.equal(3);
+        expect(document.tag.get("data:cat").size).to.equal(2);
+        expect(document.tag.get("data:cat").get("A").length).to.equal(2);
+        expect(document.tag.get("data:cat").get("B").length).to.equal(1);
+        expect(document.store.size).to.equal(3);
+        expect(document.cache.cache.size).to.equal(3);
+        expect(document.index.get("data:title").reg.size).to.equal(3);
+        expect(document.index.get("data:title").map.size).to.equal(4); // 4 terms
+        expect(document.index.get("data:title").ctx.size).to.equal(1); // 1 keyword
+        expect(document.index.get("data:title").ctx.get("title").size).to.equal(3); // 3 context terms
+        expect(document.index.get("data:body").reg.size).to.equal(3);
+        expect(document.index.get("data:body").map.size).to.equal(4); // 4 terms
+        expect(document.index.get("data:body").ctx.size).to.equal(1); // 1 keyword
+        expect(document.index.get("data:body").ctx.get("body").size).to.equal(3); // 3 context terms
+
+        document.clear();
+
+        expect(document.reg.size).to.equal(0);
+        expect(document.tag.get("data:cat").size).to.equal(0);
+        expect(document.store.size).to.equal(0);
+        expect(document.cache.cache.size).to.equal(0);
+        expect(document.index.get("data:title").reg.size).to.equal(0);
+        expect(document.index.get("data:title").map.size).to.equal(0);
+        expect(document.index.get("data:title").ctx.size).to.equal(0);
+        expect(document.index.get("data:body").reg.size).to.equal(0);
+        expect(document.index.get("data:body").map.size).to.equal(0);
+        expect(document.index.get("data:body").ctx.size).to.equal(0);
     });
 });

@@ -4,8 +4,9 @@
 
 - Resolver Support for Documents
 - Asynchronous Runtime Balancer, new option `priority`
-- Export/Import Worker Indexes + Document Worker
+- Export/Import Worker Indexes + Document Worker, new extern config options `export` and `import`
 - Improved interoperability of the different build packages, including source folder
+- Support custom `filter` function for encoder (stop-word filter)
 
 ### v0.8.0
 

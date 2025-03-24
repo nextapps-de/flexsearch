@@ -91,9 +91,7 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
-
-    /*await rows.hasNext()*/, this.normalize);
+    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -183,20 +181,16 @@ Encoder.prototype.assign = function (options) {
         /** @type {Array<Array<string, string>>} */normalize_polyfill);
     }
 
-    // options
-
-    this.rtl = merge_option(options.rtl, !1, this.rtl);
+    tmp = options.filter;
+    this.filter = "function" == typeof tmp ? tmp : merge_option(tmp && new Set(tmp), null, this.filter);
     this.dedupe = merge_option(options.dedupe, !1, this.dedupe);
-    this.filter = merge_option((tmp = options.filter) && new Set(tmp), null, this.filter);
     this.matcher = merge_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
     this.mapper = merge_option((tmp = options.mapper) && new Map(tmp), null, this.mapper);
     this.stemmer = merge_option((tmp = options.stemmer) && new Map(tmp), null, this.stemmer);
     this.replacer = merge_option(options.replacer, null, this.replacer);
     this.minlength = merge_option(options.minlength, 1, this.minlength);
     this.maxlength = merge_option(options.maxlength, 0, this.maxlength);
-
-    // minimum required tokenizer by this encoder
-    //this.tokenize = options["tokenize"] || "";
+    this.rtl = merge_option(options.rtl, !1, this.rtl);
 
     // auto-balanced cache
     this.cache = tmp = merge_option(options.cache, !0, this.cache);
@@ -258,8 +252,13 @@ Encoder.prototype.addStemmer = function (match, replace) {
 };
 
 Encoder.prototype.addFilter = function (term) {
-    this.filter || (this.filter = new Set());
-    this.filter.add(term);
+    if ("function" == typeof term) {
+        // does not support merge yet
+        this.filter = term; //merge_option(term, term, this.filter);
+    } else {
+        this.filter || (this.filter = new Set());
+        this.filter.add(term);
+    }
     this.cache && clear(this);
     return this;
 };
@@ -399,7 +398,7 @@ Encoder.prototype.encode = function (str) {
         }
 
         // pre-filter before cache
-        if (this.filter && this.filter.has(word)) {
+        if (this.filter && ("function" == typeof this.filter ? !this.filter(word) : this.filter.has(word))) {
             continue;
         }
 
@@ -414,16 +413,17 @@ Encoder.prototype.encode = function (str) {
                 this.timer = setTimeout(clear, 50, this);
             }
         }
+
+        // todo compare advantages when filter/stemmer are also encoded
+        // apply stemmer before bigger transformations
         if (this.stemmer && 2 < word.length) {
             // for(const item of this.stemmer){
             //     const key = item[0];
             //     const value = item[1];
-            //
             //     if(word.length > key.length && word.endsWith(key)){
             //         word = word.substring(0, word.length - key.length) + value;
             //         break;
             //     }
-            //
             //     // const position = word.length - key.length;
             //     // if(position > 0 && word.substring(position) === key){
             //     //     word = word.substring(0, position) + value;
@@ -431,11 +431,15 @@ Encoder.prototype.encode = function (str) {
             //     // }
             // }
             this.stemmer_test || (this.stemmer_test = new RegExp("(?!^)(" + this.stemmer_str + ")$"));
+
+            const old = word;
             word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
 
-            // 4. post-filter after matcher and stemmer was applied
-            if (word.length < this.minlength || this.filter && this.filter.has(word)) {
-                word = "";
+            // 4. post-filter after stemmer was applied
+            if (old !== word && this.filter && word.length >= this.minlength) {
+                if ("function" == typeof this.filter ? !this.filter(word) : this.filter.has(word)) {
+                    word = "";
+                }
             }
         }
 

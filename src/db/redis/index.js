@@ -1,7 +1,3 @@
-// COMPILER BLOCK -->
-import { DEBUG } from "../../config.js";
-// <-- COMPILER BLOCK
-
 import { createClient } from "redis";
 const defaults = {
     host: "localhost",
@@ -82,7 +78,7 @@ RedisDB.prototype.open = async function(){
 };
 
 RedisDB.prototype.close = async function(){
-    await this.db.disconnect(); // this.db.client.disconnect();
+    DB && await this.db.disconnect(); // this.db.client.disconnect();
     this.db = null;
     return this;
 };
@@ -205,11 +201,11 @@ RedisDB.prototype.has = function(id){
 RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false, tags){
 
     let result;
+    let params = [];
 
     if(query.length > 1 && flexsearch.depth){
 
         const key = this.id + "ctx" + this.field + ":";
-        let params = [];
         let keyword = query[0];
         let term;
 
@@ -219,19 +215,20 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
             params.push(key + (swap ? term : keyword) + ":" + (swap ? keyword : term));
             keyword = term;
         }
-        query = params;
     }
-    else{
+    else {
 
         const key = this.id + "map" + this.field + ":";
         for(let i = 0; i < query.length; i++){
-            query[i] = key + query[i];
+            params.push(key + query[i]);
         }
     }
 
+    query = params;
+
     const type = this.type;
     let key = this.id + "tmp:" + Math.random();
-    const strict_tag_intersection = false;
+    const strict_tag_intersection = true;
 
     if(suggest){
         if(!strict_tag_intersection){

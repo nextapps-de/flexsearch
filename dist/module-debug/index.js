@@ -35,9 +35,10 @@ export default function Index(options, _register) {
 
     options = /** @type IndexOptions */options ? apply_preset(options) : {};
 
+    /** @type {*} */
     let tmp = options.context;
     /** @type ContextOptions */
-    const context = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ === tmp ? { depth: 1 } : tmp || {},
+    const context = /** @type ContextOptions */ /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ === tmp ? { depth: 1 } : tmp || {},
           encoder = is_string(options.encoder) ? Charset[options.encoder] : options.encode || options.encoder || default_encoder;
 
     /** @type Encoder */
@@ -47,11 +48,16 @@ export default function Index(options, _register) {
 
 
     this.resolution = options.resolution || 9;
-    this.tokenize = (tmp = options.tokenize) && "default" !== tmp && tmp || "strict";
+    this.tokenize = tmp = (tmp = options.tokenize) && "default" !== tmp && tmp || "strict";
     this.depth = "strict" === tmp && context.depth || 0;
     this.bidirectional = !1 !== context.bidirectional;
     this.fastupdate = !!options.fastupdate;
     this.score = options.score || null;
+
+    if (context && "strict" !== this.tokenize) {
+        console.warn("Context-Search could not applied, because it is just supported when using the tokenizer \"strict\".");
+    }
+
 
     tmp = options.keystore || 0;
     tmp && (this.keystore = tmp);
@@ -167,7 +173,7 @@ function cleanup_index(map) {
         for (let i = 0, arr; i < map.length; i++) {
             (arr = map[i]) && (count += arr.length);
         }
-    } else for (const item of map) {
+    } else for (const item of map.entries()) {
         const key = item[0],
               value = item[1],
               tmp = cleanup_index(value);

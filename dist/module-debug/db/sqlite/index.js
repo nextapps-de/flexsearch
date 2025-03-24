@@ -1,5 +1,3 @@
-
-
 //const sqlite3 = require("sqlite3").verbose();
 import sqlite3 from "sqlite3";
 import path from "path";
@@ -197,7 +195,7 @@ SqliteDB.prototype.open = async function () {
 };
 
 SqliteDB.prototype.close = function () {
-    this.db.close();
+    this.db && this.db.close();
     this.db = null;
     DB[this.id] = null;
     TRX[this.id] = null;
@@ -392,7 +390,7 @@ SqliteDB.prototype.has = function (id) {
         stmt: `SELECT EXISTS(SELECT 1 FROM main.reg WHERE id = ?) as exist`,
         params: [id]
     }).then(function (result) {
-        return result && result.exist;
+        return !!(result && result.exist);
     });
 };
 
@@ -431,7 +429,7 @@ SqliteDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0
                        ${enrich ? ", doc" : ""}
                 FROM (
                     SELECT id, count(*) as count,
-                           ${suggest ? "SUM" : "MIN"}(res) as res
+                           ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
                     FROM main.ctx${this.field}
                     WHERE ${stmt}
                     GROUP BY id
@@ -500,7 +498,7 @@ SqliteDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0
                        ${enrich ? ", doc" : ""}
                 FROM (
                     SELECT id, count(*) as count,
-                           ${suggest ? "SUM" : "MIN"}(res) as res
+                           ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
                     FROM main.map${this.field}
                     WHERE ${stmt}
                     GROUP BY id
@@ -554,15 +552,13 @@ SqliteDB.prototype.info = function () {
 
 SqliteDB.prototype.transaction = function (task, callback) {
 
-    const self = this;
-
     if (TRX[this.id]) {
-        return TRX[this.id].then(function () {
-            return self.transaction(task, callback);
-        });
+        return task.call(this);
     }
 
-    const db = this.db;
+    const db = this.db,
+          self = this;
+
 
     return TRX[this.id] = new Promise(function (resolve, reject) {
         db.exec("PRAGMA optimize");
@@ -780,8 +776,8 @@ SqliteDB.prototype.remove = function (ids) {
         this.db.run("DELETE FROM main.ctx" + self.field + " WHERE id IN (" + stmt + ")", ids);
         this.db.run("DELETE FROM main.tag" + self.field + " WHERE id IN (" + stmt + ")", ids);
         this.db.run("DELETE FROM main.reg WHERE id IN (" + stmt + ")", ids);
-    }).then(function (res) {
-        return next ? self.remove(next) : res;
+    }).then(function (result) {
+        return next ? self.remove(next) : result;
     });
 };
 

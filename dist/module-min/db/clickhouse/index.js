@@ -41,7 +41,7 @@ import{ClickHouse}from"clickhouse";import StorageInterface from"../interface.js"
                         cfg String
                     ) 
                     ENGINE = TinyLog;
-                `).toPromise();}return this.db},ClickhouseDB.prototype.close=function(){return this.db.close(),this.db=null,this},ClickhouseDB.prototype.destroy=function(){return Promise.all([this.db.query(`DROP TABLE ${this.id}.map${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.ctx${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.tag${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.cfg${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.reg;`).toPromise()])},ClickhouseDB.prototype.clear=function(){return Promise.all([this.db.query(`TRUNCATE TABLE ${this.id}.map${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.ctx${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.tag${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.cfg${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.reg;`).toPromise()])};function create_result(a,b,c){if(b){for(let b=0;b<a.length;b++)c?a[b].doc&&(a[b].doc=JSON.parse(a[b].doc)):a[b]=a[b].id;return a}else{const b=[];for(let d,e=0;e<a.length;e++)d=a[e],b[d.res]||(b[d.res]=[]),b[d.res].push(c?d:d.id);return b}}ClickhouseDB.prototype.get=function(a,b,c=0,d=0,e=!0,f=!1,g){let h,j="",k=b?{ctx:b,key:a}:{key:a},l=this.id+(b?".ctx":".map")+this.field;if(g)for(let a=0,b=1;a<g.length;a+=2)j+=` AND ${l}.id IN (SELECT id FROM ${this.id}.tag_${sanitize(g[a])} WHERE tag = {tag${b}:String})`,k["tag"+b]=g[a+1],b++;return h=b?this.db.query(`
+                `).toPromise();}return this.db},ClickhouseDB.prototype.close=function(){return this.db=DB=null,this},ClickhouseDB.prototype.destroy=function(){return Promise.all([this.db.query(`DROP TABLE ${this.id}.map${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.ctx${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.tag${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.cfg${this.field};`).toPromise(),this.db.query(`DROP TABLE ${this.id}.reg;`).toPromise()])},ClickhouseDB.prototype.clear=function(){return Promise.all([this.db.query(`TRUNCATE TABLE ${this.id}.map${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.ctx${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.tag${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.cfg${this.field};`).toPromise(),this.db.query(`TRUNCATE TABLE ${this.id}.reg;`).toPromise()])};function create_result(a,b,c){if(b){for(let b=0;b<a.length;b++)c?a[b].doc&&(a[b].doc=JSON.parse(a[b].doc)):a[b]=a[b].id;return a}else{const b=[];for(let d,e=0;e<a.length;e++)d=a[e],b[d.res]||(b[d.res]=[]),b[d.res].push(c?d:d.id);return b}}ClickhouseDB.prototype.get=function(a,b,c=0,d=0,e=!0,f=!1,g){let h,j="",k=b?{ctx:b,key:a}:{key:a},l=this.id+(b?".ctx":".map")+this.field;if(g)for(let a=0,b=1;a<g.length;a+=2)j+=` AND ${l}.id IN (SELECT id FROM ${this.id}.tag_${sanitize(g[a])} WHERE tag = {tag${b}:String})`,k["tag"+b]=g[a+1],b++;return h=b?this.db.query(`
             SELECT ${l}.id
                    ${e?"":", res"}
                    ${f?", doc":""}
@@ -75,19 +75,17 @@ import{ClickHouse}from"clickhouse";import StorageInterface from"../interface.js"
         ${c?"OFFSET "+c:""}`,{params:{tag:a}}).toPromise();return d||f.then(function(a){return create_result(a,!0,!1)}),f},ClickhouseDB.prototype.enrich=async function(a){let b=1e5,c=[];"object"!=typeof a&&(a=[a]);for(let d=0;d<a.length;){const e=a.length-d>b?a.slice(d,d+b):d?a.slice(d):a;d+=e.length;let f={},g="";for(let a=0;a<e.length;a++)g+=(g?",":"")+"{id"+(a+1)+":String}",f["id"+(a+1)]=e[a];const h=await this.db.query(`
             SELECT id, doc 
             FROM ${this.id}.reg
-            WHERE id IN (${g})`,{params:f}).toPromise();if(h&&h.length){for(let a,b=0;b<h.length;b++)(a=h[b].doc)&&(h[b].doc=JSON.parse(a));c.push(h)}}return 1===c.length?c[0]:1<c.length?concat(c):c},ClickhouseDB.prototype.has=function(a){return this.db.query(`
-        SELECT EXISTS(
-            SELECT 1
-            FROM ${this.id}.reg
-            WHERE id = {id:${this.type}}
-            LIMIT 1
-        )`,{params:{id:a}}).toPromise()},ClickhouseDB.prototype.search=function(a,b,c=100,d=0,e=!1,f=!0,g=!0,h){let i;if(1<b.length&&a.depth){let j,k="",l={},m=b[0];for(let c=1;c<b.length;c++){j=b[c];const d=a.bidirectional&&j>m;k+=(k?" OR ":"")+`(ctx = {ctx${c}:String} AND key = {key${c}:String})`,l["ctx"+c]=d?j:m,l["key"+c]=d?m:j,m=j}if(h){k="("+k+")";for(let a=0,b=1;a<h.length;a+=2)k+=` AND id IN (SELECT id FROM ${this.id}.tag_${sanitize(h[a])} WHERE tag = {tag${b}:String})`,l["tag"+b]=h[a+1],b++}i=this.db.query(`
+            WHERE id IN (${g})`,{params:f}).toPromise();if(h&&h.length){for(let a,b=0;b<h.length;b++)(a=h[b].doc)&&(h[b].doc=JSON.parse(a));c.push(h)}}return 1===c.length?c[0]:1<c.length?concat(c):c},ClickhouseDB.prototype.has=async function(a){const b=await this.db.query(`
+        SELECT 1 as exist
+        FROM ${this.id}.reg
+        WHERE id = {id:${this.type}}
+        LIMIT 1`,{params:{id:a}}).toPromise();return!!(b&&b[0]&&b[0].exist)},ClickhouseDB.prototype.search=function(a,b,c=100,d=0,e=!1,f=!0,g=!1,h){let i;if(1<b.length&&a.depth){let j,k="",l={},m=b[0];for(let c=1;c<b.length;c++){j=b[c];const d=a.bidirectional&&j>m;k+=(k?" OR ":"")+`(ctx = {ctx${c}:String} AND key = {key${c}:String})`,l["ctx"+c]=d?j:m,l["key"+c]=d?m:j,m=j}if(h){k="("+k+")";for(let a=0,b=1;a<h.length;a+=2)k+=` AND id IN (SELECT id FROM ${this.id}.tag_${sanitize(h[a])} WHERE tag = {tag${b}:String})`,l["tag"+b]=h[a+1],b++}i=this.db.query(`
             SELECT r.id
                    ${f?"":", res"}
                    ${g?", doc":""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${e?"SUM":"MIN"}(res) as res
+                       ${e?"SUM":"SUM"}(res) as res
                 FROM ${this.id}.ctx${this.field}
                 WHERE ${k}
                 GROUP BY id
@@ -105,7 +103,7 @@ import{ClickHouse}from"clickhouse";import StorageInterface from"../interface.js"
                    ${g?", doc":""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${e?"SUM":"MIN"}(res) as res
+                       ${e?"SUM":"SUM"}(res) as res
                 FROM ${this.id}.map${this.field}
                 WHERE ${a}
                 GROUP BY id

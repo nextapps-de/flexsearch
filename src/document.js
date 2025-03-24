@@ -241,7 +241,7 @@ if(SUPPORT_PERSISTENT){
         // parallel:
         const promises = [];
         for(const index of this.index.values()){
-            promises.push(index.db.commit(index, replace, append));
+            promises.push(index.commit(index, replace, append));
         }
         await Promise.all(promises);
         this.reg.clear();
@@ -446,15 +446,15 @@ Document.prototype.remove = function(id){
 
 Document.prototype.clear = function(){
 
-    //const promises = [];
+    const promises = [];
 
     for(const index of this.index.values()){
         // db index will add clear task
-        index.clear();
-        // const promise = index.clear();
-        // if(promise instanceof Promise){
-        //     promises.push(promise);
-        // }
+        const promise = index.clear();
+        // worker indexes will return promises
+        if(promise.then){
+            promises.push(promise);
+        }
     }
 
     if(SUPPORT_TAGS && this.tag){
@@ -467,9 +467,13 @@ Document.prototype.clear = function(){
         this.store.clear();
     }
 
-    return this; /*promises.length
+    if(SUPPORT_CACHE && this.cache){
+        this.cache.clear();
+    }
+
+    return promises.length
         ? Promise.all(promises)
-        :*/
+        : this
 };
 
 /**

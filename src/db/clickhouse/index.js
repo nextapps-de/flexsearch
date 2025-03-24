@@ -1,6 +1,3 @@
-// COMPILER BLOCK -->
-import { DEBUG } from "../../config.js";
-// <-- COMPILER BLOCK
 import { ClickHouse } from "clickhouse";
 import StorageInterface from "../interface.js";
 import { concat, toArray } from "../../common.js";
@@ -178,8 +175,8 @@ ClickhouseDB.prototype.open = async function(){
 };
 
 ClickhouseDB.prototype.close = function(){
-    this.db.close();
-    this.db = null;
+    //DB && DB.close();
+    this.db = DB = null;
     return this;
 };
 
@@ -339,19 +336,18 @@ ClickhouseDB.prototype.enrich = async function(ids){
             : result;
 }
 
-ClickhouseDB.prototype.has = function(id){
-    return this.db.query(`
-        SELECT EXISTS(
-            SELECT 1
-            FROM ${this.id}.reg
-            WHERE id = {id:${this.type /*=== "number" ? "Int32" : "String"*/}}
-            LIMIT 1
-        )`,
+ClickhouseDB.prototype.has = async function(id){
+    const result = await this.db.query(`
+        SELECT 1 as exist
+        FROM ${this.id}.reg
+        WHERE id = {id:${this.type /*=== "number" ? "Int32" : "String"*/}}
+        LIMIT 1`,
         { params: { id }}
     ).toPromise();
+    return !!(result && result[0] && result[0].exist);
 };
 
-ClickhouseDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = true, tags){
+ClickhouseDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false, tags){
     let rows;
     if(query.length > 1 && flexsearch.depth){
 
@@ -384,7 +380,7 @@ ClickhouseDB.prototype.search = function(flexsearch, query, limit = 100, offset 
                    ${ enrich ? ", doc" : "" }
             FROM (
                 SELECT id, count(*) as count,
-                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                       ${ suggest ? "SUM" : "SUM" /*"MIN"*/ }(res) as res
                 FROM ${ this.id }.ctx${ this.field }
                 WHERE ${ where }
                 GROUP BY id
@@ -450,7 +446,7 @@ ClickhouseDB.prototype.search = function(flexsearch, query, limit = 100, offset 
                    ${ enrich ? ", doc" : "" }
             FROM (
                 SELECT id, count(*) as count,
-                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                       ${ suggest ? "SUM" : "SUM" /*"MIN"*/ }(res) as res
                 FROM ${ this.id }.map${ this.field }
                 WHERE ${ where }
                 GROUP BY id

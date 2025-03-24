@@ -120,7 +120,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
 
         enrich = SUPPORT_STORE && this.store && options.enrich && resolve;
-        highlight = options.highlight && enrich;
+        highlight = enrich && options.highlight;
         limit = options.limit || limit;
         offset = options.offset || 0;
         limit || (limit = 100);
@@ -500,7 +500,7 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
     // if(typeof template === "string"){
     //     template = new RegExp(template, "g");
     // }
-
+    console.log("template", template)
     let encoder;
     let query_enc;
     let tokenize;

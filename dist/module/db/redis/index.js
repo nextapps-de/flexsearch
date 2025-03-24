@@ -1,5 +1,3 @@
-
-
 import { createClient } from "redis";
 const defaults = {
     host: "localhost",
@@ -74,7 +72,7 @@ RedisDB.prototype.open = async function () {
 };
 
 RedisDB.prototype.close = async function () {
-    await this.db.disconnect(); // this.db.client.disconnect();
+    // this.db.client.disconnect();
     this.db = null;
     return this;
 };
@@ -167,14 +165,14 @@ RedisDB.prototype.has = function (id) {
 };
 
 RedisDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0, suggest = !1, resolve = !0, enrich = !1, tags) {
+    let result,
+        params = [];
 
-    let result;
 
     if (1 < query.length && flexsearch.depth) {
 
         const key = this.id + "ctx" + this.field + ":";
-        let params = [],
-            keyword = query[0],
+        let keyword = query[0],
             term;
 
 
@@ -184,29 +182,37 @@ RedisDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0,
             params.push(key + (swap ? term : keyword) + ":" + (swap ? keyword : term));
             keyword = term;
         }
-        query = params;
     } else {
 
         const key = this.id + "map" + this.field + ":";
         for (let i = 0; i < query.length; i++) {
-            query[i] = key + query[i];
+            params.push(key + query[i]);
         }
     }
+
+    query = params;
 
     const type = this.type;
     let key = this.id + "tmp:" + Math.random();
 
 
     if (suggest) {
-        if (tags) for (let i = 0; i < tags.length; i += 2) {
-            query.push(this.id + "tag-" + sanitize(tags[i]) + ":" + tags[i + 1]);
-        }
-
         const multi = this.db.multi().zUnionStore(key, query, { AGGREGATE: "SUM" });
         // Strict Tag Intersection: it does not put tags into union, instead it calculates the
         // intersection against the term match union. This was the default behavior
         // of Tag-Search. But putting everything into union will also provide suggestions derived
         // from tags when no term was matched.
+        if (tags) {
+            // copy over zInterStore into the same destination surprisingly works fine
+            // const key2 = key + ":2";
+            query = [key];
+            for (let i = 0; i < tags.length; i += 2) {
+                query.push(this.id + "tag-" + sanitize(tags[i]) + ":" + tags[i + 1]);
+            }
+            multi.zInterStore(key, query, { AGGREGATE: "SUM" });
+            // .unlink(key)
+            // key = key2;
+        }
 
         result = multi[resolve ? "zRange" : "zRangeWithScores"](key, "" + offset, "" + (offset + limit - 1), { REV: !0 }).unlink(key).exec();
     } else {

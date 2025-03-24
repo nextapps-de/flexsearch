@@ -43,9 +43,7 @@ export default function Document(options) {
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
     // Shared Registry
-    this.reg = this.fastupdate && !options.worker && !options.db ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
-
-    ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+    this.reg = this.fastupdate && !options.worker && !options.db ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     // todo support custom filter function
     this.storetree = (tmp = document.store || null) && tmp && !0 !== tmp && [];
@@ -54,9 +52,7 @@ export default function Document(options) {
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
     // do not apply cache again for the indexes since .searchCache()
     // is just a wrapper over .search()
-    options.cache = /* suggest */ /* append: */ /* enrich */
-
-    !1;
+    options.cache = /* suggest */ /* append: */ /* enrich */!1;
 
     this.worker = options.worker;
 
@@ -204,7 +200,7 @@ Document.prototype.commit = async function (replace, append) {
     // parallel:
     const promises = [];
     for (const index of this.index.values()) {
-        promises.push(index.db.commit(index, replace, append));
+        promises.push(index.commit(index, replace, append));
     }
     await Promise.all(promises);
     this.reg.clear();
@@ -400,15 +396,15 @@ Document.prototype.remove = function (id) {
 
 Document.prototype.clear = function () {
 
-    //const promises = [];
+    const promises = [];
 
     for (const index of this.index.values()) {
         // db index will add clear task
-        index.clear();
-        // const promise = index.clear();
-        // if(promise instanceof Promise){
-        //     promises.push(promise);
-        // }
+        const promise = index.clear();
+        // worker indexes will return promises
+        if (promise.then) {
+            promises.push(promise);
+        }
     }
 
     if (this.tag) {
@@ -421,9 +417,11 @@ Document.prototype.clear = function () {
         this.store.clear();
     }
 
-    return this; /*promises.length
-                 ? Promise.all(promises)
-                 :*/
+    if (this.cache) {
+        this.cache.clear();
+    }
+
+    return promises.length ? Promise.all(promises) : this;
 };
 
 /**
@@ -431,6 +429,7 @@ Document.prototype.clear = function () {
  * @return {boolean|Promise<boolean>}
  */
 Document.prototype.contain = function (id) {
+
     if (this.db) {
         return this.index.get(this.field[0]).db.has(id);
     }

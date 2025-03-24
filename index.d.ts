@@ -120,7 +120,7 @@ declare module "flexsearch" {
         normalize?: boolean|((str: string) => string);
         prepare?: (str: string) => string;
         finalize?: (terms: string[]) => string[];
-        filter?: Set<string>;
+        filter?: Set<string>|((term: string) => boolean);
         matcher?: Map<string, string>;
         mapper?: Map<string, string>;
         stemmer?: Map<string, string>;

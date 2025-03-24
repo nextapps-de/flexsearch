@@ -1,5 +1,3 @@
-
-
 import pg_promise from "pg-promise";
 import StorageInterface from "../interface.js";
 import { concat, toArray } from "../../common.js";
@@ -11,7 +9,7 @@ const defaults = {
     host: "localhost",
     port: "5432"
 },
-      pgp = pg_promise({ noWarnings: ! /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ }),
+      pgp = pg_promise(),
       VERSION = 1,
       MAXIMUM_QUERY_VARS = 16000,
       fields = ["map", "ctx", "reg", "tag", "cfg"],
@@ -55,7 +53,7 @@ export default function PostgresDB(name, config = {}) {
     }
     if ("object" == typeof name) {
         config = name;
-        name = name.name;
+        name = config.name;
     }
     if (!name) {
         console.info("Default storage space was used, because a name was not passed.");
@@ -63,7 +61,8 @@ export default function PostgresDB(name, config = {}) {
     this.id = (config.schema ? sanitize(config.schema) : defaults.schema) + (name ? "_" + sanitize(name) : "");
     this.field = config.field ? "_" + sanitize(config.field) : "";
     this.type = config.type ? types[config.type.toLowerCase()] : "text";
-    this.support_tag_search = !0;
+    this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
+    /*await rows.hasNext()*/;
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
     this.db = DB || (DB = config.db || null);
     Object.assign(defaults, config);
@@ -178,8 +177,8 @@ PostgresDB.prototype.open = async function () {
 };
 
 PostgresDB.prototype.close = function () {
-    this.db.close && this.db.close();
-    this.db = DB = null;
+    //DB && DB.close && DB.close();
+    this.db = /*DB =*/null;
     return this;
 };
 
@@ -318,7 +317,9 @@ PostgresDB.prototype.enrich = async function (ids) {
 };
 
 PostgresDB.prototype.has = function (id) {
-    return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [id]);
+    return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [id]).then(function (result) {
+        return !!(result && result.exists);
+    });
 };
 
 PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0, suggest = !1, resolve = !0, enrich = !1, tags) {
@@ -356,7 +357,7 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
                    ${enrich ? ", doc" : ""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${suggest ? "SUM" : "MIN"}(res) as res
+                       ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
                 FROM ${this.id}.ctx${this.field}
                 WHERE ${where}
                 GROUP BY id
@@ -406,8 +407,7 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
 
         for (let i = 0; i < query_length; i++) {
             where += (where ? "," : "") + "$" + count++;
-        }
-        where = "key " + (1 < query_length ? "IN (" + where + ")" : "= " + where);
+        }where = "key " + (1 < query_length ? "IN (" + where + ")" : "= " + where);
 
         if (tags) {
             where = "(" + where + ")";
@@ -423,7 +423,7 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
                    ${enrich ? ", doc" : ""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${suggest ? "SUM" : "MIN"}(res) as res
+                       ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
                 FROM ${this.id}.map${this.field}
                 WHERE ${where}
                 GROUP BY id
@@ -523,16 +523,22 @@ PostgresDB.prototype.info = function () {
 // };
 
 PostgresDB.prototype.transaction = function (task) {
-    if (TRX) {
-        return task.call(this, TRX);
-    }
     const self = this;
-    return (TRX || this.db).tx(function (trx) {
-        return task.call(self, TRX = trx);
-    }).finally(function () {
-        TRX = null;
+    return this.db.tx(function (trx) {
+        return task.call(self, trx);
     });
 };
+
+// PostgresDB.prototype.transaction = async function(task){
+//     if(TRX){
+//         return await task.call(this, TRX);
+//     }
+//     const self = this;
+//     return this.db.tx(async function(trx){
+//         await task.call(self, TRX = trx);
+//         TRX = null;
+//     });
+// };
 
 PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
 

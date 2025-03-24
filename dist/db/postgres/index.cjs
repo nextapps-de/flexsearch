@@ -28,7 +28,6 @@ function toArray(val, stringify){
     return result;
 }
 
-// COMPILER BLOCK -->
 const defaults = {
     schema: "flexsearch",
     user: "postgres",
@@ -38,7 +37,7 @@ const defaults = {
     port: "5432"
 };
 
-const pgp = pg_promise({ noWarnings: false });
+const pgp = pg_promise(/*{ noWarnings: true }*/);
 const MAXIMUM_QUERY_VARS = 16000;
 const fields = ["map", "ctx", "reg", "tag", "cfg"];
 const types = {
@@ -67,7 +66,7 @@ function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_]/g, "");
 }
 
-let DB, TRX;
+let DB;
 
 /**
  * @constructor
@@ -80,7 +79,7 @@ function PostgresDB(name, config = {}){
     }
     if(typeof name === "object"){
         config = name;
-        name = name.name;
+        name = config.name;
     }
     if(!name){
         console.info("Default storage space was used, because a name was not passed.");
@@ -206,8 +205,8 @@ PostgresDB.prototype.open = async function(){
 };
 
 PostgresDB.prototype.close = function(){
-    this.db.close && this.db.close();
-    this.db = DB = null;
+    //DB && DB.close && DB.close();
+    this.db = /*DB =*/ null;
     return this;
 };
 
@@ -364,7 +363,9 @@ PostgresDB.prototype.enrich = async function(ids){
 };
 
 PostgresDB.prototype.has = function(id){
-    return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [id]);
+    return this.db.oneOrNone("SELECT EXISTS(SELECT 1 FROM " + this.id + ".reg WHERE id = $1)", [id]).then(function(result){
+        return !!(result && result.exists);
+    });
 };
 
 PostgresDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false, tags){
@@ -402,7 +403,7 @@ PostgresDB.prototype.search = function(flexsearch, query, limit = 100, offset = 
                    ${ enrich ? ", doc" : "" }
             FROM (
                 SELECT id, count(*) as count,
-                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                       ${ suggest ? "SUM" : "SUM" /*"MIN"*/ }(res) as res
                 FROM ${ this.id }.ctx${ this.field }
                 WHERE ${ where }
                 GROUP BY id
@@ -471,7 +472,7 @@ PostgresDB.prototype.search = function(flexsearch, query, limit = 100, offset = 
                    ${ enrich ? ", doc" : "" }
             FROM (
                 SELECT id, count(*) as count,
-                       ${ suggest ? "SUM" : "MIN" }(res) as res
+                       ${ suggest ? "SUM" : "SUM" /*"MIN"*/ }(res) as res
                 FROM ${ this.id }.map${ this.field }
                 WHERE ${ where }
                 GROUP BY id
@@ -571,16 +572,22 @@ PostgresDB.prototype.info = function(){
 // };
 
 PostgresDB.prototype.transaction = function(task){
-    if(TRX){
-        return task.call(this, TRX);
-    }
     const self = this;
-    return (TRX || this.db).tx(function(trx){
-        return task.call(self, TRX = trx);
-    }).finally(function(){
-        TRX = null;
-    })
+    return this.db.tx(function(trx){
+        return task.call(self, trx);
+    });
 };
+
+// PostgresDB.prototype.transaction = async function(task){
+//     if(TRX){
+//         return await task.call(this, TRX);
+//     }
+//     const self = this;
+//     return this.db.tx(async function(trx){
+//         await task.call(self, TRX = trx);
+//         TRX = null;
+//     });
+// };
 
 PostgresDB.prototype.commit = async function(flexsearch, _replace, _append){
 

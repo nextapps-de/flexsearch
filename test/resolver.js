@@ -1,5 +1,5 @@
 global.self = global;
-const env = process.argv[3];
+const env = process.argv[3] && process.argv[3].startsWith("--") ? process.argv[4] : process.argv[3];
 import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
@@ -427,5 +427,120 @@ if(!build_light && !build_compact) describe("Resolver", function(){
             [ 1 ],
             [ 0, 2, 3, 4, 5, 6 ]
         ]);
+    });
+
+    it("Should have been applied on Documents properly", function(){
+
+        // some test data
+        const data = [{
+            "tconst": "tt0000001",
+            "titleType": "short",
+            "primaryTitle": "Carmencita",
+            "originalTitle": "Carmencita",
+            "isAdult": 0,
+            "startYear": "1894",
+            "endYear": "",
+            "runtimeMinutes": "1",
+            "genres": [
+                "Documentary",
+                "Short"
+            ]
+        },{
+            "tconst": "tt0000002",
+            "titleType": "short",
+            "primaryTitle": "Le clown et ses chiens",
+            "originalTitle": "Le clown et ses chiens",
+            "isAdult": 0,
+            "startYear": "1892",
+            "endYear": "",
+            "runtimeMinutes": "5",
+            "genres": [
+                "Animation",
+                "Short"
+            ]
+        }];
+
+        // create the document index
+        const index = new Document({
+            encoder: Charset.LatinBalance,
+            document: {
+                id: "tconst",
+                store: true,
+                index: [{
+                    field: "primaryTitle",
+                    tokenize: "forward"
+                },{
+                    field: "originalTitle",
+                    tokenize: "forward"
+                }],
+                tag: [{
+                    field: "startYear"
+                },{
+                    field: "genres"
+                }]
+            }
+        });
+
+        // add test data
+        for(let i = 0; i < data.length; i++){
+            index.add(data[i]);
+        }
+
+        // perform a query + enrich results
+        let result = new Resolver({
+            index: index,
+            query: "karmen",
+            pluck: "primaryTitle",
+            //enrich: true,
+        }).or({
+            index: index,
+            query: "clown",
+            pluck: "primaryTitle",
+
+        }).and({
+            index: index,
+            query: "karmen",
+            field: "primaryTitle",
+            suggest: true
+        }).not({
+            index: index,
+            query: "clown",
+            pluck: "primaryTitle",
+            enrich: true,
+            resolve: true
+        });
+
+        expect(result).to.eql([{
+            id: 'tt0000001',
+            doc: data[0]
+        }]);
+
+        result = new Resolver({
+            index: index,
+            query: "karmen",
+            pluck: "primaryTitle",
+            //enrich: true,
+        }).or({
+            index: index,
+            query: "clown",
+            pluck: "primaryTitle",
+
+        }).and({
+            index: index,
+            query: "not found",
+            field: "primaryTitle",
+            suggest: true
+        }).resolve({
+            enrich: true,
+            resolve: true
+        });
+
+        expect(result).to.eql([{
+            id: 'tt0000001',
+            doc: data[0]
+        },{
+            id: 'tt0000002',
+            doc: data[1]
+        }]);
     });
 });

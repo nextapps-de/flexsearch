@@ -186,12 +186,17 @@ export let DocumentSearchResults = [];
 export let EnrichedDocumentSearchResults = [];
 
 /**
- * @typedef Array<{
+ * @typedef {{
  *   id: (number|string),
  *   doc: (Object|null),
  *   field: (Array<string>|undefined),
  *   tag: (Array<string>|undefined)
- * }>
+ * }}
+ */
+export let MergedDocumentSearchEntry = {};
+
+/**
+ * @typedef Array<MergedDocumentSearchEntry>
  */
 export let MergedDocumentSearchResults = [];
 
@@ -218,7 +223,7 @@ export let EncoderSplitOptions = {};
  *   normalize: (boolean|(function(string):string)|undefined),
  *   prepare: ((function(string):string)|undefined),
  *   finalize: ((function(Array<string>):(Array<string>|void))|undefined),
- *   filter: (Set<string>|undefined),
+ *   filter: (Set<string>|function(string):boolean|undefined),
  *   matcher: (Map<string, string>|undefined),
  *   mapper: (Map<string, string>|undefined),
  *   stemmer: (Map<string, string>|undefined),

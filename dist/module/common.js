@@ -61,58 +61,58 @@ export function merge_option(value, default_value, merge_value) {
 
     return "undefined" == type_value ? default_value : value;
 }
+//
+// /**
+//  * @param {!number} count
+//  * @returns {Array<Object>}
+//  */
 
-/**
- * @param {!number} count
- * @returns {Array<Object>}
- */
+// export function create_object_array(count){
+//
+//     const array = new Array(count);
+//
+//     for(let i = 0; i < count; i++){
+//         array[i] = create_object();
+//     }
+//
+//     return array;
+// }
 
-export function create_object_array(count) {
+// /**
+//  * @param {!number} count
+//  * @returns {Array<Object>}
+//  */
 
-    const array = Array(count);
+// export function create_map_array(count){
+//
+//     const array = new Array(count);
+//
+//     for(let i = 0; i < count; i++){
+//         array[i] = new Map();
+//     }
+//
+//     return array;
+// }
 
-    for (let i = 0; i < count; i++) {
-        array[i] = create_object();
-    }
+// export function create_arrays(count){
+//
+//     const array = new Array(count);
+//
+//     for(let i = 0; i < count; i++){
+//         array[i] = [];
+//     }
+//
+//     return array;
+// }
+//
+// /**
+//  * @param {!Object} obj
+//  * @returns {Array<string>}
+//  */
 
-    return array;
-}
-
-/**
- * @param {!number} count
- * @returns {Array<Object>}
- */
-
-export function create_map_array(count) {
-
-    const array = Array(count);
-
-    for (let i = 0; i < count; i++) {
-        array[i] = new Map();
-    }
-
-    return array;
-}
-
-export function create_arrays(count) {
-
-    const array = Array(count);
-
-    for (let i = 0; i < count; i++) {
-        array[i] = [];
-    }
-
-    return array;
-}
-
-/**
- * @param {!Object} obj
- * @returns {Array<string>}
- */
-
-export function get_keys(obj) {
-    return Object.keys(obj);
-}
+// export function get_keys(obj){
+//     return Object.keys(obj);
+// }
 
 export function create_object() {
     return Object.create(null);

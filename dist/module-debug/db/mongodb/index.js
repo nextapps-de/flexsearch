@@ -124,8 +124,9 @@ MongoDB.prototype.open = async function () {
 };
 
 MongoDB.prototype.close = function () {
-    this.db.close();
-    this.db = null;
+    //CLIENT && CLIENT.close();
+    this.db = CLIENT = null;
+    DB[this.id] = null;
     return this;
 };
 
@@ -257,7 +258,9 @@ MongoDB.prototype.enrich = function (ids) {
 };
 
 MongoDB.prototype.has = function (id) {
-    return this.db.collection("reg").countDocuments({ id }, { limit: 1 });
+    return this.db.collection("reg").countDocuments({ id }, { limit: 1 }).then(function (result) {
+        return !!result;
+    });
 };
 
 MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offset = 0, suggest = !1, resolve = !0, enrich = !1, tags) {
@@ -281,12 +284,14 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
             keyword = term;
         }
 
-        let project = resolve ? { _id: 1 } : { _id: 1, res: 1 };
+        const project = { _id: 1 };
+        if (!resolve) project.res = 1;
+        if (enrich) project.doc = 1;
 
         const stmt = [{ $match: { $or: params } }, { $group: {
                 _id: "$id",
-                res: suggest ? { $sum: 1 } : { $min: 1 },
-                count: { $sum: 1 }
+                count: { $sum: 1 },
+                res: suggest ? { $sum: "$res" } : { $sum /*$min*/: "$res" }
             } }];
 
         suggest || stmt.push({ $match: { count: query.length - 1 } });
@@ -319,32 +324,34 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
                 count++;
             }
 
-            stmt.push({ $project: project }, { $match: match });
-        } else {
-            stmt.push({ $project: project });
+            stmt.push(
+            //{ $project: project },
+            { $match: match });
         }
 
         stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 } }, { $skip: offset }, { $limit: limit });
 
-        if (tags) {
-            project = { _id: 1 };
-            if (!resolve) project.res = 1;
-            if (enrich) project.doc = 1;
+        // if(tags){
+        //     project = { _id: 1 };
+        //     if(!resolve) project["res"] = 1;
+        //     if(enrich) project["doc"] = 1;
+        // }
 
-            stmt.push({ $project: project });
-        }
+        stmt.push({ $project: project });
 
         rows = await this.db.collection("ctx" + this.field).aggregate(stmt);
     } else {
 
-        let project = resolve ? { _id: 1 } : { _id: 1, res: 1 };
+        const project = { _id: 1 };
+        if (!resolve) project.res = 1;
+        if (enrich) project.doc = 1;
 
         const stmt = [{ $match: {
                 key: { $in: query }
             } }, { $group: {
                 _id: "$id",
-                res: suggest ? { $sum: 1 } : { $min: 1 },
-                count: { $sum: 1 }
+                count: { $sum: 1 },
+                res: suggest ? { $sum: "$res" } : { $sum /*$min*/: "$res" }
             } }];
 
         suggest || stmt.push({ $match: { count: query.length } });
@@ -377,20 +384,20 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
                 count++;
             }
 
-            stmt.push({ $project: project }, { $match: match });
-        } else {
-            stmt.push({ $project: project });
+            stmt.push(
+            //{ $project: project },
+            { $match: match });
         }
 
         stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 } }, { $skip: offset }, { $limit: limit });
 
-        if (tags) {
-            project = { _id: 1 };
-            if (!resolve) project.res = 1;
-            if (enrich) project.doc = 1;
+        // if(tags){
+        //     project = { _id: 1 };
+        //     if(!resolve) project["res"] = 1;
+        //     if(enrich) project["doc"] = 1;
+        // }
 
-            stmt.push({ $project: project });
-        }
+        stmt.push({ $project: project });
 
         rows = await this.db.collection("map" + this.field).aggregate(stmt);
     }

@@ -1,5 +1,5 @@
 global.self = global;
-const env = process.argv[3];
+const env = process.argv[3] && process.argv[3].startsWith("--") ? process.argv[4] : process.argv[3];
 import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
@@ -32,45 +32,59 @@ describe("Encoder: Latin Charset", function(){
     it("Should have been encoded properly: LatinDefault", function(){
 
         const index = new Index({ encoder: Charset.LatinDefault });
-        expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(["björn", "phillipp", "mayer"]);
+        expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+            ["björn", "phillipp", "mayer"]
+        );
     });
 
-    if(env !== "light"){
+    if(!build_light){
 
         it("Should have been encoded properly: LatinExact", function(){
 
             const index = new Index({ encoder: Charset.LatinExact });
-            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(["Björn-Phillipp", "Mayer"]);
+            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+                ["Björn-Phillipp", "Mayer"]
+            );
         });
 
         it("Should have been encoded properly: LatinSimple", function(){
 
             const index = new Index({ encoder: Charset.LatinSimple });
-            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(index.encoder.encode("bjorn/phillipp mayer"));
+            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+                index.encoder.encode("bjorn/phillipp mayer")
+            );
         });
 
         it("Should have been encoded properly: LatinBalance", function(){
 
             const index = new Index({ encoder: Charset.LatinBalance });
-            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(index.encoder.encode("bjorn philip mair"));
+            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+                index.encoder.encode("bjorn philip mair")
+            );
         });
 
         it("Should have been encoded properly: LatinAdvanced", function(){
 
             const index = new Index({ encoder: Charset.LatinAdvanced });
-            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(index.encoder.encode("bjoern filip mair"));
+            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+                index.encoder.encode("bjoern filip mair")
+            );
         });
 
         it("Should have been encoded properly: LatinExtra", function(){
 
             const index = new Index({ encoder: Charset.LatinExtra });
-            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(index.encoder.encode("bjorm filib mayr"));
+            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+                index.encoder.encode("bjorm filib mayr")
+            );
         });
 
         it("Should have been encoded properly: LatinSoundex", function(){
 
             const index = new Index({ encoder: Charset.LatinSoundex });
-            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(index.encoder.encode("bjoernsen philippo mayr"));
+            expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+                index.encoder.encode("bjoernsen philippo mayr")
+            );
         });
     }
 
@@ -206,12 +220,54 @@ describe("Filter", function(){
 
         index.add(0, "Today in the morning.");
         expect(index.search("in the")).to.have.length(0);
+
+        // extend
+        index.encoder.assign({
+            filter: ["morning"]
+        });
+
+        index.add(0, "Today in the morning.");
+        expect(index.search("in the")).to.have.length(0);
+        expect(index.search("morning")).to.have.length(0);
+        expect(index.search("Today")).to.eql([0]);
     });
 
     it("Should have been filtered properly (custom function)", function(){
 
         const encoder = new Encoder({
-            filter: ["in", "the"],
+            filter: function(word){
+                return word.length > 3;
+            }
+        });
+        const index = new Index({
+            tokenize: "strict",
+            encoder: encoder
+        });
+
+        index.add(0, "Today in the morning.");
+
+        expect(index.search("today in the morning.")).to.include(0);
+        expect(index.search("today morning")).to.include(0);
+        expect(index.search("in the")).to.have.length(0);
+
+        encoder.assign({
+            filter: function(word){
+                return word.length > 3 &&
+                       word !== "today";
+            }
+        });
+
+        index.add(0, "Today in the morning.");
+
+        expect(index.search("today in the morning.")).to.include(0);
+        expect(index.search("today morning")).to.include(0);
+        expect(index.search("in the")).to.have.length(0);
+        expect(index.search("today")).to.have.length(0);
+    });
+
+    it("Should have been filtered properly (finalize)", function(){
+
+        const encoder = new Encoder({
             finalize: function(word){
                 return word.filter(t => t.length > 3);
             }
@@ -226,12 +282,23 @@ describe("Filter", function(){
         expect(index.search("today in the morning.")).to.include(0);
         expect(index.search("today morning")).to.include(0);
         expect(index.search("in the")).to.have.length(0);
+
+        // extend
+        encoder.assign({
+            finalize: function(word){
+                return word.filter(t => t.length > 5);
+            }
+        });
+
+        expect(index.search("today in the morning.")).to.include(0);
+        expect(index.search("today morning")).to.include(0);
+        expect(index.search("in the")).to.have.length(0);
+        expect(index.search("today")).to.have.length(0);
     });
 
     it("Should have been filtered properly (minlength)", function(){
 
         const encoder = new Encoder({
-            filter: ["in", "the"],
             minlength: 4
         });
         const index = new Index({
@@ -266,7 +333,21 @@ describe("Stemmer", function(){
 
         expect(index.search("Just a multinational colonization.")).to.include(0);
         expect(index.search("multinational colonization")).to.include(0);
-        expect(index.search("tional tion")).to.have.length(0);
+        expect(index.search("multination colonize")).to.include(0);
+
+        // extend
+        encoder.assign({
+            stemmer: new Map([
+                ["licate", "e"]
+            ])
+        });
+
+        index.add(0, "Just a duplicate multinational colonization.");
+
+        expect(index.search("Just a multinational colonization.")).to.include(0);
+        expect(index.search("multinational colonization")).to.include(0);
+        expect(index.search("multination colonize")).to.include(0);
+        expect(index.search("dupe")).to.include(0);
     });
 
 //     it("Should have been stemmed properly (custom function)", function(){
@@ -335,4 +416,140 @@ describe("Stemmer", function(){
 //         expect(index.search("multinational colonization")).to.include(0);
 //         expect(index.search("tional tion")).to.have.length(0);
 //     });
+});
+
+describe("Mapper", function(){
+
+    it("Should have been applied custom Mapper properly", function(){
+
+        const index = new Index({
+            tokenize: "forward",
+            encoder: new Encoder({
+                numeric: false,
+                dedupe: false,
+                mapper: new Map([
+                    ["1", "a"],
+                    ["2", "b"],
+                    ["3", "c"],
+                    ["4", "d"],
+                    ["5", "d"],
+                    ["6", "d"],
+                    ["7", "e"],
+                    ["8", "f"]
+                ])
+            })
+        });
+
+        index.add(0, "12345678");
+
+        expect(index.search("12345678")).to.eql([0]);
+        expect(index.search("abcd")).to.eql([0]);
+        expect(index.encoder.encode("12345678")).to.eql(["abcdddef"]);
+
+        // extend
+        index.encoder.assign({
+            mapper: new Map([
+                ["1", "x"],
+                ["2", "y"],
+                ["3", "z"],
+                ["7", "x"],
+                ["8", "y"]
+            ])
+        });
+
+        index.add(0, "12345678");
+
+        expect(index.search("12345678")).to.eql([0]);
+        expect(index.search("xyzd")).to.eql([0]);
+        expect(index.encoder.encode("12345678")).to.eql(["xyzdddxy"]);
+    });
+});
+
+describe("Matcher", function(){
+
+    it("Should have been applied custom Matcher properly", function(){
+
+        const index = new Index({
+            tokenize: "forward",
+            encoder: new Encoder({
+                numeric: false,
+                dedupe: false,
+                matcher: new Map([
+                    ["1", "a"],
+                    ["2", "b"],
+                    ["3", "c"],
+                    ["456", "d"],
+                    ["7", "e"],
+                    ["8", "f"]
+                ])
+            })
+        });
+
+        index.add(0, "12345678");
+
+        expect(index.search("12345678")).to.eql([0]);
+        expect(index.search("abcd")).to.eql([0]);
+        expect(index.encoder.encode("12345678")).to.eql(["abcdef"]);
+
+        // extend
+        index.encoder.assign({
+            matcher: new Map([
+                ["1", "x"],
+                ["456", "ddd"],
+                ["8", "y"]
+            ])
+        });
+
+        index.add(0, "12345678");
+
+        expect(index.search("12345678")).to.eql([0]);
+        expect(index.search("xbcd")).to.eql([0]);
+        expect(index.encoder.encode("12345678")).to.eql(["xbcdddey"]);
+    });
+});
+
+describe("Replacer", function(){
+
+    it("Should have been applied custom Replacer properly", function(){
+
+        const index = new Index({
+            tokenize: "forward",
+            encoder: new Encoder({
+                numeric: false,
+                dedupe: false,
+                replacer: [
+                    "1", "a",
+                    "2", "b",
+                    "3", "c",
+                    /[456]/g, "d",
+                    "7", "e",
+                    "8", "f"
+                ]
+            })
+        });
+
+        index.add(0, "12345678");
+
+        expect(index.search("12345678")).to.eql([0]);
+        expect(index.search("abcd")).to.eql([0]);
+        expect(index.encoder.encode("12345678")).to.eql(["abcdddef"]);
+
+        // extend
+        index.encoder.assign({
+            replacer: [
+                "a", "1",
+                "b", "2",
+                "c", "3",
+                "e", "7",
+                "f", "8"
+            ]
+        });
+
+        index.add(0, "12345678");
+
+        expect(index.search("12345678")).to.eql([0]);
+        expect(index.search("123d")).to.eql([0]);
+        expect(index.search("abcd")).to.eql([0]);
+        expect(index.encoder.encode("12345678")).to.eql(["123ddd78"]);
+    });
 });

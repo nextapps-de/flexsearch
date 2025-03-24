@@ -1,57 +1,57 @@
 import { create_object } from "./common.js";
 
-/**
- * @param bitlength
- * @constructor
- */
-
-export function KeystoreObj(bitlength = 8){
-
-    if(!this){
-        return new KeystoreObj(bitlength);
-    }
-
-    this.index = create_object();
-    this.keys = [];
-
-    if(bitlength > 32){
-        this.crc = lcg64;
-        this.bit = BigInt(bitlength);
-    }
-    else {
-        this.crc = lcg;
-        this.bit = bitlength;
-    }
-
-    return /*this.proxy =*/ new Proxy(this, {
-        get(target, key) {
-            const address = target.crc(key);
-            const obj = target.index[address];
-            return obj && obj[key];
-        },
-        set(target, key, value){
-            const address = target.crc(key);
-            let obj = target.index[address];
-            if(!obj){
-                target.index[address] = obj = create_object();
-                target.keys.push(address);
-            }
-            obj[key] = value;
-            return true;
-        },
-        delete(target, key){
-            const address = target.crc(key);
-            const obj = target.index[address];
-            obj && delete obj[key];
-            return true;
-        }
-    });
-}
-
-KeystoreObj.prototype.clear = function(){
-    this.index = create_object();
-    this.keys = [];
-};
+// /**
+//  * @param bitlength
+//  * @constructor
+//  */
+//
+// export function KeystoreObj(bitlength = 8){
+//
+//     if(!this || this.constructor !== KeystoreObj){
+//         return new KeystoreObj(bitlength);
+//     }
+//
+//     this.index = create_object();
+//     this.keys = [];
+//
+//     if(bitlength > 32){
+//         this.crc = lcg64;
+//         this.bit = BigInt(bitlength);
+//     }
+//     else {
+//         this.crc = lcg;
+//         this.bit = bitlength;
+//     }
+//
+//     return /*this.proxy =*/ new Proxy(this, {
+//         get(target, key) {
+//             const address = target.crc(key);
+//             const obj = target.index[address];
+//             return obj && obj[key];
+//         },
+//         set(target, key, value){
+//             const address = target.crc(key);
+//             let obj = target.index[address];
+//             if(!obj){
+//                 target.index[address] = obj = create_object();
+//                 target.keys.push(address);
+//             }
+//             obj[key] = value;
+//             return true;
+//         },
+//         delete(target, key){
+//             const address = target.crc(key);
+//             const obj = target.index[address];
+//             obj && delete obj[key];
+//             return true;
+//         }
+//     });
+// }
+//
+// KeystoreObj.prototype.clear = function(){
+//     this.index = create_object();
+//     this.keys = [];
+// };
 
 // KeystoreObj.prototype.destroy = function(){
 //     this.index = null;
@@ -90,7 +90,7 @@ function _slice(self, start, end, splice){
 
 export function KeystoreArray(arr){
 
-    if(!this){
+    if(!this || this.constructor !== KeystoreArray){
         return new KeystoreArray(arr);
     }
 
@@ -194,18 +194,38 @@ KeystoreArray.prototype.destroy = function(){
 KeystoreArray.prototype.push = function(val){};
 
 /**
+ * @interface
+ */
+function Keystore() {
+    /** @type {Object<number, Map|Set>} */
+    this.index;
+    /** @type {Array<Map|Set>} */
+    this.refs;
+    /** @type {number} */
+    this.size;
+    /** @type {function((string|bigint|number)):number} */
+    this.crc;
+    /** @type {bigint|number} */
+    this.bit;
+}
+
+/**
  * @param bitlength
  * @constructor
+ * @implements Keystore
  */
 
 export function KeystoreMap(bitlength = 8){
 
-    if(!this){
+    if(!this || this.constructor !== KeystoreMap){
         return new KeystoreMap(bitlength);
     }
 
+    /** @type {Object<number, Map>} */
     this.index = create_object();
+    /** @type {Array<Map>} */
     this.refs = [];
+    /** @type {number} */
     this.size = 0;
 
     if(bitlength > 32){
@@ -218,12 +238,17 @@ export function KeystoreMap(bitlength = 8){
     }
 }
 
+/** @param {number|string} key */
 KeystoreMap.prototype.get = function(key) {
     const address = this.crc(key);
     const map = this.index[address];
     return map && map.get(key);
 };
 
+/**
+ * @param {number|string} key
+ * @param {*} value
+ */
 KeystoreMap.prototype.set = function(key, value){
     const address = this.crc(key);
     let map = this.index[address];
@@ -236,24 +261,28 @@ KeystoreMap.prototype.set = function(key, value){
     else{
         this.index[address] = map = new Map([[key, value]]);
         this.refs.push(map);
+        this.size++;
     }
 };
 
 /**
  * @param bitlength
  * @constructor
+ * @implements Keystore
  */
 
 export function KeystoreSet(bitlength = 8){
 
-    if(!this){
+    if(!this || this.constructor !== KeystoreSet){
         return new KeystoreSet(bitlength);
     }
 
-    // using plain Object with numeric key access
-    // just for max performance
+    /** @type {Object<number, Set>} */
     this.index = create_object();
+    /** @type {Array<Set>} */
     this.refs = [];
+    /** @type {number} */
+    this.size = 0;
 
     if(bitlength > 32){
         this.crc = lcg64;
@@ -265,6 +294,7 @@ export function KeystoreSet(bitlength = 8){
     }
 }
 
+/** @param {number|string} key */
 KeystoreSet.prototype.add = function(key){
     const address = this.crc(key);
     let set = this.index[address];
@@ -277,10 +307,12 @@ KeystoreSet.prototype.add = function(key){
     else{
         this.index[address] = set = new Set([key]);
         this.refs.push(set);
+        this.size++;
     }
 };
 
 KeystoreMap.prototype.has =
+/** @param {number|string} key */
 KeystoreSet.prototype.has = function(key) {
     const address = this.crc(key);
     const map_or_set = this.index[address];
@@ -300,6 +332,7 @@ KeystoreSet.prototype.size = function(){
 */
 
 KeystoreMap.prototype.delete =
+/** @param {number|string} key */
 KeystoreSet.prototype.delete = function(key){
     const address = this.crc(key);
     const map_or_set = this.index[address];
@@ -325,6 +358,9 @@ KeystoreSet.prototype.clear = function(){
 //     this.proxy = null;
 // };
 
+/**
+ * @return Iterable
+ */
 KeystoreMap.prototype.values =
 KeystoreSet.prototype.values = function*(){
     // alternatively iterate through this.keys[]
@@ -336,6 +372,9 @@ KeystoreSet.prototype.values = function*(){
     }
 };
 
+/**
+ * @return Iterable
+ */
 KeystoreMap.prototype.keys =
 KeystoreSet.prototype.keys = function*(){
     //const values = Object.values(this.index);
@@ -346,6 +385,9 @@ KeystoreSet.prototype.keys = function*(){
     }
 };
 
+/**
+ * @return Iterable
+ */
 KeystoreMap.prototype.entries =
 KeystoreSet.prototype.entries = function*(){
     //const values = Object.values(this.index);
@@ -358,7 +400,7 @@ KeystoreSet.prototype.entries = function*(){
 
 /**
  * Linear Congruential Generator (LCG)
- * @param str
+ * @param {!number|bigint|string} str
  * @this {KeystoreMap|KeystoreSet}
  */
 
@@ -379,20 +421,20 @@ function lcg(str) {
 }
 
 /**
- * @param str
+ * @param {!number|bigint|string} str
  * @this {KeystoreMap|KeystoreSet}
  */
 
 function lcg64(str) {
-    let range = BigInt(2) ** /** @type {!BigInt} */ (this.bit) - BigInt(1);
+    let range = BigInt(2) ** /** @type {!bigint} */ (this.bit) - BigInt(1);
     let type = typeof str;
     if(type === "bigint"){
-        return /** @type {!BigInt} */ (str) & range;
+        return /** @type {!bigint} */ (str) & range;
     }
     if(type === "number"){
         return BigInt(str) & range;
     }
-    let crc = BigInt(0), bit = /** @type {!BigInt} */ (this.bit) + BigInt(1);
+    let crc = BigInt(0), bit = /** @type {!bigint} */ (this.bit) + BigInt(1);
     for(let i = 0; i < str.length; i++){
         crc = (crc * bit ^ BigInt(str.charCodeAt(i))) & range;
     }

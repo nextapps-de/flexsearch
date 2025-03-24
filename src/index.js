@@ -57,10 +57,15 @@ export default function Index(options, _register){
             : {}
     );
 
+    /** @type {*} */
     let tmp = options.context;
     /** @type ContextOptions */
-    const context = tmp === true
-        ? { depth: 1 } : tmp || {};
+    const context = /** @type ContextOptions */ (
+        tmp === true
+            ? { depth: 1 }
+            : tmp || {}
+    );
+
     const encoder = SUPPORT_CHARSET && is_string(options.encoder)
         ? Charset[options.encoder]
         : options.encode || options.encoder || (
@@ -83,11 +88,17 @@ export default function Index(options, _register){
     }
 
     this.resolution = options.resolution || 9;
-    this.tokenize = ((tmp = options.tokenize) && (tmp !== "default") && tmp) || "strict";
+    this.tokenize = tmp = ((tmp = options.tokenize) && (tmp !== "default") && tmp) || "strict";
     this.depth = (tmp === "strict" && context.depth) || 0;
     this.bidirectional = context.bidirectional !== false;
     this.fastupdate = !!options.fastupdate;
     this.score = options.score || null;
+
+    if(DEBUG){
+        if(context && this.tokenize !== "strict"){
+            console.warn("Context-Search could not applied, because it is just supported when using the tokenizer \"strict\".")
+        }
+    }
 
     tmp = SUPPORT_KEYSTORE && (options.keystore || 0);
     tmp && (this.keystore = tmp);
@@ -225,7 +236,7 @@ function cleanup_index(map){
             (count += arr.length);
         }
     }
-    else for(const item of map){
+    else for(const item of map.entries()){
         const key = item[0];
         const value = item[1];
         const tmp = cleanup_index(value);

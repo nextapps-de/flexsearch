@@ -33,6 +33,7 @@ import Resolver from "./resolver.js";
 import Encoder from "./encoder.js";
 import IdxDB from "./db/indexeddb/index.js";
 import Charset from "./charset.js";
+import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 
 /** @export */ Index.prototype.add;
 /** @export */ Index.prototype.append;
@@ -141,6 +142,10 @@ if(SUPPORT_SERIALIZE){
 /** @export */ StorageInterface.prototype.info;
 /** @export */ StorageInterface.prototype.commit;
 /** @export */ StorageInterface.prototype.remove;
+
+/** @export */ KeystoreArray.length;
+/** @export */ KeystoreMap.size;
+/** @export */ KeystoreSet.size;
 
 /** @export */ Charset.LatinExact;
 /** @export */ Charset.LatinDefault;

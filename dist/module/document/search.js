@@ -1,5 +1,5 @@
 
-import { DocumentSearchOptions, DocumentSearchResults, EnrichedDocumentSearchResults, MergedDocumentSearchResults, EnrichedSearchResults, SearchResults, IntermediateSearchResults } from "../type.js";
+import { DocumentSearchOptions, DocumentSearchResults, EnrichedDocumentSearchResults, MergedDocumentSearchResults, MergedDocumentSearchEntry, EnrichedSearchResults, SearchResults, IntermediateSearchResults } from "../type.js";
 import { create_object, is_array, is_object, is_string, parse_simple } from "../common.js";
 import { intersect_union } from "../intersect.js";
 import Document from "../document.js";
@@ -97,7 +97,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         }
 
         enrich = this.store && options.enrich && resolve;
-        highlight = options.highlight && enrich;
+        highlight = enrich && options.highlight;
         limit = options.limit || limit;
         offset = options.offset || 0;
         limit || (limit = 100);
@@ -418,7 +418,7 @@ function highlight_fields(result, query, index, field, tree, template) {
     // if(typeof template === "string"){
     //     template = new RegExp(template, "g");
     // }
-
+    console.log("template", template);
     let encoder, query_enc, tokenize;
 
 
@@ -498,7 +498,7 @@ function highlight_fields(result, query, index, field, tree, template) {
  * @return {MergedDocumentSearchResults}
  */
 function merge_fields(fields, limit) {
-    /** @type {MergedDocumentSearchResults} */
+    /** @type {Array<MergedDocumentSearchEntry>} */
     const final = [],
           set = create_object();
 
@@ -527,7 +527,7 @@ function merge_fields(fields, limit) {
                     return final;
                 }
                 entry.field = set[id] = [field.field];
-                final.push(entry);
+                final.push( /** @type {MergedDocumentSearchEntry} */entry);
             } else {
                 tmp.push(field.field);
             }

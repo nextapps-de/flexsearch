@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.123 (Bundle/Debug)
+ * FlexSearch.js v0.8.132 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -46,7 +46,7 @@ function u(a, c, b) {
 function w() {
   return Object.create(null);
 }
-;const y = /[^\p{L}\p{N}]+/u, z = /(\d{3})/g, A = /(\D)(\d{3})/g, B = /(\d{3})(\D)/g, D = "".normalize && /[\u0300-\u036f]/g;
+;const y = /[^\p{L}\p{N}]+/u, z = /(\d{3})/g, B = /(\D)(\d{3})/g, C = /(\d{3})(\D)/g, E = "".normalize && /[\u0300-\u036f]/g;
 function F(a = {}) {
   if (!this || this.constructor !== F) {
     return new F(...arguments);
@@ -95,15 +95,16 @@ r.assign = function(a) {
   }
   this.prepare = u(a.prepare, null, this.prepare);
   this.finalize = u(a.finalize, null, this.finalize);
-  this.rtl = u(a.rtl, !1, this.rtl);
+  b = a.filter;
+  this.filter = "function" === typeof b ? b : u(b && new Set(b), null, this.filter);
   this.dedupe = u(a.dedupe, !1, this.dedupe);
-  this.filter = u((b = a.filter) && new Set(b), null, this.filter);
   this.matcher = u((b = a.matcher) && new Map(b), null, this.matcher);
   this.mapper = u((b = a.mapper) && new Map(b), null, this.mapper);
   this.stemmer = u((b = a.stemmer) && new Map(b), null, this.stemmer);
   this.replacer = u(a.replacer, null, this.replacer);
   this.minlength = u(a.minlength, 1, this.minlength);
   this.maxlength = u(a.maxlength, 0, this.maxlength);
+  this.rtl = u(a.rtl, !1, this.rtl);
   if (this.cache = b = u(a.cache, !0, this.cache)) {
     this.l = null, this.A = "number" === typeof b ? b : 2e5, this.i = new Map(), this.j = new Map(), this.o = this.m = 128;
   }
@@ -132,8 +133,7 @@ r.addStemmer = function(a, c) {
   return this;
 };
 r.addFilter = function(a) {
-  this.filter || (this.filter = new Set());
-  this.filter.add(a);
+  "function" === typeof a ? this.filter = a : (this.filter || (this.filter = new Set()), this.filter.add(a));
   this.cache && G(this);
   return this;
 };
@@ -182,9 +182,9 @@ r.encode = function(a) {
       this.l = setTimeout(G, 50, this);
     }
   }
-  this.normalize && ("function" === typeof this.normalize ? a = this.normalize(a) : a = D ? a.normalize("NFKD").replace(D, "").toLowerCase() : a.toLowerCase());
+  this.normalize && ("function" === typeof this.normalize ? a = this.normalize(a) : a = E ? a.normalize("NFKD").replace(E, "").toLowerCase() : a.toLowerCase());
   this.prepare && (a = this.prepare(a));
-  this.numeric && 3 < a.length && (a = a.replace(A, "$1 $2").replace(B, "$1 $2").replace(z, "$1 "));
+  this.numeric && 3 < a.length && (a = a.replace(B, "$1 $2").replace(C, "$1 $2").replace(z, "$1 "));
   const c = !(this.dedupe || this.mapper || this.filter || this.matcher || this.stemmer || this.replacer);
   let b = [], f = this.split || "" === this.split ? a.split(this.split) : a;
   for (let g = 0, e, h; g < f.length; g++) {
@@ -192,7 +192,7 @@ r.encode = function(a) {
       if (c) {
         b.push(e);
       } else {
-        if (!this.filter || !this.filter.has(e)) {
+        if (!this.filter || ("function" === typeof this.filter ? this.filter(e) : !this.filter.has(e))) {
           if (this.cache && e.length <= this.o) {
             if (this.l) {
               var d = this.j.get(e);
@@ -204,7 +204,7 @@ r.encode = function(a) {
               this.l = setTimeout(G, 50, this);
             }
           }
-          this.stemmer && 2 < e.length && (this.u || (this.u = new RegExp("(?!^)(" + this.h + ")$")), e = e.replace(this.u, k => this.stemmer.get(k)), e.length < this.minlength || this.filter && this.filter.has(e)) && (e = "");
+          this.stemmer && 2 < e.length && (this.u || (this.u = new RegExp("(?!^)(" + this.h + ")$")), d = e, e = e.replace(this.u, k => this.stemmer.get(k)), d !== e && this.filter && e.length >= this.minlength && ("function" === typeof this.filter ? !this.filter(e) : this.filter.has(e)) && (e = ""));
           if (e && (this.mapper || this.dedupe && 1 < e.length)) {
             d = "";
             for (let k = 0, n = "", m, v; k < e.length; k++) {
@@ -299,12 +299,12 @@ L.prototype.add = function(a, c, b, f) {
     }
     c = this.encoder.encode(c);
     if (f = c.length) {
-      const n = w(), m = w(), v = this.depth, C = this.resolution;
+      const n = w(), m = w(), v = this.depth, D = this.resolution;
       for (let p = 0; p < f; p++) {
         let l = c[this.rtl ? f - 1 - p : p];
         var d = l.length;
         if (d && (v || !m[l])) {
-          var g = this.score ? this.score(c, l, p, null, 0) : M(C, f, p), e = "";
+          var g = this.score ? this.score(c, l, p, null, 0) : M(D, f, p), e = "";
           switch(this.tokenize) {
             case "full":
               if (2 < d) {
@@ -312,7 +312,7 @@ L.prototype.add = function(a, c, b, f) {
                   for (g = d; g > q; g--) {
                     e = l.substring(q, g);
                     t = this.rtl ? d - 1 - q : q;
-                    var h = this.score ? this.score(c, l, p, e, t) : M(C, f, p, d, t);
+                    var h = this.score ? this.score(c, l, p, e, t) : M(D, f, p, d, t);
                     N(this, m, e, h, a, b);
                   }
                 }
@@ -322,7 +322,7 @@ L.prototype.add = function(a, c, b, f) {
               if (1 < d) {
                 for (h = d - 1; 0 < h; h--) {
                   e = l[this.rtl ? d - 1 - h : h] + e;
-                  var k = this.score ? this.score(c, l, p, e, h) : M(C, f, p, d, h);
+                  var k = this.score ? this.score(c, l, p, e, h) : M(D, f, p, d, h);
                   N(this, m, e, k, a, b);
                 }
                 e = "";
@@ -398,7 +398,7 @@ function M(a, c, b, f, d) {
       l = O(this, q, m);
       a: {
         g = l;
-        var v = f, C = e, p = k;
+        var v = f, D = e, p = k;
         let t = [];
         if (g && g.length) {
           if (g.length <= p) {
@@ -406,9 +406,9 @@ function M(a, c, b, f, d) {
             l = void 0;
             break a;
           }
-          for (let x = 0, E; x < p; x++) {
-            if (E = g[x]) {
-              t[x] = E;
+          for (let x = 0, A; x < p; x++) {
+            if (A = g[x]) {
+              t[x] = A;
             }
           }
           if (t.length) {
@@ -417,7 +417,7 @@ function M(a, c, b, f, d) {
             break a;
           }
         }
-        l = C ? void 0 : t;
+        l = D ? void 0 : t;
       }
       if (l) {
         f = l;
@@ -437,11 +437,14 @@ function M(a, c, b, f, d) {
         m = a.length;
         e = [];
         b = w();
-        for (let l = 0, q, t, x, E; l < k; l++) {
+        for (let l = 0, q, t, x, A; l < k; l++) {
           for (n = 0; n < m; n++) {
             if (x = a[n], l < x.length && (q = x[l])) {
               for (g = 0; g < q.length; g++) {
-                t = q[g], (h = b[t]) ? b[t]++ : (h = 0, b[t] = 1), E = e[h] || (e[h] = []), E.push(t);
+                if (t = q[g], (h = b[t]) ? b[t]++ : (h = 0, b[t] = 1), A = e[h] || (e[h] = []), A.push(t), c && h === m - 1 && A.length - d === c) {
+                  m = A;
+                  break b;
+                }
               }
             }
           }
@@ -556,11 +559,12 @@ function P(a, c) {
   const f = !0 === b ? {depth:1} : b || {}, d = a.encode || a.encoder || J;
   this.encoder = d.encode ? d : "object" === typeof d ? new F(d) : {encode:d};
   this.resolution = a.resolution || 9;
-  this.tokenize = (b = a.tokenize) && "default" !== b && b || "strict";
+  this.tokenize = b = (b = a.tokenize) && "default" !== b && b || "strict";
   this.depth = "strict" === b && f.depth || 0;
   this.bidirectional = !1 !== f.bidirectional;
   this.fastupdate = !!a.fastupdate;
   this.score = a.score || null;
+  f && "strict" !== this.tokenize && console.warn('Context-Search could not applied, because it is just supported when using the tokenizer "strict".');
   b = !1;
   this.map = new Map();
   this.ctx = new Map();
@@ -594,7 +598,7 @@ function Q(a) {
       (f = a[b]) && (c += f.length);
     }
   } else {
-    for (const b of a) {
+    for (const b of a.entries()) {
       const f = b[0], d = Q(b[1]);
       d ? c += d : a.delete(f);
     }
