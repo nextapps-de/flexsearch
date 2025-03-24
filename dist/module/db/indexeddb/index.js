@@ -316,6 +316,7 @@ IdxDB.prototype.commit = async function (flexsearch, _replace, _append) {
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for (let i = 0, task; i < tasks.length; i++) {
+            /** @dict */
             task = tasks[i];
             // there are just removals in the task queue
             if (task.clear) {

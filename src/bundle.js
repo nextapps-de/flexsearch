@@ -55,6 +55,7 @@ import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 /** @export */ Index.prototype.mount;
 /** @export */ Index.prototype.commit;
 /** @export */ Index.prototype.destroy;
+/** @export */ Index.prototype.encoder;
 
 if(SUPPORT_SERIALIZE || SUPPORT_PERSISTENT){
 /** @export */ Index.prototype.reg;
@@ -73,7 +74,6 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Index.prototype.cache;
 /** @export */ Index.prototype.bypass;
 /** @export */ Index.prototype.document;
-/** @export */ Index.prototype.encoder;
 }
 
 /** @export */ Encoder.prototype.assign;

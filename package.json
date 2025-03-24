@@ -2,7 +2,7 @@
   "public": true,
   "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.8.132",
+  "version": "0.8.133",
   "description": "Next-Generation full-text search library for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -81,11 +81,10 @@
     "build:module:compact:debug": "node task/build RELEASE=compact.module DEBUG=true PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT",
     "build:module:light": "node task/build RELEASE=light.module DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=false SUPPORT_CACHE=true SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false",
     "build:module:light:debug": "node task/build RELEASE=light.module DEBUG=true PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=false SUPPORT_CACHE=true SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT",
-    "build:all": "npm version --no-git-tag-version patch && npm run build:bundle && npm run build:bundle:debug && npm run build:light && npm run build:light:debug && npm run build:compact && npm run build:compact:debug && npm run build:module && npm run build:module:debug && npm run build:module:min && npm run build:module:bundle && npm run build:module:bundle:debug && npm run build:module:light && npm run build:module:light:debug && npm run build:module:compact && npm run build:module:compact:debug && npm run build:es5 && npm run build:es5:debug && npm run build:lang && npm run build:db",
+    "build:all": "npm run build:bundle && npm run build:bundle:debug && npm run build:light && npm run build:light:debug && npm run build:compact && npm run build:compact:debug && npm run build:module && npm run build:module:debug && npm run build:module:min && npm run build:module:bundle && npm run build:module:bundle:debug && npm run build:module:light && npm run build:module:light:debug && npm run build:module:compact && npm run build:module:compact:debug && npm run build:es5 && npm run build:es5:debug && npm run build:lang && npm run build:db",
     "build:custom": "node task/build RELEASE=custom",
-    "test": "mocha test/*.js",
-    "test:coverage": "c8 -c test/.c8rc.json mocha test/*.js",
-    "test:all": "npx mocha test/*.js module/bundle && npx mocha test/*.js module-debug/bundle && npx mocha test/*.js module-min/bundle && npx mocha test/*.js flexsearch.bundle.debug && npx mocha test/*.js flexsearch.bundle.min && npx mocha test/*.js flexsearch.bundle.module.debug && npx mocha test/*.js flexsearch.bundle.module.min && npx mocha test/*.js flexsearch.compact.debug && npx mocha test/*.js flexsearch.compact.min && npx mocha test/*.js flexsearch.compact.module.debug && npx mocha test/*.js flexsearch.compact.module.min && npx mocha test/*.js flexsearch.es5.debug && npx mocha test/*.js flexsearch.es5.min && npx mocha test/*.js flexsearch.light.debug && npx mocha test/*.js flexsearch.light.min && npx mocha test/*.js flexsearch.light.module.debug && npx mocha test/*.js flexsearch.light.module.min"
+    "test:all": "cd test/ && npm install && npm run test:all && cd ..",
+    "release": "npm version --no-git-tag-version patch && npm run build:all && npm run test:all"
   },
   "files": [
     "dist/**",
@@ -114,11 +113,7 @@
     "babel-plugin-transform-property-literals": "^6.9.4",
     "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
-    "google-closure-compiler": "^20240317.0.0",
-    "rollup": "^4.35.0",
-    "c8": "^10.1.3",
-    "chai": "^5.2.0",
-    "mocha": "^11.1.0"
+    "google-closure-compiler": "^20240317.0.0"
   },
   "funding": [
     {

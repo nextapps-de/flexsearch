@@ -9,7 +9,7 @@ const dirname = import.meta.dirname;
 
     // create the document and await (!) for the instance response
     const document = await new Document({
-        worker: "true",
+        worker: true,
         document: {
             id: "tconst",
             store: true,

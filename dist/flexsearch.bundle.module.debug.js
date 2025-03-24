@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.132 (Bundle/Module/Debug)
+ * FlexSearch.js v0.8.133 (Bundle/Module/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2395,7 +2395,7 @@ t.commit = async function(a, c, b) {
         c = !0;
         break;
       } else {
-        e[d] = f.W;
+        e[d] = f.del;
       }
     }
     c || (b || (e = e.concat(aa(a.reg))), e.length && await this.remove(e));
