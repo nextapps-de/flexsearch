@@ -61,58 +61,6 @@ export function merge_option(value, default_value, merge_value) {
 
     return "undefined" == type_value ? default_value : value;
 }
-//
-// /**
-//  * @param {!number} count
-//  * @returns {Array<Object>}
-//  */
-
-// export function create_object_array(count){
-//
-//     const array = new Array(count);
-//
-//     for(let i = 0; i < count; i++){
-//         array[i] = create_object();
-//     }
-//
-//     return array;
-// }
-
-// /**
-//  * @param {!number} count
-//  * @returns {Array<Object>}
-//  */
-
-// export function create_map_array(count){
-//
-//     const array = new Array(count);
-//
-//     for(let i = 0; i < count; i++){
-//         array[i] = new Map();
-//     }
-//
-//     return array;
-// }
-
-// export function create_arrays(count){
-//
-//     const array = new Array(count);
-//
-//     for(let i = 0; i < count; i++){
-//         array[i] = [];
-//     }
-//
-//     return array;
-// }
-//
-// /**
-//  * @param {!Object} obj
-//  * @returns {Array<string>}
-//  */
-
-// export function get_keys(obj){
-//     return Object.keys(obj);
-// }
 
 export function create_object() {
     return Object.create(null);
@@ -121,17 +69,6 @@ export function create_object() {
 export function concat(arrays) {
     return [].concat.apply([], arrays);
 }
-
-// export function concat(arrays){
-//     const final = [];
-//     for(let i = 0, arr; i < arrays.length; i++){
-//         arr = arrays[i];
-//         for(let j = 0; j < arr.length; j++){
-//             final.push(arr[j])
-//         }
-//     }
-//     return final;
-// }
 
 export function sort_by_length_down(a, b) {
     return b.length - a.length;

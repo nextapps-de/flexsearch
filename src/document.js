@@ -508,7 +508,7 @@ if(SUPPORT_STORE){
 
         if(SUPPORT_PERSISTENT && this.db){
             return this.index.get(this.field[0]).db.enrich(id).then(function(result){
-                return result[0] && result[0].doc;
+                return result[0] && result[0]["doc"];
             });
         }
 

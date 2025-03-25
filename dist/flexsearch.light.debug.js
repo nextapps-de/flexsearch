@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.133 (Light/Debug)
+ * FlexSearch.js v0.8.135 (Light/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -631,7 +631,8 @@ r.searchCache = function(a, c, b) {
   }
   return f;
 };
-const R = {Index:L, Charset:null, Encoder:F, Document:null, Worker:null, Resolver:null, IndexedDB:null, Language:{}}, S = self;
+w();
+const R = {Index:L, Charset:null, Encoder:F, Document:null, Worker:null, Resolver:null, IndexedDB:null, Language:{}}, S = "undefined" !== typeof global ? global : self;
 let T;
 (T = S.define) && T.amd ? T([], function() {
   return R;

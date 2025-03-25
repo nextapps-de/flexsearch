@@ -437,11 +437,12 @@ Document.prototype.search = function(query, limit, options, _promises){
 
     promises = [];
 
-    for(let i = 0, res; i < result_field.length; i++){
+    for(let i = 0; i < result_field.length; i++){
 
-        res = result[i];
+        /** @type {SearchResults|EnrichedSearchResults} */
+        let res = result[i];
 
-        if(enrich && res.length && !res[0].doc){
+        if(enrich && res.length && typeof res[0]["doc"] === "undefined"){
             if(!SUPPORT_PERSISTENT || !this.db){
                 // if(res.length){
                     res = apply_enrich.call(this, res);
@@ -505,9 +506,10 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
     let query_enc;
     let tokenize;
 
-    for(let i = 0, res, res_field, enc, idx, path; i < result.length; i++){
+    for(let i = 0, res_field, enc, idx, path; i < result.length; i++){
 
-        res = result[i].result;
+        /** @type {SearchResults|EnrichedSearchResults} */
+        let res = result[i].result;
         res_field = result[i].field;
         idx = index.get(res_field);
         enc = idx.encoder;
@@ -521,7 +523,7 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
 
         for(let j = 0; j < res.length; j++){
             let str = "";
-            let content = parse_simple(res[j].doc, path);
+            let content = parse_simple(res[j]["doc"], path);
             let doc_enc = encoder.encode(content);
             let doc_org = content.split(encoder.split);
 
@@ -595,7 +597,7 @@ function merge_fields(fields, limit, offset){
                   "id": entry
                 };
             }
-            id = entry.id;
+            id = entry["id"];
             tmp = set[id];
             if(!tmp){
                 // offset was already applied on field indexes
@@ -653,7 +655,7 @@ function get_tag(tag, key, limit, offset, enrich){
 
 export function apply_enrich(ids){
 
-    if(!this || !this.store) return ids;
+    if(!SUPPORT_PERSISTENT || !this || !this.store) return ids;
 
     /** @type {EnrichedSearchResults} */
     const result = new Array(ids.length);

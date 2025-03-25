@@ -369,9 +369,11 @@ Document.prototype.search = function (query, limit, options, _promises) {
 
     for (let i = 0, res; i < result_field.length; i++) {
 
+        /** @type {SearchResults|EnrichedSearchResults} */
         res = result[i];
 
-        if (enrich && res.length && !res[0].doc) {
+
+        if (enrich && res.length && "undefined" == typeof res[0].doc) {
             if (!this.db) {
                 // if(res.length){
                 res = apply_enrich.call(this, res);
@@ -422,9 +424,11 @@ function highlight_fields(result, query, index, field, tree, template) {
     let encoder, query_enc, tokenize;
 
 
-    for (let i = 0, res, res_field, enc, idx, path; i < result.length; i++) {
+    for (let i = 0, res_field, enc, idx, path, res; i < result.length; i++) {
 
+        /** @type {SearchResults|EnrichedSearchResults} */
         res = result[i].result;
+
         res_field = result[i].field;
         idx = index.get(res_field);
         enc = idx.encoder;

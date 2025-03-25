@@ -443,6 +443,8 @@ else (async function(){
         // replace the eval wrapper
         build = build.replace(/\(0,eval\)\('([^']+)'\)/g, "$1");
 
+        if(build.includes("console.log")) console.warn("\n!!! Console was used in build !!!\n");
+
         fs.writeFileSync(filename, build);
         fs.existsSync("dist/node/") || fs.mkdirSync("dist/node/");
         fs.copyFileSync("src/worker/node.js", "dist/node/node.js");

@@ -6,6 +6,10 @@
  */
 
 
+function create_object(){
+    return Object.create(null);
+}
+
 /**
  * @param {Map|Set} val
  * @param {boolean=} stringify
@@ -38,6 +42,8 @@ const fields = ["map", "ctx", "tag", "reg", "cfg"];
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
 }
+
+const DB = create_object();
 
 /**
  * @param {string|PersistentOptions=} name
@@ -81,10 +87,12 @@ IdxDB.prototype.open = function(){
     navigator.storage &&
     navigator.storage.persist();
 
-    return this.db || new Promise(function(resolve, reject){
+    return this.db || (this.db = new Promise(function(resolve, reject){
 
-        const req = IndexedDB.open(self.id + (self.field ? ":" + self.field : ""), VERSION);
+        DB[self.id] || (DB[self.id] = []);
+        DB[self.id].push(self.field);
 
+        const req = IndexedDB.open(self.id, VERSION);
         req.onupgradeneeded = function(event){
 
             const db = self.db = this.result;
@@ -94,12 +102,15 @@ IdxDB.prototype.open = function(){
             // The schema map:key => [res][id] is currently used instead
             // In fact that bypass the idea of a storage solution,
             // IndexedDB is such a poor contribution :(
-
-            fields.forEach(ref => {
-                db.objectStoreNames.contains(ref) ||
-                db.createObjectStore(ref);//{ autoIncrement: true /*keyPath: "id"*/ }
-                //.createIndex("idx", "ids", { multiEntry: true, unique: false });
-            });
+            for(let i = 0, ref; i < fields.length; i++){
+                ref = fields[i];
+                for(let j = 0, field; j < DB[self.id].length; j++){
+                    field = DB[self.id][j];
+                    db.objectStoreNames.contains(ref + (ref !== "reg" ? (field ? ":" + field : "") : "")) ||
+                    db.createObjectStore(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));//{ autoIncrement: true /*keyPath: "id"*/ }
+                    //.createIndex("idx", "ids", { multiEntry: true, unique: false });
+                }
+            }
 
             // switch(event.oldVersion){ // existing db version
             //     case 0:
@@ -132,7 +143,7 @@ IdxDB.prototype.open = function(){
             };
             resolve(self);
         };
-    });
+    }));
 };
 
 IdxDB.prototype.close = function(){
@@ -144,7 +155,7 @@ IdxDB.prototype.close = function(){
  * @return {!Promise<undefined>}
  */
 IdxDB.prototype.destroy = function(){
-    const req = IndexedDB.deleteDatabase(this.id + (this.field ? ":" + this.field : ""));
+    const req = IndexedDB.deleteDatabase(this.id);
     return promisfy(req);
 };
 
@@ -166,9 +177,21 @@ IdxDB.prototype.destroy = function(){
  * @return {!Promise<undefined>}
  */
 IdxDB.prototype.clear = function(){
-    const transaction = this.db.transaction(fields, "readwrite");
-    for(let i = 0; i < fields.length; i++){
-        transaction.objectStore(fields[i]).clear();
+
+    const stores = [];
+
+    for(let i = 0, ref; i < fields.length; i++){
+        ref = fields[i];
+        for(let j = 0, field; j < DB[this.id].length; j++){
+            field = DB[this.id][j];
+            stores.push(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));
+        }
+    }
+
+    const transaction = this.db.transaction(stores, "readwrite");
+
+    for(let i = 0; i < stores.length; i++){
+        transaction.objectStore(stores[i]).clear();
     }
     return promisfy(transaction);
 };
@@ -183,8 +206,8 @@ IdxDB.prototype.clear = function(){
  * @return {!Promise<SearchResults|EnrichedSearchResults>}
  */
 IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false){
-    const transaction = this.db.transaction(ctx ? "ctx" : "map", "readonly");
-    const map = transaction.objectStore(ctx ? "ctx" : "map");
+    const transaction = this.db.transaction((ctx ? "ctx" : "map") + (this.field ? ":" + this.field : ""), "readonly");
+    const map = transaction.objectStore((ctx ? "ctx" : "map") + (this.field ? ":" + this.field : ""));
     const req = map.get(ctx ? ctx + ":" + key : key);
     const self = this;
     return promisfy(req).then(function(res){
@@ -232,8 +255,8 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
      * @return {!Promise<SearchResults|EnrichedSearchResults>}
      */
     IdxDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
-        const transaction = this.db.transaction("tag", "readonly");
-        const map = transaction.objectStore("tag");
+        const transaction = this.db.transaction("tag" + (this.field ? ":" + this.field : ""), "readonly");
+        const map = transaction.objectStore("tag" + (this.field ? ":" + this.field : ""));
         const req = map.get(tag);
         const self = this;
         return promisfy(req).then(function(ids){
@@ -266,8 +289,8 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
         return Promise.all(promises).then(function(docs){
             for(let i = 0; i < docs.length; i++){
                 docs[i] = {
-                    id: ids[i],
-                    doc: docs[i] ? JSON.parse(docs[i]) : null
+                    "id": ids[i],
+                    "doc": docs[i] ? JSON.parse(docs[i]) : null
                 };
             }
             return docs;
@@ -309,11 +332,18 @@ IdxDB.prototype.info = function(){
 
 IdxDB.prototype.transaction = function(ref, modifier, task){
 
-    let store = this.trx[ref + ":" + modifier];
+    const key = ref + (ref !== "reg" ? (this.field ? ":" + this.field : "") : "");
+    /**
+     * @type {IDBObjectStore}
+     */
+    let store = this.trx[key + ":" + modifier];
     if(store) return task.call(this, store);
 
-    let transaction = this.db.transaction(ref, modifier);
-    this.trx[ref + ":" + modifier] = store = transaction.objectStore(ref);
+    let transaction = this.db.transaction(key, modifier);
+    /**
+     * @type {IDBObjectStore}
+     */
+    this.trx[key + ":" + modifier] = store = transaction.objectStore(key);
 
     return new Promise((resolve, reject) => {
         transaction.onerror = (err) => {
@@ -330,7 +360,7 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
         const promise = task.call(this, store);
         // transactions can just be used within the same event loop
         // the indexeddb is such a stupid tool :(
-        this.trx[ref+ ":" + modifier] = null;
+        this.trx[key + ":" + modifier] = null;
         return promise;
     });
 };
@@ -613,19 +643,19 @@ IdxDB.prototype.remove = function(ids){
     }
 
     return /** @type {!Promise<undefined>} */(Promise.all([
-        this.transaction("map", "readwrite", function(store){
+        this.transaction("map" + (this.field ? ":" + this.field : ""), "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids);
             };
         }),
-        this.transaction("ctx", "readwrite", function(store){
+        this.transaction("ctx" + (this.field ? ":" + this.field : ""), "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids);
             };
         }),
-        this.transaction("tag", "readwrite", function(store){
+        this.transaction("tag" + (this.field ? ":" + this.field : ""), "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids, /* tag? */ true);
@@ -669,9 +699,8 @@ function promisfy(req, callback){
         req.onsuccess = function(){
             resolve(this.result);
         };
-        /** @this {IDBRequest} */
         req.oncomplete = function(){
-            resolve(this.result);
+            resolve();
         };
         req.onerror = reject;
         req = null;

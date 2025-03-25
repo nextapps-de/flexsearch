@@ -284,13 +284,13 @@ const FlexSearch = {
 
 {
 
-    // When it is not a module, the package is for Node.js or legacy Browser
-    // Here there exists this or self
-    // const root = typeof self !== "undefined" ? self :
-    //              typeof global !== "undefined" ? global :
-    //              typeof window !== "undefined" ? window : {};
-
-    const root = self;
+    // Legacy Browser: this refers to window
+    // ESM Browser: self refers to window
+    // NodeJS: global refers to the global scope
+    const root = "undefined" != typeof global ? global :
+    //typeof window !== "undefined" ? window :
+    self;
+    //const root = self;
     let prop;
 
     // AMD (RequireJS)
