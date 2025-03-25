@@ -1,4 +1,4 @@
-import { Index } from "flexsearch/esm";
+import { Index } from "flexsearch";
 
 // create a simple index which can store id-content-pairs
 const index = new Index({

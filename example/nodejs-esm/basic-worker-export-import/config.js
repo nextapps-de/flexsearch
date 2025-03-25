@@ -1,4 +1,4 @@
-import { Encoder } from "flexsearch/esm";
+import { Encoder } from "flexsearch";
 import { promises as fs } from "fs";
 
 (async function(){

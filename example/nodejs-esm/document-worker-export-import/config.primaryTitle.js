@@ -1,5 +1,5 @@
-import { Encoder, Charset } from "flexsearch/esm";
-import EnglishPreset from "flexsearch/esm/lang/en";
+import { Encoder, Charset } from "flexsearch";
+import EnglishPreset from "flexsearch/lang/en";
 import { promises as fs } from "fs";
 
 (async function(){

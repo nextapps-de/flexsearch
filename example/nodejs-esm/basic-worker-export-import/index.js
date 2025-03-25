@@ -1,4 +1,4 @@
-import { Worker as WorkerIndex } from "flexsearch/esm";
+import { Worker as WorkerIndex } from "flexsearch";
 const dirname = import.meta.dirname;
 
 // you will need to keep the index configuration

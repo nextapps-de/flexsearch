@@ -1,4 +1,4 @@
-import { Index } from "flexsearch/esm";
+import { Index } from "flexsearch";
 import Sqlite from "flexsearch/db/sqlite";
 // import Postgres from "flexsearch/db/postgres";
 // import MongoDB from "flexsearch/db/mongodb";

@@ -2,7 +2,7 @@
   "public": true,
   "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.8.135",
+  "version": "0.8.138",
   "description": "Next-Generation full-text search library for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -48,7 +48,8 @@
       "import": "./dist/flexsearch.bundle.module.debug.js",
       "require": "./dist/flexsearch.bundle.debug.js"
     },
-    "./esm": "./dist/flexsearch.bundle.module.min.js"
+    "./esm": "./dist/flexsearch.bundle.module.min.js",
+    "./esm/lang/*": "./dist/module/lang/*.js"
   },
   "browser": {
     "flexsearch": "./dist/flexsearch.bundle.module.min.js",

@@ -1,4 +1,4 @@
-import { Document } from "flexsearch/esm";
+import { Document } from "flexsearch";
 import { promises as fs } from "fs";
 const dirname = import.meta.dirname;
 

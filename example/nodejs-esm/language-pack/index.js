@@ -1,5 +1,5 @@
-import { Index, Encoder, Charset } from "flexsearch/esm";
-import EnglishPreset from "flexsearch/esm/lang/en";
+import { Index, Encoder, Charset } from "flexsearch";
+import EnglishPreset from "flexsearch/lang/en";
 
 const encoder = new Encoder(
     Charset.LatinSimple,

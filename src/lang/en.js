@@ -228,7 +228,7 @@ export const stemmer = new Map([
     ["fulness", ""],
     ["ousness", ""],
     ["ization", ""],
-    ["tional", ""],
+    ["tional", "tion"],
     ["biliti", ""],
     ["icate", ""],
     ["ative", ""],
@@ -243,8 +243,10 @@ export const stemmer = new Map([
     ["ement", ""],
     ["izer", ""],
     ["able", ""],
+    ["ible", ""],
     ["alli", ""],
     ["ator", ""],
+    ["less", ""],
     ["logi", ""],
     ["ical", ""],
     ["ance", ""],
@@ -265,11 +267,16 @@ export const stemmer = new Map([
     ["ize", ""],
     ["ing", ""],
     ["ion", ""],
+    ["ies", "y"],
     ["al", ""],
     ["ou", ""],
     ["er", ""],
+    ["ed", ""],
+    ["es", "e"],
     ["ic", ""],
-    ["ly", ""]
+    ["ly", ""],
+    ["li", ""],
+    ["s", ""]
 ]);
 
 /*

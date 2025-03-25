@@ -26,7 +26,7 @@ export const filter = new Set(["a", "about", "above", "after", "again", "against
  * @type {Map<string, string>}
  */
 
-export const stemmer = new Map([["ational", ""], ["iveness", ""], ["fulness", ""], ["ousness", ""], ["ization", ""], ["tional", ""], ["biliti", ""], ["icate", ""], ["ative", ""], ["alize", ""], ["iciti", ""], ["entli", ""], ["ousli", ""], ["alism", ""], ["ation", ""], ["aliti", ""], ["iviti", ""], ["ement", ""], ["izer", ""], ["able", ""], ["alli", ""], ["ator", ""], ["logi", ""], ["ical", ""], ["ance", ""], ["ence", ""], ["ness", ""], ["ble", ""], ["ment", ""], ["eli", ""], ["bli", ""], ["ful", ""], ["ant", ""], ["ent", ""], ["ism", ""], ["ate", ""], ["iti", ""], ["ous", ""], ["ive", ""], ["ize", ""], ["ing", ""], ["ion", ""], ["al", ""], ["ou", ""], ["er", ""], ["ic", ""], ["ly", ""]]);
+export const stemmer = new Map([["ational", ""], ["iveness", ""], ["fulness", ""], ["ousness", ""], ["ization", ""], ["tional", "tion"], ["biliti", ""], ["icate", ""], ["ative", ""], ["alize", ""], ["iciti", ""], ["entli", ""], ["ousli", ""], ["alism", ""], ["ation", ""], ["aliti", ""], ["iviti", ""], ["ement", ""], ["izer", ""], ["able", ""], ["ible", ""], ["alli", ""], ["ator", ""], ["less", ""], ["logi", ""], ["ical", ""], ["ance", ""], ["ence", ""], ["ness", ""], ["ble", ""], ["ment", ""], ["eli", ""], ["bli", ""], ["ful", ""], ["ant", ""], ["ent", ""], ["ism", ""], ["ate", ""], ["iti", ""], ["ous", ""], ["ive", ""], ["ize", ""], ["ing", ""], ["ion", ""], ["ies", "y"], ["al", ""], ["ou", ""], ["er", ""], ["ed", ""], ["es", "e"], ["ic", ""], ["ly", ""], ["li", ""], ["s", ""]]);
 
 /*
     he’s (= he is / he has)

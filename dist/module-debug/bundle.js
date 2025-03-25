@@ -287,10 +287,7 @@ const FlexSearch = {
     // Legacy Browser: this refers to window
     // ESM Browser: self refers to window
     // NodeJS: global refers to the global scope
-    const root = "undefined" != typeof global ? global :
-    //typeof window !== "undefined" ? window :
-    self;
-    //const root = self;
+    const root = "undefined" != typeof self ? self : "undefined" != typeof global ? global : self;
     let prop;
 
     // AMD (RequireJS)

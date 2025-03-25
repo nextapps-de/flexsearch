@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.135 (Bundle/Debug)
+ * FlexSearch.js v0.8.138 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2548,7 +2548,7 @@ function Z(a) {
     a = null;
   });
 }
-;const ub = {Index:N, Charset:eb, Encoder:ka, Document:U, Worker:P, Resolver:W, IndexedDB:rb, Language:{}}, vb = "undefined" !== typeof global ? global : self;
+;const ub = {Index:N, Charset:eb, Encoder:ka, Document:U, Worker:P, Resolver:W, IndexedDB:rb, Language:{}}, vb = "undefined" !== typeof self ? self : "undefined" !== typeof global ? global : self;
 let wb;
 (wb = vb.define) && wb.amd ? wb([], function() {
   return ub;

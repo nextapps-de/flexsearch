@@ -1,4 +1,4 @@
-import { Index } from "flexsearch/esm";
+import { Index } from "flexsearch";
 
 // you will need to keep the index configuration
 // they will not export, also every change to the

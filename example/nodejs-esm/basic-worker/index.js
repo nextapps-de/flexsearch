@@ -1,4 +1,4 @@
-import { Worker as WorkerIndex } from "flexsearch/esm";
+import { Worker as WorkerIndex } from "flexsearch";
 
 (async function(){
 

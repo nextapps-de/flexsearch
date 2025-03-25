@@ -321,10 +321,9 @@ if(RELEASE !== "bundle.module" &&
     // Legacy Browser: this refers to window
     // ESM Browser: self refers to window
     // NodeJS: global refers to the global scope
-    const root = typeof global !== "undefined" ? global :
-                 //typeof window !== "undefined" ? window :
+    const root = typeof self !== "undefined" ? self :
+                 typeof global !== "undefined" ? global :
                  self;
-    //const root = self;
     let prop;
 
     // AMD (RequireJS)
