@@ -44,12 +44,12 @@
             top: 50px;
         }
         #suggestions div{
-            padding: 10px 0;
-            margin: 0 8px;
+            padding: 10px 8px;
             border-bottom: 1px solid #ddd;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+            width: calc(100% - 16px);
         }
         #suggestions b{
             color: blue;
@@ -59,17 +59,18 @@
             td,
             tr,
             input{
-                width: 97%;
+                width: 98%;
             }
         }
     </style>
 </head>
 <body>
+<span style="color: #000; float: right">(iterate through result by arrow keys)</span>
 <table>
     <tr>
         <td style="position: relative">
             <input type="text" id="autocomplete">
-            <input type="text" id="userinput" placeholder="Search by movie title ...">
+            <input type="text" id="userinput" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="Search by movie title ...">
         </td>
     </tr>
 </table>
@@ -79,103 +80,133 @@
     import { Document, Charset } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.module.min.js";
     import data from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/demo/data/movies.js";
 
-    (function(){
+    // for "Result Highlighting" it requires the usage of a Document Index
+    // also when just adding id-content-pairs to a single index
+    const index = new Document({
+        // the cache is a perfect addition
+        // for an instant search on keypress
+        cache: true,
+        document: {
+            // it requires storing the documents
+            store: true,
+            index: [{
+                field: "title",
+                charset: Charset.LatinSimple,
+                // a forward tokenizer is minimum
+                // required by an instant search
+                tokenize: "forward"
+            }]
+        }
+    });
 
-        const index = new Document({
-            cache: true,
-            document: {
-                store: true,
-                id: "id",
-                index: [{
-                    field: "title",
-                    charset: Charset.LatinSimple,
-                    tokenize: "forward"
-                }]
-            }
+    for(let i = 0; i < data.length; i++){
+        // pass a flat pseudo document when using
+        // result highlighting on plain string inputs
+        index.add(i, {
+            title: data[i]
         });
+    }
 
-        for(var i = 0; i < data.length; i++){
-            index.add({
-                id: i,
-                title: data[i]
-            });
+    const suggestions = document.getElementById("suggestions");
+    const autocomplete = document.getElementById("autocomplete");
+    const userinput = document.getElementById("userinput");
+    let results;
+    let iterate = 0;
+
+    userinput.addEventListener("input", show_results, true);
+    userinput.addEventListener("keyup", accept_autocomplete, true);
+    userinput.addEventListener("keydown", iterate_autocomplete, true);
+    suggestions.addEventListener("click", accept_suggestion, true);
+
+    function show_results(){
+
+        let value = this.value;
+        results = index.search({
+            query: value,
+            limit: 25,
+            suggest: true,
+            enrich: true,
+            highlight: "<b>$1</b>"
+        });
+        results = results[0] || results;
+        results = results.result || results;
+        iterate = 0;
+
+        let entry, childs = suggestions.childNodes;
+        let i = 0, len = results.length;
+
+        for(; i < len; i++){
+
+            entry = childs[i];
+
+            if(!entry){
+                entry = document.createElement("div");
+                suggestions.appendChild(entry);
+            }
+
+            entry.innerHTML = results[i].highlight; //data[results[i]];
         }
 
-        var suggestions = document.getElementById("suggestions");
-        var autocomplete = document.getElementById("autocomplete");
-        var userinput = document.getElementById("userinput");
+        while(childs.length > len){
+            suggestions.removeChild(childs[i]);
+        }
 
-        userinput.addEventListener("input", show_results, true);
-        userinput.addEventListener("keyup", accept_autocomplete, true);
-        suggestions.addEventListener("click", accept_suggestion, true);
+        iterate_autocomplete()
+    }
 
-        function show_results(){
+    function iterate_autocomplete(event){
 
-            var value = this.value;
-            var results = index.search({
-                query: value,
-                limit: 25,
-                suggest: true,
-                enrich: true,
-                highlight: "<b>$1</b>"
-            });
-            results = results[0] || results;
-            results = results.result || results;
+        suggestions.childNodes[iterate] &&
+        (suggestions.childNodes[iterate].style.backgroundColor = "");
 
-            var entry, childs = suggestions.childNodes;
-            var i = 0, len = results.length;
-
-            for(; i < len; i++){
-
-                entry = childs[i];
-
-                if(!entry){
-                    entry = document.createElement("div");
-                    suggestions.appendChild(entry);
+        if(event){
+            const key = event.key;
+            if(key === "ArrowUp"){
+                if(iterate > 0){
+                    iterate--;
                 }
-
-                entry.innerHTML = results[i].highlight; //data[results[i]];
+                event.preventDefault();
             }
-
-            while(childs.length > len){
-                suggestions.removeChild(childs[i])
-            }
-
-            var first_result = data[results[0]];
-            var match = first_result && first_result.toLowerCase().indexOf(value.toLowerCase());
-
-            if(first_result && (match !== -1)){
-                autocomplete.value = value + first_result.substring(match + value.length);
-                autocomplete.current = first_result;
-            }
-            else{
-
-                autocomplete.value = autocomplete.current = value;
+            else if(key === "ArrowDown"){
+                if(iterate < results.length){
+                    iterate++;
+                }
+                event.preventDefault();
             }
         }
 
-        function accept_autocomplete(event){
+        let value = userinput.value;
+        let first_result = results && results[iterate] && data[results[iterate].id];
+        let match = first_result && first_result.toLowerCase().indexOf(value.toLowerCase());
 
-            if((event || window.event).keyCode === 13) {
-
-                this.value = autocomplete.value = autocomplete.current;
-            }
+        if(first_result && (match !== -1)){
+            autocomplete.value = value + first_result.substring(match + value.length);
+            autocomplete.current = first_result;
+            suggestions.childNodes[iterate] &&
+            (suggestions.childNodes[iterate].style.backgroundColor = "rgb(0 0 255 / 10%)");
         }
+        else{
 
-        function accept_suggestion(event){
-
-            var target = (event || window.event).target;
-
-            userinput.value = autocomplete.value = target.textContent;
-
-            while(suggestions.lastChild){
-
-                suggestions.removeChild(suggestions.lastChild);
-            }
-
-            return false;
+            autocomplete.value = autocomplete.current = value;
         }
-    }());
+    }
+
+    function accept_autocomplete(event){
+
+        if((event || window.event).keyCode === 13) {
+            this.value = autocomplete.value = autocomplete.current;
+            suggestions.textContent = "";
+        }
+    }
+
+    function accept_suggestion(event){
+
+        let target = (event || window.event).target;
+        userinput.value = autocomplete.value = target.textContent;
+        suggestions.textContent = "";
+
+        return false;
+    }
 </script>
 </body>
 </html>
