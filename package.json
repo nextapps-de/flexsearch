@@ -28,21 +28,28 @@
     "email": "info@nextapps.de"
   },
   "main": "dist/flexsearch.bundle.min.js",
-  "exports": {
-    ".": "./dist/flexsearch.bundle.min.js",
-    "./lang/*": "./dist/lang/*.min.js",
-    "./db/*": "./dist/db/*/index.cjs",
-    "./esm": "./dist/flexsearch.bundle.module.min.js",
-    "./esm/lang/*": "./dist/module/lang/*.js",
-    "./esm/db/*": "./dist/module/db/*/index.js",
-    "./debug": "./dist/flexsearch.bundle.debug.js",
-    "./debug/lang/*": "./dist/lang/*.min.js",
-    "./debug/db/*": "./dist/db/*/index.cjs",
-    "./esm/debug": "./dist/flexsearch.bundle.module.debug.js",
-    "./esm/debug/lang/*": "./dist/module-debug/lang/*.js",
-    "./esm/debug/db/*": "./dist/module-debug/db/*/index.js"
-  },
   "module": "dist/flexsearch.bundle.module.min.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/flexsearch.bundle.module.min.js",
+      "require": "./dist/flexsearch.bundle.min.js"
+    },
+    "./lang/*": {
+      "import": "./dist/module/lang/*.js",
+      "require": "./dist/lang/*.min.js"
+    },
+    "./db/*": {
+      "import": "./dist/module/db/*/index.js",
+      "require": "./dist/db/*/index.cjs"
+    },
+    "./debug": {
+      "import": "./dist/flexsearch.bundle.module.debug.js",
+      "require": "./dist/flexsearch.bundle.debug.js"
+    },
+    "./esm": "./dist/flexsearch.bundle.module.min.js"
+  },
   "browser": {
     "flexsearch": "./dist/flexsearch.bundle.module.min.js",
     "flexsearch/esm": "./dist/flexsearch.bundle.module.min.js",
@@ -57,7 +64,6 @@
     "redis": false,
     "sqlite3": false
   },
-  "types": "./index.d.ts",
   "scripts": {
     "build": "npm run build:bundle && npm run build:bundle:debug",
     "build:bundle": "node task/build RELEASE=bundle DEBUG=false PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false SUPPORT_PERSISTENT=true SUPPORT_RESOLVER=true SUPPORT_KEYSTORE=true SUPPORT_COMPRESSION=false",
