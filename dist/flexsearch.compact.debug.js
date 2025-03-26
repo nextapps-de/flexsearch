@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.140 (Bundle/Debug)
+ * FlexSearch.js v0.8.141 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1118,6 +1118,9 @@ function Ka(a, c, b, e, d, f) {
       for (let y = 0, v, E; y < z.length; y++) {
         v = z[y];
         E = l[y];
+        if (!v || !E) {
+          continue;
+        }
         let F;
         for (let A = 0, G; A < k.length; A++) {
           if (G = k[A], "strict" === h) {

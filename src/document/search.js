@@ -530,6 +530,11 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
             for(let k = 0, doc_enc_cur, doc_org_cur; k < doc_enc.length; k++){
                 doc_enc_cur = doc_enc[k];
                 doc_org_cur = doc_org[k];
+
+                if(!doc_enc_cur || !doc_org_cur){
+                    continue;
+                }
+
                 let found;
                 for(let l = 0, query_enc_cur; l < query_enc.length; l++){
                     query_enc_cur = query_enc[l];

@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.140 (Bundle/Module/Debug)
+ * FlexSearch.js v0.8.141 (Bundle/Module/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1444,6 +1444,9 @@ function Ta(a, c, b, e, d, f) {
       for (let F = 0, A, x; F < y.length; F++) {
         A = y[F];
         x = l[F];
+        if (!A || !x) {
+          continue;
+        }
         let D;
         for (let H = 0, C; H < k.length; H++) {
           if (C = k[H], "strict" === h) {

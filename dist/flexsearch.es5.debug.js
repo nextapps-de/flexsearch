@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.140 (ES5/Debug)
+ * FlexSearch.js v0.8.141 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2362,25 +2362,25 @@ function wb(a, b, c, d, e, g) {
       var q = "", t = ya(p[n].doc, m), w = f.encode(t);
       t = t.split(f.split);
       for (var r = 0, A, z; r < w.length; r++) {
-        A = w[r];
-        z = t[r];
-        for (var v = void 0, y = 0, D; y < h.length; y++) {
-          if (D = h[y], "strict" === k) {
-            if (A === D) {
-              q += (q ? " " : "") + g.replace("$1", z);
-              v = !0;
-              break;
-            }
-          } else {
-            var H = A.indexOf(D);
-            if (-1 < H) {
-              q += (q ? " " : "") + z.substring(0, H) + g.replace("$1", z.substring(H, D.length)) + z.substring(H + D.length);
-              v = !0;
-              break;
+        if (A = w[r], z = t[r], A && z) {
+          for (var v = void 0, y = 0, D; y < h.length; y++) {
+            if (D = h[y], "strict" === k) {
+              if (A === D) {
+                q += (q ? " " : "") + g.replace("$1", z);
+                v = !0;
+                break;
+              }
+            } else {
+              var H = A.indexOf(D);
+              if (-1 < H) {
+                q += (q ? " " : "") + z.substring(0, H) + g.replace("$1", z.substring(H, D.length)) + z.substring(H + D.length);
+                v = !0;
+                break;
+              }
             }
           }
+          v || (q += (q ? " " : "") + t[r]);
         }
-        v || (q += (q ? " " : "") + t[r]);
       }
       p[n].highlight = q;
     }

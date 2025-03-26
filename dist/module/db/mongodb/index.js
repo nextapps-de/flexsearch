@@ -552,7 +552,7 @@ MongoDB.prototype.commit = async function (flexsearch, _replace, _append) {
         promises.push(this.db.collection("reg").insertMany(data));
     }
 
-    await Promise.all(promises);
+    promises.length && (await Promise.all(promises));
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();

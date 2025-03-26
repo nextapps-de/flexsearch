@@ -675,7 +675,7 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
     //     })
     // }]).toPromise();
 
-    await Promise.all(promises);
+    promises.length && await Promise.all(promises);
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
