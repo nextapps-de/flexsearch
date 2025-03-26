@@ -10,8 +10,8 @@ npm install mongodb@6.13.0
 Create an index and assign a MongoDB storage adapter to it by using `index.mount(db)`:
 
 ```js
-import Index from "./index.js";
-import Database from "./db/mongodb/index.js";
+import { Index } from "flexsearch";
+import Database from "flexsearch/db/mongodb";
 // create an index
 const index = new Index();
 // create db instance with optional namespace
@@ -40,7 +40,7 @@ Pass a valid `mongodb` instance on creation:
 
 ```js
 import { MongoClient } from "mongodb";
-import Database from "./db/mongodb/index.js";
+import Database from "flexsearch/db/mongodb";
 // assume you've created a custom database instance...
 const database = new MongoClient("mongodb://localhost:27017/");
 // connect and await

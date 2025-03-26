@@ -3,7 +3,7 @@
   "preferGlobal": false,
   "name": "flexsearch-mongodb",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "db.js",
   "dependencies": {
     "mongodb": "^6.13.0"
   }

@@ -10,8 +10,8 @@ npm install pg-promise@11.10.2
 Create an index and assign a Postgres storage adapter to it by using `index.mount(db)`:
 
 ```js
-import Index from "./index.js";
-import Database from "./db/postgres/index.js";
+import { Index } from "flexsearch";
+import Database from "flexsearch/db/postgres";
 
 // your database configuration
 const config = {
@@ -51,7 +51,7 @@ Pass a valid `pg-promise` instance on creation:
 
 ```js
 import pg_promise from "pg-promise";
-import Database from "./db/postgres/index.js";
+import Database from "flexsearch/db/postgres";
 const pgp = pg_promise();
 // assume you've created a custom database instance...
 const database = pgp(`postgres://${user}:${pass}@${host}:${port}/${name}`);
@@ -70,7 +70,7 @@ Once the type was upgraded, you'll need to re-create the index to switch back.
 When you data content is including numeric strings (eg. for ID "15712") then defining the type will automatically cast into the right type:
 
 ```js
-import Database from "./db/postgres/index.js";
+import Database from "flexsearch/db/postgres";
 // force integer type
 const db = new Database("my-store", {
     type: "integer"

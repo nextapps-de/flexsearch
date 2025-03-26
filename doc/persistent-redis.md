@@ -10,8 +10,8 @@ npm install redis@4.7.0
 Create an index and assign a Redis storage adapter to it by using `index.mount(db)`:
 
 ```js
-import Index from "./index.js";
-import Database from "./db/redis/index.js";
+import { Index } from "flexsearch";
+import Database from "flexsearch/db/redis";
 
 // Redis Connection
 const config = {
@@ -49,7 +49,7 @@ Pass a valid `redis` instance on creation:
 
 ```js
 import { createClient } from "redis";
-import Database from "./db/redis/index.js";
+import Database from "flexsearch/db/redis";
 // assume you've created a custom redis instance...
 const redis = await createClient("redis://localhost:6379").connect();
 // pass instance as option
@@ -64,7 +64,7 @@ Since Redis stores everything as Strings, you'll need to define the type of ID. 
 Also when your data content includes numeric strings (eg. "15712"), defining a type will automatically cast IDs into your choice:
 
 ```js
-import Database from "./db/redis/index.js";
+import Database from "flexsearch/db/redis";
 // force integer type
 const db = new Database("my-store", {
     type: "integer"

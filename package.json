@@ -41,19 +41,16 @@
       "require": "./dist/lang/*.min.js"
     },
     "./db/*": {
-      "import": "./dist/module/db/*/index.js",
-      "require": "./dist/db/*/index.cjs"
+      "import": "./dist/module/db/*/db.js",
+      "require": "./dist/db/*/db.cjs"
     },
     "./debug": {
       "import": "./dist/flexsearch.bundle.module.debug.js",
       "require": "./dist/flexsearch.bundle.debug.js"
-    },
-    "./esm": "./dist/flexsearch.bundle.module.min.js",
-    "./esm/lang/*": "./dist/module/lang/*.js"
+    }
   },
   "browser": {
     "flexsearch": "./dist/flexsearch.bundle.module.min.js",
-    "flexsearch/esm": "./dist/flexsearch.bundle.module.min.js",
     "flexsearch/debug": "./dist/flexsearch.bundle.module.debug.js",
     "dist/flexsearch.bundle.min.js": "./dist/flexsearch.bundle.min.js",
     "dist/flexsearch.bundle.module.min.js": "./dist/flexsearch.bundle.module.min.js",
@@ -76,7 +73,7 @@
     "build:es5": "node task/build RELEASE=es5 DEBUG=false PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=true SUPPORT_PERSISTENT=true SUPPORT_RESOLVER=true SUPPORT_KEYSTORE=true SUPPORT_COMPRESSION=false LANGUAGE_OUT=ECMASCRIPT5_STRICT",
     "build:es5:debug": "node task/build RELEASE=es5 DEBUG=true PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=true SUPPORT_PERSISTENT=true SUPPORT_RESOLVER=true SUPPORT_KEYSTORE=true SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT LANGUAGE_OUT=ECMASCRIPT5_STRICT",
     "build:lang": "node task/build RELEASE=lang",
-    "build:db": "npx rollup tmp/db/indexeddb/index.js --file dist/db/indexeddb/index.js --format es && npx rollup tmp/db/postgres/index.js --file dist/db/postgres/index.cjs --format cjs && npx rollup tmp/db/sqlite/index.js --file dist/db/sqlite/index.cjs --format cjs && npx rollup tmp/db/mongodb/index.js --file dist/db/mongodb/index.cjs --format cjs && npx rollup tmp/db/redis/index.js --file dist/db/redis/index.cjs --format cjs && npx rollup tmp/db/clickhouse/index.js --file dist/db/clickhouse/index.cjs --format cjs",
+    "build:db": "npx rollup tmp/db/indexeddb/db.js --file dist/db/indexeddb/db.cjs --format cjs && npx rollup tmp/db/postgres/db.js --file dist/db/postgres/db.cjs --format cjs && npx rollup tmp/db/sqlite/db.js --file dist/db/sqlite/db.cjs --format cjs && npx rollup tmp/db/mongodb/db.js --file dist/db/mongodb/db.cjs --format cjs && npx rollup tmp/db/redis/db.js --file dist/db/redis/db.cjs --format cjs && npx rollup tmp/db/clickhouse/db.js --file dist/db/clickhouse/db.cjs --format cjs",
     "build:module": "node task/babel && exit 0",
     "build:module:debug": "node task/babel DEBUG=true && exit 0",
     "build:module:min": "node task/babel RELEASE=min && exit 0",

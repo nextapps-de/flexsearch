@@ -1,4 +1,4 @@
-## Persistent Indexes
+# Persistent Indexes
 
 FlexSearch provides a new Storage Adapter where indexes are delegated through persistent storages.
 
@@ -49,15 +49,16 @@ Examples Browser:
     - [basic-persistent](../example/browser-module/basic-persistent)
     - [document-persistent](../example/browser-module/document-persistent)
 
+## Browser (IndexedDB)
+
 ```js
-import FlexSearchIndex from "./index.d.ts";
-import Database from "./db/indexeddb/index.js";
+import { Index, IndexedDB } from "../dist/flexsearch.bundle.module.min.js";
 // create an index
-const index = new FlexSearchIndex();
+const index = new Index();
 // create db instance with optional prefix
-const db = new Database("my-store");
+const db = new IndexedDB("my-store");
 // mount and await before transfering data
-await flexsearch.mount(db);
+await index.mount(db);
 
 // update the index as usual
 index.add(1, "content...");
@@ -108,7 +109,30 @@ await index.commit();
 
 You can call the commit method manually also when `commit: true` option was set.
 
-### Benchmark
+## Node.js
+
+```js
+import { Index } from "flexsearch";
+import Database from "flexsearch/db/postgres";
+// create an index
+const index = new Index();
+// create db instance with optional prefix
+const db = new Database("my-store");
+// mount and await before transfering data
+await index.mount(db);
+
+// update the index as usual
+index.add(1, "content...");
+index.update(2, "content...");
+index.remove(3);
+
+// changes are automatically committed by default
+// when you need to wait for the task completion, then you
+// can use the commit method explicitely:
+await index.commit();
+```
+
+## Benchmark
 
 The benchmark was measured in "terms per second".
 

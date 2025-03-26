@@ -5,12 +5,11 @@ IndexedDB is a persistent storage supported by all major browsers.
 Create an index and assign a IndexedDB storage adapter to it by using `index.mount(db)`:
 
 ```js
-import Index from "./index.js";
-import Database from "./db/indexeddb/index.js";
+import { Index, IndexedDB } from "../dist/flexsearch.bundle.module.min.js";
 // create an index
 const index = new Index();
 // create db instance with optional namespace
-const db = new Database("my-store");
+const db = new IndexedDB("my-store");
 // mount and await before transfering data
 await index.mount(db);
 

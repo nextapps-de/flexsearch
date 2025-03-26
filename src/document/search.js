@@ -569,7 +569,7 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
                 }
             }
 
-            res[j].highlight = str;
+            res[j]["highlight"] = str;
         }
     }
 

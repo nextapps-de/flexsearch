@@ -3,7 +3,7 @@
   "preferGlobal": false,
   "name": "flexsearch-clickhouse",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "db.js",
   "dependencies": {
     "clickhouse": "^2.6.0"
   }

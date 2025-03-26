@@ -6,7 +6,7 @@ import Index from "./index.js";
 import WorkerIndex from "./worker.js";
 import Resolver from "./resolver.js";
 import Encoder from "./encoder.js";
-import IdxDB from "./db/indexeddb/index.js";
+import IdxDB from "./db/indexeddb/db.js";
 import Charset from "./charset.js";
 import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 

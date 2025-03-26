@@ -7,7 +7,7 @@ import { join } from "path";
 // Test Path
 //import Index from "../../src/index.js";
 //import { Index } from "../../dist/flexsearch.bundle.module.min.js";
-import { Index } from "flexsearch/esm";
+import { Index } from "flexsearch";
 
 /** @type Index */
 let index;

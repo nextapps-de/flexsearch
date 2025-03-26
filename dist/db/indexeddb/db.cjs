@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * @param {*} value
  * @param {*} default_value
@@ -43,7 +45,7 @@ function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
 }
 
-const DB = create_object();
+const Db = create_object();
 
 /**
  * @param {string|PersistentOptions=} name
@@ -90,8 +92,8 @@ IdxDB.prototype.open = function(){
 
    // return this.db = new Promise(function(resolve, reject){
 
-        DB[self.id] || (DB[self.id] = []);
-        DB[self.id].push(self.field);
+        Db[self.id] || (Db[self.id] = []);
+        Db[self.id].push(self.field);
 
         const req = IndexedDB.open(self.id, VERSION);
 
@@ -107,8 +109,8 @@ IdxDB.prototype.open = function(){
             // IndexedDB is such a poor contribution :(
             for(let i = 0, ref; i < fields.length; i++){
                 ref = fields[i];
-                for(let j = 0, field; j < DB[self.id].length; j++){
-                    field = DB[self.id][j];
+                for(let j = 0, field; j < Db[self.id].length; j++){
+                    field = Db[self.id][j];
                     db.objectStoreNames.contains(ref + (ref !== "reg" ? (field ? ":" + field : "") : "")) ||
                     db.createObjectStore(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));//{ autoIncrement: true /*keyPath: "id"*/ }
                     //.createIndex("idx", "ids", { multiEntry: true, unique: false });
@@ -193,8 +195,8 @@ IdxDB.prototype.clear = function(){
 
     for(let i = 0, ref; i < fields.length; i++){
         ref = fields[i];
-        for(let j = 0, field; j < DB[this.id].length; j++){
-            field = DB[this.id][j];
+        for(let j = 0, field; j < Db[this.id].length; j++){
+            field = Db[this.id][j];
             stores.push(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));
         }
     }
@@ -719,4 +721,4 @@ function promisfy(req, callback){
     });
 }
 
-export { IdxDB as default };
+module.exports = IdxDB;

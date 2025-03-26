@@ -178,7 +178,7 @@ export default {
 Create your index by assigning the configuration file from above:
 
 ```js
-import { Worker as WorkerIndex } from "flexsearch/esm";
+import { Worker as WorkerIndex } from "flexsearch";
 const index = await new WorkerIndex(config);
 // add data to the index
 // ...
@@ -261,7 +261,7 @@ export default {
 Create your index by assigning the configuration file from above:
 
 ```js
-import { Document } from "flexsearch/esm";
+import { Document } from "flexsearch";
 const document = await new Document(config);
 // add data to the index
 // ...

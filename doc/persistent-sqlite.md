@@ -10,8 +10,8 @@ npm install sqlite3@5.1.7
 Create an index and assign a SQLite storage adapter to it by using `index.mount(db)`:
 
 ```js
-import Index from "./index.js";
-import Database from "./db/sqlite/index.js";
+import { Index } from "flexsearch";
+import Database from "flexsearch/db/sqlite";
 
 // create an index
 const index = new Index();
@@ -55,7 +55,7 @@ Pass a valid `sqlite3` instance on creation:
 
 ```js
 import sqlite3 from "sqlite3";
-import Database from "./db/sqlite/index.js";
+import Database from "flexsearch/db/sqlite";
 
 // assume you've created a custom database instance...
 const database = new sqlite3.Database("./path-to-db/main.db");

@@ -10,8 +10,8 @@ npm install clickhouse@2.6.0
 Create an index and assign a Clickhouse storage adapter to it by using `index.mount(db)`:
 
 ```js
-import Index from "./index.js";
-import Database from "./db/clickhouse/index.js";
+import { Index } from "flexsearch";
+import Database from "flexsearch/db/clickhouse";
 
 // your database configuration
 const config = {
@@ -50,7 +50,7 @@ Pass a valid `clickhouse` instance on creation:
 
 ```js
 import { ClickHouse } from "clickhouse";
-import Database from "./db/clickhouse/index.js";
+import Database from "flexsearch/db/clickhouse";
 // assume you've created a custom database instance...
 const database = new ClickHouse({/* config */});
 // pass database instance as option
@@ -68,7 +68,7 @@ The Clickhouse driver does not properly support upgrading a merge key by ALTER T
 You will save required disk space and also gain performance when define a numeric ID type explicitly.
 
 ```js
-import Database from "./db/clickhouse/index.js";
+import Database from "flexsearch/db/clickhouse";
 // force integer type
 const db = new Database("my-store", {
     type: "integer"
