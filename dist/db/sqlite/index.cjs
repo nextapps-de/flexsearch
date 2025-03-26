@@ -592,10 +592,10 @@ SqliteDB.prototype.info = function(){
     // todo
 };
 
-SqliteDB.prototype.transaction = function(task, callback){
+SqliteDB.prototype.transaction = async function(task, callback){
 
     if(TRX[this.id]){
-        return task.call(this);
+        return await task.call(this);
     }
 
     const db = this.db;

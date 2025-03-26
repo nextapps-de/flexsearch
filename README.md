@@ -8,7 +8,7 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
 <img src="https://img.shields.io/badge/build-passing-brightgreen">
-<img src="https://img.shields.io/badge/typed-73%25-yellow">
+<img src="https://img.shields.io/badge/typed-74%25-yellow">
 <img src="https://img.shields.io/badge/coverage-91%25-brightgreen">
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
@@ -553,7 +553,7 @@ Or import FlexSearch members separately by:
 
 ```html
 <script type="module">
-    import { Index, Document, Encoder, Charset, Resolver, Worker, IdxDB } 
+    import { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB } 
         from "./dist/flexsearch.bundle.module.min.js";
     const index = new Index(/* ... */);
 </script>
@@ -569,7 +569,7 @@ Use non-bundled modules:
     import Charset from "./dist/module/charset.js";
     import Resolver from "./dist/module/resolver.js";
     import Worker from "./dist/module/worker.js";
-    import IdxDB from "./dist/module/db/indexeddb/index.js";
+    import IndexedDB from "./dist/module/db/indexeddb/index.js";
     const index = new Index(/* ... */);
 </script>
 ```
@@ -611,11 +611,15 @@ const index = new FlexSearch.Index(/* ... */);
 Or require FlexSearch members separately by:
 
 ```js
-const { Index, Document, Encoder, Charset, Resolver, Worker, IdxDB } = require("flexsearch");
+const { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB } = require("flexsearch");
 const index = new Index(/* ... */);
 ```
 
-When you are using ESM in Node.js then just use the Modules explained one section above.
+When using ESM instead of CommonJS:
+```js
+import { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB } from "flexsearch";
+const index = new FlexSearch.Index(/* ... */);
+```
 
 Language packs are accessible via:
 

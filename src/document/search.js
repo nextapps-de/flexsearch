@@ -655,7 +655,7 @@ function get_tag(tag, key, limit, offset, enrich){
 
 export function apply_enrich(ids){
 
-    if(!this || !this.store) return ids;
+    if(!SUPPORT_STORE || !this || !this.store) return ids;
 
     /** @type {EnrichedSearchResults} */
     const result = new Array(ids.length);

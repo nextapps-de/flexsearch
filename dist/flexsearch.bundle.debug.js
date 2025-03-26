@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.138 (Bundle/Debug)
+ * FlexSearch.js v0.8.140 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1603,7 +1603,7 @@ t.mount = function(a) {
 t.commit = async function(a, c) {
   const b = [];
   for (const e of this.index.values()) {
-    b.push(e.commit(e, a, c));
+    b.push(e.commit(a, c));
   }
   await Promise.all(b);
   this.reg.clear();
@@ -2251,37 +2251,29 @@ t.mount = function(a) {
   return this.open();
 };
 t.open = function() {
+  if (this.db) {
+    return this.db;
+  }
   let a = this;
   navigator.storage && navigator.storage.persist();
-  return this.db || (this.db = new Promise(function(c, b) {
-    Y[a.id] || (Y[a.id] = []);
-    Y[a.id].push(a.field);
-    const e = pb.open(a.id, 1);
-    e.onupgradeneeded = function() {
-      const d = a.db = this.result;
-      for (let f = 0, g; f < qb.length; f++) {
-        g = qb[f];
-        for (let k = 0, h; k < Y[a.id].length; k++) {
-          h = Y[a.id][k], d.objectStoreNames.contains(g + ("reg" !== g ? h ? ":" + h : "" : "")) || d.createObjectStore(g + ("reg" !== g ? h ? ":" + h : "" : ""));
-        }
+  Y[a.id] || (Y[a.id] = []);
+  Y[a.id].push(a.field);
+  const c = pb.open(a.id, 1);
+  c.onupgradeneeded = function() {
+    const b = a.db = this.result;
+    for (let e = 0, d; e < qb.length; e++) {
+      d = qb[e];
+      for (let f = 0, g; f < Y[a.id].length; f++) {
+        g = Y[a.id][f], b.objectStoreNames.contains(d + ("reg" !== d ? g ? ":" + g : "" : "")) || b.createObjectStore(d + ("reg" !== d ? g ? ":" + g : "" : ""));
       }
+    }
+  };
+  return a.db = Z(c, function(b) {
+    a.db = b;
+    a.db.onversionchange = function() {
+      a.close();
     };
-    e.onblocked = function(d) {
-      console.error("blocked", d);
-      b();
-    };
-    e.onerror = function(d) {
-      console.error(this.error, d);
-      b();
-    };
-    e.onsuccess = function() {
-      a.db = this.result;
-      a.db.onversionchange = function() {
-        a.close();
-      };
-      c(a);
-    };
-  }));
+  });
 };
 t.close = function() {
   this.db && this.db.close();
@@ -2375,26 +2367,18 @@ t.search = null;
 t.info = function() {
 };
 t.transaction = function(a, c, b) {
-  const e = a + ("reg" !== a ? this.field ? ":" + this.field : "" : "");
-  let d = this.h[e + ":" + c];
-  if (d) {
-    return b.call(this, d);
+  a += "reg" !== a ? this.field ? ":" + this.field : "" : "";
+  let e = this.h[a + ":" + c];
+  if (e) {
+    return b.call(this, e);
   }
-  let f = this.db.transaction(e, c);
-  this.h[e + ":" + c] = d = f.objectStore(e);
-  return new Promise((g, k) => {
-    f.onerror = l => {
-      f.abort();
-      f = d = null;
-      k(l);
-    };
-    f.oncomplete = l => {
-      f = d = null;
-      g(l || !0);
-    };
-    const h = b.call(this, d);
-    this.h[e + ":" + c] = null;
-    return h;
+  let d = this.db.transaction(a, c);
+  this.h[a + ":" + c] = e = d.objectStore(a);
+  const f = b.call(this, e);
+  this.h[a + ":" + c] = null;
+  return Z(d).finally(function() {
+    d = e = null;
+    return f;
   });
 };
 t.commit = async function(a, c, b) {
@@ -2491,41 +2475,41 @@ t.commit = async function(a, c, b) {
 };
 function tb(a, c, b) {
   const e = a.value;
-  let d, f, g = 0;
-  for (let k = 0, h; k < e.length; k++) {
-    if (h = b ? e : e[k]) {
-      for (let l = 0, n, m; l < c.length; l++) {
-        if (m = c[l], n = h.indexOf(f ? parseInt(m, 10) : m), 0 > n && !f && "string" === typeof m && !isNaN(m) && (n = h.indexOf(parseInt(m, 10))) && (f = 1), 0 <= n) {
-          if (d = 1, 1 < h.length) {
-            h.splice(n, 1);
+  let d, f = 0;
+  for (let g = 0, k; g < e.length; g++) {
+    if (k = b ? e : e[g]) {
+      for (let h = 0, l, n; h < c.length; h++) {
+        if (n = c[h], l = k.indexOf(n), 0 <= l) {
+          if (d = 1, 1 < k.length) {
+            k.splice(l, 1);
           } else {
-            e[k] = [];
+            e[g] = [];
             break;
           }
         }
       }
-      g += h.length;
+      f += k.length;
     }
     if (b) {
       break;
     }
   }
-  g ? d && a.update(e) : a.delete();
+  f ? d && a.update(e) : a.delete();
   a.continue();
 }
 t.remove = function(a) {
   "object" !== typeof a && (a = [a]);
-  return Promise.all([this.transaction("map" + (this.field ? ":" + this.field : ""), "readwrite", function(c) {
+  return Promise.all([this.transaction("map", "readwrite", function(c) {
     c.openCursor().onsuccess = function() {
       const b = this.result;
       b && tb(b, a);
     };
-  }), this.transaction("ctx" + (this.field ? ":" + this.field : ""), "readwrite", function(c) {
+  }), this.transaction("ctx", "readwrite", function(c) {
     c.openCursor().onsuccess = function() {
       const b = this.result;
       b && tb(b, a);
     };
-  }), this.transaction("tag" + (this.field ? ":" + this.field : ""), "readwrite", function(c) {
+  }), this.transaction("tag", "readwrite", function(c) {
     c.openCursor().onsuccess = function() {
       const b = this.result;
       b && tb(b, a, !0);
@@ -2536,15 +2520,14 @@ t.remove = function(a) {
     }
   })]);
 };
-function Z(a) {
-  return new Promise((c, b) => {
-    a.onsuccess = function() {
-      c(this.result);
+function Z(a, c) {
+  return new Promise((b, e) => {
+    a.onsuccess = a.oncomplete = function() {
+      c && c(this.result);
+      c = null;
+      b(this.result);
     };
-    a.oncomplete = function() {
-      c();
-    };
-    a.onerror = b;
+    a.onerror = a.onblocked = e;
     a = null;
   });
 }

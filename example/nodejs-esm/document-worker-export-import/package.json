@@ -2,6 +2,6 @@
   "name": "nodejs-esm-document-worker-export-import",
   "type": "module",
   "dependencies": {
-    "flexsearch": "github:nextapps-de/flexsearch"
+    "flexsearch": "^0.8.138"
   }
 }

@@ -362,13 +362,13 @@ ClickhouseDB.prototype.enrich = async function(ids){
 
 ClickhouseDB.prototype.has = async function(id){
     const result = await this.db.query(`
-        SELECT 1 as exist
+        SELECT 1
         FROM ${this.id}.reg
         WHERE id = {id:${this.type /*=== "number" ? "Int32" : "String"*/}}
         LIMIT 1`,
         { params: { id }}
     ).toPromise();
-    return !!(result && result[0] && result[0].exist);
+    return !!(result && result[0] && result[0]["1"]);
 };
 
 ClickhouseDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false, tags){
@@ -554,6 +554,8 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
         return;
     }
 
+    const promises = [];
+
     if(flexsearch.map.size){
         let data = [];
         for(const item of flexsearch.map){
@@ -575,9 +577,9 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
             }
         }
         if(data.length){
-            await this.db.insert(
+            promises.push(this.db.insert(
                 `INSERT INTO ${ this.id }.map${ this.field } (key, res, id)`, data
-            ).toPromise();
+            ).toPromise());
         }
     }
 
@@ -606,9 +608,9 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
             }
         }
         if(data.length){
-            await this.db.insert(
+            promises.push(this.db.insert(
                 `INSERT INTO ${ this.id }.ctx${ this.field } (ctx, key, res, id)`, data
-            ).toPromise();
+            ).toPromise());
         }
     }
 
@@ -623,9 +625,9 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
             }
         }
         if(data.length){
-            await this.db.insert(
+            promises.push(this.db.insert(
                 `INSERT INTO ${this.id}.tag${ this.field } (tag, id)`, data
-            ).toPromise();
+            ).toPromise());
         }
     }
 
@@ -637,9 +639,9 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
             data.push({ id, doc: doc && JSON.stringify(doc) });
         }
         if(data.length){
-            await this.db.insert(
+            promises.push(this.db.insert(
                 `INSERT INTO ${this.id}.reg (id, doc)`, data
-            ).toPromise();
+            ).toPromise());
         }
     }
     else if(!flexsearch.bypass){
@@ -648,9 +650,9 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
             data[i] = { id: data[i] };
         }
         if(data.length){
-            await this.db.insert(
+            promises.push(this.db.insert(
                 `INSERT INTO ${this.id}.reg (id)`, data
-            ).toPromise();
+            ).toPromise());
         }
     }
 
@@ -672,6 +674,8 @@ ClickhouseDB.prototype.commit = async function(flexsearch, _replace, _append){
     //         }
     //     })
     // }]).toPromise();
+
+    await Promise.all(promises);
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();

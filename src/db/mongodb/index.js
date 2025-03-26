@@ -569,6 +569,8 @@ MongoDB.prototype.commit = async function(flexsearch, _replace, _append){
         return;
     }
 
+    const promises = [];
+
     if(flexsearch.map.size){
         let data = [];
         for(const item of flexsearch.map){
@@ -588,8 +590,9 @@ MongoDB.prototype.commit = async function(flexsearch, _replace, _append){
             }
         }
         if(data.length){
-            await this.db.collection("map" + this.field).insertMany(data);
-            flexsearch.map.clear();
+            promises.push(
+                this.db.collection("map" + this.field).insertMany(data)
+            );
         }
     }
 
@@ -616,26 +619,26 @@ MongoDB.prototype.commit = async function(flexsearch, _replace, _append){
             }
         }
         if(data.length){
-            await this.db.collection("ctx" + this.field).insertMany(data);
-            flexsearch.ctx.clear();
+            promises.push(
+                this.db.collection("ctx" + this.field).insertMany(data)
+            );
         }
     }
 
     if(flexsearch.tag){
         let data = [];
-        if(flexsearch.tag){
-            for(const item of flexsearch.tag){
-                const tag = item[0];
-                const ids = item[1];
-                if(!ids.length) continue;
-                for(let j = 0; j < ids.length; j++){
-                    data.push({ tag, id: ids[j] });
-                }
+        for(const item of flexsearch.tag){
+            const tag = item[0];
+            const ids = item[1];
+            if(!ids.length) continue;
+            for(let j = 0; j < ids.length; j++){
+                data.push({ tag, id: ids[j] });
             }
         }
         if(data.length){
-            await this.db.collection("tag" + this.field).insertMany(data);
-            flexsearch.tag.clear();
+            promises.push(
+                this.db.collection("tag" + this.field).insertMany(data)
+            );
         }
     }
 
@@ -653,12 +656,21 @@ MongoDB.prototype.commit = async function(flexsearch, _replace, _append){
         }
     }
     if(data.length){
-        await this.db.collection("reg").insertMany(data);
-        flexsearch.store &&
-        flexsearch.store.clear();
-        flexsearch.document ||
-        flexsearch.reg.clear();
+        promises.push(
+            this.db.collection("reg").insertMany(data)
+        );
     }
+
+    await Promise.all(promises);
+
+    flexsearch.map.clear();
+    flexsearch.ctx.clear();
+    flexsearch.tag &&
+    flexsearch.tag.clear();
+    flexsearch.store &&
+    flexsearch.store.clear();
+    flexsearch.document ||
+    flexsearch.reg.clear();
 
     // TODO
     // await this.db.collection("cfg" + this.field).insertOne({

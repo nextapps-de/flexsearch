@@ -82,17 +82,20 @@ IdxDB.prototype.mount = function(flexsearch){
 
 IdxDB.prototype.open = function(){
 
+    if(this.db) return this.db;
     let self = this;
 
     navigator.storage &&
     navigator.storage.persist();
 
-    return this.db || (this.db = new Promise(function(resolve, reject){
+   // return this.db = new Promise(function(resolve, reject){
 
         DB[self.id] || (DB[self.id] = []);
         DB[self.id].push(self.field);
 
         const req = IndexedDB.open(self.id, VERSION);
+
+        /** @this {IDBOpenDBRequest} */
         req.onupgradeneeded = function(event){
 
             const db = self.db = this.result;
@@ -122,28 +125,36 @@ IdxDB.prototype.open = function(){
             // }
         };
 
-        req.onblocked = function(event) {
-            // this event shouldn't trigger if we handle onversionchange correctly
-            // it means that there's another open connection to the same database
-            // and it wasn't closed after db.onversionchange triggered for it
-            console.error("blocked", event);
-            reject();
-        };
-
-        req.onerror = function(event){
-            console.error(this.error, event);
-            reject();
-        };
-
-        req.onsuccess = function(event){
-            self.db = this.result; //event.target.result;
+        return self.db = promisfy(req, function(result){
+            self.db = result; //event.target.result;
             self.db.onversionchange = function(){
                 //database is outdated
                 self.close();
             };
-            resolve(self);
-        };
-    }));
+        });
+
+        // req.onblocked = function(event) {
+        //     // this event shouldn't trigger if we handle onversionchange correctly
+        //     // it means that there's another open connection to the same database
+        //     // and it wasn't closed after db.onversionchange triggered for it
+        //     console.error("blocked", event);
+        //     reject();
+        // };
+        //
+        // req.onerror = function(event){
+        //     console.error(this.error, event);
+        //     reject();
+        // };
+        //
+        // req.onsuccess = function(event){
+        //     self.db = this.result; //event.target.result;
+        //     self.db.onversionchange = function(){
+        //         //database is outdated
+        //         self.close();
+        //     };
+        //     resolve(self);
+        // };
+   // });
 };
 
 IdxDB.prototype.close = function(){
@@ -338,31 +349,37 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
      */
     let store = this.trx[key + ":" + modifier];
     if(store) return task.call(this, store);
-
     let transaction = this.db.transaction(key, modifier);
     /**
      * @type {IDBObjectStore}
      */
     this.trx[key + ":" + modifier] = store = transaction.objectStore(key);
+    const promise = task.call(this, store);
+    this.trx[key + ":" + modifier] = null;
 
-    return new Promise((resolve, reject) => {
-        transaction.onerror = (err) => {
-            transaction.abort();
-            transaction = store = null;
-            reject(err);
-            //db.close;
-        };
-        transaction.oncomplete = (res) => {
-            transaction = store = null;
-            resolve(res || true);
-            //db.close;
-        };
-        const promise = task.call(this, store);
-        // transactions can just be used within the same event loop
-        // the indexeddb is such a stupid tool :(
-        this.trx[key + ":" + modifier] = null;
+    return promisfy(transaction).finally(function(){
+        transaction = store = null;
         return promise;
     });
+
+    // return new Promise((resolve, reject) => {
+    //     transaction.onerror = (err) => {
+    //         transaction.abort();
+    //         transaction = store = null;
+    //         reject(err);
+    //         //db.close;
+    //     };
+    //     transaction.oncomplete = (res) => {
+    //         transaction = store = null;
+    //         resolve(res || true);
+    //         //db.close;
+    //     };
+    //     const promise = task.call(this, store);
+    //     // transactions can just be used within the same event loop
+    //     // the indexeddb is such a stupid tool :(
+    //     this.trx[key + ":" + modifier] = null;
+    //     return promise;
+    // });
 };
 
 IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
@@ -587,7 +604,6 @@ function handle(cursor, ids, _tag){
 
     const arr = cursor.value;
     let changed;
-    let parse;
     let count = 0;
 
     for(let x = 0, result; x < arr.length; x++){
@@ -595,11 +611,7 @@ function handle(cursor, ids, _tag){
         if((result = _tag ? arr : arr[x])){
             for(let i = 0, pos, id; i < ids.length; i++){
                 id = ids[i];
-                pos = result.indexOf(parse ? parseInt(id, 10) : id);
-                if(pos < 0 && !parse && typeof id === "string" && !isNaN(id)){
-                    pos = result.indexOf(parseInt(id, 10));
-                    pos && (parse = 1);
-                }
+                pos = result.indexOf(id);
                 if(pos >= 0){
                     changed = 1;
                     if(result.length > 1){
@@ -618,12 +630,10 @@ function handle(cursor, ids, _tag){
     }
 
     if(!count){
-
         cursor.delete();
         //store.delete(cursor.key);
     }
     else if(changed){
-
         //await new Promise(resolve => {
         cursor.update(arr);//.onsuccess = resolve;
         //});
@@ -638,31 +648,33 @@ function handle(cursor, ids, _tag){
  */
 IdxDB.prototype.remove = function(ids){
 
+    const self = this;
+
     if(typeof ids !== "object"){
         ids = [ids];
     }
 
     return /** @type {!Promise<undefined>} */(Promise.all([
-        this.transaction("map" + (this.field ? ":" + this.field : ""), "readwrite", function(store){
+        self.transaction("map", "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids);
             };
         }),
-        this.transaction("ctx" + (this.field ? ":" + this.field : ""), "readwrite", function(store){
+        self.transaction("ctx", "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids);
             };
         }),
-        this.transaction("tag" + (this.field ? ":" + this.field : ""), "readwrite", function(store){
+        self.transaction("tag", "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids, /* tag? */ true);
             };
         }),
         // let filtered = [];
-        this.transaction("reg", "readwrite", function(store){
+        self.transaction("reg", "readwrite", function(store){
             for(let i = 0; i < ids.length; i++){
                 store.delete(ids[i]);
             }
@@ -688,21 +700,21 @@ IdxDB.prototype.remove = function(ids){
 };
 
 /**
- * @param {IDBRequest} req
+ * @param {IDBRequest|IDBOpenDBRequest} req
  * @param {Function=} callback
  * @return {!Promise<undefined>}
  */
 
 function promisfy(req, callback){
     return new Promise((resolve, reject) => {
-        /** @this {IDBRequest} */
-        req.onsuccess = function(){
+        // oncomplete is used for transaction
+        /** @this {IDBRequest|IDBOpenDBRequest} */
+        req.onsuccess = req.oncomplete = function(){
+            callback && callback(this.result);
+            callback = null;
             resolve(this.result);
         };
-        req.oncomplete = function(){
-            resolve();
-        };
-        req.onerror = reject;
+        req.onerror = req.onblocked = reject;
         req = null;
     });
 }

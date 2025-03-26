@@ -61,7 +61,8 @@ export default function PostgresDB(name, config = {}) {
     this.id = (config.schema ? sanitize(config.schema) : defaults.schema) + (name ? "_" + sanitize(name) : "");
     this.field = config.field ? "_" + sanitize(config.field) : "";
     this.type = config.type ? types[config.type.toLowerCase()] : "text";
-    this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
+    this.support_tag_search =
+    /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
     /*await rows.hasNext()*/;
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
     this.db = DB || (DB = config.db || null);
@@ -607,7 +608,7 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
             // while(data.length){
             //     let next;
             //     if(data.length > MAXIMUM_QUERY_VARS){
-            //         next = data.slice(MAXIMUM_QUERY_VARS);
+
             //         data = data.slice(0, MAXIMUM_QUERY_VARS);
             //     }
             //     let insert = pgp.helpers.insert(data, stmt);

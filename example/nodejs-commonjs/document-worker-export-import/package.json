@@ -1,6 +1,6 @@
 {
   "name": "nodejs-commonjs-document-worker-export-import",
   "dependencies": {
-    "flexsearch": "github:nextapps-de/flexsearch"
+    "flexsearch": "^0.8.138"
   }
 }
