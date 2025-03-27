@@ -81,6 +81,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                 break;
                             }
                         // fallthrough to next case when term length < 3
+                        case "bidirectional":
                         case "reverse":
                             // skip last round (this token exist already in "forward")
                             if(term_length > 1){

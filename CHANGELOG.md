@@ -1,5 +1,12 @@
 # Changelog
 
+### Current Version
+
+- Use multi-language charset normalization as the default `Encoder`
+- Simplified charset support for CJK, Arabic, Cyrillic, Hindi, ... no extra charset definition required, the default encoder can handle them all
+- Charset renamed `LatinExact` => `Exact`, `LatinDefault` => `Default` and `LatinSimple` => `Normalize`, these are universal charset presets for any languages
+- Charset `CjkDefault`, `ArabicDefault` and `CyrillicDefault` was removed, they are fully covered by the default universal charset presets
+
 ### v0.8.1
 
 - Resolver Support for Documents

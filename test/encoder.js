@@ -27,29 +27,29 @@ describe("Encoder", function(){
     });
 });
 
-describe("Encoder: Latin Charset", function(){
+describe("Encoder: Charset", function(){
 
-    it("Should have been encoded properly: LatinDefault", function(){
+    it("Should have been encoded properly: Default", function(){
 
-        const index = new Index({ encoder: Charset.LatinDefault });
+        const index = new Index({ encoder: Charset.Default });
         expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
-            ["björn", "phillipp", "mayer"]
+            ["bjorn", "phillipp", "mayer"]
         );
     });
 
     if(!build_light){
 
-        it("Should have been encoded properly: LatinExact", function(){
+        it("Should have been encoded properly: Exact", function(){
 
-            const index = new Index({ encoder: Charset.LatinExact });
+            const index = new Index({ encoder: Charset.Exact });
             expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
                 ["Björn-Phillipp", "Mayer"]
             );
         });
 
-        it("Should have been encoded properly: LatinSimple", function(){
+        it("Should have been encoded properly: Normalize", function(){
 
-            const index = new Index({ encoder: Charset.LatinSimple });
+            const index = new Index({ encoder: Charset.Normalize });
             expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
                 index.encoder.encode("bjorn/phillipp mayer")
             );
@@ -99,14 +99,11 @@ describe("Encoder: Latin Charset", function(){
     });
 });
 
-describe("Encoder: CJK Word Break", function(){
+describe("Encoder: CJK Charset", function(){
 
     it("Should have been tokenized properly", function(){
 
-        const index = Index({
-            encoder: Charset.CjkDefault,
-            tokenize: "forward"
-        });
+        const index = Index({ tokenize: "forward" });
 
         index.add(0, "서울시가 잠이 든 시간에 아무 말, 미뤄, 미뤄");
         expect(index.search("든")).to.include(0);
@@ -117,14 +114,11 @@ describe("Encoder: CJK Word Break", function(){
     });
 });
 
-describe("Encoder: Cyrillic Word Break", function(){
+describe("Encoder: Cyrillic Charset", function(){
 
     it("Should have been tokenized properly", function(){
 
-        const index = Index({
-            encoder: Charset.CyrillicDefault,
-            tokenize: "forward"
-        });
+        const index = Index({ tokenize: "forward" });
 
         index.add(0, "Фообар");
         expect(index.search("Фообар")).to.include(0);
@@ -132,25 +126,30 @@ describe("Encoder: Cyrillic Word Break", function(){
     });
 });
 
-describe("Encoder: Arabic Word Break", function(){
+describe("Encoder: Arabic Charset", function(){
 
     it("Should have been tokenized properly", function(){
 
-        let index = Index({
-            encoder: Charset.ArabicDefault,
-            tokenize: "forward"
-        });
+        let index = Index({ tokenize: "forward" });
 
         index.add(0, "لكن لا بد أن أوضح لك أن كل");
         expect(index.search("بد أن")).to.include(0);
         expect(index.search("أو")).to.include(0);
-        index = Index({
-            encoder: Charset.ArabicDefault,
-            tokenize: "reverse"
-        });
+
+        index = Index({ tokenize: "reverse" });
 
         index.add(0, "لكن لا بد أن أوضح لك أن كل");
         expect(index.search("ضح")).to.include(0);
+    });
+});
+
+describe("Encoder: Greek Charset", function(){
+
+    it("Should have been tokenized properly", function(){
+
+        const index = Index({ tokenize: "forward" });
+        index.add(0, "Μήγαρις ἔχω ἄλλο στὸ νοῦ μου πάρεξ ἐλευθερία καὶ γλώσσα");
+        expect(index.search("Μηγαρις εχω αλλο στο νου μου παρε ελευθ και γλωσσα")).to.include(0);
     });
 });
 

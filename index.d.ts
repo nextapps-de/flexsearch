@@ -35,28 +35,30 @@ declare module "flexsearch" {
      * * Add custom tokenizer: https://github.com/nextapps-de/flexsearch#add-custom-tokenizer
      */
     type Tokenizer =
-        | "strict"
+        | "strict" | "exact" | "default"
         | "forward"
-        | "reverse"
-        | "full"
-        | "default";
+        | "reverse" | "bidirectional"
+        | "full";
 
     /**
      * **Document:**
      * * Encoders: https://github.com/nextapps-de/flexsearch#encoders
      */
     type Encoders =
+        | "Exact"
+        | "Default"
+        | "Normalize"
+        /** @deprecated */
         | "LatinExact"
+        /** @deprecated */
         | "LatinDefault"
+        /** @deprecated */
         | "LatinSimple"
         | "LatinBalance"
         | "LatinAdvanced"
         | "LatinExtra"
         | "LatinSoundex"
-        | "ArabicDefault"
-        | "CjkDefault"
-        | "CryllicDefault"
-        | ((x: string) => string[]);
+        | ((term: string) => string[]);
 
     /**
      * **Document:**
@@ -93,7 +95,7 @@ declare module "flexsearch" {
         field?: FieldName | FieldName[] | FieldOptions | Array<FieldOptions>;
         index?: FieldName | FieldName[] | FieldOptions | Array<FieldOptions>;
         tag?: FieldName | FieldName[] | TagOptions | Array<TagOptions>;
-        store?: FieldName | FieldName[] | StoreOptions | Array<StoreOptions>;
+        store?: FieldName | FieldName[] | StoreOptions | Array<StoreOptions> | boolean;
     };
 
     type WorkerURL = string;
@@ -581,3 +583,8 @@ declare module "flexsearch" {
         db: IDBDatabase
     }
 }
+
+// https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
+// https://github.com/futurGH/ts-to-jsdoc
+// https://sethmac.com/typescript-to-jsdoc/
+

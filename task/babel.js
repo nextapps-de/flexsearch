@@ -6,7 +6,7 @@ const minify = process.argv[2] && process.argv[2].toLowerCase().includes("releas
 console.log("Start build .....");
 console.log('Bundle: ' + ('module' /* 'custom' */) + (debug ?  ":debug" : (minify ?  ":min" : "")));
 
-fs.rmSync("tmp/", { recursive: true });
+fs.existsSync("tmp") && fs.rmSync("tmp/", { recursive: true });
 fs.mkdirSync("tmp");
 fs.existsSync("dist") || fs.mkdirSync("dist");
 
@@ -49,9 +49,9 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
         "lang",
         "charset/",
         "charset/latin",
-        "charset/arabic",
-        "charset/cjk",
-        "charset/cyrillic"
+        //"charset/arabic",
+        //"charset/cjk",
+        //"charset/cyrillic"
     ];
 
     for(let i = 0, path; i < dirs.length; i++){

@@ -59,7 +59,7 @@ const numeric_split_next_char = /(\d{3})(\D)/g;
 //.replace(/(\d{3})/g, "$1 ")
 //.replace(/([^\d])([\d])/g, "$1 $2")
 //.replace(/([\d])([^\d])/g, "$1 $2")
-const normalize = "".normalize && /[\u0300-\u036f]/g; // '´`’ʼ.,
+const normalize = /*"".normalize &&*/ /[\u0300-\u036f]/g; // '´`’ʼ.,
 //const normalize_mapper = SUPPORT_CHARSET && !normalize && normalize_polyfill;
 
 /**
@@ -201,13 +201,13 @@ Encoder.prototype.assign = function(options){
     );
 
     // assign the normalization fallback to the mapper
-    if(SUPPORT_CHARSET && !normalize){
-        this.mapper = new Map(
-            /** @type {Array<Array<string, string>>} */ (
-                normalize_polyfill
-            )
-        );
-    }
+    // if(SUPPORT_CHARSET && !normalize){
+    //     this.mapper = new Map(
+    //         /** @type {Array<Array<string, string>>} */ (
+    //             normalize_polyfill
+    //         )
+    //     );
+    // }
 
     tmp = options.filter;
     this.filter = typeof tmp === "function" ? tmp : merge_option(tmp && new Set(tmp), null, this.filter);
@@ -221,7 +221,7 @@ Encoder.prototype.assign = function(options){
     this.rtl = merge_option(options.rtl, false, this.rtl);
 
     // auto-balanced cache
-    if(SUPPORT_CACHE){
+    //if(SUPPORT_CACHE){
         this.cache = tmp = merge_option(options.cache, true, this.cache);
         if(tmp){
             this.timer = null;
@@ -231,7 +231,7 @@ Encoder.prototype.assign = function(options){
             this.cache_enc_length = 128;
             this.cache_term_length = 128;
         }
-    }
+    //}
 
     // regex temporary state
     this.matcher_str = "";
@@ -277,7 +277,7 @@ Encoder.prototype.addStemmer = function(match, replace){
     this.stemmer.set(match, replace);
     this.stemmer_str += (this.stemmer_str ? "|" : "") + match;
     this.stemmer_test = null;
-    SUPPORT_CACHE && this.cache && clear(this);
+    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
     return this;
 };
 
@@ -290,7 +290,7 @@ Encoder.prototype.addFilter = function(term){
         this.filter || (this.filter = new Set());
         this.filter.add(term);
     }
-    SUPPORT_CACHE && this.cache && clear(this);
+    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
     return this;
 };
 
@@ -312,7 +312,7 @@ Encoder.prototype.addMapper = function(char_match, char_replace){
     }
     this.mapper || (this.mapper = new Map());
     this.mapper.set(char_match, char_replace);
-    SUPPORT_CACHE && this.cache && clear(this);
+    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
     return this;
 };
 
@@ -337,7 +337,7 @@ Encoder.prototype.addMatcher = function(match, replace){
     this.matcher.set(match , replace);
     this.matcher_str += (this.matcher_str ? "|" : "") + match;
     this.matcher_test = null;
-    SUPPORT_CACHE && this.cache && clear(this);
+    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
     return this;
 };
 
@@ -353,7 +353,7 @@ Encoder.prototype.addReplacer = function(regex, replace){
     }
     this.replacer || (this.replacer = []);
     this.replacer.push(regex, replace);
-    SUPPORT_CACHE && this.cache && clear(this);
+    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
     return this;
 };
 
@@ -366,7 +366,7 @@ Encoder.prototype.encode = function(str){
     //if(!str) return str;
     // todo remove dupe terms
 
-    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_enc_length){
+    if(/*SUPPORT_CACHE &&*/ this.cache && str.length <= this.cache_enc_length){
         if(this.timer){
             if(this.cache_enc.has(str)){
                 return this.cache_enc.get(str);
@@ -444,7 +444,7 @@ Encoder.prototype.encode = function(str){
             continue;
         }
 
-        if(SUPPORT_CACHE && this.cache && word.length <= this.cache_term_length){
+        if(/*SUPPORT_CACHE &&*/ this.cache && word.length <= this.cache_term_length){
             if(this.timer){
                 const tmp = this.cache_term.get(word);
                 if(tmp || tmp === ""){
@@ -530,7 +530,7 @@ Encoder.prototype.encode = function(str){
         //word = word.replace(/(.)\1+/g, "$1");
         //word = word.replace(/(?<=(.))\1+/g, "");
 
-        if(SUPPORT_CACHE && this.cache && base.length <= this.cache_term_length){
+        if(/*SUPPORT_CACHE &&*/ this.cache && base.length <= this.cache_term_length){
             this.cache_term.set(base, word);
             if(this.cache_term.size > this.cache_size){
                 this.cache_term.clear();
@@ -545,7 +545,7 @@ Encoder.prototype.encode = function(str){
         final = this.finalize(final) || final;
     }
 
-    if(SUPPORT_CACHE && this.cache && str.length <= this.cache_enc_length){
+    if(/*SUPPORT_CACHE &&*/ this.cache && str.length <= this.cache_enc_length){
         this.cache_enc.set(str, final);
         if(this.cache_enc.size > this.cache_size){
             this.cache_enc.clear();

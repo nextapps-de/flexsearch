@@ -3,7 +3,7 @@ const fs = require("fs");
 
 console.log("Start build .....");
 
-fs.rmSync("tmp/", { recursive: true });
+fs.existsSync("tmp") && fs.rmSync("tmp/", { recursive: true });
 fs.mkdirSync("tmp");
 fs.existsSync("dist") || fs.mkdirSync("dist");
 

@@ -2,8 +2,10 @@ import { EncoderOptions } from "../../type.js";
 
 /** @type EncoderOptions */
 const options = {
-    split: /\s+/,
-    normalize: !1
+    normalize: !1,
+    numeric: !1,
+    split: /\s+/
+    //normalize: false,
     //dedupe: false
 };
 export default options;
