@@ -235,3 +235,44 @@ __Search 1:__ Single term query<br>
 __Search N:__ Multi term query (Context-Search)
 
 The benchmark was executed against a single client.
+
+## Delete Store + Migration
+
+Actually there exist no migration tool. You will probably need some kind of migration on future updates or when you need to re-create the index on the database.
+
+> [!CAUTION]
+> Please use the methods `index.destroy()` and `index.clear()` carefully. This methods will delete contents (truncate, drop) from the database accordingly to the passed `name` on initialization.
+
+Just clear all contents (truncate equivalent) from a store which connected to an index:
+
+```js
+// always define a unique name when assigning a storage
+const db = new Database("my-store", config);
+await index.mount(db);
+// truncate all contents
+await index.clear();
+```
+
+Drop all tables (and its schema):
+
+```js
+// always define a unique name when assigning a storage
+const db = new Database("my-store", config);
+await index.mount(db);
+// drop all associated tables
+await index.destroy();
+```
+
+A full migration cycle could be combined by:
+
+```js
+// always define a unique name when assigning a storage
+const db = new Database("my-store", config);
+await index.mount(db);
+// drop all associated tables
+await index.destroy();
+// when destroyed you'll need to mount again
+// to run table creation
+await index.mount(db);
+// access index ...
+```

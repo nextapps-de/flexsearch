@@ -508,19 +508,24 @@ if(SUPPORT_STORE){
 
         if(SUPPORT_PERSISTENT && this.db){
             return this.index.get(this.field[0]).db.enrich(id).then(function(result){
-                return result[0] && result[0]["doc"];
+                return (result[0] && result[0]["doc"]) || null;
             });
         }
 
-        return this.store.get(id);
+        return this.store.get(id) || null;
     };
 
     /**
-     * @param {number|string} id
+     * @param {number|string|Object} id
      * @param {Object} data
      * @return {Document}
      */
     Document.prototype.set = function(id, data){
+
+        if(is_object(id)){
+            data = id;
+            id = parse_simple(data, this.key);
+        }
 
         this.store.set(id, data);
         return this;

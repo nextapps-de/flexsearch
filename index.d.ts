@@ -439,6 +439,9 @@ declare module "flexsearch" {
         contain(id: Id): boolean | Promise<boolean>;
         clear(): void | Promise<void>;
         cleanup(): void | Promise<void>;
+        get(id: Id): Promise<DocumentData> | DocumentData | null;
+        set(id: Id, document: DocumentData): this;
+        set(document: DocumentData): this;
 
         // Export and Import
         export(handler: ExportHandler): void;
@@ -561,11 +564,15 @@ declare module "flexsearch" {
 
     export class Resolver {
         constructor(options?: ResolverOptions | IntermediateSearchResults);
+        result: IntermediateSearchResults;
+        and(options: ResolverOptions): this;
+        or(options: ResolverOptions): this;
+        xor(options: ResolverOptions): this;
+        not(options: ResolverOptions): this;
         limit(limit: number): this;
         offset(offset: number): this;
         boost(boost: number): this;
         resolve(options?: DefaultResolve): SearchResults;
-        result: IntermediateSearchResults
     }
 
     class StorageInterface {
