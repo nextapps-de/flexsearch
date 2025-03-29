@@ -15,13 +15,13 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 
 [Basic Start](#load-library) &ensp;&bull;&ensp; 
 [API Reference](#api-overview) &ensp;&bull;&ensp;
-<a href="doc/encoder.md">Encoder</a> &ensp;&bull;&ensp;
-<a href="doc/document-search.md">Document Search</a> &ensp;&bull;&ensp;
-<a href="doc/persistent.md">Persistent Indexes</a> &ensp;&bull;&ensp;
-<a href="doc/worker.md">Using Worker</a> &ensp;&bull;&ensp;
-<a href="doc/document-search.md#tag-search">Tag Search</a> &ensp;&bull;&ensp;
-<a href="doc/resolver.md">Resolver</a> &ensp;&bull;&ensp;
-<a href="CHANGELOG.md">Changelog</a>
+[Encoder](doc/encoder.md) &ensp;&bull;&ensp;
+[Document Search](doc/document-search.md) &ensp;&bull;&ensp;
+[Persistent Indexes](doc/persistent.md) &ensp;&bull;&ensp;
+[Using Worker](doc/worker.md) &ensp;&bull;&ensp;
+[Tag Search](doc/document-search.md#tag-search) &ensp;&bull;&ensp;
+[Resolver](doc/resolver.md) &ensp;&bull;&ensp;
+[Changelog](CHANGELOG.md)
 
 <!--
 > [!NOTE]
@@ -108,7 +108,7 @@ Benchmarks:
 
 <details>
 <summary>Latest Benchmark Results</summary>
-
+<br>
 The benchmark was measured in terms per seconds, higher values are better (except the test "Memory").
 The memory value refers to the amount of memory which was additionally allocated during search.
 
@@ -250,6 +250,7 @@ Extern Projects & Plugins:
   - [Module (ESM)](#module-esm)
   - [Node.js](#nodejs)
 - [Basic Usage and Variants](#basic-usage-and-variants)
+- [Common Code Examples (Browser, Node.js)](#common-code-examples)
 - [API Overview](#api-overview)
 - [Options](doc/options.md)
   - [Index Options](doc/options.md)
@@ -261,20 +262,21 @@ Extern Projects & Plugins:
 - [Context Search](#context-search)
 - [Document Search (Multi-Field Search)](doc/document-search.md)
 - [Multi-Tag Search](doc/document-search.md)
-- [Phonetic Search (Fuzzy Search)](doc/fuzzy-search.md)
+- [Phonetic Search (Fuzzy Search)](#fuzzy-search)
 - [Tokenizer (Partial Search)](#tokenizer-partial-match)
 - [Encoder](doc/encoder.md)
-  - Universal Charset Collection
-  - Latin Charset Encoder Presets
-  - Language Specific Preset
+  - [Universal Charset Collection](doc/encoder.md)
+  - [Latin Charset Encoder Presets](doc/encoder.md)
+  - [Language Specific Preset](doc/encoder.md)
   - [Custom Encoder](doc/encoder.md#custom-encoder)
 - [Non-Blocking Runtime Balancer (Async)](doc/async.md)
 - [Worker Indexes](doc/worker.md)
 - [Resolver (Complex Queries)](doc/resolver.md)
-  - Boolean Operations (and, or, xor, not)
-  - Boost
-  - Limit / Offset
-  - Resolve
+  - [Boolean Operations (and, or, xor, not)](doc/resolver.md)
+  - [Boost](doc/resolver.md)
+  - [Limit / Offset](doc/resolver.md)
+  - [Resolve](doc/resolver.md)
+- [Auto-Balanced Cache by Popularity/Last Query](#auto-balanced-cache-by-popularity)
 - [Export / Import Indexes](doc/export-import.md)
   - [Fast-Boot Serialization](doc/export-import.md#fast-boot-serialization-for-server-side-rendering-php-python-ruby-rust-java-go-nodejs-)
 - [Persistent Indexes](doc/persistent.md)
@@ -285,13 +287,11 @@ Extern Projects & Plugins:
   - [SQLite](doc/persistent-sqlite.md)
   - [Clickhouse](doc/persistent-clickhouse.md)
 - [Result Highlighting](doc/result-highlighting.md)
-- [Common Code Examples (Browser, Node.js)](#common-code-examples)
+- [Custom Score Function](doc/customization.md)
+- [Custom Builds](doc/custom-builds.md)
+- [Extended Keystores (In-Memory)](doc/keystore.md)
 
 ## Load Library (Node.js, ESM, Legacy Browser)
-
-<!--
-> Please do not use the `/src/` folder of this repo. It isn't meant to be used directly, instead it needs [conditional compilation](https://en.wikipedia.org/wiki/Conditional_compilation). You can easily perform a <a href="#builds">custom build</a>, but you shouldn't use the source folder for production. You will need at least any kind of compiler which resolve the compiler flags within the code like [Closure Compiler](https://github.com/google/closure-compiler) (Advanced Compilation) or with [Babel conditional-compile](https://github.com/brianZeng/babel-plugin-conditional-compile) plugin. The `/dist/` folder is containing every version which you probably need including unminified ESM modules.
--->
 
 ```bash
 npm install flexsearch
@@ -301,7 +301,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
 
 <details>
 <summary>Download Builds</summary>
-
+<br>
 <table>
     <tr></tr>
     <tr>
@@ -397,8 +397,9 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
 <a name="bundles"></a>
 <details>
 <summary>Compare Bundles: Light, Compact, Bundle</summary>
+<br>
 
-> The Node.js package includes all features from `flexsearch.bundle.js`.
+> The Node.js package includes all features.
 
 <table>
     <tr></tr>
@@ -419,7 +420,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="#async">Async Processing</a>
+            <a href="doc/async.md">Async Processing</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -428,7 +429,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="#webworker">Workers (Web + Node.js)</a>
+            <a href="doc/worker.md">Workers (Web + Node.js)</a>
         </td>
         <td>✓</td>
         <td>-</td>
@@ -437,7 +438,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="#contextual">Context Search</a>
+            <a href="#context-search">Context Search</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -446,7 +447,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="#docs">Document Search</a>
+            <a href="doc/document-search.md">Document Search</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -455,7 +456,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="#store">Document Store</a>
+            <a href="doc/document-search.md#store">Document Store</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -473,16 +474,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            Relevance Scoring
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#cache">Auto-Balanced Cache by Popularity/Last Queries</a>
+            <a href="doc/cache.md">Auto-Balanced Cache by Popularity/Last Queries</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -491,7 +483,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="#tags">Tag Search</a>
+            <a href="doc/document-search.md#tag-search">Tag Search</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -509,7 +501,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="#phonetic">Phonetic Search (Fuzzy Search)</a>
+            <a href="#fuzzy-search">Phonetic Search (Fuzzy Search)</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -517,28 +509,28 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     </tr>
     <tr></tr>
     <tr>
-        <td>Encoder</td>
+        <td><a href="doc/encoder.md">Encoder</a></td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><a href="#export">Export / Import Indexes</a></td>
+        <td><a href="doc/export-import.md">Export / Import Indexes</a></td>
         <td>✓</td>
         <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><a href="#resolver">Resolver</a></td>
+        <td><a href="doc/resolver.md">Resolver</a></td>
         <td>✓</td>
         <td>-</td>
         <td>-</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><a href="#db">Persistent Index (IndexedDB)</a></td>
+        <td><a href="doc/persistent.md">Persistent Index (IndexedDB)</a></td>
         <td>✓</td>
         <td>-</td>
         <td>-</td>
@@ -700,15 +692,15 @@ const index = new FlexSearch.Index(/* ... */);
 Or require FlexSearch members separately by:
 
 ```js
-const { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB } = require("flexsearch");
+const { Index, Document, Encoder, Charset, Resolver, Worker } = require("flexsearch");
 const index = new Index(/* ... */);
 ```
 
 When using ESM instead of CommonJS:
 
 ```js
-import { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB } from "flexsearch";
-const index = new FlexSearch.Index(/* ... */);
+import { Index, Document, Encoder, Charset, Resolver, Worker } from "flexsearch";
+const index = new Index(/* ... */);
 ```
 
 Language packs are accessible via:
@@ -747,18 +739,16 @@ const result = index.search(text, options);
 ```
 
 ```js
-worker.add(id, text);
-const result = worker.search(text, options);
-```
-
-```js
 document.add(doc);
 const result = document.search(text, options);
 ```
 
-Each of these index types have a persistent model (optionally). So, persistent index isn't a new 4th index type, instead it extends the existing ones.
+```js
+await worker.add(id, text);
+const result = await worker.search(text, options);
+```
 
-> Every method called on a `Worker` index is treated as async. You will get back a `Promise` or you can provide a callback function as the last parameter additionally.
+> Every method called on a `Worker` index is treated as async. You will get back a `Promise` or you can provide a callback function as the last parameter alternatively.
 
 ### Common Code Examples
 
@@ -766,7 +756,7 @@ The documentation will refer to several examples. A list of all examples:
 
 <a name="examples-nodejs"></a>
 <details>
-<summary>Examples Node.js (CommonJS)</summary>
+<summary>Examples Node.js (CommonJS)</summary><br>
 
 - [basic](example/nodejs-commonjs/basic)
 - [basic-suggestion](example/nodejs-commonjs/basic-suggestion)
@@ -786,7 +776,7 @@ The documentation will refer to several examples. A list of all examples:
 
 </details>
 <details>
-<summary>Examples Node.js (ESM/Module)</summary>
+<summary>Examples Node.js (ESM/Module)</summary><br>
 
 - [basic](example/nodejs-esm/basic)
 - [basic-suggestion](example/nodejs-esm/basic-suggestion)
@@ -808,7 +798,7 @@ The documentation will refer to several examples. A list of all examples:
 
 <a name="examples-browser"></a>
 <details>
-<summary>Examples Browser (Legacy)</summary>
+<summary>Examples Browser (Legacy)</summary><br>
 
 - [basic](example/browser-legacy/basic)
 - [basic-suggestion](example/browser-legacy/basic-suggestion)
@@ -823,7 +813,7 @@ The documentation will refer to several examples. A list of all examples:
 
 </details>
 <details>
-<summary>Examples Browser (ESM/Module)</summary>
+<summary>Examples Browser (ESM/Module)</summary><br>
 
 - [basic](example/browser-module/basic)
 - [basic-suggestion](example/browser-module/basic-suggestion)
@@ -888,19 +878,19 @@ Global Members:
 
 `Document` Methods:
 
-- document.<a href="#document.add">__add__</a>(\<id\>, document)
-- ~~document.<a href="#document.append">__append__</a>(\<id\>, document)~~
-- document.<a href="#document.update">__update__</a>(\<id\>, document)
-- document.<a href="#document.remove">__remove__</a>(id)
-- document.<a href="#document.remove">__remove__</a>(document)
-- document.<a href="#document.search">__search__</a>(string, \<limit\>, \<options\>)
-- document.<a href="#document.search">__search__</a>(options)
-- document.<a href="#document.searchCache">__searchCache__</a>(...)
-- document.<a href="#document.contain">__contain__</a>(id)
-- document.<a href="#document.clear">__clear__</a>()
-- document.<a href="#index.cleanup">__cleanup__</a>()
-- document.<a href="#document.get">__get__</a>(id)
-- document.<a href="#document.get">__set__</a>(\<id\>, document)
+- document.<a href="#document.add">__add__</a>(\<id\>, document)\
+- ~~document.<a href="#document.append">__append__</a>(\<id\>, document)~~\
+- document.<a href="#document.update">__update__</a>(\<id\>, document)\
+- document.<a href="#document.remove">__remove__</a>(id)\
+- document.<a href="#document.remove">__remove__</a>(document)\
+- document.<a href="#document.search">__search__</a>(string, \<limit\>, \<options\>)\
+- document.<a href="#document.search">__search__</a>(options)\
+- document.<a href="#document.searchCache">__searchCache__</a>(...)\
+- document.<a href="#document.contain">__contain__</a>(id)\
+- document.<a href="#document.clear">__clear__</a>()\
+- document.<a href="#index.cleanup">__cleanup__</a>()\
+- document.<a href="#document.get">__get__</a>(id)\
+- document.<a href="#document.get">__set__</a>(\<id\>, document)\
 
 
 - <small>_async_</small> document.<a href="#document.export">__export__</a>(handler)
@@ -970,12 +960,14 @@ Methods `export` and also `import` are always async as well as every method you 
 
 ---
 
-`Charset` Encoder Preset:
+`Charset` Universal Encoder Preset:
 
 - Charset.<a href="#charset">__Exact__</a>
 - Charset.<a href="#charset">__Default__</a>
 - Charset.<a href="#charset">__Normalize__</a>
+- Charset.<a href="#charset">__Dedupe__</a>
 
+`Charset` Latin-specific Encoder Preset:
 
 - Charset.<a href="#charset">__LatinBalance__</a>
 - Charset.<a href="#charset">__LatinAdvanced__</a>
@@ -1064,53 +1056,55 @@ Encoding is one of the most important task and heavily influence:
     <tr>
         <td>Option</td>
         <td>Description</td>
+        <td>Charset Type</td>
         <td>Compression Ratio</td>
     </tr>
     <tr>
         <td><code>Exact</code></td>
         <td>Bypass encoding and take exact input</td>
+        <td>Universal (multi-lang)</td>
         <td>0%</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><code>Default</code></td>
-        <td>Case in-sensitive encoding</td>
-        <td>3%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>Normalize</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization</td>
+        <td><code>Normalize (Default)</code></td>
+        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication</td>
+        <td>Universal (multi-lang)</td>
         <td>~ 7%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>LatinBalance</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization<br>Phonetic basic transformation</td>
+        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication<br>Phonetic basic transformation</td>
+        <td>Latin</td>
         <td>~ 30%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>LatinAdvanced</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization<br>Phonetic advanced transformation</td>
+        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication<br>Phonetic advanced transformation</td>
+        <td>Latin</td>
         <td>~ 45%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>LatinExtra</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization<br>Soundex-like transformation</td>
+        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication<br>Soundex-like transformation</td>
+        <td>Latin</td>
         <td>~ 60%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>LatinSoundex</code></td>
         <td>Full Soundex transformation</td>
+        <td>Latin</td>
         <td>~ 70%</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>function(str) => [str]</code></td>
         <td>Pass a custom encoding function to the <code>Encoder</code></td>
+        <td>Latin</td>
         <td></td>
     </tr>
 </table>
@@ -1121,22 +1115,22 @@ Encoding is one of the most important task and heavily influence:
 #### Create a new index
 
 ```js
-var index = new Index();
+const index = new Index();
 ```
 
-Create a new index and choosing one of the presets:
+Create a new index and choosing one of the [Presets](#presets):
 
 ```js
-var index = new Index("performance");
+const index = new Index("match");
 ```
 
 Create a new index with custom options:
 
 ```js
-var index = new Index({
-    charset: "latin:extra",
-    tokenize: "reverse",
-    resolution: 9
+const index = new Index({
+    tokenize: "forward",
+    resolution: 9,
+    fastupdate: true
 });
 ```
 
@@ -1149,6 +1143,19 @@ var index = new FlexSearch({
     resolution: 5
 });
 ```
+
+Create a new index and assign an [Encoder](doc/encoder.md):
+
+```js
+//import { Charset } from "./dist/module/charset.js";
+import { Charset } from "flexsearch";
+const index = new Index({
+    tokenize: "forward",
+    encoder: Charset.LatinBalance
+});
+```
+
+
 
 The resolution refers to the maximum count of scoring slots on which the content is divided into.
 
@@ -1182,6 +1189,7 @@ Limit the result:
 index.search("John", 10);
 ```
 
+<a name="index.contain"></a>
 #### Check existence of already indexed IDs
 
 You can check if an ID was already indexed by:
@@ -1191,34 +1199,6 @@ if(index.contain(1)){
     console.log("ID is already in index");
 }
 ```
-
-<!--
-## Append Contents (*deprecated)
-
-You can append contents to an existing index like:
-
-```js
-index.append(id, content);
-```
-
-This will not overwrite the old indexed contents as it will do when perform `index.update(id, content)`. Keep in mind that `index.add(id, content)` will also perform "update" under the hood when the id was already being indexed.
-
-Appended contents will have their own context and also their own full `resolution`. Therefore, the relevance isn't being stacked but gets its own context.
-
-Let us take this example:
-
-```js
-index.add(0, "some index");
-index.append(0, "some appended content");
-
-index.add(1, "some text");
-index.append(1, "index appended content");
-```
-
-When you query `index.search("index")` then you will get index id 1 as the first entry in the result, because the context starts from zero for the appended data (isn't stacked to the old context) and here "index" is the first term.
-
-If you didn't want this behavior than just use the standard `index.add(id, content)` and provide the full length of content.
--->
 
 <a name="index.update"></a>
 #### Update item from an index
@@ -1238,23 +1218,135 @@ index.update(0, "Max Miller");
 index.remove(0);
 ```
 
-<a name="docs"></a>
-## Document Search (Field-Search)
-
-[Read here](doc/document-search.md)
-
-<a name="chaining"></a>
 ### Chaining
 
 Simply chain methods like:
 
 ```js
-var index = Index.create().addMatcher({'â': 'a'}).add(0, 'foo').add(1, 'bar');
+const index = Index.create().addMatcher({'â': 'a'}).add(0, 'foo').add(1, 'bar');
 ```
 
 ```js
 index.remove(0).update(1, 'foo').add(2, 'foobar');
 ```
+
+## Suggestions
+
+Any query on each of the index types is supporting the option `suggest: true`. Also within some of the `Resolver` stages (and, not, xor) you can add this option for the same purpose.
+
+When suggestions is enabled, it allows results which does not perfectly match to the given query e.g. when one term was not included. Suggestion-Search will keep track of the scoring, therefore the first result entry is the closest one to a perfect match.
+
+```js
+const index = Index.create().add(1, "cat dog bird");
+const result = index.search("cat fish");
+// result => []
+```
+
+Same query with suggestion enabled:
+
+```js
+const result = index.search("cat fish", { suggest: true });
+// result => [ 1 ]
+```
+
+At least one match (or partial match) has to be found to get back any result:
+
+```js
+const result = index.search("horse fish", { suggest: true });
+// result => []
+```
+
+## Fuzzy-Search
+
+Fuzzysearch describes a basic concept of how making queries more tolerant. FlexSearch provides several methods to achieve fuzziness:
+
+1. Use a tokenizer: `forward`, `reverse` or `full`
+2. Don't forget to use any of the builtin encoder `simple` > `balance` > `advanced` > `extra` > `soundex` (sorted by fuzziness)
+3. Use one of the language specific presets e.g. `/lang/en.js` for en-US specific content
+4. Enable suggestions by passing the search option `suggest: true`
+
+Additionally, you can apply custom `Mapper`, `Replacer`, `Stemmer`, `Filter` or by assigning a custom `normalize(str)`, `prepare(str)` or `finalize(arr)` function to the Encoder.
+
+### Compare Built-In Encoder Preset
+
+Original term which was indexed: "Struldbrugs"
+
+<table>
+    <tr>
+        <th align="left">Encoder:</th>
+        <th><code>Exact</code></th>
+        <th><code>Normalize (Default)</code></th>
+        <th><code>LatinBalance</code></th>
+        <th><code>LatinAdvanced</code></th>
+        <th><code>LatinExtra</code></th>
+        <th><code>LatinSoundex</code></th>
+    </tr>
+    <tr>
+        <th align="left">Index Size</th>
+        <th>3.1 Mb</th>
+        <th>1.9 Mb</th>
+        <th>1.7 Mb</th>
+        <th>1.6 Mb</th>
+        <th>1.1 Mb</th>
+        <th>0.7 Mb</th>
+    </tr>
+    <tr>
+        <td align="left">Struldbrugs</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td align="left">strũlldbrųĝgs</td>
+        <td></td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td align="left">strultbrooks</td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td align="left">shtruhldbrohkz</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+        <td>✓</td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td align="left">zdroltbrykz</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td align="left">struhlbrogger</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+    </tr>
+</table>
+
+The index size was measured after indexing the book "Gulliver's Travels".
 
 <a name="context-search"></a>
 ## Context Search
@@ -1291,6 +1383,24 @@ var index = new FlexSearch({
 > Only the tokenizer "strict" is actually supported by the contextual index.
 
 > The contextual index requires <a href="#memory">additional amount of memory</a> depending on depth.
+
+## Auto-Balanced Cache (By Popularity)
+
+You need to initialize the cache and its limit of available cache slots during the creation of the index:
+
+```js
+const index = new Index({ cache: 100 });
+```
+
+> The method `.searchCache(query)` is available for each type of index.
+
+```js
+const results = index.searchCache(query);
+```
+
+> The cache automatically balance stored entries related to their popularity.
+
+The cache also stores latest queries. A common scenario is an autocomplete or instant search when typing.
 
 ## Index Memory Allocation
 
@@ -1331,9 +1441,18 @@ You can pass a preset during creation/initialization of the index.
 
 ## Best Practices
 
+### Page-Load / Fast-Boot
+
+There are several options to optimize either the page load or when booting up or populate an index on server-side:
+
+- Using [Fast-Boot Serialization](doc/export-import.md#fast-boot-serialization-for-server-side-rendering-php-python-ruby-rust-java-go-nodejs-) for small and simple indexes
+- Using [Non-Blocking Runtime Balancer (Async)](doc/async.md) for populating larger amounts of contents while doing other processes in parallel
+- Using [Worker Indexes](doc/worker.md) will distribute the workload to dedicated balanced threads
+- Using [Persistent Indexes](doc/persistent.md) when targeting a zero-latency boot-up
+
 ### Use numeric IDs
 
-It is recommended to use numeric id values as reference when adding content to the index. The byte length of passed ids influences the memory consumption significantly. If this is not possible you should consider to use a index table and map the ids with indexes, this becomes important especially when using contextual indexes on a large amount of content.
+It is recommended to use id values from type `number` as reference when adding content to the index. The reserved byte length of passed ids influences the memory consumption significantly. When stringified numeric IDs are included in your datasets consider replacing these by `parseInt(...)` before pushing to the index.
 
 ---
 

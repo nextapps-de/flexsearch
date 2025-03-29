@@ -1,10 +1,24 @@
+# Document Search (Field-Search)
 
-<a name="docs"></a>
-## Index Documents (Field-Search)
+Whereas the simple `Index` can just consume id-content pairs, the `Document`-Index is able to process more complex data structures like JSON.
+Technically, a `Document`-Index is a layer on top of several default indexes. You can create multiple independent Document-Indexes in parallel, any of them can use the `Worker` or `Persistent` model optionally.
 
-### The Document Descriptor
+FlexSearch Documents also contain these features:
 
-Assuming our document has a data structure like this:
+- Document Store including Enrichment
+- Multi-Field-Search
+- Multi-Tag-Search
+- Resolver (Chain Complex Queries)
+- Result Highlighting
+- Export/Import
+- Worker
+- Persistent
+
+## The Document Descriptor
+
+When creating a `Document`-Index you will need to define a document descriptor in the field `document`. This descriptor is including any specific information about how the document data should be indexed.
+
+Assuming our document has a simple data structure like this:
 
 ```json
 { 
@@ -13,42 +27,32 @@ Assuming our document has a data structure like this:
 }
 ```
 
-> The document descriptor has slightly changed, there is no `field` branch anymore, instead just apply one level higher, so `key` becomes a main member of options.
+An appropriate Document Descriptor has always to define at least 2 things:
 
-For the new syntax the field "doc" was renamed to `document` and the field "field" was renamed to `index`:
+1. the property `id` describes the location of the document ID within a document item
+2. the property `index` (or `tag`) containing one or multiple fields from the document, which should be indexed for searching
 
 ```js
+// create a document index
 const index = new Document({
     document: {
         id: "id",
-        index: ["content"]
+        index: "content"
     }
 });
 
+// add documents to the index
 index.add({ 
     id: 0, 
     content: "some text"
 });
 ```
 
-The field `id` describes where the ID or unique key lives inside your documents. The default key gets the value `id` by default when not passed, so you can shorten the example from above to:
+As briefly explained above, the field `id` describes where the ID or unique key lives inside your documents. When not passed it will always take the field `id` from the top level scope of your data.
 
-```js
-const index = new Document({
-    document: {
-        index: ["content"]
-    }
-});
-```
+The property `index` takes all fields you would like to have indexed. When just selecting one field, then you can pass a string.
 
-The member `index` has a list of fields which you want to be indexed from your documents. When just selecting one field, then you can pass a string. When also using default key `id` then this shortens to just:
-
-```js
-const index = new Document({ document: "content" });
-index.add({ id: 0, content: "some text" });
-```
-
-Assuming you have several fields, you can add multiple fields to the index:
+The next example will add 2 fields `title` and `content` to the index:
 
 ```js
 var docs = [{
@@ -69,7 +73,7 @@ const index = new Document({
 });
 ```
 
-You can pass custom options for each field:
+Add both fields to the document descriptor and pass individual [Index-Options](options.md) for each field:
 
 ```js
 const index = new Document({
@@ -77,47 +81,37 @@ const index = new Document({
     index: [{
         field: "title",
         tokenize: "forward",
-        optimize: true,
+        encoder: Charset.LatinAdvanced,
         resolution: 9
     },{
         field:  "content",
-        tokenize: "strict",
-        optimize: true,
-        resolution: 5,
-        minlength: 3,
-        context: {
-            depth: 1,
-            resolution: 3
-        }
+        tokenize: "forward",
+        encoder: Charset.LatinAdvanced,
+        resolution: 3
     }]
 });
 ```
 
-Field options gets inherited when also global options was passed, e.g.:
+Field options inherits from top level options when passed, e.g.:
 
 ```js
 const index = new Document({
-    tokenize: "strict",
-    optimize: true,
+    tokenize: "forward",
+    encoder: Charset.LatinAdvanced,
     resolution: 9,
     document: {
         id: "id",
         index:[{
-            field: "title",
-            tokenize: "forward"
+            field: "title"
         },{
             field: "content",
-            minlength: 3,
-            context: {
-                depth: 1,
-                resolution: 3
-            }
+            resolution: 3
         }]
     }
 });
 ```
 
-Note: The context options from the field "content" also gets inherited by the corresponding field options, whereas this field options was inherited by the global option.
+> Assigning the `Encoder` instance to the top level configuration will share the encoder to all fields. You should avoid this when contents of fields don't have the same type of content (e.g. one field contains terms, another contains numeric IDs).
 
 ### Nested Data Fields (Complex Objects)
 
@@ -136,7 +130,7 @@ Assume the document array looks more complex (has nested branches etc.), e.g.:
 }
 ```
 
-Then use the colon separated notation `root:child:child` to define hierarchy within the document descriptor:
+Then use the colon separated notation `root:child:child` as a name for each field defining the hierarchy which corresponds to the document:
 
 ```js
 const index = new Document({
@@ -150,9 +144,11 @@ const index = new Document({
     }
 });
 ```
-> Just add fields you want to query against. Do not add fields to the index, you just need in the result (but did not query against). For this purpose you can store documents independently of its index (read below).
 
-When you want to query through a field you have to pass the exact key of the field you have defined in the `doc` as a field name (with colon syntax):
+> [!TIP]
+> Just add fields you want to query against. Do not add fields to the index, you just need in the result. For this purpose you can store documents independently of its index (read below).
+
+To query against one or multiple specific fields you have to pass the exact key of the field you have defined in the document descriptor as a field name (with colon syntax):
 
 ```js
 index.search(query, {
@@ -177,6 +173,20 @@ index.search(query, [
 Using field-specific options:
 
 ```js
+index.search("some query", [{
+    field: "record:title",
+    limit: 100,
+    suggest: true
+},{
+    field: "record:content:header",
+    limit: 100,
+    suggest: false
+}]);
+```
+
+You can also perform a search through the same field with different queries:
+
+```js
 index.search([{
     field: "record:title",
     query: "some query",
@@ -190,15 +200,11 @@ index.search([{
 }]);
 ```
 
-You can perform a search through the same field with different queries.
-
-> When passing field-specific options you need to provide the full configuration for each field. They get not inherited like the document descriptor.
-
 ### Complex Documents
 
 You need to follow 2 rules for your documents:
 
-1. The document cannot start with an Array at the root index. This will introduce sequential data and isn't supported yet. See below for a workaround for such data.
+1. The document cannot start with an Array __at the root__. This will introduce sequential data and isn't supported yet. See below for a workaround for such data.
 
 ```js
 [ // <-- not allowed as document start!
@@ -209,7 +215,7 @@ You need to follow 2 rules for your documents:
 ]
 ```
 
-2. The id can't be nested inside an array (also none of the parent fields can't be an array). This will introduce sequential data and isn't supported yet. See below for a workaround for such data.
+2. The document ID can't be nested __inside an Array__. This will introduce sequential data and isn't supported yet. See below for a workaround for such data.
 
 ```js
 {
@@ -255,27 +261,29 @@ The corresponding document descriptor (when all fields should be indexed) looks 
 const index = new Document({
     document: {
         id: "meta:id",
-        tag: "meta:tag",
         index: [
-            "contents[]:body:title",
-            "contents[]:body:footer",
-            "contents[]:keywords"
+            "contents:body:title",
+            "contents:body:footer"
+        ],
+        tag: [
+            "meta:tag",
+            "contents:keywords"
         ]
     }
 });
 ```
 
-Again, when searching you have to use the same colon-separated-string from your field definition.
+Remember when searching you have to use the same colon-separated-string as a key from your field definition.
 
 ```js
 index.search(query, { 
-    index: "contents[]:body:title"
+    index: "contents:body:title"
 });
 ```
 
 ### Not Supported Documents (Sequential Data)
 
-This example breaks both rules from above:
+This example breaks both rules described above:
 
 ```js
 [ // <-- not allowed as document start!
@@ -303,90 +311,83 @@ This example breaks both rules from above:
 ]
 ```
 
-You need to apply some kind of structure normalization.
+You need to unroll your data within a simple loop before adding to the index.
 
-A workaround to such a data structure looks like this:
+A workaround to such a data structure from above could look like:
 
 ```js
 const index = new Document({
     document: {
-        id: "record:id",
-        tag: "tag",
+        id: "id",
         index: [
-            "record:body:title",
-            "record:body:footer",
-            "record:body:keywords"
+            "body:title",
+            "body:footer"
+        ],
+        tag: [
+            "tag",
+            "keywords"
         ]
     }
 });
 
 function add(sequential_data){
 
-    for(let x = 0, data; x < sequential_data.length; x++){
+    for(let x = 0, item; x < sequential_data.length; x++){
 
-        data = sequential_data[x];
+        item = sequential_data[x];
 
-        for(let y = 0, record; y < data.records.length; y++){
-
-            record = data.records[y];
-
-            index.add({
-                id: record.id,
-                tag: data.tag,
-                record: record
-            });
+        for(let y = 0, record; y < item.records.length; y++){
+            record = item.records[y];
+            // append tag to each record
+            record.tag = item.tag;
+            // add to index
+            index.add(record);
         }
     }  
 }
 
 // now just use add() helper method as usual:
-
 add([{
     // sequential structured data
     // take the data example above
 }]);
 ```
 
-You can skip the first loop when your document data has just one index as the outer array.
-
-### Add/Update/Remove Documents to/from the Index
+### Add/Update/Remove Documents
 
 Add a document to the index:
 
 ```js
 index.add({
-            id: 0,
-            title: "Foo",
-            content: "Bar"
-          });
-```
-
-Update index with a single object or an array of objects:
-
-```js
-index.update({
-    data:{
-        id: 0,
-        title: "Foo",
-        body: {
-            content: "Bar"
-        }
-    }
+    id: 0,
+    title: "Foo",
+    content: "Bar"
 });
 ```
 
-Remove a single object or an array of objects from the index:
+Update index:
 
 ```js
-index.remove(docs);
+index.update({
+    id: 0,
+    title: "Foo",
+    content: "Foobar"
+});
 ```
 
-When the id is known, you can also simply remove by (faster):
+Remove a document and all its contents from an index, by ID:
 
 ```js
 index.remove(id);
 ```
 
+Or by the document data:
+
+```js
+index.remove(doc);
+```
+
+<!--
 ### Join / Append Arrays
 
 On the complex example above, the field `keywords` is an array but here the markup did not have brackets like `keywords[]`. That will also detect the array but instead of appending each entry to a new context, the array will be joined into on large string and added to the index.
@@ -396,8 +397,9 @@ The difference of both kinds of adding array contents is the relevance when sear
 So assuming the keyword from the example above are pre-sorted by relevance to its popularity, then you want to keep this order (information of relevance). For this purpose do not add brackets to the notation. Otherwise, it would take the entries in a new scoring context (the old order is getting lost).
 
 Also you can left bracket notation for better performance and smaller memory footprint. Use it when you did not need the granularity of relevance by the entries.
+-->
 
-### Field-Search
+## Field-Search
 
 Search through all fields:
 
@@ -417,13 +419,7 @@ Search through a given set of fields:
 index.search(query, { index: ["title", "content"] });
 ```
 
-Same as:
-
-```js
-index.search(query, ["title", "content"]);
-```
-
-Pass custom modifiers and queries to each field:
+Pass custom options and/or queries to each field:
 
 ```js
 index.search([{
@@ -439,11 +435,21 @@ index.search([{
 }]);
 ```
 
-You can perform a search through the same field with different queries.
+### Limit & Offset
 
-<a href="#options-field-search">See all available field-search options.</a>
+> By default, every query is limited to 100 entries. Unbounded queries leads into issues. You need to set the limit as an option to adjust the size.
 
-### The Result Set
+You can set the limit and the offset for each query:
+
+```js
+index.search(query, { limit: 20, offset: 100 });
+```
+
+> You cannot pre-count the size of the result-set. That's a limit by the design of FlexSearch. When you really need a count of all results you are able to page through, then just assign a high enough limit and get back all results and apply your paging offset manually (this works also on server-side). FlexSearch is fast enough that this isn't an issue.
+
+[See all available field-search options](options.md)
+
+## The Result Set
 
 Schema of the result-set:
 
@@ -566,51 +572,98 @@ index.search(query, {
 
 This gives you result which are tagged with one of the given tag.
 
-> Multiple tags will apply as the boolean "or" by default. It just needs one of the tags to be existing.
-
-This is another situation where the `bool` property is still supported. When you like to switch the default "or" logic from the tag search into "and", e.g.:
-
-```js
-index.search(query, { 
-    index: "content",
-    tag: ["dog", "animal"],
-    bool: "and"
-});
-```
 
 You will just get results which contains both tags (in this example there is just one records which has the tag "dog" and "animal").
 
-### Tag Search
+## Multi-Tag-Search
 
-You can also fetch results from one or more tags when no query was passed:
-
+Assume this document schema (a dataset from IMDB):
 ```js
-index.search({ tag: ["cat", "dog"] });
+{
+    "tconst": "tt0000001",
+    "titleType": "short",
+    "primaryTitle": "Carmencita",
+    "originalTitle": "Carmencita",
+    "isAdult": 0,
+    "startYear": "1894",
+    "endYear": "",
+    "runtimeMinutes": "1",
+    "genres": [
+        "Documentary",
+        "Short"
+    ]
+}
 ```
 
-In this case the result-set looks like:
-
+An appropriate document descriptor could look like:
 ```js
-[{
-    tag: "cat",
-    result: [ /* all cats */ ]
-},{
-    tag: "dog",
-    result: [ /* all dogs */ ]
-}]
+import Charset from "flexsearch";
+const flexsearch = new Document({
+    encoder: Charset.Normalize,
+    resolution: 3,
+    document: {
+        id: "tconst",
+        //store: true, // document store
+        index: [{
+            field: "primaryTitle",
+            tokenize: "forward"
+        },{
+            field: "originalTitle",
+            tokenize: "forward"
+        }],
+        tag: [
+            "startYear",
+            "genres"
+        ]
+    }
+});
+```
+The field contents of `primaryTitle` and `originalTitle` are encoded by the forward tokenizer. The field contents of `startYear` and `genres` are added as tags.
+
+Get all entries of a specific tag:
+```js
+const result = flexsearch.search({
+    //enrich: true, // enrich documents
+    tag: { "genres": "Documentary" },
+    limit: 1000,
+    offset: 0
+});
 ```
 
-### Limit & Offset
-
-> By default, every query is limited to 100 entries. Unbounded queries leads into issues. You need to set the limit as an option to adjust the size.
-
-You can set the limit and the offset for each query:
-
+Get entries of multiple tags (intersection):
 ```js
-index.search(query, { limit: 20, offset: 100 });
+const result = flexsearch.search({
+    //enrich: true, // enrich documents
+    tag: { 
+        "genres": ["Documentary", "Short"],
+        "startYear": "1894"
+    }
+});
 ```
 
-> You cannot pre-count the size of the result-set. That's a limit by the design of FlexSearch. When you really need a count of all results you are able to page through, then just assign a high enough limit and get back all results and apply your paging offset manually (this works also on server-side). FlexSearch is fast enough that this isn't an issue.
+Combine tags with queries (intersection):
+```js
+const result = flexsearch.search({
+    query: "Carmen", // forward tokenizer
+    tag: { 
+        "genres": ["Documentary", "Short"],
+        "startYear": "1894"
+    }
+});
+```
+
+Alternative declaration:
+```js
+const result = flexsearch.search("Carmen", {
+    tag: [{
+        field: "genres",
+        tag: ["Documentary", "Short"]
+    },{
+        field: "startYear",
+        tag: "1894"
+    }]
+});
+```
 
 ## Document Store
 
@@ -770,99 +823,6 @@ By passing the search option `merge: true` the result set will be merged into (g
 }]
 ```
 
-<a name="tag-search"></a>
-
-## Multi-Tag-Search
-
-Assume this document schema (a dataset from IMDB):
-```js
-{
-    "tconst": "tt0000001",
-    "titleType": "short",
-    "primaryTitle": "Carmencita",
-    "originalTitle": "Carmencita",
-    "isAdult": 0,
-    "startYear": "1894",
-    "endYear": "",
-    "runtimeMinutes": "1",
-    "genres": [
-        "Documentary",
-        "Short"
-    ]
-}
-```
-
-An appropriate document descriptor could look like:
-```js
-import LatinEncoder from "./charset/latin/simple.js";
-
-const flexsearch = new Document({
-    encoder: LatinEncoder,
-    resolution: 3,
-    document: {
-        id: "tconst",
-        //store: true, // document store
-        index: [{
-            field: "primaryTitle",
-            tokenize: "forward"
-        },{
-            field: "originalTitle",
-            tokenize: "forward"
-        }],
-        tag: [
-            "startYear",
-            "genres"
-        ]
-    }
-});
-```
-The field contents of `primaryTitle` and `originalTitle` are encoded by the forward tokenizer. The field contents of `startYear` and `genres` are added as tags.
-
-Get all entries of a specific tag:
-```js
-const result = flexsearch.search({
-    //enrich: true, // enrich documents
-    tag: { "genres": "Documentary" },
-    limit: 1000,
-    offset: 0
-});
-```
-
-Get entries of multiple tags (intersection):
-```js
-const result = flexsearch.search({
-    //enrich: true, // enrich documents
-    tag: { 
-        "genres": ["Documentary", "Short"],
-        "startYear": "1894"
-    }
-});
-```
-
-Combine tags with queries (intersection):
-```js
-const result = flexsearch.search({
-    query: "Carmen", // forward tokenizer
-    tag: { 
-        "genres": ["Documentary", "Short"],
-        "startYear": "1894"
-    }
-});
-```
-
-Alternative declaration:
-```js
-const result = flexsearch.search("Carmen", {
-    tag: [{
-        field: "genres",
-        tag: ["Documentary", "Short"]
-    },{
-        field: "startYear",
-        tag: "1894"
-    }]
-});
-```
-
 ## Filter Fields (Index / Tags / Datastore)
 
 ```js
@@ -897,7 +857,6 @@ const flexsearch = new Document({
     }
 });
 ```
-
 
 ## Custom Fields (Index / Tags / Datastore)
 
@@ -979,3 +938,6 @@ const result = flexsearch.search({
 });
 ```
 
+### Best Practices: Merge Documents
+
+[Read here](encoder.md#merge-documents)

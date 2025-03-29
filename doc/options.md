@@ -402,3 +402,43 @@
         <td>"or"</td>
     </tr>
 </table>
+
+## Encoder Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Field</td>
+        <td>Category</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td><b>encode</b></td>
+        <td>charset</td>
+        <td>The encoder function. Has to return an array of separated words (or an empty string).</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>rtl</b></td>
+        <td>charset</td>
+        <td>A boolean property which indicates right-to-left encoding.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>filter</b></td>
+        <td>language</td>
+        <td>Filter are also known as "stopwords", they completely filter out words from being indexed.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>stemmer</b></td>
+        <td>language</td>
+        <td>Stemmer removes word endings and is a kind of "partial normalization". A word ending just matched when the word length is bigger than the matched partial.</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><b>matcher</b></td>
+        <td>language</td>
+        <td>Matcher replaces all occurrences of a given string regardless of its position and is also a kind of "partial normalization".</td>
+    </tr>
+</table>

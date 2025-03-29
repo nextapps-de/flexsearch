@@ -12,7 +12,7 @@ You can't resolve build flags with:
 - rollup
 - Terser
 
-These are some of the basic builds located in the `/dist/` folder:
+You can run any of the basic builds located in the `/dist/` folder, e.g.:
 
 ```bash
 npm run build:bundle
