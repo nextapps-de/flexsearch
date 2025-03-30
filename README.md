@@ -23,23 +23,6 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 [Resolver](doc/resolver.md) &ensp;&bull;&ensp;
 [Changelog](CHANGELOG.md)
 
-<!--
-> [!NOTE]
-> Useful information that users should know, even when skimming content.
-
-> [!TIP]
-> Helpful advice for doing things better or more easily.
-
-> [!IMPORTANT]
-> Key information users need to know to achieve their goal.
-
-> [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
-
-> [!CAUTION]
-> Advises about risks or negative outcomes of certain actions.
--->
-
 ## Please Support this Project
 
 FlexSearch has been helping developers around the world build powerful, efficient search functionalities for years. Maintaining and improving the library requires significant time and resources. If you’ve found this project valuable and you're interested in supporting the project, please consider donating. Thanks a lot for your continued support!
@@ -259,11 +242,15 @@ Extern Projects & Plugins:
   - [Persistent Options](doc/options.md)
   - [Encoder Options](doc/options.md)
   - [Resolver Options](doc/options.md)
+- [Presets](#presets)
 - [Context Search](#context-search)
+- [Fast-Update Mode](#fast-update-mode)
+- [Suggestions](#suggestions)
 - [Document Search (Multi-Field Search)](doc/document-search.md)
 - [Multi-Tag Search](doc/document-search.md)
 - [Phonetic Search (Fuzzy Search)](#fuzzy-search)
 - [Tokenizer (Partial Search)](#tokenizer-partial-match)
+- [Charset Collection](#charset-collection)
 - [Encoder](doc/encoder.md)
   - [Universal Charset Collection](doc/encoder.md)
   - [Latin Charset Encoder Presets](doc/encoder.md)
@@ -290,6 +277,9 @@ Extern Projects & Plugins:
 - [Custom Score Function](doc/customization.md)
 - [Custom Builds](doc/custom-builds.md)
 - [Extended Keystores (In-Memory)](doc/keystore.md)
+- [Best Practices](#best-practices)
+  - [Page-Load / Fast-Boot](#page-load--fast-boot)
+  - [Use numeric IDs](#use-numeric-ids)
 
 ## Load Library (Node.js, ESM, Legacy Browser)
 
@@ -830,170 +820,167 @@ The documentation will refer to several examples. A list of all examples:
   
 </details>
 
-<a name="api"></a>
 ## API Overview
 
 Constructors:
 
-- new <a href="#mikado.new">**Index**</a>(\<options\>) : <small>_index_</small>
-- new <a href="#mikado.new">**Document**</a>(options) : <small>_document_</small>
-- new <a href="#mikado.new">**Worker**</a>(\<options\>) : <small>_worker_</small>
-- new <a href="#mikado.new">**Encoder**</a>(\<options\>, \<options\>, ...) : <small>_encoder_</small>
-- new <a href="#mikado.new">**Resolver**</a>(\<options\>) : <small>_resolver_</small>
-- new <a href="#mikado.new">**IndexedDB**</a>(\<options\>) : <small>_indexeddb_</small>
+- new [**Index**](#basic-usage)(\<options\>) : <small>_index_</small>
+- new [**Document**](doc/document-search.md)(options) : <small>_document_</small>
+- new [**Worker**](doc/worker.md)(\<options\>) : <small>_worker_</small>
+- new [**Encoder**](doc/encoder.md)(\<options\>, \<options\>, ...) : <small>_encoder_</small>
+- new [**Resolver**](doc/resolver.md)(\<options\>) : <small>_resolver_</small>
+- new [**IndexedDB**](doc/persistent-indexeddb.md)(\<options\>) : <small>_indexeddb_</small>
 
 ---
 
 Global Members:
 
-- <a href="#flexsearch.resolver">Charset</a>
-- <a href="#flexsearch.persistent">Language</a> (Legacy Browser)
+- [**Charset**](#charset-collection)
+- [**Language**](doc/encoder.md#built-in-language-packs) (Legacy Browser Only)
 
 ---
 
 `Index` / `Worker`-Index Methods:
 
-- index.<a href="#index.add">__add__</a>(id, string)
-- ~~index.<a href="#index.append">__append__</a>(id, string)~~
-- index.<a href="#index.update">__update__</a>(id, string)
-- index.<a href="#index.remove">__remove__</a>(id)
-- index.<a href="#index.search">__search__</a>(string, \<limit\>, \<options\>)
-- index.<a href="#index.search">__search__</a>(options)
-- index.<a href="#index.searchCache">__searchCache__</a>(...)
-- index.<a href="#index.contain">__contain__</a>(id)
-- index.<a href="#index.clear">__clear__</a>()
-- index.<a href="#index.cleanup">__cleanup__</a>()
+- index.[**add**](#add-text-item-to-an-index)(id, string)
+- ~~index.[**append**]()(id, string)~~
+- index.[**update**](#update-item-from-an-index)(id, string)
+- index.[**remove**](#remove-item-from-an-index)(id)
+- index.[**search**](#search-items)(string, \<limit\>, \<options\>)
+- index.[**search**](#search-items)(options)
+- index.[**searchCache**](#auto-balanced-cache-by-popularity)(...)
+- index.[**contain**](#check-existence-of-already-indexed-ids)(id)
+- index.[**clear**](#clear-all-items-from-an-index)()
+- index.[**cleanup**](#fast-update-mode)()
 
 
-- <small>_async_</small> index.<a href="#index.export">__export__</a>(handler)
-- <small>_async_</small> index.<a href="#index.import">__import__</a>(key, data)
-- <small>_async_</small> index.<a href="#index.serialize">__serialize__</a>(boolean)
+- <small>_async_</small> index.[**export**](doc/export-import.md)(handler)
+- <small>_async_</small> index.[**import**](doc/export-import.md)(key, data)
+- <small>_async_</small> index.[**serialize**](doc/export-import.md#fast-boot-serialization-for-server-side-rendering-php-python-ruby-rust-java-go-nodejs-)(boolean)
 
 
-- <small>_async_</small> index.<a href="#index.mount">__mount__</a>(db)
-- <small>_async_</small> index.<a href="#index.commit">__commit__</a>(boolean)
-- <small>_async_</small> index.<a href="#index.destroy">__destroy__</a>()
+- <small>_async_</small> index.[**mount**](doc/persistent.md)(db)
+- <small>_async_</small> index.[**commit**](doc/persistent.md)(boolean)
+- <small>_async_</small> index.[**destroy**](doc/persistent.md#delete-store--migration)()
 
 ---
 
 `Document` Methods:
 
-- document.<a href="#document.add">__add__</a>(\<id\>, document)\
-- ~~document.<a href="#document.append">__append__</a>(\<id\>, document)~~\
-- document.<a href="#document.update">__update__</a>(\<id\>, document)\
-- document.<a href="#document.remove">__remove__</a>(id)\
-- document.<a href="#document.remove">__remove__</a>(document)\
-- document.<a href="#document.search">__search__</a>(string, \<limit\>, \<options\>)\
-- document.<a href="#document.search">__search__</a>(options)\
-- document.<a href="#document.searchCache">__searchCache__</a>(...)\
-- document.<a href="#document.contain">__contain__</a>(id)\
-- document.<a href="#document.clear">__clear__</a>()\
-- document.<a href="#index.cleanup">__cleanup__</a>()\
-- document.<a href="#document.get">__get__</a>(id)\
-- document.<a href="#document.get">__set__</a>(\<id\>, document)\
+- document.[**add**](doc/document-search.md#addupdateremove-documents)(\<id\>, document)
+- ~~document.[**append**]()(\<id\>, document)~~
+- document.[**update**](doc/document-search.md#addupdateremove-documents)(\<id\>, document)
+- document.[**remove**](doc/document-search.md#addupdateremove-documents)(id)
+- document.[**remove**](doc/document-search.md#addupdateremove-documents)(document)
+- document.[**search**](doc/document-search.md#document-search-field-search)(string, \<limit\>, \<options\>)
+- document.[**search**](doc/document-search.md#document-search-field-search)(options)
+- document.[**searchCache**](#auto-balanced-cache-by-popularity)(...)
+- document.[**contain**](doc/document-search.md)(id)
+- document.[**clear**](doc/document-search.md)()
+- document.[**cleanup**](#fast-update-mode)()
+- document.[**get**](doc/document-search.md#document-store)(id)
+- document.[**set**](doc/document-search.md#document-store)(\<id\>, document)
 
 
-- <small>_async_</small> document.<a href="#document.export">__export__</a>(handler)
-- <small>_async_</small> document.<a href="#document.import">__import__</a>(key, data)
+- <small>_async_</small> document.[**export**](doc/export-import.md)(handler)
+- <small>_async_</small> document.[**import**](doc/export-import.md)(key, data)
 
 
-- <small>_async_</small> document.<a href="#document.mount">__mount__</a>(db)
-- <small>_async_</small> document.<a href="#document.commit">__commit__</a>(boolean)
-- <small>_async_</small> document.<a href="#document.destroy">__destroy__</a>()
+- <small>_async_</small> document.[**mount**](doc/persistent.md)(db)
+- <small>_async_</small> document.[**commit**](doc/persistent.md)(boolean)
+- <small>_async_</small> document.[**destroy**](doc/persistent.md#delete-store--migration)()
 
 `Document` Properties:
 
-- document.<a href="#document.store">__store__</a>
+- document.[**store**](doc/document-search.md#document-store)
 
 ---
 
 Async Equivalents (Non-Blocking Balanced):
 
-- <small>_async_</small> <a href="#addAsync">.__addAsync__( ... , \<callback\>)</a>
-- <small>_async_</small> ~~<a href="#appendAsync">.__appendAsync__( ... , \<callback\>)</a>~~
-- <small>_async_</small> <a href="#updateAsync">.__updateAsync__( ... , \<callback\>)</a>
-- <small>_async_</small> <a href="#removeAsync">.__removeAsync__( ... , \<callback\>)</a>
-- <small>_async_</small> <a href="#searchAsync">.__searchAsync__( ... , \<callback\>)</a>
+- <small>_async_</small> [**.addAsync**](doc/async.md)( ... , \<callback\>)
+- <small>_async_</small> ~~[**.appendAsync**](doc/async.md)( ... , \<callback\>)~~
+- <small>_async_</small> [**.updateAsync**](doc/async.md)( ... , \<callback\>)
+- <small>_async_</small> [**.removeAsync**](doc/async.md)( ... , \<callback\>)
+- <small>_async_</small> [**.searchAsync**](doc/async.md)( ... , \<callback\>)
 
 Async methods will return a `Promise`, additionally you can pass a callback function as the last parameter.
 
-Methods `export` and also `import` are always async as well as every method you call on a Worker-based or Persistent Index.
+Methods `.export()` and also `.import()` are always async as well as every method you call on a `Worker`-based or `Persistent` Index.
 
 ---
 
 `Encoder` Methods:
 
-- encoder.<a href="#encoder.encode">__encode__</a>(string)
-- encoder.<a href="#encoder.assign">__assign__</a>(options, \<options\>, ...)
-- encoder.<a href="#encoder.addFilter">__addFilter__</a>(string)
-- encoder.<a href="#encoder.addStemmer">__addStemmer__</a>(string => boolean)
-- encoder.<a href="#encoder.addMapper">__addMapper__</a>(char, char)
-- encoder.<a href="#encoder.addMatcher">__addMatcher__</a>(string, string)
-- encoder.<a href="#encoder.addReplacer">__addReplacer__</a>(regex, string)
+- encoder.[**encode**](doc/encoder.md)(string)
+- encoder.[**assign**](doc/encoder.md)(options, \<options\>, ...)
+- encoder.[**addFilter**](doc/encoder.md#add-language-specific-stemmer-andor-filter)(string)
+- encoder.[**addStemmer**](doc/encoder.md#add-language-specific-stemmer-andor-filter)(string => boolean)
+- encoder.[**addMapper**](doc/encoder.md)(char, char)
+- encoder.[**addMatcher**](doc/encoder.md)(string, string)
+- encoder.[**addReplacer**](doc/encoder.md)(regex, string)
 
 ---
 
 `Resolver` Methods:
 
-- resolver.<a href="#resolver.and">__and__</a>(options)
-- resolver.<a href="#resolver.or">__or__</a>(options)
-- resolver.<a href="#resolver.xor">__xor__</a>(options)
-- resolver.<a href="#resolver.not">__not__</a>(options)
-- resolver.<a href="#resolver.boost">__boost__</a>(number)
-- resolver.<a href="#resolver.limit">__limit__</a>(number)
-- resolver.<a href="#resolver.offset">__offset__</a>(number)
-- resolver.<a href="#resolver.resolve">__resolve__</a>(\<options\>)
+- resolver.[**and**](doc/resolver.md)(options)
+- resolver.[**or**](doc/resolver.md)(options)
+- resolver.[**xor**](doc/resolver.md)(options)
+- resolver.[**not**](doc/resolver.md)(options)
+- resolver.[**boost**](doc/resolver.md)(number)
+- resolver.[**limit**](doc/resolver.md)(number)
+- resolver.[**offset**](doc/resolver.md)(number)
+- resolver.[**resolve**](doc/resolver.md)(\<options\>)
 
 `Resolver` Properties:
 
-- resolver.<a href="#resolver.result">__result__</a>
+- resolver.[**result**](doc/resolver.md)
 
 ---
 
 `StorageInterface` Methods:
 
-- <small>_async_</small> db.<a href="#db.open">__mount__</a>(index, \<options\>)
-- <small>_async_</small> db.<a href="#db.open">__open__</a>()
-- <small>_async_</small> db.<a href="#db.close">__close__</a>()
-- <small>_async_</small> db.<a href="#db.destroy">__destroy__</a>()
-- <small>_async_</small> db.<a href="#db.clear">__clear__</a>()
+- <small>_async_</small> db.[**mount**](doc/persistent.md)(index, \<options\>)
+- <small>_async_</small> db.[**open**](doc/persistent.md)()
+- <small>_async_</small> db.[**close**](doc/persistent.md)()
+- <small>_async_</small> db.[**destroy**](doc/persistent.md)()
+- <small>_async_</small> db.[**clear**](doc/persistent.md)()
 
 ---
 
 `Charset` Universal Encoder Preset:
 
-- Charset.<a href="#charset">__Exact__</a>
-- Charset.<a href="#charset">__Default__</a>
-- Charset.<a href="#charset">__Normalize__</a>
-- Charset.<a href="#charset">__Dedupe__</a>
+- Charset.[**Exact**](#charset-collection)
+- Charset.[**Default**](#charset-collection)
+- Charset.[**Normalize**](#charset-collection)
 
 `Charset` Latin-specific Encoder Preset:
 
-- Charset.<a href="#charset">__LatinBalance__</a>
-- Charset.<a href="#charset">__LatinAdvanced__</a>
-- Charset.<a href="#charset">__LatinExtra__</a>
-- Charset.<a href="#charset">__LatinSoundex__</a>
+- Charset.[**LatinBalance**](#charset-collection)
+- Charset.[**LatinAdvanced**](#charset-collection)
+- Charset.[**LatinExtra**](#charset-collection)
+- Charset.[**LatinSoundex**](#charset-collection)
 
 ---
 
 `Language` Encoder Preset:
-- <a href="#charset">__en__</a>
-- <a href="#charset">__de__</a>
-- <a href="#charset">__fr__</a>
+- [**en**](doc/encoder.md#built-in-language-packs)
+- [**de**](doc/encoder.md#built-in-language-packs)
+- [**fr**](doc/encoder.md#built-in-language-packs)
 
 ## Options
 
-- [Index Options](doc/options.md#options-index)
-- [Context Options](doc/options.md#options-context)
+- [Index Options](doc/options.md)
+- [Context Options](doc/options.md)
 - [Document Options](doc/options.md)
-- [Encoder Options](doc/options.md)
+- [Encoder Options](doc/encoder.md#property-overview)
 - [Resolver Options](doc/options.md)
 - [Search Options](doc/options.md)
 - [Document Search Options](doc/options.md)
 - [Worker Options](doc/options.md)
 - [Persistent Options](doc/options.md)
 
-<a name="tokenize"></a>
 ## Tokenizer (Partial Match)
 
 The tokenizer is one of the most important options and heavily influence:
@@ -1015,35 +1002,34 @@ Try to choose the most upper of these tokenizer which covers your requirements:
         <td>Memory Factor (n = length of term)</td>
     </tr>
     <tr>
-        <td><b>"strict"</b><br><b>"exact"</b><br><b>"default"</b></td>
+        <td><code>"strict"</code><br><code>"exact"</code><br><code>"default"</code></td>
         <td>index the full term</td>
-        <td><code>foobar</code></td>
-        <td>* 1</td>
+        <td><a>foobar</a></td>
+        <td>1</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><b>"forward"</b></td>
+        <td><code>"forward"</code></td>
         <td>index term in forward direction (supports right-to-left by Index option <code>rtl: true</code>)</td>
-        <td><code>fo</code>obar<br><code>foob</code>ar<br></td>
-        <td>* n</td>
+        <td><a>fo</a>obar<br><a>foob</a>ar<br></td>
+        <td>n</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><b>"reverse"</b><br><b>"bidirectional"</b></td>
+        <td><code>"reverse"</code><br><code>"bidirectional"</code></td>
         <td>index term in both directions</td>
-        <td><code>fo</code>obar<br><code>foob</code>ar<br>foob<code>ar</code><br>fo<code>obar</code></td>
-        <td>* 2n - 1</td>
+        <td><a>fo</a>obar<br><a>foob</a>ar<br>foob<a>ar</a><br>fo<a>obar</a></td>
+        <td>2n - 1</td>
     </tr>
     <tr></tr>
     <tr>
-        <td><b>"full"</b></td>
+        <td><code>"full"</code></td>
         <td>index every consecutive partial</td>
-        <td>fo<code>oba</code>r<br>f<code>oob</code>ar</td>
-        <td>* n * (n - 1)</td>
+        <td>fo<a>oba</a>r<br>f<a>oob</a>ar</td>
+        <td>n * (n - 1)</td>
     </tr>
 </table>
 
-<a name="charset"></a>
 ## Charset Collection
 
 Encoding is one of the most important task and heavily influence:
@@ -1067,7 +1053,7 @@ Encoding is one of the most important task and heavily influence:
     </tr>
     <tr></tr>
     <tr>
-        <td><code>Normalize (Default)</code></td>
+        <td><code>Normalize</code><br><code>Default</code></td>
         <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication</td>
         <td>Universal (multi-lang)</td>
         <td>~ 7%</td>
@@ -1100,18 +1086,16 @@ Encoding is one of the most important task and heavily influence:
         <td>Latin</td>
         <td>~ 70%</td>
     </tr>
-    <tr></tr>
     <tr>
         <td><code>function(str) => [str]</code></td>
         <td>Pass a custom encoding function to the <code>Encoder</code></td>
-        <td>Latin</td>
+        <td></td>
         <td></td>
     </tr>
 </table>
 
 ## Basic Usage
 
-<a name="flexsearch.create"></a>
 #### Create a new index
 
 ```js
@@ -1155,15 +1139,12 @@ const index = new Index({
 });
 ```
 
-
-
 The resolution refers to the maximum count of scoring slots on which the content is divided into.
 
 > A formula to determine a well-balanced value for the `resolution` is: $2*floor(\sqrt{content.length})$ where content is the value pushed by `index.add()`. Here the maximum length of all contents should be used.
 
 <a href="#options">See all available custom options.</a>
 
-<a name="index.add"></a>
 #### Add text item to an index
 
 Every content which should be added to the index needs an ID. When your content has no ID, then you need to create one by passing an index or count or something else as an ID (a value from type `number` is highly recommended). Those IDs are unique references to a given content. This is important when you update or adding over content through existing IDs. When referencing is not a concern, you can simply use something simple like `count++`.
@@ -1174,7 +1155,6 @@ Every content which should be added to the index needs an ID. When your content 
 index.add(0, "John Doe");
 ```
 
-<a name="index.search"></a>
 #### Search items
 
 > Index.__search(string | options, \<limit\>, \<options\>)__
@@ -1189,18 +1169,16 @@ Limit the result:
 index.search("John", 10);
 ```
 
-<a name="index.contain"></a>
 #### Check existence of already indexed IDs
 
 You can check if an ID was already indexed by:
 
 ```js
 if(index.contain(1)){
-    console.log("ID is already in index");
+    console.log("ID was found in index");
 }
 ```
 
-<a name="index.update"></a>
 #### Update item from an index
 
 > Index.__update(id, string)__
@@ -1209,13 +1187,20 @@ if(index.contain(1)){
 index.update(0, "Max Miller");
 ```
 
-<a name="index.remove"></a>
 #### Remove item from an index
 
 > Index.__remove(id)__
 
 ```js
 index.remove(0);
+```
+
+#### Clear all items from an index
+
+> Index.__clear()__
+
+```js
+index.clear();
 ```
 
 ### Chaining
@@ -1348,7 +1333,33 @@ Original term which was indexed: "Struldbrugs"
 
 The index size was measured after indexing the book "Gulliver's Travels".
 
-<a name="context-search"></a>
+## Fast-Update Mode
+
+The default mode is highly optimized for search performance and adding contents to the index. Whenever you need to `update` or `remove` existing contents of an index you can enable an additional register which boost those tasks also to a high-performance level. This register will take an extra amount of memory (~30% increase of index size).
+
+```js
+const index = new Index({
+  fastupdate: true
+});
+```
+```js
+const index = new Document({
+  fastupdate: true
+});
+```
+
+> `Worker`-Index and `Persistent`-Index does not support the fastupdate option, because of its nature.
+
+When using fastupdate, the index won't fully clear up, when removing items. A barely rest of structure will still remain. It's not a memory issue, because this rest will take less than 1% of the index size. But instead the internal performance of key lookups will lose efficiency, because of not used (empty) keys in the index.
+
+In most cases this is not an issue. But you can trigger a `cleanup` task, which will find those empty index slots and remove them:
+
+```js
+index.cleanup();
+```
+
+> The `cleanup` method has no effect when not using `fastupdate: true`.
+
 ## Context Search
 
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document. The context acts like a bidirectional moving window of 2 pointers (terms) which can initially have a maximum distance of the value passed via option setting `depth` and dynamically growth on search when the query did not match any results.
@@ -1357,7 +1368,6 @@ The basic idea of this concept is to limit relevance by its context instead of c
     <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4" width="100%">
 </p>
 
-<a name="contextual_enable"></a>
 ### Enable Context-Search
 
 Create an index and use the default context:

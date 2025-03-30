@@ -1,6 +1,10 @@
 ## Result Highlighting
 
-Result highlighting could be just enabled when using Document-Index with enabled Data-Store. Also when you just want to add id-content-pairs you'll need to use a DocumentIndex for this feature (just define a simple document descriptor as shown below).
+Demo: <a href="https://raw.githack.com/nextapps-de/flexsearch/master/demo/autocomplete.html" target="_blank">Auto-Complete</a>
+
+> Result highlighting could be just enabled when using `Document`-Index with enabled document store by passing option `store` on creation.
+
+Alternatively simply upgrade id-content-pairs to a flat document on-the-fly when calling `.add()`.
 
 ```js
 // create the document index

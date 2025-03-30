@@ -74,8 +74,8 @@ await index.commit();
 Alternatively mount a store by index creation:
 
 ```js
-const index = new FlexSearchIndex({
-    db: new Storage("my-store")
+const index = new Index({
+    db: new IndexedDB("my-store")
 });
 
 // await for the db response before access the first time
@@ -94,7 +94,7 @@ Auto-Commit is enabled by default and will process changes asynchronously in bat
 You can fully disable the auto-commit feature and perform them manually:
 
 ```js
-const index = new FlexSearchIndex({
+const index = new Index({
     db: new Storage("my-store"),
     commit: false
 });

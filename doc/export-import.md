@@ -35,6 +35,8 @@ When using Server-Side-Rendering you can create a different export which instant
 
 > When your index is too large you should use the default export/import mechanism.
 
+You'll need Javascript to create the serialized output. Alternatively just create a small Node.js script to build the output.
+
 As the first step populate the FlexSearch index with your contents.
 
 You have two options:

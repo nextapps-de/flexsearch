@@ -451,13 +451,17 @@ index.search(query, { limit: 20, offset: 100 });
 
 ## The Result Set
 
-Schema of the result-set:
+Schema of the default result-set:
 
-> `fields[] => { field, result[] => { document }}`
+> `fields[] => { field, result[] => id }`
 
-The first index is an array of fields the query was applied to. Each of this field has a record (object) with 2 properties "field" and "result". The "result" is also an array and includes the result for this specific field. The result could be an array of IDs or as enriched with stored document data.
+Schema of an enriched result-set:
 
-A non-enriched result set now looks like:
+> `fields[] => { field, result[] => { id, doc }}`
+
+The top-level scope of the result set is an array of fields on which the query was applied to. Each of this field has a record (object) with 2 properties `field` and `result`. The `result` could be an array of IDs or is getting enriched by the stored document data (when index was created with `store: true`).
+
+A default non-enriched result set looks like:
 
 ```js
 [{
@@ -469,7 +473,7 @@ A non-enriched result set now looks like:
 }]
 ```
 
-An enriched result set now looks like:
+An enriched result set looks like:
 
 ```js
 [{
@@ -489,12 +493,36 @@ An enriched result set now looks like:
 }]
 ```
 
-When using `pluck` instead of "field" you can explicitly select just one field and get back a flat representation:
+### Merge Document Results
+
+Schema of the merged result-set:
+
+> `result[] => { id, doc, field[] }}`
+
+By passing the search option `merge: true` all fields of the result set will be merged (grouped by ID):
 
 ```js
-index.search(query, { pluck: "title", enrich: true });
+[{
+    id: 1001,
+    doc: {/* stored document */}
+    field: ["fieldname-1", "fieldname-2"]
+},{
+    id: 1002,
+    doc: {/* stored document */}
+    field: ["fieldname-3"]
+}]
 ```
 
+### Pluck Single Fields
+
+When using `pluck` instead of `field` you can explicitly select just one field and get back a flat representation:
+
+```js
+index.search(query, { 
+    pluck: "title",
+    enrich: true
+});
+```
 ```js
 [
     { id: 0, doc: { /* document */ }},
@@ -503,30 +531,15 @@ index.search(query, { pluck: "title", enrich: true });
 ]
 ```
 
-This result set is a replacement of "boolean search". Instead of applying your bool logic to a nested object, you can apply your logic by yourself on top of the result-set dynamically. This opens hugely capabilities on how you process the results. Therefore, the results from the fields aren't squashed into one result anymore. That keeps some important information, like the name of the field as well as the relevance of each field results which didn't get mixed anymore.
+## Tags
 
-> A field search will apply a query with the boolean "or" logic by default. Each field has its own result to the given query.
-
-There is one situation where the `bool` property is being still supported. When you like to switch the default "or" logic from the field search into "and", e.g.:
-
-```js
-index.search(query, { 
-    index: ["title", "content"],
-    bool: "and" 
-});
-```
-
-You will just get results which contains the query in both fields. That's it.
-
-### Tags
-
-Like the `key` for the ID just define the path to the tag:
+Like the property `index` within a document descriptor just define a property `tag`:
 
 ```js
 const index = new Document({
     document: { 
         id: "id",
-        tag: "tag",
+        tag: "species",
         index: "content"
     }
 });
@@ -535,17 +548,17 @@ const index = new Document({
 ```js
 index.add({
     id: 0,
-    tag: "cat",
+    species: "cat",
     content: "Some content ..."
 });
 ```
 
-Your data also can have multiple tags as an array:
+Your data also can include multiple tags as an array:
 
 ```js
 index.add({
     id: 1,
-    tag: ["animal", "dog"],
+    species: ["fish", "dog"],
     content: "Some content ..."
 });
 ```
@@ -553,29 +566,32 @@ index.add({
 You can perform a tag-specific search by:
 
 ```js
-index.search(query, { 
-    index: "content",
-    tag: "animal" 
+index.search(query, {
+    tag: { species: "fish" } 
 });
 ```
 
-This just gives you result which was tagged with the given tag.
+This just gives you results which was tagged with the given tag.
 
 Use multiple tags when searching:
 
 ```js
-index.search(query, { 
-    index: "content",
-    tag: ["cat", "dog"]
+index.search(query, {
+    tag: { species: ["cat", "dog"] }
 });
 ```
 
-This gives you result which are tagged with one of the given tag.
+This give you results which was tagged with at least one of the given tags.
 
+Get back all tagged results without passing any query:
 
-You will just get results which contains both tags (in this example there is just one records which has the tag "dog" and "animal").
+```js
+index.search({
+    tag: { species: "cat" }
+});
+```
 
-## Multi-Tag-Search
+### Multi-Tag Search
 
 Assume this document schema (a dataset from IMDB):
 ```js
@@ -598,7 +614,7 @@ Assume this document schema (a dataset from IMDB):
 An appropriate document descriptor could look like:
 ```js
 import Charset from "flexsearch";
-const flexsearch = new Document({
+const index = new Document({
     encoder: Charset.Normalize,
     resolution: 3,
     document: {
@@ -622,7 +638,7 @@ The field contents of `primaryTitle` and `originalTitle` are encoded by the forw
 
 Get all entries of a specific tag:
 ```js
-const result = flexsearch.search({
+const result = index.search({
     //enrich: true, // enrich documents
     tag: { "genres": "Documentary" },
     limit: 1000,
@@ -632,7 +648,7 @@ const result = flexsearch.search({
 
 Get entries of multiple tags (intersection):
 ```js
-const result = flexsearch.search({
+const result = index.search({
     //enrich: true, // enrich documents
     tag: { 
         "genres": ["Documentary", "Short"],
@@ -643,7 +659,7 @@ const result = flexsearch.search({
 
 Combine tags with queries (intersection):
 ```js
-const result = flexsearch.search({
+const result = index.search({
     query: "Carmen", // forward tokenizer
     tag: { 
         "genres": ["Documentary", "Short"],
@@ -654,7 +670,7 @@ const result = flexsearch.search({
 
 Alternative declaration:
 ```js
-const result = flexsearch.search("Carmen", {
+const result = index.search("Carmen", {
     tag: [{
         field: "genres",
         tag: ["Documentary", "Short"]
@@ -726,24 +742,12 @@ Your results look now like:
 }]
 ```
 
-### Configure Storage (Recommended)
+### Configure Document Store (Recommended)
 
-This will add just specific fields from a document to the store (the ID isn't necessary to keep in store):
+You can configure independently what should being indexed and what should being stored. This can reduce required index space significantly. Indexed fields do not require to be included in the stored data (also the ID isn't necessary to keep in store).
+It is recommended to just add fields to the store you'll need in the final result to process further on.
 
-```js
-const index = new Document({
-    document: {
-        index: "content",
-        store: ["author", "email"]
-    }
-});
-
-index.add(id, content);
-```
-
-You can configure independently what should being indexed and what should being stored. It is highly recommended to make use of this whenever you can.
-
-Here a useful example of configuring doc and store:
+A short example of configuring a document store:
 
 ```js
 const index = new Document({
@@ -782,51 +786,14 @@ Your results are now looking like:
 }]
 ```
 
-Both field "author" and "email" are not indexed.
-
-
-## Merge Document Results
-
-By default, the result set of Field-Search has a structure grouped by field names:
-```js
-[{
-    field: "fieldname-1",
-    result: [{
-        id: 1001,
-        doc: {/* stored document */}
-    }]
-},{
-    field: "fieldname-2",
-    result: [{
-        id: 1001,
-        doc: {/* stored document */}
-    }]
-},{
-    field: "fieldname-3",
-    result: [{
-        id: 1002,
-        doc: {/* stored document */}
-    }]
-}]
-```
-
-By passing the search option `merge: true` the result set will be merged into (group by id):
-```js
-[{
-    id: 1001,
-    doc: {/* stored document */}
-    field: ["fieldname-1", "fieldname-2"]
-},{
-    id: 1002,
-    doc: {/* stored document */}
-    field: ["fieldname-3"]
-}]
-```
+Both field "author" and "email" are not indexed, whereas the indexed field "content" was not included in the stored data.
 
 ## Filter Fields (Index / Tags / Datastore)
 
+You can pass a function to the field option property `filter`. This function just has to return `true` if the document should be indexed.
+
 ```js
-const flexsearch = new Document({
+const index = new Document({
     document: {
         id: "id",
         index: [{
@@ -860,7 +827,13 @@ const flexsearch = new Document({
 
 ## Custom Fields (Index / Tags / Datastore)
 
+You can pass a function to the field option property `custom` to either:
+
+1. change and/or extend the original input string
+2. create a new "virtual" field which is not included in document data
+
 Dataset example:
+
 ```js
 {
     "id": 10001,
@@ -873,9 +846,10 @@ Dataset example:
 }
 ```
 
-You can apply custom fields derived from data or by anything else:
+You can apply custom fields derived from document data or by any external data:
+
 ```js
-const flexsearch = new Document({
+const index = new Document({
     document: {
         id: "id",
         index: [{
@@ -925,14 +899,14 @@ const flexsearch = new Document({
 
 Perform a query against the custom field as usual:
 ```js
-const result = flexsearch.search({
+const result = index.search({
     query: "10178 Berlin Alexanderplatz",
     field: "location"
 });
 ```
 
 ```js
-const result = flexsearch.search({
+const result = index.search({
     query: "john doe",
     tag: { "city": "Berlin" }
 });

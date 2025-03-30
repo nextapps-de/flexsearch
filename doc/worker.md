@@ -1,10 +1,9 @@
-
-<a name="webworker"></a>
 ## Worker Parallelism (Browser + Node.js)
 
-The new worker model from v0.7.0 is divided into "fields" from the document (1 worker = 1 field index). This way the worker becomes able to solve tasks (subtasks) completely. The downside of this paradigm is they might not have been perfect balanced in storing contents (fields may have different length of contents). On the other hand there is no indication that balancing the storage gives any advantage (they all require the same amount in total).
+The internal worker model is distributed by document fields and will solve subtasks in parallel.
 
 When using a document index, then just apply the option "worker":
+
 ```js
 const index = new Document({
     index: ["tag", "name", "title", "text"],
@@ -33,36 +32,51 @@ When you perform a field search through all fields then this task is being balan
 
 ### Worker Index
 
-Above we have seen that documents will create worker automatically for each field. You can also create a WorkerIndex directly (same like using `Index` instead of `Document`).
+Above we have seen that documents will create worker automatically for each field. You can also create a `Worker`-Index directly. It's the same as using `Index` instead of `Document`.
 
-Use as ES6 module:
+> Worker-Index always return a `Promise` for all methods called on the index.
+
+#### ES6 Module (Bundle):
+
+When using one of the bundles from `/dist/` you can create a Worker-Index:
 
 ```js
-import WorkerIndex from "./worker/index.js";
-const index = new WorkerIndex(options);
+import { Worker } from "./dist/flexsearch.bundle.module.min.js";
+const index = new Worker({/* options */ });
+await index.add(1, "some");
+await index.add(2, "content");
+await index.add(3, "to");
+await index.add(4, "index");
+```
+
+#### ES6 Module (Non-Bundle):
+
+When not using a bundle you can take the worker file from `/dist/` folder as follows:
+
+```js
+import Worker from "./dist/module/worker.js";
+const index = new Worker({/* options */ });
 index.add(1, "some")
      .add(2, "content")
      .add(3, "to")
      .add(4, "index");
 ```
 
-Or when bundled version was used instead:
+#### Browser Legacy (Bundle):
+
+When loading a legacy bundle via script tag (non-modules):
 
 ```js
-var index = new FlexSearch.Worker(options);
-index.add(1, "some")
-     .add(2, "content")
-     .add(3, "to")
-     .add(4, "index");
+const index = new FlexSearch.Worker({/* options */ });
+await index.add(1, "some");
+await index.add(2, "content");
+await index.add(3, "to");
+await index.add(4, "index");
 ```
 
-Such a WorkerIndex works pretty much the same as a created instance of `Index`.
+### Worker (Node.js)
 
-> A WorkerIndex only support the `async` variant of all methods. That means when you call `index.search()` on a WorkerIndex this will perform also in async the same way as `index.searchAsync()` will do.
-
-### Worker Threads (Node.js)
-
-The worker model for Node.js is based on "worker threads" and works exactly the same way:
+The worker model for Node.js is based on native worker threads and works exactly the same way:
 
 ```js
 const { Document } = require("flexsearch");
@@ -80,7 +94,7 @@ const { Worker } = require("flexsearch");
 const index = new Worker({ options });
 ```
 
-### The Worker Async Model (Best Practices)
+## The Worker Async Model (Best Practices)
 
 A worker will always perform as async. On a query method call you always should handle the returned promise (e.g. use `await`) or pass a callback function as the last parameter.
 

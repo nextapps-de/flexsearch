@@ -5,20 +5,6 @@
 
 Search capabilities highly depends on language processing. The Encoder class is one of the most important core functionalities of FlexSearch.
 
-Current Encoding Pipeline:
-
-1. Charset Normalization
-2. Custom Preparation
-3. Split Content (into terms, apply includes/excludes)
-4. Filter: Pre-Filter
-5. Matcher (substitute partials)
-6. Stemmer (substitute term endings)
-7. Filter: Post-Filter
-8. Replace Chars (Mapper)
-9. Custom Regex (Replacer)
-10. Letter Deduplication
-11. Custom Finalize
-
 > Encoders are basically responsible for "fuzziness". [Read here about Phonetic Search/Fuzzy Search](../README.md#fuzzy-search)
 
 ### Default Encoder
@@ -76,7 +62,7 @@ const encoder = new Encoder({
 3. Charset.LatinExtra
 4. Charset.LatinSoundex
 
-### Example
+### Basic Usage
 
 ```js
 const encoder = new Encoder({
@@ -249,6 +235,15 @@ encoder.addStemmer("ly", "");
 encoder.addReplacer(/[´`’ʼ]/g, "'");
 ```
 
+Using a custom filter:
+
+```js
+encoder.addFilter(function(str){
+    // return true to keep the content
+    return str.length > 1;
+});
+```
+
 Shortcut for just assigning one encoder configuration to an index:
 
 ```js
@@ -257,13 +252,92 @@ const index = new Index({
 });
 ```
 
-### Encoder Processing Workflow
+### Property Overview
 
-This workflow schema might help you to understand each step in the iteration:
-<br><br>
-<img src="encoder-workflow.svg">
+<table>
+    <tr></tr>
+    <tr>
+        <th align="left">Property</th>
+        <th width="50%" align="left">Description</th>
+        <th align="left">Values</th>
+    </tr>
+    <tr>
+        <td><code>normalize</code></td>
+        <td>The normalization stage will simplify the input content e.g. by replacing "é" to "e"</td>
+        <td>
+            <code>true</code> enable normalization (default)
+            <code>false</code> disable normalization<br>
+            <code>function(str) => str</code> custom function
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>prepare</code></td>
+        <td>The preparation stage is a custom function direct followed when normalization was done</td>
+        <td>
+            <code>function(str) => str</code> custom function
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>finalize</code></td>
+        <td>The finalization stage is a custom function executed at the last task in the encoding pipeline (here it gets an array of tokens and need to return an array of tokens)</td>
+        <td>
+            <code>function([str]) => [str]</code> custom function
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>filter</code></td>
+        <td>Stop-word filter is like a blacklist of words to be filtered out from indexing at all (e.g. "and", "to" or "be"). This is also very useful when using <a href="../README.md#context-search">Context Search</a></td>
+        <td>
+            <code>Set(["and", "to", "be"])</code><br>
+            <code>function(str) => bool</code> custom function<hr style="margin: 5px">
+            <code>encoder.addFilter("and")</code>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>stemmer</code></td>
+        <td>Stemmer will normalize several linguistic mutations of the same word (e.g. "run" and "running", or "property" and "properties"). This is also very useful when using <a href="../README.md#context-search">Context Search</a></td>
+        <td>
+            <code>Map([["ing", ""], ["ies", "y"]])</code><hr style="margin: 5px">
+            <code>encoder.addStemmer("ing", "")</code>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>mapper</code></td>
+        <td>Mapper will replace a single char (e.g. "é" into "e")</td>
+        <td>
+            <code>Map([["é", "e"], ["ß", "ss"]])</code><hr style="margin: 5px">
+            <code>encoder.addMapper("é", "e")</code>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>matcher</code></td>
+        <td>Matcher will do same as Mapper but instead of single chars it will replace char sequences</td>
+        <td>
+            <code>Map([["and", "&"], ["usd", "$"]])</code><hr style="margin: 5px">
+            <code>encoder.addMatcher("and", "&")</code>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>replacer</code></td>
+        <td>Replacer takes custom regular expressions and couldn't get optimized in the same way as Mapper or Matcher. You should take this as the last option when no other replacement can do the same.</td>
+        <td>
+            <code>[/[^a-z0-9]/g, "", /([^aeo])h(.)/g, "$1$2"])</code><hr style="margin: 5px">
+            <code>encoder.addReplacer(/[^a-z0-9]/g, "")</code>
+        </td>
+    </tr>
+</table>
 
-### Custom Encoder
+> [!TIP]
+> The methods `.addMapper()`, `.addMatcher()` and `.addReplacer()` might be confusing. For this reason they will automatically resolve to the right one when just using the same method for every rule. You can simplify this e.g. by just use `.addReplacer()` for each of this 3 rules.
+
+## Custom Encoder
 
 Since it is very simple to create a custom Encoder, you are welcome to create your own.
 e.g.
@@ -291,100 +365,40 @@ If nothing of them are applicable for your task you should tokenize everything i
 
 If you get some good results please feel free to share your encoder.
 
-### Add language-specific stemmer and/or filter
+### Encoder Processing Workflow
 
-> __Stemmer:__ several linguistic mutations of the same word (e.g. "run" and "running")
+1. Charset Normalization
+2. Custom Preparation
+3. Split Content (into terms, apply includes/excludes)
+4. Filter: Pre-Filter
+5. Stemmer (substitute term endings)
+6. Filter: Post-Filter
+7. Replace Chars (Mapper)
+8. Letter Deduplication
+9. Matcher (substitute partials)
+10. Custom Regex (Replacer)
+11. Custom Finalize
 
-> __Filter:__ a blacklist of words to be filtered out from indexing at all (e.g. "and", "to" or "be")
+This workflow schema might help you to understand each step in the iteration:
+<br><br>
+<img src="encoder-workflow.svg" style="max-width: 650px" width="100%">
 
-Assign a private custom stemmer or filter during creation/initialization:
-```js
-const index = new Index({
-    stemmer: {
-
-        // object {key: replacement}
-        "ational": "ate",
-        "tional": "tion",
-        "enci": "ence",
-        "ing": ""
-    },
-    filter: [
-
-        // array blacklist
-        "in",
-        "into",
-        "is",
-        "isn't",
-        "it",
-        "it's"
-    ]
-});
-```
-
-Using a custom filter, e.g.:
-```js
-const index = new Index({
-    filter: function(value){
-        // just add values with length > 1 to the index
-        return value.length > 1;
-    }
-});
-```
-
-Load language packs with legacy browser support (non-modules):
-
-```html
-<html>
-<head>
-    <script src="js/flexsearch.bundle.min.js"></script>
-    <script src="js/lang/en.min.js"></script>
-    <script src="js/lang/de.min.js"></script>
-</head>
-...
-```
-
-In Node.js all built-in language packs files are available by its scope:
-
-```js
-const EnglishPreset = require("flexsearch/lang/en");
-const index = new Index({
-    encoder: EnglishPreset
-});
-```
-
-<a name="rtl"></a>
 ## Right-To-Left Support
 
-> Set the tokenizer at least to "reverse" or "full" when using RTL.
+> [!NOTE]
+> When a string is already encoded/interpreted as Right-To-Left you didn't need to use that. This option is just useful, when the source content wasn't encoded as RTL.
 
-Just set the field "rtl" to _true_ and use a compatible tokenizer:
+Just set the property `rtl: true` when creating the `Encoder`:
 
 ```js
-var index = new Index({
-    encode: str => str.toLowerCase().split(/[^a-z]+/),
-    tokenize: "reverse",
-    rtl: true
-});
+const encoder = new Encoder({ rtl: true });
 ```
 
-<a name="cjk"></a>
 ## CJK Word Break (Chinese, Japanese, Korean)
 
-Set a custom tokenizer which fits your needs, e.g.:
-
 ```js
-var index = FlexSearch.create({
-    encode: str => str.replace(/[\x00-\x7F]/g, "").split("")
-});
-```
-
-You can also pass a custom encoder function to apply some linguistic transformations.
-
-```js
+const index = new Index();
 index.add(0, "一个单词");
-```
-
-```js
 var results = index.search("单词");
 ```
 
@@ -394,7 +408,7 @@ var results = index.search("单词");
 - German: `de`
 - French: `fr`
 
-### 1. Import Language Packs: ES6 Modules
+### Import Language Packs: ES6 Modules
 
 The most simple way to assign charset/language specific encoding via modules is:
 
@@ -428,7 +442,7 @@ const index = Index({
 });
 ```
 
-#### 2. Import Language Packs: ES5 Legacy Browser
+#### Import Language Packs: ES5 Legacy Browser
 
 When loading language packs, make sure that the library was loaded before:
 
@@ -454,6 +468,17 @@ const index = FlexSearch.Index({
         FlexSearch.Language["en"],
         { minlength: 3 }
     )
+});
+```
+
+#### Import Language Packs: Node.js
+
+In Node.js all built-in language packs files are available by its scope:
+
+```js
+const EnglishPreset = require("flexsearch/lang/en");
+const index = new Index({
+    encoder: EnglishPreset
 });
 ```
 
