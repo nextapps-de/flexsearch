@@ -853,13 +853,13 @@ Global Members:
 - index.[**clear**](#clear-all-items-from-an-index)()
 - index.[**cleanup**](#fast-update-mode)()
 
-<hr style="height: 1px"/>
+##
 
 - <small>_async_</small> index.[**export**](doc/export-import.md)(handler)
 - <small>_async_</small> index.[**import**](doc/export-import.md)(key, data)
 - <small>_async_</small> index.[**serialize**](doc/export-import.md#fast-boot-serialization-for-server-side-rendering-php-python-ruby-rust-java-go-nodejs-)(boolean)
 
-<hr style="height: 1px"/>
+##
 
 - <small>_async_</small> index.[**mount**](doc/persistent.md)(db)
 - <small>_async_</small> index.[**commit**](doc/persistent.md)(boolean)
@@ -883,12 +883,12 @@ Global Members:
 - document.[**get**](doc/document-search.md#document-store)(id)
 - document.[**set**](doc/document-search.md#document-store)(\<id\>, document)
 
-<hr style="height: 1px"/>
+##
 
 - <small>_async_</small> document.[**export**](doc/export-import.md)(handler)
 - <small>_async_</small> document.[**import**](doc/export-import.md)(key, data)
 
-<hr style="height: 1px"/>
+##
 
 - <small>_async_</small> document.[**mount**](doc/persistent.md)(db)
 - <small>_async_</small> document.[**commit**](doc/persistent.md)(boolean)
