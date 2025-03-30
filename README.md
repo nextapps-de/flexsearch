@@ -226,7 +226,7 @@ Extern Projects & Plugins:
 ## Table of contents
 
 > [!TIP]
-> You will just need to spend 5 minutes to improve your results significantly by understanding these 3 elementary things about FlexSearch : [Tokenizer](#tokenize), [Encoder](#encoder) and [Suggestions](#suggestion)
+> You will just need to spend 5 minutes to improve your results significantly by understanding these 3 elementary things about FlexSearch : [Tokenizer](#tokenizer-partial-match), [Encoder](doc/encoder.md) and [Suggestions](#suggestions)
 
 - [Load Library (Node.js, ESM, Legacy Browser)](#load-library)
   - [Non-Module Bundles (ES5 Legacy)](#non-module-bundles-es5-legacy)
