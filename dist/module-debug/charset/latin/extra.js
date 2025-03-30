@@ -7,7 +7,7 @@ export const compact = [/(?!^)[aeo]/g, "" // before soundex: aeoy, old: aioy
 
 /** @type EncoderOptions */
 const options = {
-    normalize: !0,
+    //normalize: true,
     dedupe: !0,
     mapper: soundex,
     replacer: replacer.concat(compact),

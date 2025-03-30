@@ -1,15 +1,14 @@
 import charset_latin_exact from "./charset/latin/exact.js";
-import charset_latin_default from "./charset/latin/default.js";
-import charset_latin_simple from "./charset/latin/simple.js";
+import charset_latin_normalize from "./charset/latin/normalize.js";
 import charset_latin_balance from "./charset/latin/balance.js";
 import charset_latin_advanced from "./charset/latin/advanced.js";
 import charset_latin_extra from "./charset/latin/extra.js";
 import charset_latin_soundex from "./charset/latin/soundex.js";
 
-// all charset
+// universal charset
 export const Exact = charset_latin_exact;
-export const Default = charset_latin_default;
-export const Normalize = charset_latin_simple;
+export const Default = charset_latin_normalize;
+export const Normalize = charset_latin_normalize;
 // latin charset
 export const LatinBalance = charset_latin_balance;
 export const LatinAdvanced = charset_latin_advanced;
@@ -17,14 +16,14 @@ export const LatinExtra = charset_latin_extra;
 export const LatinSoundex = charset_latin_soundex;
 // deprecated
 export const LatinExact = charset_latin_exact;
-export const LatinDefault = charset_latin_default;
-export const LatinSimple = charset_latin_simple;
+export const LatinDefault = charset_latin_normalize;
+export const LatinSimple = charset_latin_normalize;
 
 export default {
-    // all charset
+    // universal charset
     Exact: charset_latin_exact,
-    Default: charset_latin_default,
-    Normalize: charset_latin_simple,
+    Default: charset_latin_normalize,
+    Normalize: charset_latin_normalize,
     // latin charset
     LatinBalance: charset_latin_balance,
     LatinAdvanced: charset_latin_advanced,
@@ -32,6 +31,6 @@ export default {
     LatinSoundex: charset_latin_soundex,
     // deprecated
     LatinExact: charset_latin_exact,
-    LatinDefault: charset_latin_default,
-    LatinSimple: charset_latin_simple,
+    LatinDefault: charset_latin_normalize,
+    LatinSimple: charset_latin_normalize
 };

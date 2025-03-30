@@ -3,7 +3,7 @@
   "preferGlobal": false,
   "name": "flexsearch-postgres",
   "version": "0.1.0",
-  "main": "db.js",
+  "main": "index.js",
   "dependencies": {
     "pg-promise": "^11.10.2"
   }

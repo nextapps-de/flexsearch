@@ -7,13 +7,13 @@
  */
 
 import { IndexOptions, ContextOptions, EncoderOptions } from "./type.js";
-import Encoder from "./encoder.js";
+import Encoder, { fallback_encoder } from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import Charset from "./charset.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex, serialize } from "./serialize.js";
-import default_encoder from "./charset/latin/default.js";
+//import default_encoder from "./charset/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
 import tick from "./profiler.js";
@@ -39,7 +39,7 @@ export default function Index(options, _register) {
     let tmp = options.context;
     /** @type ContextOptions */
     const context = /** @type ContextOptions */ /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ === tmp ? { depth: 1 } : tmp || {},
-          encoder = is_string(options.encoder) ? Charset[options.encoder] : options.encode || options.encoder || default_encoder;
+          encoder = is_string(options.encoder) ? Charset[options.encoder] : options.encode || options.encoder || {} /*default_encoder*/;
 
     /** @type Encoder */
     this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder( /** @type {EncoderOptions} */encoder) : { encode: encoder };

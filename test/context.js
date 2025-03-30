@@ -12,7 +12,7 @@ const Charset = _Charset || (await import("../src/charset.js")).default;
 
 describe("Context", function(){
 
-    it("Should have been added properly to the context", function(){
+    it("Should have been added properly to the context (bidirectional enabled)", function(){
 
         let index = new Index({
             tokenize: "strict",
@@ -26,13 +26,20 @@ describe("Context", function(){
         expect(index.reg.size).to.equal(1);
         expect(index.search("zero one")).to.include(0);
         expect(index.search("zero two")).to.include(0);
+        // breaks the context chain:
         expect(index.search("zero three").length).to.equal(0);
+        expect(index.search("zero three", { suggest: true })).to.include(0);
+        // breaks the context chain:
         expect(index.search("three seven").length).to.equal(0);
+        expect(index.search("three seven", { suggest: true })).to.include(0);
         expect(index.search("three five seven")).to.include(0);
+        // bidirectional:
         expect(index.search("eight six four")).to.include(0);
         expect(index.search("seven five three")).to.include(0);
         expect(index.search("three foobar seven").length).to.equal(0);
+        expect(index.search("three foobar seven", { suggest: true })).to.include(0);
         expect(index.search("seven foobar three").length).to.equal(0);
+        expect(index.search("seven foobar three", { suggest: true })).to.include(0);
         expect(index.search("eight ten")).to.include(0);
         expect(index.search("ten nine seven eight six five three four two zero one")).to.include(0);
 
@@ -42,6 +49,7 @@ describe("Context", function(){
         expect(index.search("1 5")).to.include(1);
         expect(index.search("2 4 1")).to.include(1);
 
+        // disable bidirectional
         index = new Index({
             tokenize: "strict",
             context: {
@@ -52,5 +60,42 @@ describe("Context", function(){
 
         index.add(0, "zero one two three four five six seven eight nine ten");
         expect(index.search("ten nine seven eight six five three four two zero one").length).to.equal(0);
+    });
+
+    it("Should have been added properly to the context when bidirectional was disabled", function(){
+
+        let index = new Index({
+            tokenize: "strict",
+            context: {
+                depth: 2,
+                bidirectional: false
+            }
+        });
+
+        index.add(1, "1 2 3 4 5 6 7 8 9");
+        expect(index.search("3 1").length).to.equal(0);
+        expect(index.search("4 3 2").length).to.equal(0);
+    });
+
+    it("Should have been added properly when dupes will break the context chain", function(){
+
+        const index = new Index({
+            context: {
+                depth: 2
+            }
+        });
+
+        index.add(1, "1 2 3 4 5 6 7 8 1 2 9");
+
+        expect(index.search("1 9")).to.include(1);
+        expect(index.search("1 2 9")).to.include(1);
+        expect(index.search("9 1 2")).to.include(1);
+
+        // todo shuffled chain:
+        //expect(index.search("1 3 9")).to.include(1);
+        expect(index.search("3 1 9")).to.include(1);
+        expect(index.search("9 1 3")).to.include(1);
+        // todo shuffled chain:
+        //expect(index.search("9 3 1")).to.include(1);
     });
 });

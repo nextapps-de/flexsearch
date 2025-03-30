@@ -43,7 +43,7 @@ describe("Encoder: Charset", function(){
 
             const index = new Index({ encoder: Charset.Exact });
             expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
-                ["Björn-Phillipp", "Mayer"]
+                ["Björn", "Phillipp", "Mayer"]
             );
         });
 

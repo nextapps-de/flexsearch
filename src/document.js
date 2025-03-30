@@ -522,7 +522,7 @@ if(SUPPORT_STORE){
      */
     Document.prototype.set = function(id, data){
 
-        if(is_object(id)){
+        if(typeof id === "object"){
             data = id;
             id = parse_simple(data, this.key);
         }

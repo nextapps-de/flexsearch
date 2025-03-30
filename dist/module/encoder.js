@@ -1,6 +1,6 @@
 
 import { merge_option } from "./common.js";
-import normalize_polyfill from "./charset/normalize.js";
+import normalize_polyfill from "./charset/polyfill.js";
 import { EncoderOptions } from "./type.js";
 
 /*
@@ -507,6 +507,11 @@ Encoder.prototype.encode = function (str) {
 
     return final;
 };
+
+export function fallback_encoder(str) {
+
+    return str.normalize("NFKD").replace(normalize, "").toLowerCase().trim().split(/\s+/);
+}
 
 // Encoder.prototype.compress = function(str) {
 //

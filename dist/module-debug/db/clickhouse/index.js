@@ -47,7 +47,7 @@ function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_]/g, "");
 }
 
-let DB;
+let Index;
 
 /**
  * @constructor
@@ -74,7 +74,7 @@ export default function ClickhouseDB(name, config = {}) {
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
     //this.trx = false;
     this.support_tag_search = !0;
-    this.db = DB || (DB = config.db || null);
+    this.db = Index || (Index = config.db || null);
     Object.assign(defaults, config);
     config.database && (defaults.config.database = config.database);
     this.db && delete defaults.db;
@@ -93,7 +93,7 @@ ClickhouseDB.prototype.mount = function (flexsearch) {
 ClickhouseDB.prototype.open = async function () {
 
     if (!this.db) {
-        this.db = DB || (DB = new ClickHouse(defaults));
+        this.db = Index || (Index = new ClickHouse(defaults));
     }
 
     const exists = await this.db.query(`
@@ -174,7 +174,7 @@ ClickhouseDB.prototype.open = async function () {
 
 ClickhouseDB.prototype.close = function () {
     //DB && DB.close();
-    this.db = DB = null;
+    this.db = Index = null;
     return this;
 };
 

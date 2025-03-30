@@ -16,7 +16,7 @@ function sanitize(str) {
 }
 
 let CLIENT,
-    DB = Object.create(null);
+    Index = Object.create(null);
 
 
 /**
@@ -38,7 +38,7 @@ export default function MongoDB(name, config = {}) {
     this.id = "flexsearch" + (name ? "-" + sanitize(name) : "");
     this.field = config.field ? "-" + sanitize(config.field) : "";
     this.type = config.type || "";
-    this.db = config.db || DB[this.id] || CLIENT || null;
+    this.db = config.db || Index[this.id] || CLIENT || null;
     this.trx = !1;
     this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
     Object.assign(defaults, config);
@@ -87,7 +87,7 @@ async function createCollection(db, ref, field) {
 MongoDB.prototype.open = async function () {
 
     if (!this.db) {
-        if (!(this.db = DB[this.id])) {
+        if (!(this.db = Index[this.id])) {
             if (!(this.db = CLIENT)) {
 
                 let url = defaults.url;
@@ -101,7 +101,7 @@ MongoDB.prototype.open = async function () {
     }
 
     if (this.db.db) {
-        this.db = DB[this.id] = this.db.db(this.id);
+        this.db = Index[this.id] = this.db.db(this.id);
     }
 
     const collections = await this.db.listCollections().toArray();
@@ -126,7 +126,7 @@ MongoDB.prototype.open = async function () {
 MongoDB.prototype.close = function () {
     //CLIENT && CLIENT.close();
     this.db = CLIENT = null;
-    DB[this.id] = null;
+    Index[this.id] = null;
     return this;
 };
 

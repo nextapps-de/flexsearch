@@ -2,7 +2,7 @@ import { EncoderOptions } from "../../type.js";
 
 /** @type EncoderOptions */
 const options = {
-    normalize: !0
+    //normalize: true
     // normalize: function(str){
     //     return str.toLowerCase();
     // },

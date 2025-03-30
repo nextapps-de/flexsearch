@@ -42,8 +42,8 @@ describe("Scoring", function(){
 
         expect(index.search("1")).to.eql([0]);
         expect(index.search("one")).to.eql([1, 2]);
-        expect(index.search("one two")).to.eql([2]); // 1: no bi-directional
-        expect(index.search("four one")).to.eql([1]); // 2: no bi-directional
+        expect(index.search("one two")).to.eql([1]); // 2 => no bi-directional
+        expect(index.search("four one")).to.eql([2]); // 1 => no bi-directional
 
         index = new Index({
             tokenize: "strict",

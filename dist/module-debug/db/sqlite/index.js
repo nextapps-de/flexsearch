@@ -36,7 +36,7 @@ function sanitize(str) {
 
 // global transaction to keep track of database lock
 const TRX = Object.create(null),
-      DB = Object.create(null);
+      Index = Object.create(null);
 
 
 /**
@@ -59,7 +59,7 @@ export default function SqliteDB(name, config = {}) {
     this.id = config.path || (":memory:" === name ? name : "flexsearch" + (name ? "-" + sanitize(name) : "") + ".sqlite");
     this.field = config.field ? "_" + sanitize(config.field) : "";
     this.support_tag_search = /* tag? */ /* stringify */ /* stringify */ /* single param */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
-    this.db = config.db || DB[this.id] || null;
+    this.db = config.db || Index[this.id] || null;
     this.type = config.type ? types[config.type.toLowerCase()] : "string";
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
 }
@@ -77,7 +77,7 @@ SqliteDB.prototype.open = async function () {
 
     if (!this.db) {
 
-        if (!(this.db = DB[this.id])) {
+        if (!(this.db = Index[this.id])) {
 
             let filepath = this.id;
             if (":memory:" !== filepath) {
@@ -89,7 +89,7 @@ SqliteDB.prototype.open = async function () {
                 }
             }
 
-            this.db = DB[this.id] = new sqlite3.Database(filepath);
+            this.db = Index[this.id] = new sqlite3.Database(filepath);
         }
     }
 
@@ -197,7 +197,7 @@ SqliteDB.prototype.open = async function () {
 SqliteDB.prototype.close = function () {
     this.db && this.db.close();
     this.db = null;
-    DB[this.id] = null;
+    Index[this.id] = null;
     TRX[this.id] = null;
     return this;
 };

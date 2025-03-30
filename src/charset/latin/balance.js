@@ -40,7 +40,7 @@ export const soundex = new Map([
 
 /** @type EncoderOptions */
 const options = {
-    normalize: true,
+    //normalize: true,
     dedupe: true,
     mapper: soundex
 };

@@ -227,15 +227,31 @@ export default function(DB, DBClass){
         // mount database to the index
         //await db.mount(document);
         //expect(document.index.get("primaryTitle").db).to.be.instanceof(db.constructor);
-        //document.clear();
+        //await document.clear();
 
         // add test data
         for(let i = 0; i < data.length; i++){
             document.add(data[i]);
         }
 
+        expect(document.index.get("primaryTitle").reg.size).to.equal(2);
+        expect(document.index.get("primaryTitle").map.size).to.equal(25);
+        expect(document.index.get("originalTitle").reg.size).to.equal(2);
+        expect(document.index.get("originalTitle").map.size).to.equal(25);
+        // tag pseudo indexes (persistent only)
+        expect(document.index.get("startYear").reg.size).to.equal(2);
+        expect(document.index.get("startYear").map.size).to.equal(0);
+        expect(document.index.get("genres").reg.size).to.equal(2);
+        expect(document.index.get("genres").map.size).to.equal(0);
+        expect(document.reg.size).to.equal(2);
+        expect(document.store.size).to.equal(2);
+        expect(document.tag.size).to.equal(2);
+        expect(document.tag.get("startYear").size).to.equal(2);
+        expect(document.tag.get("genres").size).to.equal(3);
+
         // transfer changes in bulk
         await document.commit();
+        //await new Promise(resolve => setTimeout(resolve, 200));
 
         expect(document.index.get("primaryTitle").reg.size).to.equal(0);
         expect(document.index.get("primaryTitle").map.size).to.equal(0);

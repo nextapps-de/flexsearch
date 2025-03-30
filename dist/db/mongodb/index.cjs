@@ -1,28 +1,50 @@
-import { MongoClient } from "mongodb";
+'use strict';
+
+var mongodb = require('mongodb');
+
+/**
+ * @param {*} value
+ * @param {*} default_value
+ * @param {*=} merge_value
+ * @return {*}
+ */
+
+
+/**
+ * @param {Map|Set} val
+ * @param {boolean=} stringify
+ * @return {Array}
+ */
+
+function toArray(val, stringify){
+    const result = [];
+    for(const key of val.keys()){
+        result.push(key);
+    }
+    return result;
+}
+
 const defaults = {
     host: "localhost",
     port: "27017",
     user: null,
     pass: null
 };
-const VERSION = 1;
 const fields = ["map", "ctx", "tag", "reg", "cfg"];
-import StorageInterface from "../interface.js";
-import { toArray } from "../../common.js";
 
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
 }
 
 let CLIENT;
-let DB = Object.create(null);
+let Index = Object.create(null);
 
 /**
  * @constructor
  * @implements StorageInterface
  */
 
-export default function MongoDB(name, config = {}){
+function MongoDB(name, config = {}){
     if(!this){
         return new MongoDB(name, config);
     }
@@ -36,13 +58,12 @@ export default function MongoDB(name, config = {}){
     this.id = "flexsearch" + (name ? "-" + sanitize(name) : "");
     this.field = config.field ? "-" + sanitize(config.field) : "";
     this.type = config.type || "";
-    this.db = config.db || DB[this.id] || CLIENT || null;
+    this.db = config.db || Index[this.id] || CLIENT || null;
     this.trx = false;
     this.support_tag_search = true;
     Object.assign(defaults, config);
     this.db && delete defaults.db;
-};
-
+}
 // MongoDB.mount = function(flexsearch){
 //     return new this().mount(flexsearch);
 // };
@@ -85,7 +106,7 @@ async function createCollection(db, ref, field){
 MongoDB.prototype.open = async function(){
 
     if(!this.db){
-        if(!(this.db = DB[this.id])){
+        if(!(this.db = Index[this.id])){
             if(!(this.db = CLIENT)){
 
                 let url = defaults.url;
@@ -94,14 +115,14 @@ MongoDB.prototype.open = async function(){
                         ? `mongodb://${ defaults.user }:${ defaults.pass }@${ defaults.host }:${ defaults.port }`
                         : `mongodb://${ defaults.host }:${ defaults.port }`;
                 }
-                this.db = CLIENT = new MongoClient(url);
+                this.db = CLIENT = new mongodb.MongoClient(url);
                 await this.db.connect();
             }
         }
     }
 
     if(this.db.db){
-        this.db = DB[this.id] = this.db.db(this.id);
+        this.db = Index[this.id] = this.db.db(this.id);
     }
 
     const collections = await this.db.listCollections().toArray();
@@ -125,7 +146,7 @@ MongoDB.prototype.open = async function(){
 MongoDB.prototype.close = function(){
     //CLIENT && CLIENT.close();
     this.db = CLIENT = null;
-    DB[this.id] = null;
+    Index[this.id] = null;
     return this;
 };
 
@@ -161,7 +182,7 @@ function create_result(rows, resolve, enrich){
         }
         return rows;
     }
-    else{
+    else {
         const arr = [];
         for(let i = 0, row; i < rows.length; i++){
             row = rows[i];
@@ -183,7 +204,7 @@ MongoDB.prototype.get = async function(key, ctx, limit = 0, offset = 0, resolve 
                    .find(params, { projection: { _id: 0, res: 1, id: 1 }, limit, skip: offset })
                    .toArray();
     }
-    else{
+    else {
 
         const project = { _id: 0, id: 1 };
         const stmt = [
@@ -233,7 +254,7 @@ MongoDB.prototype.get = async function(key, ctx, limit = 0, offset = 0, resolve 
                 { $project: { id: 1, doc: 1 } }
             );
         }
-        else{
+        else {
             stmt.push(
                 { $project: project }
             );
@@ -250,7 +271,7 @@ MongoDB.prototype.get = async function(key, ctx, limit = 0, offset = 0, resolve 
 
         while(true/*await rows.hasNext()*/){
             const row = await result.next();
-            if(row) rows.push(row)
+            if(row) rows.push(row);
             else break;
         }
     }
@@ -267,7 +288,7 @@ MongoDB.prototype.tag = async function(tag, limit = 0, offset = 0, enrich = fals
             .toArray();
         return create_result(rows, true, false);
     }
-    else{
+    else {
 
         const stmt = [
             { $match: { tag } },
@@ -291,7 +312,7 @@ MongoDB.prototype.tag = async function(tag, limit = 0, offset = 0, enrich = fals
 
         while(true/*await rows.hasNext()*/){
             const row = await result.next();
-            if(row) rows.push(row)
+            if(row) rows.push(row);
             else break;
         }
 
@@ -390,11 +411,6 @@ MongoDB.prototype.search = async function(flexsearch, query, limit = 100, offset
                 { $match: match }
             );
         }
-        else {
-            // stmt.push(
-            //     { $project: project }
-            // );
-        }
 
         stmt.push(
             { $sort: suggest
@@ -416,7 +432,7 @@ MongoDB.prototype.search = async function(flexsearch, query, limit = 100, offset
 
         rows = await this.db.collection("ctx" + this.field).aggregate(stmt);
     }
-    else{
+    else {
 
         const project = { _id: 1 };
         if(!resolve) project["res"] = 1;
@@ -475,11 +491,6 @@ MongoDB.prototype.search = async function(flexsearch, query, limit = 100, offset
                 { $match: match }
             );
         }
-        else {
-            // stmt.push(
-            //     { $project: project }
-            // );
-        }
 
         stmt.push(
             { $sort: suggest
@@ -508,7 +519,7 @@ MongoDB.prototype.search = async function(flexsearch, query, limit = 100, offset
             if(resolve && !enrich){
                 result.push(row._id);
             }
-            else{
+            else {
                 row.id = row._id;
                 delete row._id;
                 result.push(row);
@@ -520,10 +531,10 @@ MongoDB.prototype.search = async function(flexsearch, query, limit = 100, offset
     if(resolve && !enrich){
         return result;
     }
-    else{
+    else {
         return create_result(result, resolve, enrich);
     }
-}
+};
 
 MongoDB.prototype.info = function(){
     // todo
@@ -542,7 +553,7 @@ MongoDB.prototype.commit = async function(flexsearch, _replace, _append){
         // there are just removals in the task queue
         flexsearch.commit_task = [];
     }
-    else{
+    else {
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for(let i = 0, task; i < tasks.length; i++){
@@ -553,7 +564,7 @@ MongoDB.prototype.commit = async function(flexsearch, _replace, _append){
                 _replace = true;
                 break;
             }
-            else{
+            else {
                 tasks[i] = task.del;
             }
         }
@@ -708,3 +719,5 @@ MongoDB.prototype.remove = function(ids){
         this.db.collection("reg").deleteMany({ "id": { "$in": ids }})
     ]);
 };
+
+module.exports = MongoDB;

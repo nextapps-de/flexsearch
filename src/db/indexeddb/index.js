@@ -1,32 +1,15 @@
-'use strict';
-
-/**
- * @param {*} value
- * @param {*} default_value
- * @param {*=} merge_value
- * @return {*}
- */
-
-
-function create_object(){
-    return Object.create(null);
-}
-
-/**
- * @param {Map|Set} val
- * @param {boolean=} stringify
- * @return {Array}
- */
-
-function toArray(val, stringify){
-    const result = [];
-    for(const key of val.keys()){
-        result.push(key);
-    }
-    return result;
-}
-
 // COMPILER BLOCK -->
+import {
+    DEBUG,
+    SUPPORT_STORE,
+    SUPPORT_TAGS
+} from "../../config.js";
+// <-- COMPILER BLOCK
+import {
+    PersistentOptions,
+    SearchResults,
+    EnrichedSearchResults
+} from "../../type.js";
 
 const VERSION = 1;
 const IndexedDB = typeof window !== "undefined" && (
@@ -35,7 +18,19 @@ const IndexedDB = typeof window !== "undefined" && (
     window.webkitIndexedDB ||
     window.msIndexedDB
 );
+const IDBTransaction = typeof window !== "undefined" && (
+    window.IDBTransaction ||
+    window.webkitIDBTransaction ||
+    window.msIDBTransaction
+);
+const IDBKeyRange = typeof window !== "undefined" && (
+    window.IDBKeyRange ||
+    window.webkitIDBKeyRange ||
+    window.msIDBKeyRange
+);
 const fields = ["map", "ctx", "tag", "reg", "cfg"];
+import StorageInterface from "../interface.js";
+import { create_object, toArray } from "../../common.js";
 
 /**
  * @param {!string} str
@@ -45,7 +40,7 @@ function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
 }
 
-const DB = create_object();
+const Index = create_object();
 
 /**
  * @param {string|PersistentOptions=} name
@@ -54,7 +49,7 @@ const DB = create_object();
  * @implements StorageInterface
  */
 
-function IdxDB(name, config = {}){
+export default function IdxDB(name, config = {}){
     if(!this){
         return new IdxDB(name, config);
     }
@@ -72,7 +67,8 @@ function IdxDB(name, config = {}){
     this.fastupdate = false;
     this.db = null;
     this.trx = {};
-}
+};
+
 IdxDB.prototype.mount = function(flexsearch){
     //if(flexsearch.constructor === Document){
     if(!flexsearch.encoder){
@@ -92,8 +88,8 @@ IdxDB.prototype.open = function(){
 
    // return this.db = new Promise(function(resolve, reject){
 
-        DB[self.id] || (DB[self.id] = []);
-        DB[self.id].push(self.field);
+        Index[self.id] || (Index[self.id] = []);
+        Index[self.id].push(self.field);
 
         const req = IndexedDB.open(self.id, VERSION);
 
@@ -109,8 +105,8 @@ IdxDB.prototype.open = function(){
             // IndexedDB is such a poor contribution :(
             for(let i = 0, ref; i < fields.length; i++){
                 ref = fields[i];
-                for(let j = 0, field; j < DB[self.id].length; j++){
-                    field = DB[self.id][j];
+                for(let j = 0, field; j < Index[self.id].length; j++){
+                    field = Index[self.id][j];
                     db.objectStoreNames.contains(ref + (ref !== "reg" ? (field ? ":" + field : "") : "")) ||
                     db.createObjectStore(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));//{ autoIncrement: true /*keyPath: "id"*/ }
                     //.createIndex("idx", "ids", { multiEntry: true, unique: false });
@@ -195,8 +191,8 @@ IdxDB.prototype.clear = function(){
 
     for(let i = 0, ref; i < fields.length; i++){
         ref = fields[i];
-        for(let j = 0, field; j < DB[this.id].length; j++){
-            field = DB[this.id][j];
+        for(let j = 0, field; j < Index[this.id].length; j++){
+            field = Index[this.id][j];
             stores.push(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));
         }
     }
@@ -248,17 +244,17 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
                     }
                 }
             }
-            return enrich
+            return SUPPORT_STORE && enrich
                 ? self.enrich(result)
                 : result;
         }
-        else {
+        else{
             return res;
         }
     });
 };
 
-{
+if(SUPPORT_TAGS){
 
     /**
      * @param {!string} tag
@@ -276,14 +272,14 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
             if(!ids || !ids.length || offset >= ids.length) return [];
             if(!limit && !offset) return ids;
             const result = ids.slice(offset, offset + limit);
-            return enrich
+            return SUPPORT_STORE && enrich
                 ? self.enrich(result)
                 : result;
         });
     };
 }
 
-{
+if(SUPPORT_STORE){
 
     /**
      * @param {SearchResults} ids
@@ -392,7 +388,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         // there are just removals in the task queue
         flexsearch.commit_task = [];
     }
-    else {
+    else{
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for(let i = 0, task; i < tasks.length; i++){
@@ -404,7 +400,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                 _replace = true;
                 break;
             }
-            else {
+            else{
                 tasks[i] = task["del"];
             }
         }
@@ -451,7 +447,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                                 //result[i] = new Set([...result[i], ...value[i]]);
                                 //result[i] = result[i].union(new Set(value[i]));
                             }
-                            else {
+                            else{
                                 result[i] = val;
                                 changed = 1;
                                 //result[i] = new Set(value[i])
@@ -459,7 +455,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                         }
                     }
                 }
-                else {
+                else{
                     result = value;
                     changed = 1;
                     //result = [];
@@ -470,7 +466,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
 
                 changed &&
                 store.put(result, key);
-            };
+            }
         }
     });
 
@@ -506,26 +502,26 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                                     //result[i] = res.concat(val);
                                     changed = 1;
                                 }
-                                else {
+                                else{
                                     result[i] = val;
                                     changed = 1;
                                 }
                             }
                         }
                     }
-                    else {
+                    else{
                         result = value;
                         changed = 1;
                     }
 
                     changed &&
                     store.put(result, ctx_key + ":" + key);
-                };
+                }
             }
         }
     });
 
-    if(flexsearch.store){
+    if(SUPPORT_STORE && flexsearch.store){
         await this.transaction("reg", "readwrite", function(store){
             for(const item of flexsearch.store){
                 const id = item[0];
@@ -545,7 +541,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         });
     }
 
-    if(flexsearch.tag){
+    if(SUPPORT_TAGS && flexsearch.tag){
         await this.transaction("tag", "readwrite", function(store){
             for(const item of flexsearch.tag){
                 const tag = item[0];
@@ -558,7 +554,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                         ? result.concat(ids)
                         : ids;
                     store.put(result, tag);
-                };
+                }
             }
         });
     }
@@ -584,11 +580,11 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
-    {
+    if(SUPPORT_TAGS){
         flexsearch.tag &&
         flexsearch.tag.clear();
     }
-    {
+    if(SUPPORT_STORE){
         flexsearch.store &&
         flexsearch.store.clear();
     }
@@ -619,7 +615,7 @@ function handle(cursor, ids, _tag){
                     if(result.length > 1){
                         result.splice(pos, 1);
                     }
-                    else {
+                    else{
                         arr[x] = [];
                         break;
                     }
@@ -669,7 +665,7 @@ IdxDB.prototype.remove = function(ids){
                 cursor && handle(cursor, ids);
             };
         }),
-        self.transaction("tag", "readwrite", function(store){
+        SUPPORT_TAGS && self.transaction("tag", "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
                 cursor && handle(cursor, ids, /* tag? */ true);
@@ -720,5 +716,3 @@ function promisfy(req, callback){
         req = null;
     });
 }
-
-module.exports = IdxDB;

@@ -292,7 +292,7 @@ const index = new Index({
         <td>Stop-word filter is like a blacklist of words to be filtered out from indexing at all (e.g. "and", "to" or "be"). This is also very useful when using <a href="../README.md#context-search">Context Search</a></td>
         <td>
             <code>Set(["and", "to", "be"])</code><br>
-            <code>function(str) => bool</code> custom function<hr style="margin: 5px">
+            <code>function(str) => bool</code> custom function<h2></h2>
             <code>encoder.addFilter("and")</code>
         </td>
     </tr>
@@ -301,7 +301,7 @@ const index = new Index({
         <td><code>stemmer</code></td>
         <td>Stemmer will normalize several linguistic mutations of the same word (e.g. "run" and "running", or "property" and "properties"). This is also very useful when using <a href="../README.md#context-search">Context Search</a></td>
         <td>
-            <code>Map([["ing", ""], ["ies", "y"]])</code><hr style="margin: 5px">
+            <code>Map([["ing", ""], ["ies", "y"]])</code><h2></h2>
             <code>encoder.addStemmer("ing", "")</code>
         </td>
     </tr>
@@ -310,7 +310,7 @@ const index = new Index({
         <td><code>mapper</code></td>
         <td>Mapper will replace a single char (e.g. "é" into "e")</td>
         <td>
-            <code>Map([["é", "e"], ["ß", "ss"]])</code><hr style="margin: 5px">
+            <code>Map([["é", "e"], ["ß", "ss"]])</code><h2></h2>
             <code>encoder.addMapper("é", "e")</code>
         </td>
     </tr>
@@ -319,7 +319,7 @@ const index = new Index({
         <td><code>matcher</code></td>
         <td>Matcher will do same as Mapper but instead of single chars it will replace char sequences</td>
         <td>
-            <code>Map([["and", "&"], ["usd", "$"]])</code><hr style="margin: 5px">
+            <code>Map([["and", "&"], ["usd", "$"]])</code><h2></h2>
             <code>encoder.addMatcher("and", "&")</code>
         </td>
     </tr>
@@ -328,7 +328,7 @@ const index = new Index({
         <td><code>replacer</code></td>
         <td>Replacer takes custom regular expressions and couldn't get optimized in the same way as Mapper or Matcher. You should take this as the last option when no other replacement can do the same.</td>
         <td>
-            <code>[/[^a-z0-9]/g, "", /([^aeo])h(.)/g, "$1$2"])</code><hr style="margin: 5px">
+            <code>[/[^a-z0-9]/g, "", /([^aeo])h(.)/g, "$1$2"])</code><h2></h2>
             <code>encoder.addReplacer(/[^a-z0-9]/g, "")</code>
         </td>
     </tr>
@@ -363,7 +363,7 @@ const index = new Index({
 You can't extend to the built-in tokenizer "exact", "forward", "bidirectional" or "full".
 If nothing of them are applicable for your task you should tokenize everything inside your custom encoder function.
 
-If you get some good results please feel free to share your encoder.
+If you get some good results please feel free creating a pull request to share your encoder to the community.
 
 ### Encoder Processing Workflow
 
@@ -381,7 +381,7 @@ If you get some good results please feel free to share your encoder.
 
 This workflow schema might help you to understand each step in the iteration:
 <br><br>
-<img src="encoder-workflow.svg" style="max-width: 650px" width="100%">
+<img src="encoder-workflow.svg" width="750px">
 
 ## Right-To-Left Support
 

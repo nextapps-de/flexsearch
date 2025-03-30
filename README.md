@@ -1352,11 +1352,11 @@ const index = new Document({
 });
 ```
 
-> `Worker`-Index and `Persistent`-Index does not support the fastupdate option, because of its nature.
+> `Persistent`-Index does not support the `fastupdate` option, because of its nature.
 
-When using fastupdate, the index won't fully clear up, when removing items. A barely rest of structure will still remain. It's not a memory issue, because this rest will take less than 1% of the index size. But instead the internal performance of key lookups will lose efficiency, because of not used (empty) keys in the index.
+When using `fastupdate: true`, the index won't fully clear up, when removing items. A barely rest of structure will still remain. It's not a memory issue, because this rest will take less than 1% of the index size. But instead the internal performance of key lookups will lose efficiency, because of not used (empty) keys in the index.
 
-In most cases this is not an issue. But you can trigger a `cleanup` task, which will find those empty index slots and remove them:
+In most cases this is not an issue. But you can trigger a `index.cleanup()` task, which will find those empty index slots and remove them:
 
 ```js
 index.cleanup();

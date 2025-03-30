@@ -23,13 +23,14 @@ import {
 // <-- COMPILER BLOCK
 
 import { IndexOptions, ContextOptions, EncoderOptions } from "./type.js";
-import Encoder from "./encoder.js";
+import Encoder, { fallback_encoder } from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import Charset from "./charset.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex, serialize } from "./serialize.js";
-import default_encoder from "./charset/latin/default.js";
+import { remove_index } from "./index/remove.js";
+//import default_encoder from "./charset/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
 import tick from "./profiler.js";
@@ -65,13 +66,10 @@ export default function Index(options, _register){
             ? { depth: 1 }
             : tmp || {}
     );
-
     const encoder = SUPPORT_CHARSET && is_string(options.encoder)
         ? Charset[options.encoder]
         : options.encode || options.encoder || (
-          SUPPORT_ENCODER ? default_encoder : function(str){
-              return str.toLowerCase().trim().split(/\s+/);
-          }
+          SUPPORT_ENCODER ? {} /*default_encoder*/ : fallback_encoder
     );
     /** @type Encoder */
     this.encoder = encoder.encode
@@ -221,31 +219,31 @@ Index.prototype.update = function(id, content){
         : this.add(id, content);
 };
 
-/**
- * @param map
- * @return {number}
- */
-
-function cleanup_index(map){
-
-    let count = 0;
-
-    if(is_array(map)){
-        for(let i = 0, arr; i < map.length; i++){
-            (arr = map[i]) &&
-            (count += arr.length);
-        }
-    }
-    else for(const item of map.entries()){
-        const key = item[0];
-        const value = item[1];
-        const tmp = cleanup_index(value);
-        tmp ? count += tmp
-            : map.delete(key);
-    }
-
-    return count;
-}
+// /**
+//  * @param map
+//  * @return {number}
+//  */
+//
+// function cleanup_index(map){
+//
+//     let count = 0;
+//
+//     if(is_array(map)){
+//         for(let i = 0, arr; i < map.length; i++){
+//             (arr = map[i]) &&
+//             (count += arr.length);
+//         }
+//     }
+//     else for(const item of map.entries()){
+//         const key = item[0];
+//         const value = item[1];
+//         const tmp = cleanup_index(value);
+//         tmp ? count += tmp
+//             : map.delete(key);
+//     }
+//
+//     return count;
+// }
 
 Index.prototype.cleanup = function(){
 
@@ -254,9 +252,11 @@ Index.prototype.cleanup = function(){
         return this;
     }
 
-    cleanup_index(this.map);
+    remove_index(this.map);
+    //cleanup_index(this.map);
     this.depth &&
-    cleanup_index(this.ctx);
+    //cleanup_index(this.ctx);
+    remove_index(this.ctx);
 
     return this;
 };

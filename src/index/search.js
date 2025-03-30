@@ -88,8 +88,7 @@ Index.prototype.search = function(query, limit, options){
 
     // fast path single term
     if(length === 1){
-        return single_term_query.call(
-            this,
+        return single_term_query.call(this,
             query_terms[0], // term
             "",             // ctx
             limit,
@@ -107,10 +106,9 @@ Index.prototype.search = function(query, limit, options){
 
     // fast path single context
     if(length === 2 && context && !suggest){
-        return single_term_query.call(
-            this,
-            query_terms[0], // term
-            query_terms[1], // ctx
+        return single_term_query.call(this,
+            query_terms[1], // term
+            query_terms[0], // ctx
             limit,
             offset,
             resolve,

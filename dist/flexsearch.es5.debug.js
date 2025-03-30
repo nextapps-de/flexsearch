@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.143 (ES5/Debug)
+ * FlexSearch.js v0.8.147 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1166,17 +1166,17 @@ function Ha(a) {
   });
 }
 ;function Ia(a) {
-  La.call(a, "add");
-  La.call(a, "append");
-  La.call(a, "search");
-  La.call(a, "update");
-  La.call(a, "remove");
+  Ja.call(a, "add");
+  Ja.call(a, "append");
+  Ja.call(a, "search");
+  Ja.call(a, "update");
+  Ja.call(a, "remove");
 }
 var Ma, Na, Oa;
 function Pa() {
   Ma = Oa = 0;
 }
-function La(a) {
+function Ja(a) {
   this[a + "Async"] = function() {
     var b = arguments, c = b[b.length - 1];
     if ("function" === typeof c) {
@@ -2233,10 +2233,10 @@ W.prototype.search = function(a, b, c, d) {
         if (p) {
           if (this.db) {
             y.tag = p;
-            var Ja = v.db.support_tag_search;
+            var Ka = v.db.support_tag_search;
             y.field = n;
           }
-          Ja || (y.enrich = !1);
+          Ka || (y.enrich = !1);
         }
         if (r) {
           r[A] = v.search(a, b, y);
@@ -2251,7 +2251,7 @@ W.prototype.search = function(a, b, c, d) {
         D = [];
         H = 0;
         if (this.db && d) {
-          if (!Ja) {
+          if (!Ka) {
             for (I = n.length; I < d.length; I++) {
               var M = d[I];
               if (M && M.length) {
@@ -2263,7 +2263,7 @@ W.prototype.search = function(a, b, c, d) {
           }
         } else {
           I = 0;
-          for (var Zb = M = void 0; I < p.length; I += 2) {
+          for (var Yb = M = void 0; I < p.length; I += 2) {
             M = this.tag.get(p[I]);
             if (!M) {
               if (console.warn("Tag '" + p[I] + ":" + p[I + 1] + "' will be skipped because there is no field '" + p[I] + "'."), q) {
@@ -2272,7 +2272,7 @@ W.prototype.search = function(a, b, c, d) {
                 return k ? e : new Y(e);
               }
             }
-            if (Zb = (M = M && M.get(p[I + 1])) && M.length) {
+            if (Yb = (M = M && M.get(p[I + 1])) && M.length) {
               H++, D.push(M);
             } else if (!q) {
               return k ? e : new Y(e);
@@ -2296,7 +2296,7 @@ W.prototype.search = function(a, b, c, d) {
     }
   }
   if (r) {
-    if (this.db && p && p.length && !Ja) {
+    if (this.db && p && p.length && !Ka) {
       for (f = 0; f < p.length; f += 2) {
         g = this.index.get(p[f]);
         if (!g) {
@@ -2309,9 +2309,9 @@ W.prototype.search = function(a, b, c, d) {
         r.push(g.db.tag(p[f + 1], b, w, !1));
       }
     }
-    var $b = this;
+    var Zb = this;
     return Promise.all(r).then(function(Q) {
-      return Q.length ? $b.search(a, b, c, Q) : Q;
+      return Q.length ? Zb.search(a, b, c, Q) : Q;
     });
   }
   if (!h) {
@@ -2330,12 +2330,12 @@ W.prototype.search = function(a, b, c, d) {
     e[w] = {field:g[w], result:q};
   }
   if (f && this.db && r.length) {
-    var Ka = this;
+    var La = this;
     return Promise.all(r).then(function(Q) {
       for (var R = 0; R < Q.length; R++) {
         e[R].result = Q[R];
       }
-      return m ? ub(e, b) : t ? vb(e, a, Ka.index, Ka.field, Ka.J, t) : e;
+      return m ? ub(e, b) : t ? vb(e, a, La.index, La.field, La.J, t) : e;
     });
   }
   return m ? ub(e, b) : t ? vb(e, a, this.index, this.field, this.J, t) : e;
@@ -2613,10 +2613,11 @@ u.cleanup = function() {
 };
 u.get = function(a) {
   return this.db ? this.index.get(this.field[0]).db.enrich(a).then(function(b) {
-    return b[0] && b[0].doc;
-  }) : this.store.get(a);
+    return b[0] && b[0].doc || null;
+  }) : this.store.get(a) || null;
 };
 u.set = function(a, b) {
+  "object" === typeof a && (b = a, a = ya(b, this.key));
   this.store.set(a, b);
   return this;
 };
@@ -2735,20 +2736,19 @@ xb.prototype.clear = function() {
   this.cache.clear();
   this.h = "";
 };
-var Ab = {normalize:!1, numeric:!1, split:/\s+/};
-var Bb = {normalize:!0};
-var Cb = {normalize:!0, dedupe:!0};
-var Db = new Map([["b", "p"], ["v", "f"], ["w", "f"], ["z", "s"], ["x", "s"], ["d", "t"], ["n", "m"], ["c", "k"], ["g", "k"], ["j", "k"], ["q", "k"], ["i", "e"], ["y", "e"], ["u", "o"]]);
-var Eb = new Map([["ae", "a"], ["oe", "o"], ["sh", "s"], ["kh", "k"], ["th", "t"], ["ph", "f"], ["pf", "f"]]), Fb = [/([^aeo])h(.)/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2", /(.)\1+/g, "$1"];
-var Gb = {a:"", e:"", i:"", o:"", u:"", y:"", b:1, f:1, p:1, v:1, c:2, g:2, j:2, k:2, q:2, s:2, x:2, z:2, "\u00df":2, d:3, t:3, l:4, m:5, n:5, r:6};
-var Hb = {na:Ab, ma:Bb, oa:Cb, LatinBalance:{normalize:!0, dedupe:!0, mapper:Db}, LatinAdvanced:{normalize:!0, dedupe:!0, mapper:Db, matcher:Eb, replacer:Fb}, LatinExtra:{normalize:!0, dedupe:!0, mapper:Db, replacer:Fb.concat([/(?!^)[aeo]/g, ""]), matcher:Eb}, LatinSoundex:{normalize:!0, dedupe:!1, include:{letter:!0}, finalize:function(a) {
+var Ab = {normalize:!1, numeric:!1};
+var Bb = {};
+var Cb = new Map([["b", "p"], ["v", "f"], ["w", "f"], ["z", "s"], ["x", "s"], ["d", "t"], ["n", "m"], ["c", "k"], ["g", "k"], ["j", "k"], ["q", "k"], ["i", "e"], ["y", "e"], ["u", "o"]]);
+var Db = new Map([["ae", "a"], ["oe", "o"], ["sh", "s"], ["kh", "k"], ["th", "t"], ["ph", "f"], ["pf", "f"]]), Eb = [/([^aeo])h(.)/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2", /(.)\1+/g, "$1"];
+var Fb = {a:"", e:"", i:"", o:"", u:"", y:"", b:1, f:1, p:1, v:1, c:2, g:2, j:2, k:2, q:2, s:2, x:2, z:2, "\u00df":2, d:3, t:3, l:4, m:5, n:5, r:6};
+var Gb = {na:Ab, ma:Bb, oa:Bb, LatinBalance:{dedupe:!0, mapper:Cb}, LatinAdvanced:{dedupe:!0, mapper:Cb, matcher:Db, replacer:Eb}, LatinExtra:{dedupe:!0, mapper:Cb, replacer:Eb.concat([/(?!^)[aeo]/g, ""]), matcher:Db}, LatinSoundex:{dedupe:!1, include:{letter:!0}, finalize:function(a) {
   for (var b = 0; b < a.length; b++) {
-    for (var c = a[b], d = c.charAt(0), e = Gb[d], g = 1, f; g < c.length && (f = c.charAt(g), "h" === f || "w" === f || !(f = Gb[f]) || f === e || (d += f, e = f, 4 !== d.length)); g++) {
+    for (var c = a[b], d = c.charAt(0), e = Fb[d], g = 1, f; g < c.length && (f = c.charAt(g), "h" === f || "w" === f || !(f = Fb[f]) || f === e || (d += f, e = f, 4 !== d.length)); g++) {
     }
     a[b] = d;
   }
-}}, LatinExact:Ab, LatinDefault:Bb, LatinSimple:Cb};
-var Ib = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
+}}, LatinExact:Ab, LatinDefault:Bb, LatinSimple:Bb};
+var Hb = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
 P.prototype.add = function(a, b, c, d) {
   if (b && (a || 0 === a)) {
     if (!d && !c && this.reg.has(a)) {
@@ -2759,14 +2759,14 @@ P.prototype.add = function(a, b, c, d) {
       for (var e = J(), g = J(), f = this.depth, h = this.resolution, k = 0; k < d; k++) {
         var l = b[this.rtl ? d - 1 - k : k], m = l.length;
         if (m && (f || !g[l])) {
-          var n = this.score ? this.score(b, l, k, null, 0) : Jb(h, d, k), p = "";
+          var n = this.score ? this.score(b, l, k, null, 0) : Ib(h, d, k), p = "";
           switch(this.tokenize) {
             case "full":
               if (2 < m) {
                 n = 0;
                 for (var q; n < m; n++) {
                   for (var t = m; t > n; t--) {
-                    p = l.substring(n, t), q = this.rtl ? m - 1 - n : n, q = this.score ? this.score(b, l, k, p, q) : Jb(h, d, k, m, q), Kb(this, g, p, q, a, c);
+                    p = l.substring(n, t), q = this.rtl ? m - 1 - n : n, q = this.score ? this.score(b, l, k, p, q) : Ib(h, d, k, m, q), Jb(this, g, p, q, a, c);
                   }
                 }
                 break;
@@ -2775,24 +2775,24 @@ P.prototype.add = function(a, b, c, d) {
             case "reverse":
               if (1 < m) {
                 for (t = m - 1; 0 < t; t--) {
-                  p = l[this.rtl ? m - 1 - t : t] + p, q = this.score ? this.score(b, l, k, p, t) : Jb(h, d, k, m, t), Kb(this, g, p, q, a, c);
+                  p = l[this.rtl ? m - 1 - t : t] + p, q = this.score ? this.score(b, l, k, p, t) : Ib(h, d, k, m, t), Jb(this, g, p, q, a, c);
                 }
                 p = "";
               }
             case "forward":
               if (1 < m) {
                 for (t = 0; t < m; t++) {
-                  p += l[this.rtl ? m - 1 - t : t], Kb(this, g, p, n, a, c);
+                  p += l[this.rtl ? m - 1 - t : t], Jb(this, g, p, n, a, c);
                 }
                 break;
               }
             default:
-              if (Kb(this, g, l, n, a, c), f && 1 < d && k < d - 1) {
+              if (Jb(this, g, l, n, a, c), f && 1 < d && k < d - 1) {
                 for (m = J(), p = this.da, n = l, t = Math.min(f + 1, this.rtl ? k + 1 : d - k), q = m[n] = 1; q < t; q++) {
                   if ((l = b[this.rtl ? d - 1 - k - q : k + q]) && !m[l]) {
                     m[l] = 1;
-                    var w = this.score ? this.score(b, n, k, l, q - 1) : Jb(p + (d / 2 > p ? 0 : 1), d, k, t - 1, q - 1), r = this.bidirectional && l > n;
-                    Kb(this, e, r ? n : l, w, a, c, r ? l : n);
+                    var w = this.score ? this.score(b, n, k, l, q - 1) : Ib(p + (d / 2 > p ? 0 : 1), d, k, t - 1, q - 1), r = this.bidirectional && l > n;
+                    Jb(this, e, r ? n : l, w, a, c, r ? l : n);
                   }
                 }
               }
@@ -2804,10 +2804,10 @@ P.prototype.add = function(a, b, c, d) {
       b = "";
     }
   }
-  this.db && (b || this.commit_task.push({del:a}), this.ca && Lb(this));
+  this.db && (b || this.commit_task.push({del:a}), this.ca && Kb(this));
   return this;
 };
-function Kb(a, b, c, d, e, g, f) {
+function Jb(a, b, c, d, e, g, f) {
   var h = f ? a.ctx : a.map, k;
   if (!b[c] || f && !(k = b[c])[f]) {
     if (f ? (b = k || (b[c] = J()), b[f] = 1, (k = h.get(f)) ? h = k : h.set(f, h = new Map())) : b[c] = 1, (k = h.get(c)) ? h = k : h.set(c, h = k = []), h = h[d] || (h[d] = []), !g || !h.includes(e)) {
@@ -2825,7 +2825,7 @@ function Kb(a, b, c, d, e, g, f) {
     }
   }
 }
-function Jb(a, b, c, d, e) {
+function Ib(a, b, c, d, e) {
   return c && 1 < a ? b + (d || 0) <= a ? c + (e || 0) : (a - 1) / (b + (d || 0)) * (c + (e || 0)) + 1 | 0 : 0;
 }
 ;P.prototype.search = function(a, b, c) {
@@ -2848,11 +2848,11 @@ function Jb(a, b, c, d, e) {
   var q = p.length;
   b = b || (g ? 100 : 0);
   if (1 === q) {
-    return Mb.call(this, p[0], "", b, e, g, k, n);
+    return Lb.call(this, p[0], "", b, e, g, k, n);
   }
   f = this.depth && !1 !== f;
   if (2 === q && f && !h) {
-    return Mb.call(this, p[0], p[1], b, e, g, k, n);
+    return Lb.call(this, p[1], p[0], b, e, g, k, n);
   }
   var t = J(), w = 0;
   if (1 < q && f) {
@@ -2882,10 +2882,10 @@ function Jb(a, b, c, d, e) {
               break;
             }
             t[v] = 1;
-            return E(y, Nb(A, v, r, 0, 0, !1, !1), 6);
+            return E(y, Mb(A, v, r, 0, 0, !1, !1), 6);
           case 6:
             z = y.D;
-            if (z = Ob(z, d, h, m)) {
+            if (z = Nb(z, d, h, m)) {
               d = z;
               y.h = 4;
               break;
@@ -2897,7 +2897,7 @@ function Jb(a, b, c, d, e) {
             y.h = 2;
             break;
           case 4:
-            return y.return(Pb(d, m, b, e, h, l, g));
+            return y.return(Ob(d, m, b, e, h, l, g));
         }
       });
     }();
@@ -2905,8 +2905,8 @@ function Jb(a, b, c, d, e) {
   for (c = a = void 0; w < q; w++) {
     if ((c = p[w]) && !t[c]) {
       t[c] = 1;
-      a = Nb(this, c, r, 0, 0, !1, !1);
-      if (a = Ob(a, d, h, m)) {
+      a = Mb(this, c, r, 0, 0, !1, !1);
+      if (a = Nb(a, d, h, m)) {
         d = a;
         break;
       }
@@ -2914,9 +2914,9 @@ function Jb(a, b, c, d, e) {
     }
     h && r && w === q - 1 && !d.length && (m = this.resolution, r = "", w = -1, t = J());
   }
-  return Pb(d, m, b, e, h, l, g);
+  return Ob(d, m, b, e, h, l, g);
 };
-function Pb(a, b, c, d, e, g, f) {
+function Ob(a, b, c, d, e, g, f) {
   var h = a.length, k = a;
   if (1 < h) {
     k = ib(a, b, c, d, e, g, f);
@@ -2925,13 +2925,13 @@ function Pb(a, b, c, d, e, g, f) {
   }
   return f ? k : new Y(k);
 }
-function Mb(a, b, c, d, e, g, f) {
-  a = Nb(this, a, b, c, d, e, g, f);
+function Lb(a, b, c, d, e, g, f) {
+  a = Mb(this, a, b, c, d, e, g, f);
   return this.db ? a.then(function(h) {
     return e ? h || [] : new Y(h);
   }) : a && a.length ? e ? lb.call(this, a, c, d) : new Y(a) : e ? [] : new Y();
 }
-function Ob(a, b, c, d) {
+function Nb(a, b, c, d) {
   var e = [];
   if (a && a.length) {
     if (a.length <= d) {
@@ -2952,7 +2952,7 @@ function Ob(a, b, c, d) {
     return e;
   }
 }
-function Nb(a, b, c, d, e, g, f, h) {
+function Mb(a, b, c, d, e, g, f, h) {
   var k;
   c && (k = a.bidirectional && b > c) && (k = c, c = b, b = k);
   if (a.db) {
@@ -2976,15 +2976,15 @@ function Nb(a, b, c, d, e, g, f, h) {
         }
       }
     } else {
-      Qb(this.map, a), this.depth && Qb(this.ctx, a);
+      Pb(this.map, a), this.depth && Pb(this.ctx, a);
     }
     b || this.reg.delete(a);
   }
-  this.db && (this.commit_task.push({del:a}), this.ca && Lb(this));
+  this.db && (this.commit_task.push({del:a}), this.ca && Kb(this));
   this.cache && this.cache.remove(a);
   return this;
 };
-function Qb(a, b) {
+function Pb(a, b) {
   var c = 0;
   if (a.constructor === Array) {
     for (var d = 0, e = void 0, g; d < a.length; d++) {
@@ -2999,7 +2999,7 @@ function Qb(a, b) {
     }
   } else {
     for (d = x(a.entries()), e = d.next(); !e.done; e = d.next()) {
-      g = e.value, e = g[0], (g = Qb(g[1], b)) ? c += g : a.delete(e);
+      g = e.value, e = g[0], (g = Pb(g[1], b)) ? c += g : a.delete(e);
     }
   }
   return c;
@@ -3010,12 +3010,12 @@ function Qb(a, b) {
   }
   if (a) {
     var c = K(a) ? a : a.preset;
-    c && (Ib[c] || console.warn("Preset not found: " + c), a = Object.assign({}, Ib[c], a));
+    c && (Hb[c] || console.warn("Preset not found: " + c), a = Object.assign({}, Hb[c], a));
   } else {
     a = {};
   }
   c = a.context;
-  var d = !0 === c ? {depth:1} : c || {}, e = K(a.encoder) ? Hb[a.encoder] : a.encode || a.encoder || Bb;
+  var d = !0 === c ? {depth:1} : c || {}, e = K(a.encoder) ? Gb[a.encoder] : a.encode || a.encoder || {};
   this.encoder = e.encode ? e : "object" === typeof e ? new Fa(e) : {encode:e};
   this.resolution = a.resolution || 9;
   this.tokenize = c = (c = a.tokenize) && "default" !== c && "exact" !== c && c || "strict";
@@ -3053,7 +3053,7 @@ u.destroy = function() {
   this.commit_timer && (clearTimeout(this.commit_timer), this.commit_timer = null);
   return this.db.destroy();
 };
-function Lb(a) {
+function Kb(a) {
   a.commit_timer || (a.commit_timer = setTimeout(function() {
     a.commit_timer = null;
     a.db.commit(a, void 0, void 0);
@@ -3079,7 +3079,7 @@ u.update = function(a, b) {
     return c.add(a, b);
   }) : this.add(a, b);
 };
-function Rb(a) {
+function Qb(a) {
   var b = 0;
   if (a.constructor === Array) {
     for (var c = 0, d = void 0; c < a.length; c++) {
@@ -3089,7 +3089,7 @@ function Rb(a) {
     for (c = x(a.entries()), d = c.next(); !d.done; d = c.next()) {
       var e = d.value;
       d = e[0];
-      (e = Rb(e[1])) ? b += e : a.delete(d);
+      (e = Qb(e[1])) ? b += e : a.delete(d);
     }
   }
   return b;
@@ -3098,8 +3098,8 @@ u.cleanup = function() {
   if (!this.fastupdate) {
     return console.info('Cleanup the index isn\'t required when not using "fastupdate".'), this;
   }
-  Rb(this.map);
-  this.depth && Rb(this.ctx);
+  Qb(this.map);
+  this.depth && Qb(this.ctx);
   return this;
 };
 u.searchCache = zb;
@@ -3169,11 +3169,11 @@ u.serialize = function(a) {
   return a ? "function inject(index){" + b + c + d + "}" : b + c + d;
 };
 Ia(P.prototype);
-var Sb = "undefined" !== typeof window && (window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB), Tb = ["map", "ctx", "tag", "reg", "cfg"], Ub = J();
-function Vb(a, b) {
+var Rb = "undefined" !== typeof window && (window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB), Sb = ["map", "ctx", "tag", "reg", "cfg"], Tb = J();
+function Ub(a, b) {
   b = void 0 === b ? {} : b;
   if (!this) {
-    return new Vb(a, b);
+    return new Ub(a, b);
   }
   "object" === typeof a && (b = a, a = a.name);
   a || console.info("Default storage space was used, because a name was not passed.");
@@ -3184,7 +3184,7 @@ function Vb(a, b) {
   this.db = null;
   this.h = {};
 }
-u = Vb.prototype;
+u = Ub.prototype;
 u.mount = function(a) {
   if (!a.encoder) {
     return a.mount(this);
@@ -3198,14 +3198,14 @@ u.open = function() {
   }
   var a = this;
   navigator.storage && navigator.storage.persist();
-  Ub[a.id] || (Ub[a.id] = []);
-  Ub[a.id].push(a.field);
-  var b = Sb.open(a.id, 1);
+  Tb[a.id] || (Tb[a.id] = []);
+  Tb[a.id].push(a.field);
+  var b = Rb.open(a.id, 1);
   b.onupgradeneeded = function() {
-    for (var c = a.db = this.result, d = 0, e; d < Tb.length; d++) {
-      e = Tb[d];
-      for (var g = 0, f; g < Ub[a.id].length; g++) {
-        f = Ub[a.id][g], c.objectStoreNames.contains(e + ("reg" !== e ? f ? ":" + f : "" : "")) || c.createObjectStore(e + ("reg" !== e ? f ? ":" + f : "" : ""));
+    for (var c = a.db = this.result, d = 0, e; d < Sb.length; d++) {
+      e = Sb[d];
+      for (var g = 0, f; g < Tb[a.id].length; g++) {
+        f = Tb[a.id][g], c.objectStoreNames.contains(e + ("reg" !== e ? f ? ":" + f : "" : "")) || c.createObjectStore(e + ("reg" !== e ? f ? ":" + f : "" : ""));
       }
     }
   };
@@ -3221,14 +3221,14 @@ u.close = function() {
   this.db = null;
 };
 u.destroy = function() {
-  var a = Sb.deleteDatabase(this.id);
+  var a = Rb.deleteDatabase(this.id);
   return Z(a);
 };
 u.clear = function() {
-  for (var a = [], b = 0, c; b < Tb.length; b++) {
-    c = Tb[b];
-    for (var d = 0, e; d < Ub[this.id].length; d++) {
-      e = Ub[this.id][d], a.push(c + ("reg" !== c ? e ? ":" + e : "" : ""));
+  for (var a = [], b = 0, c; b < Sb.length; b++) {
+    c = Sb[b];
+    for (var d = 0, e; d < Tb[this.id].length; d++) {
+      e = Tb[this.id][d], a.push(c + ("reg" !== c ? e ? ":" + e : "" : ""));
     }
   }
   b = this.db.transaction(a, "readwrite");
@@ -3475,7 +3475,7 @@ u.commit = function(a, b, c) {
     }
   });
 };
-function Wb(a, b, c) {
+function Vb(a, b, c) {
   for (var d = a.value, e, g = 0, f = 0, h; f < d.length; f++) {
     if (h = c ? d : d[f]) {
       for (var k = 0, l; k < b.length; k++) {
@@ -3502,17 +3502,17 @@ u.remove = function(a) {
   return Promise.all([this.transaction("map", "readwrite", function(b) {
     b.openCursor().onsuccess = function() {
       var c = this.result;
-      c && Wb(c, a);
+      c && Vb(c, a);
     };
   }), this.transaction("ctx", "readwrite", function(b) {
     b.openCursor().onsuccess = function() {
       var c = this.result;
-      c && Wb(c, a);
+      c && Vb(c, a);
     };
   }), this.transaction("tag", "readwrite", function(b) {
     b.openCursor().onsuccess = function() {
       var c = this.result;
-      c && Wb(c, a, !0);
+      c && Vb(c, a, !0);
     };
   }), this.transaction("reg", "readwrite", function(b) {
     for (var c = 0; c < a.length; c++) {
@@ -3531,8 +3531,8 @@ function Z(a, b) {
     a = null;
   });
 }
-;var Xb = {Index:P, Charset:Hb, Encoder:Fa, Document:W, Worker:Ra, Resolver:Y, IndexedDB:Vb, Language:{}}, Yb = "undefined" !== typeof self ? self : "undefined" !== typeof global ? global : self, ac;
-(ac = Yb.define) && ac.amd ? ac([], function() {
-  return Xb;
-}) : "object" === typeof Yb.exports ? Yb.exports = Xb : Yb.FlexSearch = Xb;
+;var Wb = {Index:P, Charset:Gb, Encoder:Fa, Document:W, Worker:Ra, Resolver:Y, IndexedDB:Ub, Language:{}}, Xb = "undefined" !== typeof self ? self : "undefined" !== typeof global ? global : self, $b;
+($b = Xb.define) && $b.amd ? $b([], function() {
+  return Wb;
+}) : "object" === typeof Xb.exports ? Xb.exports = Wb : Xb.FlexSearch = Wb;
 }(this||self));

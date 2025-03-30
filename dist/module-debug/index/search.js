@@ -57,8 +57,7 @@ Index.prototype.search = function (query, limit, options) {
         offset = options.offset || 0;
         context = options.context;
         suggest = options.suggest;
-        resolve = /*global_resolve &&*/ /* suggest */
-        /* append: */ /* enrich */!1 !== options.resolve;
+        resolve = /*global_resolve &&*/ /* suggest */ /* append: */ /* enrich */!1 !== options.resolve;
         //resolve || (global_resolve = 0);
         enrich = resolve && options.enrich;
         boost = options.boost;
@@ -91,8 +90,8 @@ Index.prototype.search = function (query, limit, options) {
 
     // fast path single context
     if (2 === length && context && !suggest) {
-        return single_term_query.call(this, query_terms[0], // term
-        query_terms[1], // ctx
+        return single_term_query.call(this, query_terms[1], // term
+        query_terms[0], // ctx
         limit, offset, resolve, enrich, tag);
     }
 

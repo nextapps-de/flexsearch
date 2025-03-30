@@ -8,7 +8,7 @@ export const compact = [
 
 /** @type EncoderOptions */
 const options = {
-    normalize: true,
+    //normalize: true,
     dedupe: true,
     mapper: soundex,
     replacer: replacer.concat(compact),
