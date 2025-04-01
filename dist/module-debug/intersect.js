@@ -81,11 +81,8 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                     // fast path early result when limit was set
                     if (resolve) {
                         if (limit && count === length - 1) {
-                            // if(tmp.length - offset > limit){
-                            //     return tmp.slice(offset, limit + offset);
-                            // }
                             if (tmp.length - offset === limit) {
-                                return tmp;
+                                return offset ? tmp.slice(offset) : tmp;
                             }
                         }
                     }
@@ -196,7 +193,7 @@ export function union(arrays, limit, offset, resolve, boost) {
                             // adjust score to reduce resolution of suggestions
                             // todo: instead of applying the resolve task directly it could
                             //       be added to the chain and resolved later, that will keep
-                            //       the original score but also can't resolve early because of
+                            //       the original score but also can't resolve early when
                             //       nothing was found
                             let score = 0 | (k + (i < arr_len - 1 ? boost || 0 : 0)) / (i + 1),
                                 arr = result[score] || (result[score] = []);

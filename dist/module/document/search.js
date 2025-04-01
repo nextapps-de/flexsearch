@@ -443,44 +443,45 @@ function highlight_fields(result, query, index, field, tree, template) {
         for (let j = 0; j < res.length; j++) {
             let str = "",
                 content = parse_simple(res[j].doc, path),
-                doc_enc = encoder.encode(content),
-                doc_org = content.split(encoder.split);
+                doc_org = content.split(/\s+/);
+            //let doc_enc = encoder.encode(content);
 
-
-            for (let k = 0, doc_enc_cur, doc_org_cur; k < doc_enc.length; k++) {
-                doc_enc_cur = doc_enc[k];
+            for (let k = 0, doc_org_cur, doc_enc_cur; k < doc_org.length; k++) {
                 doc_org_cur = doc_org[k];
-
-                if (!doc_enc_cur || !doc_org_cur) {
-                    continue;
-                }
+                //doc_enc_cur = doc_enc[k];
+                doc_enc_cur = encoder.encode(doc_org_cur).join(" ");
 
                 let found;
-                for (let l = 0, query_enc_cur; l < query_enc.length; l++) {
-                    query_enc_cur = query_enc[l];
-                    // todo tokenize could be custom also when "strict" was used
-                    if ("strict" === tokenize) {
-                        if (doc_enc_cur === query_enc_cur) {
-                            str += (str ? " " : "") + template.replace("$1", doc_org_cur);
-                            found = !0;
-                            break;
-                        }
-                    } else {
-                        const position = doc_enc_cur.indexOf(query_enc_cur);
-                        if (-1 < position) {
-                            str += (str ? " " : "") +
-                            // prefix
-                            doc_org_cur.substring(0, position) +
-                            // match
-                            template.replace("$1", doc_org_cur.substring(position, query_enc_cur.length)) +
-                            // suffix
-                            doc_org_cur.substring(position + query_enc_cur.length);
-                            found = !0;
-                            break;
-                        }
-                    }
 
-                    //str += doc_enc[k].replace(new RegExp("(" + doc_enc[k] + ")", "g"), template.replace("$1", content))
+                if (doc_enc_cur && doc_org_cur) {
+
+                    for (let l = 0, query_enc_cur; l < query_enc.length; l++) {
+                        query_enc_cur = query_enc[l];
+                        // todo tokenize could be custom also when "strict" was used
+                        if ("strict" === tokenize) {
+                            if (doc_enc_cur === query_enc_cur) {
+                                str += (str ? " " : "") + template.replace("$1", doc_org_cur);
+                                found = !0;
+                                break;
+                            }
+                        } else {
+                            const position = doc_enc_cur.indexOf(query_enc_cur);
+                            //console.log(doc_org_cur, doc_enc_cur, query_enc_cur, position)
+                            if (-1 < position) {
+                                str += (str ? " " : "") +
+                                // prefix
+                                doc_org_cur.substring(0, position) +
+                                // match
+                                template.replace("$1", doc_org_cur.substring(position, query_enc_cur.length)) +
+                                // suffix
+                                doc_org_cur.substring(position + query_enc_cur.length);
+                                found = !0;
+                                break;
+                            }
+                        }
+
+                        //str += doc_enc[k].replace(new RegExp("(" + doc_enc[k] + ")", "g"), template.replace("$1", content))
+                    }
                 }
 
                 if (!found) {

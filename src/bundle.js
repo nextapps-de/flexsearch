@@ -298,6 +298,8 @@ if(SUPPORT_SERIALIZE){
 /** @export */ ResolverOptions.or;
 /** @export */ ResolverOptions.xor;
 /** @export */ ResolverOptions.not;
+/** @export */ ResolverOptions.pluck;
+/** @export */ ResolverOptions.field;
 
 const FlexSearch = {
     "Index": Index,

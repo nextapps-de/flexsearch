@@ -94,33 +94,40 @@ Index.prototype.remove = function (id, _skip_deletion) {
 };
 
 /**
+ * When called without passing ID it just will clean up
  * @param {!Map|Array<number|string|Array<number|string>>} map
- * @param {!number|string} id
+ * @param {!number|string=} id
  * @return {number}
  */
 
-function remove_index(map, id) {
+export function remove_index(map, id) {
 
     // a check counter of filled resolution slots
     // to prevent removing the field
     let count = 0;
 
+
     if (is_array(map)) {
         for (let x = 0, arr, index; x < map.length; x++) {
             if ((arr = map[x]) && arr.length) {
-                index = arr.indexOf(id);
-                if (0 <= index) {
-                    if (1 < arr.length) {
-                        arr.splice(index, 1);
-                        count++;
-                    } else {
-                        // remove resolution slot
-                        delete map[x];
-                    }
-                    // the index key:[res, id] is unique
-                    break;
-                } else {
+                if ("undefined" == typeof id) {
+                    //count += arr.length;
                     count++;
+                } else {
+                    index = arr.indexOf(id);
+                    if (0 <= index) {
+                        if (1 < arr.length) {
+                            arr.splice(index, 1);
+                            count++;
+                        } else {
+                            // remove resolution slot
+                            delete map[x];
+                        }
+                        // the index key:[res, id] is unique
+                        break;
+                    } else {
+                        count++;
+                    }
                 }
             }
         }

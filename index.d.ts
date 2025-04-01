@@ -206,15 +206,7 @@ declare module "flexsearch" {
 
     type DefaultSearchResults = Id[];
     type IntermediateSearchResults = Array<Id[]>;
-    type EnrichedSearchResults = Array<{
-        id: Id;
-        score: number;
-    }>;
-    type SearchResults =
-        DefaultSearchResults |
-        EnrichedSearchResults |
-        Resolver |
-        Promise<SearchResults>;
+    type SearchResults = DefaultSearchResults | Resolver;
 
     /**
      * **Document:**
@@ -232,12 +224,12 @@ declare module "flexsearch" {
         append(id: Id, content: string): this | Promise<this>;
         update(id: Id, content: string): this | Promise<this>;
         remove(id: Id): this | Promise<this>;
-        search(query: string, options?: Limit | SearchOptions): SearchResults;
-        search(query: string, limit: number, options: SearchOptions): SearchResults;
-        search(options: SearchOptions): SearchResults;
-        searchCache(query: string, options?: Limit | SearchOptions): SearchResults;
-        searchCache(query: string, limit: number, options: SearchOptions): SearchResults;
-        searchCache(options: SearchOptions): SearchResults;
+        search(query: string, options?: Limit | SearchOptions): SearchResults | Promise<SearchResults>;
+        search(query: string, limit: number, options: SearchOptions): SearchResults | Promise<SearchResults>;
+        search(options: SearchOptions): SearchResults | Promise<SearchResults>;
+        searchCache(query: string, options?: Limit | SearchOptions): SearchResults | Promise<SearchResults>;
+        searchCache(query: string, limit: number, options: SearchOptions): SearchResults | Promise<SearchResults>;
+        searchCache(options: SearchOptions): SearchResults | Promise<SearchResults>;
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
         contain(id: Id): boolean | Promise<boolean>;
         clear(): void | Promise<void>;
@@ -349,16 +341,16 @@ declare module "flexsearch" {
     type EnrichedDocumentSearchResults = Array<{
         field?: FieldName;
         tag?: FieldName;
-        highlight?: TemplateResultHighlighting;
         result: Array<{
             id: Id;
-            doc: Object | null;
+            doc: DocumentData | null;
+            highlight?: string;
         }>;
     }>;
 
     type MergedDocumentSearchResults = Array<{
         id: Id;
-        doc: Object | null;
+        doc: DocumentData | null;
         field?: FieldName[];
         tag?: FieldName[];
     }>;
@@ -367,7 +359,7 @@ declare module "flexsearch" {
         DefaultDocumentSearchResults |
         EnrichedDocumentSearchResults |
         MergedDocumentSearchResults |
-        Promise<DocumentSearchResults>;
+        Resolver;
 
     /**
      *  # Document Search Result
@@ -399,11 +391,10 @@ declare module "flexsearch" {
         | number
         | boolean
         | null
-        | DocumentValue[]
-        | {[key: string]: DocumentValue};
+        | DocumentData;
 
     type DocumentData = {
-        [k: string]: DocumentValue;
+        [key: string]: DocumentValue | DocumentValue[];
     };
 
     /**
@@ -426,12 +417,12 @@ declare module "flexsearch" {
         remove(id: Id): this | Promise<this>;
         remove(document: DocumentData): this | Promise<this>;
         // https://github.com/nextapps-de/flexsearch#field-search
-        search(query: string, options?: Limit | DocumentSearchOptions): DocumentSearchResults;
-        search(query: string, limit: number, options: DocumentSearchOptions): DocumentSearchResults;
-        search(options: DocumentSearchOptions): DocumentSearchResults;
-        searchCache(query: string, options?: Limit | DocumentSearchOptions): DocumentSearchResults;
-        searchCache(query: string, limit: number, options: DocumentSearchOptions): DocumentSearchResults;
-        searchCache(options: DocumentSearchOptions): DocumentSearchResults;
+        search(query: string, options?: Limit | DocumentSearchOptions): DocumentSearchResults | Promise<DocumentSearchResults>;
+        search(query: string, limit: number, options: DocumentSearchOptions): DocumentSearchResults | Promise<DocumentSearchResults>;
+        search(options: DocumentSearchOptions): DocumentSearchResults | Promise<DocumentSearchResults>;
+        searchCache(query: string, options?: Limit | DocumentSearchOptions): DocumentSearchResults | Promise<DocumentSearchResults>;
+        searchCache(query: string, limit: number, options: DocumentSearchOptions): DocumentSearchResults | Promise<DocumentSearchResults>;
+        searchCache(options: DocumentSearchOptions): DocumentSearchResults | Promise<DocumentSearchResults>;
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
         contain(id: Id): boolean | Promise<boolean>;
         clear(): void | Promise<void>;
@@ -542,10 +533,18 @@ declare module "flexsearch" {
         index?: Index | Document;
         resolve?: boolean;
         suggest?: boolean;
+        /** only usable when "resolve" was set to true */
+        enrich?: boolean;
+        boost?: number;
+        limit?: number;
+        offset?: number;
         and?: ResolverOptions | Array<ResolverOptions>;
         or?: ResolverOptions | Array<ResolverOptions>;
         xor?: ResolverOptions | Array<ResolverOptions>;
         not?: ResolverOptions | Array<ResolverOptions>;
+        pluck?: FieldName;
+        field?: FieldName;
+
     };
 
     export class Encoder {

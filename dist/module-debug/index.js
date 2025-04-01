@@ -13,6 +13,7 @@ import Charset from "./charset.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex, serialize } from "./serialize.js";
+import { remove_index } from "./index/remove.js";
 //import default_encoder from "./charset/latin/default.js";
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
@@ -160,29 +161,31 @@ Index.prototype.update = function (id, content) {
     return res && res.then ? res.then(() => self.add(id, content)) : this.add(id, content);
 };
 
-/**
- * @param map
- * @return {number}
- */
-
-function cleanup_index(map) {
-
-    let count = 0;
-
-    if (is_array(map)) {
-        for (let i = 0, arr; i < map.length; i++) {
-            (arr = map[i]) && (count += arr.length);
-        }
-    } else for (const item of map.entries()) {
-        const key = item[0],
-              value = item[1],
-              tmp = cleanup_index(value);
-
-        tmp ? count += tmp : map.delete(key);
-    }
-
-    return count;
-}
+// /**
+//  * @param map
+//  * @return {number}
+//  */
+//
+// function cleanup_index(map){
+//
+//     let count = 0;
+//
+//     if(is_array(map)){
+//         for(let i = 0, arr; i < map.length; i++){
+//             (arr = map[i]) &&
+//             (count += arr.length);
+//         }
+//     }
+//     else for(const item of map.entries()){
+//         const key = item[0];
+//         const value = item[1];
+//         const tmp = cleanup_index(value);
+//         tmp ? count += tmp
+//             : map.delete(key);
+//     }
+//
+//     return count;
+// }
 
 Index.prototype.cleanup = function () {
 
@@ -191,8 +194,11 @@ Index.prototype.cleanup = function () {
         return this;
     }
 
-    cleanup_index(this.map);
-    this.depth && cleanup_index(this.ctx);
+    remove_index(this.map);
+    //cleanup_index(this.map);
+    this.depth &&
+    //cleanup_index(this.ctx);
+    remove_index(this.ctx);
 
     return this;
 };
