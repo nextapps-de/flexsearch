@@ -58,7 +58,7 @@ declare module "flexsearch" {
         | "LatinAdvanced"
         | "LatinExtra"
         | "LatinSoundex"
-        | ((term: string) => string[]);
+        | ((content: string) => string[]);
 
     /**
      * **Document:**
@@ -141,17 +141,14 @@ declare module "flexsearch" {
         char?: string|string[];
     };
 
-    export type Charset = {
-        LatinExact: EncoderOptions;
-        LatinDefault: EncoderOptions;
-        LatinSimple: EncoderOptions;
-        LatinBalance: EncoderOptions;
-        LatinAdvanced: EncoderOptions;
-        LatinExtra: EncoderOptions;
-        LatinSoundex: EncoderOptions;
-        ArabicDefault: EncoderOptions;
-        CjkDefault: EncoderOptions;
-        CyrillicDefault: EncoderOptions;
+    export const Charset: {
+        Exact: EncoderOptions,
+        Default: EncoderOptions,
+        Normalize: EncoderOptions,
+        LatinBalance: EncoderOptions,
+        LatinAdvanced: EncoderOptions,
+        LatinExtra: EncoderOptions,
+        LatinSoundex: EncoderOptions
     };
 
     /**
@@ -190,7 +187,7 @@ declare module "flexsearch" {
         commit?: boolean;
 
         // Language-specific Options and Encoding
-        encoder?: Charset | Encoders | EncoderOptions;
+        encoder?: typeof Charset | Encoders | EncoderOptions;
         encode?: (text: string) => string[],
         rtl?: boolean;
     };
@@ -339,8 +336,8 @@ declare module "flexsearch" {
 
     type DocumentOptions = IndexOptions & {
         worker?: boolean | WorkerURL | WorkerPath;
-        doc?: DocumentDescriptor | DocumentDescriptor[];
-        document?: DocumentDescriptor | DocumentDescriptor[];
+        doc?: DocumentDescriptor;
+        document?: DocumentDescriptor;
     };
 
     type DefaultDocumentSearchResults = Array<{
@@ -589,6 +586,18 @@ declare module "flexsearch" {
     export class IndexedDB extends StorageInterface{
         db: IDBDatabase
     }
+
+    const FlexSearch: {
+        Index: typeof Index,
+        Document: typeof Document,
+        Worker: typeof Worker,
+        Encoder: typeof Encoder,
+        Charset: typeof Charset,
+        Resolver: typeof Resolver,
+        IndexedDB: typeof IndexedDB
+    }
+
+    export default FlexSearch;
 }
 
 // https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
