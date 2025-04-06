@@ -424,6 +424,6 @@ await Promise.all(files.map(async file => {
 
 ## CSP-friendly Worker (Browser)
 
-When just using worker by passing the option `worker: true`, the worker will be created by code generation under the hood. This might have issues when using strict CSP settings.
+When using worker via one of the bundled versions (e.g. `flexearch.bundle.min.js`), the worker will be created by code generation under the hood. This might have issues when using strict CSP settings.
 
-You can overcome this issue by passing the filepath to the worker file like `worker: "./worker.js"`. The original worker file is located at `src/worker/worker.js`.
+You can overcome this issue by using the non-bundled versions e.g. `dist/module/` or by passing the filepath to the worker file instead of `true` like `worker: "dist/module/worker/worker.js"`.

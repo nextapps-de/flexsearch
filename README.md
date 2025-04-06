@@ -240,7 +240,7 @@ Extern Projects & Plugins:
   - [Document Options](doc/options.md)
   - [Worker Index Options](doc/worker.md#worker-index-options)
   - [Persistent Options](doc/options.md)
-  - [Encoder Options](doc/options.md)
+  - [Encoder Options](doc/encoder.md#encoder-options)
   - [Resolver Options](doc/options.md)
 - [Presets](#presets)
 - [Context Search](#context-search)
@@ -1133,9 +1133,9 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
     <tr>
         <td>tokenize</td>
         <td>
-            "strict" or "exact"<br>
+            "strict" / "exact"<br>
             "forward"<br>
-            "reverse" or "bidirectional<br>
+            "reverse" / "bidirectional<br>
             "full"
         </td>
         <td>

@@ -217,7 +217,7 @@ Encoder.prototype.assign = function(options){
     this.stemmer = merge_option((tmp = options.stemmer) && new Map(tmp), null, this.stemmer);
     this.replacer = merge_option(options.replacer, null, this.replacer);
     this.minlength = merge_option(options.minlength, 1, this.minlength);
-    this.maxlength = merge_option(options.maxlength, 0, this.maxlength);
+    this.maxlength = merge_option(options.maxlength, 1024, this.maxlength);
     this.rtl = merge_option(options.rtl, false, this.rtl);
 
     // auto-balanced cache
@@ -427,7 +427,8 @@ Encoder.prototype.encode = function(str){
         if(!(word = base = words[i])){
             continue;
         }
-        if(word.length < this.minlength){
+        if(word.length < this.minlength ||
+           word.length > this.maxlength){
             continue;
         }
         if(skip) {
