@@ -1,42 +1,45 @@
-## Worker Parallelism (Browser + Node.js)
-
-The internal worker model is distributed by document fields and will solve subtasks in parallel.
-
-When using a document index, then just apply the option "worker":
-
-```js
-const index = new Document({
-    index: ["tag", "name", "title", "text"],
-    worker: true
-});
-
-index.add({ 
-    id: 1, tag: "cat", name: "Tom", title: "some", text: "some" 
-}).add({
-    id: 2, tag: "dog", name: "Ben", title: "title", text: "content" 
-}).add({ 
-    id: 3, tag: "cat", name: "Max", title: "to", text: "to" 
-}).add({ 
-    id: 4, tag: "dog", name: "Tim", title: "index", text: "index" 
-});
-```
-
-```
-Worker 1: { 1: "cat", 2: "dog", 3: "cat", 4: "dog" }
-Worker 2: { 1: "Tom", 2: "Ben", 3: "Max", 4: "Tim" }
-Worker 3: { 1: "some", 2: "title", 3: "to", 4: "index" }
-Worker 4: { 1: "some", 2: "content", 3: "to", 4: "index" }
-```
-
-When you perform a field search through all fields then this task is being balanced perfectly through all workers, which can solve their subtasks independently.
+# Worker Parallelism (Browser + Node.js)
 
 ### Worker Index
 
-Above we have seen that documents will create worker automatically for each field. You can also create a `Worker`-Index directly. It's the same as using `Index` instead of `Document`.
+Using a Worker-Index is pretty much the same as using a standard `Index`.
 
 > Worker-Index always return a `Promise` for all methods called on the index.
 
-#### ES6 Module (Bundle):
+> When adding/updating/removing large bulks of content to the index, it is recommended to use the async version of each method to prevent blocking issues on the main thread. Read more about [Asynchronous Runtime Balancer](async.md)
+
+### Worker Document
+
+> The internal worker model is distributed by document fields and will solve subtasks in parallel.
+
+Documents will create worker automatically for each field by just apply the option `worker: true`:
+
+```js
+const index = new Document({
+    worker: true,
+    document: { 
+        id: "id",
+        index: ["name", "title"],
+        tag: ["cat"]
+    }
+});
+
+index.add({ 
+    id: 1, cat: "catA", name: "Tom", title: "some" 
+}).add({
+    id: 2, cat: "catA", name: "Ben", title: "title"
+}).add({ 
+    id: 3, cat: "catB", name: "Max", title: "to"
+}).add({ 
+    id: 4, cat: "catB", name: "Tim", title: "index"" 
+});
+```
+
+When you perform a field search through multiple fields then this task is being well-balanced through all involved workers, which can solve their subtasks independently.
+
+## Examples
+
+### ES6 Module (Bundle):
 
 When using one of the bundles from `/dist/` you can create a Worker-Index:
 
@@ -49,7 +52,7 @@ await index.add(3, "to");
 await index.add(4, "index");
 ```
 
-#### ES6 Module (Non-Bundle):
+### ES6 Module (Non-Bundle):
 
 When not using a bundle you can take the worker file from `/dist/` folder as follows:
 
@@ -62,7 +65,7 @@ index.add(1, "some")
      .add(4, "index");
 ```
 
-#### Browser Legacy (Bundle):
+### Browser Legacy (Bundle):
 
 When loading a legacy bundle via script tag (non-modules):
 
@@ -82,8 +85,12 @@ The worker model for Node.js is based on native worker threads and works exactly
 const { Document } = require("flexsearch");
 
 const index = new Document({
-    index: ["tag", "name", "title", "text"],
-    worker: true
+    worker: true,
+    document: {
+        id: "id",
+        index: ["name", "title"],
+        tag: ["cat"]
+    }
 });
 ```
 
@@ -94,69 +101,35 @@ const { Worker } = require("flexsearch");
 const index = new Worker({ options });
 ```
 
-## The Worker Async Model (Best Practices)
+### Worker-Index Options
 
-A worker will always perform as async. On a query method call you always should handle the returned promise (e.g. use `await`) or pass a callback function as the last parameter.
+> Worker-Index Options extends the default [Index Options](../README.md#index-options), you can apply also.
 
-```js
-const index = new Document({
-    index: ["tag", "name", "title", "text"],
-    worker: true
-});
-```
-
-All requests and sub-tasks will run in parallel (prioritize "all tasks completed"):
-
-```js
-index.searchAsync(query, callback);
-index.searchAsync(query, callback);
-index.searchAsync(query, callback);
-```
-
-Also (prioritize "all tasks completed"):
-
-```js
-index.searchAsync(query).then(callback);
-index.searchAsync(query).then(callback);
-index.searchAsync(query).then(callback);
-```
-
-Or when you have just one callback when all requests are done, simply use `Promise.all()` which also prioritize "all tasks completed":
-
-```js
-Promise.all([
-    index.searchAsync(query),
-    index.searchAsync(query),
-    index.searchAsync(query)
-]).then(callback);
-```
-
-Inside the callback of `Promise.all()` you will also get an array of results as the first parameter respectively for each query you put into.
-
-When using `await` you can prioritize the order (prioritize "first task completed") and solve requests one by one and just process the sub-tasks in parallel:
-
-```js
-await index.searchAsync(query);
-await index.searchAsync(query);
-await index.searchAsync(query);
-```
-
-Same for `index.add()`, `index.append()`, `index.remove()` or `index.update()`. Here there is a special case which isn't disabled by the library, but you need to keep in mind when using Workers.
-
-When you call the "synced" version on a worker index:
-
-```js
-index.add(doc);
-index.add(doc);
-index.add(doc);
-// contents aren't indexed yet,
-// they just queued on the message channel 
-```
-
-Of course, you can do that but keep in mind that the main thread does not have an additional queue for distributed worker tasks. Running these in a long loop fires content massively to the message channel via `worker.postMessage()` internally. Luckily the browser and Node.js will handle such incoming tasks for you automatically (as long enough free RAM is available). When using the "synced" version on a worker index, the content isn't indexed one line below, because all calls are treated as async by default.
-
-> When adding/updating/removing large bulks of content to the index (or high frequency), it is recommended to use the async version along with `async/await` to keep a low memory footprint during long processes.
-
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>config</td>
+        <td>String</td>
+        <td>Either the absolute URL to the config file when used in Browser context (should match the Same-Origin-Policy) or the filepath to the configuration file when used in Node.js context</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>export</td>
+        <td>function</td>
+        <td>The export handler function. Read more about <a href="export-import.md">Export</a></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>import</td>
+        <td>function</td>
+        <td>The export handler function. Read more about <a href="export-import.md">Import</a></td>
+    </tr>
+</table>
 
 ## Extern Worker Configuration
 

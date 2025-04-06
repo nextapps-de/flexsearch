@@ -196,8 +196,9 @@ declare module "flexsearch" {
         config?: WorkerConfigURL | WorkerConfigPath,
         export?: () => Promise<void>;
         import?: () => Promise<void>;
-        db: null,
-        commit: null
+        // no persistent supported
+        db: null;
+        commit: null;
     };
 
     /************************************/

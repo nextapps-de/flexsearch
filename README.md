@@ -238,7 +238,7 @@ Extern Projects & Plugins:
 - [Options](doc/options.md)
   - [Index Options](#index-options)
   - [Document Options](doc/options.md)
-  - [Worker Options](doc/options.md)
+  - [Worker Index Options](doc/worker.md#worker-index-options)
   - [Persistent Options](doc/options.md)
   - [Encoder Options](doc/options.md)
   - [Resolver Options](doc/options.md)
@@ -1152,8 +1152,9 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
         <td>Sets the scoring <a href="#resolution">resolution</a></td>
         <td>9</td>
     </tr>
+    <tr></tr>
     <tr>
-        <td>encoder<br><br><br><br><br><br><br></td>
+        <td>encoder<br><br><br><br><br><br><br><br></td>
         <td>
             <a href="doc/encoder.md">new Encoder(options)</a><br>
             Charset.Exact<br>
@@ -1165,7 +1166,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             Charset.LatinSoundex<br>
             false
         </td>
-        <td>Choose one of the <a href="#charset-collection">built-in encoder</a><br><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
+        <td>Choose one of the <a href="#charset-collection">built-in encoder</a><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
         <td>"default"</td>
     </tr>
     <tr></tr>
@@ -1174,7 +1175,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
         <td>
             function(string) => string[]
         </td>
-        <td>Pass a <a href="doc/encoder.md#custom-encoder">custom encoding function</a><br><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
+        <td>Pass a <a href="doc/encoder.md#custom-encoder">custom encoding function</a><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
         <td>"default"</td>
     </tr>
     <tr></tr>
