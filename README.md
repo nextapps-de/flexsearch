@@ -236,7 +236,7 @@ Extern Projects & Plugins:
 - [Common Code Examples (Browser, Node.js)](#common-code-examples)
 - [API Overview](#api-overview)
 - [Options](doc/options.md)
-  - [Index Options](doc/options.md)
+  - [Index Options](#index-options)
   - [Document Options](doc/options.md)
   - [Worker Options](doc/options.md)
   - [Persistent Options](doc/options.md)
@@ -288,6 +288,8 @@ npm install flexsearch
 ```
 
 The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
+
+> It is not recommended to use the `/src/` folder of this repository as it requires some kind of conditional compilation to resolve the build flags. The `/dist/` folder contains every version you might need including unminified ES6 modules. When none of the `/dist/` folder versions works for you please open an issue. Alternatively you can read more about [Custom Builds](doc/custom-builds.md).
 
 <details>
 <summary>Download Builds</summary>
@@ -985,6 +987,320 @@ Methods `.export()` and also `.import()` are always async as well as every metho
 - [Worker Options](doc/options.md)
 - [Persistent Options](doc/options.md)
 
+## Basic Usage
+
+#### Create a new index
+
+```js
+const index = new Index();
+```
+
+Create a new index and choosing one of the [Presets](#presets):
+
+```js
+const index = new Index("match");
+```
+
+Create a new index with custom options:
+
+```js
+const index = new Index({
+    tokenize: "forward",
+    resolution: 9,
+    fastupdate: true
+});
+```
+
+Create a new index and extend a preset with custom options:
+
+```js
+var index = new FlexSearch({
+    preset: "memory",
+    tokenize: "forward",
+    resolution: 5
+});
+```
+
+Create a new index and assign an [Encoder](doc/encoder.md):
+
+```js
+//import { Charset } from "./dist/module/charset.js";
+import { Charset } from "flexsearch";
+const index = new Index({
+    tokenize: "forward",
+    encoder: Charset.LatinBalance
+});
+```
+
+» [Resolution](#resolution)<br>
+» [All available custom options](doc/options.md)
+
+#### Add text item to an index
+
+Every content which should be added to the index needs an ID. When your content has no ID, then you need to create one by passing an index or count or something else as an ID (a value from type `number` is highly recommended). Those IDs are unique references to a given content. This is important when you update or adding over content through existing IDs. When referencing is not a concern, you can simply use something simple like `count++`.
+
+> Index.__add(id, string)__
+
+```js
+index.add(0, "John Doe");
+```
+
+#### Search items
+
+> Index.__search(string | options, \<limit\>, \<options\>)__
+
+```js
+index.search("John");
+```
+
+Limit the result:
+
+```js
+index.search("John", 10);
+```
+
+#### Check existence of already indexed IDs
+
+You can check if an ID was already indexed by:
+
+```js
+if(index.contain(1)){
+    console.log("ID was found in index");
+}
+```
+
+#### Update item from an index
+
+> Index.__update(id, string)__
+
+```js
+index.update(0, "Max Miller");
+```
+
+#### Remove item from an index
+
+> Index.__remove(id)__
+
+```js
+index.remove(0);
+```
+
+#### Clear all items from an index
+
+> Index.__clear()__
+
+```js
+index.clear();
+```
+
+### Chaining
+
+Simply chain methods like:
+
+```js
+const index = new Index().addMatcher({'â': 'a'}).add(0, 'foo').add(1, 'bar');
+```
+
+```js
+index.remove(0).update(1, 'foo').add(2, 'foobar');
+```
+
+## Index Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>preset</td>
+        <td>
+            "memory"<br>
+            "performance"<br>
+            "match"<br>
+            "score"<br>
+            "default"
+        </td>
+        <td>
+            The <a href="#presets">configuration profile</a> as a shortcut or as a base for your custom settings.<br>
+        </td>
+        <td>"default"</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tokenize</td>
+        <td>
+            "strict" or "exact"<br>
+            "forward"<br>
+            "reverse" or "bidirectional<br>
+            "full"
+        </td>
+        <td>
+            Indicates how terms should be indexed by <a href="#tokenizer-partial-match">tokenization</a>.
+        </td>
+        <td>"strict"</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>resolution</td>
+        <td>
+            Number
+        </td>
+        <td>Sets the scoring <a href="#resolution">resolution</a></td>
+        <td>9</td>
+    </tr>
+    <tr>
+        <td>encoder<br><br><br><br><br><br><br></td>
+        <td>
+            <a href="doc/encoder.md">new Encoder(options)</a><br>
+            Charset.Exact<br>
+            Charset.Default<br>
+            Charset.Normalize<br>
+            Charset.LatinBalance<br>
+            Charset.LatinAdvanced<br>
+            Charset.LatinExtra<br>
+            Charset.LatinSoundex<br>
+            false
+        </td>
+        <td>Choose one of the <a href="#charset-collection">built-in encoder</a><br><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
+        <td>"default"</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>encode</td>
+        <td>
+            function(string) => string[]
+        </td>
+        <td>Pass a <a href="doc/encoder.md#custom-encoder">custom encoding function</a><br><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
+        <td>"default"</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>context</td>
+        <td>
+            Boolean<br>
+            <a href="#context-options">Context Options</a>
+        </td>
+        <td>Enable/Disable <a href="#context-search">context index</a>. When passing "true" as a value will use the defaults for the context.</td>
+        <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>cache</td>
+        <td>
+            Boolean<br>
+            Number
+        </td>
+        <td>Enable/Disable and/or set capacity of cached entries.<br><br>The cache automatically balance stored entries related to their popularity.</td>
+        <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>fastupdate</td>
+        <td>
+            Boolean
+        </td>
+        <td>Additionally add a <a href="#fastupdate">fastupdate index</a> which boost any replace/update/remove task to a high performance level by also increasing index size by ~30%.</td>
+        <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>priority</td>
+        <td>
+            Number
+        </td>
+        <td>Sets the task execution priority (1 low priority - 9 high priority) when using the <a href="#async">async methods</a></td>
+        <td>4</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>score</td>
+        <td>
+            function(string) => number
+        </td>
+        <td>Use a <a href="doc/customization.md">custom score function</a></td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>keystore</td>
+        <td>
+            Number
+        </td>
+        <td>Increase available size for In-Memory-Index by additionally using uniform balanced registers (<a href="doc/keystore.md">Keystore</a>). You can apply values from 1 to 64.</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td colspan="4">
+            Persistent Options:
+        </td>
+    </tr>
+    <tr>
+        <td>db</td>
+        <td>
+            StorageInterface
+        </td>
+        <td>Pass an instance of a <a href="doc/persistent.md">persistent adapter</a></td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>commit</td>
+        <td>
+            Boolean
+        </td>
+        <td>When disabled any changes won't commit, instead it needs calling <code>index.commit()</code> manually to make modifications to the index (add, update, remove) persistent.</td>
+        <td>true</td>
+    </tr>
+</table>
+
+## Suggestions
+
+Any query on each of the index types is supporting the option `suggest: true`. Also within some of the `Resolver` stages (and, not, xor) you can add this option for the same purpose.
+
+When suggestions is enabled, it allows results which does not perfectly match to the given query e.g. when one term was not included. Suggestion-Search will keep track of the scoring, therefore the first result entry is the closest one to a perfect match.
+
+```js
+const index = new Index().add(1, "cat dog bird");
+const result = index.search("cat fish");
+// result => []
+```
+
+Same query with suggestion enabled:
+
+```js
+const result = index.search("cat fish", { suggest: true });
+// result => [ 1 ]
+```
+
+At least one match (or partial match) has to be found to get back any result:
+
+```js
+const result = index.search("horse fish", { suggest: true });
+// result => []
+```
+
+## Resolution
+
+The resolution refers to the maximum count of scoring slots on which the content is divided into.
+
+> A formula to determine a well-balanced value for the `resolution` is: $2*floor(\sqrt{content.length})$ where content is the largest value pushed by `index.add()`. This formula does not apply to the `context` resolution.
+
+A resolution of 1 will disable scoring, when `context` was not enabled.
+A suggested minimum meaningful resolution is 3, because the first and last slot are reserved when available.
+
+### Context Resolution
+
+When `context` was enabled the minimum valuable resolution is 1.
+You can adjust the resolution of the context index independently.
+Giving both a value of 1 will disable scoring by term position related to the document root.
+Instead, the scoring refers to the distance between each term within the query.
+
+Although using a resolution > 1 can further improve context scoring. The default resolution still matters when context chain breaks and falls back to default index internally. A context resolution higher than 50% of the default resolution is probably too much.
+
 ## Tokenizer (Partial Match)
 
 The tokenizer is one of the most important options and heavily influence:
@@ -1097,153 +1413,6 @@ Encoding is one of the most important task and heavily influence:
         <td></td>
     </tr>
 </table>
-
-## Basic Usage
-
-#### Create a new index
-
-```js
-const index = new Index();
-```
-
-Create a new index and choosing one of the [Presets](#presets):
-
-```js
-const index = new Index("match");
-```
-
-Create a new index with custom options:
-
-```js
-const index = new Index({
-    tokenize: "forward",
-    resolution: 9,
-    fastupdate: true
-});
-```
-
-Create a new index and extend a preset with custom options:
-
-```js
-var index = new FlexSearch({
-    preset: "memory",
-    tokenize: "forward",
-    resolution: 5
-});
-```
-
-Create a new index and assign an [Encoder](doc/encoder.md):
-
-```js
-//import { Charset } from "./dist/module/charset.js";
-import { Charset } from "flexsearch";
-const index = new Index({
-    tokenize: "forward",
-    encoder: Charset.LatinBalance
-});
-```
-
-The resolution refers to the maximum count of scoring slots on which the content is divided into.
-
-> A formula to determine a well-balanced value for the `resolution` is: $2*floor(\sqrt{content.length})$ where content is the value pushed by `index.add()`. Here the maximum length of all contents should be used.
-
-<a href="#options">See all available custom options.</a>
-
-#### Add text item to an index
-
-Every content which should be added to the index needs an ID. When your content has no ID, then you need to create one by passing an index or count or something else as an ID (a value from type `number` is highly recommended). Those IDs are unique references to a given content. This is important when you update or adding over content through existing IDs. When referencing is not a concern, you can simply use something simple like `count++`.
-
-> Index.__add(id, string)__
-
-```js
-index.add(0, "John Doe");
-```
-
-#### Search items
-
-> Index.__search(string | options, \<limit\>, \<options\>)__
-
-```js
-index.search("John");
-```
-
-Limit the result:
-
-```js
-index.search("John", 10);
-```
-
-#### Check existence of already indexed IDs
-
-You can check if an ID was already indexed by:
-
-```js
-if(index.contain(1)){
-    console.log("ID was found in index");
-}
-```
-
-#### Update item from an index
-
-> Index.__update(id, string)__
-
-```js
-index.update(0, "Max Miller");
-```
-
-#### Remove item from an index
-
-> Index.__remove(id)__
-
-```js
-index.remove(0);
-```
-
-#### Clear all items from an index
-
-> Index.__clear()__
-
-```js
-index.clear();
-```
-
-### Chaining
-
-Simply chain methods like:
-
-```js
-const index = Index.create().addMatcher({'â': 'a'}).add(0, 'foo').add(1, 'bar');
-```
-
-```js
-index.remove(0).update(1, 'foo').add(2, 'foobar');
-```
-
-## Suggestions
-
-Any query on each of the index types is supporting the option `suggest: true`. Also within some of the `Resolver` stages (and, not, xor) you can add this option for the same purpose.
-
-When suggestions is enabled, it allows results which does not perfectly match to the given query e.g. when one term was not included. Suggestion-Search will keep track of the scoring, therefore the first result entry is the closest one to a perfect match.
-
-```js
-const index = Index.create().add(1, "cat dog bird");
-const result = index.search("cat fish");
-// result => []
-```
-
-Same query with suggestion enabled:
-
-```js
-const result = index.search("cat fish", { suggest: true });
-// result => [ 1 ]
-```
-
-At least one match (or partial match) has to be found to get back any result:
-
-```js
-const result = index.search("horse fish", { suggest: true });
-// result => []
-```
 
 ## Fuzzy-Search
 
@@ -1364,6 +1533,7 @@ index.cleanup();
 
 > The `cleanup` method has no effect when not using `fastupdate: true`.
 
+
 ## Context Search
 
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document. The context acts like a bidirectional moving window of 2 pointers (terms) which can initially have a maximum distance of the value passed via option setting `depth` and dynamically growth on search when the query did not match any results.
@@ -1394,9 +1564,72 @@ var index = new FlexSearch({
 });
 ```
 
-> Only the tokenizer "strict" is actually supported by the contextual index.
+> Only the tokenizer `strict` is actually supported by the context index.
 
-> The contextual index requires <a href="#memory">additional amount of memory</a> depending on depth.
+> The context index requires <a href="#memory">additional amount of memory</a> depending on passed property `depth`.
+
+### Compare Context Search
+
+Pay attention of the numbers "1", "2" and "3":
+
+```js
+const index = new Index();
+index.add(1, "1 A B C D 2 E F G H I 3 J K L");
+index.add(2, "A B C D E F G H I J 1 2 3 K L");
+const result = index.search("1 2 3");
+// --> [1, 2]
+```
+
+Same example with context enabled:
+
+```js
+const index = new Index({ context: true });
+index.add(1, "1 A B C D 2 E F G H I 3 J K L");
+index.add(2, "A B C D E F G H I J 1 2 3 K L");
+const result = index.search("1 2 3");
+// --> [2, 1]
+```
+
+The first index returns ID 1 in the first slot for the best pick, because matched terms are closer to the document root. The 2nd index has context enabled and returns the ID 2 in the first slot, because of the distance between terms.
+
+### Context Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>resolution</td>
+        <td>
+            Number
+        </td>
+        <td>Sets the scoring <a href="#resolution">resolution</a> for the context.</td>
+        <td>1</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>depth<br><br></td>
+        <td>
+            false<br>
+            Number
+        </td>
+        <td>Enable/Disable context index and also sets the maximum initial distance of related terms.</td>
+        <td>1</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>bidirectional</td>
+        <td>
+            Boolean
+        </td>
+        <td>If enabled the context direction (aka "context chain") can move bidirectional. You should ony disable this options when you need a more exact match with fewer results.</td>
+        <td>true</td>
+    </tr>
+</table>
 
 ## Auto-Balanced Cache (By Popularity)
 

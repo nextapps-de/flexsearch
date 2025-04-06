@@ -98,4 +98,32 @@ describe("Context", function(){
         // todo shuffled chain:
         //expect(index.search("9 3 1")).to.include(1);
     });
+
+    it("Should have been added properly when dupes will break the context chain", function(){
+
+        // the default scoring is quite capable
+        let index = new Index();
+        index.add(1, "1 A B C D E F 2 G H I J K L 3");
+        index.add(2, "A B C D E F G H I J 1 2 3 K L");
+        let result = index.search("1 2 3");
+        expect(result[0]).to.equal(2);
+        result = index.search("3 2 1");
+        expect(result[0]).to.equal(2);
+
+        // from here it starts
+        index = new Index();
+        index.add(1, "1 A B C D 2 E F G H I 3 J K L");
+        index.add(2, "A B C D E F G H I J 1 2 3 K L");
+        result = index.search("1 2 3");
+        expect(result[0]).to.equal(1);
+
+        index = new Index({ context: true });
+        index.add(1, "1 A B C D 2 E F G H I 3 J K L");
+        index.add(2, "A B C D E F G H I J 1 2 3 K L");
+        result = result = index.search("1 2 3");
+        expect(result[0]).to.equal(2);
+
+        index.search("1 2 3", { context: false });
+        expect(result[0]).to.equal(1);
+    });
 });

@@ -18,3 +18,5 @@ The internal ID arrays scales automatically when limit of 2^31 has reached by us
 
 > Persistent storages has no keystore limit by default.
 > You should not enable keystore when using persistent indexes, as long as you do not stress the buffer too hard before calling `index.commit()`.
+
+There is no additional memory cost when using a Keystore.

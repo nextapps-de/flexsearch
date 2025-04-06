@@ -141,7 +141,7 @@ export let SearchOptions = {};
  *   index: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
  *   pluck: (string|DocumentSearchOptions|undefined),
  *   merge: (boolean|undefined),
- *   highlight: (string|undefined),
+ *   highlight: (string|undefined)
  * }}
  */
 export let DocumentSearchOptions = {};
@@ -161,7 +161,8 @@ export let IntermediateSearchResults = [];
 /**
  * @typedef Array<{
  *   id: (number|string),
- *   doc: (Object|null)
+ *   doc: (Object|null),
+ *   highlight: (string|undefined)
  * }>
  */
 export let EnrichedSearchResults = [];
@@ -179,17 +180,16 @@ export let DocumentSearchResults = [];
  * @typedef Array<{
  *   field: (string|undefined),
  *   tag: (string|undefined),
- *   highlight: (string|undefined),
- *   result: {EnrichedSearchResults}
+ *   result: EnrichedSearchResults
  * }>
  */
 export let EnrichedDocumentSearchResults = [];
-
 
 /**
  * @typedef {{
  *   id: (number|string),
  *   doc: (Object|null),
+ *   highlight: (string|undefined),
  *   field: (Array<string>|undefined),
  *   tag: (Array<string>|undefined)
  * }}

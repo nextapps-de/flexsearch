@@ -496,19 +496,36 @@ Document.prototype.search = function(query, limit, options, _promises){
 
  */
 
+/**
+ * @param {EnrichedDocumentSearchResults} result
+ * @param query
+ * @param index
+ * @param field
+ * @param tree
+ * @param template
+ * @param limit
+ * @param offset
+ * @return {*}
+ */
 function highlight_fields(result, query, index, field, tree, template, limit, offset){
 
+    // The biggest issue is dealing with custom encoders, for this reason
+    // a regular expression can't apply
+    // Todo: when one of the basic encoders was used, provide
+    //       combined regex
+    //
     // if(typeof template === "string"){
     //     template = new RegExp(template, "g");
     // }
-    //console.log("template", template)
+
     let encoder;
     let query_enc;
     let tokenize;
 
+    // for every field
     for(let i = 0, res_field, enc, idx, path; i < result.length; i++){
 
-        /** @type {SearchResults|EnrichedSearchResults} */
+        /** @type {EnrichedSearchResults} */
         let res = result[i].result;
         res_field = result[i].field;
         idx = index.get(res_field);
@@ -516,26 +533,33 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
         tokenize = idx.tokenize;
         path = tree[field.indexOf(res_field)];
 
+        // re-encode query when encoder has changed
         if(enc !== encoder){
             encoder = enc;
             query_enc = encoder.encode(query);
         }
 
+        // for every doc in results
         for(let j = 0; j < res.length; j++){
             let str = "";
             let content = parse_simple(res[j]["doc"], path);
             //let doc_enc = encoder.encode(content);
             let doc_org = content.split(/\s+/);
 
+            // loop terms of encoded doc content
             for(let k = 0, doc_org_cur, doc_enc_cur; k < doc_org.length; k++){
                 doc_org_cur = doc_org[k];
                 //doc_enc_cur = doc_enc[k];
-                doc_enc_cur = encoder.encode(doc_org_cur).join(" ");
+                doc_enc_cur = enc.encode(doc_org_cur);
+                doc_enc_cur = doc_enc_cur.length > 1
+                    ? doc_enc_cur.join(" ")
+                    : doc_enc_cur[0];
 
                 let found;
 
                 if(doc_enc_cur && doc_org_cur){
 
+                    // loop terms of encoded query content
                     for(let l = 0, query_enc_cur; l < query_enc.length; l++){
                         query_enc_cur = query_enc[l];
                         // todo tokenize could be custom also when "strict" was used

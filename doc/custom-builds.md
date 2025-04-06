@@ -48,8 +48,6 @@ npm run build:custom
 
 The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when format is module to `dist/flexsearch.custom.module.xxxx.min.js` (the "xxxx" is a hash based on the used build flags).
 
-<a name="build-flags" id="builds"></a>
-
 ### Supported Build Flags
 
 <table>

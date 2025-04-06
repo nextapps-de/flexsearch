@@ -156,14 +156,14 @@ declare module "flexsearch" {
      *
      * **Document:**
      * * Index options: https://github.com/nextapps-de/flexsearch#index-options
-     * * Tokenizer: https://github.com/nextapps-de/flexsearch#tokenizer
-     * * Encoder: https://github.com/nextapps-de/flexsearch#encoder
-     * * Context: https://github.com/nextapps-de/flexsearch#context
-     * * Resolver: https://github.com/nextapps-de/flexsearch#resolver
-     * * Keystore: https://github.com/nextapps-de/flexsearch#keystore
-     * * Persistent: https://github.com/nextapps-de/flexsearch#persistent
-     * * Right-To-Left: https://github.com/nextapps-de/flexsearch#rtl
-     * * Language: https://github.com/nextapps-de/flexsearch#languages
+     * * Tokenizer: https://github.com/nextapps-de/flexsearch#tokenizer-partial-match
+     * * Encoder: https://github.com/nextapps-de/flexsearch#charset-collection
+     * * Context: https://github.com/nextapps-de/flexsearch#context-search
+     * * Resolver: https://github.com/nextapps-de/flexsearch/doc/resolver.md
+     * * Keystore: https://github.com/nextapps-de/flexsearch/doc/keystore.md
+     * * Persistent: https://github.com/nextapps-de/flexsearch/doc/persistent.md
+     * * Right-To-Left: https://github.com/nextapps-de/flexsearch/doc/encoder.md#right-to-left-support
+     * * Language: https://github.com/nextapps-de/flexsearch/doc/encoder.md#built-in-language-packs
      */
     type IndexOptions = {
         preset?: Preset;
