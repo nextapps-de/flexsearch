@@ -116,16 +116,19 @@ import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 /** @export */KeystoreMap.size;
 /** @export */KeystoreSet.size;
 
-/** @export */Charset.LatinExact;
-/** @export */Charset.LatinDefault;
-/** @export */Charset.LatinSimple;
+/** @export */Charset.Exact;
+/** @export */Charset.Default;
+/** @export */Charset.Normalize;
 /** @export */Charset.LatinBalance;
 /** @export */Charset.LatinAdvanced;
 /** @export */Charset.LatinExtra;
 /** @export */Charset.LatinSoundex;
-/** @export */Charset.ArabicDefault;
-/** @export */Charset.CjkDefault;
-/** @export */Charset.CyrillicDefault;
+/** @export @deprecated */Charset.LatinExact;
+/** @export @deprecated */Charset.LatinDefault;
+/** @export @deprecated */Charset.LatinSimple;
+/** @export @deprecated */Charset.ArabicDefault;
+/** @export @deprecated */Charset.CjkDefault;
+/** @export @deprecated */Charset.CyrillicDefault;
 
 /** @export */IndexOptions.preset;
 /** @export */IndexOptions.context;

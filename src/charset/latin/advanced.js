@@ -26,7 +26,7 @@ export const replacer = [
 /** @type EncoderOptions */
 const options = {
     //normalize: true,
-    dedupe: true,
+    //dedupe: true,
     mapper: soundex,
     matcher: matcher,
     replacer: replacer

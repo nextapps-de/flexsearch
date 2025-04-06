@@ -69,6 +69,7 @@ Document.prototype.search = function(query, limit, options, _promises){
     /** @type {
      *   DocumentSearchResults|
      *   EnrichedDocumentSearchResults|
+     *   MergedDocumentSearchResults|
      *   SearchResults|
      *   IntermediateSearchResults|
      *   EnrichedSearchResults
@@ -432,7 +433,7 @@ Document.prototype.search = function(query, limit, options, _promises){
             : new Resolver(result);
     }
     if(pluck && (!enrich || !this.store)){
-        return result[0];
+        return /** @type {SearchResults} */ (result[0]);
     }
 
     promises = [];
@@ -450,6 +451,7 @@ Document.prototype.search = function(query, limit, options, _promises){
             }
             else{
                 PROFILER && tick("Document.search:doc:get");
+                // todo
                 // the documents are stored on the first field
                 promises.push(res = this.index.get(this.field[0]).db.enrich(res));
             }
@@ -457,13 +459,13 @@ Document.prototype.search = function(query, limit, options, _promises){
 
         if(pluck){
             return resolve
-                ? res
-                : new Resolver(res);
+                ? /** @type {SearchResults|EnrichedSearchResults} */ (res)
+                : new Resolver(/** @type {IntermediateSearchResults} */ (res));
         }
 
         result[i] = {
             "field": result_field[i],
-            "result": res
+            "result": /** @type {SearchResults|EnrichedSearchResults} */ (res)
         };
     }
 
@@ -474,40 +476,34 @@ Document.prototype.search = function(query, limit, options, _promises){
                 result[j]["result"] = promises[j];
             }
             return merge
-                ? merge_fields(result, /** @type {number} */ (limit), offset)
+                ? merge_fields(result)
                 : highlight
-                    ? highlight_fields(result, query, self.index, self.field, self.tree, highlight, limit, offset)
-                    : result;
+                    ? highlight_fields(result, /** @type {string} */ (query), self.index, self.field, self.tree, highlight)
+                    : /** @type {DocumentSearchResults} */ (
+                        result
+                    );
         });
     }
 
     return merge
-        ? merge_fields(result, limit, offset)
+        ? merge_fields(result)
         : highlight
-            ? highlight_fields(result, query, this.index, this.field, this.tree, highlight, limit, offset)
-            : result;
+            ? highlight_fields(result, /** @type {string} */ (query), this.index, this.field, this.tree, highlight)
+            : /** @type {DocumentSearchResults} */ (
+                result
+            );
 }
-
-/*
-
- karmen or clown or not found
-[Carmen]cita
-       Le [clown] et ses chiens
-
- */
 
 /**
  * @param {EnrichedDocumentSearchResults} result
- * @param query
- * @param index
- * @param field
- * @param tree
- * @param template
- * @param limit
- * @param offset
- * @return {*}
+ * @param {string} query
+ * @param {Map<string, Index>} index
+ * @param {string} field
+ * @param {Array<string>} tree
+ * @param {string} template
+ * @return {EnrichedDocumentSearchResults}
  */
-function highlight_fields(result, query, index, field, tree, template, limit, offset){
+function highlight_fields(result, query, index, field, tree, template){
 
     // The biggest issue is dealing with custom encoders, for this reason
     // a regular expression can't apply
@@ -525,9 +521,12 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
     // for every field
     for(let i = 0, res_field, enc, idx, path; i < result.length; i++){
 
+        res_field = result[i].field;
+        // skip when not a field entry (e.g. tags)
+        if(!res_field) continue;
+
         /** @type {EnrichedSearchResults} */
         let res = result[i].result;
-        res_field = result[i].field;
         idx = index.get(res_field);
         enc = idx.encoder;
         tokenize = idx.tokenize;
@@ -609,12 +608,10 @@ function highlight_fields(result, query, index, field, tree, template, limit, of
 
 /**
  * @param {DocumentSearchResults} fields
- * @param {number=} limit
- * @param {number=} offset
  * @return {MergedDocumentSearchResults}
  */
-function merge_fields(fields, limit, offset){
-    /** @type {Array<MergedDocumentSearchEntry>} */
+function merge_fields(fields){
+    /** @type {MergedDocumentSearchResults} */
     const final = [];
     const set = create_object();
     for(let i = 0, field, res; i < fields.length; i++){
@@ -624,23 +621,11 @@ function merge_fields(fields, limit, offset){
             entry = res[j];
             // upgrade flat results
             if(typeof entry !== "object"){
-                entry = {
-                  "id": entry
-                };
+                entry = { "id": entry };
             }
             id = entry["id"];
             tmp = set[id];
             if(!tmp){
-                // offset was already applied on field indexes
-                // if(offset){
-                //     offset--;
-                //     continue;
-                // }
-                // apply limit from last round, because just fields could
-                // be pushed without adding new results
-                if(final.length === limit){
-                    return final;
-                }
                 entry.field = set[id] = [field.field];
                 final.push(/** @type {MergedDocumentSearchEntry} */ (entry));
             }

@@ -24,7 +24,7 @@ if(!build_light) describe("Export / Import", function(){
         index.add(2, "foobar foo bar");
 
         expect(index.reg.size).to.equal(3);
-        expect(index.map.size).to.equal(9);
+        expect(index.map.size).to.equal(8);
         expect(index.search("foobar")).to.eql([2, 0, 1]);
 
         const payload = new Map();
@@ -34,7 +34,7 @@ if(!build_light) describe("Export / Import", function(){
 
         expect(payload).to.eql(new Map([
             ['1.reg', '[0,1,2]'],
-            ['1.map', '[["f",[[0,2],[1]]],["fo",[[0,2],[1]]],["foo",[[0,2],[1]]],["b",[[1],[0],[2]]],["ba",[[1],[0],[2]]],["bar",[[1],[0],[2]]],["foob",[[2],null,[0,1]]],["fooba",[[2],null,[0,1]]],["foobar",[[2],null,[0,1]]]]']
+            ['1.map', '[["f",[[0,2],[1]]],["fo",[[0,2],[1]]],["b",[[1],[0],[2]]],["ba",[[1],[0],[2]]],["bar",[[1],[0],[2]]],["fob",[[2],null,[0,1]]],["foba",[[2],null,[0,1]]],["fobar",[[2],null,[0,1]]]]']
         ]));
 
         index = new Index({
@@ -46,7 +46,7 @@ if(!build_light) describe("Export / Import", function(){
         }
 
         expect(index.reg.size).to.equal(3);
-        expect(index.map.size).to.equal(9);
+        expect(index.map.size).to.equal(8);
         expect(index.search("foobar")).to.eql([2, 0, 1]);
     });
 
@@ -72,8 +72,8 @@ if(!build_light) describe("Export / Import", function(){
 
         expect(payload).to.eql(new Map([
             ['1.reg', '[0,1,2]'],
-            ['1.map', '[["foo",[[0],[1,2]]],["bar",[[1],[0],[2]]],["foobar",[[2],null,[0,1]]]]'],
-            ['1.ctx', '[["foo",[["bar",[[0,1],[2]]]]],["foobar",[["bar",[null,[0]]],["foo",[[2],[1]]]]]]']
+            ['1.map', '[["fo",[[0],[1,2]]],["bar",[[1],[0],[2]]],["fobar",[[2],null,[0,1]]]]'],
+            ['1.ctx', '[["fo",[["bar",[[0,1],[2]]]]],["fobar",[["bar",[null,[0]]],["fo",[[2],[1]]]]]]']
         ]));
 
         index = new Index({

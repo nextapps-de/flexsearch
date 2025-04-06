@@ -120,10 +120,10 @@ describe("Context", function(){
         index = new Index({ context: true });
         index.add(1, "1 A B C D 2 E F G H I 3 J K L");
         index.add(2, "A B C D E F G H I J 1 2 3 K L");
-        result = result = index.search("1 2 3");
+        result = index.search("1 2 3");
         expect(result[0]).to.equal(2);
 
-        index.search("1 2 3", { context: false });
+        result = index.search("1 2 3", { context: false });
         expect(result[0]).to.equal(1);
     });
 });

@@ -1,4 +1,4 @@
-import { EncoderOptions } from "../../type.js";
+import { EncoderOptions } from "../type.js";
 
 /** @type EncoderOptions */
 const options = {

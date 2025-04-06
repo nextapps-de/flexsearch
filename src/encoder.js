@@ -211,7 +211,7 @@ Encoder.prototype.assign = function(options){
 
     tmp = options.filter;
     this.filter = typeof tmp === "function" ? tmp : merge_option(tmp && new Set(tmp), null, this.filter);
-    this.dedupe = merge_option(options.dedupe, false, this.dedupe);
+    this.dedupe = merge_option(options.dedupe, true, this.dedupe);
     this.matcher = merge_option((tmp = options.matcher) && new Map(tmp), null, this.matcher);
     this.mapper = merge_option((tmp = options.mapper) && new Map(tmp), null, this.mapper);
     this.stemmer = merge_option((tmp = options.stemmer) && new Map(tmp), null, this.stemmer);

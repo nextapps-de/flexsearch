@@ -1,0 +1,1 @@
+import{EncoderOptions}from"../type.js";const options={normalize:!1,numeric:!1,dedupe:!1};export default options;

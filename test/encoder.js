@@ -31,9 +31,14 @@ describe("Encoder: Charset", function(){
 
     it("Should have been encoded properly: Default", function(){
 
-        const index = new Index({ encoder: Charset.Default });
+        let index = new Index({ encoder: Charset.Default });
         expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
-            ["bjorn", "phillipp", "mayer"]
+            ["bjorn", "philip", "mayer"]
+        );
+
+        index = new Index();
+        expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
+            ["bjorn", "philip", "mayer"]
         );
     });
 
@@ -51,7 +56,7 @@ describe("Encoder: Charset", function(){
 
             const index = new Index({ encoder: Charset.Normalize });
             expect(index.encoder.encode("Björn-Phillipp Mayer")).to.eql(
-                index.encoder.encode("bjorn/phillipp mayer")
+                index.encoder.encode("bjorn/philip mayer")
             );
         });
 

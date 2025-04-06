@@ -64,10 +64,10 @@ describe("Initialize", function(){
         index.encoder.normalize = encoder.normalize;
         expect(index.encoder).to.eql(encoder);
         expect(index.encoder.minlength).to.equal(1);
-        expect(index.encoder.maxlength).to.equal(0);
+        expect(index.encoder.maxlength).to.equal(1024);
         expect(index.encoder.rtl).to.equal(false);
         expect(index.encoder.numeric).to.equal(true);
-        expect(index.encoder.dedupe).to.equal(false);
+        expect(index.encoder.dedupe).to.equal(true);
     });
 });
 
@@ -82,8 +82,8 @@ describe("Add", function(){
         index.add(1, "FooBar");
         index.add(3, "Some 'short' content.");
 
-        expect(index.reg.keys()).to.have.members([0, 1, 2, 3]);
-        expect(index.map.keys()).to.have.members(["foo", "bar", "foobar", "some", "short", "content"]);
+        expect(Array.from(index.reg.keys())).to.have.members([0, 1, 2, 3]);
+        expect(Array.from(index.map.keys())).to.have.members(["fo", "bar", "fobar", "some", "short", "content"]);
         expect(index.ctx.size).to.equal(0);
         expect(index.reg.size).to.equal(4);
     });
@@ -97,12 +97,12 @@ describe("Add", function(){
         index.add(2, "T10030T10030");
         index.add(3, "1443-AB14345-1778");
 
-        expect(index.reg.keys()).to.have.members([0, 1, 2, 3]);
-        expect(index.map.keys()).to.have.members([
+        expect(Array.from(index.reg.keys())).to.have.members([0, 1, 2, 3]);
+        expect(Array.from(index.map.keys())).to.have.members([
             "test", "123", "456", "789",
-            "t", "100", "30",
+            "t", "10", "30",
             // id 2 was already completely added, split: "t", "100", "30", "t", "100", "30"
-            "144", "3", "ab", "143", "45", "177", "8"
+            "14", "3", "ab", "143", "45", "17", "8"
         ]);
         expect(index.ctx.size).to.equal(0);
         expect(index.reg.size).to.equal(4);

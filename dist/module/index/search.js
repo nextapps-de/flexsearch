@@ -26,10 +26,10 @@ import resolve_default from "../resolve/default.js";
 Index.prototype.search = function (query, limit, options) {
 
     if (!options) {
-        if (!limit && is_object(query)) {
+        if (!limit && "object" == typeof query) {
             options = /** @type {!SearchOptions} */query;
             query = "";
-        } else if (is_object(limit)) {
+        } else if ("object" == typeof limit) {
             options = /** @type {!SearchOptions} */limit;
             limit = 0;
         }
@@ -188,21 +188,21 @@ Index.prototype.search = function (query, limit, options) {
         keyword;
 
 
-    if (1 < length) {
-        if (context) {
-            // start with context right away
-            keyword = query_terms[0];
-            index = 1;
-        }
-        // todo
-        // else if(maxlength > 9 && (maxlength / minlength) > 3){
-        //     // sorting terms will break the context chain
-        //     // bigger terms has less occurrence
-        //     // this might also reduce the intersection task
-        //     // todo check intersection order
-        //     query_terms.sort(sort_by_length_down);
-        // }
+    //if(length > 1){
+    if (context) {
+        // start with context right away
+        keyword = query_terms[0];
+        index = 1;
     }
+    // todo
+    // else if(maxlength > 9 && (maxlength / minlength) > 3){
+    //     // sorting terms will break the context chain
+    //     // bigger terms has less occurrence
+    //     // this might also reduce the intersection task
+    //     // todo check intersection order
+    //     query_terms.sort(sort_by_length_down);
+    // }
+    //}
 
     if (!resolution && 0 !== resolution) {
         resolution = keyword ? this.resolution_ctx : this.resolution;

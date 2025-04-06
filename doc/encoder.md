@@ -271,7 +271,7 @@ const index = new Index({
         <td>
             <a href="#encoder-split-options">Encoder Split Options</a>
         </td>
-        <td>Deduplicate following letters, e.g. "missing" to "mising"</td>
+        <td>Define which of the string contents should be included (inclusion properties defaults to false)</td>
         <td>{ letter: true, number: true }</td>
     </tr>
     <tr></tr>
@@ -280,7 +280,7 @@ const index = new Index({
         <td>
             <a href="#encoder-split-options">Encoder Split Options</a>
         </td>
-        <td>Deduplicate following letters, e.g. "missing" to "mising"</td>
+        <td>Define which of the string contents should be excluded (exclusion properties defaults to true)</td>
         <td>false</td>
     </tr>
     <tr></tr>
@@ -323,7 +323,7 @@ const index = new Index({
         <td>
             Number
         </td>
-        <td>Set the minimum term length which should be added to the index. This limit does not apply to the `forward` tokenizer. You still get results when just typing "f" on a term "flexsearch" when e.g. `minlength: 4` was used.</td>
+        <td>Set the minimum term length which should be added to the index. This limit does not apply to the <code>forward</code> tokenizer. You still get results when just typing "f" on a term "flexsearch" when e.g. <code>minlength: 4</code> was used.</td>
         <td>1</td>
     </tr>
     <tr></tr>

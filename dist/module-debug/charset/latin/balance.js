@@ -31,7 +31,7 @@ export const soundex = new Map([["b", "p"],
 /** @type EncoderOptions */
 const options = {
     //normalize: true,
-    dedupe: !0,
+    //dedupe: true,
     mapper: soundex
 };
 export default options;

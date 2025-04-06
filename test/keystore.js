@@ -26,8 +26,8 @@ if(!build_light && !build_compact) describe("Keystore", function(){
         }
 
         expect(index.map.size).to.equal(2);
-        expect(index.map.get("foo")[0].length).to.equal(100);
-        expect(index.ctx.get("foo").get("bar")[0].length).to.equal(100);
+        expect(index.map.get("fo")[0].length).to.equal(100);
+        expect(index.ctx.get("fo").get("bar")[0].length).to.equal(100);
         expect(index.reg.size).to.equal(100);
 
         for(let i = 0; i < 100; i++){
@@ -38,9 +38,9 @@ if(!build_light && !build_compact) describe("Keystore", function(){
         index.cleanup();
         expect(index.map.size).to.equal(1);
 
-        expect(index.map.get("foo")).to.be.undefined;
-        expect(index.map.get("foobar")[0].length).to.equal(100);
-        expect(index.ctx.get("foo")).to.be.undefined;
+        expect(index.map.get("fo")).to.be.undefined;
+        expect(index.map.get("fobar")[0].length).to.equal(100);
+        expect(index.ctx.get("fo")).to.be.undefined;
         expect(index.reg.size).to.equal(100);
 
         for(let i = 0; i < 50; i++){
@@ -48,7 +48,7 @@ if(!build_light && !build_compact) describe("Keystore", function(){
         }
 
         expect(index.map.size).to.equal(1);
-        expect(index.map.get("foobar")[0].length).to.equal(50);
+        expect(index.map.get("fobar")[0].length).to.equal(50);
         expect(index.reg.size).to.equal(50);
 
         index.clear();
@@ -76,8 +76,8 @@ if(!build_light && !build_compact) describe("Keystore", function(){
         index.add(1, "foo bar");
         index.add(2, "foo bar");
 
-        let foo = index.map.get("foo");
-        let bar = index.ctx.get("foo").get("bar");
+        let foo = index.map.get("fo");
+        let bar = index.ctx.get("fo").get("bar");
         foo[0].length = 2**31 - 10;
         bar[0].length = 2**31 - 10;
 
@@ -85,10 +85,10 @@ if(!build_light && !build_compact) describe("Keystore", function(){
             index.add(i, "foo bar");
         }
 
-        expect(index.map.get("foo")[0].length).to.equal(2**31 + 10);
-        expect(index.ctx.get("foo").get("bar")[0].length).to.equal(2**31 + 10);
+        expect(index.map.get("fo")[0].length).to.equal(2**31 + 10);
+        expect(index.ctx.get("fo").get("bar")[0].length).to.equal(2**31 + 10);
         //expect(index.reg.size).to.equal(2**31 + 1);
-        expect(index.search("foo bar", 3)).to.eql([0, 1, 2]);
+        expect(index.search("fo bar", 3)).to.eql([0, 1, 2]);
 
         index.clear();
 

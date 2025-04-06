@@ -18,7 +18,7 @@ export const replacer = [/([^aeo])h(.)/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2",
 /** @type EncoderOptions */
 const options = {
     //normalize: true,
-    dedupe: !0,
+    //dedupe: true,
     mapper: soundex,
     matcher: matcher,
     replacer: replacer

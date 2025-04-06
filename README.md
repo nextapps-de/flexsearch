@@ -1609,7 +1609,7 @@ The first index returns ID 1 in the first slot for the best pick, because matche
             Number
         </td>
         <td>Sets the scoring <a href="#resolution">resolution</a> for the context.</td>
-        <td>1</td>
+        <td>3</td>
     </tr>
     <tr></tr>
     <tr>

@@ -10,7 +10,7 @@ const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-describe("Caching", function(){
+if(!build_light) describe("Caching", function(){
 
     it("Should have been cached and sorted by popularity/latest", function(){
 

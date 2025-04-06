@@ -36,11 +36,11 @@ import resolve_default from "../resolve/default.js";
 Index.prototype.search = function(query, limit, options){
 
     if(!options){
-        if(!limit && is_object(query)){
+        if(!limit && typeof query === "object"){
             options = /** @type {!SearchOptions} */ (query);
             query = "";
         }
-        else if(is_object(limit)){
+        else if(typeof limit === "object"){
             options = /** @type {!SearchOptions} */ (limit);
             limit = 0;
         }
@@ -208,7 +208,7 @@ Index.prototype.search = function(query, limit, options){
     let dupes = create_object();
     let index = 0, keyword;
 
-    if(length > 1){
+    //if(length > 1){
         if(context){
             // start with context right away
             keyword = query_terms[0];
@@ -222,7 +222,7 @@ Index.prototype.search = function(query, limit, options){
         //     // todo check intersection order
         //     query_terms.sort(sort_by_length_down);
         // }
-    }
+    //}
 
     if(!resolution && resolution !== 0){
         resolution = keyword

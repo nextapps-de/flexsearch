@@ -1,5 +1,6 @@
 // When you are looking for type definitions which fully describes the usage take a look into the index.d.ts file.
 // Some of the types here aren't supposed to be used as public, they might be defined just for internal state.
+
 import Index from "./index.js";
 import Encoder from "./encoder.js";
 import StorageInterface from "./db/interface.js";
@@ -141,7 +142,7 @@ export let SearchOptions = {};
  *   index: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
  *   pluck: (string|DocumentSearchOptions|undefined),
  *   merge: (boolean|undefined),
- *   highlight: (string|undefined),
+ *   highlight: (string|undefined)
  * }}
  */
 export let DocumentSearchOptions = {};
@@ -153,7 +154,7 @@ export let DocumentSearchOptions = {};
 export let SearchResults = [];
 
 /**
- * @typedef Array<Array<number|string>>
+ * @typedef Array<SearchResults>
  * @global
  */
 export let IntermediateSearchResults = [];
@@ -161,7 +162,8 @@ export let IntermediateSearchResults = [];
 /**
  * @typedef Array<{
  *   id: (number|string),
- *   doc: (Object|null)
+ *   doc: (Object|null),
+ *   highlight: (string|undefined)
  * }>
  */
 export let EnrichedSearchResults = [];
@@ -179,8 +181,7 @@ export let DocumentSearchResults = [];
  * @typedef Array<{
  *   field: (string|undefined),
  *   tag: (string|undefined),
- *   highlight: (string|undefined),
- *   result: {EnrichedSearchResults}
+ *   result: EnrichedSearchResults
  * }>
  */
 export let EnrichedDocumentSearchResults = [];

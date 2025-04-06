@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.149 (Bundle/Debug)
+ * FlexSearch.js v0.8.151 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -97,13 +97,13 @@ r.assign = function(a) {
   this.finalize = u(a.finalize, null, this.finalize);
   b = a.filter;
   this.filter = "function" === typeof b ? b : u(b && new Set(b), null, this.filter);
-  this.dedupe = u(a.dedupe, !1, this.dedupe);
+  this.dedupe = u(a.dedupe, !0, this.dedupe);
   this.matcher = u((b = a.matcher) && new Map(b), null, this.matcher);
   this.mapper = u((b = a.mapper) && new Map(b), null, this.mapper);
   this.stemmer = u((b = a.stemmer) && new Map(b), null, this.stemmer);
   this.replacer = u(a.replacer, null, this.replacer);
   this.minlength = u(a.minlength, 1, this.minlength);
-  this.maxlength = u(a.maxlength, 0, this.maxlength);
+  this.maxlength = u(a.maxlength, 1024, this.maxlength);
   this.rtl = u(a.rtl, !1, this.rtl);
   if (this.cache = b = u(a.cache, !0, this.cache)) {
     this.l = null, this.A = "number" === typeof b ? b : 2e5, this.i = new Map(), this.j = new Map(), this.o = this.m = 128;
@@ -188,7 +188,7 @@ r.encode = function(a) {
   const d = !(this.dedupe || this.mapper || this.filter || this.matcher || this.stemmer || this.replacer);
   let b = [], f = this.split || "" === this.split ? a.split(this.split) : a;
   for (let g = 0, e, h; g < f.length; g++) {
-    if ((e = h = f[g]) && !(e.length < this.minlength)) {
+    if ((e = h = f[g]) && !(e.length < this.minlength || e.length > this.maxlength)) {
       if (d) {
         b.push(e);
       } else {
@@ -409,7 +409,7 @@ function L(a, d, b, f, c) {
   }
   h = w();
   var n = 0;
-  if (1 < b && g) {
+  if (g) {
     var m = a[0];
     n = 1;
   }

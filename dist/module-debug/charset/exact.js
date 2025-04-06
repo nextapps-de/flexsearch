@@ -1,9 +1,10 @@
-import { EncoderOptions } from "../../type.js";
+import { EncoderOptions } from "../type.js";
 
 /** @type EncoderOptions */
 const options = {
-    normalize: false,
-    numeric: false
+    normalize: !1,
+    numeric: !1,
+    dedupe: !1
     //split: /\s+/
     //normalize: false,
     //dedupe: false
