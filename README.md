@@ -7,7 +7,7 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 <h3>Next-Generation full-text search library for Browser and Node.js</h3>
 
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
-<img src="https://img.shields.io/badge/build-passing-brightgreen">
+<a target="_blank" href="https://github.com/nextapps-de/flexsearch/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen">
 <img src="https://img.shields.io/badge/coverage-91%25-brightgreen">
 <img src="https://img.shields.io/badge/typed-74%25-yellow"><!--<a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>-->
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
