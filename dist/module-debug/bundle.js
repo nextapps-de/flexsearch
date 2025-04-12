@@ -123,6 +123,7 @@ import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 /** @export */Charset.LatinAdvanced;
 /** @export */Charset.LatinExtra;
 /** @export */Charset.LatinSoundex;
+/** @export */Charset.CJK;
 /** @export @deprecated */Charset.LatinExact;
 /** @export @deprecated */Charset.LatinDefault;
 /** @export @deprecated */Charset.LatinSimple;

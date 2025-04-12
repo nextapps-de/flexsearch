@@ -62,6 +62,10 @@ const encoder = new Encoder({
 3. Charset.LatinExtra
 4. Charset.LatinSoundex
 
+#### Built-In CJK Encoder
+
+1. Charset.CJK
+
 ### Basic Usage
 
 ```js
@@ -566,7 +570,7 @@ const encoder = new Encoder({ rtl: true });
 ## CJK Word Break (Chinese, Japanese, Korean)
 
 ```js
-const index = new Index();
+const index = new Index({ encoder: Charset.CJK });
 index.add(0, "一个单词");
 var results = index.search("单词");
 ```

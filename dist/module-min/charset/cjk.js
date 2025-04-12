@@ -1,0 +1,1 @@
+import{EncoderOptions}from"../type.js";const options={split:""};export default options;

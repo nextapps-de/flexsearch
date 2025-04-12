@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.152 (ES5/Debug)
+ * FlexSearch.js v0.8.153 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2742,7 +2742,7 @@ var Gb = {Exact:Ab, Default:Bb, Normalize:Bb, LatinBalance:{mapper:Cb}, LatinAdv
     }
     a[b] = d;
   }
-}}, LatinExact:Ab, LatinDefault:Bb, LatinSimple:Bb};
+}}, CJK:{split:""}, LatinExact:Ab, LatinDefault:Bb, LatinSimple:Bb};
 O.prototype.remove = function(a, b) {
   var c = this.reg.size && (this.fastupdate ? this.reg.get(a) : this.reg.has(a));
   if (c) {

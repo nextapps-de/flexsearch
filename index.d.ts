@@ -58,6 +58,7 @@ declare module "flexsearch" {
         | "LatinAdvanced"
         | "LatinExtra"
         | "LatinSoundex"
+        | "CJK"
         | ((content: string) => string[]);
 
     /**

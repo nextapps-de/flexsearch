@@ -108,7 +108,7 @@ describe("Encoder: CJK Charset", function(){
 
     it("Should have been tokenized properly", function(){
 
-        const index = Index({ tokenize: "forward" });
+        const index = Index({ encoder: Charset.CJK });
 
         index.add(0, "서울시가 잠이 든 시간에 아무 말, 미뤄, 미뤄");
         expect(index.search("든")).to.include(0);
@@ -116,6 +116,17 @@ describe("Encoder: CJK Charset", function(){
 
         index.add(1, "一个单词");
         expect(index.search("一个")).to.include(1);
+        expect(index.search("单词")).to.include(1);
+        expect(index.search("词单")).to.include(1);
+    });
+
+    it("Should have been tokenized properly", function(){
+
+        const index = Index({ encoder: Charset.CJK });
+        index.add(1 , "多大的;多少平");
+
+        const result = index.search('是多少平的', { suggest: true });
+        expect(result).to.include(1);
     });
 });
 

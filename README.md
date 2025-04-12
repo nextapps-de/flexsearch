@@ -967,6 +967,10 @@ Methods `.export()` and also `.import()` are always async as well as every metho
 - Charset.[**LatinExtra**](#charset-collection)
 - Charset.[**LatinSoundex**](#charset-collection)
 
+`Charset` Chinese, Japanese, Korean Encoder Preset:
+
+- Charset.[**CJK**](#charset-collection)
+
 ---
 
 `Language` Encoder Preset:

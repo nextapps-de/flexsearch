@@ -154,6 +154,7 @@ if(SUPPORT_SERIALIZE){
 /** @export */ Charset.LatinAdvanced;
 /** @export */ Charset.LatinExtra;
 /** @export */ Charset.LatinSoundex;
+/** @export */ Charset.CJK;
 /** @export @deprecated */ Charset.LatinExact;
 /** @export @deprecated */ Charset.LatinDefault;
 /** @export @deprecated */ Charset.LatinSimple;
