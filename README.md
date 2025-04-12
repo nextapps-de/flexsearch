@@ -362,19 +362,19 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>Javascript Modules (ESM)</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/module/" target="_blank">Download</a></td>
+        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.1%2Fdist%2Fmodule" target="_blank">Download</a></td>
         <td><a href="https://github.com/nextapps-de/flexsearch/tree/0.8.1/dist/module" target="_blank">https://github.com/nextapps-de/flexsearch/tree/0.8.1/dist/module</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules Minified (ESM)</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/module-min/" target="_blank">Download</a></td>
+        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.1%2Fdist%2Fmodule-min" target="_blank">Download</a></td>
         <td><a href="https://github.com/nextapps-de/flexsearch/tree/0.8.1/dist/module-min" target="_blank">https://github.com/nextapps-de/flexsearch/tree/0.8.1/dist/module-min</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules Debug (ESM)</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/module-debug/" target="_blank">Download</a></td>
+        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.1%2Fdist%2Fmodule-debug" target="_blank">Download</a></td>
         <td><a href="https://github.com/nextapps-de/flexsearch/tree/0.8.1/dist/module-debug" target="_blank">https://github.com/nextapps-de/flexsearch/tree/0.8.1/dist/module-debug</a></td>
     </tr>
     <tr></tr>
