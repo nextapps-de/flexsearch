@@ -1328,28 +1328,28 @@ Try to choose the most upper of these tokenizer which covers your requirements:
     <tr>
         <td><code>"strict"</code><br><code>"exact"</code><br><code>"default"</code></td>
         <td>index the full term</td>
-        <td><a>foobar</a></td>
+        <td><code>foobar</code></td>
         <td>1</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>"forward"</code></td>
         <td>index term in forward direction (supports right-to-left by Index option <code>rtl: true</code>)</td>
-        <td><a>fo</a>obar<br><a>foob</a>ar<br></td>
+        <td><code>fo</code>obar<br><code>foob</code>ar<br></td>
         <td>n</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>"reverse"</code><br><code>"bidirectional"</code></td>
         <td>index term in both directions</td>
-        <td><a>fo</a>obar<br><a>foob</a>ar<br>foob<a>ar</a><br>fo<a>obar</a></td>
+        <td><code>fo</code>obar<br><code>foob</code>ar<br>foob<code>ar</code><br>fo<code>obar</code></td>
         <td>2n - 1</td>
     </tr>
     <tr></tr>
     <tr>
         <td><code>"full"</code></td>
         <td>index every consecutive partial</td>
-        <td>fo<a>oba</a>r<br>f<a>oob</a>ar</td>
+        <td>fo<code>oba</code>r<br>f<code>oob</code>ar</td>
         <td>n * (n - 1)</td>
     </tr>
 </table>
