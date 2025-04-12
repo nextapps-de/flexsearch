@@ -1,10 +1,11 @@
 /**!
- * FlexSearch.js v0.8.152 (Bundle/Module/Debug)
+ * FlexSearch.js v0.8.152 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
+(function _f(self){'use strict';if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;
 var v;
 function A(a, c, b) {
   const e = typeof b, d = typeof a;
@@ -386,7 +387,7 @@ function Q(a) {
   };
 }
 function ra(a, c, b) {
-  return c ? "undefined" !== typeof module ? new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js") : import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/node/node.mjs")}) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + ka.toString()], {type:"text/javascript"}))) : new window.Worker("string" === typeof b ? b : import.meta.url.replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
+  return c ? "undefined" !== typeof module ? new(require("worker_threads")["Worker"])(__dirname+"/node/node.js") : import("worker_threads").then(function(worker){return new worker["Worker"]((1,eval)("import.meta.dirname")+"/node/node.mjs")}) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + ka.toString()], {type:"text/javascript"}))) : new window.Worker("string" === typeof b ? b : (0,eval)("import.meta.url").replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
   "module/worker/worker.js"), {type:"module"});
 }
 ;function sa(a, c = 0) {
@@ -1341,7 +1342,7 @@ U.prototype.search = function(a, c, b, e) {
           }
         }
       } else {
-        for (let K = 0, L, ob; K < l.length; K += 2) {
+        for (let K = 0, L, rb; K < l.length; K += 2) {
           L = this.tag.get(l[K]);
           if (!L) {
             if (console.warn("Tag '" + l[K] + ":" + l[K + 1] + "' will be skipped because there is no field '" + l[K] + "'."), r) {
@@ -1350,7 +1351,7 @@ U.prototype.search = function(a, c, b, e) {
               return m ? d : new W(d);
             }
           }
-          if (ob = (L = L && L.get(l[K + 1])) && L.length) {
+          if (rb = (L = L && L.get(l[K + 1])) && L.length) {
             y++, w.push(L);
           } else if (!r) {
             return m ? d : new W(d);
@@ -2442,7 +2443,7 @@ v.commit = async function(a, c, b) {
     }
   }), a.map.clear(), a.ctx.clear(), a.tag && a.tag.clear(), a.store && a.store.clear(), a.document || a.reg.clear());
 };
-function pb(a, c, b) {
+function ob(a, c, b) {
   const e = a.value;
   let d, f = 0;
   for (let g = 0, k; g < e.length; g++) {
@@ -2471,17 +2472,17 @@ v.remove = function(a) {
   return Promise.all([this.transaction("map", "readwrite", function(c) {
     c.openCursor().onsuccess = function() {
       const b = this.result;
-      b && pb(b, a);
+      b && ob(b, a);
     };
   }), this.transaction("ctx", "readwrite", function(c) {
     c.openCursor().onsuccess = function() {
       const b = this.result;
-      b && pb(b, a);
+      b && ob(b, a);
     };
   }), this.transaction("tag", "readwrite", function(c) {
     c.openCursor().onsuccess = function() {
       const b = this.result;
-      b && pb(b, a, !0);
+      b && ob(b, a, !0);
     };
   }), this.transaction("reg", "readwrite", function(c) {
     for (let b = 0; b < a.length; b++) {
@@ -2500,6 +2501,9 @@ function Z(a, c) {
     a = null;
   });
 }
-;export default {Index:N, Charset:bb, Encoder:ja, Document:U, Worker:P, Resolver:W, IndexedDB:nb, Language:{}};
-
-export const Index=N;export const  Charset=bb;export const  Encoder=ja;export const  Document=U;export const  Worker=P;export const  Resolver=W;export const  IndexedDB=nb;export const  Language={};
+;const pb = {Index:N, Charset:bb, Encoder:ja, Document:U, Worker:P, Resolver:W, IndexedDB:nb, Language:{}}, qb = "undefined" !== typeof self ? self : "undefined" !== typeof global ? global : self;
+let sb;
+(sb = qb.define) && sb.amd ? sb([], function() {
+  return pb;
+}) : "object" === typeof qb.exports ? qb.exports = pb : qb.FlexSearch = pb;
+}(this||self));

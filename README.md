@@ -1,16 +1,15 @@
 FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 <h1></h1>
 <h1>
-    <img src="doc/flexsearch-logo-glass-animated.svg" style="max-width: 500px" alt="FlexSearch.js: Next-Generation full-text search library for Browser and Node.js">
+    <img src="doc/flexsearch-logo-glass-animated.svg" style="width: 580px; max-width: 100%" alt="FlexSearch.js: Next-Generation full-text search library for Browser and Node.js">
     <p></p>
 </h1>
 <h3>Next-Generation full-text search library for Browser and Node.js</h3>
 
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
 <img src="https://img.shields.io/badge/build-passing-brightgreen">
-<img src="https://img.shields.io/badge/typed-74%25-yellow">
 <img src="https://img.shields.io/badge/coverage-91%25-brightgreen">
-<a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>
+<img src="https://img.shields.io/badge/typed-74%25-yellow"><!--<a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>-->
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 
 [Basic Start](#load-library) &ensp;&bull;&ensp; 
@@ -46,7 +45,7 @@ FlexSearch has been helping developers around the world build powerful, efficien
 
 FlexSearch performs queries up to 1,000,000 times faster <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">compared to other libraries</a> by also providing <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">powerful search capabilities</a> like multi-field search (document search), phonetic transformations, partial matching, tag-search or suggestions.
 
-Bigger workloads are scalable through workers to perform any updates or queries on the index in parallel through dedicated balanced threads.
+Bigger workloads are scalable through workers to perform any updates or queries to the index in parallel through dedicated balanced threads.
 
 The latest generation v0.8 introduce [Persistent Indexes](doc/persistent.md), well optimized for scaling of large datasets and running in parallel. All available features was natively ported right into the database engine of your choice.
 
@@ -93,7 +92,7 @@ Benchmarks:
 <summary>Latest Benchmark Results</summary>
 <br>
 The benchmark was measured in terms per seconds, higher values are better (except the test "Memory").
-The memory value refers to the amount of memory which was additionally allocated during search.
+The memory value refers to the amount of memory which was additionally allocated during search.<br>
 
 <table>
     <tr></tr>
@@ -226,7 +225,7 @@ Extern Projects & Plugins:
 ## Table of contents
 
 > [!TIP]
-> You will just need to spend 5 minutes to improve your results significantly by understanding these 3 elementary things about FlexSearch : [Tokenizer](#tokenizer-partial-match), [Encoder](doc/encoder.md) and [Suggestions](#suggestions)
+> Understanding those 3 elementary things about FlexSearch will improve your results significantly: [Tokenizer](#tokenizer-partial-match), [Encoder](doc/encoder.md) and [Suggestions](#suggestions)
 
 - [Load Library (Node.js, ESM, Legacy Browser)](#load-library)
   - [Non-Module Bundles (ES5 Legacy)](#non-module-bundles-es5-legacy)
@@ -1213,7 +1212,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
         <td>
             Number
         </td>
-        <td>Sets the task execution priority (1 low priority - 9 high priority) when using the <a href="#async">async methods</a></td>
+        <td>Sets the task execution priority (1 low priority - 9 high priority) when using the <a href="doc/async.md">async methods</a></td>
         <td>4</td>
     </tr>
     <tr></tr>
@@ -1417,7 +1416,7 @@ Encoding is one of the most important task and heavily influence:
 
 ## Fuzzy-Search
 
-Fuzzysearch describes a basic concept of how making queries more tolerant. FlexSearch provides several methods to achieve fuzziness:
+FlexSearch provides several methods to achieve fuzziness to make queries more tolerant:
 
 1. Use a tokenizer: `forward`, `reverse` or `full`
 2. Don't forget to use any of the builtin encoder `simple` > `balance` > `advanced` > `extra` > `soundex` (sorted by fuzziness)

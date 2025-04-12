@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.151 (Bundle/Debug)
+ * FlexSearch.js v0.8.152 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -204,7 +204,7 @@ r.encode = function(a) {
               this.l = setTimeout(G, 50, this);
             }
           }
-          this.stemmer && 2 < e.length && (this.u || (this.u = new RegExp("(?!^)(" + this.h + ")$")), c = e, e = e.replace(this.u, k => this.stemmer.get(k)), c !== e && this.filter && e.length >= this.minlength && ("function" === typeof this.filter ? !this.filter(e) : this.filter.has(e)) && (e = ""));
+          this.stemmer && 2 < e.length && (this.u || (this.u = new RegExp("(?!^)(" + this.h + ")$")), e = e.replace(this.u, k => this.stemmer.get(k)));
           if (e && (this.mapper || this.dedupe && 1 < e.length)) {
             c = "";
             for (let k = 0, n = "", m, v; k < e.length; k++) {
@@ -543,7 +543,7 @@ function N(a, d, b) {
   this.bidirectional = !1 !== f.bidirectional;
   this.fastupdate = !!a.fastupdate;
   this.score = a.score || null;
-  f && "strict" !== this.tokenize && console.warn('Context-Search could not applied, because it is just supported when using the tokenizer "strict".');
+  f && f.depth && "strict" !== this.tokenize && console.warn('Context-Search could not applied, because it is just supported when using the tokenizer "strict".');
   this.map = new Map();
   this.ctx = new Map();
   this.reg = d || (this.fastupdate ? new Map() : new Set());

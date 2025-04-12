@@ -4,11 +4,12 @@ import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
 if(FlexSearch.FlexSearch) FlexSearch = FlexSearch.FlexSearch;
-const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver } = FlexSearch;
+const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver, IndexedDB } = FlexSearch;
 const build_light = env && env.includes(".light");
 const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
+const EnglishPreset = await import("../src/lang/en.js");
 
 describe("Github Issues", function(){
 
@@ -86,5 +87,22 @@ describe("Github Issues", function(){
             field: "content",
             result: [2]
         }]);
+    });
+
+    it("#486", function(){
+
+        const encoder = new Encoder(Charset.LatinDefault, EnglishPreset);
+        const index = new Index({
+            tokenize: "full",
+            encoder
+        });
+
+        index.add(1, "user is not working, but users is working");
+
+        const userResult = index.search("user");
+        const usersResult = index.search("users");
+
+        expect(userResult).to.eql([1]);
+        expect(usersResult).to.eql([1]);
     });
 });

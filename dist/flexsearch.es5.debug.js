@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.151 (ES5/Debug)
+ * FlexSearch.js v0.8.152 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1077,9 +1077,9 @@ u.encode = function(a) {
               this.D = setTimeout(L, 50, this);
             }
           }
-          this.stemmer && 2 < f.length && (this.N || (this.N = new RegExp("(?!^)(" + this.A + ")$")), k = f, f = f.replace(this.N, function(q) {
+          this.stemmer && 2 < f.length && (this.N || (this.N = new RegExp("(?!^)(" + this.A + ")$")), f = f.replace(this.N, function(q) {
             return b.stemmer.get(q);
-          }), k !== f && this.filter && f.length >= this.minlength && ("function" === typeof this.filter ? !this.filter(f) : this.filter.has(f)) && (f = ""));
+          }));
           if (f && (this.mapper || this.dedupe && 1 < f.length)) {
             k = "";
             for (var l = 0, m = "", n = void 0, p = void 0; l < f.length; l++) {
@@ -3022,7 +3022,7 @@ function Nb(a, b, c, d, e, g, f, h) {
   this.bidirectional = !1 !== d.bidirectional;
   this.fastupdate = !!a.fastupdate;
   this.score = a.score || null;
-  d && "strict" !== this.tokenize && console.warn('Context-Search could not applied, because it is just supported when using the tokenizer "strict".');
+  d && d.depth && "strict" !== this.tokenize && console.warn('Context-Search could not applied, because it is just supported when using the tokenizer "strict".');
   (c = a.keystore || 0) && (this.keystore = c);
   this.map = c ? new T(c) : new Map();
   this.ctx = c ? new T(c) : new Map();

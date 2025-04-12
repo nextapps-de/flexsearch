@@ -55,7 +55,7 @@ export default function Index(options, _register) {
     this.fastupdate = !!options.fastupdate;
     this.score = options.score || null;
 
-    if (context && "strict" !== this.tokenize) {
+    if (context && context.depth && "strict" !== this.tokenize) {
         console.warn("Context-Search could not applied, because it is just supported when using the tokenizer \"strict\".");
     }
 

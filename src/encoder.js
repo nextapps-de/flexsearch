@@ -478,18 +478,22 @@ Encoder.prototype.encode = function(str){
                 this.stemmer_test = new RegExp("(?!^)(" + this.stemmer_str + ")$")
             );
 
-            const old = word;
+            //const old = word;
             word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
 
+            // if(old !== word && word.length > 2){
+            //     word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
+            // }
+
             // 4. post-filter after stemmer was applied
-            if(old !== word && this.filter && word.length >= this.minlength){
-                if(typeof this.filter === "function"
-                        ? !this.filter(word)
-                        : this.filter.has(word)
-                ){
-                    word = "";
-                }
-            }
+            // if(old !== word && this.filter && word.length >= this.minlength){
+            //     if(typeof this.filter === "function"
+            //             ? !this.filter(word)
+            //             : this.filter.has(word)
+            //     ){
+            //         word = "";
+            //     }
+            // }
         }
 
         // apply mapper and collapsing
