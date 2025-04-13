@@ -32,6 +32,8 @@ describe("Initialize", function(){
         expect(index).to.respondTo("update");
         expect(index).to.respondTo("remove");
         expect(index).to.respondTo("clear");
+        expect(index).to.respondTo("cleanup");
+        expect(index).to.respondTo("contain");
 
         expect(index).to.hasOwnProperty("map");
         expect(index).to.hasOwnProperty("ctx");
@@ -58,7 +60,7 @@ describe("Initialize", function(){
 
     it("Should have the default Encoder", function(){
 
-        const encoder = new Encoder(Charset.LatinDefault);
+        const encoder = new Encoder(Charset.Default);
         expect(index.tokenize).to.equal("strict");
         expect(typeof index.encoder.normalize).to.equal(typeof encoder.normalize);
         index.encoder.normalize = encoder.normalize;
@@ -88,9 +90,9 @@ describe("Add", function(){
         expect(index.reg.size).to.equal(4);
     });
 
-    build_light || it("Should have been numeric content properly added to the index (Triplets)", function(){
+    it("Should have been numeric content properly added to the index (Triplets)", function(){
 
-        const index = new Index();
+        let index = new Index();
 
         index.add(0, "TEST-123456789123456789");
         index.add(1, "T10030");
@@ -101,8 +103,27 @@ describe("Add", function(){
         expect(Array.from(index.map.keys())).to.have.members([
             "test", "123", "456", "789",
             "t", "10", "30",
-            // id 2 was already completely added, split: "t", "100", "30", "t", "100", "30"
+            // id 2 was already completely added, split: "t", "10", "30", "t", "10", "30"
             "14", "3", "ab", "143", "45", "17", "8"
+        ]);
+        expect(index.ctx.size).to.equal(0);
+        expect(index.reg.size).to.equal(4);
+
+        // disabled deduplication
+        index.clear();
+        index.encoder.dedupe = false;
+
+        index.add(0, "TEST-123456789123456789");
+        index.add(1, "T10030");
+        index.add(2, "T10030T10030");
+        index.add(3, "1443-AB14345-1778");
+
+        expect(Array.from(index.reg.keys())).to.have.members([0, 1, 2, 3]);
+        expect(Array.from(index.map.keys())).to.have.members([
+            "test", "123", "456", "789",
+            "t", "100", "30",
+            // id 2 was already completely added, split: "t", "100", "30", "t", "100", "30"
+            "144", "3", "ab", "143", "45", "177", "8"
         ]);
         expect(index.ctx.size).to.equal(0);
         expect(index.reg.size).to.equal(4);
@@ -316,7 +337,7 @@ describe("Update (Sync)", function(){
 
         const index = new Index({
             fastupdate: true,
-            tokenize: "full"
+            tokenize: "reverse"
         });
         index.add(1, "foo");
         index.add(2, "bar");
@@ -327,43 +348,47 @@ describe("Update (Sync)", function(){
         index.update(3, "foo");
 
         expect(index.reg.size).to.equal(3);
-        expect(index.search("foo")).to.have.members([2, 3]);
-        expect(index.search("bar")).to.have.members([1, 2]);
+        expect(index.search("foo")).to.eql([2, 3]);
+        expect(index.search("bar")).to.eql([1, 2]);
         expect(index.search("bar")).to.not.include(3);
-        expect(index.search("foobar")).to.have.members([2]);
+        expect(index.search("foobar")).to.eql([2]);
 
         index.update(1, "bar");
         index.update(2, "foobar");
         index.update(3, "foo");
+        index.update(4, "new");
 
-        expect(index.reg.size).to.equal(3);
-        expect(index.search("foo")).to.have.members([2, 3]);
-        expect(index.search("bar")).to.have.members([1, 2]);
+        index.update(5, "foo");
+        index.update(5);
+        index.update(6, "foo");
+        index.update(6, null);
+        index.update(7, "foo");
+        index.update(7, false);
+
+        expect(index.reg.size).to.equal(4);
+        expect(index.search("foo")).to.eql([2, 3]);
+        expect(index.search("bar")).to.eql([1, 2]);
         expect(index.search("bar")).to.not.include(3);
-        expect(index.search("foobar")).to.have.members([2]);
+        expect(index.search("foobar")).to.eql([2]);
+        expect(index.search("new")).to.eql([4]);
     });
 
     it("Should not have been updated to the index", function(){
 
-        const index = new Index({ tokenize: "full" });
+        const index = new Index({ tokenize: "bidirectional" });
         index.add(1, "bar");
         index.add(2, "foobar");
         index.add(3, "foo");
 
         index.update("foo");
-        // todo
-        // index.update(1);
         index.update(null, "foobar");
         index.update(void 0, "foobar");
-        // index.update(1, null);
-        // index.update(2, false);
-        index.update(4, "new");
 
-        expect(index.reg.size).to.equal(4);
-        expect(index.search("foo")).to.have.members([2, 3]);
-        expect(index.search("bar")).to.have.members([1, 2]);
+        expect(index.reg.size).to.equal(3);
+        expect(index.search("foo")).to.eql([2, 3]);
+        expect(index.search("bar")).to.eql([1, 2]);
         expect(index.search("bar")).to.not.include(3);
-        expect(index.search("foobar")).to.have.members([2]);
+        expect(index.search("foobar")).to.eql([2]);
     });
 });
 
@@ -373,7 +398,7 @@ describe("Remove (Sync)", function(){
 
         const index = new Index({
             fastupdate: true,
-            tokenize: "full"
+            tokenize: "reverse"
         });
         index.add(1, "bar");
         index.add(2, "foobar");
@@ -425,11 +450,11 @@ describe("Presets", function(){
 
     it("Should have been properly initialized", function(){
 
-        expect(Index("memory").reg.size).to.equal(0);
-        expect(Index("performance").reg.size).to.equal(0);
-        expect(Index("match").reg.size).to.equal(0);
-        expect(Index("score").reg.size).to.equal(0);
-        expect(Index("default").reg.size).to.equal(0);
+        expect(Index("memory").resolution).to.equal(1);
+        expect(Index("performance").resolution).to.equal(3);
+        expect(Index("match").resolution).to.equal(9);
+        expect(Index("score").resolution).to.equal(9);
+        expect(Index("default").resolution).to.equal(9);
     });
 
     it("Should have been properly extended", function(){

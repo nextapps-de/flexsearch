@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no, minimal-ui">
     <title>Demo: Auto-Complete</title>
     <style>
         body{
-            padding:0;
-            margin:0 10px;
+            padding: 0;
+            margin: 0 10px;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 14px;
         }
-        table{
-            width: 300px;
-            table-layout: fixed;
+        #header{
             position: fixed;
-            top: 0;
-            padding-top: 10px;
+            top: 10px;
+            left: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: row;
+            max-width: 500px;
+            table-layout: fixed;
             background-color: #fff;
             z-index: 1;
         }
-        td, tr{
-            width: 300px;
-            border: none;
-        }
-        input{
-            width: 300px;
+        input[type="text"]{
+            width: 100%;
             border: 1px solid #ddd;
             border-radius: 4px;
             outline: none;
@@ -34,6 +36,11 @@
         #autocomplete{
             color: #999;
             background-color: #f5f5f5;
+            pointer-events: none;
+        }
+        #trigger-prev,
+        #trigger-next{
+            pointer-events: none
         }
         input{
             padding:7px 5px;
@@ -54,31 +61,55 @@
         #suggestions b{
             color: blue;
         }
+        #suggestions:empty:before{
+            content: "No resuls found";
+            font-size: 12px;
+            color: #999;
+            margin-left: 7px;
+        }
+        #info{
+            position: absolute;
+            bottom: 7px;
+            left: 12px;
+            color: #888;
+        }
+        label{
+            width: 100px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
         @media only screen and (max-width: 600px) {
-            table,
-            td,
-            tr,
-            input{
-                width: 98%;
+            body{
+                font-size: 12px;
+            }
+            input[type="text"]{
+                /*width: 98%;*/
             }
         }
     </style>
 </head>
 <body>
-<span style="color: #000; float: right">(iterate through result by arrow keys)</span>
-<table>
-    <tr>
-        <td style="position: relative">
-            <input type="text" id="autocomplete">
-            <input type="text" id="userinput" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="Search by movie title ...">
-        </td>
-    </tr>
-</table>
+<div id="header">
+    <div style="position: relative; width: 100%;">
+        <input type="text" id="trigger-prev">
+        <input type="text" id="autocomplete" disabled>
+        <input type="text" id="userinput" placeholder="Search by movie title ..." autocorrect="off" spellcheck="false" autocomplete="off" autofocus>
+        <input type="text" id="trigger-next">
+    </div>
+    <label>
+        <input type="checkbox" id="suggest" checked> Suggest
+    </label>
+</div>
 <div id="suggestions"></div>
+<!--<div id="info">iterate results by arrow keys</div>-->
 <script type="module">
 
-    import { Document, Charset } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.module.min.js";
-    import data from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/demo/data/movies.js";
+    //import { Document, Charset } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.bundle.module.min.js";
+    import { Document, Charset } from "../src/bundle.js";
+    //import EnglishPreset from "../src/lang/en.js";
+    import data from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/demo/data/movies.js";
 
     // for "Result Highlighting" it requires the usage of a Document Index
     // also when just adding id-content-pairs to a single index
@@ -91,7 +122,6 @@
             store: true,
             index: [{
                 field: "title",
-                charset: Charset.LatinSimple,
                 // a forward tokenizer is minimum
                 // required by an instant search
                 tokenize: "forward"
@@ -103,28 +133,52 @@
         // pass a flat pseudo document when using
         // result highlighting on plain string inputs
         index.add(i, {
-            title: data[i]
+            "title": data[i]
         });
     }
 
     const suggestions = document.getElementById("suggestions");
     const autocomplete = document.getElementById("autocomplete");
     const userinput = document.getElementById("userinput");
+    const suggest = document.getElementById("suggest");
+    const trigger_prev = document.getElementById("trigger-prev");
+    const trigger_next = document.getElementById("trigger-next");
     let results;
     let iterate = 0;
 
     userinput.addEventListener("input", show_results, true);
     userinput.addEventListener("keyup", accept_autocomplete, true);
     userinput.addEventListener("keydown", iterate_autocomplete, true);
+    suggest.addEventListener("change", toggle_suggest, true);
     suggestions.addEventListener("click", accept_suggestion, true);
+
+    trigger_prev.addEventListener("focus", function(){
+        if(iterate > 0) {
+            iterate_autocomplete({ key: "ArrowUp"});
+        }
+        userinput.focus();
+    }, true);
+    trigger_next.addEventListener("focus", function(){
+        if(iterate < results.length){
+            iterate_autocomplete({ key: "ArrowDown"});
+        }
+        userinput.focus();
+    }, true);
+
+    function toggle_suggest(){
+        // changing any of the search options requires
+        // deletion of cached results (when using cache)
+        index.cache.clear();
+        show_results();
+    }
 
     function show_results(){
 
-        let value = this.value;
-        results = index.search({
+        let value = userinput.value;
+        results = index.searchCache({
             query: value,
             limit: 25,
-            suggest: true,
+            suggest: suggest.checked,
             enrich: true,
             highlight: "<b>$1</b>"
         });
@@ -165,12 +219,14 @@
                 if(iterate > 0){
                     iterate--;
                 }
+                event.preventDefault &&
                 event.preventDefault();
             }
             else if(key === "ArrowDown"){
                 if(iterate < results.length){
                     iterate++;
                 }
+                event.preventDefault &&
                 event.preventDefault();
             }
         }

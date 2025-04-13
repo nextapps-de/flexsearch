@@ -10,13 +10,13 @@ const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-if(!build_light) describe("Caching", function(){
+if(!build_light) describe("Cache", function(){
 
     it("Should have been cached and sorted by popularity/latest", function(){
 
         const index = new Index({
-            cache: 2,
-            tokenize: "reverse"
+            tokenize: "reverse",
+            cache: 2
         });
 
         index.add(0, "foo")
@@ -42,11 +42,26 @@ if(!build_light) describe("Caching", function(){
         expect(index.searchCache("bar")).to.eql([1, 2]);
         expect(Array.from(index.cache.cache.values()).pop()).to.eql([1, 2]);
 
-        // Synchronization
-        // ------------------------------------
+    });
+
+    it("Should have been synchronized properly", function(){
+
+        const index = new Index({
+            tokenize: "reverse",
+            cache: 2
+        });
+
+        index.add(0, "foo")
+             .add(1, "bar")
+             .add(2, "foobar");
+
+        expect(index.searchCache("foo")).to.eql([0, 2]);
+        expect(index.cache.cache.size).to.equal(1);
+
+        expect(index.searchCache("bar")).to.eql([1, 2]);
+        expect(index.cache.cache.size).to.equal(2);
 
         index.remove(2).update(1, "foo").add(3, "foobar");
-
         // 2 was removed
         expect(index.cache.cache.size).to.equal(1);
         // 2 was removed, 3 was added, the cache takes the original reference

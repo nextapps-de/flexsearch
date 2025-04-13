@@ -12,6 +12,18 @@ const Charset = _Charset || (await import("../src/charset.js")).default;
 
 describe("Encoder", function(){
 
+    it("Should have been properly normalized", function(){
+
+        const index = new Index();
+        expect(index.encoder.normalize).to.equal(true);
+
+        index.add(1, "La Bamba");
+        index.add(2, "La Bohème");
+
+        expect(index.search("la boheme")).to.eql([2]);
+        expect(index.search("la boheme", { suggest: true })).to.eql([2, 1]);
+    });
+
     it("Should have been properly added a custom encoder", function(){
 
         const encode = str => str.toLowerCase().split(/\s+/);

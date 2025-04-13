@@ -1537,13 +1537,12 @@ index.cleanup();
 
 > The `cleanup` method has no effect when not using `fastupdate: true`.
 
-
 ## Context Search
 
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document. The context acts like a bidirectional moving window of 2 pointers (terms) which can initially have a maximum distance of the value passed via option setting `depth` and dynamically growth on search when the query did not match any results.
 
 <p align="center">
-    <img src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/doc/contextual-index.svg?v=4" width="100%">
+    <img src="doc/context-index.svg" width="100%">
 </p>
 
 ### Enable Context-Search
@@ -1574,7 +1573,7 @@ var index = new FlexSearch({
 
 ### Compare Context Search
 
-Pay attention of the numbers "1", "2" and "3":
+Pay attention to the numbers "1", "2" and "3":
 
 ```js
 const index = new Index();

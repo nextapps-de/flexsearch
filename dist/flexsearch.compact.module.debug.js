@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.153 (Bundle/Debug)
+ * FlexSearch.js v0.8.154 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1349,21 +1349,21 @@ w.import = function(a, c) {
 };
 ia(U.prototype);
 function Ma(a, c, b) {
-  a = ("object" === typeof a ? "" + a.query : a).toLowerCase();
+  const e = ("object" === typeof a ? "" + a.query : a).toLowerCase();
   this.cache || (this.cache = new X());
-  let e = this.cache.get(a);
-  if (!e) {
-    e = this.search(a, c, b);
-    if (e.then) {
-      const d = this;
-      e.then(function(f) {
-        d.cache.set(a, f);
-        return f;
+  let d = this.cache.get(e);
+  if (!d) {
+    d = this.search(a, c, b);
+    if (d.then) {
+      const f = this;
+      d.then(function(g) {
+        f.cache.set(e, g);
+        return g;
       });
     }
-    this.cache.set(a, e);
+    this.cache.set(e, d);
   }
-  return e;
+  return d;
 }
 function X(a) {
   this.limit = a && !0 !== a ? a : 1000;

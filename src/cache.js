@@ -3,28 +3,28 @@ import Document from "./document.js";
 import { SearchOptions, DocumentSearchOptions } from "./type.js";
 
 /**
- * @param {string|SearchOptions|DocumentSearchOptions} query
- * @param {number|SearchOptions|DocumentSearchOptions=} limit
+ * @param {string|SearchOptions|DocumentSearchOptions} query_or_options
+ * @param {number|SearchOptions|DocumentSearchOptions=} limit_or_options
  * @param {SearchOptions|DocumentSearchOptions=} options
  * @this {Index|Document}
  * @returns {Array<number|string>|Promise}
  */
 
-export function searchCache(query, limit, options){
+export function searchCache(query_or_options, limit_or_options, options){
 
-    query = (typeof query === "object"
-        ? "" + query.query
-        : "" + query
+    const query = (typeof query_or_options === "object"
+        ? "" + query_or_options.query
+        : "" + query_or_options
     ).toLowerCase();
 
     if(!this.cache){
         this.cache = new CacheClass();
     }
 
-    //let encoded = this.encoder.encode(query).join(" ");
     let cache = this.cache.get(query);
     if(!cache){
-        cache = this.search(query, limit, options);
+        cache = this.search(query_or_options, limit_or_options, options);
+
         if(cache.then){
             const self = this;
             cache.then(function(cache){
@@ -32,6 +32,7 @@ export function searchCache(query, limit, options){
                 return cache;
             });
         }
+
         this.cache.set(query, cache);
     }
     return cache;
@@ -53,16 +54,14 @@ export default function CacheClass(limit){
 
 /**
  * @param {string} key
- * @param value
+ * @param {Array} value
  */
 
 CacheClass.prototype.set = function(key, value){
-    //if(!this.cache.has(key)){
-        this.cache.set(this.last = key, value);
-        if(this.cache.size > this.limit){
-            this.cache.delete(this.cache.keys().next().value);
-        }
-    //}
+    this.cache.set(this.last = key, value);
+    if(this.cache.size > this.limit){
+        this.cache.delete(this.cache.keys().next().value);
+    }
 };
 
 /**
