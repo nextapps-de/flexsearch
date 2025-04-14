@@ -40,7 +40,7 @@
         }
         #trigger-prev,
         #trigger-next{
-            pointer-events: none
+            z-index: -1;
         }
         input{
             padding:7px 5px;
@@ -103,7 +103,7 @@
 <!--<div id="info">iterate results by arrow keys</div>-->
 <script type="module">
 
-    import { Document } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.bundle.module.min.js";
+    import { Document } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.compact.module.min.js";
     import data from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/demo/data/movies.js";
 
     // for "Result Highlighting" it requires the usage of a Document Index
@@ -138,25 +138,22 @@
     const suggest = document.getElementById("suggest");
     const trigger_prev = document.getElementById("trigger-prev");
     const trigger_next = document.getElementById("trigger-next");
-    let results;
+    let results = [];
     let iterate = 0;
 
     userinput.addEventListener("input", show_results, true);
     userinput.addEventListener("keyup", accept_autocomplete, true);
-    userinput.addEventListener("keydown", iterate_autocomplete, true);
+    userinput.addEventListener("keydown", iterate_selected, true);
     suggest.addEventListener("change", toggle_suggest, true);
     suggestions.addEventListener("click", accept_suggestion, true);
 
     trigger_prev.addEventListener("focus", function(){
-        if(iterate > 0) {
-            iterate_autocomplete({ key: "ArrowUp"});
-        }
+        iterate_selected({ key: "ArrowUp"});
         userinput.focus();
     }, true);
+
     trigger_next.addEventListener("focus", function(){
-        if(iterate < results.length){
-            iterate_autocomplete({ key: "ArrowDown"});
-        }
+        iterate_selected({ key: "ArrowDown"});
         userinput.focus();
     }, true);
 
@@ -169,17 +166,14 @@
 
     function show_results(){
 
-        let value = userinput.value;
         results = index.searchCache({
-            query: value,
-            limit: 25,
+            query: userinput.value,
             suggest: suggest.checked,
+            limit: 25,
+            pluck: "title",
             enrich: true,
             highlight: "<b>$1</b>"
         });
-        results = results[0] || results;
-        results = results.result || results;
-        iterate = 0;
 
         let entry, childs = suggestions.childNodes;
         let i = 0, len = results.length;
@@ -200,26 +194,26 @@
             suggestions.removeChild(childs[i]);
         }
 
-        iterate_autocomplete()
+        select_result(0);
+        iterate_selected();
     }
 
-    function iterate_autocomplete(event){
+    function iterate_selected(event){
 
-        suggestions.childNodes[iterate] &&
-        (suggestions.childNodes[iterate].style.backgroundColor = "");
+        let index = iterate;
 
         if(event){
             const key = event.key;
             if(key === "ArrowUp"){
                 if(iterate > 0){
-                    iterate--;
+                    select_result(--index);
                 }
                 event.preventDefault &&
                 event.preventDefault();
             }
             else if(key === "ArrowDown"){
                 if(iterate < results.length){
-                    iterate++;
+                    select_result(++index);
                 }
                 event.preventDefault &&
                 event.preventDefault();
@@ -227,32 +221,41 @@
         }
 
         let value = userinput.value;
-        let first_result = results && results[iterate] && data[results[iterate].id];
+        let first_result = results && results[index] && data[results[index].id];
         let match = first_result && first_result.toLowerCase().indexOf(value.toLowerCase());
 
-        if(first_result && (match !== -1)){
+        if(first_result && (match > -1)){
             autocomplete.value = value + first_result.substring(match + value.length);
             autocomplete.current = first_result;
-            suggestions.childNodes[iterate] &&
-            (suggestions.childNodes[iterate].style.backgroundColor = "rgb(0 0 255 / 10%)");
         }
         else{
-
             autocomplete.value = autocomplete.current = value;
         }
     }
 
+    function select_result(index){
+
+        let node = suggestions.childNodes[iterate];
+        node && (node.style.backgroundColor = "");
+
+        iterate = index;
+
+        node = suggestions.childNodes[iterate];
+        node && (node.style.backgroundColor = "rgba(0, 0, 255, 0.1)");
+    }
+
     function accept_autocomplete(event){
 
-        if((event || window.event).keyCode === 13) {
-            this.value = autocomplete.value = autocomplete.current;
+        const key = (event || window.event).keyCode;
+        if(key === 13 || key === 39) {
+            userinput.value = autocomplete.value = autocomplete.current;
             suggestions.textContent = "";
         }
     }
 
     function accept_suggestion(event){
 
-        let target = (event || window.event).target;
+        const target = (event || window.event).target;
         userinput.value = autocomplete.value = target.textContent;
         suggestions.textContent = "";
 

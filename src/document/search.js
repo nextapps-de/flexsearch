@@ -459,7 +459,9 @@ Document.prototype.search = function(query, limit, options, _promises){
 
         if(pluck){
             return resolve
-                ? /** @type {SearchResults|EnrichedSearchResults} */ (res)
+                ? (highlight
+                    ? highlight_fields(/** @type {string} */ (query), res, this.index, pluck, highlight)
+                    : /** @type {SearchResults|EnrichedSearchResults} */ (res))
                 : new Resolver(/** @type {IntermediateSearchResults} */ (res));
         }
 
@@ -478,7 +480,7 @@ Document.prototype.search = function(query, limit, options, _promises){
             return merge
                 ? merge_fields(result)
                 : highlight
-                    ? highlight_fields(result, /** @type {string} */ (query), self.index, self.field, self.tree, highlight)
+                    ? highlight_fields(/** @type {string} */ (query), result, self.index, pluck, highlight)
                     : /** @type {DocumentSearchResults} */ (
                         result
                     );
@@ -488,22 +490,21 @@ Document.prototype.search = function(query, limit, options, _promises){
     return merge
         ? merge_fields(result)
         : highlight
-            ? highlight_fields(result, /** @type {string} */ (query), this.index, this.field, this.tree, highlight)
+            ? highlight_fields(/** @type {string} */ (query), result, this.index, pluck, highlight)
             : /** @type {DocumentSearchResults} */ (
                 result
             );
 }
 
 /**
- * @param {EnrichedDocumentSearchResults} result
  * @param {string} query
+ * @param {EnrichedDocumentSearchResults|EnrichedSearchResults} result
  * @param {Map<string, Index>} index
- * @param {string} field
- * @param {Array<string>} tree
+ * @param {string} pluck
  * @param {string} template
- * @return {EnrichedDocumentSearchResults}
+ * @return {EnrichedDocumentSearchResults|EnrichedSearchResults}
  */
-function highlight_fields(result, query, index, field, tree, template){
+function highlight_fields(query, result, index, pluck, template){
 
     // The biggest issue is dealing with custom encoders, for this reason
     // a regular expression can't apply
@@ -519,18 +520,27 @@ function highlight_fields(result, query, index, field, tree, template){
     let tokenize;
 
     // for every field
-    for(let i = 0, res_field, enc, idx, path; i < result.length; i++){
-
-        res_field = result[i].field;
-        // skip when not a field entry (e.g. tags)
-        if(!res_field) continue;
+    for(let i = 0, enc, idx, path; i < result.length; i++){
 
         /** @type {EnrichedSearchResults} */
-        let res = result[i].result;
-        idx = index.get(res_field);
+        let res;
+
+        if(pluck){
+            res = result;
+            path = pluck;
+        }
+        else{
+            const tmp = result[i];
+            path = tmp.field;
+            if(!path) continue;
+            res = tmp.result;
+        }
+
+        // skip when not a field entry (e.g. tags)
+
+        idx = index.get(path);
         enc = idx.encoder;
         tokenize = idx.tokenize;
-        path = tree[field.indexOf(res_field)];
 
         // re-encode query when encoder has changed
         if(enc !== encoder){
@@ -595,6 +605,10 @@ function highlight_fields(result, query, index, field, tree, template){
             }
 
             res[j]["highlight"] = str;
+        }
+
+        if(pluck){
+            break;
         }
     }
 
