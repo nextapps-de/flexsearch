@@ -43,7 +43,7 @@ const Index = Object.create(null);
  */
 
 export default function SqliteDB(name, config = {}){
-    if(!this){
+    if(!this || this.constructor !== SqliteDB){
         return new SqliteDB(name, config);
     }
     if(typeof name === "object"){
@@ -68,7 +68,7 @@ export default function SqliteDB(name, config = {}){
 
 SqliteDB.prototype.mount = function(flexsearch){
     //if(flexsearch.constructor === Document){
-    if(!flexsearch.encoder){
+    if(flexsearch.index){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

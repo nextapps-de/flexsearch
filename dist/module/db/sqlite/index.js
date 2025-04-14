@@ -45,7 +45,7 @@ const TRX = Object.create(null),
  */
 
 export default function SqliteDB(name, config = {}) {
-    if (!this) {
+    if (!this || this.constructor !== SqliteDB) {
         return new SqliteDB(name, config);
     }
     if ("object" == typeof name) {
@@ -58,7 +58,8 @@ export default function SqliteDB(name, config = {}) {
     //field = "Test-456";
     this.id = config.path || (":memory:" === name ? name : "flexsearch" + (name ? "-" + sanitize(name) : "") + ".sqlite");
     this.field = config.field ? "_" + sanitize(config.field) : "";
-    this.support_tag_search = /* tag? */ /* stringify */ /* stringify */ /* single param */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search = /* tag? */ /* stringify */ /* stringify */ /* single param */!0 /*await rows.hasNext()*/
+    /*await rows.hasNext()*/ /*await rows.hasNext()*/;
     this.db = config.db || Index[this.id] || null;
     this.type = config.type ? types[config.type.toLowerCase()] : "string";
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
@@ -66,7 +67,7 @@ export default function SqliteDB(name, config = {}) {
 
 SqliteDB.prototype.mount = function (flexsearch) {
     //if(flexsearch.constructor === Document){
-    if (!flexsearch.encoder) {
+    if (flexsearch.index) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

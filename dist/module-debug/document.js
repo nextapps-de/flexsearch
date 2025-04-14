@@ -6,10 +6,11 @@
  * https://github.com/nextapps-de/flexsearch
  */
 
-import { IndexOptions, DocumentOptions, DocumentDescriptor, FieldOptions, StoreOptions } from "./type.js";
+import { IndexOptions, DocumentOptions, DocumentDescriptor, FieldOptions, StoreOptions, EncoderOptions } from "./type.js";
 import StorageInterface from "./db/interface.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
+import Encoder from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import { is_string, is_object, parse_simple } from "./common.js";
 import apply_async from "./async.js";
@@ -54,18 +55,12 @@ export default function Document(options) {
     // is just a wrapper over .search()
     options.cache = /* suggest */ /* append: */ /* enrich */!1;
 
-    this.worker = options.worker;
+    this.worker = options.worker || !1;
 
     this.priority = options.priority || 4;
 
-    // if(SUPPORT_ASYNC){
-    //     // this switch is used by recall of promise callbacks
-    //     this.async = false;
-    // }
-
     /**
      * @type {Map<string, Index>}
-     * @export
      */
     this.index = parse_descriptor.call(this, options, document);
 
@@ -113,13 +108,27 @@ export default function Document(options) {
         }
         if (promises.length) {
             const self = this;
-            return Promise.all(promises).then(function (promises) {
+            return Promise.all(promises).then(function (result) {
+                const encoder_last = new Map();
                 let count = 0;
                 for (const item of self.index.entries()) {
-                    const key = /** @type {string} */item[0],
-                          index = item[1];
+                    const key = /** @type {string} */item[0];
+                    let index = item[1];
+                    if (index.then) {
+                        // make encoder available for result highlighting
+                        let opt = promises[count].encoder || {},
+                            encoder = encoder_last.get(opt);
+                        // handle shared encoders
 
-                    index.then && self.index.set(key, promises[count++]);
+                        if (!encoder) {
+                            encoder = opt.encode ? opt : new Encoder(opt);
+                            encoder_last.set(opt, encoder);
+                        }
+                        index = result[count];
+                        index.encoder = encoder;
+                        self.index.set(key, index);
+                        count++;
+                    }
                 }
                 return self;
             });
@@ -127,7 +136,6 @@ export default function Document(options) {
     } else {
         if (options.db) {
             this.fastupdate = !1;
-            // think about to return the promise here
             // actually it can be awaited on "await index.db"
             this.mount(options.db);
         }
@@ -136,7 +144,7 @@ export default function Document(options) {
 
 /**
  * @param {!StorageInterface} db
- * @return {Promise<Array<?>>}
+ * @return {Promise<void>}
  */
 Document.prototype.mount = function (db) {
     if (this.worker) {
@@ -195,9 +203,10 @@ Document.prototype.mount = function (db) {
         }
     }
 
-    //this.async = true;
-    this.db = !0;
-    return Promise.all(promises);
+    const self = this;
+    return this.db = Promise.all(promises).then(function () {
+        self.db = !0;
+    });
 };
 
 Document.prototype.commit = async function (replace, append) {
@@ -250,6 +259,8 @@ function parse_descriptor(options, document) {
         if (this.worker) {
             const worker = new WorkerIndex(opt);
             if (worker) {
+                // assign encoder for result highlighting
+                worker.encoder = opt.encoder;
                 // worker could be a promise
                 // it needs to be resolved and swapped later
                 index.set(key, worker);

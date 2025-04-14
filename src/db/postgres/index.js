@@ -48,7 +48,7 @@ let DB, TRX;
  */
 
 export default function PostgresDB(name, config = {}){
-    if(!this){
+    if(!this || this.constructor !== PostgresDB){
         return new PostgresDB(name, config);
     }
     if(typeof name === "object"){
@@ -70,7 +70,7 @@ export default function PostgresDB(name, config = {}){
 
 PostgresDB.prototype.mount = function(flexsearch){
     //if(flexsearch.constructor === Document){
-    if(!flexsearch.encoder){
+    if(flexsearch.index){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

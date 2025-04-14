@@ -368,4 +368,147 @@ export default function(DB, DBClass){
             index.db.close();
         }
     });
+
+    it("Result Highlighting", async function(){
+
+        // some test data
+        const data = [{
+            "id": 1,
+            "title": "Carmencita"
+        },{
+            "id": 2,
+            "title": "Le clown et ses chiens"
+        }];
+
+        // create the document index
+        const index = new Document({
+            cache: true,
+            db: new DB("test-highlight", {
+                type: "Integer"
+            }),
+            document: {
+                store: true,
+                index: [{
+                    field: "title",
+                    tokenize: "forward",
+                    encoder: Charset.LatinBalance
+                }]
+            }
+        });
+
+        await index.db;
+
+        // add test data
+        for(let i = 0; i < data.length; i++){
+            index.add(data[i]);
+        }
+
+        await index.commit();
+
+        // perform a query
+        let result = await index.searchCache({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        // todo Redis has slightly different sorting by aggregation
+        if(result[0].result[0].id === 1){
+            expect(result[0].result).to.eql([{
+                id: 1,
+                doc: data[0],
+                highlight: '<b>Carmen</b>cita'
+            },{
+                id: 2,
+                doc: data[1],
+                highlight: 'Le <b>clown</b> et ses chiens'
+            }]);
+        }
+        else{
+            expect(result[0].result).to.eql([{
+                id: 2,
+                doc: data[1],
+                highlight: 'Le <b>clown</b> et ses chiens'
+            },{
+                id: 1,
+                doc: data[0],
+                highlight: '<b>Carmen</b>cita'
+            }]);
+        }
+
+        // perform a query on cache
+        result = await index.searchCache({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        // todo Redis has slightly different sorting by aggregation
+        if(result[0].result[0].id === 1){
+            expect(result[0].result).to.eql([{
+                id: 1,
+                doc: data[0],
+                highlight: '<b>Carmen</b>cita'
+            }, {
+                id: 2,
+                doc: data[1],
+                highlight: 'Le <b>clown</b> et ses chiens'
+            }]);
+        }
+        else{
+            expect(result[0].result).to.eql([{
+                id: 2,
+                doc: data[1],
+                highlight: 'Le <b>clown</b> et ses chiens'
+            },{
+                id: 1,
+                doc: data[0],
+                highlight: '<b>Carmen</b>cita'
+            }]);
+        }
+
+        // perform a query using pluck
+        result = await index.search({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            pluck: "title",
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        // todo Redis has slightly different sorting by aggregation
+        if(result[0].id === 1){
+            expect(result).to.eql([{
+                id: 1,
+                doc: data[0],
+                highlight: '<b>Carmen</b>cita'
+            },{
+                id: 2,
+                doc: data[1],
+                highlight: 'Le <b>clown</b> et ses chiens'
+            }]);
+        }
+        else{
+            expect(result).to.eql([{
+                id: 2,
+                doc: data[1],
+                highlight: 'Le <b>clown</b> et ses chiens'
+            },{
+                id: 1,
+                doc: data[0],
+                highlight: '<b>Carmen</b>cita'
+            }]);
+        }
+    });
 }

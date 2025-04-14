@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.155 (ES5/Debug)
+ * FlexSearch.js v0.8.156 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1172,9 +1172,9 @@ function Ia(a) {
   Ka.call(a, "update");
   Ka.call(a, "remove");
 }
-var Ma, Na, Oa;
+var La, Na, Oa;
 function Pa() {
-  Ma = Oa = 0;
+  La = Oa = 0;
 }
 function Ka(a) {
   this[a + "Async"] = function() {
@@ -1183,7 +1183,7 @@ function Ka(a) {
       var d = c;
       delete b[b.length - 1];
     }
-    Ma ? Oa || (Oa = Date.now() - Na >= this.priority * this.priority * 3) : (Ma = setTimeout(Pa, 0), Na = Date.now());
+    La ? Oa || (Oa = Date.now() - Na >= this.priority * this.priority * 3) : (La = setTimeout(Pa, 0), Na = Date.now());
     if (Oa) {
       var e = this;
       return new Promise(function(f) {
@@ -2233,10 +2233,10 @@ V.prototype.search = function(a, b, c, d) {
         if (p) {
           if (this.db) {
             x.tag = p;
-            var La = v.db.support_tag_search;
+            var Ma = v.db.support_tag_search;
             x.field = n;
           }
-          La || (x.enrich = !1);
+          Ma || (x.enrich = !1);
         }
         if (r) {
           r[z] = v.search(a, b, x);
@@ -2251,7 +2251,7 @@ V.prototype.search = function(a, b, c, d) {
         E = [];
         N = 0;
         if (this.db && d) {
-          if (!La) {
+          if (!Ma) {
             for (H = n.length; H < d.length; H++) {
               var L = d[H];
               if (L && L.length) {
@@ -2296,7 +2296,7 @@ V.prototype.search = function(a, b, c, d) {
     }
   }
   if (r) {
-    if (this.db && p && p.length && !La) {
+    if (this.db && p && p.length && !Ma) {
       for (f = 0; f < p.length; f += 2) {
         g = this.index.get(p[f]);
         if (!g) {
@@ -2439,7 +2439,7 @@ function W(a) {
   this.store = c && (d ? new T(d) : new Map());
   this.cache = (c = a.cache || null) && new Y(c);
   a.cache = !1;
-  this.worker = a.worker;
+  this.worker = a.worker || !1;
   this.priority = a.priority || 4;
   this.index = xb.call(this, a, b);
   this.tag = null;
@@ -2463,20 +2463,21 @@ function W(a) {
   }
   if (this.worker) {
     this.fastupdate = !1;
-    a = [];
-    c = y(this.index.values());
-    for (b = c.next(); !b.done; b = c.next()) {
-      b = b.value, b.then && a.push(b);
+    var g = [];
+    a = y(this.index.values());
+    for (c = a.next(); !c.done; c = a.next()) {
+      c = c.value, c.then && g.push(c);
     }
-    if (a.length) {
-      var g = this;
-      return Promise.all(a).then(function(f) {
-        for (var h = 0, k = y(g.index.entries()), l = k.next(); !l.done; l = k.next()) {
-          l = l.value;
-          var m = l[0];
-          l[1].then && g.index.set(m, f[h++]);
+    if (g.length) {
+      var f = this;
+      return Promise.all(g).then(function(h) {
+        for (var k = new Map(), l = 0, m = y(f.index.entries()), n = m.next(); !n.done; n = m.next()) {
+          var p = n.value;
+          n = p[0];
+          var q = p[1];
+          q.then && (q = g[l].encoder || {}, p = k.get(q), p || (p = q.encode ? q : new Ga(q), k.set(q, p)), q = h[l], q.encoder = p, f.index.set(n, q), l++);
         }
-        return g;
+        return f;
       });
     }
   } else {
@@ -2490,9 +2491,9 @@ u.mount = function(a) {
   }
   var b = this.field;
   if (this.tag) {
-    for (var c = 0, d; c < this.aa.length; c++) {
+    for (var c = 0, d = void 0; c < this.aa.length; c++) {
       d = this.aa[c];
-      var e;
+      var e = void 0;
       this.index.set(d, e = new O({}, this.reg));
       b === this.field && (b = b.slice(0));
       b.push(d);
@@ -2502,7 +2503,8 @@ u.mount = function(a) {
   c = [];
   d = {db:a.db, type:a.type, fastupdate:a.fastupdate};
   e = 0;
-  for (var g; e < b.length; e++) {
+  var g = void 0;
+  for (g = void 0; e < b.length; e++) {
     d.field = g = b[e];
     g = this.index.get(g);
     var f = new a.constructor(a.id, d);
@@ -2511,8 +2513,10 @@ u.mount = function(a) {
     g.document = !0;
     e ? g.bypass = !0 : g.store = this.store;
   }
-  this.db = !0;
-  return Promise.all(c);
+  var h = this;
+  return this.db = Promise.all(c).then(function() {
+    h.db = !0;
+  });
 };
 u.commit = function(a, b) {
   var c = this, d, e, g, f;
@@ -2544,6 +2548,7 @@ function xb(a, b) {
     f = xa(f) ? Object.assign({}, a, f) : a;
     if (this.worker) {
       var h = new Ra(f);
+      h.encoder = f.encoder;
       c.set(g, h);
     }
     this.worker || c.set(g, new O(f, this.reg));
@@ -3166,7 +3171,7 @@ Ja(O.prototype);
 var Pb = "undefined" !== typeof window && (window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB), Qb = ["map", "ctx", "tag", "reg", "cfg"], Rb = I();
 function Sb(a, b) {
   b = void 0 === b ? {} : b;
-  if (!this) {
+  if (!this || this.constructor !== Sb) {
     return new Sb(a, b);
   }
   "object" === typeof a && (b = a, a = a.name);
@@ -3180,7 +3185,7 @@ function Sb(a, b) {
 }
 u = Sb.prototype;
 u.mount = function(a) {
-  if (!a.encoder) {
+  if (a.index) {
     return a.mount(this);
   }
   a.db = this;

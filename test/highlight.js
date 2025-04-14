@@ -9,10 +9,11 @@ const build_light = env && env.includes(".light");
 const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
+import SQLite from "flexsearch/db/sqlite";
 
 if(!build_light) describe("Result Highlighting", function(){
 
-    it("Should have been indexed properly", function(){
+    it("Should have been highlighted results properly (Document)", function(){
 
         // some test data
         const data = [{
@@ -25,6 +26,7 @@ if(!build_light) describe("Result Highlighting", function(){
 
         // create the document index
         const index = new Document({
+            cache: true,
             document: {
                 store: true,
                 index: [{
@@ -41,7 +43,7 @@ if(!build_light) describe("Result Highlighting", function(){
         }
 
         // perform a query
-        const result = index.search({
+        let result = index.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
             // set enrich to true (required)
@@ -60,9 +62,147 @@ if(!build_light) describe("Result Highlighting", function(){
             doc: data[1],
             highlight: 'Le <b>clown</b> et ses chiens'
         }]);
+
+        // perform a query on cache
+        result = index.searchCache({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        },{
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
+
+        // perform a query using pluck
+        result = index.search({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            pluck: "title",
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        expect(result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        },{
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
     });
 
-    it("Should have been indexed properly (#480)", function(){
+    if(!build_compact) it("Should have been highlighted results properly (Document Worker)", async function(){
+
+        // some test data
+        const data = [{
+            "id": 1,
+            "title": "Carmencita"
+        },{
+            "id": 2,
+            "title": "Le clown et ses chiens"
+        }];
+
+        // create the document index
+        const index = await new Document({
+            cache: true,
+            worker: true,
+            document: {
+                store: true,
+                index: [{
+                    field: "title",
+                    tokenize: "forward",
+                    encoder: Charset.LatinBalance
+                }]
+            }
+        });
+
+        // add test data
+        for(let i = 0; i < data.length; i++){
+            await index.add(data[i]);
+        }
+
+        // perform a query
+        let result = await index.searchCache({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        },{
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
+
+        // perform a query on cache
+        result = await index.searchCache({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        },{
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
+
+        // perform a query using pluck
+        result = await index.search({
+            query: "karmen or clown or not found",
+            suggest: true,
+            // set enrich to true (required)
+            enrich: true,
+            pluck: "title",
+            // highlight template
+            // $1 is a placeholder for the matched partial
+            highlight: "<b>$1</b>"
+        });
+
+        expect(result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        },{
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
+    });
+
+    it("Should have been highlighted results properly (#480)", function(){
 
         const index = new Document({
             document: {
@@ -103,7 +243,6 @@ if(!build_light) describe("Result Highlighting", function(){
             enrich: true,
             highlight: "<b>$1</b>"
         });
-
 
         expect(result.length).to.equal(2);
         expect(result[0]).to.eql({

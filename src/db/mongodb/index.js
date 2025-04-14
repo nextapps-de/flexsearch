@@ -23,7 +23,7 @@ let Index = Object.create(null);
  */
 
 export default function MongoDB(name, config = {}){
-    if(!this){
+    if(!this || this.constructor !== MongoDB){
         return new MongoDB(name, config);
     }
     if(typeof name === "object"){
@@ -49,7 +49,7 @@ export default function MongoDB(name, config = {}){
 
 MongoDB.prototype.mount = function(flexsearch){
     //if(flexsearch.constructor === Document){
-    if(!flexsearch.encoder){
+    if(flexsearch.index){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

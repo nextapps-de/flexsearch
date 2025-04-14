@@ -20,10 +20,18 @@ import {
 } from "./config.js";
 // <-- COMPILER BLOCK
 
-import { IndexOptions, DocumentOptions, DocumentDescriptor, FieldOptions, StoreOptions } from "./type.js";
+import {
+    IndexOptions,
+    DocumentOptions,
+    DocumentDescriptor,
+    FieldOptions,
+    StoreOptions,
+    EncoderOptions
+} from "./type.js";
 import StorageInterface from "./db/interface.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
+import Encoder from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import { is_string, is_object, parse_simple } from "./common.js";
 import apply_async from "./async.js";
@@ -81,21 +89,15 @@ export default function Document(options){
     }
 
     if(SUPPORT_WORKER){
-        this.worker = options.worker;
+        this.worker = options.worker || false;
     }
 
     if(SUPPORT_ASYNC){
         this.priority = options.priority || 4;
     }
 
-    // if(SUPPORT_ASYNC){
-    //     // this switch is used by recall of promise callbacks
-    //     this.async = false;
-    // }
-
     /**
      * @type {Map<string, Index>}
-     * @export
      */
     this.index = parse_descriptor.call(this, options, document);
 
@@ -146,12 +148,28 @@ export default function Document(options){
         }
         if(promises.length){
             const self = this;
-            return Promise.all(promises).then(function(promises){
+            return Promise.all(promises).then(function(result){
+                const encoder_last = new Map();
                 let count = 0;
                 for(const item of self.index.entries()){
                     const key = /** @type {string} */ (item[0]);
-                    const index = item[1];
-                    index.then && self.index.set(key, promises[count++]);
+                    let index = item[1];
+                    if(index.then){
+                        // make encoder available for result highlighting
+                        let opt = promises[count].encoder || {};
+                        // handle shared encoders
+                        let encoder = encoder_last.get(opt);
+                        if(!encoder){
+                            encoder = opt.encode
+                                ? opt
+                                : new Encoder(opt);
+                            encoder_last.set(opt, encoder);
+                        }
+                        index = result[count];
+                        index.encoder = encoder;
+                        self.index.set(key, index);
+                        count++;
+                    }
                 }
                 return self;
             });
@@ -160,7 +178,6 @@ export default function Document(options){
     else if(SUPPORT_PERSISTENT){
         if(options.db){
             this.fastupdate = false;
-            // think about to return the promise here
             // actually it can be awaited on "await index.db"
             this.mount(options.db);
         }
@@ -171,7 +188,7 @@ if(SUPPORT_PERSISTENT){
 
     /**
      * @param {!StorageInterface} db
-     * @return {Promise<Array<?>>}
+     * @return {Promise<void>}
      */
     Document.prototype.mount = function(db){
 
@@ -232,9 +249,10 @@ if(SUPPORT_PERSISTENT){
             }
         }
 
-        //this.async = true;
-        this.db = true;
-        return Promise.all(promises);
+        const self = this;
+        return this.db = Promise.all(promises).then(function(){
+            self.db = true;
+        });
     };
 
     Document.prototype.commit = async function(replace, append){
@@ -292,6 +310,8 @@ function parse_descriptor(options, document){
         if(SUPPORT_WORKER && this.worker){
             const worker = new WorkerIndex(opt);
             if(worker){
+                // assign encoder for result highlighting
+                worker.encoder = opt.encoder;
                 // worker could be a promise
                 // it needs to be resolved and swapped later
                 index.set(key, worker);
