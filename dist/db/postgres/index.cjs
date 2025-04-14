@@ -74,7 +74,7 @@ let DB;
  */
 
 function PostgresDB(name, config = {}){
-    if(!this){
+    if(!this || this.constructor !== PostgresDB){
         return new PostgresDB(name, config);
     }
     if(typeof name === "object"){
@@ -95,7 +95,7 @@ function PostgresDB(name, config = {}){
 }
 PostgresDB.prototype.mount = function(flexsearch){
     //if(flexsearch.constructor === Document){
-    if(!flexsearch.encoder){
+    if(flexsearch.index){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

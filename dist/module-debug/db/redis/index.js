@@ -63,17 +63,19 @@ RedisDB.prototype.open = async function () {
     if (this.db) {
         return this.db;
     }
-
+    if (DB) {
+        return this.db = DB;
+    }
     let url = defaults.url;
     if (!url) {
         url = defaults.user ? `redis://${defaults.user}:${defaults.pass}@${defaults.host}:${defaults.port}` : `redis://${defaults.host}:${defaults.port}`;
     }
-    return this.db = await createClient(url).on("error", err => console.error(err)).connect();
+    return this.db = DB = await createClient(url).on("error", err => console.error(err)).connect();
 };
 
 RedisDB.prototype.close = async function () {
-    // this.db.client.disconnect();
-    this.db = null;
+    DB && (await this.db.disconnect()); // this.db.client.disconnect();
+    this.db = DB = null;
     return this;
 };
 
@@ -87,22 +89,22 @@ RedisDB.prototype.clear = function () {
 
 function create_result(range, type, resolve, enrich) {
     if (resolve) {
-        for (let i = 0, tmp, id; i < range.length; i++) {
-            tmp = range[i];
-            id = "number" === type ? parseInt(tmp.value || tmp, 10) : tmp.value || tmp;
-            range[i] = /*enrich
-                       ? { id, doc: tmp.doc }
-                       :*/id;
+        if ("number" === type) {
+            for (let i = 0, tmp, id; i < range.length; i++) {
+                tmp = range[i];
+                id = "number" === type ? parseInt(tmp.id || tmp, 10) : tmp.id || tmp;
+                range[i] = enrich ? { id, doc: tmp.doc } : id;
+            }
         }
         return range;
     } else {
         let result = [];
         for (let i = 0, tmp, id, score; i < range.length; i++) {
             tmp = range[i];
-            id = "number" === type ? parseInt(tmp.value, 10) : tmp.value;
+            id = "number" === type ? parseInt(tmp.id || tmp, 10) : tmp.id || tmp;
             score = tmp.score;
             result[score] || (result[score] = []);
-            result[score].push(enrich ? { id, doc: tmp.doc } : id);
+            result[score].push(id);
         }
         return result;
     }

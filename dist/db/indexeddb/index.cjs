@@ -55,7 +55,7 @@ const Index = create_object();
  */
 
 function IdxDB(name, config = {}){
-    if(!this){
+    if(!this || this.constructor !== IdxDB){
         return new IdxDB(name, config);
     }
     if(typeof name === "object"){
@@ -75,7 +75,7 @@ function IdxDB(name, config = {}){
 }
 IdxDB.prototype.mount = function(flexsearch){
     //if(flexsearch.constructor === Document){
-    if(!flexsearch.encoder){
+    if(flexsearch.index){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;

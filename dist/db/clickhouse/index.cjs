@@ -80,7 +80,7 @@ let Index;
  */
 
 function ClickhouseDB(name, config = {}){
-    if(!this){
+    if(!this || this.constructor !== ClickhouseDB){
         return new ClickhouseDB(name, config);
     }
     if(typeof name === "object"){
@@ -106,7 +106,7 @@ function ClickhouseDB(name, config = {}){
 }
 ClickhouseDB.prototype.mount = function(flexsearch){
     //if(flexsearch.constructor === Document){
-    if(!flexsearch.encoder){
+    if(flexsearch.index){
         return flexsearch.mount(this);
     }
     defaults.resolution = Math.max(flexsearch.resolution, flexsearch.resolution_ctx);
