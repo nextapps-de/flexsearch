@@ -313,22 +313,22 @@ export const stemmer = new Map([
 const options = {
     prepare: function(str){
         return str
-        // normalization
+        // normalize symbols
         .replace(/´`’ʼ/g, "'")
         .replace(/_+/g, " ")
         .replace(/&/g, " and ")
         .replace(/\$/g, " USD ")
         .replace(/£/g, " GBP ")
         // explode short forms
-        .replace(/([a-z])'s\b/g, "$1 is")
         .replace(/\bi'm\b/g, "i am")
         .replace(/\b(can't|cannot)\b/g, "can not")
         .replace(/\bwon't\b/g, "will not")
+        .replace(/([a-z])'s\b/g, "$1 is has")
         .replace(/([a-z])n't\b/g, "$1 not")
         .replace(/([a-z])'ll\b/g, "$1 will")
         .replace(/([a-z])'re\b/g, "$1 are")
         .replace(/([a-z])'ve\b/g, "$1 have")
-        .replace(/([a-z])'d\b/g, "$1 would");
+        .replace(/([a-z])'d\b/g, "$1 would had");
     },
     filter: filter,
     stemmer: stemmer

@@ -28,21 +28,22 @@ Built-in Encoder
 The main workflow follows an increasing strategy,
 starting from a simple .toLowerCase() to full RegExp
 Pipeline:
-    1. apply this.normalize: charset normalization:
+    1. apply this.normalize (charset normalization)
        applied on the whole input string e.g. lowercase,
        everything you put later into (filter, matcher, stemmer, mapper, etc.)
        has to be normalized by definition, because it won't apply to them automatically
-    2. apply this.prepare (custom preparation, string in - string out)
-    3  split numerics into triplets when not surrounded by a letter
-    4. apply this.split: split input into terms (includes/excludes)
-    5. apply this.filter (pre-filter)
-    6. apply this.stemmer (replace term endings)
-    7. apply this.filter (post-filter)
+    2. apply this.prepare (custom function, string in - string out)
+    3  split numerics into triplets
+    4. split input into terms (by one of them: split/include/exclude)
+    5. pre-encoded term deduplication
+    6. apply this.filter (stop-words)
+    7. apply this.stemmer (replace term endings)
     8. apply this.mapper (replace chars)
     9. apply this.dedupe (letter deduplication)
    10. apply this.matcher (replace terms)
    11. apply this.replacer (custom regex)
-   12. apply this.finalize
+   12. post-encoded term deduplication
+   13. apply this.finalize (custom function, array in - array out)
 */
 
 const whitespace = /[^\p{L}\p{N}]+/u,
@@ -91,7 +92,9 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
+    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */
+    /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/
+    /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
 
     // {
     //     letter: true,
@@ -198,8 +201,7 @@ Encoder.prototype.assign = function (options) {
     // auto-balanced cache
     this.cache = tmp = merge_option(options.cache, !0, this.cache);
     if (tmp) {
-        this.timer = null;
-        this.cache_size = "number" == typeof tmp ? tmp : 2e5;
+        this.timer = null;this.cache_size = "number" == typeof tmp ? tmp : 2e5;
         this.cache_enc = new Map();
         this.cache_term = new Map();
         this.cache_enc_length = 128;
@@ -384,11 +386,13 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
     const skip = !(this.dedupe || this.mapper || this.filter || this.matcher || this.stemmer || this.replacer);
     let final = [],
         dupes = create_object(),
+        last_term,
+        last_term_enc,
         words = this.split || "" === this.split ? str.split( /** @type {string|RegExp} */this.split) : [str];
     // str;
 
     for (let i = 0, word, base; i < words.length; i++) {
-        // filter empty entries
+
         if (!(word = base = words[i])) {
             continue;
         }
@@ -397,17 +401,23 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
             continue;
         }
 
-        if (dedupe_terms && dupes[word]) {
-            continue;
+        if (dedupe_terms) {
+            if (dupes[word]) {
+                continue;
+            }
+            dupes[word] = 1;
+        } else {
+            if (last_term === word) {
+                continue;
+            }
+            last_term = word;
         }
 
         if (skip) {
-            dedupe_terms && (dupes[word] = 1);
             final.push(word);
             continue;
         }
 
-        // pre-filter before cache
         if (this.filter && ("function" == typeof this.filter ? !this.filter(word) : this.filter.has(word))) {
             continue;
         }
@@ -424,9 +434,12 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
             }
         }
 
-        // todo compare advantages when filter/stemmer are also encoded
-        // apply stemmer before bigger transformations
-        if (this.stemmer && 2 < word.length) {
+        // from here minlength should not apply again
+        // when the input string is further shrinking
+
+        // it needs to apply stemmer before bigger transformations
+        // it needs to apply stemmer after filter (user -> us -> filter out)
+        if (this.stemmer) {
             // for(const item of this.stemmer){
             //     const key = item[0];
             //     const value = item[1];
@@ -440,24 +453,19 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
             //     //     break;
             //     // }
             // }
+
+            // todo compare advantages when filter/stemmer are also encoded
             this.stemmer_test || (this.stemmer_test = new RegExp("(?!^)(" + this.stemmer_str + ")$"));
 
-            //const old = word;
-            word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
+            let old;
 
-            // if(old !== word && word.length > 2){
-            //     word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
-            // }
-
-            // 4. post-filter after stemmer was applied
-            // if(old !== word && this.filter && word.length >= this.minlength){
-            //     if(typeof this.filter === "function"
-            //             ? !this.filter(word)
-            //             : this.filter.has(word)
-            //     ){
-            //         word = "";
-            //     }
-            // }
+            // loop stemmer as long as anything has matched
+            // just terms with length > 2 should need a stemmer (its -> it)
+            // the minlength also prevents stemmer looping to cut off everything
+            while (old !== word && 2 < word.length) {
+                old = word;
+                word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
+            }
         }
 
         // apply mapper and collapsing
@@ -472,9 +480,6 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
             }
             word = final;
         }
-
-        // from here the input string can shrink,
-        // minlength should not apply
 
         // apply matcher
         if (this.matcher && 1 < word.length) {
@@ -502,8 +507,20 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
             }
         }
 
-        if (word && (!dedupe_terms || !dupes[word])) {
-            dedupe_terms && (dupes[word] = 1);
+        if (word) {
+            if (word !== base) {
+                if (dedupe_terms) {
+                    if (dupes[word]) {
+                        continue;
+                    }
+                    dupes[word] = 1;
+                } else {
+                    if (last_term_enc === word) {
+                        continue;
+                    }
+                    last_term_enc = word;
+                }
+            }
             final.push(word);
         }
     }
