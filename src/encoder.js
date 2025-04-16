@@ -5,7 +5,7 @@ import {
     SUPPORT_CHARSET
 } from "./config.js";
 // <-- COMPILER BLOCK
-import { merge_option } from "./common.js";
+import { create_object, merge_option } from "./common.js";
 import normalize_polyfill from "./charset/polyfill.js";
 import { EncoderOptions } from "./type.js";
 
@@ -221,17 +221,15 @@ Encoder.prototype.assign = function(options){
     this.rtl = merge_option(options.rtl, false, this.rtl);
 
     // auto-balanced cache
-    //if(SUPPORT_CACHE){
-        this.cache = tmp = merge_option(options.cache, true, this.cache);
-        if(tmp){
-            this.timer = null;
-            this.cache_size = typeof tmp === "number" ? tmp : 2e5;
-            this.cache_enc = new Map();
-            this.cache_term = new Map();
-            this.cache_enc_length = 128;
-            this.cache_term_length = 128;
-        }
-    //}
+    this.cache = tmp = merge_option(options.cache, true, this.cache);
+    if(tmp){
+        this.timer = null;
+        this.cache_size = typeof tmp === "number" ? tmp : 2e5;
+        this.cache_enc = new Map();
+        this.cache_term = new Map();
+        this.cache_enc_length = 128;
+        this.cache_term_length = 128;
+    }
 
     // regex temporary state
     this.matcher_str = "";
@@ -277,7 +275,7 @@ Encoder.prototype.addStemmer = function(match, replace){
     this.stemmer.set(match, replace);
     this.stemmer_str += (this.stemmer_str ? "|" : "") + match;
     this.stemmer_test = null;
-    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
+    this.cache && clear(this);
     return this;
 };
 
@@ -290,7 +288,7 @@ Encoder.prototype.addFilter = function(term){
         this.filter || (this.filter = new Set());
         this.filter.add(term);
     }
-    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
+    this.cache && clear(this);
     return this;
 };
 
@@ -312,7 +310,7 @@ Encoder.prototype.addMapper = function(char_match, char_replace){
     }
     this.mapper || (this.mapper = new Map());
     this.mapper.set(char_match, char_replace);
-    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
+    this.cache && clear(this);
     return this;
 };
 
@@ -337,7 +335,7 @@ Encoder.prototype.addMatcher = function(match, replace){
     this.matcher.set(match , replace);
     this.matcher_str += (this.matcher_str ? "|" : "") + match;
     this.matcher_test = null;
-    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
+    this.cache && clear(this);
     return this;
 };
 
@@ -353,20 +351,18 @@ Encoder.prototype.addReplacer = function(regex, replace){
     }
     this.replacer || (this.replacer = []);
     this.replacer.push(regex, replace);
-    /*SUPPORT_CACHE &&*/ this.cache && clear(this);
+    this.cache && clear(this);
     return this;
 };
 
 /**
  * @param {!string} str
+ * @param {boolean=} dedupe_terms Note: term deduplication will break the context chain
  * @return {!Array<string>}
  */
-Encoder.prototype.encode = function(str){
+Encoder.prototype.encode = function(str, dedupe_terms){
 
-    //if(!str) return str;
-    // todo remove dupe terms
-
-    if(/*SUPPORT_CACHE &&*/ this.cache && str.length <= this.cache_enc_length){
+    if(this.cache && str.length <= this.cache_enc_length){
         if(this.timer){
             if(this.cache_enc.has(str)){
                 return this.cache_enc.get(str);
@@ -408,6 +404,7 @@ Encoder.prototype.encode = function(str){
     //     );
     //     str = str.replace(this.matcher_test, match => this.matcher.get(match));
     // }
+
     // if(this.stemmer){
     //     this.stemmer_test || (
     //         this.stemmer_test = new RegExp("(?!\\b)(" + this.stemmer_str + ")(\\b|_)", "g")
@@ -417,21 +414,28 @@ Encoder.prototype.encode = function(str){
 
     const skip = !(this.dedupe || this.mapper || this.filter || this.matcher || this.stemmer || this.replacer);
     let final = [];
-    let changed;
+    let dupes = create_object();
     let words = this.split || this.split === ""
         ? str.split(/** @type {string|RegExp} */ (this.split))
-        : str; //[str];
+        : [str]; // str;
 
     for(let i = 0, word, base; i < words.length; i++){
         // filter empty entries
         if(!(word = base = words[i])){
             continue;
         }
+
         if(word.length < this.minlength ||
            word.length > this.maxlength){
             continue;
         }
+
+        if(dedupe_terms && dupes[word]){
+            continue;
+        }
+
         if(skip) {
+            dedupe_terms && (dupes[word] = 1);
             final.push(word);
             continue;
         }
@@ -445,7 +449,7 @@ Encoder.prototype.encode = function(str){
             continue;
         }
 
-        if(/*SUPPORT_CACHE &&*/ this.cache && word.length <= this.cache_term_length){
+        if(this.cache && word.length <= this.cache_term_length){
             if(this.timer){
                 const tmp = this.cache_term.get(word);
                 if(tmp || tmp === ""){
@@ -535,7 +539,7 @@ Encoder.prototype.encode = function(str){
         //word = word.replace(/(.)\1+/g, "$1");
         //word = word.replace(/(?<=(.))\1+/g, "");
 
-        if(/*SUPPORT_CACHE &&*/ this.cache && base.length <= this.cache_term_length){
+        if(this.cache && base.length <= this.cache_term_length){
             this.cache_term.set(base, word);
             if(this.cache_term.size > this.cache_size){
                 this.cache_term.clear();
@@ -543,14 +547,17 @@ Encoder.prototype.encode = function(str){
             }
         }
 
-        word && final.push(word);
+        if(word && (!dedupe_terms || !dupes[word])){
+            dedupe_terms && (dupes[word] = 1);
+            final.push(word);
+        }
     }
 
     if(this.finalize){
         final = this.finalize(final) || final;
     }
 
-    if(/*SUPPORT_CACHE &&*/ this.cache && str.length <= this.cache_enc_length){
+    if(this.cache && str.length <= this.cache_enc_length){
         this.cache_enc.set(str, final);
         if(this.cache_enc.size > this.cache_size){
             this.cache_enc.clear();
@@ -562,8 +569,11 @@ Encoder.prototype.encode = function(str){
 };
 
 export function fallback_encoder(str){
-
-    return str.normalize("NFKD").replace(normalize, "").toLowerCase().trim().split(/\s+/);
+    return str.normalize("NFKD")
+              .replace(normalize, "")
+              .toLowerCase()
+              .trim()
+              .split(/\s+/);
 }
 
 // Encoder.prototype.compress = function(str) {

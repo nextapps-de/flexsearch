@@ -29,9 +29,10 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
             }
         }
 
+        const depth = this.depth;
         // do not force a string as input
         // https://github.com/nextapps-de/flexsearch/issues/432
-        content = this.encoder.encode(content);
+        content = this.encoder.encode(content, !depth);
         const word_length = content.length;
 
         if (word_length) {
@@ -40,7 +41,6 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
 
             const dupes_ctx = create_object(),
                   dupes = create_object(),
-                  depth = this.depth,
                   resolution = this.resolution;
 
 

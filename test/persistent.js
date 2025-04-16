@@ -98,12 +98,23 @@ export default function(DB, DBClass){
         result = await index.search("cute cats");
         expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
 
+        result = await index.search("cute");
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
+
         result = await index.search("cute dogs cats");
         expect(result).to.eql([1]);
 
-        // todo Redis Union did not sort by term count matches yet
-        if(DBClass !== "Redis"){
-            result = await index.search("cute dogs cats", { suggest: true });
+        result = await index.search("cute dogs cats", { suggest: true });
+        expect(result).to.eql([1, 6, 5, 4, 3, 2, 0]);
+
+        // Redis lacks of its own union feature, because it didn't provide
+        // a way to order results by count of union matches
+        if(DBClass === "Redis"){
+            result = await index.search("undefined cute undefined dogs undefined cats undefined", { suggest: true });
+            expect(result).to.eql([6, 5, 1, 4, 3, 2, 0]);
+        }
+        else{
+            result = await index.search("undefined cute undefined dogs undefined cats undefined", { suggest: true });
             expect(result).to.eql([1, 6, 5, 4, 3, 2, 0]);
         }
 
@@ -141,7 +152,7 @@ export default function(DB, DBClass){
         // mount database to the index
         //await db.mount(index);
         //expect(index.db).to.equal(db);
-        //await index.clear();
+        await index.clear();
 
         // some test data
         const data = [
@@ -176,9 +187,17 @@ export default function(DB, DBClass){
         result = await index.search("cute dogs cats");
         expect(result).to.eql([1]);
 
-        // todo Redis Union did not sort by term count matches yet
-        if(DBClass !== "Redis"){
-            result = await index.search("cute dogs cats", { suggest: true });
+        result = await index.search("cute");
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
+
+        // Redis lacks of its own union feature, because it didn't provide
+        // a way to order results by count of union matches
+        if(DBClass === "Redis"){
+            result = await index.search("undefined cute undefined dogs undefined cats undefined", { suggest: true });
+            expect(result).to.eql([6, 5, 1, 4, 3, 2, 0]);
+        }
+        else{
+            result = await index.search("undefined cute undefined dogs undefined cats undefined", { suggest: true });
             expect(result).to.eql([1, 6, 5, 4, 3, 2, 0]);
         }
 
@@ -416,29 +435,15 @@ export default function(DB, DBClass){
             highlight: "<b>$1</b>"
         });
 
-        // todo Redis has slightly different sorting by aggregation
-        if(result[0].result[0].id === 1){
-            expect(result[0].result).to.eql([{
-                id: 1,
-                doc: data[0],
-                highlight: '<b>Carmen</b>cita'
-            },{
-                id: 2,
-                doc: data[1],
-                highlight: 'Le <b>clown</b> et ses chiens'
-            }]);
-        }
-        else{
-            expect(result[0].result).to.eql([{
-                id: 2,
-                doc: data[1],
-                highlight: 'Le <b>clown</b> et ses chiens'
-            },{
-                id: 1,
-                doc: data[0],
-                highlight: '<b>Carmen</b>cita'
-            }]);
-        }
+        expect(result[0].result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        },{
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
 
         // perform a query on cache
         result = await index.searchCache({
@@ -451,29 +456,15 @@ export default function(DB, DBClass){
             highlight: "<b>$1</b>"
         });
 
-        // todo Redis has slightly different sorting by aggregation
-        if(result[0].result[0].id === 1){
-            expect(result[0].result).to.eql([{
-                id: 1,
-                doc: data[0],
-                highlight: '<b>Carmen</b>cita'
-            }, {
-                id: 2,
-                doc: data[1],
-                highlight: 'Le <b>clown</b> et ses chiens'
-            }]);
-        }
-        else{
-            expect(result[0].result).to.eql([{
-                id: 2,
-                doc: data[1],
-                highlight: 'Le <b>clown</b> et ses chiens'
-            },{
-                id: 1,
-                doc: data[0],
-                highlight: '<b>Carmen</b>cita'
-            }]);
-        }
+        expect(result[0].result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        }, {
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
 
         // perform a query using pluck
         result = await index.search({
@@ -487,28 +478,14 @@ export default function(DB, DBClass){
             highlight: "<b>$1</b>"
         });
 
-        // todo Redis has slightly different sorting by aggregation
-        if(result[0].id === 1){
-            expect(result).to.eql([{
-                id: 1,
-                doc: data[0],
-                highlight: '<b>Carmen</b>cita'
-            },{
-                id: 2,
-                doc: data[1],
-                highlight: 'Le <b>clown</b> et ses chiens'
-            }]);
-        }
-        else{
-            expect(result).to.eql([{
-                id: 2,
-                doc: data[1],
-                highlight: 'Le <b>clown</b> et ses chiens'
-            },{
-                id: 1,
-                doc: data[0],
-                highlight: '<b>Carmen</b>cita'
-            }]);
-        }
+        expect(result).to.eql([{
+            id: 1,
+            doc: data[0],
+            highlight: '<b>Carmen</b>cita'
+        },{
+            id: 2,
+            doc: data[1],
+            highlight: 'Le <b>clown</b> et ses chiens'
+        }]);
     });
 }

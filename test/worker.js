@@ -48,6 +48,9 @@ if(!build_light && !build_compact) describe("Worker", function(){
         result = await index.search("cute cat");
         expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
 
+        result = await index.search("cute");
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
+
         result = await index.search("cudi tok-kat");
         expect(result).to.eql([1]);
     });

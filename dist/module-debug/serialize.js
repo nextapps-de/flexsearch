@@ -232,8 +232,7 @@ export function importIndex(key, data) {
         case "reg":
 
             // fast update isn't supported by export/import
-            this.fastupdate = /* suggest */
-            /* append: */ /* enrich */ /* resolve: */!1;
+            this.fastupdate = /* suggest */ /* append: */ /* enrich */ /* resolve: */!1;
             this.reg = json_to_reg( /** @type {Array<string|number>} */data, this.reg);
             break;
 

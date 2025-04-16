@@ -221,11 +221,17 @@ describe("Search Scoring", function(){
         expect(result.length).to.equal(7);
         expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
 
+        result = index.search("cute");
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
+
         result = index.search("cute dogs cats");
         expect(result.length).to.equal(1);
         expect(result).to.eql([1]);
 
         result = index.search("cute dogs cats", { suggest: true });
+        expect(result).to.eql([1, 6, 5, 4, 3, 2, 0]);
+
+        result = index.search("undefined cute undefined dogs undefined cats undefined", { suggest: true });
         expect(result).to.eql([1, 6, 5, 4, 3, 2, 0]);
 
         result = index.search("cute cat");
@@ -256,6 +262,9 @@ describe("Tokenizer", function(){
         result = index.search("cute cat");
         expect(result.length).to.equal(7);
         expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
+
+        result = index.search("cute");
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
     });
 
     it("Should have been \"reverse\" tokenized properly", function(){
@@ -279,6 +288,9 @@ describe("Tokenizer", function(){
         result = index.search("ute ats");
         expect(result.length).to.equal(7);
         expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
+
+        result = index.search("cute");
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
     });
 
     it("Should have been \"full\" tokenized properly", function(){
@@ -301,6 +313,9 @@ describe("Tokenizer", function(){
 
         result = index.search("ut at");
         expect(result.length).to.equal(7);
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
+
+        result = index.search("cute");
         expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
     });
 });
@@ -328,6 +343,9 @@ describe("Search: Suggestion", function(){
         result = index.search("nothing or cute cat or cute dog", { suggest: true });
         expect(result.length).to.equal(7);
         expect(result).to.eql([1, 6, 5, 4, 3, 2, 0]);
+
+        result = index.search("cute");
+        expect(result).to.eql([6, 5, 4, 3, 2, 1, 0]);
     });
 });
 

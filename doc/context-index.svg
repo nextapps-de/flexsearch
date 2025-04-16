@@ -2,24 +2,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="767px" height="399px"
      version="1.1">
     <defs>
-        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="mx-gradient-63f063-1-ffffff-1-s-0">
-            <stop offset="0%" style="stop-color:#74a2ff"/>
-            <stop offset="100%" style="stop-color:#ffffff"/>
-        </linearGradient>
-        <linearGradient x1="0%" y1="100%" x2="0%" y2="0%" id="mx-gradient-ffffff-1-63f063-1-s-0">
-            <stop offset="0%" style="stop-color:#74a2ff"/>
+        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="mx-gradient">
+            <stop offset="0%" style="stop-color:#ffffff"/>
+            <stop offset="50%" style="stop-color:#74a2ff"/>
             <stop offset="100%" style="stop-color:#ffffff"/>
         </linearGradient>
     </defs>
-    <g transform="translate(0.5,0.5)">
-        <rect x="231" y="-19" width="71" height="227" fill="url(#mx-gradient-63f063-1-ffffff-1-s-0)" stroke="#4986ff"
+    <g transform="translate(-40,-20) scale(1.1)">
+        <rect x="231" y="-259" width="71" height="470" fill="url(#mx-gradient)" stroke="#4986ff"
               stroke-dasharray="3 3" transform="rotate(90,266.5,94.5)" pointer-events="none"/>
-        <rect x="465" y="-25" width="71" height="239" fill="url(#mx-gradient-ffffff-1-63f063-1-s-0)" stroke="#4986ff"
-              stroke-dasharray="3 3" transform="rotate(90,500.5,94.5)" pointer-events="none"/>
-        <rect x="343" y="88" width="70" height="13" fill="#74a2ff" stroke="none" transform="rotate(90,378,94.5)"
-              pointer-events="none"/>
         <g transform="translate(357.5,68.5)">
-            <text x="27" y="16" fill="#000000" text-anchor="middle" font-size="16px" font-family="Helvetica" font-weight="bold">Term 4
+            <text x="27" y="16" fill="#000" text-anchor="middle" font-size="16px" font-family="Helvetica" font-weight="bold">Term 4
             </text>
         </g>
         <rect x="240" y="185" width="291" height="58" fill="#4986ff" stroke="#74a2ff" pointer-events="none"/>
@@ -53,12 +46,12 @@
             <text x="41" y="10" fill="#74a2ff" text-anchor="middle" font-size="11px" font-family="Helvetica">2. Context Score
             </text>
         </g>
-        <path d="M 332 95 L 435.63 95" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
+        <path d="M 332 95 L 435.63 95" fill="none" stroke="#000" stroke-miterlimit="10" stroke-dasharray="3 3"
               pointer-events="none"/>
-        <path d="M 440.88 95 L 433.88 98.5 L 435.63 95 L 433.88 91.5 Z" fill="#000000" stroke="#000000"
+        <path d="M 440.88 95 L 433.88 98.5 L 435.63 95 L 433.88 91.5 Z" fill="#000" stroke="#000"
               stroke-miterlimit="10" pointer-events="none"/>
         <g transform="translate(345.5,104.5)">
-            <text x="36" y="11" fill="#000000" text-anchor="middle" font-size="11px" font-family="Helvetica">1. Partial Score
+            <text x="36" y="11" fill="#000" text-anchor="middle" font-size="11px" font-family="Helvetica">1. Partial Score
             </text>
         </g>
         <path d="M 379 100 L 379 100" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
@@ -96,35 +89,35 @@
             </text>
         </g>
         <g opacity="0.65" transform="translate(167.5,84.5)">
-            <text x="26" y="16" fill="#000000" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 2
+            <text x="26" y="16" fill="#555" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 2
             </text>
         </g>
         <g opacity="0.85" transform="translate(247.5,84.5)">
-            <text x="26" y="16" fill="#000000" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 3
+            <text x="26" y="16" fill="#111" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 3
             </text>
         </g>
         <g opacity="0.85" transform="translate(467.5,84.5)">
-            <text x="26" y="16" fill="#000000" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 5
+            <text x="26" y="16" fill="#111" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 5
             </text>
         </g>
         <g opacity="0.65" transform="translate(547.5,84.5)">
-            <text x="26" y="16" fill="#000000" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 6
+            <text x="26" y="16" fill="#555" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 6
             </text>
         </g>
         <g transform="translate(84.5,84.5)">
-            <text x="26" y="16" fill="#999999" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 1
+            <text x="26" y="16" fill="#99999999" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 1
             </text>
         </g>
         <g transform="translate(630.5,84.5)">
-            <text x="26" y="16" fill="#999999" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 7
+            <text x="26" y="16" fill="#99999999" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 7
             </text>
         </g>
         <g transform="translate(699.5,84.5)">
-            <text x="7" y="16" fill="#999999" text-anchor="middle" font-size="16px" font-family="Helvetica">...
+            <text x="7" y="16" fill="#99999999" text-anchor="middle" font-size="16px" font-family="Helvetica">...
             </text>
         </g>
         <g transform="translate(53.5,84.5)">
-            <text x="7" y="16" fill="#999999" text-anchor="middle" font-size="16px" font-family="Helvetica">...
+            <text x="7" y="16" fill="#99999999" text-anchor="middle" font-size="16px" font-family="Helvetica">...
             </text>
         </g>
     </g>

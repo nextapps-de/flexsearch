@@ -59,6 +59,8 @@ function RedisDB(name, config = {}){
     this.fastupdate = true;
     this.db = config.db || DB || null;
     this.support_tag_search = true;
+    this.resolution = 9;
+    this.resolution_ctx = 9;
     //this.trx = false;
     Object.assign(defaults, config);
     this.db && delete defaults.db;
@@ -73,6 +75,8 @@ RedisDB.prototype.mount = function(flexsearch){
         return flexsearch.mount(this);
     }
     flexsearch.db = this;
+    this.resolution = flexsearch.resolution;
+    this.resolution_ctx = flexsearch.resolution_ctx;
     // todo support
     //this.fastupdate = flexsearch.fastupdate;
     return this.open();
@@ -118,7 +122,7 @@ RedisDB.prototype.clear = function(){
     ]);
 };
 
-function create_result(range, type, resolve, enrich){
+function create_result(range, type, resolve, enrich, resolution){
     if(resolve){
         if(type === "number"){
             for(let i = 0, tmp, id; i < range.length; i++){
@@ -140,7 +144,7 @@ function create_result(range, type, resolve, enrich){
             id = type === "number"
                 ? parseInt(tmp.id || tmp, 10)
                 : tmp.id || tmp;
-            score = tmp.score;
+            score = resolution - tmp.score;
             result[score] || (result[score] = []);
             result[score].push(id);
         }
@@ -181,7 +185,7 @@ RedisDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true
     return result.then(async function(range){
         if(!range.length) return range;
         if(enrich) range = await self.enrich(range);
-        return create_result(range, type, resolve, enrich);
+        return create_result(range, type, resolve, enrich, ctx ? self.resolution_ctx : self.resolution);
     });
 };
 
@@ -218,10 +222,12 @@ RedisDB.prototype.has = function(id){
 
 RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false, tags){
 
+    const ctx = query.length > 1 && flexsearch.depth;
     let result;
     let params = [];
+    let weights = [];
 
-    if(query.length > 1 && flexsearch.depth){
+    if(ctx){
 
         const key = this.id + "ctx" + this.field + ":";
         let keyword = query[0];
@@ -231,6 +237,7 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
             term = query[i];
             swap = flexsearch.bidirectional && (term > keyword);
             params.push(key + (swap ? term : keyword) + ":" + (swap ? keyword : term));
+            weights.push(1);
             keyword = term;
         }
     }
@@ -239,6 +246,7 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
         const key = this.id + "map" + this.field + ":";
         for(let i = 0; i < query.length; i++){
             params.push(key + query[i]);
+            weights.push(1);
         }
     }
 
@@ -248,7 +256,15 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
     let key = this.id + "tmp:" + Math.random();
 
     if(suggest){
-        const multi = this.db.multi().zUnionStore(key, query, { AGGREGATE: "SUM" });
+        const multi = this.db.multi();
+        // The zStore implementation lacks of ordering by match count (occurrences).
+        // Unfortunately, I couldn't find an elegant way to overcome this issue completely.
+        // For this reason it needs additionally a zInterStore to boost at least matches
+        // when all terms were found
+        multi.zInterStore(key, query, { AGGREGATE: "SUM" });
+        query.push(key);
+        weights.push(query.length);
+        multi.zUnionStore(key, query, { WEIGHTS: weights, AGGREGATE: "SUM" });
         // Strict Tag Intersection: it does not put tags into union, instead it calculates the
         // intersection against the term match union. This was the default behavior
         // of Tag-Search. But putting everything into union will also provide suggestions derived
@@ -261,23 +277,33 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
                 for(let i = 0; i < tags.length; i += 2){
                     query.push(this.id + "tag-" + sanitize(tags[i]) + ":" + tags[i + 1]);
                 }
-                multi.zInterStore(key, query, { AGGREGATE: "SUM" });
+                multi.zInterStore(key, query, { AGGREGATE: "MAX" });
                 // .unlink(key)
                 // key = key2;
             }
         }
         result = multi
-            [(resolve ? "zRange" : "zRangeWithScores")](key, "" + offset, "" + (offset + limit - 1), { REV: true })
+            [(resolve ? "zRange" : "zRangeWithScores")](
+                key,
+                "" + offset,
+                "" + (offset + limit - 1),
+                { REV: true }
+            )
             .unlink(key)
             .exec();
     }
     else {
-        if(tags) for(let i = 0; i < tags.length; i+=2){
+        if(tags) for(let i = 0; i < tags.length; i += 2){
             query.push(this.id + "tag-" + sanitize(tags[i]) + ":" + tags[i + 1]);
         }
         result = this.db.multi()
-            .zInterStore(key, query, { AGGREGATE: "MIN" })
-            [(resolve ? "zRange" : "zRangeWithScores")](key, "" + offset, "" + (offset + limit - 1), { REV: true })
+            .zInterStore(key, query, { AGGREGATE: "MAX" })
+            [(resolve ? "zRange" : "zRangeWithScores")](
+                key,
+                "" + offset,
+                "" + (offset + limit - 1),
+                { REV: true }
+            )
             .unlink(key)
             .exec();
     }
@@ -286,12 +312,12 @@ RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, 
     return result.then(async function(range){
         range = suggest && tags
             // take the 3rd result from batch return
-            ? range[2]
+            ? range[3]
             // take the 2nd result from batch return
-            : range[1];
+            : range[suggest ? 2 : 1];
         if(!range.length) return range;
         if(enrich) range = await self.enrich(range);
-        return create_result(range, type, resolve, enrich);
+        return create_result(range, type, resolve, enrich, ctx ? self.resolution_ctx : self.resolution);
     });
 };
 
@@ -299,7 +325,7 @@ RedisDB.prototype.info = function(){
     // todo
 };
 
-RedisDB.prototype.transaction = async function(task, callback){
+RedisDB.prototype.transaction = function(task, callback){
 
     if(TRX){
         return task.call(this, TRX);
@@ -309,8 +335,9 @@ RedisDB.prototype.transaction = async function(task, callback){
     let promise1 = /*await*/ task.call(this, TRX);
     let promise2 = TRX.exec();
     TRX = null;
-    callback && promise.then(callback);
-    await Promise.all([promise1, promise2]);
+    return Promise.all([promise1, promise2]).then(function(){
+        callback && callback();
+    });
 };
 
 RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
@@ -360,7 +387,7 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
                     let result = [];
                     for(let j = 0; j < ids.length; j++){
                         result.push({
-                            score: i,
+                            score: this.resolution - i,
                             value: "" + ids[j]
                         });
                     }
@@ -409,7 +436,10 @@ RedisDB.prototype.commit = async function(flexsearch, _replace, _append){
                     if((ids = arr[i]) && ids.length){
                         let result = [];
                         for(let j = 0; j < ids.length; j++){
-                            result.push({ score: i, value: "" + ids[j] });
+                            result.push({
+                                score: this.resolution_ctx - i,
+                                value: "" + ids[j]
+                            });
                         }
                         if(typeof ids[0] === "number"){
                             this.type = "number";

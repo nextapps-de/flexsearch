@@ -77,12 +77,11 @@ Index.prototype.search = function(query, limit, options){
         resolve = !SUPPORT_RESOLVER || this.resolve; // || global_resolve;
     }
 
-    // todo: term deduplication during encoding when context is disabled
-
+    context = this.depth && context !== false;
     // do not force a string as input
     // https://github.com/nextapps-de/flexsearch/issues/432
     /** @type {Array<string>} */
-    let query_terms = this.encoder.encode(query);
+    let query_terms = this.encoder.encode(query, !context);
     length = query_terms.length;
     limit = /** @type {!number} */ (limit || (resolve ? 100 : 0));
 
@@ -98,11 +97,6 @@ Index.prototype.search = function(query, limit, options){
             tag
         );
     }
-
-    // TODO: dedupe terms within encoder?
-    // TODO: deduplication will break the context chain
-
-    context = this.depth && context !== false;
 
     // fast path single context
     if(length === 2 && context && !suggest){
