@@ -53,5 +53,7 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
-    - run: cd test && npm ci
-    - run: cd test && npm test
+    - run: npm ci
+      working-directory: test
+    - run: npm test
+      working-directory: test
