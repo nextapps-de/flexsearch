@@ -13,7 +13,7 @@ jobs:
   # Label of the container job
   container-job:
     # Containers must run in Linux based operating systems
-    runs-on: debian-latest
+    runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: node:20-bookworm-slim
 
