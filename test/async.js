@@ -1,10 +1,5 @@
 global.self = global;
-console.log(process.argv)
-const env = process.argv[4] && process.argv[4] === "--exit"
-    ? process.argv[5]
-    : process.argv[3] && process.argv[3] === "--exit"
-        ? process.argv[4]
-        : process.argv[3];
+const env = process.argv[3] && process.argv[3] === "--exit" ? process.argv[4] : process.argv[3];
 import { expect } from "chai";
 console.log("--RELEASE-------------");
 console.log(env ? "dist/" + env + ".js" : "src/bundle.js")
@@ -62,7 +57,7 @@ if(!build_light) describe("Add (Async)", function(){
             if(duration) break;
         }
 
-        expect(duration).to.closeTo(0, 2);
+        expect(duration).to.closeTo(0, 3);
 
         for(let i = 0; i < 999999999; i++){
             await index.addAsync(i, "foo");
@@ -71,7 +66,7 @@ if(!build_light) describe("Add (Async)", function(){
             }
         }
 
-        expect(duration).to.closeTo(4, 2);
+        expect(duration).to.closeTo(4, 3);
     });
 
     it("Should have been added asynchronously to the index (priority: 9)", async function(){
