@@ -1,7 +1,10 @@
 global.self = global;
-const env = process.argv[3] && process.argv[3].startsWith("--") ? process.argv[4] : process.argv[3];
+const env = process.argv[4] && process.argv[4] === "--exit"
+    ? process.argv[5]
+    : process.argv[3] && process.argv[3] === "--exit"
+        ? process.argv[4]
+        : process.argv[3];
 import { expect } from "chai";
-console.log(process.argv);
 console.log("--RELEASE-------------");
 console.log(env ? "dist/" + env + ".js" : "src/bundle.js")
 console.log("----------------------");
