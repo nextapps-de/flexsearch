@@ -1,5 +1,6 @@
 {
   "name": "flexsearch-test",
+  "type": "module",
   "scripts": {
     "test": "mocha ./*.js --exit",
     "test:coverage": "c8 -c ./.c8rc.json mocha ./*.js --exit",
