@@ -126,4 +126,34 @@ describe("Context", function(){
         result = index.search("1 2 3", { context: false });
         expect(result[0]).to.equal(1);
     });
+
+    it("Should have been handled properly the context chain (term deduplication)", function(){
+
+        let index = new Index({ context: true });
+        index.add(1, "A A B B C C A A B B C C");
+
+        let result = index.search("A");
+        expect(result).to.eql([1]);
+
+        result = index.search("A A");
+        expect(result).to.eql([1]);
+
+        result = index.search("A A A");
+        expect(result).to.eql([1]);
+
+        result = index.search("A B A");
+        expect(result).to.eql([1]);
+
+        result = index.search("A B B");
+        expect(result).to.eql([1]);
+
+        result = index.search("B A B");
+        expect(result).to.eql([1]);
+
+        result = index.search("B A A");
+        expect(result).to.eql([1]);
+
+        result = index.search("C C B B A A");
+        expect(result).to.eql([1]);
+    });
 });
