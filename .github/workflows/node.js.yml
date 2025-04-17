@@ -55,5 +55,5 @@ jobs:
     - run: npm run build:bundle --if-present
     - run: npm ci
       working-directory: test
-    - run: npm test:github
+    - run: npm run test:github
       working-directory: test
