@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.157 (ES5/Debug)
+ * FlexSearch.js v0.8.158 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -109,7 +109,7 @@ ja.prototype.return = function(a) {
   this.B = {return:a};
   this.h = this.H;
 };
-function D(a, b, c) {
+function E(a, b, c) {
   a.h = c;
   return {value:b};
 }
@@ -1176,14 +1176,14 @@ function Ia(a) {
             h.h = 5;
             break;
           }
-          return D(h, M.import.call(Ha, d[0]), 9);
+          return E(h, M.import.call(Ha, d[0]), 9);
         }
         f = d && Ha[b].apply(Ha, d);
         if (!f || !f.then) {
           h.h = 5;
           break;
         }
-        return D(h, f, 7);
+        return E(h, f, 7);
       case 7:
         f = h.D;
         h.h = 5;
@@ -1541,7 +1541,7 @@ u.values = U.prototype.values = function db() {
           break;
         }
         f = e.value;
-        return D(g, f, 6);
+        return E(g, f, 6);
       case 6:
         e = d.next(), g.h = 5;
     }
@@ -1567,7 +1567,7 @@ u.keys = U.prototype.keys = function eb() {
           break;
         }
         f = e.value;
-        return D(g, f, 6);
+        return E(g, f, 6);
       case 6:
         e = d.next(), g.h = 5;
     }
@@ -1593,7 +1593,7 @@ u.entries = U.prototype.entries = function fb() {
           break;
         }
         f = e.value;
-        return D(g, f, 6);
+        return E(g, f, 6);
       case 6:
         e = d.next(), g.h = 5;
     }
@@ -2205,13 +2205,13 @@ V.prototype.search = function(a, b, c, d) {
         } else {
           w = Object.keys(A);
           x = 0;
-          for (var E = void 0, N = void 0; x < w.length; x++) {
-            if (E = w[x], N = A[E], N.constructor === Array) {
+          for (var D = void 0, N = void 0; x < w.length; x++) {
+            if (D = w[x], N = A[D], N.constructor === Array) {
               for (var H = 0; H < N.length; H++) {
-                r.push(E, N[H]);
+                r.push(D, N[H]);
               }
             } else {
-              r.push(E, N);
+              r.push(D, N);
             }
           }
         }
@@ -2278,14 +2278,14 @@ V.prototype.search = function(a, b, c, d) {
       }
       x = w && (k ? w.length : w.result.length);
       if (p && x) {
-        E = [];
+        D = [];
         N = 0;
         if (this.db && d) {
           if (!Ma) {
             for (H = n.length; H < d.length; H++) {
               var L = d[H];
               if (L && L.length) {
-                N++, E.push(L);
+                N++, D.push(L);
               } else if (!q) {
                 return k ? e : new X(e);
               }
@@ -2303,14 +2303,14 @@ V.prototype.search = function(a, b, c, d) {
               }
             }
             if (Wb = (L = L && L.get(p[H + 1])) && L.length) {
-              N++, E.push(L);
+              N++, D.push(L);
             } else if (!q) {
               return k ? e : new X(e);
             }
           }
         }
         if (N) {
-          w = kb(w, E, k);
+          w = kb(w, D, k);
           x = w.length;
           if (!x && !q) {
             return k ? w : new X(w);
@@ -2402,9 +2402,9 @@ function ub(a, b, c, d, e) {
                 break;
               }
             } else {
-              var E = z.indexOf(x);
-              if (-1 < E) {
-                q += (q ? " " : "") + r.substring(0, E) + e.replace("$1", r.substring(E, x.length)) + r.substring(E + x.length);
+              var D = z.indexOf(x);
+              if (-1 < D) {
+                q += (q ? " " : "") + r.substring(0, D) + e.replace("$1", r.substring(D, D + x.length)) + r.substring(D + x.length);
                 A = !0;
                 break;
               }
@@ -2557,7 +2557,7 @@ u.commit = function(a, b) {
       for (f = e.next(); !f.done; f = e.next()) {
         g = f.value, d.push(g.commit(a, b));
       }
-      return D(h, Promise.all(d), 2);
+      return E(h, Promise.all(d), 2);
     }
     c.reg.clear();
     h.h = 0;
@@ -2971,7 +2971,7 @@ function Jb(a, b, c, d, e) {
               break;
             }
             t[w] = 1;
-            return D(x, Mb(z, w, r, 0, 0, !1, !1), 6);
+            return E(x, Mb(z, w, r, 0, 0, !1, !1), 6);
           case 6:
             A = x.D;
             if (A = Nb(A, d, h, m)) {
@@ -3363,7 +3363,7 @@ u.commit = function(a, b, c) {
     switch(h.h) {
       case 1:
         if (b) {
-          return D(h, d.clear(), 12);
+          return E(h, d.clear(), 12);
         }
         e = a.commit_task;
         a.commit_task = [];
@@ -3380,7 +3380,7 @@ u.commit = function(a, b, c) {
           h.h = 5;
           break;
         }
-        return D(h, d.clear(), 8);
+        return E(h, d.clear(), 8);
       case 8:
         b = !0;
         h.h = 6;
@@ -3399,7 +3399,7 @@ u.commit = function(a, b, c) {
           h.h = 10;
           break;
         }
-        return D(h, d.remove(e), 11);
+        return E(h, d.remove(e), 11);
       case 11:
       case 10:
         h.h = 3;
@@ -3407,7 +3407,7 @@ u.commit = function(a, b, c) {
       case 12:
         a.commit_task = [];
       case 3:
-        return a.reg.size ? D(h, d.transaction("map", "readwrite", function(k) {
+        return a.reg.size ? E(h, d.transaction("map", "readwrite", function(k) {
           for (var l = y(a.map), m = l.next(), n = {}; !m.done; n = {O:void 0, Y:void 0}, m = l.next()) {
             m = m.value, n.Y = m[0], n.O = m[1], n.O.length && (b ? k.put(n.O, n.Y) : k.get(n.Y).onsuccess = function(p) {
               return function() {
@@ -3434,7 +3434,7 @@ u.commit = function(a, b, c) {
           }
         }), 13) : h.return();
       case 13:
-        return D(h, d.transaction("ctx", "readwrite", function(k) {
+        return E(h, d.transaction("ctx", "readwrite", function(k) {
           for (var l = y(a.ctx), m = l.next(), n = {}; !m.done; n = {V:void 0}, m = l.next()) {
             m = m.value;
             n.V = m[0];
@@ -3447,8 +3447,8 @@ u.commit = function(a, b, c) {
                     for (var A = Math.max(r.length, t.P.length), w = 0, x; w < A; w++) {
                       if ((x = t.P[w]) && x.length) {
                         if ((z = r[w]) && z.length) {
-                          for (var E = 0; E < x.length; E++) {
-                            z.push(x[E]);
+                          for (var D = 0; D < x.length; D++) {
+                            z.push(x[D]);
                           }
                         } else {
                           r[w] = x;
@@ -3467,7 +3467,7 @@ u.commit = function(a, b, c) {
         }), 14);
       case 14:
         if (a.store) {
-          return D(h, d.transaction("reg", "readwrite", function(k) {
+          return E(h, d.transaction("reg", "readwrite", function(k) {
             for (var l = y(a.store), m = l.next(); !m.done; m = l.next()) {
               var n = m.value;
               m = n[0];
@@ -3480,7 +3480,7 @@ u.commit = function(a, b, c) {
           h.h = 16;
           break;
         }
-        return D(h, d.transaction("reg", "readwrite", function(k) {
+        return E(h, d.transaction("reg", "readwrite", function(k) {
           for (var l = y(a.reg.keys()), m = l.next(); !m.done; m = l.next()) {
             k.put(1, m.value);
           }
@@ -3490,7 +3490,7 @@ u.commit = function(a, b, c) {
           h.h = 20;
           break;
         }
-        return D(h, d.transaction("tag", "readwrite", function(k) {
+        return E(h, d.transaction("tag", "readwrite", function(k) {
           for (var l = y(a.tag), m = l.next(), n = {}; !m.done; n = {X:void 0, ba:void 0}, m = l.next()) {
             m = m.value, n.ba = m[0], n.X = m[1], n.X.length && (k.get(n.ba).onsuccess = function(p) {
               return function() {

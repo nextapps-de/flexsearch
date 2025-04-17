@@ -516,7 +516,7 @@ function highlight_fields(query, result, index, pluck, template) {
                                 // prefix
                                 doc_org_cur.substring(0, position) +
                                 // match
-                                template.replace("$1", doc_org_cur.substring(position, query_enc_cur.length)) +
+                                template.replace("$1", doc_org_cur.substring(position, position + query_enc_cur.length)) +
                                 // suffix
                                 doc_org_cur.substring(position + query_enc_cur.length);
                                 found = !0;

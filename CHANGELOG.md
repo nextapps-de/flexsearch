@@ -2,10 +2,13 @@
 
 ### Current Version
 
+- Improved Stemmer Handling
+- Improved Result Highlighting
 - Use multi-language charset normalization as the default `Encoder`
-- Simplified charset support for CJK, Arabic, Cyrillic, Hindi, ... no extra charset definition required, the default encoder can handle them all
+- Simplified charset support for multi-language content
 - Charset renamed `LatinExact` => `Exact`, `LatinDefault` => `Default` and `LatinSimple` => `Normalize`, these are universal charset presets for any languages
-- Charset `CjkDefault`, `ArabicDefault` and `CyrillicDefault` was removed, they are fully covered by the default universal charset presets
+- Charset `ArabicDefault` and `CyrillicDefault` was removed, they are fully covered by the default universal charset presets
+- Charset `Charset.CjkDefault` was renamed to `Charset.CJK`
 
 ### v0.8.1
 
