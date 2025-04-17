@@ -129,7 +129,7 @@ export const filter = new Set([
     "out",
     "over",
     "own",
-    "people",
+    //"people",
     "same",
     "say",
     "see",
@@ -223,22 +223,22 @@ export const filter = new Set([
  */
 
 export const stemmer = new Map([
-    ["ational", ""],
-    ["iveness", ""],
-    ["fulness", ""],
-    ["ousness", ""],
+    //["ational", "ate"],
+    //["iveness", ""],
+    //["fulness", ""],
+    //["ousness", ""],
     ["ization", ""],
-    ["tional", "tion"],
+    //["tional", "tion"],
     ["biliti", ""],
     ["icate", ""],
     ["ative", ""],
-    ["alize", ""],
-    ["iciti", ""],
-    ["entli", ""],
-    ["ousli", ""],
-    ["alism", ""],
+    //["alize", ""],
+    //["iciti", ""],
+    //["entli", ""],
+    //["ousli", ""],
+    //["alism", ""],
     ["ation", ""],
-    ["aliti", ""],
+    //["aliti", ""],
     ["iviti", ""],
     ["ement", ""],
     ["izer", ""],
@@ -254,6 +254,7 @@ export const stemmer = new Map([
     ["ness", ""],
     ["ble", ""],
     ["ment", ""],
+    //["nal", "n"],
     ["eli", ""],
     ["bli", ""],
     ["ful", ""],
@@ -272,7 +273,7 @@ export const stemmer = new Map([
     ["ou", ""],
     ["er", ""],
     ["ed", ""],
-    ["es", "e"],
+    //["es", "e"],
     ["ic", ""],
     ["ly", ""],
     ["li", ""],
@@ -315,7 +316,7 @@ const options = {
         return str
         // normalize symbols
         .replace(/´`’ʼ/g, "'")
-        .replace(/_+/g, " ")
+        //.replace(/[_\-]+/g, " ")
         .replace(/&/g, " and ")
         .replace(/\$/g, " USD ")
         .replace(/£/g, " GBP ")
