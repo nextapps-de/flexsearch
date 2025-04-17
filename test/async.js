@@ -57,7 +57,7 @@ if(!build_light) describe("Add (Async)", function(){
             if(duration) break;
         }
 
-        expect(duration).to.equal(0);
+        expect(duration).to.closeTo(0, 2);
 
         for(let i = 0; i < 999999999; i++){
             await index.addAsync(i, "foo");

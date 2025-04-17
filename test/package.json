@@ -1,11 +1,11 @@
 {
   "name": "flexsearch-test",
   "scripts": {
-    "test": "mocha test/*.js --exit",
-    "test:coverage": "c8 -c test/.c8rc.json mocha test/*.js --exit",
-    "test:keystore": "set NODE_OPTIONS=--max-old-space-size=16000 && c8 -c test/.c8rc.json mocha test/keystore.js --exit",
-    "test:db": "c8 -c test/.c8rc.json mocha test/persistent.*.js --exit",
-    "test:all": "npx mocha test/*.js --exit module/bundle && npx mocha test/*.js --exit module-debug/bundle && npx mocha test/*.js --exit module-min/bundle && npx mocha test/*.js --exit flexsearch.bundle.debug && npx mocha test/*.js --exit flexsearch.bundle.min && npx mocha test/*.js --exit flexsearch.bundle.module.debug && npx mocha test/*.js --exit flexsearch.bundle.module.min && npx mocha test/*.js --exit flexsearch.compact.debug && npx mocha test/*.js --exit flexsearch.compact.min && npx mocha test/*.js --exit flexsearch.compact.module.debug && npx mocha test/*.js --exit flexsearch.compact.module.min && npx mocha test/*.js --exit flexsearch.es5.debug && npx mocha test/*.js --exit flexsearch.es5.min && npx mocha test/*.js --exit flexsearch.light.debug && npx mocha test/*.js --exit flexsearch.light.min && npx mocha test/*.js --exit flexsearch.light.module.debug && npx mocha test/*.js --exit flexsearch.light.module.min"
+    "test": "mocha ./*.js --exit",
+    "test:coverage": "c8 -c ./.c8rc.json mocha ./*.js --exit",
+    "test:keystore": "set NODE_OPTIONS=--max-old-space-size=16000 && c8 -c ./.c8rc.json mocha ./keystore.js --exit",
+    "test:db": "c8 -c ./.c8rc.json mocha ./persistent.*.js --exit",
+    "test:all": "npx mocha ./*.js --exit module/bundle && npx mocha ./*.js --exit module-debug/bundle && npx mocha ./*.js --exit module-min/bundle && npx mocha ./*.js --exit flexsearch.bundle.debug && npx mocha ./*.js --exit flexsearch.bundle.min && npx mocha ./*.js --exit flexsearch.bundle.module.debug && npx mocha ./*.js --exit flexsearch.bundle.module.min && npx mocha ./*.js --exit flexsearch.compact.debug && npx mocha ./*.js --exit flexsearch.compact.min && npx mocha ./*.js --exit flexsearch.compact.module.debug && npx mocha ./*.js --exit flexsearch.compact.module.min && npx mocha ./*.js --exit flexsearch.es5.debug && npx mocha ./*.js --exit flexsearch.es5.min && npx mocha ./*.js --exit flexsearch.light.debug && npx mocha ./*.js --exit flexsearch.light.min && npx mocha ./*.js --exit flexsearch.light.module.debug && npx mocha ./*.js --exit flexsearch.light.module.min"
   },
   "devDependencies": {
     "c8": "^10.1.3",
