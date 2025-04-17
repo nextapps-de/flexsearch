@@ -1,4 +1,5 @@
 global.self = global;
+console.log(process.argv)
 const env = process.argv[4] && process.argv[4] === "--exit"
     ? process.argv[5]
     : process.argv[3] && process.argv[3] === "--exit"
