@@ -10,9 +10,33 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  # Label of the container job
+  container-job:
+    # Containers must run in Linux based operating systems
+    runs-on: debian-latest
+    # Docker Hub image that `container-job` executes in
+    container: node:20-bookworm-slim
 
-    runs-on: ubuntu-latest
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DATABASE: postgres
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
+
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     strategy:
       matrix:
@@ -28,4 +52,4 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test
+    - run: npm run test
