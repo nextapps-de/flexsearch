@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "test": "mocha *.js --exit",
-    "test:github": "mocha *.js --exit flexsearch.compact.min",
+    "test:github": "mocha *.js flexsearch.compact.min",
     "test:coverage": "c8 -c ./.c8rc.json mocha ./*.js --exit",
     "test:keystore": "set NODE_OPTIONS=--max-old-space-size=16000 && c8 -c ./.c8rc.json mocha ./keystore.js --exit",
     "test:db": "c8 -c ./.c8rc.json mocha ./persistent.*.js --exit",
