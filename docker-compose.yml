@@ -1,0 +1,51 @@
+version: "3.6"
+services:
+  postgres:
+    image: postgres:latest
+    restart: on-failure
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    container_name: flexsearch_postgres_db
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    restart: on-failure
+    volumes:
+      - ch-data:/var/lib/clickhouse
+    ports:
+      - "8123:8123"
+    container_name: flexsearch_clickhouse_db
+  redis:
+    image: redislabs/rejson:latest
+    restart: on-failure
+    volumes:
+      - rd-data:/data
+    ports:
+      - "6379:6379"
+    container_name: flexsearch_redis_db
+  mongo:
+    image: mongo:latest
+    restart: on-failure
+    volumes:
+      - mg-data:/data
+    ports:
+      - "27017:27017"
+    container_name: flexsearch_mongo_db
+volumes:
+  pg-data:
+    driver: local
+  ch-data:
+    driver: local
+  rd-data:
+    driver: local
+  mg-data:
+    driver: local
