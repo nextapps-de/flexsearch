@@ -8,7 +8,7 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen"></a>
-<img src="https://img.shields.io/badge/coverage-91%25-brightgreen">
+<a target="_blank" href="https://coveralls.io/github/nextapps-de/flexsearch?branch=master"><img src="https://img.shields.io/badge/coverage-91%25-brightgreen">
 <img src="https://img.shields.io/badge/typed-74%25-yellow"><!--<a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>-->
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 
