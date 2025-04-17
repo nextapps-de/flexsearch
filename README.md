@@ -1181,7 +1181,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
     </tr>
     <tr></tr>
     <tr>
-        <td>encoder<br><br><br><br><br><br><br><br></td>
+        <td>encoder</td>
         <td>
             <a href="doc/encoder.md">new Encoder(options)</a><br>
             Charset.Exact<br>
@@ -1191,6 +1191,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
             Charset.LatinAdvanced<br>
             Charset.LatinExtra<br>
             Charset.LatinSoundex<br>
+            Charset.CJK<br>
             false
         </td>
         <td>Choose one of the <a href="#charset-collection">built-in encoder</a><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
