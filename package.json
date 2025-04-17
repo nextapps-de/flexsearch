@@ -63,7 +63,7 @@
     "sqlite3": false
   },
   "scripts": {
-    "build": "npm run build:bundle && npm run build:bundle:debug",
+    "build": "npm run build:bundle && npm run build:bundle:debug && exit 0",
     "build:bundle": "node task/build RELEASE=bundle DEBUG=false PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false SUPPORT_PERSISTENT=true SUPPORT_RESOLVER=true SUPPORT_KEYSTORE=true SUPPORT_COMPRESSION=false",
     "build:bundle:debug": "node task/build RELEASE=bundle DEBUG=true PROFILER=false SUPPORT_WORKER=true SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false SUPPORT_PERSISTENT=true SUPPORT_RESOLVER=true SUPPORT_KEYSTORE=true SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT",
     "build:compact": "node task/build RELEASE=compact DEBUG=false PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=true SUPPORT_CACHE=true SUPPORT_ASYNC=true SUPPORT_STORE=true SUPPORT_TAGS=true SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=true SUPPORT_DOCUMENT=true POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false",
