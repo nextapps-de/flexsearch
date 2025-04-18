@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/main",
+    "pages/document",
+    "pages/worker",
+    "pages/index"
+
+  ]
+}

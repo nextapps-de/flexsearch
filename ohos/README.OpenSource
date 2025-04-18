@@ -1,0 +1,11 @@
+[
+    {
+        "Name": "flexsearch",
+        "License": "Apache License",
+        "License File": " LICENSE ",
+        "Version Number": "0.7.2",
+        "Owner": "xiafeng@huawei.com",
+        "Upstream URL": "https://github.com/nextapps-de/flexsearch/",
+        "Description": "Next-Generation full text search library for Browser and Node.js"
+    }
+]

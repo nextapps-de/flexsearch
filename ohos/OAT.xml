@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <oatconfig>
+        <filefilterlist>
+            <filefilter name="copyrightPolicyFilter" desc="Filters for copyright header policies">
+                <filteritem type="filename" name="NOTICE" desc="版权免责声明文件，无需修改"/>
+                <filteritem type="filename" name="hvigorfile.js" desc="项目工程默认文件，不需要添加版权头"/>
+                <filteritem type="filename" name="*.json5" desc="项目工程默认文件，不需要添加版权头"/>
+                <filteritem type="filepath" name="library/src/.*" desc="第三方开源软件flexsearch的源码"/>
+                <filteritem type="filepath" name="hvigor/hvigor-wrapper.js" desc="项目工程默认文件,DevEco Studio自动生成，不手动修改"/>
+                <filteritem type="filename" name="hvigorfile.ts" desc="项目工程默认文件，不需要添加版权头"/>
+                <filteritem type="filename" name="hvigorw" desc="项目工程默认文件，不需要添加版权头"/>
+                <filteritem type="filename" name="hvigorw.bat" desc="项目工程默认文件，不需要添加版权头"/>
+                <filteritem type="filepath" name="library/index.d.ts" desc="项目工程默认文件，不需要添加版权头"/>
+            </filefilter>
+            <filefilter name="defaultPolicyFilter" desc="Filters for compatibility，license header policies">
+                <filteritem type="filename" name="NOTICE" desc="版权免责声明文件，无需修改"/>
+                <filteritem type="filename" name="hvigorfile.js" desc="项目工程默认文件，不需要添加许可证头"/>
+                <filteritem type="filename" name="*.json5" desc="项目工程默认文件，不需要添加许可证头"/>
+                <filteritem type="filename" name="hvigorfile.ts" desc="项目工程默认文件，不需要添加许可证头"/>
+                <filteritem type="filename" name="hvigorw" desc="项目工程默认文件，不需要添加版权头"/>
+                <filteritem type="filename" name="hvigorw.bat" desc="项目工程默认文件，不需要添加版权头"/>
+		        <filteritem type="filepath" name="hvigor/hvigor-wrapper.js" desc="项目工程默认文件,DevEco Studio自动生成，不手动修改"/>
+                <filteritem type="filepath" name="library/src/.*" desc="第三方开源软件flexsearch的源码"/>
+                <filteritem type="filepath" name="library/index.d.ts" desc="第三方开源软件flexsearch的源码"/>
+            </filefilter>
+            <filefilter
+                desc="Filters for resources files policies"
+                name="binaryFileTypePolicyFilter">
+                <filteritem
+                    desc="自研图片资源文件，DevEco Studio自动生成，不手动修改"
+                    name="entry/src/main/resources/base/media/icon.png"
+                    type="filepath"/>
+                <filteritem
+                    desc="自研图片资源文件，DevEco Studio自动生成，不手动修改"
+                    name="entry/src/ohosTest/resources/base/media/icon.png"
+                    type="filepath"/>
+                <filteritem
+                    desc="自研图片资源文件，DevEco Studio自动生成，不手动修改"
+                    name="AppScope/resources/base/media/app_icon.png"
+                    type="filepath"/>
+                <filteritem
+                    desc="hvigor配置文件，DevEco Studio自动生成，不手动修改"
+                    name="*.json5"
+                    type="filename"/>
+            </filefilter>
+        </filefilterlist>
+        <policylist>
+            <policy
+                desc=""
+                name="projectPolicy">
+                <policyitem
+                    desc="原开源库版权头，版权头维持原样，不做侵入式修改"
+                    filefilter="copyrightPolicyFilter"
+                    group="defaultGroup"
+                    name="Copyright 2018-2021 Nextapps GmbH"
+                    path="library/src/document.js"
+                    rule="may"
+                    type="copyright"/>
+            </policy>
+        </policylist>
+    </oatconfig>
+</configuration>

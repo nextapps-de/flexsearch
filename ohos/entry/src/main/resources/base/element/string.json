@@ -1,0 +1,212 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "FlexSearch"
+    },
+    {
+      "name": "document_data",
+      "value": "Document data:"
+    },
+    {
+      "name": "Single_field",
+      "value": "Single field (content) search - keyword \"real estate\""
+    },
+    {
+      "name": "Multi_field",
+      "value": "Multi field (title&content) search - keyword \\\"real estate\\\""
+    },
+    {
+      "name": "Search_by_tag",
+      "value": "Search by tag (property, epidemic)"
+    },
+    {
+      "name": "page_search",
+      "value": "Page Search - Add 1 to page No every time you click"
+    },
+    {
+      "name": "Test_Result",
+      "value": "Test Result: "
+    },
+    {
+      "name": "Page_content_display_completed",
+      "value": "Page_content_display_completed"
+    },
+    {
+      "name": "importTest",
+      "value": "importTest， Need to perform exportTest first"
+    },
+    {
+      "name": "import",
+      "value": "Import(), you need to first execute export()"
+    },
+    {
+      "name": "Property",
+      "value": "Property"
+    },
+    {
+      "name": "title1",
+      "value": "Take-out delivery guy buys a house in a small city for 70,000 yuan"
+    },
+    {
+      "name": "content1",
+      "value": "A year ago, Li detailed his experience of buying a house in the \"Wander bar\". Compared to the exorbitant prices in the first-tier cities, the 50,000-yuan-per-house property deal went viral. Therefore, many \"wanderers\" also brought tens of thousands of cash to the area, trying to end their wandering life."
+    },
+    {
+      "name": "Epidemic",
+      "value": "Epidemic"
+    },
+    {
+      "name": "Livelihood",
+      "value": "Livelihood"
+    },
+    {
+      "name": "Economy",
+      "value": "Economy"
+    },
+    {
+      "name": "title2",
+      "value": "A mother-son pair confirmed to enter a certain place"
+    },
+    {
+      "name": "title3",
+      "value": "Rainstorm waterlogging"
+    },
+    {
+      "name": "title4",
+      "value": "New data on the housing market: No more golden September, cooling may continue in the fourth quarter"
+    },
+    {
+      "name": "title5",
+      "value": "Economic trends"
+    },
+    {
+      "name": "title6",
+      "value": "Epidemic affecting 8 provinces! When will we get the booster shot? Experts from disease control remind of winter epidemics..."
+    },
+    {
+      "name": "title7",
+      "value": "Epidemic: Variant virus causing concern leads to a parliamentary report for response..."
+    },
+    {
+      "name": "title8",
+      "value": "Property: 8 am news bulletin: Discussing an event publicly twice within a week releases what kind of information? | A real estate company\\'s current risks include..."
+    },
+    {
+      "name": "title9",
+      "value": "Property: Planned pilot cities for real estate tax collection"
+    },
+    {
+      "name": "title10",
+      "value": "Development of China\\'s real estate industry"
+    },
+    {
+      "name": "title11",
+      "value": "Talent attraction and technology retention (frontline exploration of livelihood) - news report"
+    },
+    {
+      "name": "content2",
+      "value": "Ms. Chen, 31 years old, unemployed, has been living in a certain area for the past half year before entering. She mainly stays at home and goes out to buy groceries once in 2-3 days. On the morning of July 17th, she experienced throat pain and had no other symptoms such as fever..."
+    },
+    {
+      "name": "content3",
+      "value": "Several regions in a certain area experienced heavy to torrential rain, resulting in a sharp rise in water levels of rivers and severe flooding in Enshi city. Property damage was caused to the public. The picture shows the masses clearing up mud from the road."
+    },
+    {
+      "name": "content4",
+      "value": "According to the housing price data for 70 large and medium-sized cities released on Wednesday, new housing prices in first and second-tier cities... In the third quarter financial data press conference, it was also stated that some financial institutions have issues with financing convention rules..."
+    },
+    {
+      "name": "content5",
+      "value": "Pulse of Economic Trends. By Reuters Staff. 2 Min Read."
+    },
+    {
+      "name": "content6",
+      "value": "According to Elephant News, within just three days, there have been... On October 18th, there were 6 new locally confirmed cases and 1 asymptomatic infection case reported."
+    },
+    {
+      "name": "content7",
+      "value": "Sources informed CNN reporters that it may soon recommend people who are 40 or above and have previously received Moderna or Pfizer vaccines to receive a third dose."
+    },
+    {
+      "name": "content8",
+      "value": "Property: A real estate company currently faces risks related to its inability to repay maturing debt, partial construction site shutdowns, and uncertainty in timely delivery of pre-sold properties. Overall, the risk is considered a case-specific risk. Yi Gang said..."
+    },
+    {
+      "name": "content9",
+      "value": "Property: (...), real estate value..."
+    },
+    {
+      "name": "content10",
+      "value": "In terms of land supply, guarantees are provided for affordable housing..."
+    },
+    {
+      "name": "content11",
+      "value": "In recent years, talent attraction and training have been strengthened: platforms have been built based on industrial development needs to specifically introduce high-level talents; group-based support has been provided in healthcare, education, and other livelihood sectors..."
+    },
+    {
+      "name": "Property2",
+      "value": "Property"
+    },
+    {
+      "name": "housing",
+      "value": "housing"
+    },
+    {
+      "name": "montage",
+      "value": "montage"
+    },
+    {
+      "name": "Before_montage",
+      "value": "Before montage"
+    },
+    {
+      "name": "the_value_before_montage",
+      "value": "This is the value before montage"
+    },
+    {
+      "name": "tail_connection",
+      "value": "Tail connection"
+    },
+    {
+      "name": "tail_title",
+      "value": "I am the tail title"
+    },
+    {
+      "name": "tail_content",
+      "value": "I am the tail content"
+    },
+    {
+      "name": "update",
+      "value": "update"
+    },
+    {
+      "name": "before_update",
+      "value": "before update"
+    },
+    {
+      "name": "value_before_update",
+      "value": "This is the value before the update"
+    },
+    {
+      "name": "update_content",
+      "value": "Update"
+    },
+    {
+      "name": "update_title",
+      "value": "A mother and son tested positive upon entering a certain area, ######### title after the update #########."
+    },
+    {
+      "name": "update_content_value",
+      "value": "Update: Chen, female, 31 years old, unemployed, had been living in a certain area for the past six months, primarily staying at home, going out every 2-3 days to buy groceries. On the early morning of July 17, she experienced a sore throat, with no fever or other symptoms..."
+    }
+  ]
+}
