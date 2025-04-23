@@ -1,5 +1,3 @@
-import { EncoderOptions } from "../type.js";
-
 /**
  * http://www.ranks.nl/stopwords
  * http://snowball.tartarus.org/algorithms/french/stop.txt
@@ -205,7 +203,7 @@ export const stemmer = new Map([
 ]);
 
 /**
- * @type EncoderOptions
+ * @type {import('../type.js').EncoderOptions}
  */
 const options = {
     prepare: function(str){

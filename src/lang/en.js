@@ -1,5 +1,3 @@
-import { EncoderOptions } from "../type.js";
-
 // todo filter out minlength
 
 /**
@@ -309,7 +307,7 @@ export const stemmer = new Map([
 // ]);
 
 /**
- * @type EncoderOptions
+ * @type {import('../type.js').EncoderOptions}
  */
 const options = {
     prepare: function(str){

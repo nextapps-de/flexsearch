@@ -1,5 +1,3 @@
-import { EncoderOptions } from "../type.js";
-
 /**
  * Filter are also known as "stopwords", they completely filter out words from being indexed.
  * Source: http://www.ranks.nl/stopwords
@@ -190,7 +188,7 @@ const map = new Map([
 ]);
 
 /**
- * @type EncoderOptions
+ * @type {import('../type.js').EncoderOptions}
  */
 const options = {
     prepare: function(str){
