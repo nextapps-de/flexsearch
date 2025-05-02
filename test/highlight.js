@@ -195,7 +195,7 @@ if(!build_light) describe("Result Highlighting", function(){
         }]);
     });
 
-    it.only("Should have been highlighted results by boundary properly", function(){
+    it("Should have been highlighted results by boundary properly", function(){
 
         const data = [{
             "id": 1,
