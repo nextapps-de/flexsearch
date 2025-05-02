@@ -1,5 +1,5 @@
 
-import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, FieldOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions, PersistentOptions, ResolverOptions } from "./type.js";
+import { SearchOptions, ContextOptions, DocumentDescriptor, DocumentSearchOptions, FieldOptions, IndexOptions, DocumentOptions, TagOptions, StoreOptions, EncoderOptions, EncoderSplitOptions, PersistentOptions, ResolverOptions, HighlightBoundaryOptions, HighlightEllipsisOptions, HighlightOptions } from "./type.js";
 import StorageInterface from "./db/interface.js";
 import Document from "./document.js";
 import Index from "./index.js";
@@ -273,6 +273,19 @@ import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 /** @export */ResolverOptions.not;
 /** @export */ResolverOptions.pluck;
 /** @export */ResolverOptions.field;
+
+/** @export */HighlightBoundaryOptions.before;
+/** @export */HighlightBoundaryOptions.after;
+/** @export */HighlightBoundaryOptions.total;
+
+/** @export */HighlightEllipsisOptions.template;
+/** @export */HighlightEllipsisOptions.pattern;
+
+/** @export */HighlightOptions.template;
+/** @export */HighlightOptions.boundary;
+/** @export */HighlightOptions.ellipsis;
+/** @export */HighlightOptions.clip;
+/** @export */HighlightOptions.merge;
 
 const FlexSearch = {
     Index: Index,

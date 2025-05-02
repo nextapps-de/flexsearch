@@ -23,7 +23,10 @@ import {
     EncoderOptions,
     EncoderSplitOptions,
     PersistentOptions,
-    ResolverOptions
+    ResolverOptions,
+    HighlightBoundaryOptions,
+    HighlightEllipsisOptions,
+    HighlightOptions
 } from "./type.js";
 import StorageInterface from "./db/interface.js";
 import Document from "./document.js";
@@ -304,6 +307,19 @@ if(SUPPORT_SERIALIZE){
 /** @export */ ResolverOptions.not;
 /** @export */ ResolverOptions.pluck;
 /** @export */ ResolverOptions.field;
+
+/** @export */ HighlightBoundaryOptions.before;
+/** @export */ HighlightBoundaryOptions.after;
+/** @export */ HighlightBoundaryOptions.total;
+
+/** @export */ HighlightEllipsisOptions.template;
+/** @export */ HighlightEllipsisOptions.pattern;
+
+/** @export */ HighlightOptions.template;
+/** @export */ HighlightOptions.boundary;
+/** @export */ HighlightOptions.ellipsis;
+/** @export */ HighlightOptions.clip;
+/** @export */ HighlightOptions.merge;
 
 const FlexSearch = {
     "Index": Index,

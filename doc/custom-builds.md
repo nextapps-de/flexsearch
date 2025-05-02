@@ -1,6 +1,9 @@
 ## Custom Builds
 
-The `/src/` folder of this repository requires some compilation to resolve the build flags. Those are your options:
+The `/src/` folder of this repository requires some compilation to resolve the build flags.
+
+<!--
+Those are your options:
 
 - Closure Compiler (Advanced Compilation)
 - Babel + Plugin `babel-plugin-conditional-compile`
@@ -11,6 +14,7 @@ You can't resolve build flags with:
 - esbuild
 - rollup
 - Terser
+-->
 
 You can run any of the basic builds located in the `/dist/` folder, e.g.:
 
@@ -62,115 +66,123 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
     <tr>
         <td>SUPPORT_WORKER</td>
         <td>true, false</td>
-        <td></td>
+        <td>Worker Indexes</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_ENCODER</td>
         <td>true, false</td>
-        <td></td>
+        <td>When not included you'll need to pass a custom <code>encode</code> method when creating an index</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_CHARSET</td>
         <td>true, false</td>
-        <td></td>
+        <td>Includes: <code>LatinBalance</code>, <code>LatinAdvanced</code>, <code>LatinExtra</code>, <code>LatinSoundex</code></td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_CACHE</td>
         <td>true, false</td>
-        <td></td>
+        <td>Support for <code>index.searchCache()</code></td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_ASYNC</td>
         <td>true, false</td>
-        <td>Asynchronous Rendering (support Promises)</td>
+        <td>The async version of index standard methods</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_STORE</td>
         <td>true, false</td>
-        <td></td>
+        <td>Document Datastore</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_SUGGESTION</td>
         <td>true, false</td>
-        <td></td>
+        <td>Use the option <code>suggestions</code> when searching</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_SERIALIZE</td>
         <td>true, <b>false</b></td>
-        <td></td>
+        <td>Export / Import / Serialize Index</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_DOCUMENT</td>
         <td>true, false</td>
-        <td></td>
+        <td>Document Indexes</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_TAGS</td>
         <td>true, false</td>
-        <td></td>
+        <td>Tag-Search</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_PERSISTENT</td>
         <td>true, false</td>
-        <td></td>
+        <td>Use any of the persistent indexes</td>
     </tr>
     <tr></tr>
     <tr>
         <td>SUPPORT_KEYSTORE</td>
         <td>true, false</td>
-        <td></td>
+        <td>Extended size for InMemory indexes</td>
     </tr>
+    <!--
     <tr></tr>
     <tr>
         <td>SUPPORT_COMPRESSION</td>
         <td>true, false</td>
         <td></td>
     </tr>
+    -->
     <tr></tr>
     <tr>
         <td>SUPPORT_RESOLVER</td>
         <td>true, false</td>
-        <td></td>
+        <td>Apply complex queries by chaining boolean operations</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>SUPPORT_HIGHLIGHTING</td>
+        <td>true, false</td>
+        <td>Result Highlighting for Document-Search (also requires <code>SUPPORT_STORE</code>)</td>
     </tr>
     <tr>
         <td colspan="3"><br><b>Compiler Flags</b></td>
     </tr>
     <tr>
         <td>DEBUG</td>
-        <td>true, <b>false</b></td>
-        <td>Output debug information to the console (default: false)</td>
+        <td>true, false</td>
+        <td>Apply common checks and throw errors more frequently, output debug information and helpful hints to the console</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>RELEASE<br><br><br><br><br></td>
-        <td><b>custom</b><br>custom.module<br>bundle<br>bundle.module<br>es5<br>light<br>compact</td>
-        <td></td>
+        <td>RELEASE</td>
+        <td>custom<br>custom.module</td>
+        <td>Choose build schema: custom = Legacy Browser (<code>window.FlexSearch</code>), custom.module = ES6 Modules (ESM)</td>
     </tr>
     <tr></tr>
     <tr>
         <td>POLYFILL</td>
-        <td>true, <b>false</b></td>
-        <td>Include Polyfills (based on LANGUAGE_OUT)</td>
+        <td>true, false</td>
+        <td>Include Polyfills (based on <code>LANGUAGE_OUT</code>)</td>
     </tr>
     <tr></tr>
     <tr>
         <td>PROFILER</td>
-        <td>true, <b>false</b></td>
+        <td>true, false</td>
         <td>Just used for automatic performance tests</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>LANGUAGE_OUT<br><br><br><br><br><br><br><br><br><br><br></td>
+        <td>LANGUAGE_OUT</td>
         <td>ECMASCRIPT3<br>ECMASCRIPT5<br>ECMASCRIPT_2015<br>ECMASCRIPT_2016<br>ECMASCRIPT_2017<br>ECMASCRIPT_2018<br>ECMASCRIPT_2019<br>ECMASCRIPT_2020<br>ECMASCRIPT_2021<br>ECMASCRIPT_2022<br>ECMASCRIPT_NEXT<br>STABLE</td>
         <td>Target language</td>
     </tr>

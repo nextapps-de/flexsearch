@@ -20,7 +20,8 @@
         "SUPPORT_PERSISTENT": true,
         "SUPPORT_KEYSTORE": true,
         "SUPPORT_COMPRESSION": true,
-        "SUPPORT_RESOLVER": true
+        "SUPPORT_RESOLVER": true,
+        "SUPPORT_HIGHLIGHTING": true
       }
     }],
     "babel-plugin-minify-constant-folding",

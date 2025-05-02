@@ -1,5 +1,5 @@
 // COMPILER BLOCK -->
-import { SUPPORT_ASYNC } from "./config.js";
+import { SUPPORT_ASYNC, SUPPORT_WORKER } from "./config.js";
 // <-- COMPILER BLOCK
 import { IndexOptions } from "./type.js";
 import { create_object } from "./common.js";
@@ -100,17 +100,20 @@ export default function WorkerIndex(options = /** @type IndexOptions */ ({})){
         : init.call(this, worker);
 }
 
-register("add");
-register("append");
-register("search");
-register("update");
-register("remove");
-register("clear");
-register("export");
-register("import");
+if(SUPPORT_WORKER){
 
-if(SUPPORT_ASYNC){
-    apply_async(WorkerIndex.prototype);
+    register("add");
+    register("append");
+    register("search");
+    register("update");
+    register("remove");
+    register("clear");
+    register("export");
+    register("import");
+
+    if(SUPPORT_ASYNC){
+        apply_async(WorkerIndex.prototype);
+    }
 }
 
 function register(key){

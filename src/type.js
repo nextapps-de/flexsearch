@@ -142,7 +142,7 @@ export let SearchOptions = {};
  *   index: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
  *   pluck: (string|DocumentSearchOptions|undefined),
  *   merge: (boolean|undefined),
- *   highlight: (string|undefined)
+ *   highlight: (HighlightOptions|string|undefined)
  * }}
  */
 export let DocumentSearchOptions = {};
@@ -262,3 +262,31 @@ export let PersistentOptions = {};
  * }}
  */
 export let ResolverOptions = {};
+
+/**
+ * @typedef {{
+ *   before: (number|undefined),
+ *   after: (number|undefined),
+ *   total: (number|undefined)
+ * }}
+ */
+export let HighlightBoundaryOptions = {};
+
+/**
+ * @typedef {{
+ *   template: string,
+ *   pattern: (string|boolean|undefined)
+ * }}
+ */
+export let HighlightEllipsisOptions = {};
+
+/**
+ * @typedef {{
+ *   template: string,
+ *   boundary: (HighlightBoundaryOptions|number|undefined),
+ *   clip: (boolean|undefined),
+ *   merge: (boolean|undefined),
+ *   ellipsis: (HighlightEllipsisOptions|string|boolean|undefined)
+ * }}
+ */
+export let HighlightOptions = {};

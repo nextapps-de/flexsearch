@@ -105,6 +105,9 @@ declare module "flexsearch" {
     type WorkerConfigPath = string;
     type SerializedFunctionString = string;
     type FieldName = string;
+    /**
+     * The template to be applied on matches (e.g. <code>"\<b>$1\</b>"</code>), where <code>\$1</code> is a placeholder for the matched partial
+     */
     type TemplateResultHighlighting = string;
 
     /**
@@ -254,6 +257,7 @@ declare module "flexsearch" {
             content: string,
             callback?: AsyncCallback<void>
         ): Promise<this>;
+        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         appendAsync(
             id: Id,
             content: string,
@@ -383,9 +387,9 @@ declare module "flexsearch" {
         field?: Array<DocumentSearchOptions> | DocumentSearchOptions | string[] | string;
         index?: Array<DocumentSearchOptions> | DocumentSearchOptions | string[] | string;
         pluck?: FieldName | DocumentSearchOptions;
+        highlight?: HighlightOptions | TemplateResultHighlighting;
         enrich?: boolean;
         merge?: boolean;
-        highlight?: TemplateResultHighlighting;
     };
 
     type DocumentValue =
@@ -453,11 +457,13 @@ declare module "flexsearch" {
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
+        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         appendAsync(
             id: Id,
             document: DocumentData,
             callback?: AsyncCallback<void>
         ): Promise<this>;
+        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         appendAsync(
             document: DocumentData,
             callback?: AsyncCallback<void>
@@ -533,20 +539,38 @@ declare module "flexsearch" {
 
     type ResolverOptions = DefaultResolve & {
         index?: Index | Document;
-        resolve?: boolean;
-        suggest?: boolean;
-        /** only usable when "resolve" was set to true */
-        enrich?: boolean;
-        boost?: number;
-        limit?: number;
-        offset?: number;
+        pluck?: FieldName;
+        field?: FieldName;
         and?: ResolverOptions | Array<ResolverOptions>;
         or?: ResolverOptions | Array<ResolverOptions>;
         xor?: ResolverOptions | Array<ResolverOptions>;
         not?: ResolverOptions | Array<ResolverOptions>;
-        pluck?: FieldName;
-        field?: FieldName;
+        boost?: number;
+        suggest?: boolean;
+        resolve?: boolean;
+        limit?: number;
+        offset?: number;
+        /** only usable when "resolve" was set to true */
+        enrich?: boolean;
+    };
 
+    type HighlightBoundaryOptions = {
+        before?: number;
+        after?: number;
+        total?: number;
+    };
+
+    type HighlightEllipsisOptions = {
+        template?: TemplateResultHighlighting;
+        pattern?: string | boolean;
+    };
+
+    type HighlightOptions = {
+        template?: TemplateResultHighlighting;
+        boundary?: HighlightBoundaryOptions | number;
+        ellipsis?: HighlightEllipsisOptions | string | boolean;
+        clip?: boolean;
+        merge?: boolean;
     };
 
     export class Encoder {

@@ -1,11 +1,12 @@
 
 import { DocumentSearchOptions, DocumentSearchResults, EnrichedDocumentSearchResults, MergedDocumentSearchResults, MergedDocumentSearchEntry, EnrichedSearchResults, SearchResults, IntermediateSearchResults } from "../type.js";
-import { create_object, is_array, is_object, is_string, parse_simple } from "../common.js";
+import { create_object, is_array, is_object, is_string } from "../common.js";
 import { intersect_union } from "../intersect.js";
 import Document from "../document.js";
 import Index from "../index.js";
 import Resolver from "../resolver.js";
 import tick from "../profiler.js";
+import { highlight_fields } from "./highlight.js";
 
 /**
  * @param {!string|DocumentSearchOptions} query
@@ -62,7 +63,8 @@ Document.prototype.search = function (query, limit, options, _promises) {
         tag,
         offset,
         count = 0,
-        resolve = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/,
+        resolve = /* tag? */ /* stringify */ /* stringify */
+    /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/,
         highlight;
 
 
@@ -97,8 +99,8 @@ Document.prototype.search = function (query, limit, options, _promises) {
             }
         }
 
-        enrich = this.store && options.enrich && resolve;
-        highlight = enrich && options.highlight;
+        highlight = resolve && this.store && options.highlight;
+        enrich = highlight || resolve && this.store && options.enrich;
         limit = options.limit || limit;
         offset = options.offset || 0;
         limit || (limit = 100);
@@ -221,6 +223,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
             offset = field_options.offset || offset;
             suggest = field_options.suggest || suggest;
             enrich = this.store && (field_options.enrich || enrich);
+            highlight = enrich && (options.highlight || highlight);
         }
 
         if (_promises) {
@@ -409,120 +412,6 @@ Document.prototype.search = function (query, limit, options, _promises) {
 
     return merge ? merge_fields(result) : highlight ? highlight_fields( /** @type {string} */query, result, this.index, pluck, highlight) : /** @type {DocumentSearchResults} */result;
 };
-
-/**
- * @param {string} query
- * @param {EnrichedDocumentSearchResults|EnrichedSearchResults} result
- * @param {Map<string, Index>} index
- * @param {string} pluck
- * @param {string} template
- * @return {EnrichedDocumentSearchResults|EnrichedSearchResults}
- */
-function highlight_fields(query, result, index, pluck, template) {
-
-    // The biggest issue is dealing with custom encoders, for this reason
-    // a regular expression can't apply
-    // Todo: when one of the basic encoders was used, provide
-    //       combined regex
-    //
-    // if(typeof template === "string"){
-    //     template = new RegExp(template, "g");
-    // }
-
-    let encoder, query_enc, tokenize;
-
-
-    // for every field
-    for (let i = 0, enc, idx, path; i < result.length; i++) {
-
-        /** @type {EnrichedSearchResults} */
-        let res;
-
-        if (pluck) {
-            res = result;
-            path = pluck;
-        } else {
-            const tmp = result[i];
-            path = tmp.field;
-            if (!path) continue;
-            res = tmp.result;
-        }
-
-        // skip when not a field entry (e.g. tags)
-
-        idx = index.get(path);
-        enc = idx.encoder;
-        tokenize = idx.tokenize;
-
-        // re-encode query when encoder has changed
-        if (enc !== encoder) {
-            encoder = enc;
-            query_enc = encoder.encode(query);
-        }
-
-        // for every doc in results
-        for (let j = 0; j < res.length; j++) {
-            let str = "",
-                content = parse_simple(res[j].doc, path),
-                doc_org = content.split(/\s+/);
-            //let doc_enc = encoder.encode(content);
-
-            // loop terms of encoded doc content
-            for (let k = 0, doc_org_cur, doc_enc_cur; k < doc_org.length; k++) {
-                doc_org_cur = doc_org[k];
-                //doc_enc_cur = doc_enc[k];
-                doc_enc_cur = enc.encode(doc_org_cur);
-                doc_enc_cur = 1 < doc_enc_cur.length ? doc_enc_cur.join(" ") : doc_enc_cur[0];
-
-                let found;
-
-                if (doc_enc_cur && doc_org_cur) {
-
-                    // loop terms of encoded query content
-                    for (let l = 0, query_enc_cur; l < query_enc.length; l++) {
-                        query_enc_cur = query_enc[l];
-                        // todo tokenize could be custom also when "strict" was used
-                        if ("strict" === tokenize) {
-                            if (doc_enc_cur === query_enc_cur) {
-                                str += (str ? " " : "") + template.replace("$1", doc_org_cur);
-                                found = !0;
-                                break;
-                            }
-                        } else {
-                            const position = doc_enc_cur.indexOf(query_enc_cur);
-                            //console.log(doc_org_cur, doc_enc_cur, query_enc_cur, position)
-                            if (-1 < position) {
-                                str += (str ? " " : "") +
-                                // prefix
-                                doc_org_cur.substring(0, position) +
-                                // match
-                                template.replace("$1", doc_org_cur.substring(position, position + query_enc_cur.length)) +
-                                // suffix
-                                doc_org_cur.substring(position + query_enc_cur.length);
-                                found = !0;
-                                break;
-                            }
-                        }
-
-                        //str += doc_enc[k].replace(new RegExp("(" + doc_enc[k] + ")", "g"), template.replace("$1", content))
-                    }
-                }
-
-                if (!found) {
-                    str += (str ? " " : "") + doc_org[k];
-                }
-            }
-
-            res[j].highlight = str;
-        }
-
-        if (pluck) {
-            break;
-        }
-    }
-
-    return result;
-}
 
 // todo support Resolver
 // todo when searching through multiple fields each term should

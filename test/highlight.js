@@ -9,7 +9,6 @@ const build_light = env && env.includes(".light");
 const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
-import SQLite from "flexsearch/db/sqlite";
 
 if(!build_light) describe("Result Highlighting", function(){
 
@@ -46,7 +45,6 @@ if(!build_light) describe("Result Highlighting", function(){
         let result = index.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
             enrich: true,
             // highlight template
             // $1 is a placeholder for the matched partial
@@ -67,7 +65,6 @@ if(!build_light) describe("Result Highlighting", function(){
         result = index.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
             enrich: true,
             // highlight template
             // $1 is a placeholder for the matched partial
@@ -88,7 +85,6 @@ if(!build_light) describe("Result Highlighting", function(){
         result = index.search({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
             enrich: true,
             pluck: "title",
             // highlight template
@@ -141,7 +137,6 @@ if(!build_light) describe("Result Highlighting", function(){
         let result = await index.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
             enrich: true,
             // highlight template
             // $1 is a placeholder for the matched partial
@@ -162,7 +157,6 @@ if(!build_light) describe("Result Highlighting", function(){
         result = await index.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
             enrich: true,
             // highlight template
             // $1 is a placeholder for the matched partial
@@ -183,7 +177,6 @@ if(!build_light) describe("Result Highlighting", function(){
         result = await index.search({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
             enrich: true,
             pluck: "title",
             // highlight template
@@ -200,6 +193,651 @@ if(!build_light) describe("Result Highlighting", function(){
             doc: data[1],
             highlight: 'Le <b>clown</b> et ses chiens'
         }]);
+    });
+
+    it.only("Should have been highlighted results by boundary properly", function(){
+
+        const data = [{
+            "id": 1,
+            "title": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+        },{
+            "id": 2,
+            "title": "Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. At vero eos et accusam et justo duo dolores et ea rebum. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua."
+        }];
+
+        const index = new Document({
+            document: {
+                store: true,
+                index: [{
+                    field: "title",
+                    tokenize: "full",
+                    encoder: Charset.LatinBalance
+                }]
+            }
+        });
+
+        // add test data
+        for(let i = 0; i < data.length; i++){
+            index.add(data[i]);
+        }
+
+
+        const tmp = index.search({
+            query: "sit amet",
+            pluck: "title",
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: 80,
+                clip: true
+            }
+        });
+
+        // ------------------------------
+
+        let result = index.search({
+            query: "undefined akusam undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                // highlight template
+                // $1 is a placeholder for the matched partial
+                template: "<b>$1</b>",
+                boundary: 49
+            }
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 2,
+            doc: data[1],
+            highlight: "...t. At vero eos et <b>accusam</b> et justo duo dolo..."
+        },{
+            id: 1,
+            doc: data[0],
+            highlight: "...a. At vero eos et <b>accusam</b> et justo duo dolo..."
+        }]);
+
+        expect(result[0].result[0].highlight.length).to.equal(49 + (3 + 4));
+        expect(result[0].result[1].highlight.length).to.equal(49 + (3 + 4));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                // highlight template
+                // $1 is a placeholder for the matched partial
+                template: "<b>$1</b>",
+                ellipsis: "",
+                boundary: 49
+            }
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 2,
+            doc: data[1],
+            highlight: "amet. At vero eos et <b>accusam</b> et justo duo dolores"
+        },{
+            id: 1,
+            doc: data[0],
+            highlight: "ptua. At vero eos et <b>accusam</b> et justo duo dolores"
+        }]);
+
+        expect(result[0].result[0].highlight.length).to.equal(49 + (3 + 4));
+        expect(result[0].result[1].highlight.length).to.equal(49 + (3 + 4));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                // highlight template
+                // $1 is a placeholder for the matched partial
+                template: "<b>$1</b>",
+                clip: false,
+                boundary: 49
+            }
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 2,
+            doc: data[1],
+            highlight: "... At vero eos et <b>accusam</b> et justo duo ..."
+        },{
+            id: 1,
+            doc: data[0],
+            highlight: "... At vero eos et <b>accusam</b> et justo duo ..."
+        }]);
+
+        expect(result[0].result[0].highlight.length).to.below(49 + (3 + 4));
+        expect(result[0].result[1].highlight.length).to.below(49 + (3 + 4));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akusam",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: 5
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("...<b>accusam</b>...");
+        expect(result[0].result[1].highlight).to.equal("...<b>accusam</b>...");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akusam",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: 5
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accusam</b>");
+        expect(result[0].result[1].highlight).to.equal("<b>accusam</b>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akusam",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: {
+                    before: 50,
+                    after: 50,
+                    total: 5
+                }
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accusam</b>");
+        expect(result[0].result[1].highlight).to.equal("<b>accusam</b>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: 5
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accusam</b>");
+        expect(result[0].result[1].highlight).to.equal("<b>accusam</b>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akus",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: 5
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accus</b>am");
+        expect(result[0].result[1].highlight).to.equal("<b>accus</b>am");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "cusa",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: 5
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("a<b>ccusa</b>m");
+        expect(result[0].result[1].highlight).to.equal("a<b>ccusa</b>m");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "cusa",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                ellipsis: "...",
+                clip: false,
+                boundary: 5
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("...a<b>ccusa</b>m...");
+        expect(result[0].result[1].highlight).to.equal("...a<b>ccusa</b>m...");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "cusa",
+            enrich: true,
+            highlight: {
+                template: "<b class='highlight'>$1</b>",
+                ellipsis: "<i class='ellipsis'>...</i>",
+                clip: true,
+                boundary: 5
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<i class='ellipsis'>...</i>a<b class='highlight'>ccusa</b>m<i class='ellipsis'>...</i>");
+        expect(result[0].result[1].highlight).to.equal("<i class='ellipsis'>...</i>a<b class='highlight'>ccusa</b>m<i class='ellipsis'>...</i>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akusam",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: true,
+                ellipsis: false,
+                boundary: {
+                    before: 5,
+                    after: 5
+                }
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("s et <b>accusam</b> et j");
+        expect(result[0].result[1].highlight).to.equal("s et <b>accusam</b> et j");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akusam",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: true,
+                ellipsis: "",
+                boundary: {
+                    before: 0,
+                    after: 0
+                }
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accusam</b>");
+        expect(result[0].result[1].highlight).to.equal("<b>accusam</b>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akusam",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: true,
+                ellipsis: "",
+                boundary: {
+                    before: 5,
+                    total: 50
+                }
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("s et <b>accusam</b> et justo duo dolores et ea rebum. Lor");
+        expect(result[0].result[1].highlight).to.equal("s et <b>accusam</b> et justo duo dolores et ea rebum. Ste");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "akusam",
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: true,
+                ellipsis: "",
+                boundary: {
+                    after: 5,
+                    total: 50
+                }
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("et. At vero eos et <b>accusam</b> et j");
+        expect(result[0].result[1].highlight).to.equal("ua. At vero eos et <b>accusam</b> et j");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: 51
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("... eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea re...");
+        expect(result[0].result[1].highlight).to.equal("... eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea re...");
+        expect(result[0].result[0].highlight.length).to.equal(51 + 3 * (3 + 4));
+        expect(result[0].result[1].highlight.length).to.equal(51 + 3 * (3 + 4));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "...",
+                boundary: 51
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("... eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea ...");
+        expect(result[0].result[1].highlight).to.equal("... eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea ...");
+        expect(result[0].result[0].highlight.length).to.below(51 + 3 * (3 + 4));
+        expect(result[0].result[1].highlight.length).to.below(51 + 3 * (3 + 4));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: 52
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("vero eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea ");
+        expect(result[0].result[1].highlight).to.equal("vero eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea ");
+        expect(result[0].result[0].highlight.length).to.below(51 + 3 * (3 + 4));
+        expect(result[0].result[1].highlight.length).to.below(51 + 3 * (3 + 4));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: 7 + 1 + 5 + 1 + 7
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accusam</b> <b>justo</b> <b>dolores</b>");
+        expect(result[0].result[1].highlight).to.equal("<b>accusam</b> <b>justo</b> <b>dolores</b>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "",
+                boundary: 20
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accusam</b> <b>justo</b>");
+        expect(result[0].result[1].highlight).to.equal("<b>accusam</b> <b>justo</b>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                merge: true,
+                ellipsis: "",
+                boundary: 21
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("<b>accusam justo dolores</b>");
+        expect(result[0].result[1].highlight).to.equal("<b>accusam justo dolores</b>");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "...",
+                boundary: 18
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("...<b>accusam</b>...");
+        expect(result[0].result[1].highlight).to.equal("...<b>accusam</b>...");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "...",
+                boundary: 7 + 5 + (3 * 3) + 1
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("...<b>accusam</b>...<b>justo</b>...");
+        expect(result[0].result[1].highlight).to.equal("...<b>accusam</b>...<b>justo</b>...");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "...",
+                boundary: 7 + 5 + (3 * 3) + 1 - 1
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("...<b>accusam</b>...");
+        expect(result[0].result[1].highlight).to.equal("...<b>accusam</b>...");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: true,
+                ellipsis: "...",
+                boundary: 7 + 5 + (3 * 3) + 1 - 1
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("...<b>accusam</b>...");
+        expect(result[0].result[1].highlight).to.equal("...<b>accusam</b>...");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined aku undefined usam undefined akusam undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "...",
+                boundary: 7 + 5 + (3 * 3) + 1
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("... et <b>accusam</b> et ...");
+        expect(result[0].result[1].highlight).to.equal("... et <b>accusam</b> et ...");
+        expect(result[0].result[0].highlight.length).to.below(7 + 5 + (3 * 3) + 1 + 7);
+        expect(result[0].result[1].highlight.length).to.below(7 + 5 + (3 * 3) + 1 + 7);
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined justo undefined dolores undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                clip: false,
+                ellipsis: "...",
+                boundary: 50
+            }
+        });
+
+        expect(result[0].result[0].highlight).to.equal("... eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea ...");
+        expect(result[0].result[1].highlight).to.equal("... eos et <b>accusam</b> et <b>justo</b> duo <b>dolores</b> et ea ...");
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined labore undefined sanktus undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: 100
+            }
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 2,
+            doc: data[1],
+            highlight: "...sea takimata <b>sanctus</b> est Lorem ipsu...eos et <b>accusam</b> et justo...invidunt ut <b>labore</b> et dolore..."
+        },{
+            id: 1,
+            doc: data[0],
+            highlight: "...invidunt ut <b>labore</b> et dolore magn...eos et <b>accusam</b> et justo...sea takimata <b>sanctus</b> est Lorem..."
+        }]);
+
+        // ------------------------------
+
+        result = index.search({
+            query: "undefined akusam undefined labore undefined sanktus undefined",
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: {
+                    before: 15,
+                    after: 15,
+                    total: 100
+                }
+            }
+        });
+
+        expect(result[0].result).to.eql([{
+            id: 2,
+            doc: data[1],
+            highlight: "...sea takimata <b>sanctus</b> est Lorem ipsu...eos et <b>accusam</b> et justo...invidunt ut <b>labore</b> et dolore..."
+        },{
+            id: 1,
+            doc: data[0],
+            highlight: "...invidunt ut <b>labore</b> et dolore magn...eos et <b>accusam</b> et justo...sea takimata <b>sanctus</b> est Lorem..."
+        }]);
+
+        // ------------------------------
+
+        result = index.search({
+            query: "sit amet",
+            pluck: "title",
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: 80,
+                clip: true
+            }
+        });
+
+        expect(result[0].highlight).to.eql("...dolor <b>sit</b> <b>amet</b>, con<b>set</b>etur sadipscing...r, <b>sed</b> diam...<b>sed</b> diam...<b>sit</b> <b>amet</b>.");
+        expect(result[1].highlight).to.eql("...or <b>sit</b> <b>amet</b>. At...<b>sit</b> <b>amet</b>, con<b>set</b>etur sadipscing...<b>sed</b> diam...<b>sed</b> diam...");
+
+        expect(result[0].highlight.length).to.below(80 + (7 * 7));
+        expect(result[1].highlight.length).to.below(80 + (7 * 7));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "sit amet",
+            pluck: "title",
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: 32,
+                clip: true
+            }
+        });
+
+        expect(result[0].highlight).to.eql("...<b>sit</b> <b>amet</b>, con<b>set</b>etur...");
+        expect(result[1].highlight).to.eql("...<b>sit</b> <b>amet</b>....<b>sit</b> <b>amet</b>,...");
+
+        expect(result[0].highlight.length).to.below(80 + (7 * 7));
+        expect(result[1].highlight.length).to.below(80 + (7 * 7));
+
+        // ------------------------------
+
+        result = index.search({
+            query: "sit amet",
+            pluck: "title",
+            highlight: {
+                template: "<b>$1</b>",
+                boundary: 32,
+                ellipsis: {
+                    template: "<i>$1</i>",
+                    pattern: "..."
+                },
+                clip: true
+            }
+        });
+
+        expect(result[0].highlight).to.eql("<i>...</i><b>sit</b> <b>amet</b>, con<b>set</b>etur<i>...</i>");
+        expect(result[1].highlight).to.eql("<i>...</i><b>sit</b> <b>amet</b>.<i>...</i><b>sit</b> <b>amet</b>,<i>...</i>");
+
+        expect(result[0].highlight.length).to.below(80 + (7 * 7));
+        expect(result[1].highlight.length).to.below(80 + (7 * 7));
     });
 
     it("Should have been highlighted results properly (#480)", function(){
@@ -271,7 +909,7 @@ if(!build_light) describe("Result Highlighting", function(){
     it("Should have been highlighted results properly (#489)", async function(){
 
         const index = new Document({
-            encoder: Charset.LatinBalance,
+            encoder: Charset.Normalize,
             document: {
                 store: true,
                 index: [
@@ -296,11 +934,11 @@ if(!build_light) describe("Result Highlighting", function(){
         const search = await index.search("h", {
             suggest: true,
             enrich: true,
-            highlight: `<mark>$1</mark>`,
+            highlight: `<b>$1</b>`
         });
 
         expect(search.length).to.equal(1);
         expect(search[0].result.length).to.equal(1);
-        expect(search[0].result[0].highlight).to.equal('Publis<mark>h</mark>ed: April 14, 2025 From bold color c<mark>h</mark>oices to intricate patterns, t<mark>h</mark>ere are many ways to make your springtime <mark>h</mark>oliday decorations stand out from t<mark>h</mark>e rest. T<mark>h</mark>e Onion s<mark>h</mark>ares tips for dyeing Easter eggs.');
+        expect(search[0].result[0].highlight).to.equal('Publis<b>h</b>ed: April 14, 2025 From bold color c<b>h</b>oices to intricate patterns, t<b>h</b>ere are many ways to make your springtime <b>h</b>oliday decorations stand out from t<b>h</b>e rest. T<b>h</b>e Onion s<b>h</b>ares tips for dyeing Easter eggs.');
     });
 });

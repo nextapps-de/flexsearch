@@ -19,6 +19,7 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 [Persistent Indexes](doc/persistent.md) &ensp;&bull;&ensp;
 [Using Worker](doc/worker.md) &ensp;&bull;&ensp;
 [Tag Search](doc/document-search.md#tag-search) &ensp;&bull;&ensp;
+[Highlighting](doc/result-highlighting.md) &ensp;&bull;&ensp;
 [Resolver](doc/resolver.md) &ensp;&bull;&ensp;
 [Changelog](CHANGELOG.md)
 
@@ -472,7 +473,7 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     <tr></tr>
     <tr>
         <td>
-            <a href="doc/document-search.md#store">Document Store</a>
+            <a href="doc/document-search.md#store">Document Datastore</a>
         </td>
         <td>✓</td>
         <td>✓</td>
@@ -542,6 +543,13 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
         <td><a href="doc/resolver.md">Resolver</a></td>
         <td>✓</td>
         <td>-</td>
+        <td>-</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><a href="doc/result-highlighting.md">Result Highlighting</a></td>
+        <td>✓</td>
+        <td>✓</td>
         <td>-</td>
     </tr>
     <tr></tr>

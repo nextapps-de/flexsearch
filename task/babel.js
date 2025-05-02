@@ -48,10 +48,7 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
         "worker",
         "lang",
         "charset/",
-        "charset/latin",
-        //"charset/arabic",
-        //"charset/cjk",
-        //"charset/cyrillic"
+        "charset/latin"
     ];
 
     for(let i = 0, path; i < dirs.length; i++){

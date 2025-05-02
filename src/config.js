@@ -1,5 +1,5 @@
 /** @define {string} */
-export const RELEASE = "custom";
+export const RELEASE = "source";
 
 /** @define {boolean} */
 export const DEBUG = true;
@@ -51,3 +51,6 @@ export const SUPPORT_COMPRESSION = false;
 
 /** @define {boolean} */
 export const SUPPORT_RESOLVER = true;
+
+/** @define {boolean} */
+export const SUPPORT_HIGHLIGHTING = true;

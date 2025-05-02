@@ -8,6 +8,7 @@
 
 // COMPILER BLOCK -->
 import {
+    RELEASE,
     DEBUG,
     PROFILER,
     SUPPORT_ENCODER,
@@ -37,6 +38,12 @@ import tick from "./profiler.js";
 import "./index/add.js";
 import "./index/search.js";
 import "./index/remove.js";
+
+if(DEBUG && RELEASE === "source"){
+    typeof console !== "undefined" && console.log && console.log(
+        "You see this warning, because it looks like you are using the source folder of FlexSearch which is not intended to use directly. Consider using one of the builds from the /dist/ folder instead. More information: https://github.com/nextapps-de/flexsearch?tab=readme-ov-file#load-library-nodejs-esm-legacy-browser"
+    );
+}
 
 /**
  * @constructor
