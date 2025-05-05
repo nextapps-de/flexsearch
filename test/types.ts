@@ -4,8 +4,15 @@ import "../index";
 const document = new Document<{
     title: string
     description: string
-    tags: string[]
-}>({});
+    tags: {
+        name: string
+        id: number
+    }[]
+}>({
+    document: {
+        index: ["tags"],
+    },
+});
 
 async function test() {
     // The correct type
