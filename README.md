@@ -23,6 +23,8 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 [Resolver](doc/resolver.md) &ensp;&bull;&ensp;
 [Changelog](CHANGELOG.md)
 
+[<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/nextapps-de/flexsearch)
+
 ## Please Support this Project
 
 FlexSearch has been helping developers around the world build powerful, efficient search functionalities for years. Maintaining and improving the library requires significant time and resources. If you’ve found this project valuable and you're interested in supporting the project, please consider donating. Thanks a lot for your continued support!
