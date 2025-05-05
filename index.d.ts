@@ -108,8 +108,8 @@ declare module "flexsearch" {
         ? {
             [K in keyof D]: K extends string
                 ? D[K] extends Array<infer U>
-                    ? `${K}` | `${K}[]:${FieldName<U> & string}`
-                    : K | `${K}:${FieldName<D[K]> & string}`
+                    ? `${ K }` | `${ K }[]:${ FieldName<U> & string }`
+                    : K | `${ K }:${ FieldName<D[K]> & string }`
                 : never
         }[keyof D]
         : never
@@ -219,7 +219,7 @@ declare module "flexsearch" {
 
     type DefaultSearchResults = Id[];
     type IntermediateSearchResults = Array<Id[]>;
-    type SearchResults = DefaultSearchResults | Resolver;
+    type SearchResults<R extends boolean = false> = R extends true ? Resolver : DefaultSearchResults;
 
     /**
      * **Document:**
@@ -242,13 +242,15 @@ declare module "flexsearch" {
 
         remove(id: Id): this | Promise<this>;
 
-        search(query: string, options?: Limit | SearchOptions): SearchResults | Promise<SearchResults>;
-        search(query: string, limit: number, options: SearchOptions): SearchResults | Promise<SearchResults>;
-        search(options: SearchOptions): SearchResults | Promise<SearchResults>;
+        search(query: string, limit?: Limit): SearchResults | Promise<SearchResults>;
+        search<R extends boolean = false>(query: string, options?: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
+        search<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
+        search<R extends boolean = false>(options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
 
-        searchCache(query: string, options?: Limit | SearchOptions): SearchResults | Promise<SearchResults>;
-        searchCache(query: string, limit: number, options: SearchOptions): SearchResults | Promise<SearchResults>;
-        searchCache(options: SearchOptions): SearchResults | Promise<SearchResults>;
+        searchCache(query: string, limit?: Limit): SearchResults | Promise<SearchResults>;
+        searchCache<R extends boolean = false>(query: string, options?: Limit | SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
+        searchCache<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
+        searchCache<R extends boolean = false>(options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
 
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
         contain(id: Id): boolean | Promise<boolean>;
@@ -299,19 +301,24 @@ declare module "flexsearch" {
 
         searchAsync(
             query: string,
-            options?: Limit | SearchOptions,
+            limit?: Limit,
             callback?: AsyncCallback<SearchResults>,
         ): Promise<SearchResults>
-        searchAsync(
+        searchAsync<R extends boolean = false>(
+            query: string,
+            options?: SearchOptions<R>,
+            callback?: AsyncCallback<SearchResults<R>>,
+        ): Promise<SearchResults<R>>
+        searchAsync<R extends boolean = false>(
             query: string,
             limit: Limit,
-            options?: SearchOptions,
-            callback?: AsyncCallback<SearchResults>,
-        ): Promise<SearchResults>;
-        searchAsync(
-            options: SearchOptions,
-            callback?: AsyncCallback<SearchResults>,
-        ): Promise<SearchResults>;
+            options?: SearchOptions<R>,
+            callback?: AsyncCallback<SearchResults<R>>,
+        ): Promise<SearchResults<R>>;
+        searchAsync<R extends boolean = false>(
+            options: SearchOptions<R>,
+            callback?: AsyncCallback<SearchResults<R>>,
+        ): Promise<SearchResults<R>>;
     }
 
     /**
