@@ -217,9 +217,9 @@ declare module "flexsearch" {
     /* Index Search                     */
     /************************************/
 
-    type DefaultSearchResults = Id[];
+    export type DefaultSearchResults = Id[];
     type IntermediateSearchResults = Array<Id[]>;
-    type SearchResults = DefaultSearchResults | Resolver;
+    type SearchResults<D extends DocumentData = DocumentData> = DefaultSearchResults | Resolver<D>;
 
     /**
      * **Document:**
@@ -606,14 +606,14 @@ declare module "flexsearch" {
         enrich?: boolean;
     };
 
-    type ResolverOptions = DefaultResolve & {
-        index?: Index | Document;
-        pluck?: FieldName;
-        field?: FieldName;
-        and?: ResolverOptions | Array<ResolverOptions>;
-        or?: ResolverOptions | Array<ResolverOptions>;
-        xor?: ResolverOptions | Array<ResolverOptions>;
-        not?: ResolverOptions | Array<ResolverOptions>;
+    type ResolverOptions<D extends DocumentData = DocumentData> = DefaultResolve & {
+        index?: Index | Document<D>;
+        pluck?: FieldName<D>;
+        field?: FieldName<D>;
+        and?: ResolverOptions<D> | Array<ResolverOptions<D>>;
+        or?: ResolverOptions<D> | Array<ResolverOptions<D>>;
+        xor?: ResolverOptions<D> | Array<ResolverOptions<D>>;
+        not?: ResolverOptions<D> | Array<ResolverOptions<D>>;
         boost?: number;
         suggest?: boolean;
         resolve?: boolean;
@@ -660,7 +660,7 @@ declare module "flexsearch" {
         addReplacer(match: string | RegExp, replace: string): this;
     }
 
-    export class Resolver {
+    export class Resolver<D extends DocumentData = DocumentData> {
         result: IntermediateSearchResults;
 
         constructor(options?: ResolverOptions | IntermediateSearchResults);
@@ -679,7 +679,7 @@ declare module "flexsearch" {
 
         boost(boost: number): this;
 
-        resolve(options?: DefaultResolve): SearchResults;
+        resolve(options?: DefaultResolve): SearchResults<D>;
     }
 
     class StorageInterface {
