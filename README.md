@@ -1,5 +1,8 @@
 FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
-<h1></h1>
+
+[<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/nextapps-de/flexsearch)
+
+<h2></h2>
 <h1>
     <img src="doc/flexsearch-logo-glass-animated.svg" style="width: 580px; max-width: 100%" alt="FlexSearch.js: Next-Generation full-text search library for Browser and Node.js">
     <p></p>
@@ -23,8 +26,6 @@ FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
 [Resolver](doc/resolver.md) &ensp;&bull;&ensp;
 [Changelog](CHANGELOG.md)
 
-[<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/nextapps-de/flexsearch)
-
 ## Please Support this Project
 
 FlexSearch has been helping developers around the world build powerful, efficient search functionalities for years. Maintaining and improving the library requires significant time and resources. If you’ve found this project valuable and you're interested in supporting the project, please consider donating. Thanks a lot for your continued support!
@@ -40,13 +41,13 @@ FlexSearch has been helping developers around the world build powerful, efficien
 
 <a href="https://antithesis.com" target="_blank" style="display: inline-block">
     <center>
-        <img src="doc/antithesis_logo.svg" width="180" alt="Donate using Open Collective"><br>
+        <img src="doc/antithesis_logo.svg" width="200" alt="Donate using Open Collective"><br>
         Antithesis Operations LLC
     </center>
 </a>
 <h1></h1>
 
-FlexSearch performs queries up to 1,000,000 times faster <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">compared to other libraries</a> by also providing <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">powerful search capabilities</a> like multi-field search (document search), phonetic transformations, partial matching, tag-search or suggestions.
+FlexSearch performs queries up to 1,000,000 times faster <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">compared to other libraries</a> by also providing <a href="https://nextapps-de.github.io/flexsearch/match.html" target="_blank">powerful search capabilities</a> like multi-field search (document search), phonetic transformations, partial matching, tag-search, result highlighting or suggestions.
 
 Bigger workloads are scalable through workers to perform any updates or queries to the index in parallel through dedicated balanced threads.
 
@@ -563,9 +564,9 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     </tr>
     <tr>
         <td>File Size (gzip)</td>
-        <td>14.0 kb</td>
-        <td>9.0 kb</td>
-        <td>4.4 kb</td>
+        <td>16.3 kb</td>
+        <td>11.4 kb</td>
+        <td>4.5 kb</td>
     </tr>
 </table>
 
