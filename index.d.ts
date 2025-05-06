@@ -162,7 +162,13 @@ declare module "flexsearch" {
         LatinAdvanced: EncoderOptions,
         LatinExtra: EncoderOptions,
         LatinSoundex: EncoderOptions,
-        CJK: EncoderOptions
+        CJK: EncoderOptions,
+        /** @deprecated */
+        LatinSimple: EncoderOptions,
+        /** @deprecated */
+        LatinExact: EncoderOptions,
+        /** @deprecated */
+        LatinDefault: EncoderOptions
     };
 
     /**
@@ -230,8 +236,15 @@ declare module "flexsearch" {
      * * Usage: https://github.com/nextapps-de/flexsearch#usage
      */
 
-    type IndexSearchResultsWrapper<W extends boolean = false, D extends StorageInterface = undefined, R extends boolean = false> =
-        W extends false ? D extends undefined ? SearchResults<R> : Promise<SearchResults<R>> : Promise<SearchResults<R>>
+    type IndexSearchResultsWrapper<
+        W extends boolean = false,
+        D extends StorageInterface = undefined,
+        R extends boolean = false
+    > = W extends false
+        ? D extends undefined
+            ? SearchResults<R>
+            : Promise<SearchResults<R>>
+        : Promise<SearchResults<R>>
 
     export class Index<W extends boolean = false, D extends StorageInterface = undefined> {
         constructor(options?: Preset | IndexOptions<D>);
@@ -405,12 +418,13 @@ declare module "flexsearch" {
     }>;
 
     type DocumentSearchResults<D extends DocumentData = DocumentData, R extends boolean = false, E extends boolean = false, M extends boolean = false> =
-        R extends true ? Resolver :
-            M extends true ?
-                MergedDocumentSearchResults<D> :
-                E extends true ?
-                    EnrichedDocumentSearchResults<D> :
-                    DefaultDocumentSearchResults
+        R extends true
+            ? Resolver
+            : M extends true
+                ? MergedDocumentSearchResults<D>
+                : E extends true
+                    ? EnrichedDocumentSearchResults<D>
+                    : DefaultDocumentSearchResults
 
 
     /**
@@ -428,9 +442,12 @@ declare module "flexsearch" {
      * * Document search options: https://github.com/nextapps-de/flexsearch#document-search-options
      */
 
-    type DocumentSearchOptions<D extends DocumentData = DocumentData, R extends boolean = false, E extends boolean = false, M extends boolean = false> =
-        SearchOptions<R>
-        & {
+    type DocumentSearchOptions<
+        D extends DocumentData = DocumentData,
+        R extends boolean = false,
+        E extends boolean = false,
+        M extends boolean = false
+    > = SearchOptions<R> & {
         tag?: Object | Array<Object>;
         field?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | string[] | string;
         index?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | string[] | string;
@@ -470,7 +487,11 @@ declare module "flexsearch" {
      * * API overview: https://github.com/nextapps-de/flexsearch#api-overview
      * * Document store: https://github.com/nextapps-de/flexsearch#document-store
      */
-    export class Document<D extends DocumentData = DocumentData, W extends WorkerType = false, B extends StorageInterface = undefined> {
+    export class Document<
+        D extends DocumentData = DocumentData,
+        W extends WorkerType = false,
+        B extends StorageInterface = undefined
+    > {
         constructor(options: DocumentOptions<D, W, B>);
 
         add(id: Id, document: D): this | Promise<this>;
@@ -648,7 +669,7 @@ declare module "flexsearch" {
         resolve?: boolean;
         limit?: number;
         offset?: number;
-        /** only usable when "resolve" was set to true */
+        /** only usable when "resolve" was not set to false */
         enrich?: boolean;
     };
 
@@ -716,7 +737,6 @@ declare module "flexsearch" {
         db: any;
 
         constructor(name: string, config: PersistentOptions);
-
         constructor(config: string | PersistentOptions);
 
         mount(index: Index | Document): Promise<void>;
