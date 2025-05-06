@@ -177,7 +177,7 @@ declare module "flexsearch" {
      * * Right-To-Left: https://github.com/nextapps-de/flexsearch/doc/encoder.md#right-to-left-support
      * * Language: https://github.com/nextapps-de/flexsearch/doc/encoder.md#built-in-language-packs
      */
-    type IndexOptions = {
+    type IndexOptions<D extends StorageInterface = undefined> = {
         preset?: Preset;
         tokenize?: Tokenizer;
         cache?: boolean | number;
@@ -195,7 +195,7 @@ declare module "flexsearch" {
         ) => number;
 
         // Persistent-specific options
-        db?: StorageInterface;
+        db?: D;
         commit?: boolean;
 
         // Language-specific Options and Encoding
@@ -228,8 +228,11 @@ declare module "flexsearch" {
      * * Usage: https://github.com/nextapps-de/flexsearch#usage
      */
 
-    export class Index {
-        constructor(options?: Preset | IndexOptions);
+    type IndexSearchResultsWrapper<W extends boolean = false, D extends StorageInterface = undefined, R extends boolean = false> =
+        W extends false ? D extends undefined ? SearchResults<R> : Promise<SearchResults<R>> : Promise<SearchResults<R>>
+
+    export class Index<W extends boolean = false, D extends StorageInterface = undefined> {
+        constructor(options?: Preset | IndexOptions<D>);
 
         add(id: Id, content: string): this | Promise<this>;
 
@@ -242,15 +245,15 @@ declare module "flexsearch" {
 
         remove(id: Id): this | Promise<this>;
 
-        search(query: string, limit?: Limit): SearchResults | Promise<SearchResults>;
-        search<R extends boolean = false>(query: string, options?: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
-        search<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
-        search<R extends boolean = false>(options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
+        search(query: string, limit?: Limit): IndexSearchResultsWrapper<W, D>;
+        search<R extends boolean = false>(query: string, options?: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
+        search<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
+        search<R extends boolean = false>(options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
 
-        searchCache(query: string, limit?: Limit): SearchResults | Promise<SearchResults>;
-        searchCache<R extends boolean = false>(query: string, options?: Limit | SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
-        searchCache<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
-        searchCache<R extends boolean = false>(options: SearchOptions<R>): SearchResults<R> | Promise<SearchResults<R>>;
+        searchCache(query: string, limit?: Limit): W extends false ? SearchResults : Promise<SearchResults>;
+        searchCache<R extends boolean = false>(query: string, options?: Limit | SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
+        searchCache<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
+        searchCache<R extends boolean = false>(options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
 
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
         contain(id: Id): boolean | Promise<boolean>;
@@ -328,7 +331,7 @@ declare module "flexsearch" {
      * * Worker index: https://github.com/nextapps-de/flexsearch#worker-index
      */
 
-    export class Worker extends Index {
+    export class Worker extends Index<true> {
         constructor(options?: Preset | WorkerIndexOptions);
 
         export(): Promise<void>;
@@ -366,8 +369,12 @@ declare module "flexsearch" {
      * * Document options: https://github.com/nextapps-de/flexsearch#document-options
      */
 
-    type DocumentOptions<D extends DocumentData = DocumentData> = IndexOptions & {
-        worker?: boolean | WorkerURL | WorkerPath;
+    type WorkerType = boolean | WorkerURL | WorkerPath
+
+    type DocumentOptions<D extends DocumentData = DocumentData, W extends WorkerType = false, B extends StorageInterface = undefined> =
+        IndexOptions<B>
+        & {
+        worker?: W;
         doc?: DocumentDescriptor<D>;
         document?: DocumentDescriptor<D>;
     };
@@ -442,14 +449,27 @@ declare module "flexsearch" {
         [key: string]: DocumentValue | DocumentValue[];
     };
 
+    type DocumentSearchResultsWrapper<
+        D extends DocumentData = DocumentData,
+        W extends WorkerType = false,
+        B extends StorageInterface = undefined,
+        R extends boolean = false,
+        E extends boolean = false,
+        M extends boolean = false,
+    > = W extends false
+        ? B extends undefined
+            ? DocumentSearchResults<D, R, E, M>
+            : Promise<DocumentSearchResults<D, R, E, M>>
+        : Promise<DocumentSearchResults<D, R, E, M>>
+
     /**
      * **Document:**
      * * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants
      * * API overview: https://github.com/nextapps-de/flexsearch#api-overview
      * * Document store: https://github.com/nextapps-de/flexsearch#document-store
      */
-    export class Document<D extends DocumentData = DocumentData> {
-        constructor(options: DocumentOptions<D>);
+    export class Document<D extends DocumentData = DocumentData, W extends WorkerType = false, B extends StorageInterface = undefined> {
+        constructor(options: DocumentOptions<D, W, B>);
 
         add(id: Id, document: D): this | Promise<this>;
         add(document: D): this | Promise<this>;
@@ -466,32 +486,32 @@ declare module "flexsearch" {
         remove(document: D): this | Promise<this>;
 
         // https://github.com/nextapps-de/flexsearch#field-search
-        search(query: string, limit: Limit): DocumentSearchResults<D> | Promise<DocumentSearchResults<D>>;
+        search(query: string, limit: Limit): DocumentSearchResultsWrapper<D, W, B>;
         search<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
             query: string,
             options?: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResults<D, R, E, M> | Promise<DocumentSearchResults<D, R, E, M>>;
+        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
         search<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
             query: string,
             limit: Limit,
             options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResults<D, R, E, M> | Promise<DocumentSearchResults<D, R, E, M>>;
+        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
         search<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
             options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResults<D, R, E, M> | Promise<DocumentSearchResults<D, R, E, M>>;
+        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
 
-        searchCache(query: string, limit: Limit): DocumentSearchResults<D> | Promise<DocumentSearchResults<D>>;
+        searchCache(query: string, limit: Limit): W extends false ? DocumentSearchResults<D> : Promise<DocumentSearchResults<D>>;
         searchCache<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
             query: string,
             options?: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResults<D, R, E, M> | Promise<DocumentSearchResults<D, R, E, M>>;
+        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
         searchCache<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
             query: string,
             limit: Limit, options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResults<D, R, E, M> | Promise<DocumentSearchResults<D, R, E, M>>;
+        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
         searchCache<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
             options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResults<D, R, E, M> | Promise<DocumentSearchResults<D, R, E, M>>;
+        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
 
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
         contain(id: Id): boolean | Promise<boolean>;
@@ -689,7 +709,7 @@ declare module "flexsearch" {
         resolve(options?: DefaultResolve): SearchResults;
     }
 
-    class StorageInterface {
+    export class StorageInterface {
         db: any;
 
         constructor(name: string, config: PersistentOptions);
