@@ -630,23 +630,7 @@ type PersistentOptions = {
     db?: any;
 };
 
-declare module "flexsearch/db/redis" {
-    export default StorageInterface;
-}
-
-declare module "flexsearch/db/postgres" {
-    export default StorageInterface;
-}
-
-declare module "flexsearch/db/mongodb" {
-    export default StorageInterface;
-}
-
-declare module "flexsearch/db/sqlite" {
-    export default StorageInterface;
-}
-
-declare module "flexsearch/db/clickhouse" {
+declare module "flexsearch/db/*" {
     export default StorageInterface;
 }
 
@@ -658,16 +642,9 @@ declare module "flexsearch/db/indexeddb" {
 
 // -----------------------------------
 
-declare module "flexsearch/lang/en" {
-    export default EncoderOptions;
-}
-
-declare module "flexsearch/lang/de" {
-    export default EncoderOptions;
-}
-
-declare module "flexsearch/lang/fr" {
-    export default EncoderOptions;
+declare module "flexsearch/lang/*" {
+    const Options: EncoderOptions;
+    export default Options;
 }
 
 // https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
