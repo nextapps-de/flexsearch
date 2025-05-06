@@ -193,7 +193,7 @@ declare module "flexsearch" {
         commit?: boolean;
 
         // Language-specific Options and Encoding
-        encoder?: typeof Charset | Encoders | EncoderOptions | Encoder;
+        encoder?: Encoders | EncoderOptions | Encoder;
         encode?: (text: string) => string[],
         rtl?: boolean;
     };
@@ -504,6 +504,34 @@ declare module "flexsearch" {
         ): Promise<DocumentSearchResults>;
     }
 
+    type IdType =
+        "text" |
+        "char" |
+        "varchar" |
+        "string" |
+        "number" |
+        "numeric" |
+        "integer" |
+        "smallint" |
+        "tinyint" |
+        "mediumint" |
+        "int" |
+        "int8" |
+        "uint8" |
+        "int16" |
+        "uint16" |
+        "int32" |
+        "uint32" |
+        "int64" |
+        "uint64" |
+        "bigint";
+
+    type PersistentOptions = {
+        name?: string;
+        type?: IdType;
+        db?: any;
+    };
+
     type DefaultResolve = {
         query?: string;
         limit?: number;
@@ -601,34 +629,6 @@ declare module "flexsearch" {
 }
 
 // -----------------------------------
-
-type IdType =
-    "text" |
-    "char" |
-    "varchar" |
-    "string" |
-    "number" |
-    "numeric" |
-    "integer" |
-    "smallint" |
-    "tinyint" |
-    "mediumint" |
-    "int" |
-    "int8" |
-    "uint8" |
-    "int16" |
-    "uint16" |
-    "int32" |
-    "uint32" |
-    "int64" |
-    "uint64" |
-    "bigint";
-
-type PersistentOptions = {
-    name?: string;
-    type?: IdType;
-    db?: any;
-};
 
 declare module "flexsearch/db/*" {
     export default StorageInterface;
