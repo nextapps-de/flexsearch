@@ -124,6 +124,7 @@ declare module "flexsearch" {
      * * Language: https://github.com/nextapps-de/flexsearch#languages
      */
 
+    global {
     type EncoderOptions = {
         rtl?: boolean;
         dedupe?: boolean;
@@ -142,7 +143,7 @@ declare module "flexsearch" {
         minlength?: number;
         maxlength?: number;
         cache?: boolean | number;
-    };
+    }}
 
     type EncoderSplitOptions = {
         letter?: boolean;
@@ -710,6 +711,7 @@ declare module "flexsearch" {
         resolve(options?: DefaultResolve): SearchResults;
     }
 
+    global {
     export class StorageInterface {
         db: any;
 
@@ -726,7 +728,7 @@ declare module "flexsearch" {
         destroy(): Promise<void>;
 
         clear(): Promise<void>;
-    }
+    }}
 
     export class IndexedDB extends StorageInterface {
         db: IDBDatabase;
