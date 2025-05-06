@@ -116,6 +116,7 @@ declare module "flexsearch" {
      * * Language: https://github.com/nextapps-de/flexsearch#languages
      */
 
+    global {
     type EncoderOptions = {
         rtl?: boolean;
         dedupe?: boolean;
@@ -134,7 +135,7 @@ declare module "flexsearch" {
         minlength?: number;
         maxlength?: number;
         cache?: boolean|number;
-    };
+    }}
 
     type EncoderSplitOptions = {
         letter?: boolean;
@@ -152,7 +153,8 @@ declare module "flexsearch" {
         LatinBalance: EncoderOptions,
         LatinAdvanced: EncoderOptions,
         LatinExtra: EncoderOptions,
-        LatinSoundex: EncoderOptions
+        LatinSoundex: EncoderOptions,
+        CJK: EncoderOptions
     };
 
     /**
@@ -502,34 +504,6 @@ declare module "flexsearch" {
         ): Promise<DocumentSearchResults>;
     }
 
-    type IdType =
-        "text" |
-        "char" |
-        "varchar" |
-        "string" |
-        "number" |
-        "numeric" |
-        "integer" |
-        "smallint" |
-        "tinyint" |
-        "mediumint" |
-        "int" |
-        "int8" |
-        "uint8" |
-        "int16" |
-        "uint16" |
-        "int32" |
-        "uint32" |
-        "int64" |
-        "uint64" |
-        "bigint";
-
-    type PersistentOptions = {
-        name?: string;
-        type?: IdType;
-        db?: any;
-    };
-
     type DefaultResolve = {
         query?: string;
         limit?: number;
@@ -597,6 +571,7 @@ declare module "flexsearch" {
         resolve(options?: DefaultResolve): SearchResults;
     }
 
+    global{
     class StorageInterface {
         constructor(name: string, config: PersistentOptions);
         constructor(config: string | PersistentOptions);
@@ -606,7 +581,7 @@ declare module "flexsearch" {
         destroy() : Promise<void>;
         clear() : Promise<void>;
         db: any;
-    }
+    }}
 
     export class IndexedDB extends StorageInterface{
         db: IDBDatabase
@@ -625,7 +600,76 @@ declare module "flexsearch" {
     export default FlexSearch;
 }
 
+// -----------------------------------
+
+type IdType =
+    "text" |
+    "char" |
+    "varchar" |
+    "string" |
+    "number" |
+    "numeric" |
+    "integer" |
+    "smallint" |
+    "tinyint" |
+    "mediumint" |
+    "int" |
+    "int8" |
+    "uint8" |
+    "int16" |
+    "uint16" |
+    "int32" |
+    "uint32" |
+    "int64" |
+    "uint64" |
+    "bigint";
+
+type PersistentOptions = {
+    name?: string;
+    type?: IdType;
+    db?: any;
+};
+
+declare module "flexsearch/db/redis" {
+    export default StorageInterface;
+}
+
+declare module "flexsearch/db/postgres" {
+    export default StorageInterface;
+}
+
+declare module "flexsearch/db/mongodb" {
+    export default StorageInterface;
+}
+
+declare module "flexsearch/db/sqlite" {
+    export default StorageInterface;
+}
+
+declare module "flexsearch/db/clickhouse" {
+    export default StorageInterface;
+}
+
+declare module "flexsearch/db/indexeddb" {
+    export default class IndexedDB extends StorageInterface{
+        db: IDBDatabase
+    }
+}
+
+// -----------------------------------
+
+declare module "flexsearch/lang/en" {
+    export default EncoderOptions;
+}
+
+declare module "flexsearch/lang/de" {
+    export default EncoderOptions;
+}
+
+declare module "flexsearch/lang/fr" {
+    export default EncoderOptions;
+}
+
 // https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
 // https://github.com/futurGH/ts-to-jsdoc
 // https://sethmac.com/typescript-to-jsdoc/
-
