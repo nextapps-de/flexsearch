@@ -193,7 +193,7 @@ declare module "flexsearch" {
         commit?: boolean;
 
         // Language-specific Options and Encoding
-        encoder?: typeof Charset | Encoders | EncoderOptions;
+        encoder?: typeof Charset | Encoders | EncoderOptions | Encoder;
         encode?: (text: string) => string[],
         rtl?: boolean;
     };
