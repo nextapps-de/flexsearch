@@ -382,7 +382,7 @@ declare module "flexsearch" {
      * * Document options: https://github.com/nextapps-de/flexsearch#document-options
      */
 
-    type WorkerType = boolean | WorkerURL | WorkerPath
+    type WorkerType = boolean | WorkerURL | WorkerPath;
 
     type DocumentOptions<
         D extends DocumentData = DocumentData,
@@ -415,6 +415,7 @@ declare module "flexsearch" {
         doc: D | null;
         field?: FieldName[];
         tag?: FieldName[];
+        highlight?: {[field: FieldName]: string};
     }>;
 
     type DocumentSearchResults<
@@ -451,10 +452,10 @@ declare module "flexsearch" {
         E extends boolean = false,
         M extends boolean = false
     > = SearchOptions<R> & {
-        tag?: Object | Array<Object>;
-        field?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | string[] | string;
-        index?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | string[] | string;
-        pluck?: FieldName | DocumentSearchOptions<D, R, E, M>;
+        tag?: {[field: FieldName]: string} | Array<{[field: FieldName]: string}>;
+        field?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | FieldName[] | FieldName;
+        index?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | FieldName[] | FieldName;
+        pluck?: FieldName | DocumentSearchOptions<D, R, E, false>;
         highlight?: HighlightOptions | TemplateResultHighlighting;
         enrich?: E;
         merge?: M;

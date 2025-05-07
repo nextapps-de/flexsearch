@@ -264,7 +264,7 @@ Extern Projects & Plugins:
   - [Latin Charset Encoder Presets](doc/encoder.md)
   - [Language Specific Preset](doc/encoder.md)
   - [Custom Encoder](doc/encoder.md#custom-encoder)
-- [Non-Blocking Runtime Balancer (Async)](doc/async.md)
+- [Async Non-Blocking Runtime Balancer](doc/async.md)
 - [Worker Indexes](doc/worker.md)
   - [Worker Index Options](doc/worker.md#worker-index-options)
 - [Resolver (Complex Queries)](doc/resolver.md)
@@ -286,10 +286,10 @@ Extern Projects & Plugins:
   - [Clickhouse](doc/persistent-clickhouse.md)
 - [Custom Score Function](doc/customization.md)
 - [Custom Builds](doc/custom-builds.md)
-- [Extended Keystores (In-Memory)](doc/keystore.md)
+- [Extended Keystores (In-Memory Index)](doc/keystore.md)
 - [Best Practices](#best-practices)
   - [Page-Load / Fast-Boot](#page-load--fast-boot)
-  - [Use numeric IDs](#use-numeric-ids)
+  - [Prefer numeric typed IDs](#use-numeric-ids)
 
 ## Load Library (Node.js, ESM, Legacy Browser)
 
