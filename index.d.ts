@@ -75,7 +75,7 @@ declare module "flexsearch" {
      * **Document:**
      * * Search options: https://github.com/nextapps-de/flexsearch#search-options
      */
-    type SearchOptions<R extends boolean = true> = {
+    export type SearchOptions<R extends boolean = true> = {
         query?: string;
         limit?: number;
         offset?: number;
@@ -93,8 +93,7 @@ declare module "flexsearch" {
      * * Language: https://github.com/nextapps-de/flexsearch#languages
      */
 
-    global {
-    type EncoderOptions = {
+    export type EncoderOptions = {
         rtl?: boolean;
         dedupe?: boolean;
         include?: EncoderSplitOptions;
@@ -112,9 +111,9 @@ declare module "flexsearch" {
         minlength?: number;
         maxlength?: number;
         cache?: boolean | number;
-    }}
+    }
 
-    type EncoderSplitOptions = {
+    export type EncoderSplitOptions = {
         letter?: boolean;
         number?: boolean;
         symbol?: boolean;
@@ -154,7 +153,7 @@ declare module "flexsearch" {
      * * Right-To-Left: https://github.com/nextapps-de/flexsearch/doc/encoder.md#right-to-left-support
      * * Language: https://github.com/nextapps-de/flexsearch/doc/encoder.md#built-in-language-packs
      */
-    type IndexOptions<
+    export type IndexOptions<
         S extends StorageInterface = undefined,
         R extends boolean = true
     > = {
@@ -189,9 +188,9 @@ declare module "flexsearch" {
     /* Index Search                     */
     /************************************/
 
-    type DefaultSearchResults = Id[];
-    type IntermediateSearchResults = Array<Id[]>;
-    type SearchResults<R extends boolean = true> = R extends true ? DefaultSearchResults : Resolver;
+    export type DefaultSearchResults = Id[];
+    export type IntermediateSearchResults = Array<Id[]>;
+    export type SearchResults<R extends boolean = true> = R extends true ? DefaultSearchResults : Resolver;
 
     /**
      * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants \
@@ -199,7 +198,7 @@ declare module "flexsearch" {
      * Usage: https://github.com/nextapps-de/flexsearch#usage
      */
 
-    type IndexSearchResultsWrapper<
+    export type IndexSearchResultsWrapper<
         W extends boolean = false,
         S extends StorageInterface = undefined,
         R extends boolean = true
@@ -327,7 +326,7 @@ declare module "flexsearch" {
     type WorkerConfigPath = string;
     type WorkerType = boolean | WorkerURL | WorkerPath;
 
-    type WorkerIndexOptions = IndexOptions & {
+    export type WorkerIndexOptions = IndexOptions & {
         config?: WorkerConfigURL | WorkerConfigPath,
         export?: () => Promise<void>;
         import?: () => Promise<void>;
@@ -351,9 +350,9 @@ declare module "flexsearch" {
     /**
      * The template to be applied on matches (e.g. <code>"\<b>$1\</b>"</code>), where <code>\$1</code> is a placeholder for the matched partial
      */
-    type TemplateResultHighlighting = string;
+    export type TemplateResultHighlighting = string;
     type TagName = string;
-    type FieldName<D = DocumentData> = D extends object
+    export type FieldName<D = DocumentData> = D extends object
         ? {
             [K in keyof D]: K extends string
                 ? D[K] extends Array<infer U>
@@ -363,7 +362,7 @@ declare module "flexsearch" {
           }[keyof D]
         : never;
 
-    type FieldOptions<D extends DocumentData = DocumentData> = IndexOptions & {
+    export type FieldOptions<D extends DocumentData = DocumentData> = IndexOptions & {
         field: FieldName<D>,
         filter?: (content: string) => boolean;
         custom?: (content: string) => string | boolean;
@@ -371,14 +370,14 @@ declare module "flexsearch" {
         db?: StorageInterface;
     };
 
-    type TagOptions<D extends DocumentData> = {
+    export type TagOptions<D extends DocumentData> = {
         field: FieldName<D>;
         filter?: (content: string) => boolean;
         custom?: (content: string) => string | boolean;
         db?: StorageInterface;
     };
 
-    type StoreOptions = {
+    export type StoreOptions = {
         field: FieldName;
         filter?: (content: string) => boolean;
         custom?: (content: string) => string | boolean;
@@ -400,7 +399,7 @@ declare module "flexsearch" {
      * * Document options: https://github.com/nextapps-de/flexsearch#document-options
      */
 
-    type DocumentOptions<
+    export type DocumentOptions<
         D extends DocumentData = DocumentData,
         W extends WorkerType = false,
         S extends StorageInterface = undefined
@@ -414,7 +413,7 @@ declare module "flexsearch" {
      * **Document:**
      * * The document descriptor: https://github.com/nextapps-de/flexsearch#the-document-descriptor
      */
-    type DocumentDescriptor<D extends DocumentData = DocumentData> = {
+    export type DocumentDescriptor<D extends DocumentData = DocumentData> = {
         id?: string | "id";
         field?: FieldName<D> | FieldName<D>[] | FieldOptions<D> | Array<FieldOptions<D>>;
         index?: FieldName<D> | FieldName<D>[] | FieldOptions<D> | Array<FieldOptions<D>>;
@@ -422,25 +421,25 @@ declare module "flexsearch" {
         store?: FieldName<D> | FieldName<D>[] | StoreOptions | Array<StoreOptions> | boolean;
     };
 
-    type DefaultDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+    export type DefaultDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
         field?: FieldName<D>;
         tag?: FieldName<D>;
         result: DefaultSearchResults;
     }>;
 
-    type EnrichedResults<D extends DocumentData = DocumentData> = Array<{
+    export type EnrichedResults<D extends DocumentData = DocumentData> = Array<{
         id: Id;
         doc: D | null;
         highlight?: string;
     }>;
 
-    type EnrichedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+    export type EnrichedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
         field?: FieldName<D>;
         tag?: FieldName<D>;
         result: EnrichedResults<D>;
     }>;
 
-    type MergedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+    export type MergedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
         id: Id;
         doc?: D | null;
         field?: FieldName[];
@@ -448,7 +447,7 @@ declare module "flexsearch" {
         highlight?: {[field: FieldName]: string};
     }>;
 
-    type DocumentSearchResults<
+    export type DocumentSearchResults<
         D extends DocumentData = DocumentData,
         H extends HighlightOptions = undefined,
         P extends PluckOptions = undefined,
@@ -469,18 +468,18 @@ declare module "flexsearch" {
                         : DefaultDocumentSearchResults
         : Resolver;
 
-    type PluckOptions<
+    export type PluckOptions<
         D extends DocumentData = DocumentData,
         H extends HighlightOptions = undefined,
         R extends boolean = true,
         E extends boolean = false
-    > = FieldName | DocumentSearchOptions<D, H, undefined, R, E>;
+    > = FieldName<D> | DocumentSearchOptions<D, H, undefined, R, E>;
 
     /**
      * **Document:**
      * * Document search options: https://github.com/nextapps-de/flexsearch#document-search-options
      */
-    type DocumentSearchOptions<
+    export type DocumentSearchOptions<
         D extends DocumentData = DocumentData,
         H extends HighlightOptions = undefined,
         P extends PluckOptions = undefined,
@@ -497,18 +496,18 @@ declare module "flexsearch" {
         merge?: M;
     };
 
-    type DocumentValue =
+    export type DocumentValue =
         | string
         | number
         | boolean
         | null
         | DocumentData;
 
-    type DocumentData = {
+    export type DocumentData = {
         [key: string]: DocumentValue | DocumentValue[];
     };
 
-    type DocumentSearchResultsWrapper<
+    export type DocumentSearchResultsWrapper<
         D extends DocumentData = DocumentData,
         W extends WorkerType = false,
         S extends StorageInterface = undefined,
@@ -579,7 +578,7 @@ declare module "flexsearch" {
             M extends boolean = false
         >(
             query: string,
-            options?: DocumentSearchOptions<D, H, P, R, E, M>,
+            options: DocumentSearchOptions<D, H, P, R, E, M>,
         ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
         searchCache<
             H extends HighlightOptions = undefined,
@@ -589,7 +588,7 @@ declare module "flexsearch" {
             M extends boolean = false
         >(
             query: string,
-            options?: DocumentSearchOptions<D, H, P, R, E, M>,
+            options: DocumentSearchOptions<D, H, P, R, E, M>,
         ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
 
         /** @deprecated Pass "limit" within options */
@@ -792,7 +791,7 @@ declare module "flexsearch" {
         db?: any;
     };
 
-    type DefaultResolve<
+    export type DefaultResolve<
         D extends DocumentData = DocumentData,
         H extends HighlightOptions = undefined,
         E extends boolean = false
@@ -805,7 +804,7 @@ declare module "flexsearch" {
         highlight?: D extends DocumentData ? H : undefined;
     };
 
-    type ResolverOptions<
+    export type ResolverOptions<
         D extends DocumentData = DocumentData,
         W extends WorkerType = false,
         S extends StorageInterface = undefined,
@@ -827,18 +826,18 @@ declare module "flexsearch" {
         resolve?: R;
     };
 
-    type HighlightBoundaryOptions = {
+    export type HighlightBoundaryOptions = {
         before?: number;
         after?: number;
         total?: number;
     };
 
-    type HighlightEllipsisOptions = {
+    export type HighlightEllipsisOptions = {
         template?: TemplateResultHighlighting;
         pattern?: string | boolean;
     };
 
-    type HighlightOptions = TemplateResultHighlighting | {
+    export type HighlightOptions = TemplateResultHighlighting | {
         template?: TemplateResultHighlighting;
         boundary?: HighlightBoundaryOptions | number;
         ellipsis?: HighlightEllipsisOptions | string | boolean;
@@ -886,8 +885,7 @@ declare module "flexsearch" {
         resolve(options?: DefaultResolve): SearchResults;
     }
 
-    global {
-    class StorageInterface {
+    export class StorageInterface {
         db: any;
 
         constructor(name: string, config: PersistentOptions);
@@ -902,7 +900,7 @@ declare module "flexsearch" {
         destroy(): Promise<void>;
 
         clear(): Promise<void>;
-    }}
+    }
 
     export class IndexedDB extends StorageInterface {
         db: IDBDatabase;
@@ -924,10 +922,12 @@ declare module "flexsearch" {
 // -----------------------------------
 
 declare module "flexsearch/db/*" {
+    import { StorageInterface } from "flexsearch";
     export default StorageInterface;
 }
 
 declare module "flexsearch/db/indexeddb" {
+    import { StorageInterface } from "flexsearch";
     export default class IndexedDB extends StorageInterface{
         db: IDBDatabase
     }
@@ -936,6 +936,7 @@ declare module "flexsearch/db/indexeddb" {
 // -----------------------------------
 
 declare module "flexsearch/lang/*" {
+    import { EncoderOptions } from "flexsearch";
     const Options: EncoderOptions;
     export default Options;
 }

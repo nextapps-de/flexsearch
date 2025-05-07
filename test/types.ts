@@ -5,26 +5,29 @@ import {
     Worker,
     Resolver,
     StorageInterface,
+    DefaultSearchResults,
 } from "flexsearch";
-import "../index";
 
 async function test() {
+
     const document = new Document<{
-        title: string
-        description: string
-        tags: {
-            name: string
-            id: number
-        }[]
+        id: number,
+        title: string,
+        description: string,
+        tags: string[]
     }>({
         document: {
-            index: [ "tags" ],
+            id: "id",
+            index: [ "title", "description" ],
+            tag: [ "tags" ],
+            store: [ "title", "description" ]
         },
     });
+
     // The correct type
     const doc1 = await document.searchAsync({});
     const doc2: Resolver = await document.searchAsync({
-        resolve: true,
+        resolve: false,
     });
     const doc3 = await document.searchAsync({
         enrich: true,
@@ -34,14 +37,46 @@ async function test() {
         merge: true,
     });
     doc4[0].doc.title;
+
     // The wrong type
+
+    const t_1_1: DefaultSearchResults = document.search("test", { pluck: "title" });
     // @ts-expect-error
-    const docw1: Resolver = await document.searchAsync({});
+    const t_1_2: DefaultSearchResults = document.search("test", {});
+
+    const t_2_1: DefaultDocumentSearchResults = document.search("test", {});
     // @ts-expect-error
-    const docw2: DefaultDocumentSearchResults = await document.searchAsync({
-        enrich: true,
-    });
+    const t_2_2: DefaultSearchResults = document.search("test", {});
+
+    const t_3_1: DefaultDocumentSearchResults = document.search({});
+    const t_3_2: DefaultDocumentSearchResults = document.search({ resolve: true });
+
+    const t_4_1: Resolver = document.search({ resolve: false });
+    const t_4_2: Resolver = new Resolver();
+    // @ts-expect-error
+    const t_4_3: Resolver = document.search({});
+    // @ts-expect-error
+    const t_4_4: Resolver = document.search({ resolve: true });
+
+    // @ts-expect-error
+    const docw6: DefaultDocumentSearchResults = await document.searchAsync({});
+    // @ts-expect-error
+    const docw7: DefaultDocumentSearchResults = await document.searchAsync({ pluck: false });
+    // @ts-expect-error
+    const docw8: DefaultDocumentSearchResults = await document.searchAsync({ enrich: false });
+
+    // @ts-expect-error
+    const docw4: Resolver = await document.searchAsync({});
+    // @ts-expect-error
+    const docw5: Resolver = await document.searchAsync({ resolve: true });
+    // @ts-expect-error
+    const docw6: DefaultDocumentSearchResults = await document.searchAsync({});
+    // @ts-expect-error
+    const docw7: DefaultDocumentSearchResults = await document.searchAsync({ pluck: false });
+    // @ts-expect-error
+    const docw8: DefaultDocumentSearchResults = await document.searchAsync({ enrich: false });
     // Promise?
+
     const documentNoWorker = new Document({});
     const doc5 = documentNoWorker.search({}); // No Promise
 
