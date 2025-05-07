@@ -237,32 +237,38 @@ Extern Projects & Plugins:
   - [Module (ESM)](#module-esm)
   - [Node.js](#nodejs)
 - [Basic Usage and Variants](#basic-usage-and-variants)
+  - [Index Options](#index-options)
+  - [Search Options](#search-options)
 - [Common Code Examples (Browser, Node.js)](#common-code-examples)
 - [API Overview](#api-overview)
-- [Options](doc/options.md)
-  - [Index Options](#index-options)
-  - [Document Options](doc/options.md)
-  - [Worker Index Options](doc/worker.md#worker-index-options)
-  - [Persistent Options](doc/options.md)
-  - [Encoder Options](doc/encoder.md#encoder-options)
-  - [Resolver Options](doc/options.md)
 - [Presets](#presets)
 - [Context Search](#context-search)
+  - [Context Options](#context-options)
 - [Fast-Update Mode](#fast-update-mode)
 - [Suggestions](#suggestions)
 - [Document Search (Multi-Field Search)](doc/document-search.md)
-- [Multi-Tag Search](doc/document-search.md)
+  - [Document Index Options](doc/document-search.md#document-options)
+  - [Document Descriptor](doc/document-search.md#the-document-descriptor)
+  - [Document Search Options](doc/document-search.md#document-search-options)
+  - [Multi-Tag Search](doc/document-search.md)
+  - [Result Highlighting](doc/result-highlighting.md)
+    - [Highlighting Options](doc/result-highlighting.md#highlighting-options)
+      - [Boundary Options](doc/result-highlighting.md#highlighting-boundary-options)
+      - [Ellipsis Options](doc/result-highlighting.md#highlighting-ellipsis-options)
 - [Phonetic Search (Fuzzy Search)](#fuzzy-search)
 - [Tokenizer (Partial Search)](#tokenizer-partial-match)
 - [Charset Collection](#charset-collection)
 - [Encoder](doc/encoder.md)
+  - [Encoder Options](doc/encoder.md#encoder-options)
   - [Universal Charset Collection](doc/encoder.md)
   - [Latin Charset Encoder Presets](doc/encoder.md)
   - [Language Specific Preset](doc/encoder.md)
   - [Custom Encoder](doc/encoder.md#custom-encoder)
 - [Non-Blocking Runtime Balancer (Async)](doc/async.md)
 - [Worker Indexes](doc/worker.md)
+  - [Worker Index Options](doc/worker.md#worker-index-options)
 - [Resolver (Complex Queries)](doc/resolver.md)
+  - [Resolver Options](doc/resolver.md)
   - [Boolean Operations (and, or, xor, not)](doc/resolver.md)
   - [Boost](doc/resolver.md)
   - [Limit / Offset](doc/resolver.md)
@@ -271,13 +277,13 @@ Extern Projects & Plugins:
 - [Export / Import Indexes](doc/export-import.md)
   - [Fast-Boot Serialization](doc/export-import.md#fast-boot-serialization-for-server-side-rendering-php-python-ruby-rust-java-go-nodejs-)
 - [Persistent Indexes](doc/persistent.md)
+  - [Persistent Index Options](doc/persistent.md)
   - [IndexedDB (Browser)](doc/persistent-indexeddb.md)
   - [Postgres](doc/persistent-postgres.md)
   - [Redis](doc/persistent-redis.md)
   - [MongoDB](doc/persistent-mongodb.md)
   - [SQLite](doc/persistent-sqlite.md)
   - [Clickhouse](doc/persistent-clickhouse.md)
-- [Result Highlighting](doc/result-highlighting.md)
 - [Custom Score Function](doc/customization.md)
 - [Custom Builds](doc/custom-builds.md)
 - [Extended Keystores (In-Memory)](doc/keystore.md)
@@ -1014,18 +1020,6 @@ Methods `.export()` and also `.import()` are always async as well as every metho
 - [**de**](doc/encoder.md#built-in-language-packs)
 - [**fr**](doc/encoder.md#built-in-language-packs)
 
-## Options
-
-- [Index Options](doc/options.md)
-- [Context Options](doc/options.md)
-- [Document Options](doc/options.md)
-- [Encoder Options](doc/encoder.md#property-overview)
-- [Resolver Options](doc/options.md)
-- [Search Options](doc/options.md)
-- [Document Search Options](doc/options.md)
-- [Worker Options](doc/options.md)
-- [Persistent Options](doc/options.md)
-
 ## Basic Usage
 
 #### Create a new index
@@ -1044,9 +1038,7 @@ Create a new index with custom options:
 
 ```js
 const index = new Index({
-    tokenize: "forward",
-    resolution: 9,
-    fastupdate: true
+    tokenize: "forward"
 });
 ```
 
@@ -1063,7 +1055,6 @@ var index = new FlexSearch({
 Create a new index and assign an [Encoder](doc/encoder.md):
 
 ```js
-//import { Charset } from "./dist/module/charset.js";
 import { Charset } from "flexsearch";
 const index = new Index({
     tokenize: "forward",
@@ -1071,8 +1062,10 @@ const index = new Index({
 });
 ```
 
-» [Resolution](#resolution)<br>
-» [All available custom options](doc/options.md)
+Related Topics: [Index Options](#index-options) 
+&ensp;&bull;&ensp; [Resolution](#resolution)
+&ensp;&bull;&ensp; [Charset Collection](#charset-collection)
+&ensp;&bull;&ensp; [Tokenizer](#tokenizer-partial-match)
 
 #### Add text item to an index
 
@@ -1295,6 +1288,38 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
         </td>
         <td>When disabled any changes won't commit, instead it needs calling <code>index.commit()</code> manually to make modifications to the index (add, update, remove) persistent.</td>
         <td>true</td>
+    </tr>
+</table>
+
+## Search Options
+
+<table>
+    <tr><td colspan="4"></td></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>limit</td>
+        <td>number</td>
+        <td>Sets the limit of results.</td>
+        <td>100</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>offset</td>
+        <td>number</td>
+        <td>Apply offset (skip items).</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>suggest</td>
+        <td>Boolean</td>
+        <td>Enables <a href="#suggestions">suggestions</a> in results.</td>
+        <td>false</td>
     </tr>
 </table>
 
@@ -1630,7 +1655,7 @@ const result = index.search("1 2 3");
 // --> [2, 1]
 ```
 
-The first index returns ID 1 in the first slot for the best pick, because matched terms are closer to the document root. The 2nd index has context enabled and returns the ID 2 in the first slot, because of the distance between terms.
+The first index returns ID 1 in the first slot for the best pick, because matched terms are closer to the document root. The 2nd index has context enabled and returns the ID 2 in the first slot, because of the shorter distance between terms.
 
 ### Context Options
 

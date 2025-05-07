@@ -388,7 +388,7 @@ declare module "flexsearch" {
         D extends DocumentData = DocumentData,
         W extends WorkerType = false,
         B extends StorageInterface = undefined
-    > = IndexOptions<B> & {
+    > = IndexOptions<B> & DocumentDescriptor<D> & {
         worker?: W;
         doc?: DocumentDescriptor<D>;
         document?: DocumentDescriptor<D>;
@@ -429,7 +429,6 @@ declare module "flexsearch" {
                 : E extends true
                     ? EnrichedDocumentSearchResults<D>
                     : DefaultDocumentSearchResults
-
 
     /**
      *  # Document Search Result

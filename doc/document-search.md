@@ -14,9 +14,155 @@ FlexSearch Documents also contain these features:
 - Worker
 - Persistent
 
+### Document Options
+
+> Document options basically inherits from [Index Options](../README.md#index-options), so you can apply most of those options either in the top scope of the config (for all fields) or as per field or both of them.
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>document</td>
+        <td><a href="#the-document-descriptor">Document Descriptor</a></td>
+        <td>Includes any specific information about how the document data should be indexed</td>
+        <td style="font-style: italic">(mandatory)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>worker</td>
+        <td>Boolean<br>String</td>
+        <td>Enable a worker distributed model. Read more about here: <a href="worker.md">Worker Index</a></td>
+        <td><code>false</code></td>
+    </tr>
+</table>
+
+### Document Search Options
+
+> Document search options basically inherits from [Index Search Options](../README.md#search-options), so you can apply most of those options either in the top scope of the config (for all fields) or as per field or both of them.
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>index</td>
+        <td>String<br>Array&lt;String&gt;<br>Array&lt;SearchOptions&gt;</td>
+        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tag</td>
+        <td>Object&lt;field:tag&gt;</td>
+        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>enrich</td>
+        <td>Boolean</td>
+        <td>Enrich IDs from the results with the corresponding documents.</td>
+        <td><code>false</code></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>merge</td>
+        <td>Boolean</td>
+        <td>Merge multiple fields in resultset into one and group results per ID</td>
+        <td><code>false</code></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>pluck</td>
+        <td>String</td>
+        <td>Pick and apply search to just one field and return a flat result representation</td>
+        <td><code>false</code></td>
+    </tr>
+</table>
+
 ## The Document Descriptor
 
 When creating a `Document`-Index you will need to define a document descriptor in the field `document`. This descriptor is including any specific information about how the document data should be indexed.
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>String</td>
+        <td vertical-align="top"></td>
+        <td><code>"id"</code></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>index</td>
+        <td>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>tag</td>
+        <td>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>store</td>
+        <td>Boolean<br>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
+        <td></td>
+        <td><code>false</code></td>
+    </tr>
+</table>
+
+### Field Options
+
+> You can use all standard [Index Options](../README.md#index-options) within field options.
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>field</td>
+        <td>String</td>
+        <td>The field name (colon seperated syntax)</td>
+        <td style="font-style: italic">(mandatory)</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>filter</td>
+        <td>Function</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>custom</td>
+        <td>Function</td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
 
 Assuming our document has a simple data structure like this:
 
@@ -73,7 +219,7 @@ const index = new Document({
 });
 ```
 
-Add both fields to the document descriptor and pass individual [Index-Options](options.md) for each field:
+Add both fields to the document descriptor and pass individual [Index-Options](../README.md#index-options) for each field:
 
 ```js
 const index = new Document({
@@ -447,7 +593,7 @@ index.search(query, { limit: 20, offset: 100 });
 
 > You cannot pre-count the size of the result-set. That's a limit by the design of FlexSearch. When you really need a count of all results you are able to page through, then just assign a high enough limit and get back all results and apply your paging offset manually (this works also on server-side). FlexSearch is fast enough that this isn't an issue.
 
-[See all available field-search options](options.md)
+[See all available field-search options](../README.md#search-options)
 
 ## The Result Set
 
