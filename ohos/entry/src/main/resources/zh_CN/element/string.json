@@ -1,0 +1,212 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "模块描述"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "FlexSearch"
+    },
+    {
+      "name": "document_data",
+      "value": "文档数据："
+    },
+    {
+      "name": "Single_field",
+      "value": "单字段(content)搜索-关键词“房地产”"
+    },
+    {
+      "name": "Search_by_tag",
+      "value": "通过tag(房产、流行病)搜索"
+    },
+    {
+      "name": "Multi_field",
+      "value": "多字段(title&content)搜索-关键词“房地产”"
+    },
+    {
+      "name": "page_search",
+      "value": "分页搜索-每次点击pageNo加1"
+    },
+    {
+      "name": "Test_Result",
+      "value": "测试结果："
+    },
+    {
+      "name": "Page_content_display_completed",
+      "value": "分页内容展示完毕"
+    },
+    {
+      "name": "importTest",
+      "value": "importTest，需先执行exportTest"
+    },
+    {
+      "name": "import",
+      "value": "import(),需先先执行export()"
+    },
+    {
+      "name": "Property",
+      "value": "房产"
+    },
+    {
+      "name": "title1",
+      "value": "外卖小哥7万元小城买房"
+    },
+    {
+      "name": "content1",
+      "value": "一年前，李某在“流浪吧”详述了自己前往买房的经历，相比于一线城市的天价，5万一套房的叙说令一夜爆火。于是很多“流浪”的人也携带几万块现金，去往该地试图终结自己的流浪生涯"
+    },
+    {
+      "name": "Epidemic",
+      "value": "流行病"
+    },
+    {
+      "name": "Livelihood",
+      "value": "民生"
+    },
+    {
+      "name": "Economy",
+      "value": "经济"
+    },
+    {
+      "name": "title2",
+      "value": "一对母子入境某地确诊"
+    },
+    {
+      "name": "title3",
+      "value": "暴雨内涝"
+    },
+    {
+      "name": "title4",
+      "value": "楼市新数据：金九不再 四季度或持续降温"
+    },
+    {
+      "name": "title5",
+      "value": "经济走向"
+    },
+    {
+      "name": "title6",
+      "value": "流行病波及8省份！加强针什么时候能打？疾控专家提醒冬季流行病 ..."
+    },
+    {
+      "name": "title7",
+      "value": "流行病：变种病毒在引发关注议会报告以应对 ..."
+    },
+    {
+      "name": "title8",
+      "value": "新闻8点见丨一周内两度公开谈事件，释放哪些信息？_ ..."
+    },
+    {
+      "name": "title9",
+      "value": "征收房地产税计划试点城市"
+    },
+    {
+      "name": "title10",
+      "value": "中国房地产发展"
+    },
+    {
+      "name": "title11",
+      "value": "人才引进来技术留下来（一线探民生）--新闻报道"
+    },
+    {
+      "name": "content2",
+      "value": "陈某，女，31岁，无业，入境前半年一直在某地区居住生活，以居家为主，2-3天外出买菜一次。7月17日凌晨出现咽痛，无发热等其他症状..."
+    },
+    {
+      "name": "content3",
+      "value": "某地区多地出现暴雨到大暴雨，清江水位暴涨，恩施城区内涝严重，民众财产受损。图为群众清理道路淤泥"
+    },
+    {
+      "name": "content4",
+      "value": "周三公布的70个大中城市房价数据显示，一、二线城市新建 ... 在3季度金融数据新闻发布会上还表示，部分金融机构对融资惯例规则存在..."
+    },
+    {
+      "name": "content5",
+      "value": "把脉经济走向. By Reuters Staff. 2 Min Read."
+    },
+    {
+      "name": "content6",
+      "value": "大象新闻消息，仅三天时间，已经 ... 10月18日，当地新增本土确诊病例6例，无症状感染者1..."
+    },
+    {
+      "name": "content7",
+      "value": "消息人士向有线电视新闻网记者透露，可能很快就会推荐40岁或40岁以上、此前曾接种过莫德纳或辉瑞疫苗的人员接种第三剂疫苗。"
+    },
+    {
+      "name": "content8",
+      "value": "一家房地产公司，目前的主要风险是到期债务未能偿还，部分工地停工，已预售的房产按时交付有不确定性。总体而言，风险是个案风险。 易纲称，..."
+    },
+    {
+      "name": "content9",
+      "value": "... 在房地产中；房地产价值的...。"
+    },
+    {
+      "name": "content10",
+      "value": "土地供应方面，保障住房..."
+    },
+    {
+      "name": "content11",
+      "value": "近年来，加强人才引进与培养：根据产业发展需求搭建平台，有针对性地引入高层次人才；在医疗、教育等民生领域进行组团式帮..."
+    },
+    {
+      "name": "Property2",
+      "value": "房地产"
+    },
+    {
+      "name": "housing",
+      "value": "住房"
+    },
+    {
+      "name": "montage",
+      "value": "拼接"
+    },
+    {
+      "name": "Before_montage",
+      "value": "拼接前"
+    },
+    {
+      "name": "the_value_before_montage",
+      "value": "这是拼接之前的值"
+    },
+    {
+      "name": "tail_connection",
+      "value": "尾接"
+    },
+    {
+      "name": "tail_title",
+      "value": "我是尾接的标题"
+    },
+    {
+      "name": "tail_content",
+      "value": "我是尾接的内容"
+    },
+    {
+      "name": "update",
+      "value": "更新"
+    },
+    {
+      "name": "before_update",
+      "value": "更新前"
+    },
+    {
+      "name": "value_before_update",
+      "value": "这是更新之前的值"
+    },
+    {
+      "name": "update_content",
+      "value": "更新内容"
+    },
+    {
+      "name": "update_title",
+      "value": "一对母子入境某地确诊,######### update以后的title #########"
+    },
+    {
+      "name": "update_content_value",
+      "value": "更新内容陈某，女，31岁，无业，入境前半年一直在某地区居住生活，以居家为主，2-3天外出买菜一次。7月17日凌晨出现咽痛，无发热等其他症状..."
+    }
+  ]
+}
