@@ -30,9 +30,8 @@ declare module "flexsearch" {
         | "default";
 
     /**
-     * **Document:**
-     * * Tokenizer: https://github.com/nextapps-de/flexsearch#tokenizer-prefix-search
-     * * Add custom tokenizer: https://github.com/nextapps-de/flexsearch#add-custom-tokenizer
+     * Tokenizer: https://github.com/nextapps-de/flexsearch#tokenizer-prefix-search \
+     * Custom Tokenizer: https://github.com/nextapps-de/flexsearch#add-custom-tokenizer
      */
     type Tokenizer =
         | "strict" | "exact" | "default"
@@ -41,8 +40,7 @@ declare module "flexsearch" {
         | "full";
 
     /**
-     * **Document:**
-     * * Encoders: https://github.com/nextapps-de/flexsearch#encoders
+     * Encoders: https://github.com/nextapps-de/flexsearch#encoders
      */
     type Encoders =
         | "Exact"
@@ -77,7 +75,7 @@ declare module "flexsearch" {
      * **Document:**
      * * Search options: https://github.com/nextapps-de/flexsearch#search-options
      */
-    export type SearchOptions<R extends boolean = false> = {
+    type SearchOptions<R extends boolean = false> = {
         query?: string;
         limit?: number;
         offset?: number;
@@ -217,8 +215,8 @@ declare module "flexsearch" {
         export?: () => Promise<void>;
         import?: () => Promise<void>;
         // no persistent supported
-        db: null;
-        commit: null;
+        db?: null;
+        commit?: null;
     };
 
     /************************************/
@@ -386,21 +384,23 @@ declare module "flexsearch" {
 
     type WorkerType = boolean | WorkerURL | WorkerPath
 
-    type DocumentOptions<D extends DocumentData = DocumentData, W extends WorkerType = false, B extends StorageInterface = undefined> =
-        IndexOptions<B>
-        & {
+    type DocumentOptions<
+        D extends DocumentData = DocumentData,
+        W extends WorkerType = false,
+        B extends StorageInterface = undefined
+    > = IndexOptions<B> & {
         worker?: W;
         doc?: DocumentDescriptor<D>;
         document?: DocumentDescriptor<D>;
     };
 
-    export type DefaultDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+    type DefaultDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
         field?: FieldName<D>;
         tag?: FieldName<D>;
         result: DefaultSearchResults;
     }>;
 
-    export type EnrichedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+    type EnrichedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
         field?: FieldName<D>;
         tag?: FieldName<D>;
         result: Array<{
@@ -410,15 +410,19 @@ declare module "flexsearch" {
         }>;
     }>;
 
-    export type MergedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+    type MergedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
         id: Id;
         doc: D | null;
         field?: FieldName[];
         tag?: FieldName[];
     }>;
 
-    type DocumentSearchResults<D extends DocumentData = DocumentData, R extends boolean = false, E extends boolean = false, M extends boolean = false> =
-        R extends true
+    type DocumentSearchResults<
+        D extends DocumentData = DocumentData,
+        R extends boolean = false,
+        E extends boolean = false,
+        M extends boolean = false
+    > = R extends true
             ? Resolver
             : M extends true
                 ? MergedDocumentSearchResults<D>
@@ -733,7 +737,7 @@ declare module "flexsearch" {
     }
 
     global {
-    export class StorageInterface {
+    class StorageInterface {
         db: any;
 
         constructor(name: string, config: PersistentOptions);
