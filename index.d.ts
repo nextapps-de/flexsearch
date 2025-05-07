@@ -75,7 +75,7 @@ declare module "flexsearch" {
      * **Document:**
      * * Search options: https://github.com/nextapps-de/flexsearch#search-options
      */
-    type SearchOptions<R extends boolean = false> = {
+    type SearchOptions<R extends boolean = true> = {
         query?: string;
         limit?: number;
         offset?: number;
@@ -85,36 +85,7 @@ declare module "flexsearch" {
         resolve?: R;
     };
 
-    /**
-     * **Document:**
-     * * The document descriptor: https://github.com/nextapps-de/flexsearch#the-document-descriptor
-     */
-    type DocumentDescriptor<D extends DocumentData = DocumentData> = {
-        id?: string | "id";
-        field?: FieldName<D> | FieldName<D>[] | FieldOptions<D> | Array<FieldOptions<D>>;
-        index?: FieldName<D> | FieldName<D>[] | FieldOptions<D> | Array<FieldOptions<D>>;
-        tag?: FieldName<D> | FieldName<D>[] | TagOptions<D> | Array<TagOptions<D>>;
-        store?: FieldName<D> | FieldName<D>[] | StoreOptions | Array<StoreOptions> | boolean;
-    };
-
-    type WorkerURL = string;
-    type WorkerPath = string;
-    type WorkerConfigURL = string;
-    type WorkerConfigPath = string;
     type SerializedFunctionString = string;
-    type FieldName<D = DocumentData> = D extends object
-        ? {
-            [K in keyof D]: K extends string
-                ? D[K] extends Array<infer U>
-                    ? `${ K }` | `${ K }[]:${ FieldName<U> & string }`
-                    : K | `${ K }:${ FieldName<D[K]> & string }`
-                : never
-        }[keyof D]
-        : never
-    /**
-     * The template to be applied on matches (e.g. <code>"\<b>$1\</b>"</code>), where <code>\$1</code> is a placeholder for the matched partial
-     */
-    type TemplateResultHighlighting = string;
 
     /**
      * **Document:**
@@ -183,7 +154,10 @@ declare module "flexsearch" {
      * * Right-To-Left: https://github.com/nextapps-de/flexsearch/doc/encoder.md#right-to-left-support
      * * Language: https://github.com/nextapps-de/flexsearch/doc/encoder.md#built-in-language-packs
      */
-    type IndexOptions<D extends StorageInterface = undefined> = {
+    type IndexOptions<
+        S extends StorageInterface = undefined,
+        R extends boolean = true
+    > = {
         preset?: Preset;
         tokenize?: Tokenizer;
         cache?: boolean | number;
@@ -199,9 +173,10 @@ declare module "flexsearch" {
             partial: string,
             partial_index: number,
         ) => number;
+        resolve?: R;
 
         // Persistent-specific options
-        db?: D;
+        db?: S;
         commit?: boolean;
 
         // Language-specific Options and Encoding
@@ -210,42 +185,36 @@ declare module "flexsearch" {
         rtl?: boolean;
     };
 
-    type WorkerIndexOptions = IndexOptions & {
-        config?: WorkerConfigURL | WorkerConfigPath,
-        export?: () => Promise<void>;
-        import?: () => Promise<void>;
-        // no persistent supported
-        db?: null;
-        commit?: null;
-    };
-
     /************************************/
     /* Index Search                     */
     /************************************/
 
     type DefaultSearchResults = Id[];
     type IntermediateSearchResults = Array<Id[]>;
-    type SearchResults<R extends boolean = false> = R extends true ? Resolver : DefaultSearchResults;
+    type SearchResults<R extends boolean = true> = R extends true ? DefaultSearchResults : Resolver;
 
     /**
-     * **Document:**
-     * * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants
-     * * API overview: https://github.com/nextapps-de/flexsearch#api-overview
-     * * Usage: https://github.com/nextapps-de/flexsearch#usage
+     * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants \
+     * API overview: https://github.com/nextapps-de/flexsearch#api-overview \
+     * Usage: https://github.com/nextapps-de/flexsearch#usage
      */
 
     type IndexSearchResultsWrapper<
         W extends boolean = false,
-        D extends StorageInterface = undefined,
-        R extends boolean = false
+        S extends StorageInterface = undefined,
+        R extends boolean = true
     > = W extends false
-        ? D extends undefined
+        ? S extends undefined
             ? SearchResults<R>
             : Promise<SearchResults<R>>
         : Promise<SearchResults<R>>
 
-    export class Index<W extends boolean = false, D extends StorageInterface = undefined> {
-        constructor(options?: Preset | IndexOptions<D>);
+    export class Index<
+        W extends boolean = false,
+        S extends StorageInterface = undefined,
+        r extends boolean = true
+    > {
+        constructor(options?: Preset | IndexOptions<S, r>);
 
         add(id: Id, content: string): this | Promise<this>;
 
@@ -258,15 +227,20 @@ declare module "flexsearch" {
 
         remove(id: Id): this | Promise<this>;
 
-        search(query: string, limit?: Limit): IndexSearchResultsWrapper<W, D>;
-        search<R extends boolean = false>(query: string, options?: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
-        search<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
-        search<R extends boolean = false>(options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
+        /** @deprecated Pass "limit" within options */
+        search(query: string, limit?: Limit): IndexSearchResultsWrapper<W, S>;
+        /** @deprecated Pass "limit" within options */
+        search<R extends boolean = r>(query: string, options?: SearchOptions<R>): IndexSearchResultsWrapper<W, S, R>;
+        /** @deprecated Pass "limit" within options */
+        search<R extends boolean = r>(query: string, limit: Limit, options: SearchOptions<R>): IndexSearchResultsWrapper<W, S, R>;
+        search<R extends boolean = r>(options: SearchOptions<R>): IndexSearchResultsWrapper<W, S, R>;
 
+        /** @deprecated Pass "limit" within options */
         searchCache(query: string, limit?: Limit): W extends false ? SearchResults : Promise<SearchResults>;
-        searchCache<R extends boolean = false>(query: string, options?: Limit | SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
-        searchCache<R extends boolean = false>(query: string, limit: Limit, options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
-        searchCache<R extends boolean = false>(options: SearchOptions<R>): IndexSearchResultsWrapper<W, D, R>;
+        searchCache(query: string, options?: SearchOptions): IndexSearchResultsWrapper<W, S>;
+        /** @deprecated Pass "limit" within options */
+        searchCache(query: string, limit: Limit, options: SearchOptions): IndexSearchResultsWrapper<W, S>;
+        searchCache(options: SearchOptions): IndexSearchResultsWrapper<W, S>;
 
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
         contain(id: Id): boolean | Promise<boolean>;
@@ -317,32 +291,50 @@ declare module "flexsearch" {
 
         searchAsync(
             query: string,
+            callback?: AsyncCallback<SearchResults>,
+        ): Promise<SearchResults>
+        /** @deprecated Pass "limit" within options */
+        searchAsync(
+            query: string,
             limit?: Limit,
             callback?: AsyncCallback<SearchResults>,
         ): Promise<SearchResults>
-        searchAsync<R extends boolean = false>(
+        searchAsync<R extends boolean = r>(
             query: string,
             options?: SearchOptions<R>,
             callback?: AsyncCallback<SearchResults<R>>,
         ): Promise<SearchResults<R>>
-        searchAsync<R extends boolean = false>(
+        /** @deprecated Pass "limit" within options */
+        searchAsync<R extends boolean = r>(
             query: string,
             limit: Limit,
             options?: SearchOptions<R>,
             callback?: AsyncCallback<SearchResults<R>>,
         ): Promise<SearchResults<R>>;
-        searchAsync<R extends boolean = false>(
+        searchAsync<R extends boolean = r>(
             options: SearchOptions<R>,
             callback?: AsyncCallback<SearchResults<R>>,
         ): Promise<SearchResults<R>>;
     }
 
-    /**
-     * **Document:**
-     * * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants
-     * * API overview: https://github.com/nextapps-de/flexsearch#api-overview
-     * * Worker index: https://github.com/nextapps-de/flexsearch#worker-index
-     */
+    /************************************/
+    /* Worker Index                     */
+    /************************************/
+
+    type WorkerURL = string;
+    type WorkerPath = string;
+    type WorkerConfigURL = string;
+    type WorkerConfigPath = string;
+    type WorkerType = boolean | WorkerURL | WorkerPath;
+
+    type WorkerIndexOptions = IndexOptions & {
+        config?: WorkerConfigURL | WorkerConfigPath,
+        export?: () => Promise<void>;
+        import?: () => Promise<void>;
+        // no persistent supported
+        db?: null;
+        commit?: null;
+    };
 
     export class Worker extends Index<true> {
         constructor(options?: Preset | WorkerIndexOptions);
@@ -356,80 +348,42 @@ declare module "flexsearch" {
     /* Document Search                  */
     /************************************/
 
+    /**
+     * The template to be applied on matches (e.g. <code>"\<b>$1\</b>"</code>), where <code>\$1</code> is a placeholder for the matched partial
+     */
+    type TemplateResultHighlighting = string;
+    type TagName = string;
+    type FieldName<D = DocumentData> = D extends object
+        ? {
+            [K in keyof D]: K extends string
+                ? D[K] extends Array<infer U>
+                    ? `${ K }` | `${ K }[]:${ FieldName<U> & string }`
+                    : K | `${ K }:${ FieldName<D[K]> & string }`
+                : never
+          }[keyof D]
+        : never;
+
     type FieldOptions<D extends DocumentData = DocumentData> = IndexOptions & {
         field: FieldName<D>,
         filter?: (content: string) => boolean;
-        custom?: (content: string) => string;
+        custom?: (content: string) => string | boolean;
         config?: WorkerConfigURL | WorkerConfigPath;
+        db?: StorageInterface;
     };
 
     type TagOptions<D extends DocumentData> = {
         field: FieldName<D>;
         filter?: (content: string) => boolean;
-        custom?: (content: string) => string;
+        custom?: (content: string) => string | boolean;
         db?: StorageInterface;
     };
 
     type StoreOptions = {
         field: FieldName;
         filter?: (content: string) => boolean;
-        custom?: (content: string) => string;
+        custom?: (content: string) => string | boolean;
         db?: StorageInterface;
     };
-
-    /*
-     * **Document:**
-     * * Document options: https://github.com/nextapps-de/flexsearch#document-options
-     */
-
-    type WorkerType = boolean | WorkerURL | WorkerPath;
-
-    type DocumentOptions<
-        D extends DocumentData = DocumentData,
-        W extends WorkerType = false,
-        B extends StorageInterface = undefined
-    > = IndexOptions<B> & DocumentDescriptor<D> & {
-        worker?: W;
-        doc?: DocumentDescriptor<D>;
-        document?: DocumentDescriptor<D>;
-    };
-
-    type DefaultDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
-        field?: FieldName<D>;
-        tag?: FieldName<D>;
-        result: DefaultSearchResults;
-    }>;
-
-    type EnrichedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
-        field?: FieldName<D>;
-        tag?: FieldName<D>;
-        result: Array<{
-            id: Id;
-            doc: D | null;
-            highlight?: string;
-        }>;
-    }>;
-
-    type MergedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
-        id: Id;
-        doc: D | null;
-        field?: FieldName[];
-        tag?: FieldName[];
-        highlight?: {[field: FieldName]: string};
-    }>;
-
-    type DocumentSearchResults<
-        D extends DocumentData = DocumentData,
-        R extends boolean = false,
-        E extends boolean = false,
-        M extends boolean = false
-    > = R extends true
-            ? Resolver
-            : M extends true
-                ? MergedDocumentSearchResults<D>
-                : E extends true
-                    ? EnrichedDocumentSearchResults<D>
-                    : DefaultDocumentSearchResults
 
     /**
      *  # Document Search Result
@@ -441,22 +395,104 @@ declare module "flexsearch" {
      *  If neither of these conditions is met, then the returned result will be a `ISimpleDocumentSearchResult`.
      */
 
+    /*
+     * **Document:**
+     * * Document options: https://github.com/nextapps-de/flexsearch#document-options
+     */
+
+    type DocumentOptions<
+        D extends DocumentData = DocumentData,
+        W extends WorkerType = false,
+        S extends StorageInterface = undefined
+    > = IndexOptions<S> & DocumentDescriptor<D> & {
+        worker?: W;
+        doc?: DocumentDescriptor<D>;
+        document?: DocumentDescriptor<D>;
+    };
+
+    /**
+     * **Document:**
+     * * The document descriptor: https://github.com/nextapps-de/flexsearch#the-document-descriptor
+     */
+    type DocumentDescriptor<D extends DocumentData = DocumentData> = {
+        id?: string | "id";
+        field?: FieldName<D> | FieldName<D>[] | FieldOptions<D> | Array<FieldOptions<D>>;
+        index?: FieldName<D> | FieldName<D>[] | FieldOptions<D> | Array<FieldOptions<D>>;
+        tag?: FieldName<D> | FieldName<D>[] | TagOptions<D> | Array<TagOptions<D>>;
+        store?: FieldName<D> | FieldName<D>[] | StoreOptions | Array<StoreOptions> | boolean;
+    };
+
+    type DefaultDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+        field?: FieldName<D>;
+        tag?: FieldName<D>;
+        result: DefaultSearchResults;
+    }>;
+
+    type EnrichedResults<D extends DocumentData = DocumentData> = Array<{
+        id: Id;
+        doc: D | null;
+        highlight?: string;
+    }>;
+
+    type EnrichedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+        field?: FieldName<D>;
+        tag?: FieldName<D>;
+        result: EnrichedResults<D>;
+    }>;
+
+    type MergedDocumentSearchResults<D extends DocumentData = DocumentData> = Array<{
+        id: Id;
+        doc?: D | null;
+        field?: FieldName[];
+        tag?: FieldName[];
+        highlight?: {[field: FieldName]: string};
+    }>;
+
+    type DocumentSearchResults<
+        D extends DocumentData = DocumentData,
+        H extends HighlightOptions = undefined,
+        P extends PluckOptions = undefined,
+        R extends boolean = true,
+        E extends boolean = false,
+        M extends boolean = false
+    > = R extends true
+        ? P extends PluckOptions
+            ? E extends true
+                ? EnrichedResults<D>
+                : DefaultSearchResults
+            : M extends true
+                ? MergedDocumentSearchResults<D>
+                : E extends true
+                    ? EnrichedDocumentSearchResults<D>
+                    : H extends HighlightOptions
+                        ? EnrichedDocumentSearchResults<D>
+                        : DefaultDocumentSearchResults
+        : Resolver;
+
+    type PluckOptions<
+        D extends DocumentData = DocumentData,
+        H extends HighlightOptions = undefined,
+        R extends boolean = true,
+        E extends boolean = false
+    > = FieldName | DocumentSearchOptions<D, H, undefined, R, E>;
+
     /**
      * **Document:**
      * * Document search options: https://github.com/nextapps-de/flexsearch#document-search-options
      */
-
     type DocumentSearchOptions<
         D extends DocumentData = DocumentData,
-        R extends boolean = false,
+        H extends HighlightOptions = undefined,
+        P extends PluckOptions = undefined,
+        R extends boolean = true,
         E extends boolean = false,
-        M extends boolean = false
+        M extends boolean = false,
     > = SearchOptions<R> & {
-        tag?: {[field: FieldName]: string} | Array<{[field: FieldName]: string}>;
-        field?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | FieldName[] | FieldName;
-        index?: Array<DocumentSearchOptions<D, R, E, M>> | DocumentSearchOptions<D, R, E, M> | FieldName[] | FieldName;
-        pluck?: FieldName | DocumentSearchOptions<D, R, E, false>;
-        highlight?: HighlightOptions | TemplateResultHighlighting;
+        tag?: {[field: FieldName]: TagName} | Array<{[field: FieldName]: TagName}>;
+        field?: Array<DocumentSearchOptions<D, H, P, R, E, M>> | DocumentSearchOptions<D, H, P, R, E, M> | FieldName[] | FieldName;
+        index?: Array<DocumentSearchOptions<D, H, P, R, E, M>> | DocumentSearchOptions<D, H, P, R, E, M> | FieldName[] | FieldName;
+        pluck?: P;
+        highlight?: H;
         enrich?: E;
         merge?: M;
     };
@@ -475,79 +511,148 @@ declare module "flexsearch" {
     type DocumentSearchResultsWrapper<
         D extends DocumentData = DocumentData,
         W extends WorkerType = false,
-        B extends StorageInterface = undefined,
-        R extends boolean = false,
+        S extends StorageInterface = undefined,
+        H extends HighlightOptions = undefined,
+        P extends PluckOptions = undefined,
+        R extends boolean = true,
         E extends boolean = false,
-        M extends boolean = false,
+        M extends boolean = false
     > = W extends false
-        ? B extends undefined
-            ? DocumentSearchResults<D, R, E, M>
-            : Promise<DocumentSearchResults<D, R, E, M>>
-        : Promise<DocumentSearchResults<D, R, E, M>>
+        ? S extends undefined
+            ? DocumentSearchResults<D, H, P, R, E, M>
+            : Promise<DocumentSearchResults<D, H, P, R, E, M>>
+        : Promise<DocumentSearchResults<D, H, P, R, E, M>>
 
     /**
-     * **Document:**
-     * * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants
-     * * API overview: https://github.com/nextapps-de/flexsearch#api-overview
-     * * Document store: https://github.com/nextapps-de/flexsearch#document-store
+     * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants \
+     * API overview: https://github.com/nextapps-de/flexsearch#api-overview \
+     * Document store: https://github.com/nextapps-de/flexsearch#document-store
      */
     export class Document<
         D extends DocumentData = DocumentData,
         W extends WorkerType = false,
-        B extends StorageInterface = undefined
+        S extends StorageInterface = undefined
     > {
-        constructor(options: DocumentOptions<D, W, B>);
+        constructor(options: DocumentOptions<D, W, S>);
 
-        add(id: Id, document: D): this | Promise<this>;
-        add(document: D): this | Promise<this>;
+        add(id: Id, document: D): W extends WorkerType
+            ? Promise<this>
+            : this;
+        add(document: D): W extends WorkerType
+            ? Promise<this>
+            : this;
 
         /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
-        append(id: Id, document: D): this | Promise<this>;
+        append(id: Id, document: D): W extends WorkerType
+            ? Promise<this>
+            : this;
         /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
-        append(document: D): this | Promise<this>;
+        append(document: D): W extends WorkerType
+            ? Promise<this>
+            : this;
 
-        update(id: Id, document: D): this | Promise<this>;
-        update(document: D): this | Promise<this>;
+        update(id: Id, document: D): W extends WorkerType
+            ? Promise<this>
+            : this;
+        update(document: D): W extends WorkerType
+            ? Promise<this>
+            : this;
 
-        remove(id: Id): this | Promise<this>;
-        remove(document: D): this | Promise<this>;
+        remove(id: Id): W extends WorkerType
+            ? Promise<this>
+            : this;
+        remove(document: D): W extends WorkerType
+            ? Promise<this>
+            : this;
 
         // https://github.com/nextapps-de/flexsearch#field-search
-        search(query: string, limit: Limit): DocumentSearchResultsWrapper<D, W, B>;
-        search<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
+        /** @deprecated Pass "limit" within options */
+        search(query: string, limit: Limit): DocumentSearchResultsWrapper<D, W, S>;
+        /** @deprecated Pass "limit" within options */
+        searchCache(query: string, limit: Limit): DocumentSearchResultsWrapper<D, W, S>;
+
+        search<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
             query: string,
-            options?: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
-        search<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
+            options?: DocumentSearchOptions<D, H, P, R, E, M>,
+        ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
+        searchCache<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
+            query: string,
+            options?: DocumentSearchOptions<D, H, P, R, E, M>,
+        ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
+
+        /** @deprecated Pass "limit" within options */
+        search<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
             query: string,
             limit: Limit,
-            options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
-        search<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
-            options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
+            options: DocumentSearchOptions<D, H, P, R, E, M>,
+        ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
+        /** @deprecated Pass "limit" within options */
+        searchCache<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
+            query: string,
+            limit: Limit,
+            options: DocumentSearchOptions<D, H, P, R, E, M>,
+        ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
 
-        searchCache(query: string, limit: Limit): W extends false ? DocumentSearchResults<D> : Promise<DocumentSearchResults<D>>;
-        searchCache<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
-            query: string,
-            options?: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
-        searchCache<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
-            query: string,
-            limit: Limit, options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
-        searchCache<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
-            options: DocumentSearchOptions<D, R, E, M>,
-        ): DocumentSearchResultsWrapper<D, W, B, R, E, M>;
+        search<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
+            options: DocumentSearchOptions<D, H, P, R, E, M>,
+        ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
+        searchCache<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
+            options: DocumentSearchOptions<D, H, P, R, E, M>,
+        ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
+
 
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
-        contain(id: Id): boolean | Promise<boolean>;
+        contain(id: Id): D extends StorageInterface
+            ? Promise<boolean>
+            : boolean;
 
-        clear(): void | Promise<void>;
+        clear(): D extends StorageInterface
+            ? Promise<void>
+            : W extends WorkerType
+                ? Promise<void>
+                : void;
 
-        cleanup(): void | Promise<void>;
+        cleanup(): void;
 
-        get(id: Id): Promise<D> | D | null;
+        get(id: Id): D extends StorageInterface
+            ? Promise<D>
+            : D | null;
 
         set(id: Id, document: D): this;
         set(document: D): this;
@@ -607,22 +712,56 @@ declare module "flexsearch" {
             callback?: AsyncCallback<void>,
         ): Promise<this>;
 
-        searchAsync(query: string, limit?: Limit): Promise<DocumentSearchResults<D>>
-        searchAsync<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
+        /** @deprecated Pass "limit" within options */
+        searchAsync(query: string, limit?: Limit): Promise<DocumentSearchResultsWrapper<D, W, S>>
+
+        searchAsync<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
             query: string,
-            options?: DocumentSearchOptions<D, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, R, E, M>>
-        searchAsync<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
+            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+
+        searchAsync<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
+            query: string,
+            options?: DocumentSearchOptions<D, H, P, R, E, M>,
+            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+
+        /** @deprecated Pass "limit" within options */
+        searchAsync<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
             query: string,
             limit: Limit,
-            options?: DocumentSearchOptions<D, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, R, E, M>>;
-        searchAsync<R extends boolean = false, E extends boolean = false, M extends boolean = false>(
-            options: DocumentSearchOptions<D, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, R, E, M>>;
+            options?: DocumentSearchOptions<D, H, P, R, E, M>,
+            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>;
+
+        searchAsync<
+            H extends HighlightOptions = undefined,
+            P extends PluckOptions = undefined,
+            R extends boolean = true,
+            E extends boolean = false,
+            M extends boolean = false
+        >(
+            options: DocumentSearchOptions<D, H, P, R, E, M>,
+            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>;
     }
 
     type IdType =
@@ -653,28 +792,39 @@ declare module "flexsearch" {
         db?: any;
     };
 
-    type DefaultResolve = {
-        query?: string;
-        limit?: number;
-        offset?: number;
-        enrich?: boolean;
-    };
-
-    type ResolverOptions = DefaultResolve & {
-        index?: Index | Document;
-        pluck?: FieldName;
-        field?: FieldName;
-        and?: ResolverOptions | Array<ResolverOptions>;
-        or?: ResolverOptions | Array<ResolverOptions>;
-        xor?: ResolverOptions | Array<ResolverOptions>;
-        not?: ResolverOptions | Array<ResolverOptions>;
-        boost?: number;
-        suggest?: boolean;
-        resolve?: boolean;
+    type DefaultResolve<
+        D extends DocumentData = DocumentData,
+        H extends HighlightOptions = undefined,
+        E extends boolean = false
+    > = {
         limit?: number;
         offset?: number;
         /** only usable when "resolve" was not set to false */
-        enrich?: boolean;
+        enrich?: D extends DocumentData ? E : undefined;
+        /** only usable when "resolve" was not set to false */
+        highlight?: D extends DocumentData ? H : undefined;
+    };
+
+    type ResolverOptions<
+        D extends DocumentData = DocumentData,
+        W extends WorkerType = false,
+        S extends StorageInterface = undefined,
+        H extends HighlightOptions = undefined,
+        R extends boolean = true,
+        E extends boolean = false
+    > = DefaultResolve<D, H, E> & {
+        query?: string;
+        index?: Index | Document;
+        pluck?: FieldName;
+        field?: FieldName;
+        tag?: {[field: FieldName]: TagName} | Array<{[field: FieldName]: TagName}>;
+        and?: ResolverOptions<D, W, S, H, R, E> | Array<ResolverOptions<D, W, S, H, R, E>>;
+        or?:  ResolverOptions<D, W, S, H, R, E> | Array<ResolverOptions<D, W, S, H, R, E>>;
+        xor?: ResolverOptions<D, W, S, H, R, E> | Array<ResolverOptions<D, W, S, H, R, E>>;
+        not?: ResolverOptions<D, W, S, H, R, E> | Array<ResolverOptions<D, W, S, H, R, E>>;
+        boost?: number;
+        suggest?: boolean;
+        resolve?: R;
     };
 
     type HighlightBoundaryOptions = {
@@ -688,7 +838,7 @@ declare module "flexsearch" {
         pattern?: string | boolean;
     };
 
-    type HighlightOptions = {
+    type HighlightOptions = TemplateResultHighlighting | {
         template?: TemplateResultHighlighting;
         boundary?: HighlightBoundaryOptions | number;
         ellipsis?: HighlightEllipsisOptions | string | boolean;
