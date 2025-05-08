@@ -12,7 +12,7 @@ import { SearchOptions, DocumentSearchOptions } from "./type.js";
 
 export function searchCache(query_or_options, limit_or_options, options) {
 
-    const query = ("object" == typeof query_or_options ? "" + query_or_options.query : "" + query_or_options).toLowerCase();
+    const query = (limit_or_options ? "" + query_or_options : "object" == typeof query_or_options ? "" + query_or_options.query : query_or_options).toLowerCase();
 
     if (!this.cache) {
         this.cache = new CacheClass();

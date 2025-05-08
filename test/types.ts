@@ -1,14 +1,88 @@
 import {
-    DefaultDocumentSearchResults,
     Document,
     Index,
     Worker,
     Resolver,
+    IndexedDB
+} from "flexsearch";
+import {
+    DefaultDocumentSearchResults,
     StorageInterface,
     DefaultSearchResults,
+    EnrichedDocumentSearchResults,
+    MergedDocumentSearchResults,
+    DocumentData
 } from "flexsearch";
 
-async function test() {
+async function test_index() {
+
+    const index = new Index();
+    const index2 = new Index({ resolve: false });
+    const index3 = new Index({ db: new IndexedDB("my-store") });
+
+    const idx1: DefaultSearchResults = index.search({ cache: true });
+    const idx2: Promise<DefaultSearchResults> = index.searchAsync({ cache: true });
+    const idx3: Resolver = index.search({ resolve: false });
+    const idx4: Resolver = index2.search({});
+    const idx5: Resolver = idx3.and({}, {}).limit(100).or({}, {}).boost(2).xor({}, { resolve: false }).not({}, {}).offset(10);
+    const idx6: DefaultSearchResults = idx5.resolve({ limit: 10, offset: 2 });
+    const idx7: DefaultSearchResults = idx5.and({}, { resolve: true });
+    const idx8: DefaultSearchResults = index.searchCache({});
+    const idx9: Promise<DefaultSearchResults> = index.searchCacheAsync({});
+
+    const db1: Promise<IndexedDB> = index3.db;
+    const db2: IndexedDB = await index3.db;
+    const idx10: Promise<DefaultSearchResults> = index3.search({ cache: true });
+    const idx11: Promise<DefaultSearchResults> = index3.searchAsync({ cache: true }, function(res: DefaultSearchResults){});
+    const idx12: Promise<void> = index3.commit();
+    const idx13: Promise<void> = index3.mount(db2);
+    const idx14: Promise<DefaultSearchResults> = index3.searchCache({});
+    const idx15: Promise<DefaultSearchResults> = index3.searchCacheAsync({});
+    const idx16: Promise<DefaultSearchResults> = index3.search({ resolve: true, cache: true });
+    const idx17: Promise<DefaultSearchResults> = index3.searchAsync({ resolve: true, cache: true });
+    const idx18: Resolver = index2.searchCache({});
+    const idx19: Promise<Resolver> = index2.searchCacheAsync({});
+
+    const res1: Resolver = new Resolver({ index });
+    const res2: Resolver = res1.and({ index }).limit(100);
+    const res3: DefaultSearchResults = res2.resolve();
+
+    // @ts-expect-error
+    const idx_err1 = index.search({ highlight: true });
+    // @ts-expect-error
+    const idx_err2 = index.search({ pluck: true });
+    // @ts-expect-error
+    const idx_err3 = index.search({ enrich: true });
+    // @ts-expect-error
+    const idx_err4 = index.search({ merge: true });
+    // @ts-expect-error
+    const index4 = new Index({ document: {} });
+    // @ts-expect-error
+    const index5 = new Index({ worker: true });
+
+    // @ts-expect-error
+    const idx_err5: DefaultSearchResults = idx5.resolve({}, { boost: 1 });
+    // @ts-expect-error
+    const idx_err6: DefaultSearchResults = idx5.resolve({}, { enrich: true });
+    // @ts-expect-error
+    const idx_err7: DefaultSearchResults = idx5.resolve({}, { highlight: true });
+    // @ts-expect-error
+    const idx_err8: DefaultSearchResults = idx5.and({}, { resolve: true }).limit(100);
+
+    // @ts-expect-error
+    const idx_err9: Resolver = index2.search({ cache: true });
+    // @ts-expect-error
+    const idx_err10: Promise<Resolver> = index2.searchAsync({ cache: true });
+    // @ts-expect-error
+    const idx_err11: Resolver = index3.search({ resolve: false, cache: true });
+    // @ts-expect-error
+    const idx_err12: Promise<Resolver> = index3.searchAsync({ resolve: false, cache: true });
+
+}
+
+async function test_document() {
+
+    // ----------------------------------------------------------------
 
     const document = new Document<{
         id: number,
@@ -16,43 +90,101 @@ async function test() {
         description: string,
         tags: string[]
     }>({
+        encoder: "LatinBalance",
+        resolution: 9,
+        context: false,
         document: {
             id: "id",
+            store: [ "title", "description" ],
             index: [ "title", "description" ],
-            tag: [ "tags" ],
-            store: [ "title", "description" ]
+            tag: [ "tags" ]
         },
     });
 
-    // The correct type
-    const doc1 = await document.searchAsync({});
-    const doc2: Resolver = await document.searchAsync({
-        resolve: false,
-    });
-    const doc3 = await document.searchAsync({
-        enrich: true,
-    });
-    const doc4 = await document.searchAsync({
-        enrich: true,
-        merge: true,
-    });
-    doc4[0].doc.title;
+    type doctype = {
+        id: number,
+        meta: {
+            title: string,
+            description: string,
+            tags: string[]
+        }
+    };
 
-    // The wrong type
+    const document2 = new Document<doctype>({
+        document: {
+            id: "id",
+            store: [{
+                field: "meta:title",
+                filter: function(data){
+                    return true;
+                }
+            },{
+                field: "meta:description"
+            },{
+                field: "custom",
+                custom: function(data){
+                    return false;
+                }
+            }],
+            index: [{
+                field: "meta:title",
+                filter: function(data){
+                    return true;
+                }
+            },{
+                field: "meta:description",
+                encoder: "LatinBalance",
+                resolution: 9,
+                context: false,
+            },{
+                field: "custom",
+                custom: function(data){
+                    return data.meta.title + " " + data.meta.description;
+                }
+            }],
+            tag: [{
+                field: "meta:tags",
+                filter: function(data){
+                    return true;
+                }
+            },{
+                field: "custom",
+                custom: function(data){
+                    return "tag";
+                }
+            }]
+        },
+    });
 
-    const t_1_1: DefaultSearchResults = document.search("test", { pluck: "title" });
+    const doc1: DefaultDocumentSearchResults = document.search({ cache: true });
+    const doc2: EnrichedDocumentSearchResults = document.search({ enrich: true });
+    const doc3: MergedDocumentSearchResults = document.search({ merge: true });
+    const doc4: EnrichedDocumentSearchResults = document.search({ highlight: true });
+    const doc5: Promise<DefaultDocumentSearchResults> = document.searchAsync({});
+    const doc6: Resolver = document.search({ resolve: false });
+    const doc7: DefaultSearchResults = document.search({ pluck: "title" });
+    const doc8: DefaultSearchResults = document2.search({ pluck: "meta:title" });
+    const doc9: DefaultDocumentSearchResults = document.searchCache({});
+    const doc10: Promise<DefaultDocumentSearchResults> = document.searchAsync({ cache: true });
+    const doc11: Promise<DefaultDocumentSearchResults> = document.searchCacheAsync({});
+    const doc13: DefaultDocumentSearchResults = document.search({ resolve: true });
+    const doc14: Resolver = document.search({ resolve: false });
+    const doc15: DefaultSearchResults = doc14.resolve({});
+    const doc16: DefaultSearchResults = doc14.and({ resolve: true });
+
+    const res1: Resolver = doc14.and({ index: document, field: "meta:title" });
+    const res2: DefaultDocumentSearchResults = doc14.resolve();
+
     // @ts-expect-error
-    const t_1_2: DefaultSearchResults = document.search("test", {});
+    let tmp1: DocumentData = doc1[0].result[0].doc;
+    let tmp2: DocumentData = doc2[0].result[0].doc;
+    let tmp3: DocumentData = doc3[0].doc;
 
-    const t_2_1: DefaultDocumentSearchResults = document.search("test", {});
+    // @ts-expect-error
+    const t_2_1: DefaultSearchResults = document2.search({ pluck: "title" });
     // @ts-expect-error
     const t_2_2: DefaultSearchResults = document.search("test", {});
 
-    const t_3_1: DefaultDocumentSearchResults = document.search({});
-    const t_3_2: DefaultDocumentSearchResults = document.search({ resolve: true });
-
-    const t_4_1: Resolver = document.search({ resolve: false });
-    const t_4_2: Resolver = new Resolver();
     // @ts-expect-error
     const t_4_3: Resolver = document.search({});
     // @ts-expect-error
@@ -75,23 +207,23 @@ async function test() {
     const docw7: DefaultDocumentSearchResults = await document.searchAsync({ pluck: false });
     // @ts-expect-error
     const docw8: DefaultDocumentSearchResults = await document.searchAsync({ enrich: false });
-    // Promise?
+
+}
+
+async function test_worker() {
 
     const documentNoWorker = new Document({});
-    const doc5 = documentNoWorker.search({}); // No Promise
+    const doc6 = documentNoWorker.search({}); // No Promise
 
     const documentWorker = new Document({
         worker: true,
     });
-    const doc6 = await documentWorker.search({}) // Promise
+    const doc7 = await documentWorker.search({}) // Promise
 
     const documentWorker2 = new Document({
         worker: '...',
     });
-    const doc7 = await documentWorker2.search({}) // Promise
-
-    const index = new Index({})
-    const idx = index.search({}) // No Promise
+    const doc8 = await documentWorker2.search({}) // Promise
 
     const worker =  new Worker()
     const wkr = await worker.search({}) // Promise
@@ -100,6 +232,6 @@ async function test() {
         db: {} as unknown as StorageInterface
     })
 
-    const doc8 = documentDb.search({}) // Promise
+    const doc9 = documentDb.search({}) // Promise
 }
 

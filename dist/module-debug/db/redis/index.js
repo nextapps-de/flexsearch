@@ -36,8 +36,7 @@ export default function RedisDB(name, config = {}) {
     this.id = (name ? sanitize(name) : "flexsearch") + "|";
     this.field = config.field ? "-" + sanitize(config.field) : "";
     this.type = config.type || "";
-    this.fastupdate = /* tag? */ /* stringify */ /* stringify */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
-    /*await rows.hasNext()*/;
+    this.fastupdate = /* tag? */ /* stringify */ /* stringify */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
     this.db = config.db || DB || null;
     this.support_tag_search = !0;
     this.resolution = 9;
@@ -156,7 +155,7 @@ RedisDB.prototype.enrich = function (ids) {
     if ("object" != typeof ids) {
         ids = [ids];
     }
-    return this.db.hmGet(this.id + "doc", ids).then(function (res) {
+    return this.db.hmGet(this.id + "doc", "number" === this.type ? ids.map(i => "" + i) : ids).then(function (res) {
         for (let i = 0; i < res.length; i++) {
             res[i] = {
                 id: ids[i],
@@ -384,7 +383,7 @@ RedisDB.prototype.commit = async function (flexsearch, _replace, _append) {
                         const ref = this.id + "ctx" + this.field + ":" + ctx_key + ":" + key;
                         trx.zAdd(ref, result);
                         // if(this.fastupdate) for(let j = 0; j < ids.length; j++){
-
+                        //     trx.sAdd("ref" + this.field + ":" + ids[j], ref);
                         // }
                         if (this.fastupdate) for (let j = 0, id; j < ids.length; j++) {
                             // Map performs bad when pushing numeric-like values as key

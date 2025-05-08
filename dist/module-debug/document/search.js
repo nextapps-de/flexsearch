@@ -45,6 +45,13 @@ Document.prototype.search = function (query, limit, options, _promises) {
         }
     }
 
+    if (options && options.cache) {
+        options.cache = /* suggest */ /* append: */ /* enrich */!1;
+        const res = this.searchCache(query, limit, options);
+        options.cache = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+        return res;
+    }
+
     /** @type {
      *   DocumentSearchResults|
      *   EnrichedDocumentSearchResults|
@@ -63,8 +70,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         tag,
         offset,
         count = 0,
-        resolve = /* tag? */ /* stringify */ /* stringify */
-    /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/,
+        resolve = !0,
         highlight;
 
 
@@ -82,7 +88,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         field = pluck || options.field || (field = options.index) && (field.index ? null : field);
         tag = this.tag && options.tag;
         suggest = options.suggest;
-        resolve = /* suggest */ /* append: */ /* enrich */!1 !== options.resolve;
+        resolve = !1 !== options.resolve;
 
         // upgrade pluck when missing
         if (!resolve && !pluck) {
@@ -102,13 +108,15 @@ Document.prototype.search = function (query, limit, options, _promises) {
             }
         }
 
-        if (this.store && options.enrich && !resolve) {
+        if (this.store && options.highlight && !resolve) {
+            console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })");
+        } else if (this.store && options.enrich && !resolve) {
             console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
         }
 
 
         highlight = resolve && this.store && options.highlight;
-        enrich = highlight || resolve && this.store && options.enrich;
+        enrich = !!highlight || resolve && this.store && options.enrich;
         limit = options.limit || limit;
         offset = options.offset || 0;
         limit || (limit = 100);
@@ -211,8 +219,11 @@ Document.prototype.search = function (query, limit, options, _promises) {
     }
 
     field || (field = this.field);
-    let promises = !_promises && (this.worker || this.db /*|| this.async*/) && [],
-        db_tag_search;
+
+    let db_tag_search,
+        promises = (this.worker || this.db /*||
+                                           (SUPPORT_ASYNC && this.async)*/
+    ) && !_promises && [];
 
 
     // multi field search
@@ -235,11 +246,11 @@ Document.prototype.search = function (query, limit, options, _promises) {
             field_options = key;
             key = field_options.field;
             query = field_options.query || query;
-            limit = field_options.limit || limit;
-            offset = field_options.offset || offset;
-            suggest = field_options.suggest || suggest;
-            enrich = this.store && (field_options.enrich || enrich);
-            highlight = enrich && (options.highlight || highlight);
+            limit = inherit(field_options.limit, limit);
+            offset = inherit(field_options.offset, offset);
+            suggest = inherit(field_options.suggest, suggest);
+            highlight = resolve && this.store && inherit(field_options.highlight, highlight);
+            enrich = !!highlight || resolve && this.store && inherit(field_options.enrich, enrich);
         }
 
         if (_promises) {
@@ -296,7 +307,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                             arr.push(ids);
                         } else if (!suggest) {
                             // no tags found
-                            return resolve ? result : new Resolver(result);
+                            return resolve || !!0 ? result : new Resolver(result);
                         }
                     }
                 }
@@ -312,7 +323,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                         if (suggest) {
                             continue;
                         } else {
-                            return resolve ? result : new Resolver(result);
+                            return resolve || !!0 ? result : new Resolver(result);
                         }
                     }
 
@@ -324,7 +335,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                         arr.push(ids);
                     } else if (!suggest) {
                         // no tags found
-                        return resolve ? result : new Resolver(result);
+                        return resolve || !!0 ? result : new Resolver(result);
                     }
                 }
             }
@@ -334,7 +345,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                 len = res.length;
                 if (!len && !suggest) {
                     // nothing matched
-                    return resolve ? res : new Resolver( /** @type {IntermediateSearchResults} */res);
+                    return resolve || !!0 ? res : new Resolver( /** @type {IntermediateSearchResults} */res);
                 }
                 // move counter back by 1
                 count--;
@@ -347,7 +358,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
             count++;
         } else if (1 === field.length) {
             // fast path: nothing matched
-            return resolve ? result : new Resolver(result);
+            return resolve || !!0 ? result : new Resolver(result);
         }
     }
 
@@ -365,7 +376,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
                         if (suggest) {
                             continue;
                         } else {
-                            return resolve ? result : new Resolver(result);
+                            return resolve || !!0 ? result : new Resolver(result);
                         }
                     }
 
@@ -383,7 +394,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
     }
 
     if (!count) {
-        return resolve ? result : new Resolver(result);
+        return resolve || !!0 ? result : new Resolver(result);
     }
     if (pluck && (!enrich || !this.store)) {
         return (/** @type {SearchResults} */result[0]
@@ -411,7 +422,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         }
 
         if (pluck) {
-            return resolve ? highlight ? highlight_fields( /** @type {string} */query, res, this.index, pluck, highlight) : /** @type {SearchResults|EnrichedSearchResults} */res : new Resolver( /** @type {IntermediateSearchResults} */res);
+            return resolve || !!0 ? highlight ? highlight_fields( /** @type {string} */query, res, this.index, pluck, highlight) : /** @type {SearchResults|EnrichedSearchResults} */res : new Resolver( /** @type {IntermediateSearchResults} */res);
         }
 
         result[i] = {
@@ -432,6 +443,10 @@ Document.prototype.search = function (query, limit, options, _promises) {
 
     return merge ? merge_fields(result) : highlight ? highlight_fields( /** @type {string} */query, result, this.index, pluck, highlight) : /** @type {DocumentSearchResults} */result;
 };
+
+function inherit(target_value, default_value) {
+    return "undefined" == typeof target_value ? default_value : target_value;
+}
 
 // todo support Resolver
 // todo when searching through multiple fields each term should

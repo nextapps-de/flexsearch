@@ -1,3 +1,6 @@
+// COMPILER BLOCK -->
+import { SUPPORT_CACHE } from "./config.js";
+// <-- COMPILER BLOCK
 import Document from "./document.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
@@ -8,6 +11,9 @@ export default function(prototype){
     register.call(prototype, "search");
     register.call(prototype, "update");
     register.call(prototype, "remove");
+    if(SUPPORT_CACHE){
+        register.call(prototype, "searchCache");
+    }
 }
 
 let timer;

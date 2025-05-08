@@ -125,6 +125,7 @@ export let StoreOptions = {};
  *   suggest: (boolean|undefined),
  *   resolve: (boolean|undefined),
  *   enrich: (boolean|undefined),
+ *   cache: (boolean|undefined)
  * }}
  */
 export let SearchOptions = {};
@@ -134,9 +135,12 @@ export let SearchOptions = {};
  *   query: (string|undefined),
  *   limit: (number|undefined),
  *   offset: (number|undefined),
+ *   resolution: (number|undefined),
  *   context: (boolean|undefined),
  *   suggest: (boolean|undefined),
+ *   resolve: (boolean|undefined),
  *   enrich: (boolean|undefined),
+ *   cache: (boolean|undefined),
  *   tag: (Object|Array<Object>|undefined),
  *   field: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
  *   index: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),

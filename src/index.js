@@ -161,7 +161,7 @@ if(SUPPORT_PERSISTENT){
             this.commit_timer = null;
         }
         return this.db.destroy();
-    }
+    };
 }
 
 /**

@@ -94,6 +94,7 @@ export function highlight_fields(query, result, index, pluck, config){
         let res;
 
         if(pluck){
+            //res = result[0].result;
             res = result;
             path = pluck;
         }

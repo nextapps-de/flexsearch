@@ -12,9 +12,11 @@ import { SearchOptions, DocumentSearchOptions } from "./type.js";
 
 export function searchCache(query_or_options, limit_or_options, options){
 
-    const query = (typeof query_or_options === "object"
-        ? "" + query_or_options.query
-        : "" + query_or_options
+    const query = (limit_or_options
+        ? "" + query_or_options
+        : typeof query_or_options === "object"
+            ? "" + query_or_options.query
+            : query_or_options
     ).toLowerCase();
 
     if(!this.cache){

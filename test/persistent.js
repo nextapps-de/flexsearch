@@ -428,8 +428,6 @@ export default function(DB, DBClass){
         let result = await index.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
-            enrich: true,
             // highlight template
             // $1 is a placeholder for the matched partial
             highlight: "<b>$1</b>"
@@ -449,8 +447,6 @@ export default function(DB, DBClass){
         result = await index.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
-            enrich: true,
             // highlight template
             // $1 is a placeholder for the matched partial
             highlight: "<b>$1</b>"
@@ -470,15 +466,13 @@ export default function(DB, DBClass){
         result = await index.search({
             query: "karmen or clown or not found",
             suggest: true,
-            // set enrich to true (required)
-            enrich: true,
-            pluck: "title",
+            field: "title",
             // highlight template
             // $1 is a placeholder for the matched partial
             highlight: "<b>$1</b>"
         });
 
-        expect(result).to.eql([{
+        expect(result[0].result).to.eql([{
             id: 1,
             doc: data[0],
             highlight: '<b>Carmen</b>cita'

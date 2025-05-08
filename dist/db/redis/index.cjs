@@ -205,7 +205,7 @@ RedisDB.prototype.enrich = function(ids){
     if(typeof ids !== "object"){
         ids = [ids];
     }
-    return this.db.hmGet(this.id + "doc", ids).then(function(res){
+    return this.db.hmGet(this.id + "doc", this.type === "number" ? ids.map(i => "" + i) : ids).then(function(res){
         for(let i = 0; i < res.length; i++){
             res[i] = {
                 id: ids[i],

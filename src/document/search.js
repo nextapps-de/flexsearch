@@ -1,12 +1,14 @@
 // COMPILER BLOCK -->
 import {
     DEBUG,
-    PROFILER, SUPPORT_HIGHLIGHTING,
+    PROFILER, SUPPORT_ASYNC, SUPPORT_CACHE,
+    SUPPORT_HIGHLIGHTING,
     SUPPORT_PERSISTENT,
     SUPPORT_RESOLVER,
     SUPPORT_STORE,
     SUPPORT_SUGGESTION,
-    SUPPORT_TAGS
+    SUPPORT_TAGS,
+    SUPPORT_WORKER
 } from "../config.js";
 // <-- COMPILER BLOCK
 import {
@@ -67,6 +69,13 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
     }
 
+    if(SUPPORT_CACHE && options && options.cache){
+        options.cache = false;
+        const res = this.searchCache(query, limit, options);
+        options.cache = true;
+        return res;
+    }
+
     /** @type {
      *   DocumentSearchResults|
      *   EnrichedDocumentSearchResults|
@@ -116,13 +125,16 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
 
         if(DEBUG){
-            if(SUPPORT_STORE && this.store && options.enrich && !resolve){
+            if(SUPPORT_STORE && this.store && options.highlight && !resolve){
+                console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })");
+            }
+            else if(SUPPORT_STORE && this.store && options.enrich && !resolve){
                 console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
             }
         }
 
         highlight = SUPPORT_STORE && SUPPORT_HIGHLIGHTING && resolve && this.store && options.highlight;
-        enrich = SUPPORT_STORE && (highlight || (resolve && this.store && options.enrich));
+        enrich = SUPPORT_STORE && (!!highlight || (resolve && this.store && options.enrich));
         limit = options.limit || limit;
         offset = options.offset || 0;
         limit || (limit = 100);
@@ -232,8 +244,13 @@ Document.prototype.search = function(query, limit, options, _promises){
     }
 
     field || (field = this.field);
-    let promises = !_promises && (this.worker || this.db /*|| this.async*/) && [];
+
     let db_tag_search;
+    let promises = (
+        (SUPPORT_WORKER && this.worker) ||
+        (SUPPORT_PERSISTENT && this.db) /*||
+        (SUPPORT_ASYNC && this.async)*/
+    ) && !_promises && [];
 
     // multi field search
     // field could be a custom set of selected fields by this query
@@ -255,11 +272,11 @@ Document.prototype.search = function(query, limit, options, _promises){
             field_options = key;
             key = field_options.field;
             query = field_options.query || query;
-            limit = field_options.limit || limit;
-            offset = field_options.offset || offset;
-            suggest = SUPPORT_SUGGESTION && (field_options.suggest || suggest);
-            enrich = SUPPORT_STORE && this.store && (field_options.enrich || enrich);
-            highlight = SUPPORT_STORE && SUPPORT_HIGHLIGHTING && enrich && (options.highlight || highlight);
+            limit = inherit(field_options.limit, limit);
+            offset = inherit(field_options.offset, offset);
+            suggest = SUPPORT_SUGGESTION && inherit(field_options.suggest, suggest);
+            highlight = SUPPORT_STORE && SUPPORT_HIGHLIGHTING && resolve && this.store && inherit(field_options.highlight, highlight);
+            enrich = SUPPORT_STORE && (!!highlight || (resolve && this.store && inherit(field_options.enrich, enrich)));
         }
 
         if(_promises){
@@ -319,7 +336,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                         }
                         else if(!suggest){
                             // no tags found
-                            return resolve
+                            return resolve || !SUPPORT_RESOLVER
                                 ? result
                                 : new Resolver(result)
                         }
@@ -342,7 +359,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                             continue;
                         }
                         else{
-                            return resolve
+                            return resolve || !SUPPORT_RESOLVER
                                 ? result
                                 : new Resolver(result)
                         }
@@ -357,7 +374,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                     }
                     else if(!suggest){
                         // no tags found
-                        return resolve
+                        return resolve || !SUPPORT_RESOLVER
                             ? result
                             : new Resolver(result)
                     }
@@ -370,7 +387,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                 len = res.length;
                 if(!len && !suggest){
                     // nothing matched
-                    return resolve
+                    return resolve || !SUPPORT_RESOLVER
                         ? res
                         : new Resolver(/** @type {IntermediateSearchResults} */ (res));
                 }
@@ -386,7 +403,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
         else if(field.length === 1){
             // fast path: nothing matched
-            return resolve
+            return resolve || !SUPPORT_RESOLVER
                 ? result
                 : new Resolver(result);
         }
@@ -408,7 +425,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                             continue;
                         }
                         else{
-                            return resolve
+                            return resolve || !SUPPORT_RESOLVER
                                 ? result
                                 : new Resolver(result);
                         }
@@ -430,7 +447,7 @@ Document.prototype.search = function(query, limit, options, _promises){
     }
 
     if(!count){
-        return resolve
+        return resolve || !SUPPORT_RESOLVER
             ? result
             : new Resolver(result);
     }
@@ -460,7 +477,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
 
         if(pluck){
-            return resolve
+            return resolve || !SUPPORT_RESOLVER
                 ? (highlight
                     ? highlight_fields(/** @type {string} */ (query), res, this.index, pluck, highlight)
                     : /** @type {SearchResults|EnrichedSearchResults} */ (res))
@@ -496,6 +513,12 @@ Document.prototype.search = function(query, limit, options, _promises){
             : /** @type {DocumentSearchResults} */ (
                 result
             );
+}
+
+function inherit(target_value, default_value){
+    return typeof target_value === "undefined"
+        ? default_value
+        : target_value;
 }
 
 // todo support Resolver

@@ -8,12 +8,6 @@ import Resolver from "../resolver.js";
 import { intersect } from "../intersect.js";
 import resolve_default from "../resolve/default.js";
 
-// todo remove
-// let global_resolve = 1;
-// export function set_resolve(resolve){
-//     global_resolve = resolve;
-// }
-
 /**
  * @param {string|SearchOptions} query
  * @param {number|SearchOptions=} limit
@@ -33,6 +27,14 @@ Index.prototype.search = function (query, limit, options) {
             options = /** @type {!SearchOptions} */limit;
             limit = 0;
         }
+    }
+
+    if (options && options.cache) {
+        options.cache = /* suggest */ /* append: */ /* enrich */!1;
+        const res = this.searchCache(query, limit, options);
+        options.cache = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
+        ;
+        return res;
     }
 
     /** @type {!Array<IntermediateSearchResults>} */
@@ -57,14 +59,15 @@ Index.prototype.search = function (query, limit, options) {
         offset = options.offset || 0;
         context = options.context;
         suggest = options.suggest;
-        resolve = /*global_resolve &&*/ /* suggest */ /* append: */ /* enrich */!1 !== options.resolve;
-        //resolve || (global_resolve = 0);
+        resolve = options.resolve;
         enrich = resolve && options.enrich;
         boost = options.boost;
         resolution = options.resolution;
         tag = this.db && options.tag;
-    } else {
-        resolve = this.resolve; // || global_resolve;
+    }
+
+    if ("undefined" == typeof resolve) {
+        resolve = this.resolve;
     }
 
     context = this.depth && !1 !== context;

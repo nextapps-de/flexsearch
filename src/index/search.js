@@ -18,12 +18,6 @@ import Resolver from "../resolver.js";
 import { intersect } from "../intersect.js";
 import resolve_default from "../resolve/default.js";
 
-// todo remove
-// let global_resolve = 1;
-// export function set_resolve(resolve){
-//     global_resolve = resolve;
-// }
-
 /**
  * @param {string|SearchOptions} query
  * @param {number|SearchOptions=} limit
@@ -46,6 +40,13 @@ Index.prototype.search = function(query, limit, options){
         }
     }
 
+    if(SUPPORT_CACHE && options && options.cache){
+        options.cache = false;
+        const res = this.searchCache(query, limit, options);
+        options.cache = true;
+        return res;
+    }
+
     /** @type {!Array<IntermediateSearchResults>} */
     let result = [];
     let length;
@@ -66,15 +67,15 @@ Index.prototype.search = function(query, limit, options){
         offset = options.offset || 0;
         context = options.context;
         suggest = SUPPORT_SUGGESTION && options.suggest;
-        resolve = !SUPPORT_RESOLVER || (/*global_resolve &&*/ options.resolve !== false);
-        //resolve || (global_resolve = 0);
+        resolve = !SUPPORT_RESOLVER || options.resolve;
         enrich = resolve && options.enrich;
-        boost = options.boost;
+        boost = SUPPORT_DOCUMENT && options.boost;
         resolution = options.resolution;
-        tag = SUPPORT_PERSISTENT && SUPPORT_DOCUMENT && SUPPORT_TAGS && this.db && options.tag;
+        tag = SUPPORT_DOCUMENT && SUPPORT_TAGS && SUPPORT_PERSISTENT && this.db && options.tag;
     }
-    else{
-        resolve = !SUPPORT_RESOLVER || this.resolve; // || global_resolve;
+
+    if(typeof resolve === "undefined"){
+        resolve = !SUPPORT_RESOLVER || this.resolve;
     }
 
     context = this.depth && context !== false;

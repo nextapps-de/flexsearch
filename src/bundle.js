@@ -50,6 +50,7 @@ import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 /** @export */ Index.prototype.addAsync;
 /** @export */ Index.prototype.appendAsync;
 /** @export */ Index.prototype.searchAsync;
+/** @export */ Index.prototype.searchCacheAsync;
 /** @export */ Index.prototype.updateAsync;
 /** @export */ Index.prototype.removeAsync;
 /** @export */ Index.prototype.export;
@@ -98,6 +99,7 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Document.prototype.addAsync;
 /** @export */ Document.prototype.appendAsync;
 /** @export */ Document.prototype.searchAsync;
+/** @export */ Document.prototype.searchCacheAsync;
 /** @export */ Document.prototype.updateAsync;
 /** @export */ Document.prototype.removeAsync;
 /** @export */ Document.prototype.mount;
@@ -251,6 +253,7 @@ if(SUPPORT_SERIALIZE){
 /** @export */ SearchOptions.suggest;
 /** @export */ SearchOptions.resolve;
 /** @export */ SearchOptions.enrich;
+/** @export */ SearchOptions.cache;
 /** @export */ SearchOptions.resolution;
 
 /** @export */ DocumentSearchOptions.query;
@@ -258,7 +261,10 @@ if(SUPPORT_SERIALIZE){
 /** @export */ DocumentSearchOptions.offset;
 /** @export */ DocumentSearchOptions.context;
 /** @export */ DocumentSearchOptions.suggest;
+/** @export */ DocumentSearchOptions.resolve;
 /** @export */ DocumentSearchOptions.enrich;
+/** @export */ DocumentSearchOptions.cache;
+/** @export */ DocumentSearchOptions.resolution;
 /** @export */ DocumentSearchOptions.tag;
 /** @export */ DocumentSearchOptions.field;
 /** @export */ DocumentSearchOptions.index;

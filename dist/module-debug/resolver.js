@@ -1,6 +1,5 @@
 import Index from "./index.js";
 import default_resolver from "./resolve/default.js";
-//import { set_resolve } from "./index/search.js";
 import { apply_enrich } from "./document/search.js";
 import { ResolverOptions, IntermediateSearchResults } from "./type.js";
 import "./resolve/handler.js";
@@ -100,8 +99,6 @@ Resolver.prototype.boost = function (boost) {
  * @param {boolean=} enrich
  */
 Resolver.prototype.resolve = function (limit, offset, enrich) {
-
-    //set_resolve(1);
     const result = this.result,
           index = this.index;
 

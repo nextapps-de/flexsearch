@@ -126,6 +126,7 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                     const final = [];
                     for(let i = 0, arr; i < result.length; i++){
                         arr = result[i];
+                        //if(!arr) continue;
                         if(arr.length > offset){
                             offset -= arr.length;
                             continue;
