@@ -193,10 +193,12 @@ async function test_document() {
     const doc26: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ enrich: true });
     // highlight within last resolver stage is work in progress:
     const doc27: EnrichedResults = doc24.and({}, { index: document2, resolve: true, highlight: "" });
+    const doc28: DefaultSearchResults = document2.search({ pluck: { field: "meta:title", limit: 10 } });
+    const doc30: EnrichedResults = document2.search({ pluck: { field: "meta:title", highlight: true } });
 
     // highlight on .resolve() is never supported:
     // @ts-expect-error
-    const doc28: EnrichedResults = doc24.resolve({ highlight: "" });
+    const err0: EnrichedResults = doc24.resolve({ highlight: "" });
 
     // @ts-expect-error
     const err1: DocumentData = doc1[0].result[0].doc;

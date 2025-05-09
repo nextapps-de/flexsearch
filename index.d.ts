@@ -994,16 +994,16 @@ declare module "flexsearch" {
 
         constructor(options?: ResolverOptions<D, W, S> | IntermediateSearchResults);
 
-        and<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
+        and<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
             IndexSearchResultsWrapper<W, S, R, D>;
 
-        or<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
+        or<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
             IndexSearchResultsWrapper<W, S, R, D>;
 
-        xor<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
+        xor<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
             IndexSearchResultsWrapper<W, S, R, D>;
 
-        not<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
+        not<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
             IndexSearchResultsWrapper<W, S, R, D>;
 
         limit(limit: number): Resolver<D, W, S>;
