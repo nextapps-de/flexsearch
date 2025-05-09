@@ -185,12 +185,18 @@ async function test_document() {
     const doc20: Resolver = doc19.or({ index: document2, field: "meta:title" });
     const doc21: DefaultDocumentSearchResults = doc20.resolve();
     const doc22: EnrichedResults = doc20.resolve({ enrich: true });
-    const doc23: EnrichedResults = doc20.resolve({ highlight: true });
+    // highlight on .resolve() is never supported:
+    //const doc23: EnrichedResults = doc20.resolve({ highlight: true });
+    // highlight within last resolver stage is work in progress:
+    const doc23: EnrichedResults = doc20.and({ resolve: true, highlight: true });
 
     const doc24: Resolver = new Resolver({ index: document });
     const doc25: EnrichedResults = doc24.and({}, { index: document2, resolve: true, enrich: true });
     const doc26: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ enrich: true });
-    const doc27: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ highlight: true });
+    // highlight on .resolve() is never supported:
+    //const doc27: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ highlight: true });
+    // highlight within last resolver stage is work in progress:
+    const doc27: EnrichedResults = doc24.and({}, { index: document2, resolve: true, highlight: true });
 
     // @ts-expect-error
     let tmp1: DocumentData = doc1[0].result[0].doc;
