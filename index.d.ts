@@ -419,13 +419,17 @@ declare module "flexsearch" {
         db?: StorageInterface;
     };
 
-    export type FieldOptions<D = DocumentData> = IndexOptions & DefaultFieldOptions<D> & {
-        config?: WorkerConfigURL | WorkerConfigPath;
-    };
-
     export type TagOptions<D = DocumentData> = DefaultFieldOptions<D>;
 
     export type StoreOptions<D = DocumentData> = DefaultFieldOptions<D> | DefaultCustomFieldOptions<D>;
+
+    export interface IndexWorkerConfig {
+        config?: WorkerConfigURL | WorkerConfigPath;
+    }
+
+    export type FieldOptions<D extends DocumentData> =
+        (DefaultFieldOptions<D> & IndexWorkerConfig)
+        | (DefaultCustomFieldOptions<D> & IndexWorkerConfig)
 
     /**
      *  # Document Search Result
