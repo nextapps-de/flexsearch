@@ -3,7 +3,7 @@ import {
     Index,
     Worker,
     Resolver,
-    IndexedDB
+    IndexedDB, EnrichedResults
 } from "flexsearch";
 import {
     DefaultDocumentSearchResults,
@@ -44,8 +44,13 @@ async function test_index() {
     const idx19: Promise<Resolver> = index2.searchCacheAsync({});
 
     const res1: Resolver = new Resolver({ index });
-    const res2: Resolver = res1.and({ index }).limit(100);
+    const res2: Resolver = res1.and({}, { index }).limit(100);
     const res3: DefaultSearchResults = res2.resolve();
+
+    const res4: Resolver<undefined, false, IndexedDB> = new Resolver({ index: index3 });
+    const res5: Promise<Resolver<undefined, false, IndexedDB>> = res4.and();
+    const res6: Promise<Resolver<undefined, false, IndexedDB>> = res4.and({ index: index3 });
+    const res7: Promise<DefaultSearchResults> = (await res6).limit(100).resolve();
 
     // @ts-expect-error
     const idx_err1 = index.search({ highlight: true });
@@ -78,6 +83,8 @@ async function test_index() {
     // @ts-expect-error
     const idx_err12: Promise<Resolver> = index3.searchAsync({ resolve: false, cache: true });
 
+    // @ts-expect-deprecation
+    const idx_err13: DefaultSearchResults = index.search("query", 100);
 }
 
 async function test_document() {
@@ -168,12 +175,22 @@ async function test_document() {
     const doc10: Promise<DefaultDocumentSearchResults> = document.searchAsync({ cache: true });
     const doc11: Promise<DefaultDocumentSearchResults> = document.searchCacheAsync({});
     const doc13: DefaultDocumentSearchResults = document.search({ resolve: true });
+
     const doc14: Resolver = document.search({ resolve: false });
     const doc15: DefaultSearchResults = doc14.resolve({});
     const doc16: DefaultSearchResults = doc14.and({ resolve: true });
+    const doc17: EnrichedResults = doc14.resolve({ enrich: true });
+    const doc18: EnrichedResults = doc14.and({ resolve: true, enrich: true });
+    const doc19: Resolver = doc14.and({ index: document, field: "title" });
+    const doc20: Resolver = doc19.or({ index: document2, field: "meta:title" });
+    const doc21: DefaultDocumentSearchResults = doc20.resolve();
+    const doc22: EnrichedResults = doc20.resolve({ enrich: true });
+    const doc23: EnrichedResults = doc20.resolve({ highlight: true });
 
-    const res1: Resolver = doc14.and({ index: document, field: "meta:title" });
-    const res2: DefaultDocumentSearchResults = doc14.resolve();
+    const doc24: Resolver = new Resolver({ index: document });
+    const doc25: EnrichedResults = doc24.and({}, { index: document2, resolve: true, enrich: true });
+    const doc26: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ enrich: true });
+    const doc27: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ highlight: true });
 
     // @ts-expect-error
     let tmp1: DocumentData = doc1[0].result[0].doc;

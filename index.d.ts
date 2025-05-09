@@ -198,7 +198,7 @@ declare module "flexsearch" {
         D extends DocumentData = undefined
     > = R extends true
         ? DefaultSearchResults
-        : Resolver<D, W, S>;
+        : Resolver<D, W, S>
 
     /**
      * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants \
@@ -209,12 +209,13 @@ declare module "flexsearch" {
     export type IndexSearchResultsWrapper<
         W extends WorkerType = false,
         S extends StorageInterface | boolean = false,
-        R extends boolean = true
+        R extends boolean = true,
+        D extends DocumentData = undefined
     > = W extends false
         ? S extends false
-            ? SearchResults<W, S, R>
-            : Promise<SearchResults<W, S, R>>
-        : Promise<SearchResults<W, S, R>>
+            ? SearchResults<W, S, R, D>
+            : Promise<SearchResults<W, S, R, D>>
+        : Promise<SearchResults<W, S, R, D>>
 
     export class Index<
         W extends WorkerType = false,
@@ -364,14 +365,18 @@ declare module "flexsearch" {
     type WorkerConfigPath = string;
     type WorkerType = boolean | WorkerURL | WorkerPath;
 
-    export type WorkerIndexOptions = IndexOptions & {
-        config?: WorkerConfigURL | WorkerConfigPath,
+    export type WorkerIndexOptions = IndexOptions & IndexWorkerConfig & {
+        //config?: WorkerConfigURL | WorkerConfigPath,
         export?: () => Promise<void>;
         import?: () => Promise<void>;
         // no persistent supported
         db?: null;
         commit?: null;
     };
+
+    export interface IndexWorkerConfig {
+        config?: WorkerConfigURL | WorkerConfigPath;
+    }
 
     export class Worker extends Index<true> {
         constructor(options?: Preset | WorkerIndexOptions);
@@ -402,33 +407,31 @@ declare module "flexsearch" {
         }[keyof D]
         : never;
 
-    export type DefaultFieldOptions<
-        D = DocumentData,
-    > = IndexOptions & {
-        field: FieldName<D>;
-        filter?: (doc: D) => boolean;
-        db?: StorageInterface;
-    };
+    export type DefaultFieldOptions<D = DocumentData> =
+        IndexOptions & {
+            field: FieldName<D>;
+            filter?: (doc: D) => boolean;
+            db?: StorageInterface;
+        };
 
-    export type DefaultCustomFieldOptions<
-        D = DocumentData,
-    > = IndexOptions & {
-        custom: CustomFN<D>;
-        field: FieldName;
-        filter?: (doc: D) => boolean;
-        db?: StorageInterface;
-    };
+    export type DefaultCustomFieldOptions<D = DocumentData> =
+        IndexOptions & {
+            custom: CustomFN<D>;
+            field: FieldName;
+            filter?: (doc: D) => boolean;
+            db?: StorageInterface;
+        };
 
-    export type TagOptions<D = DocumentData> = DefaultFieldOptions<D> | DefaultCustomFieldOptions<D>;
+    export type TagOptions<D = DocumentData> =
+        | DefaultFieldOptions<D>
+        | DefaultCustomFieldOptions<D>;
 
-    export type StoreOptions<D = DocumentData> = DefaultFieldOptions<D> | DefaultCustomFieldOptions<D>;
-
-    export interface IndexWorkerConfig {
-        config?: WorkerConfigURL | WorkerConfigPath;
-    }
+    export type StoreOptions<D = DocumentData> =
+        | DefaultFieldOptions<D>
+        | DefaultCustomFieldOptions<D>;
 
     export type FieldOptions<D extends DocumentData> =
-        (DefaultFieldOptions<D> & IndexWorkerConfig)
+        | (DefaultFieldOptions<D> & IndexWorkerConfig)
         | (DefaultCustomFieldOptions<D> & IndexWorkerConfig)
 
     /**
@@ -992,16 +995,16 @@ declare module "flexsearch" {
         constructor(options?: ResolverOptions<D, W, S> | IntermediateSearchResults);
 
         and<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
-            SearchResults<W, S, R, D>;
+            IndexSearchResultsWrapper<W, S, R, D>;
 
         or<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
-            SearchResults<W, S, R, D>;
+            IndexSearchResultsWrapper<W, S, R, D>;
 
         xor<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
-            SearchResults<W, S, R, D>;
+            IndexSearchResultsWrapper<W, S, R, D>;
 
         not<R extends boolean = false>(...args: ResolverOptions<D, W, S, unknown, R>[]):
-            SearchResults<W, S, R, D>;
+            IndexSearchResultsWrapper<W, S, R, D>;
 
         limit(limit: number): Resolver<D, W, S>;
 
@@ -1009,7 +1012,7 @@ declare module "flexsearch" {
 
         boost(boost: number): Resolver<D, W, S>;
 
-        resolve(options?: DefaultResolve<D>): SearchResults<W, S, true, D>;
+        resolve(options?: DefaultResolve<D>): IndexSearchResultsWrapper<W, S, true, D>;
     }
 
     export class StorageInterface {
