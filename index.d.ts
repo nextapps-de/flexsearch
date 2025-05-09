@@ -502,7 +502,7 @@ declare module "flexsearch" {
         H extends HighlightOptions | boolean = false,
         R extends boolean = true,
         E extends boolean = false
-    > = FieldName<D> | DocumentSearchOptions<D, H, false, R, E>;
+    > = FieldName<D> | DocumentSearchOptions<D, H, true, R, E>;
 
     export type DocumentSearchResults<
         D extends DocumentData = DocumentData,
@@ -955,12 +955,12 @@ declare module "flexsearch" {
     };
 
     export type HighlightEllipsisOptions = {
-        template?: TemplateResultHighlighting;
+        template: TemplateResultHighlighting;
         pattern?: string | boolean;
     };
 
     export type HighlightOptions = TemplateResultHighlighting | {
-        template?: TemplateResultHighlighting;
+        template: TemplateResultHighlighting;
         boundary?: HighlightBoundaryOptions | number;
         ellipsis?: HighlightEllipsisOptions | string | boolean;
         clip?: boolean;

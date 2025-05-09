@@ -166,7 +166,7 @@ async function test_document() {
     const doc1: DefaultDocumentSearchResults = document.search({ cache: true });
     const doc2: EnrichedDocumentSearchResults = document.search({ enrich: true });
     const doc3: MergedDocumentSearchResults = document.search({ merge: true });
-    const doc4: EnrichedDocumentSearchResults = document.search({ highlight: true });
+    const doc4: EnrichedDocumentSearchResults = document.search({ highlight: { template: "" } });
     const doc5: Promise<DefaultDocumentSearchResults> = document.searchAsync({});
     const doc6: DefaultSearchResults = document.search({ resolve: false }).resolve();
     const doc7: DefaultDocumentSearchResults = document.search({ field: "title" });
@@ -186,51 +186,41 @@ async function test_document() {
     const doc21: DefaultSearchResults = doc20.resolve();
     const doc22: EnrichedResults = doc20.resolve({ enrich: true });
     // highlight within last resolver stage is work in progress:
-    const doc23: EnrichedResults = doc20.and({ resolve: true, highlight: true });
+    const doc23: EnrichedResults = doc20.and({ resolve: true, highlight: { template: "", boundary: {} } });
 
     const doc24: Resolver = new Resolver({ index: document });
     const doc25: EnrichedResults = doc24.and({}, { index: document2, resolve: true, enrich: true });
     const doc26: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ enrich: true });
     // highlight within last resolver stage is work in progress:
-    const doc27: EnrichedResults = doc24.and({}, { index: document2, resolve: true, highlight: true });
+    const doc27: EnrichedResults = doc24.and({}, { index: document2, resolve: true, highlight: "" });
 
     // highlight on .resolve() is never supported:
     // @ts-expect-error
-    const doc28: EnrichedResults = doc24.resolve({ highlight: true });
+    const doc28: EnrichedResults = doc24.resolve({ highlight: "" });
 
     // @ts-expect-error
-    let tmp1: DocumentData = doc1[0].result[0].doc;
-    let tmp2: DocumentData = doc2[0].result[0].doc;
-    let tmp3: DocumentData = doc3[0].doc;
+    const err1: DocumentData = doc1[0].result[0].doc;
+    const err2: DocumentData = doc2[0].result[0].doc;
+    const err3: DocumentData = doc3[0].doc;
 
     // @ts-expect-error
-    const t_2_1: DefaultSearchResults = document2.search({ pluck: "title" });
+    const err4: DefaultSearchResults = document2.search({ pluck: "title" });
     // @ts-expect-error
-    const t_2_2: DefaultSearchResults = document.search("test", {});
+    const err5: DefaultSearchResults = document.search("test", {});
 
     // @ts-expect-error
-    const t_4_3: Resolver = document.search({});
+    const err6: Resolver = document.search({});
     // @ts-expect-error
-    const t_4_4: Resolver = document.search({ resolve: true });
+    const err7: Resolver = document.search({ resolve: true });
 
     // @ts-expect-error
-    const docw6: DefaultDocumentSearchResults = await document.searchAsync({});
+    const err8: DefaultDocumentSearchResults = document.searchAsync({});
     // @ts-expect-error
-    const docw7: DefaultDocumentSearchResults = await document.searchAsync({ pluck: false });
+    const err9: DefaultDocumentSearchResults = await document.searchAsync({ pluck: "title" });
     // @ts-expect-error
-    const docw8: DefaultDocumentSearchResults = await document.searchAsync({ enrich: false });
-
+    const err10: DefaultDocumentSearchResults = await document.searchAsync({ enrich: true });
     // @ts-expect-error
-    const docw4: Resolver = await document.searchAsync({});
-    // @ts-expect-error
-    const docw5: Resolver = await document.searchAsync({ resolve: true });
-    // @ts-expect-error
-    const docw6: DefaultDocumentSearchResults = await document.searchAsync({});
-    // @ts-expect-error
-    const docw7: DefaultDocumentSearchResults = await document.searchAsync({ pluck: false });
-    // @ts-expect-error
-    const docw8: DefaultDocumentSearchResults = await document.searchAsync({ enrich: false });
-
+    const err11: EnrichedDocumentSearchResults = document.search({ highlight: {} });
 }
 
 async function test_worker() {
