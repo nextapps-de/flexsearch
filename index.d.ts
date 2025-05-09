@@ -419,7 +419,7 @@ declare module "flexsearch" {
         db?: StorageInterface;
     };
 
-    export type TagOptions<D = DocumentData> = DefaultFieldOptions<D>;
+    export type TagOptions<D = DocumentData> = DefaultFieldOptions<D> | DefaultCustomFieldOptions<D>;
 
     export type StoreOptions<D = DocumentData> = DefaultFieldOptions<D> | DefaultCustomFieldOptions<D>;
 
