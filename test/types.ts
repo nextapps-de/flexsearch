@@ -168,8 +168,8 @@ async function test_document() {
     const doc3: MergedDocumentSearchResults = document.search({ merge: true });
     const doc4: EnrichedDocumentSearchResults = document.search({ highlight: true });
     const doc5: Promise<DefaultDocumentSearchResults> = document.searchAsync({});
-    const doc6: Resolver = document.search({ resolve: false });
-    const doc7: DefaultSearchResults = document.search({ pluck: "title" });
+    const doc6: DefaultSearchResults = document.search({ resolve: false }).resolve();
+    const doc7: DefaultDocumentSearchResults = document.search({ field: "title" });
     const doc8: DefaultSearchResults = document2.search({ pluck: "meta:title" });
     const doc9: DefaultDocumentSearchResults = document.searchCache({});
     const doc10: Promise<DefaultDocumentSearchResults> = document.searchAsync({ cache: true });
@@ -182,21 +182,21 @@ async function test_document() {
     const doc17: EnrichedResults = doc14.resolve({ enrich: true });
     const doc18: EnrichedResults = doc14.and({ resolve: true, enrich: true });
     const doc19: Resolver = doc14.and({ index: document, field: "title" });
-    const doc20: Resolver = doc19.or({ index: document2, field: "meta:title" });
-    const doc21: DefaultDocumentSearchResults = doc20.resolve();
+    const doc20: Resolver = doc19.or({ index: document2, pluck: "meta:title" });
+    const doc21: DefaultSearchResults = doc20.resolve();
     const doc22: EnrichedResults = doc20.resolve({ enrich: true });
-    // highlight on .resolve() is never supported:
-    //const doc23: EnrichedResults = doc20.resolve({ highlight: true });
     // highlight within last resolver stage is work in progress:
     const doc23: EnrichedResults = doc20.and({ resolve: true, highlight: true });
 
     const doc24: Resolver = new Resolver({ index: document });
     const doc25: EnrichedResults = doc24.and({}, { index: document2, resolve: true, enrich: true });
     const doc26: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ enrich: true });
-    // highlight on .resolve() is never supported:
-    //const doc27: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ highlight: true });
     // highlight within last resolver stage is work in progress:
     const doc27: EnrichedResults = doc24.and({}, { index: document2, resolve: true, highlight: true });
+
+    // highlight on .resolve() is never supported:
+    // @ts-expect-error
+    const doc28: EnrichedResults = doc24.resolve({ highlight: true });
 
     // @ts-expect-error
     let tmp1: DocumentData = doc1[0].result[0].doc;
