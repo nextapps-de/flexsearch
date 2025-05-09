@@ -404,10 +404,17 @@ declare module "flexsearch" {
 
     export type DefaultFieldOptions<
         D = DocumentData,
-        C extends CustomFN<D> | boolean = false
     > = IndexOptions & {
-        custom?: C;
-        field: C extends false ? FieldName<D> : FieldName;
+        field: FieldName<D>;
+        filter?: (doc: D) => boolean;
+        db?: StorageInterface;
+    };
+
+    export type DefaultCustomFieldOptions<
+        D = DocumentData,
+    > = IndexOptions & {
+        custom: CustomFN<D>;
+        field: FieldName;
         filter?: (doc: D) => boolean;
         db?: StorageInterface;
     };
@@ -418,7 +425,7 @@ declare module "flexsearch" {
 
     export type TagOptions<D = DocumentData> = DefaultFieldOptions<D>;
 
-    export type StoreOptions<D = DocumentData> = DefaultFieldOptions<D>;
+    export type StoreOptions<D = DocumentData> = DefaultFieldOptions<D> | DefaultCustomFieldOptions<D>;
 
     /**
      *  # Document Search Result
