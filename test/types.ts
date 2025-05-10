@@ -48,7 +48,7 @@ async function test_index() {
     const res3: DefaultSearchResults = res2.resolve();
 
     const res4: Resolver<undefined, false, IndexedDB> = new Resolver({ index: index3 });
-    const res5: Promise<Resolver<undefined, false, IndexedDB>> = res4.and();
+    const res5: Promise<Resolver<undefined, false, IndexedDB>> = res4.and({});
     const res6: Promise<Resolver<undefined, false, IndexedDB>> = res4.and({ index: index3 });
     const res7: Promise<DefaultSearchResults> = (await res6).limit(100).resolve();
 
@@ -89,14 +89,14 @@ async function test_index() {
 
 async function test_document() {
 
-    // ----------------------------------------------------------------
-
-    const document = new Document<{
+    type doctype = {
         id: number,
         title: string,
         description: string,
         tags: string[]
-    }>({
+    };
+
+    const document = new Document<doctype>({
         encoder: "LatinBalance",
         resolution: 9,
         context: false,
@@ -108,7 +108,7 @@ async function test_document() {
         },
     });
 
-    type doctype = {
+    type doctype2 = {
         id: number,
         meta: {
             title: string,
@@ -117,7 +117,7 @@ async function test_document() {
         }
     };
 
-    const document2 = new Document<doctype>({
+    const document2 = new Document<doctype2>({
         document: {
             id: "id",
             store: [{
@@ -176,25 +176,25 @@ async function test_document() {
     const doc11: Promise<DefaultDocumentSearchResults> = document.searchCacheAsync({});
     const doc13: DefaultDocumentSearchResults = document.search({ resolve: true });
 
-    const doc14: Resolver = document.search({ resolve: false });
+    const doc14: Resolver<doctype> = document.search({ resolve: false });
     const doc15: DefaultSearchResults = doc14.resolve({});
     const doc16: DefaultSearchResults = doc14.and({ resolve: true });
     const doc17: EnrichedResults = doc14.resolve({ enrich: true });
     const doc18: EnrichedResults = doc14.and({ resolve: true, enrich: true });
-    const doc19: Resolver = doc14.and({ index: document, field: "title" });
-    const doc20: Resolver = doc19.or({ index: document2, pluck: "meta:title" });
+    const doc19: Resolver<doctype> = doc14.and({ index: document, field: "title" });
+    const doc20: Resolver<doctype2> = doc19.or({ index: document2, pluck: "meta:title" });
     const doc21: DefaultSearchResults = doc20.resolve();
     const doc22: EnrichedResults = doc20.resolve({ enrich: true });
     // highlight within last resolver stage is work in progress:
     const doc23: EnrichedResults = doc20.and({ resolve: true, highlight: { template: "", boundary: {} } });
 
-    const doc24: Resolver = new Resolver({ index: document });
-    const doc25: EnrichedResults = doc24.and({}, { index: document2, resolve: true, enrich: true });
+    const doc24: Resolver<doctype2> = new Resolver({ index: document2 });
+    const doc25: EnrichedResults = doc24.and({}, { index: document, resolve: true, enrich: true });
     const doc26: EnrichedResults = doc24.and({}, { index: document2 }).resolve({ enrich: true });
     // highlight within last resolver stage is work in progress:
     const doc27: EnrichedResults = doc24.and({}, { index: document2, resolve: true, highlight: "" });
     const doc28: DefaultSearchResults = document2.search({ pluck: { field: "meta:title", limit: 10 } });
-    const doc30: EnrichedResults = document2.search({ pluck: { field: "meta:title", highlight: true } });
+    const doc30: EnrichedResults = document2.search({ highlight: true, enrich: true, pluck: { field: "meta:title"} });
 
     // highlight on .resolve() is never supported:
     // @ts-expect-error

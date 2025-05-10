@@ -195,10 +195,10 @@ declare module "flexsearch" {
         W extends WorkerType = false,
         S extends StorageInterface | boolean = false,
         R extends boolean = true,
-        D extends DocumentData = undefined
+        //D extends DocumentData = undefined
     > = R extends true
         ? DefaultSearchResults
-        : Resolver<D, W, S>
+        : Resolver<undefined, W, S>
 
     /**
      * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants \
@@ -210,12 +210,12 @@ declare module "flexsearch" {
         W extends WorkerType = false,
         S extends StorageInterface | boolean = false,
         R extends boolean = true,
-        D extends DocumentData = undefined
+        //D extends DocumentData = undefined
     > = W extends false
         ? S extends false
-            ? SearchResults<W, S, R, D>
-            : Promise<SearchResults<W, S, R, D>>
-        : Promise<SearchResults<W, S, R, D>>
+            ? SearchResults<W, S, R>
+            : Promise<SearchResults<W, S, R>>
+        : Promise<SearchResults<W, S, R>>
 
     export class Index<
         W extends WorkerType = false,
@@ -501,7 +501,7 @@ declare module "flexsearch" {
         D extends DocumentData = DocumentData,
         H extends HighlightOptions | boolean = false,
         R extends boolean = true,
-        E extends boolean = false
+        E extends boolean = H extends HighlightOptions ? true : false
     > = FieldName<D> | DocumentSearchOptions<D, H, true, R, E>;
 
     export type DocumentSearchResults<
@@ -509,21 +509,40 @@ declare module "flexsearch" {
         H extends HighlightOptions | boolean = false,
         P extends PluckOptions<D, H, R, E> | boolean = false,
         R extends boolean = true,
-        E extends boolean = false,
+        E extends boolean = H extends HighlightOptions ? true : false,
+        M extends boolean = false
+    > = P extends false
+        ? M extends true
+            ? MergedDocumentSearchResults<D>
+            : E extends true
+                ? EnrichedDocumentSearchResults<D>
+                : H extends false
+                    ? DefaultDocumentSearchResults<D>
+                    : EnrichedDocumentSearchResults<D>
+        : E extends true
+            ? EnrichedResults<D>
+            : DefaultSearchResults;
+
+    export type DocumentSearchResultsWrapper<
+        D extends DocumentData = DocumentData,
+        W extends WorkerType = false,
+        S extends StorageInterface | boolean = false,
+        H extends HighlightOptions | boolean = false,
+        P extends PluckOptions<D, H, R, E> | boolean = false,
+        R extends boolean = true,
+        E extends boolean = H extends HighlightOptions ? true : false,
         M extends boolean = false
     > = R extends true
-        ? P extends false
-            ? M extends true
-                ? MergedDocumentSearchResults<D>
-                : E extends true
-                    ? EnrichedDocumentSearchResults<D>
-                    : H extends false
-                        ? DefaultDocumentSearchResults<D>
-                        : EnrichedDocumentSearchResults<D>
-            : E extends true
-                ? EnrichedResults<D>
-                : DefaultSearchResults
-        : Resolver;
+        ? W extends false
+            ? S extends false
+                ? DocumentSearchResults<D, H, P, R, E, M>
+                : Promise<DocumentSearchResults<D, H, P, R, E, M>>
+            : Promise<DocumentSearchResults<D, H, P, R, E, M>>
+        : W extends false
+            ? S extends false
+                ? Resolver<D, W, S, H, R, E>
+                : Promise<Resolver<D, W, S, H, R, E>>
+            : Promise<Resolver<D, W, S, H, R, E>>;
 
     /**
      * **Document:**
@@ -534,7 +553,7 @@ declare module "flexsearch" {
         H extends HighlightOptions | boolean = false,
         P extends PluckOptions<D, H, R, E> | boolean = false,
         R extends boolean = true,
-        E extends boolean = false,
+        E extends boolean = H extends HighlightOptions ? true : false,
         M extends boolean = false,
     > = SearchOptions<R> & {
         tag?: {[field: FieldName]: TagName} | Array<{[field: FieldName]: TagName}>;
@@ -556,21 +575,6 @@ declare module "flexsearch" {
     export type DocumentData = {
         [key: string]: DocumentValue | DocumentValue[];
     };
-
-    export type DocumentSearchResultsWrapper<
-        D extends DocumentData = DocumentData,
-        W extends WorkerType = false,
-        S extends StorageInterface | boolean = false,
-        H extends HighlightOptions | boolean = false,
-        P extends PluckOptions<D, H, R, E> | boolean = false,
-        R extends boolean = true,
-        E extends boolean = false,
-        M extends boolean = false
-    > = W extends false
-        ? S extends false
-            ? DocumentSearchResults<D, H, P, R, E, M>
-            : Promise<DocumentSearchResults<D, H, P, R, E, M>>
-        : Promise<DocumentSearchResults<D, H, P, R, E, M>>
 
     /**
      * Basic usage and variants: https://github.com/nextapps-de/flexsearch#basic-usage-and-variants \
@@ -626,7 +630,7 @@ declare module "flexsearch" {
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
@@ -636,7 +640,7 @@ declare module "flexsearch" {
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
@@ -648,7 +652,7 @@ declare module "flexsearch" {
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
@@ -660,7 +664,7 @@ declare module "flexsearch" {
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
@@ -672,7 +676,7 @@ declare module "flexsearch" {
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             options: DocumentSearchOptions<D, H, P, R, E, M>,
@@ -681,7 +685,7 @@ declare module "flexsearch" {
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             options: DocumentSearchOptions<D, H, P, R, E, M>,
@@ -766,118 +770,118 @@ declare module "flexsearch" {
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>
         searchCacheAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>
 
         /** @deprecated Pass "limit" within options */
         searchAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
             limit: Limit,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>
         /** @deprecated Pass "limit" within options */
         searchCacheAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
             limit: Limit,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>
 
         /** @deprecated Pass "limit" within options */
         searchAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
             limit: Limit,
             options?: DocumentSearchOptions<D, H, P, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>;
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>;
         /** @deprecated Pass "limit" within options */
         searchCacheAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
             limit: Limit,
             options?: DocumentSearchOptions<D, H, P, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>;
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>;
 
         searchAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
             options?: DocumentSearchOptions<D, H, P, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>
         searchCacheAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             query: string,
             options?: DocumentSearchOptions<D, H, P, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>
 
         searchAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             options: DocumentSearchOptions<D, H, P, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>;
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>;
         searchCacheAsync<
             H extends HighlightOptions | boolean = false,
             P extends PluckOptions<D, H, R, E> | boolean = false,
             R extends boolean = true,
-            E extends boolean = false,
+            E extends boolean = H extends HighlightOptions ? true : false,
             M extends boolean = false
         >(
             options: DocumentSearchOptions<D, H, P, R, E, M>,
-            callback?: AsyncCallback<DocumentSearchResults<D, H, P, R, E, M>>,
-        ): Promise<DocumentSearchResults<D, H, P, R, E, M>>;
+            callback?: AsyncCallback<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>,
+        ): Promise<DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>>;
     }
 
     type IdType =
@@ -902,7 +906,7 @@ declare module "flexsearch" {
         "uint64" |
         "bigint";
 
-    type PersistentOptions = {
+    export type PersistentOptions = {
         name?: string;
         type?: IdType;
         db?: any;
@@ -910,7 +914,6 @@ declare module "flexsearch" {
 
     export type DefaultResolve<
         D extends DocumentData = undefined,
-        H extends HighlightOptions | boolean = false,
         R extends boolean = true,
         E extends boolean = false
     > = {
@@ -921,10 +924,6 @@ declare module "flexsearch" {
         enrich?: D extends DocumentData
             ? R extends true ? E : false
             : false;
-        /** only usable when "resolve" was not set to false */
-        highlight?: D extends DocumentData
-            ? R extends true ? H : false
-            : false;
     };
 
     export type ResolverOptions<
@@ -933,8 +932,8 @@ declare module "flexsearch" {
         S extends StorageInterface | boolean = false,
         H extends HighlightOptions | boolean = false,
         R extends boolean = false,
-        E extends boolean = false
-    > = DefaultResolve<D, H, R, E> & {
+        E extends boolean = H extends HighlightOptions ? true : false
+    > = DefaultResolve<D, R, E> & {
         query?: string;
         index?: Index<W, S> | Document<D, W, S>;
         pluck?: FieldName<D>;
@@ -946,6 +945,10 @@ declare module "flexsearch" {
         not?: ResolverOptions<D, W, S, H, R, E> | Array<ResolverOptions<D, W, S, H, R, E>>;
         boost?: number;
         suggest?: boolean;
+        /** only usable when "resolve" was not set to false */
+        highlight?: D extends DocumentData
+            ? R extends true ? H : false
+            : false;
     };
 
     export type HighlightBoundaryOptions = {
@@ -988,23 +991,42 @@ declare module "flexsearch" {
     export class Resolver<
         D extends DocumentData = undefined,
         W extends WorkerType = false,
-        S extends StorageInterface | boolean = false
+        S extends StorageInterface | boolean = false,
+        H extends HighlightOptions | boolean = false,
+        R extends boolean = false,
+        E extends boolean = H extends HighlightOptions ? true : false
     > {
         result: IntermediateSearchResults;
 
         constructor(options?: ResolverOptions<D, W, S> | IntermediateSearchResults);
 
-        and<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
-            IndexSearchResultsWrapper<W, S, R, D>;
+        and<d extends DocumentData = D,
+            h extends HighlightOptions | boolean = H,
+            r extends boolean = R,
+            e extends boolean = h extends HighlightOptions ? true : E
+        >(...args: ResolverOptions<d, W, S, h, r, e>[]):
+            DocumentSearchResultsWrapper<d, W, S, h, true, r, e>;
 
-        or<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
-            IndexSearchResultsWrapper<W, S, R, D>;
+        or<d extends DocumentData = D,
+            h extends HighlightOptions | boolean = H,
+            r extends boolean = R,
+            e extends boolean = h extends HighlightOptions ? true : E
+        >(...args: ResolverOptions<d, W, S, h, r, e>[]):
+            DocumentSearchResultsWrapper<d, W, S, h, true, r, e>;
 
-        xor<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
-            IndexSearchResultsWrapper<W, S, R, D>;
+        xor<d extends DocumentData = D,
+            h extends HighlightOptions | boolean = H,
+            r extends boolean = R,
+            e extends boolean = h extends HighlightOptions ? true : E
+        >(...args: ResolverOptions<d, W, S, h, r, e>[]):
+            DocumentSearchResultsWrapper<d, W, S, h, true, r, e>;
 
-        not<R extends boolean = false>(...args: ResolverOptions<D, W, S, false, R>[]):
-            IndexSearchResultsWrapper<W, S, R, D>;
+        not<d extends DocumentData = D,
+            h extends HighlightOptions | boolean = H,
+            r extends boolean = R,
+            e extends boolean = h extends HighlightOptions ? true : E
+        >(...args: ResolverOptions<d, W, S, h, r, e>[]):
+            DocumentSearchResultsWrapper<d, W, S, h, true, r, e>;
 
         limit(limit: number): Resolver<D, W, S>;
 
@@ -1012,7 +1034,7 @@ declare module "flexsearch" {
 
         boost(boost: number): Resolver<D, W, S>;
 
-        resolve(options?: DefaultResolve<D>): IndexSearchResultsWrapper<W, S, true, D>;
+        resolve<e extends boolean = E>(options?: DefaultResolve<D, true, e>): DocumentSearchResultsWrapper<D, W, S, false, true, true, e>;
     }
 
     export class StorageInterface {
@@ -1067,8 +1089,8 @@ declare module "flexsearch/db/*" {
 
 declare module "flexsearch/lang/*" {
     import { EncoderOptions } from "flexsearch";
-    const Options: EncoderOptions;
-    export default Options;
+    //const Options: EncoderOptions;
+    export default EncoderOptions;
 }
 
 // https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
