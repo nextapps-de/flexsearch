@@ -1032,13 +1032,16 @@ declare module "flexsearch" {
         resolve<e extends boolean = E>(options?: DefaultResolve<D, true, e>): DocumentSearchResultsWrapper<D, W, S, false, true, true, e>;
     }
 
-    export class StorageInterface {
+    export class StorageInterface<
+        D extends DocumentData = DocumentData,
+        W extends WorkerType = false
+    > {
         db: any;
 
         constructor(name: string, config: PersistentOptions);
         constructor(config: string | PersistentOptions);
 
-        mount(index: Index | Document): Promise<void>;
+        mount(index: Index | Document<D, W, StorageInterface>): Promise<void>;
 
         open(): Promise<void>;
 
@@ -1084,8 +1087,8 @@ declare module "flexsearch/db/*" {
 
 declare module "flexsearch/lang/*" {
     import { EncoderOptions } from "flexsearch";
-    //const Options: EncoderOptions;
-    export default EncoderOptions;
+    const Options: EncoderOptions;
+    export default Options;
 }
 
 // https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
