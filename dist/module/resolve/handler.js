@@ -35,7 +35,9 @@ Resolver.prototype.handler = function (fn, args) {
         offset = 0,
         enrich,
         resolve,
-        suggest;
+        suggest,
+        highlight,
+        highlight_query;
     /** @type {Array<Promise<SearchResults|IntermediateSearchResults>>} */
 
     for (let i = 0, query; i < args.length; i++) {
@@ -55,13 +57,21 @@ Resolver.prototype.handler = function (fn, args) {
                 offset = query.offset || 0;
                 suggest = query.suggest;
                 resolve = query.resolve;
-                enrich = query.enrich && resolve;
+                highlight = query.highlight && resolve;
+                enrich = highlight || query.enrich && resolve;
 
                 if (query.index) {
                     query.resolve = /* suggest */ /* append: */ /* enrich */!1;
-
+                    //if(DEBUG)
+                    //query.enrich = false;
                     result = query.index.search(query).result;
                     query.resolve = resolve;
+                    //if(DEBUG)
+                    //query.enrich = enrich;
+
+                    if (highlight) {
+                        highlight_query = query.search;
+                    }
                 } else if (query.and) {
                     result = this.and(query.and);
                 } else if (query.or) {
@@ -93,6 +103,8 @@ Resolver.prototype.handler = function (fn, args) {
         offset,
         enrich,
         resolve,
-        suggest
+        suggest,
+        highlight,
+        highlight_query
     };
 };

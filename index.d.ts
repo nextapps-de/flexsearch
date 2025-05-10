@@ -1,10 +1,5 @@
 declare module "flexsearch" {
 
-    // Type definitions for flexsearch 0.8
-    // Project: https://github.com/nextapps-de/flexsearch/
-    // Definitions by: LOSSES Don <https://github.com/Losses>
-    // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-
     /************************************/
     /* Utils                            */
     /************************************/
@@ -1096,3 +1091,4 @@ declare module "flexsearch/lang/*" {
 // https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
 // https://github.com/futurGH/ts-to-jsdoc
 // https://sethmac.com/typescript-to-jsdoc/
+// https://github.com/DefinitelyTyped/DefinitelyTyped

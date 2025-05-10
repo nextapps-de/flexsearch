@@ -7,6 +7,7 @@ import "./resolve/or.js";
 import "./resolve/and.js";
 import "./resolve/xor.js";
 import "./resolve/not.js";
+import { highlight_fields } from "./document/highlight.js";
 
 /**
  * @param {IntermediateSearchResults|ResolverOptions=} result
@@ -97,11 +98,12 @@ Resolver.prototype.boost = function (boost) {
  * @param {number|ResolverOptions=} limit
  * @param {number=} offset
  * @param {boolean=} enrich
+ * @param {boolean=} highlight
  */
 Resolver.prototype.resolve = function (limit, offset, enrich) {
-    const result = this.result,
-          index = this.index;
 
+    const index = this.index;
+    let result = this.result;
     this.index = null;
     this.result = null;
 
@@ -109,6 +111,7 @@ Resolver.prototype.resolve = function (limit, offset, enrich) {
         if ("object" == typeof limit) {
             enrich = limit.enrich;
             offset = limit.offset;
+            limit.highlight;
             limit = limit.limit;
         }
         // const document = this.index;
@@ -119,7 +122,10 @@ Resolver.prototype.resolve = function (limit, offset, enrich) {
         //         : result;
         // }
         // else{
-        return default_resolver.call(index, result, limit || 100, offset, enrich);
+        result = default_resolver.call(index, result, limit || 100, offset, enrich);
+        // if(highlight){
+        //     result = highlight_fields(result);
+        // }
         // }
     }
 

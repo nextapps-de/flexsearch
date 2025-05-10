@@ -1,5 +1,5 @@
 // COMPILER BLOCK -->
-import { DEBUG } from "../config.js";
+import { DEBUG, SUPPORT_HIGHLIGHTING } from "../config.js";
 // <-- COMPILER BLOCK
 import Resolver from "../resolver.js";
 import { ResolverOptions, SearchResults, IntermediateSearchResults } from "../type.js";
@@ -34,7 +34,7 @@ Resolver.prototype.handler = function(fn, args){
     let final = [];
     /** @type {Array<Promise<SearchResults|IntermediateSearchResults>>} */
     let promises = [];
-    let limit = 0, offset = 0, enrich, resolve, suggest;
+    let limit = 0, offset = 0, enrich, resolve, suggest, highlight, highlight_query;
 
     for(let i = 0, query; i < args.length; i++){
 
@@ -57,14 +57,21 @@ Resolver.prototype.handler = function(fn, args){
                 offset = query.offset || 0;
                 suggest = query.suggest;
                 resolve = query.resolve;
-                enrich = query.enrich && resolve;
+                highlight = query.highlight && resolve;
+                enrich = highlight || (query.enrich && resolve);
 
                 if(query.index){
                     query.resolve = false;
-                    if(DEBUG) query.enrich = false;
+                    //if(DEBUG)
+                    //query.enrich = false;
                     result = query.index.search(query).result;
                     query.resolve = resolve;
-                    if(DEBUG) query.enrich = enrich;
+                    //if(DEBUG)
+                    //query.enrich = enrich;
+
+                    if(SUPPORT_HIGHLIGHTING && highlight){
+                        highlight_query = query.search;
+                    }
                 }
                 else if(query.and){
                     result = this["and"](query.and);
@@ -103,6 +110,8 @@ Resolver.prototype.handler = function(fn, args){
         offset,
         enrich,
         resolve,
-        suggest
+        suggest,
+        highlight,
+        highlight_query
     };
 }
