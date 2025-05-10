@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.162 (ES5/Debug)
+ * FlexSearch.js v0.8.163 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1781,19 +1781,21 @@ function pb(a, b, c, d, e, f, g, k) {
         } else {
           e = [];
           for (f = 0; f < h.length; f++) {
-            if (g = h[f], g.length > d) {
-              d -= g.length;
-            } else {
-              if (g.length > c || d) {
-                g = g.slice(d, c + d), c -= g.length, d && (d -= g.length);
-              }
-              e.push(g);
-              if (!c) {
-                break;
+            if (g = h[f]) {
+              if (d && g.length > d) {
+                d -= g.length;
+              } else {
+                if (c && g.length > c || d) {
+                  g = g.slice(d, c + d), c -= g.length, d && (d -= g.length);
+                }
+                e.push(g);
+                if (!c) {
+                  break;
+                }
               }
             }
           }
-          h = 1 < e.length ? [].concat.apply([], e) : e[0];
+          h = e;
         }
       }
     }
@@ -1912,8 +1914,23 @@ function tb(a, b, c) {
       } else if (n.constructor === Array) {
         r = n;
       } else {
-        if (f = n.limit || 0, g = n.offset || 0, l = n.suggest, h = n.resolve, k = (m = n.highlight && h) || n.enrich && h, n.index) {
-          n.resolve = !1, r = n.index.search(n).result, n.resolve = h, m && (q = n.search);
+        if (f = n.limit || 0, g = n.offset || 0, l = n.suggest, h = n.resolve, k = (m = n.highlight && h) || n.enrich && h, r = void 0, n.index && (a.index = r = n.index), n.query || n.tag) {
+          if (!a.index) {
+            throw Error("Resolver can't apply because the corresponding Index was never specified");
+          }
+          if (n.field) {
+            if (!a.index.index) {
+              throw Error("Resolver can't apply because the corresponding Document Index was not specified");
+            }
+            r = a.index.index.get(n.field);
+            if (!r) {
+              throw Error("Resolver can't apply because the specified Document field '" + n.field + "' was not found");
+            }
+          }
+          n.resolve = !1;
+          r = r.search(n).result;
+          n.resolve = h;
+          m && (q = n.query);
         } else if (n.and) {
           r = a.and(n.and);
         } else if (n.or) {
@@ -2345,14 +2362,14 @@ function Cb(a, b, c, d) {
   }
   return b;
 }
-;function X(a) {
+;function X(a, b) {
   if (!this || this.constructor !== X) {
-    return new X(a);
+    return new X(a, b);
   }
   if (a && a.index) {
-    return a.resolve = !1, this.index = a.index, this.h = a.boost || 0, this.result = a.index.search(a).result, this;
+    return a.resolve = !1, this.index = a.index, this.h = a.boost || 0, this.result = this.index.search(a).result, this;
   }
-  this.index = null;
+  this.index = b || null;
   this.result = a || [];
   this.h = 0;
 }
@@ -2529,7 +2546,7 @@ ob.prototype.search = function(a, b, c, d) {
               if (G && G.length) {
                 E++, t.push(G);
               } else if (!n) {
-                return h ? f : new X(f);
+                return h ? f : new X(f, this);
               }
             }
           }
@@ -2541,13 +2558,13 @@ ob.prototype.search = function(a, b, c, d) {
               if (console.warn("Tag '" + p[C] + ":" + p[C + 1] + "' will be skipped because there is no field '" + p[C] + "'."), n) {
                 continue;
               } else {
-                return h ? f : new X(f);
+                return h ? f : new X(f, this);
               }
             }
             if (N = (G = G && G.get(p[C + 1])) && G.length) {
               E++, t.push(G);
             } else if (!n) {
-              return h ? f : new X(f);
+              return h ? f : new X(f, this);
             }
           }
         }
@@ -2555,7 +2572,7 @@ ob.prototype.search = function(a, b, c, d) {
           x = tb(x, t, h);
           A = x.length;
           if (!A && !n) {
-            return h ? x : new X(x);
+            return h ? x : new X(x, this);
           }
           E--;
         }
@@ -2563,7 +2580,7 @@ ob.prototype.search = function(a, b, c, d) {
       if (A) {
         g[k] = D, f.push(x), k++;
       } else if (1 === q.length) {
-        return h ? f : new X(f);
+        return h ? f : new X(f, this);
       }
     }
   }
@@ -2575,7 +2592,7 @@ ob.prototype.search = function(a, b, c, d) {
           if (console.warn("Tag '" + p[e] + ":" + p[e + 1] + "' was not found because there is no field '" + p[e] + "'."), n) {
             continue;
           } else {
-            return h ? f : new X(f);
+            return h ? f : new X(f, this);
           }
         }
         u.push(g.db.tag(p[e + 1], b, v, !1));
@@ -2587,17 +2604,17 @@ ob.prototype.search = function(a, b, c, d) {
     });
   }
   if (!k) {
-    return h ? f : new X(f);
+    return h ? f : new X(f, this);
   }
   if (l && (!e || !this.store)) {
-    return f[0];
+    return f = f[0], h || (f.index = this), f;
   }
   u = [];
   for (v = 0; v < g.length; v++) {
     n = f[v];
     e && n.length && "undefined" === typeof n[0].doc && (this.db ? u.push(n = this.index.get(this.field[0]).db.enrich(n)) : n = vb.call(this, n));
     if (l) {
-      return h ? r ? Db(a, n, this.index, l, r) : n : new X(n);
+      return h ? r ? Db(a, n, this.index, l, r) : n : new X(n, this);
     }
     f[v] = {field:g[v], result:n};
   }
@@ -3206,15 +3223,15 @@ function $b(a, b, c, d, e, f, g) {
   if (1 < k) {
     h = rb(a, b, c, d, e, f, g);
   } else if (1 === k) {
-    return g ? ub.call(null, a[0], c, d) : new X(a[0]);
+    return g ? ub.call(null, a[0], c, d) : new X(a[0], this);
   }
-  return g ? h : new X(h);
+  return g ? h : new X(h, this);
 }
 function Xb(a, b, c, d, e, f, g) {
   a = Yb(this, a, b, c, d, e, f, g);
   return this.db ? a.then(function(k) {
-    return e ? k || [] : new X(k);
-  }) : a && a.length ? e ? ub.call(this, a, c, d) : new X(a) : e ? [] : new X();
+    return e ? k || [] : new X(k, this);
+  }) : a && a.length ? e ? ub.call(this, a, c, d) : new X(a, this) : e ? [] : new X([], this);
 }
 function Zb(a, b, c, d) {
   var e = [];

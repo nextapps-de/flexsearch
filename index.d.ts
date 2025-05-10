@@ -583,35 +583,19 @@ declare module "flexsearch" {
     > {
         constructor(options: DocumentOptions<D, W, S>);
 
-        add(id: Id, document: D): W extends WorkerType
-            ? Promise<this>
-            : this;
-        add(document: D): W extends WorkerType
-            ? Promise<this>
-            : this;
+        add(id: Id, document: D): W extends false ? this : Promise<this>;
+        add(document: D): W extends false ? this : Promise<this>;
 
         /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
-        append(id: Id, document: D): W extends WorkerType
-            ? Promise<this>
-            : this;
+        append(id: Id, document: D): W extends false ? this : Promise<this>;
         /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
-        append(document: D): W extends WorkerType
-            ? Promise<this>
-            : this;
+        append(document: D): W extends false ? this : Promise<this>;
 
-        update(id: Id, document: D): W extends WorkerType
-            ? Promise<this>
-            : this;
-        update(document: D): W extends WorkerType
-            ? Promise<this>
-            : this;
+        update(id: Id, document: D): W extends false ? this : Promise<this>;
+        update(document: D): W extends false ? this : Promise<this>;
 
-        remove(id: Id): W extends WorkerType
-            ? Promise<this>
-            : this;
-        remove(document: D): W extends WorkerType
-            ? Promise<this>
-            : this;
+        remove(id: Id): W extends false ? this : Promise<this>;
+        remove(document: D): W extends false ? this : Promise<this>;
 
         // https://github.com/nextapps-de/flexsearch#field-search
         search(query: string): DocumentSearchResultsWrapper<D, W, S>;
@@ -687,21 +671,19 @@ declare module "flexsearch" {
         ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
 
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
-        contain(id: Id): D extends StorageInterface
-            ? Promise<boolean>
-            : boolean;
+        contain(id: Id): S extends false
+            ? boolean
+            : Promise<boolean>;
 
-        clear(): D extends StorageInterface
-            ? Promise<void>
-            : W extends WorkerType
-                ? Promise<void>
-                : void;
+        clear(): S extends false
+            ? W extends false ? void : Promise<void>
+            : Promise<void>;
 
         cleanup(): void;
 
-        get(id: Id): D extends StorageInterface
-            ? Promise<D>
-            : D | null;
+        get(id: Id): S extends false
+            ? D | null
+            : Promise<D | null>;
 
         set(id: Id, document: D): this;
         set(document: D): this;

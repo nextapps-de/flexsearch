@@ -126,12 +126,12 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                     const final = [];
                     for(let i = 0, arr; i < result.length; i++){
                         arr = result[i];
-                        //if(!arr) continue;
-                        if(arr.length > offset){
+                        if(!arr) continue;
+                        if(offset && arr.length > offset){
                             offset -= arr.length;
                             continue;
                         }
-                        if((arr.length > limit) || offset){
+                        if((limit && arr.length > limit) || offset){
                             arr = arr.slice(offset, limit + offset);
                             limit -= arr.length;
                             if(offset) offset -= arr.length;
@@ -141,14 +141,15 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                             break;
                         }
                     }
-                    result = final.length > 1
-                        ? concat(final)
-                        : final[0];
+                    result = final
+                    // result = final.length > 1
+                    //     ? concat(final)
+                    //     : final[0];
                 }
 
-                return /** @type {SearchResults|IntermediateSearchResults} */ (
-                    result
-                );
+                // return /** @type {SearchResults|IntermediateSearchResults} */ (
+                //     result
+                // );
             }
         }
         else{

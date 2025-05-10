@@ -59,18 +59,42 @@ Resolver.prototype.handler = function (fn, args) {
                 resolve = query.resolve;
                 highlight = query.highlight && resolve;
                 enrich = highlight || query.enrich && resolve;
+                let index;
 
                 if (query.index) {
-                    query.resolve = /* suggest */ /* append: */ /* enrich */!1;
+                    this.index = index = query.index;
+                }
+
+                if (query.query || query.tag) {
+                    if (!this.index) {
+                        throw new Error("Resolver can't apply because the corresponding Index was never specified");
+                    }
+
+                    if (query.field) {
+                        if (!this.index.index) {
+                            throw new Error("Resolver can't apply because the corresponding Document Index was not specified");
+                        }
+
+
+                        index = this.index.index.get(query.field);
+
+                        if (!index) {
+                            throw new Error("Resolver can't apply because the specified Document field '" + query.field + "' was not found");
+                        }
+                    }
+
+
+                    query.resolve = /* suggest */
+                    /* append: */ /* enrich */!1;
                     //if(DEBUG)
                     //query.enrich = false;
-                    result = query.index.search(query).result;
+                    result = index.search(query).result;
                     query.resolve = resolve;
                     //if(DEBUG)
                     //query.enrich = enrich;
 
                     if (highlight) {
-                        highlight_query = query.search;
+                        highlight_query = query.query;
                     }
                 } else if (query.and) {
                     result = this.and(query.and);

@@ -304,7 +304,6 @@ Index.prototype.search = function(query, limit, options){
             }
 
             if(keyword){
-
                 // the context is a moving window where the keyword is going forward like a cursor
                 // 1. when suggestion enabled just forward keyword if term was found
                 // 2. as long as the result is empty forward the pointer also
@@ -373,12 +372,12 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
                 limit,
                 offset
             )
-            : new Resolver(result[0]);
+            : new Resolver(result[0], this);
     }
 
     return !SUPPORT_RESOLVER || resolve
         ? final
-        : new Resolver(final);
+        : new Resolver(final, this);
 }
 
 /**
@@ -412,18 +411,18 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
         return result.then(function(result){
             return !SUPPORT_RESOLVER || resolve
                 ? result || []
-                : new Resolver(result);
+                : new Resolver(result, this);
         });
     }
 
     return result && result.length
         ? (!SUPPORT_RESOLVER || resolve
             ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */ (result), limit, offset)
-            : new Resolver(result)
+            : new Resolver(result, this)
         )
         : !SUPPORT_RESOLVER || resolve
             ? []
-            : new Resolver();
+            : new Resolver([], this);
 }
 
 /**

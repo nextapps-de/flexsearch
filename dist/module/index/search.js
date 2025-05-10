@@ -32,8 +32,7 @@ Index.prototype.search = function (query, limit, options) {
     if (options && options.cache) {
         options.cache = /* suggest */ /* append: */ /* enrich */!1;
         const res = this.searchCache(query, limit, options);
-        options.cache = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
-        ;
+        options.cache = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
         return res;
     }
 
@@ -277,7 +276,6 @@ Index.prototype.search = function (query, limit, options) {
             }
 
             if (keyword) {
-
                 // the context is a moving window where the keyword is going forward like a cursor
                 // 1. when suggestion enabled just forward keyword if term was found
                 // 2. as long as the result is empty forward the pointer also
@@ -324,10 +322,10 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
     if (1 < length) {
         final = intersect(result, resolution, limit, offset, suggest, boost, resolve);
     } else if (1 === length) {
-        return resolve ? resolve_default.call(null, result[0], limit, offset) : new Resolver(result[0]);
+        return resolve ? resolve_default.call(null, result[0], limit, offset) : new Resolver(result[0], this);
     }
 
-    return resolve ? final : new Resolver(final);
+    return resolve ? final : new Resolver(final, this);
 }
 
 /**
@@ -351,11 +349,11 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag) {
 
     if (this.db) {
         return result.then(function (result) {
-            return resolve ? result || [] : new Resolver(result);
+            return resolve ? result || [] : new Resolver(result, this);
         });
     }
 
-    return result && result.length ? resolve ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */result, limit, offset) : new Resolver(result) : resolve ? [] : new Resolver();
+    return result && result.length ? resolve ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */result, limit, offset) : new Resolver(result, this) : resolve ? [] : new Resolver([], this);
 }
 
 /**

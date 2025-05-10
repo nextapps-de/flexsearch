@@ -338,7 +338,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                             // no tags found
                             return resolve || !SUPPORT_RESOLVER
                                 ? result
-                                : new Resolver(result)
+                                : new Resolver(result, this)
                         }
                     }
                 }
@@ -361,7 +361,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                         else{
                             return resolve || !SUPPORT_RESOLVER
                                 ? result
-                                : new Resolver(result)
+                                : new Resolver(result, this)
                         }
                     }
 
@@ -376,7 +376,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                         // no tags found
                         return resolve || !SUPPORT_RESOLVER
                             ? result
-                            : new Resolver(result)
+                            : new Resolver(result, this)
                     }
                 }
             }
@@ -389,7 +389,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                     // nothing matched
                     return resolve || !SUPPORT_RESOLVER
                         ? res
-                        : new Resolver(/** @type {IntermediateSearchResults} */ (res));
+                        : new Resolver(/** @type {IntermediateSearchResults} */ (res), this);
                 }
                 // move counter back by 1
                 count--;
@@ -405,7 +405,7 @@ Document.prototype.search = function(query, limit, options, _promises){
             // fast path: nothing matched
             return resolve || !SUPPORT_RESOLVER
                 ? result
-                : new Resolver(result);
+                : new Resolver(result, this);
         }
     }
 
@@ -427,7 +427,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                         else{
                             return resolve || !SUPPORT_RESOLVER
                                 ? result
-                                : new Resolver(result);
+                                : new Resolver(result, this);
                         }
                     }
                     PROFILER && tick("Document.search:tag:get:" + tag[y + 1]);
@@ -449,10 +449,12 @@ Document.prototype.search = function(query, limit, options, _promises){
     if(!count){
         return resolve || !SUPPORT_RESOLVER
             ? result
-            : new Resolver(result);
+            : new Resolver(result, this);
     }
     if(pluck && (!enrich || !this.store)){
-        return /** @type {SearchResults} */ (result[0]);
+        result = result[0];
+        if(!resolve) result.index = this;
+        return /** @type {SearchResults|Resolver} */ (result);
     }
 
     promises = [];
@@ -481,7 +483,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                 ? (highlight
                     ? highlight_fields(/** @type {string} */ (query), res, this.index, pluck, highlight)
                     : /** @type {SearchResults|EnrichedSearchResults} */ (res))
-                : new Resolver(/** @type {IntermediateSearchResults} */ (res));
+                : new Resolver(/** @type {IntermediateSearchResults} */ (res), this);
         }
 
         result[i] = {

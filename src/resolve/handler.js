@@ -1,8 +1,17 @@
 // COMPILER BLOCK -->
-import { DEBUG, SUPPORT_HIGHLIGHTING } from "../config.js";
+import {
+    DEBUG,
+    SUPPORT_DOCUMENT,
+    SUPPORT_HIGHLIGHTING,
+    SUPPORT_STORE
+} from "../config.js";
 // <-- COMPILER BLOCK
 import Resolver from "../resolver.js";
-import { ResolverOptions, SearchResults, IntermediateSearchResults } from "../type.js";
+import {
+    ResolverOptions,
+    SearchResults,
+    IntermediateSearchResults
+} from "../type.js";
 
 /**
  * @param {string} fn
@@ -57,20 +66,51 @@ Resolver.prototype.handler = function(fn, args){
                 offset = query.offset || 0;
                 suggest = query.suggest;
                 resolve = query.resolve;
-                highlight = query.highlight && resolve;
-                enrich = highlight || (query.enrich && resolve);
+                highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && query.highlight && resolve;
+                enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && highlight || (query.enrich && resolve);
+                let index;
 
                 if(query.index){
+                    this.index = index = query.index;
+                }
+
+                if(query.query || query.tag){
+
+                    if(DEBUG){
+                        if(!this.index){
+                            throw new Error("Resolver can't apply because the corresponding Index was never specified");
+                        }
+                    }
+
+                    if(SUPPORT_DOCUMENT){
+                        if(query.field){
+
+                            if(DEBUG){
+                                if(!this.index.index){
+                                    throw new Error("Resolver can't apply because the corresponding Document Index was not specified");
+                                }
+                            }
+
+                            index = this.index.index.get(query.field);
+
+                            if(DEBUG){
+                                if(!index){
+                                    throw new Error("Resolver can't apply because the specified Document field '" + query.field + "' was not found");
+                                }
+                            }
+                        }
+                    }
+
                     query.resolve = false;
                     //if(DEBUG)
                     //query.enrich = false;
-                    result = query.index.search(query).result;
+                    result = index.search(query).result;
                     query.resolve = resolve;
                     //if(DEBUG)
                     //query.enrich = enrich;
 
-                    if(SUPPORT_HIGHLIGHTING && highlight){
-                        highlight_query = query.search;
+                    if(highlight){
+                        highlight_query = query.query;
                     }
                 }
                 else if(query.and){

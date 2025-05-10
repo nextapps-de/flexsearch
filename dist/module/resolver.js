@@ -1,4 +1,5 @@
 import Index from "./index.js";
+import Document from "./document.js";
 import default_resolver from "./resolve/default.js";
 import { apply_enrich } from "./document/search.js";
 import { ResolverOptions, IntermediateSearchResults } from "./type.js";
@@ -11,13 +12,14 @@ import { highlight_fields } from "./document/highlight.js";
 
 /**
  * @param {IntermediateSearchResults|ResolverOptions=} result
+ * @param {Index|Document=} index
  * @return {Resolver}
  * @constructor
  */
 
-export default function Resolver(result) {
+export default function Resolver(result, index) {
     if (!this || this.constructor !== Resolver) {
-        return new Resolver(result);
+        return new Resolver(result, index);
     }
     // if(result && result.constructor === Resolver){
     //     // todo test this branch
@@ -27,13 +29,13 @@ export default function Resolver(result) {
     if (result && result.index) {
         // result = /** @type {ResolverOptions} */ (result);
         result.resolve = /* suggest */ /* append: */ /* enrich */ /* resolve: */!1;
-        this.index = /** @type {Index} */result.index;
+        this.index = /** @type {Index|Document} */result.index;
         this.boostval = result.boost || 0;
-        this.result = result.index.search(result).result;
+        this.result = this.index.search(result).result;
         return this;
     }
-    /** @type {Index|null} */
-    this.index = null;
+    /** @type {Index|Document|null} */
+    this.index = index || null;
     /** @type {IntermediateSearchResults} */
     this.result = /** @type {IntermediateSearchResults} */result || [];
     /** @type {number} */

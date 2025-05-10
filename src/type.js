@@ -252,7 +252,7 @@ export let PersistentOptions = {};
 
 /**
  * @typedef {{
- *   index: (Index|undefined),
+ *   index: (Index|Document|undefined),
  *   query: (string|undefined),
  *   limit: (number|undefined),
  *   offset: (number|undefined),

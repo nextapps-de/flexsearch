@@ -105,4 +105,50 @@ describe("Github Issues", function(){
         expect(userResult).to.eql([1]);
         expect(usersResult).to.eql([1]);
     });
+
+    it("#500", function(){
+
+        const indexableFields = ['field1', 'field2'];
+
+        const searchIndex = new Document({
+            document: {
+                id: '_id',
+                index: indexableFields.map(f => ({field: f, tokenize: 'full', encoder: Charset.LatinExtra})),
+            },
+        });
+
+        searchIndex.add({
+            _id: '123',
+            field1: '1234',
+            field2: '123 b',
+        });
+
+        const submitSearch = query => {
+
+            // Since there are subfields to account for, build up the query one field at a time
+            let res = searchIndex.search({
+                query,
+                field: "field1",
+                resolve: false
+            });
+
+            // Combine the queries with "or" and "resolve" them to get the results
+            res = res.or({
+                query,
+                field: "field2"
+            });
+
+            res = res.resolve();
+
+            return res;
+        };
+
+        // console.log('this works', submitSearch('123'));
+        // console.log('this throws an error', submitSearch('1234'));
+        // console.log('this throws an error', submitSearch('123 b'));
+
+        expect(submitSearch('123')).to.eql(["123"]);
+        expect(submitSearch('1234')).to.eql(["123"]);
+        expect(submitSearch('123 b')).to.eql(["123"]);
+    });
 });
