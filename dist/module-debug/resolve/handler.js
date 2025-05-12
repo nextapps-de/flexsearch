@@ -63,29 +63,31 @@ Resolver.prototype.handler = function (fn, args) {
 
                 if (query.index) {
                     this.index = index = query.index;
+                } else {
+                    index = this.index;
                 }
 
                 if (query.query || query.tag) {
                     if (!this.index) {
                         throw new Error("Resolver can't apply because the corresponding Index was never specified");
                     }
+                    {
+                        const field = query.field || query.pluck;
+                        if (field) {
+                            if (!this.index.index) {
+                                throw new Error("Resolver can't apply because the corresponding Document Index was not specified");
+                            }
 
-                    if (query.field) {
-                        if (!this.index.index) {
-                            throw new Error("Resolver can't apply because the corresponding Document Index was not specified");
-                        }
 
+                            index = this.index.index.get(field);
 
-                        index = this.index.index.get(query.field);
-
-                        if (!index) {
-                            throw new Error("Resolver can't apply because the specified Document field '" + query.field + "' was not found");
+                            if (!index) {
+                                throw new Error("Resolver can't apply because the specified Document Field '" + field + "' was not found");
+                            }
                         }
                     }
 
-
-                    query.resolve = /* suggest */
-                    /* append: */ /* enrich */!1;
+                    query.resolve = /* suggest */ /* append: */ /* enrich */!1;
                     //if(DEBUG)
                     //query.enrich = false;
                     result = index.search(query).result;

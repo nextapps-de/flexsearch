@@ -3,15 +3,17 @@ import { IndexOptions } from "./type.js";
 import { create_object } from "./common.js";
 import handler from "./worker/handler.js";
 import apply_async from "./async.js";
+import Encoder from "./encoder.js";
 
 let pid = 0;
 
 /**
  * @param {IndexOptions=} options
+ * @param {Encoder=} encoder
  * @constructor
  */
 
-export default function WorkerIndex(options = /** @type IndexOptions */{}) {
+export default function WorkerIndex(options = /** @type IndexOptions */{}, encoder) {
 
     if (!this || this.constructor !== WorkerIndex) {
         return new WorkerIndex(options);
@@ -80,6 +82,10 @@ export default function WorkerIndex(options = /** @type IndexOptions */{}) {
 
         this.priority = options.priority || 4;
 
+        // assign encoder for result highlighting
+        if (encoder) {
+            this.encoder = encoder;
+        }
 
         return this;
     }

@@ -63,17 +63,20 @@ Resolver.prototype.handler = function (fn, args) {
 
                 if (query.index) {
                     this.index = index = query.index;
+                } else {
+                    index = this.index;
                 }
 
                 if (query.query || query.tag) {
-                    if (query.field) {
+                    {
+                        const field = query.field || query.pluck;
+                        if (field) {
 
-                        index = this.index.index.get(query.field);
+                            index = this.index.index.get(field);
+                        }
                     }
 
-
-                    query.resolve = /* suggest */
-                    /* append: */ /* enrich */!1;
+                    query.resolve = /* suggest */ /* append: */ /* enrich */!1;
                     //if(DEBUG)
                     //query.enrich = false;
                     result = index.search(query).result;

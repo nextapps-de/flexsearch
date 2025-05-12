@@ -106,12 +106,117 @@ describe("Github Issues", function(){
         expect(usersResult).to.eql([1]);
     });
 
-    it("#500", function(){
+    if(!build_light && !build_compact) it("#499", function(){
+
+        const DocumentIndexConfig = {
+            document: {
+                id: "id",
+                store: true,
+                // fuzzy search fields
+                index: [
+                    {
+                        field: "className",
+                        tokenize: "forward",
+                    },
+                ],
+                // These get tagged as their specific key
+                tag: [
+                    {
+                        field: "language",
+                    },
+                    {
+                        field: "feedbackScore",
+                        custom: (data) =>
+                            Number(data.avgInstructorScore) >= 4 ? ">=4" : false,
+                    },
+                ],
+            },
+        };
+
+        const index = new Document(DocumentIndexConfig);
+
+        let all_docs = [{
+            "id": "1234",
+            "className": "My Class Name",
+            "language": "German",
+            "avgInstructorScore": 4.69,
+        }];
+
+        for (const doc of all_docs) {
+            index.add(doc);
+        }
+
+        const resolveOptions = {
+            enrich: true,
+            limit: index.store.size,
+        };
+
+        //console.log(index.search({ tag: { feedbackScore: ">=4", language: "German" }, resolve: true }))
+        //console.log(index.search({ tag: { feedbackScore: ">=4", language: "German" }, resolve: true, enrich: true }))
+        //console.log(index.search({ tag: { feedbackScore: ">=4", language: "German" }, resolve: false }).resolve({ enrich: true }))
+
+        let results = index.search({ tag: { feedbackScore: ">=4", language: "German" }, resolve: false })
+                           .resolve(resolveOptions);
+
+        expect(results).to.eql([{
+            id: '1234',
+            doc: {
+                id: '1234',
+                className: 'My Class Name',
+                language: 'German',
+                avgInstructorScore: 4.69
+            }
+        }]);
+
+        results = index.search({ query: "class", field: "className", resolve: false })
+                       .and({ tag: { feedbackScore: ">=4", language: "German" } })
+                       .resolve(resolveOptions);
+
+        expect(results).to.eql([{
+            id: '1234',
+            doc: {
+                id: '1234',
+                className: 'My Class Name',
+                language: 'German',
+                avgInstructorScore: 4.69
+            }
+        }]);
+
+        results = index.search({ tag: { feedbackScore: ">=4" }, resolve: false })
+                       .and({ tag: { language: "German" } })
+                       .resolve(resolveOptions);
+
+        expect(results).to.eql([{
+            id: '1234',
+            doc: {
+                id: '1234',
+                className: 'My Class Name',
+                language: 'German',
+                avgInstructorScore: 4.69
+            }
+        }]);
+
+        results = index.search({ query: "class", field: "className", resolve: false })
+                       .and({ tag: { feedbackScore: ">=4", language: "German" }, resolve: true, enrich: true });
+
+        expect(results).to.eql([{
+            id: '1234',
+            doc: {
+                id: '1234',
+                className: 'My Class Name',
+                language: 'German',
+                avgInstructorScore: 4.69
+            }
+        }]);
+    });
+
+    if(!build_light && !build_compact) it("#500", function(){
 
         const indexableFields = ['field1', 'field2'];
 
         const searchIndex = new Document({
             document: {
+                store: true,
                 id: '_id',
                 index: indexableFields.map(f => ({field: f, tokenize: 'full', encoder: Charset.LatinExtra})),
             },
@@ -143,12 +248,76 @@ describe("Github Issues", function(){
             return res;
         };
 
-        // console.log('this works', submitSearch('123'));
-        // console.log('this throws an error', submitSearch('1234'));
-        // console.log('this throws an error', submitSearch('123 b'));
+        // console.log(submitSearch('123'));
+        // console.log(submitSearch('1234'));
+        // console.log(submitSearch('123 b'));
 
         expect(submitSearch('123')).to.eql(["123"]);
         expect(submitSearch('1234')).to.eql(["123"]);
         expect(submitSearch('123 b')).to.eql(["123"]);
+
+        const submitSearch2 = query => {
+
+            // Since there are subfields to account for, build up the query one field at a time
+            return searchIndex.search({
+                query,
+                field: "field1",
+                resolve: false
+            }).or({
+                query,
+                field: "field2",
+                resolve: true
+            });
+        };
+
+        expect(submitSearch2('123')).to.eql(["123"]);
+        expect(submitSearch2('1234')).to.eql(["123"]);
+        expect(submitSearch2('123 b')).to.eql(["123"]);
+
+        const submitSearch3 = query => {
+
+            // Since there are subfields to account for, build up the query one field at a time
+            let res1 = searchIndex.search({
+                query,
+                field: "field1",
+                resolve: false
+            });
+
+            let res2 = searchIndex.search({
+                query,
+                field: "field2",
+                resolve: false
+            });
+
+            // Combine the queries with "or" and "resolve" them to get the results
+            return res1.or(res2).resolve({ enrich: true });
+        };
+
+        expect(submitSearch3('123')).to.eql([{
+            "id": "123",
+            "doc": {
+                "_id": "123",
+                "field1": "1234",
+                "field2": "123 b"
+            }
+        }]);
+
+        expect(submitSearch3('1234')).to.eql([{
+            "id": "123",
+            "doc": {
+                "_id": "123",
+                "field1": "1234",
+                "field2": "123 b"
+            }
+        }]);
+
+        expect(submitSearch3('123 b')).to.eql([{
+            "id": "123",
+            "doc": {
+                "_id": "123",
+                "field1": "1234",
+                "field2": "123 b"
+            }
+        }]);
     });
 });

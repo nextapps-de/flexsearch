@@ -1,7 +1,7 @@
 
 import { DocumentSearchOptions, DocumentSearchResults, EnrichedDocumentSearchResults, MergedDocumentSearchResults, MergedDocumentSearchEntry, EnrichedSearchResults, SearchResults, IntermediateSearchResults } from "../type.js";
 import { create_object, is_array, is_object, is_string } from "../common.js";
-import { intersect_union } from "../intersect.js";
+import { intersect, intersect_union } from "../intersect.js";
 import Document from "../document.js";
 import Index from "../index.js";
 import Resolver from "../resolver.js";
@@ -48,7 +48,8 @@ Document.prototype.search = function (query, limit, options, _promises) {
     if (options && options.cache) {
         options.cache = /* suggest */ /* append: */ /* enrich */!1;
         const res = this.searchCache(query, limit, options);
-        options.cache = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+        options.cache = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/
+        /*await rows.hasNext()*/;
         return res;
     }
 
@@ -66,6 +67,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         enrich,
         merge,
         suggest,
+        boost,
         field,
         tag,
         offset,
@@ -85,28 +87,11 @@ Document.prototype.search = function (query, limit, options, _promises) {
         query = options.query || query;
         pluck = options.pluck;
         merge = options.merge;
+        boost = options.boost;
         field = pluck || options.field || (field = options.index) && (field.index ? null : field);
         tag = this.tag && options.tag;
         suggest = options.suggest;
         resolve = !1 !== options.resolve;
-
-        // upgrade pluck when missing
-        if (!resolve && !pluck) {
-            field = field || this.field;
-            if (field) {
-                if (is_string(field)) {
-                    pluck = field;
-                } else {
-                    if (is_array(field) && 1 === field.length) {
-                        field = field[0];
-                    }
-                    pluck = field.field || field.index;
-                }
-            }
-            if (!pluck) {
-                throw new Error("Apply resolver on document search requires either the option 'pluck' to be set or just select a single field name in your query.");
-            }
-        }
 
         if (this.store && options.highlight && !resolve) {
             console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })");
@@ -119,7 +104,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         enrich = !!highlight || resolve && this.store && options.enrich;
         limit = options.limit || limit;
         offset = options.offset || 0;
-        limit || (limit = 100);
+        limit || (limit = resolve ? 100 : 0);
 
         if (tag && (!this.db || !_promises)) {
 
@@ -192,23 +177,46 @@ Document.prototype.search = function (query, limit, options, _promises) {
                     } else {
                         ids = get_tag.call(this, pairs[j], pairs[j + 1], limit, offset, enrich);
                     }
-                    result.push({
+                    result.push(resolve ? {
                         field: pairs[j],
                         tag: pairs[j + 1],
                         result: ids
-                    });
+                    } : [ids]);
                 }
 
                 if (promises.length) {
+                    const self = this;
                     return Promise.all(promises).then(function (promises) {
                         for (let j = 0; j < promises.length; j++) {
-                            result[j].result = promises[j];
+                            if (resolve) {
+                                result[j].result = promises[j];
+                            } else {
+                                result[j] = promises[j];
+                            }
                         }
-                        return result;
+                        return resolve || !!0 ? result : new Resolver(1 < result.length ? intersect(result, 1, 0, 0, suggest, boost) : result[0], self);
                     });
                 }
 
-                return result;
+                return resolve || !!0 ? result : new Resolver(1 < result.length ? intersect(result, 1, 0, 0, suggest, boost) : result[0], this);
+            }
+        }
+
+        // upgrade pluck when missing
+        if (!resolve && !pluck) {
+            field = field || this.field;
+            if (field) {
+                if (is_string(field)) {
+                    pluck = field;
+                } else {
+                    if (is_array(field) && 1 === field.length) {
+                        field = field[0];
+                    }
+                    pluck = field.field || field.index;
+                }
+            }
+            if (!pluck) {
+                throw new Error("Apply resolver on document search requires either the option 'pluck' to be set or just select a single field name in your query.");
             }
         }
 
@@ -493,7 +501,7 @@ function merge_fields(fields) {
 function get_tag(tag, key, limit, offset) {
     let res = this.tag.get(tag);
     if (!res) {
-        console.warn("Tag '" + tag + "' was not found");
+        console.warn("Tag-Field '" + tag + "' was not found");
         return [];
     }
     res = res && res.get(key);

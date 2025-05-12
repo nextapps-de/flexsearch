@@ -298,7 +298,7 @@ To query against one or multiple specific fields you have to pass the exact key 
 
 ```js
 index.search(query, {
-    index: [
+    field: [
         "record:title",
         "record:content:header",
         "record:content:footer"

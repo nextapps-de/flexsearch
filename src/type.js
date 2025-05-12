@@ -10,7 +10,7 @@ import StorageInterface from "./db/interface.js";
  *   preset: (string|undefined),
  *   context: (IndexOptions|undefined),
  *   encoder: (Encoder|Function|Object|undefined),
- *   encode: (Function|undefined),
+ *   encode: (function(string):Array<string>|undefined),
  *   resolution: (number|undefined),
  *   tokenize: (string|undefined),
  *   fastupdate: (boolean|undefined),

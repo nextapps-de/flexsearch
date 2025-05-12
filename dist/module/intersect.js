@@ -1,4 +1,5 @@
 
+import Resolver from "./resolver.js";
 import { create_object, concat, sort_by_length_up, get_max_len } from "./common.js";
 import { SearchResults, IntermediateSearchResults } from "./type.js";
 
@@ -239,7 +240,7 @@ export function union(arrays, limit, offset, resolve, boost) {
 }
 
 /**
- * @param {SearchResults|IntermediateSearchResults} arrays
+ * @param {SearchResults|IntermediateSearchResults|Resolver} arrays
  * @param {Array<SearchResults>} mandatory
  * @param {boolean=} resolve
  * @returns {SearchResults}

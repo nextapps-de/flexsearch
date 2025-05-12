@@ -73,6 +73,9 @@ Resolver.prototype.handler = function(fn, args){
                 if(query.index){
                     this.index = index = query.index;
                 }
+                else{
+                    index = this.index;
+                }
 
                 if(query.query || query.tag){
 
@@ -83,7 +86,8 @@ Resolver.prototype.handler = function(fn, args){
                     }
 
                     if(SUPPORT_DOCUMENT){
-                        if(query.field){
+                        const field = query.field || query.pluck;
+                        if(field){
 
                             if(DEBUG){
                                 if(!this.index.index){
@@ -91,11 +95,11 @@ Resolver.prototype.handler = function(fn, args){
                                 }
                             }
 
-                            index = this.index.index.get(query.field);
+                            index = this.index.index.get(field);
 
                             if(DEBUG){
                                 if(!index){
-                                    throw new Error("Resolver can't apply because the specified Document field '" + query.field + "' was not found");
+                                    throw new Error("Resolver can't apply because the specified Document Field '" + field + "' was not found");
                                 }
                             }
                         }

@@ -22,7 +22,7 @@ import {
     IntermediateSearchResults
 } from "../type.js";
 import { create_object, is_array, is_object, is_string } from "../common.js";
-import { intersect_union } from "../intersect.js";
+import { intersect, intersect_union } from "../intersect.js";
 import Document from "../document.js";
 import Index from "../index.js";
 import Resolver from "../resolver.js";
@@ -86,7 +86,7 @@ Document.prototype.search = function(query, limit, options, _promises){
      * } */
     let result = [];
     let result_field = [];
-    let pluck, enrich, merge, suggest;
+    let pluck, enrich, merge, suggest, boost;
     let field, tag, offset, count = 0, resolve = true, highlight;
 
     if(options){
@@ -100,29 +100,11 @@ Document.prototype.search = function(query, limit, options, _promises){
         query = options.query || query;
         pluck = options.pluck;
         merge = options.merge;
+        boost = options.boost;
         field = pluck || options.field || ((field = options.index) && (field.index ? null : field));
         tag = SUPPORT_TAGS && this.tag && options.tag;
         suggest = SUPPORT_SUGGESTION && options.suggest;
         resolve = !SUPPORT_RESOLVER || (options.resolve !== false);
-
-        // upgrade pluck when missing
-        if(SUPPORT_RESOLVER && !resolve && !pluck){
-            field = field || this.field;
-            if(field){
-                if(is_string(field)){
-                    pluck = field;
-                }
-                else{
-                    if(is_array(field) && field.length === 1){
-                        field = field[0];
-                    }
-                    pluck = field.field || field.index;
-                }
-            }
-            if(DEBUG && !pluck){
-                throw new Error("Apply resolver on document search requires either the option 'pluck' to be set or just select a single field name in your query.");
-            }
-        }
 
         if(DEBUG){
             if(SUPPORT_STORE && this.store && options.highlight && !resolve){
@@ -137,7 +119,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         enrich = SUPPORT_STORE && (!!highlight || (resolve && this.store && options.enrich));
         limit = options.limit || limit;
         offset = options.offset || 0;
-        limit || (limit = 100);
+        limit || (limit = (resolve ? 100 : 0));
 
         if(tag && (!SUPPORT_PERSISTENT || !this.db || !_promises)){
 
@@ -217,23 +199,56 @@ Document.prototype.search = function(query, limit, options, _promises){
                         PROFILER && tick("Document.search:tag:get:" + pairs[j + 1]);
                         ids = get_tag.call(this, pairs[j], pairs[j + 1], limit, offset, enrich);
                     }
-                    result.push({
+                    result.push(resolve ? {
                         "field": pairs[j],
                         "tag": pairs[j + 1],
                         "result": ids
-                    });
+                    } : [ids]);
                 }
 
                 if(promises.length){
+                    const self = this;
                     return Promise.all(promises).then(function(promises){
                         for(let j = 0; j < promises.length; j++){
-                            result[j].result = promises[j];
+                            if(resolve){
+                                result[j]["result"] = promises[j];
+                            }
+                            else{
+                                result[j] = promises[j];
+                            }
                         }
-                        return result;
+                        return resolve || !SUPPORT_RESOLVER
+                            ? result
+                            : new Resolver(result.length > 1
+                                ? intersect(result, 1, 0, 0, suggest, boost)
+                                : result[0], self)
                     });
                 }
 
-                return result;
+                return resolve || !SUPPORT_RESOLVER
+                    ? result
+                    : new Resolver(result.length > 1
+                        ? intersect(result, 1, 0, 0, suggest, boost)
+                        : result[0], this)
+            }
+        }
+
+        // upgrade pluck when missing
+        if(SUPPORT_RESOLVER && !resolve && !pluck){
+            field = field || this.field;
+            if(field){
+                if(is_string(field)){
+                    pluck = field;
+                }
+                else{
+                    if(is_array(field) && field.length === 1){
+                        field = field[0];
+                    }
+                    pluck = field.field || field.index;
+                }
+            }
+            if(DEBUG && !pluck){
+                throw new Error("Apply resolver on document search requires either the option 'pluck' to be set or just select a single field name in your query.");
             }
         }
 
@@ -568,14 +583,14 @@ function get_tag(tag, key, limit, offset, enrich){
     PROFILER && tick("Document.search:tag:get:" + key);
     let res = this.tag.get(tag);
     if(!res){
-        DEBUG && console.warn("Tag '" + tag + "' was not found");
+        DEBUG && console.warn("Tag-Field '" + tag + "' was not found");
         return [];
     }
     res = res && res.get(key);
     let len = res && (res.length - offset);
 
     if(len && (len > 0)){
-        if((len > limit) || offset){
+        if((limit && len > limit) || offset){
             res = res.slice(offset, offset + limit);
         }
         if(enrich){

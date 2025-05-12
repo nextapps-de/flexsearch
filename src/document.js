@@ -11,6 +11,9 @@ import {
     DEBUG,
     SUPPORT_ASYNC,
     SUPPORT_CACHE,
+    SUPPORT_CHARSET,
+    SUPPORT_ENCODER,
+    SUPPORT_HIGHLIGHTING,
     SUPPORT_KEYSTORE,
     SUPPORT_PERSISTENT,
     SUPPORT_SERIALIZE,
@@ -31,7 +34,7 @@ import {
 import StorageInterface from "./db/interface.js";
 import Index from "./index.js";
 import WorkerIndex from "./worker.js";
-import Encoder from "./encoder.js";
+import Encoder, { fallback_encoder } from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import { is_string, is_object, parse_simple } from "./common.js";
 import apply_async from "./async.js";
@@ -39,6 +42,7 @@ import { exportDocument, importDocument } from "./serialize.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import "./document/add.js";
 import "./document/search.js";
+import Charset from "./charset.js";
 
 /**
  * @constructor
@@ -97,7 +101,7 @@ export default function Document(options){
     }
 
     /**
-     * @type {Map<string, Index>}
+     * @type {Map<string, Index|WorkerIndex>}
      */
     this.index = parse_descriptor.call(this, options, document);
 
@@ -131,7 +135,7 @@ export default function Document(options){
                             this.tagtree[i]._filter = params.filter;
                         }
                     }
-                    // the tag fields needs to be hold by indices
+                    // the tag fields need to be hold by indices
                     this.tagfield[i] = field;
                     this.tag.set(field, new Map());
                 }
@@ -153,23 +157,33 @@ export default function Document(options){
                 let count = 0;
                 for(const item of self.index.entries()){
                     const key = /** @type {string} */ (item[0]);
-                    let index = item[1];
+                    let index = /** @type {Index|WorkerIndex | Promise<Index|WorkerIndex>} */ (item[1]);
+                    // let encoder;
+                    // if(SUPPORT_HIGHLIGHTING && SUPPORT_STORE){
+                    //     // make encoder available for result highlighting
+                    //     let opt = promises[count].encoder || {};
+                    //     // handle shared encoders
+                    //     let encoder = encoder_last.get(opt);
+                    //     if(!encoder){
+                    //         encoder = opt.encode
+                    //             ? opt
+                    //             : SUPPORT_ENCODER
+                    //                 ? new Encoder(
+                    //                     SUPPORT_CHARSET && typeof opt === "string"
+                    //                         ? Charset[opt]
+                    //                         : opt)
+                    //                 : { encode: fallback_encoder };
+                    //         encoder_last.set(opt, encoder);
+                    //     }
+                    // }
                     if(index.then){
-                        // make encoder available for result highlighting
-                        let opt = promises[count].encoder || {};
-                        // handle shared encoders
-                        let encoder = encoder_last.get(opt);
-                        if(!encoder){
-                            encoder = opt.encode
-                                ? opt
-                                : new Encoder(opt);
-                            encoder_last.set(opt, encoder);
-                        }
                         index = result[count];
-                        index.encoder = encoder;
                         self.index.set(key, index);
                         count++;
                     }
+                    // if(encoder){
+                    //     index.encoder = encoder;
+                    // }
                 }
                 return self;
             });
@@ -178,7 +192,8 @@ export default function Document(options){
     else if(SUPPORT_PERSISTENT){
         if(options.db){
             this.fastupdate = false;
-            // actually it can be awaited on "await index.db"
+            // a constructor should not return a promise
+            // it can be awaited on "await index.db"
             this.mount(options.db);
         }
     }
@@ -281,10 +296,12 @@ if(SUPPORT_PERSISTENT){
 
 /**
  * @this {Document}
+ * @return {Map<string, Index|WorkerIndex>}
  */
 
 function parse_descriptor(options, document){
 
+    /** @type {Map<string, Index|WorkerIndex>} */
     const index = new Map();
     let field = document.index || document.field || document;
 
@@ -308,10 +325,21 @@ function parse_descriptor(options, document){
         );
 
         if(SUPPORT_WORKER && this.worker){
-            const worker = new WorkerIndex(opt);
+            let encoder;
+            // assign encoder for result highlighting
+            if(SUPPORT_HIGHLIGHTING && SUPPORT_STORE){
+                encoder = opt.encoder;
+                encoder = encoder && encoder.encode
+                    ? encoder
+                    : SUPPORT_ENCODER
+                        ? new Encoder(
+                            SUPPORT_CHARSET && typeof encoder === "string"
+                                ? Charset[encoder]
+                                : encoder)
+                        : { encode: fallback_encoder };
+            }
+            const worker = new WorkerIndex(opt, /** @type {Encoder} */ (encoder));
             if(worker){
-                // assign encoder for result highlighting
-                worker.encoder = opt.encoder;
                 // worker could be a promise
                 // it needs to be resolved and swapped later
                 index.set(key, worker);

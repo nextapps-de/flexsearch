@@ -898,9 +898,9 @@ declare module "flexsearch" {
         offset?: number;
         resolve?: R;
         /** only usable when "resolve" was not set to false */
-        enrich?: D extends DocumentData
-            ? R extends true ? E : false
-            : false;
+        enrich?: D extends undefined
+            ? false
+            : R extends true ? E : false;
     };
 
     export type ResolverOptions<
@@ -910,7 +910,7 @@ declare module "flexsearch" {
         H extends HighlightOptions | boolean = false,
         R extends boolean = false,
         E extends boolean = H extends HighlightOptions ? true : false
-    > = DefaultResolve<D, R, E> & {
+    > = Resolver<D, W, S, H, R, E> | (DefaultResolve<D, R, E> & {
         query?: string;
         index?: Index<W, S> | Document<D, W, S>;
         pluck?: FieldName<D>;
@@ -923,10 +923,10 @@ declare module "flexsearch" {
         boost?: number;
         suggest?: boolean;
         /** only usable when "resolve" was not set to false */
-        highlight?: D extends DocumentData
-            ? R extends true ? H : false
-            : false;
-    };
+        highlight?: D extends undefined
+            ? false
+            : R extends true ? H : false;
+    });
 
     export type HighlightBoundaryOptions = {
         before?: number;
