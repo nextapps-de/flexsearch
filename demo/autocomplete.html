@@ -90,10 +90,10 @@
 <body>
 <div id="header">
     <form style="position: relative; width: 100%;">
-        <input type="text" id="trigger-prev">
-        <input type="text" id="autocomplete" disabled>
-        <input type="text" id="userinput" placeholder="Search by movie title ..." autocorrect="off" spellcheck="false" autocomplete="off" autofocus>
-        <input type="text" id="trigger-next">
+        <input type="text" id="trigger-prev" tabindex="1">
+        <input type="text" id="autocomplete" readonly>
+        <input type="text" id="userinput" tabindex="2" placeholder="Search by movie title ..." autocorrect="off" spellcheck="false" autocomplete="off" autofocus>
+        <input type="text" id="trigger-next" tabindex="3">
     </form>
     <label>
         <input type="checkbox" id="suggest" checked> Suggest
@@ -102,6 +102,17 @@
 <div id="suggestions"></div>
 <!--<div id="info">iterate results by arrow keys</div>-->
 <script type="module">
+
+    // Features:
+    // 1. Instant Search
+    // 2. Auto-Complete
+    // 3. Suggestions
+    // 4. Query Cache
+    // 5. Result Highlighting
+    // 6. Tokenizer
+    // 7. Encoder
+    // 8. Document Index (Field-Search)
+    // 9. Keyboard Navigation
 
     import { Document } from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/dist/flexsearch.compact.module.min.js";
     import data from "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@master/demo/data/movies.js";
@@ -113,20 +124,23 @@
         // for an instant search on keypress
         cache: true,
         document: {
-            // it requires storing the documents
+            // storing documents is required in this example
             store: true,
             index: [{
                 field: "title",
-                // a forward tokenizer is minimum
+                // important: a forward tokenizer is minimum
                 // required by an instant search
                 tokenize: "forward"
             }]
         }
     });
 
+    // The movies.js data used in this example is an array of strings.
+    // Since result highlighting needs a Document Index, the data
+    // has to be simply upgraded to a pseudo document.
+
     for(let i = 0; i < data.length; i++){
-        // pass a flat pseudo document when using
-        // result highlighting on plain string inputs
+        // pass a json-like object
         index.add(i, {
             "title": data[i]
         });
@@ -148,12 +162,12 @@
     suggestions.addEventListener("click", accept_suggestion, true);
 
     trigger_prev.addEventListener("focus", function(){
-        iterate_selected({ key: "ArrowUp"});
+        iterate_selected({ key: "ArrowUp" });
         userinput.focus();
     }, true);
 
     trigger_next.addEventListener("focus", function(){
-        iterate_selected({ key: "ArrowDown"});
+        iterate_selected({ key: "ArrowDown" });
         userinput.focus();
     }, true);
 
@@ -247,8 +261,11 @@
     function accept_autocomplete(event){
 
         const key = (event || window.event).keyCode;
+
         if(key === 13 || key === 39) {
-            userinput.value = autocomplete.value = autocomplete.current;
+            const node = suggestions.childNodes[iterate];
+            if(!node) return;
+            userinput.value = autocomplete.value = node.textContent;
             suggestions.textContent = "";
         }
     }
