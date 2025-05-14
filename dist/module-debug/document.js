@@ -239,7 +239,7 @@ function parse_descriptor(options, document) {
         if (this.worker) {
             let encoder = opt.encoder;
 
-            encoder = encoder && encoder.encode ? encoder : new Encoder("string" == typeof encoder ? Charset[encoder] : encoder);
+            encoder = encoder && encoder.encode ? encoder : new Encoder("string" == typeof encoder ? Charset[encoder] : encoder || {});
 
             const worker = new WorkerIndex(opt, /** @type {Encoder} */encoder);
             if (worker) {

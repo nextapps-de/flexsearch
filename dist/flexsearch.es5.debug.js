@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.165 (ES5/Debug)
+ * FlexSearch.js v0.8.166 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2818,7 +2818,7 @@ function Qb(a, b) {
     T(f) || (g = f, f = f.field);
     g = Da(g) ? Object.assign({}, a, g) : a;
     if (this.worker) {
-      var h = (h = g.encoder) && h.encode ? h : new Ma("string" === typeof h ? Nb[h] : h);
+      var h = (h = g.encoder) && h.encode ? h : new Ma("string" === typeof h ? Nb[h] : h || {});
       h = new Ya(g, h);
       c.set(f, h);
     }

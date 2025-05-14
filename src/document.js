@@ -313,7 +313,7 @@ function parse_descriptor(options, document){
                         ? new Encoder(
                             SUPPORT_CHARSET && typeof encoder === "string"
                                 ? Charset[encoder]
-                                : encoder)
+                                : encoder || {})
                         : { encode: fallback_encoder };
             }
             const worker = new WorkerIndex(opt, /** @type {Encoder} */ (encoder));
