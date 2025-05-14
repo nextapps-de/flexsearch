@@ -36,30 +36,25 @@ export default function RedisDB(name, config = {}) {
     this.id = (name ? sanitize(name) : "flexsearch") + "|";
     this.field = config.field ? "-" + sanitize(config.field) : "";
     this.type = config.type || "";
-    this.fastupdate = /* tag? */ /* stringify */ /* stringify */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.fastupdate = !0;
     this.db = config.db || DB || null;
     this.support_tag_search = !0;
     this.resolution = 9;
     this.resolution_ctx = 9;
-    //this.trx = false;
+
     Object.assign(defaults, config);
     this.db && delete defaults.db;
 }
 
-// RedisDB.mount = function(flexsearch){
-//     return new this().mount(flexsearch);
-// };
-
 RedisDB.prototype.mount = function (flexsearch) {
-    //if(flexsearch.constructor === Document){
+
     if (flexsearch.index) {
         return flexsearch.mount(this);
     }
     flexsearch.db = this;
     this.resolution = flexsearch.resolution;
     this.resolution_ctx = flexsearch.resolution_ctx;
-    // todo support
-    //this.fastupdate = flexsearch.fastupdate;
+
     return this.open();
 };
 
@@ -78,7 +73,7 @@ RedisDB.prototype.open = async function () {
 };
 
 RedisDB.prototype.close = async function () {
-    DB && (await this.db.disconnect()); // this.db.client.disconnect();
+    DB && (await this.db.disconnect());
     this.db = DB = null;
     return this;
 };
@@ -114,12 +109,11 @@ function create_result(range, type, resolve, enrich, resolution) {
     }
 }
 
-RedisDB.prototype.get = function (key, ctx, limit = 0, offset = 0, resolve = !0, enrich = /* suggest */!1, tags) {
+RedisDB.prototype.get = function (key, ctx, limit = 0, offset = 0, resolve = !0, enrich = !1, tags) {
 
     if (tags) {
-        // flexsearch dummy
         const query = ctx ? [ctx, key] : [key];
-        // keyword first
+
         return this.search({ depth: !!ctx }, query, limit, offset, !1, resolve, enrich, tags);
     }
 
@@ -209,28 +203,19 @@ RedisDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0,
 
     if (suggest) {
         const multi = this.db.multi();
-        // The zStore implementation lacks of ordering by match count (occurrences).
-        // Unfortunately, I couldn't find an elegant way to overcome this issue completely.
-        // For this reason it needs additionally a zInterStore to boost at least matches
-        // when all terms were found
+
         multi.zInterStore(key, query, { AGGREGATE: "SUM" });
         query.push(key);
         weights.push(query.length);
         multi.zUnionStore(key, query, { WEIGHTS: weights, AGGREGATE: "SUM" });
-        // Strict Tag Intersection: it does not put tags into union, instead it calculates the
-        // intersection against the term match union. This was the default behavior
-        // of Tag-Search. But putting everything into union will also provide suggestions derived
-        // from tags when no term was matched.
+
         if (tags) {
-            // copy over zInterStore into the same destination surprisingly works fine
-            // const key2 = key + ":2";
+
             query = [key];
             for (let i = 0; i < tags.length; i += 2) {
                 query.push(this.id + "tag-" + sanitize(tags[i]) + ":" + tags[i + 1]);
             }
             multi.zInterStore(key, query, { AGGREGATE: "MAX" });
-            // .unlink(key)
-            // key = key2;
         }
 
         result = multi[resolve ? "zRange" : "zRangeWithScores"](key, "" + offset, "" + (offset + limit - 1), { REV: !0 }).unlink(key).exec();
@@ -243,20 +228,14 @@ RedisDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0,
 
     const self = this;
     return result.then(async function (range) {
-        range = suggest && tags
-        // take the 3rd result from batch return
-        ? range[3]
-        // take the 2nd result from batch return
-        : range[suggest ? 2 : 1];
+        range = suggest && tags ? range[3] : range[suggest ? 2 : 1];
         if (!range.length) return range;
         if (enrich) range = await self.enrich(range);
         return create_result(range, type, resolve, enrich, ctx ? self.resolution_ctx : self.resolution);
     });
 };
 
-RedisDB.prototype.info = function () {
-    // todo
-};
+RedisDB.prototype.info = function () {};
 
 RedisDB.prototype.transaction = function (task, callback) {
 
@@ -265,7 +244,7 @@ RedisDB.prototype.transaction = function (task, callback) {
     }
 
     TRX = this.db.multi();
-    let promise1 = /*await*/task.call(this, TRX),
+    let promise1 = task.call(this, TRX),
         promise2 = TRX.exec();
 
     TRX = null;
@@ -276,17 +255,16 @@ RedisDB.prototype.transaction = function (task, callback) {
 
 RedisDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
-    // process cleanup tasks
     if (_replace) {
         await this.clear();
-        // there are just removals in the task queue
+
         flexsearch.commit_task = [];
     } else {
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for (let i = 0, task; i < tasks.length; i++) {
             task = tasks[i];
-            // there are just removals in the task queue
+
             if (task.clear) {
                 await this.clear();
                 _replace = !0;
@@ -330,15 +308,9 @@ RedisDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
                     const ref = this.id + "map" + this.field + ":" + key;
                     trx.zAdd(ref, result);
-                    // if(this.fastupdate) for(let j = 0; j < ids.length; j++){
-                    //     trx.sAdd("ref" + this.field + ":" + ids[j], ref);
-                    // }
+
                     if (this.fastupdate) for (let j = 0, id; j < ids.length; j++) {
-                        // Map performs bad when pushing numeric-like values as key
-                        // id = ids[j];
-                        // let tmp = refs.get(id);
-                        // tmp || refs.set(id, tmp = []);
-                        // tmp.push(ref);
+
                         id = ids[j];
                         let tmp = refs.get(id);
                         tmp || refs.set(id, tmp = []);
@@ -347,11 +319,7 @@ RedisDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 }
             }
         }
-        // if(this.fastupdate) for(let item of refs){
-        //     const key = item[0];
-        //     const value = item[1];
-        //     trx.sAdd("ref" + this.field + ":" + key, value);
-        // }
+
         if (this.fastupdate) for (const item of refs) {
             const key = item[0],
                   value = item[1];
@@ -382,15 +350,9 @@ RedisDB.prototype.commit = async function (flexsearch, _replace, _append) {
                         }
                         const ref = this.id + "ctx" + this.field + ":" + ctx_key + ":" + key;
                         trx.zAdd(ref, result);
-                        // if(this.fastupdate) for(let j = 0; j < ids.length; j++){
-                        //     trx.sAdd("ref" + this.field + ":" + ids[j], ref);
-                        // }
+
                         if (this.fastupdate) for (let j = 0, id; j < ids.length; j++) {
-                            // Map performs bad when pushing numeric-like values as key
-                            // id = ids[j];
-                            // let tmp = refs.get(id);
-                            // tmp || refs.set(id, tmp = []);
-                            // tmp.push(ref);
+
                             id = ids[j];
                             let tmp = refs.get(id);
                             tmp || refs.set(id, tmp = []);
@@ -430,12 +392,7 @@ RedisDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
                 if (!ids.length) continue;
                 let result = [];
-                // for(let i = 0; i < ids.length; i++){
-                //     result.push({
-                //         score: 0,
-                //         value: "" + ids[i]
-                //     });
-                // }
+
                 if ("number" == typeof ids[0]) {
                     for (let i = 0; i < ids.length; i++) {
                         result[i] = "" + ids[i];
@@ -446,23 +403,6 @@ RedisDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 trx.sAdd(this.id + "tag" + this.field + ":" + tag, result);
             }
         }
-
-        // TODO
-        // trx.set(this.id + "cfg" + this.field, JSON.stringify({
-        //     "encode": typeof flexsearch.encode === "string" ? flexsearch.encode : "",
-        //     "charset": typeof flexsearch.charset === "string" ? flexsearch.charset : "",
-        //     "tokenize": flexsearch.tokenize,
-        //     "resolution": flexsearch.resolution,
-        //     "minlength": flexsearch.minlength,
-        //     "optimize": flexsearch.optimize,
-        //     "fastupdate": flexsearch.fastupdate,
-        //     "encoder": flexsearch.encoder,
-        //     "context": {
-        //         "depth": flexsearch.depth,
-        //         "bidirectional": flexsearch.bidirectional,
-        //         "resolution": flexsearch.resolution_ctx
-        //     }
-        // }));
     });
 
     flexsearch.map.clear();
@@ -506,21 +446,15 @@ RedisDB.prototype.remove = function (ids) {
                 id = "" + ids[i];
 
                 if (this.fastupdate) {
-                    // const refs = new Map();
+
                     const ref = await this.db.sMembers(this.id + "ref" + this.field + ":" + id);
                     if (ref) {
                         for (let j = 0; j < ref.length; j++) {
-                            // let tmp = refs.get(ref[j]);
-                            // tmp || refs.set(ref[j], tmp = []);
-                            // tmp.push(id);
+
                             trx.zRem(ref[j], id);
                         }
                         trx.unlink(this.id + "ref" + this.field + ":" + id);
                     }
-                    // for(let item of refs){
-                    //     //console.log(item[0], item[1])
-                    //     trx.zRem(item[0], item[1]);
-                    // }
                 }
 
                 trx.hDel(this.id + "doc", id);

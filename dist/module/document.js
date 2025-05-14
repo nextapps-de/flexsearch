@@ -44,17 +44,15 @@ export default function Document(options) {
     keystore = options.keystore || 0;
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
-    // Shared Registry
-    this.reg = this.fastupdate && !options.worker && !options.db ? keystore && /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
-    // todo support custom filter function
+    this.reg = this.fastupdate && !options.worker && !options.db ? keystore && !0 ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
+
     this.storetree = (tmp = document.store || null) && tmp && !0 !== tmp && [];
     this.store = tmp && (keystore && !0 ? new KeystoreMap(keystore) : new Map());
 
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
-    // do not apply cache again for the indexes since .searchCache()
-    // is just a wrapper over .search()
-    options.cache = /* suggest */ /* append: */ /* enrich */!1;
+
+    options.cache = !1;
 
     this.worker = options.worker || !1;
 
@@ -66,7 +64,7 @@ export default function Document(options) {
     this.index = parse_descriptor.call(this, options, document);
 
     this.tag = null;
-    // TODO case-insensitive tags?
+
     if (tmp = document.tag) {
         if ("string" == typeof tmp) {
             tmp = [tmp];
@@ -87,20 +85,20 @@ export default function Document(options) {
                     this.tagtree[i] = parse_tree(field, this.marker);
                     if (params.filter) {
                         if ("string" == typeof this.tagtree[i]) {
-                            // it needs an object to put a property to it
+
                             this.tagtree[i] = new String(this.tagtree[i]);
                         }
                         this.tagtree[i]._filter = params.filter;
                     }
                 }
-                // the tag fields need to be hold by indices
+
                 this.tagfield[i] = field;
                 this.tag.set(field, new Map());
             }
         }
     }
 
-    // resolve worker promises and swap instances
+
     if (this.worker) {
         this.fastupdate = !1;
         const promises = [];
@@ -110,38 +108,15 @@ export default function Document(options) {
         if (promises.length) {
             const self = this;
             return Promise.all(promises).then(function (result) {
-                new Map();
-
                 let count = 0;
                 for (const item of self.index.entries()) {
                     const key = /** @type {string} */item[0];
                     let index = /** @type {Index|WorkerIndex | Promise<Index|WorkerIndex>} */item[1];
-                    // let encoder;
-                    // if(SUPPORT_HIGHLIGHTING && SUPPORT_STORE){
-                    //     // make encoder available for result highlighting
-                    //     let opt = promises[count].encoder || {};
-                    //     // handle shared encoders
-                    //     let encoder = encoder_last.get(opt);
-                    //     if(!encoder){
-                    //         encoder = opt.encode
-                    //             ? opt
-                    //             : SUPPORT_ENCODER
-                    //                 ? new Encoder(
-                    //                     SUPPORT_CHARSET && typeof opt === "string"
-                    //                         ? Charset[opt]
-                    //                         : opt)
-                    //                 : { encode: fallback_encoder };
-                    //         encoder_last.set(opt, encoder);
-                    //     }
-                    // }
                     if (index.then) {
                         index = result[count];
                         self.index.set(key, index);
                         count++;
                     }
-                    // if(encoder){
-                    //     index.encoder = encoder;
-                    // }
                 }
                 return self;
             });
@@ -149,8 +124,7 @@ export default function Document(options) {
     } else {
         if (options.db) {
             this.fastupdate = !1;
-            // a constructor should not return a promise
-            // it can be awaited on "await index.db"
+
             this.mount(options.db);
         }
     }
@@ -165,22 +139,19 @@ Document.prototype.mount = function (db) {
     let fields = this.field;
 
     if (this.tag) {
-        // tag indexes are referenced by field
-        // move tags to their field indexes respectively
+
         for (let i = 0, field; i < this.tagfield.length; i++) {
             field = this.tagfield[i];
-            let index; // = this.index.get(field);
-            //if(!index){
-            // create raw index when not exists
+            let index;
+
             this.index.set(field, index = new Index( /** @type IndexOptions */{}, this.reg));
-            // copy and push to the field selection
+
             if (fields === this.field) {
                 fields = fields.slice(0);
             }
-            // tag indexes also needs to be upgraded to db instances
+
             fields.push(field);
-            //}
-            // assign reference
+
             index.tag = this.tag.get(field);
         }
     }
@@ -193,22 +164,20 @@ Document.prototype.mount = function (db) {
     };
 
 
-    // upgrade all indexes to db instances
     for (let i = 0, index, field; i < fields.length; i++) {
         config.field = field = fields[i];
         index = this.index.get(field);
         const dbi = new db.constructor(db.id, config);
-        // take over the storage id
+
         dbi.id = db.id;
         promises[i] = dbi.mount(index);
-        // add an identification property
+
         index.document = !0;
         if (i) {
-            // the register has to export just one time
-            // also it's needed by the index for ID contain check
+
             index.bypass = !0;
         } else {
-            // the datastore has to export one time
+
             index.store = this.store;
         }
     }
@@ -220,18 +189,13 @@ Document.prototype.mount = function (db) {
 };
 
 Document.prototype.commit = async function (replace, append) {
-    // parallel:
+
     const promises = [];
     for (const index of this.index.values()) {
         promises.push(index.commit(replace, append));
     }
     await Promise.all(promises);
     this.reg.clear();
-    // queued:
-    // for(const index of this.index.values()){
-    //     await index.db.commit(index, replace, append);
-    // }
-    // this.reg.clear();
 };
 
 Document.prototype.destroy = function () {
@@ -270,17 +234,15 @@ function parse_descriptor(options, document) {
 
         if (this.worker) {
             let encoder = opt.encoder;
-            // assign encoder for result highlighting
 
             encoder = encoder && encoder.encode ? encoder : new Encoder("string" == typeof encoder ? Charset[encoder] : encoder);
 
             const worker = new WorkerIndex(opt, /** @type {Encoder} */encoder);
             if (worker) {
-                // worker could be a promise
-                // it needs to be resolved and swapped later
+
                 index.set(key, worker);
             } else {
-                // fallback when not supported
+
                 this.worker = !1;
             }
         }
@@ -295,7 +257,7 @@ function parse_descriptor(options, document) {
             this.tree[i] = parse_tree(key, this.marker);
             if (opt.filter) {
                 if ("string" == typeof this.tree[i]) {
-                    // it needs an object to put a property to it
+
                     this.tree[i] = new String(this.tree[i]);
                 }
                 this.tree[i]._filter = opt.filter;
@@ -320,7 +282,7 @@ function parse_descriptor(options, document) {
                 this.storetree[i] = parse_tree(field, this.marker);
                 if (store.filter) {
                     if ("string" == typeof this.storetree[i]) {
-                        // it needs an object to put a property to it
+
                         this.storetree[i] = new String(this.storetree[i]);
                     }
                     this.storetree[i]._filter = store.filter;
@@ -339,7 +301,7 @@ function parse_tree(key, marker) {
 
     for (let i = 0; i < tree.length; i++) {
         key = tree[i];
-        // todo apply some indexes e.g. [0], [-1], [0-2]
+
         if ("]" === key[key.length - 1]) {
             key = key.substring(0, key.length - 2);
             if (key) {
@@ -393,7 +355,7 @@ Document.prototype.remove = function (id) {
     if (this.reg.has(id)) {
 
         if (this.tag) {
-            // when fastupdate was enabled all ids are already removed
+
             if (!this.fastupdate) {
                 for (let field of this.tag.values()) {
                     for (let item of field) {
@@ -416,7 +378,6 @@ Document.prototype.remove = function (id) {
         this.reg.delete(id);
     }
 
-    // the cache could be used outside the InMemory store
     if (this.cache) {
         this.cache.remove(id);
     }
@@ -429,9 +390,9 @@ Document.prototype.clear = function () {
     const promises = [];
 
     for (const index of this.index.values()) {
-        // db index will add clear task
+
         const promise = index.clear();
-        // worker indexes will return promises
+
         if (promise.then) {
             promises.push(promise);
         }
@@ -507,7 +468,7 @@ Document.prototype.set = function (id, data) {
     return this;
 };
 
-// todo mo
+
 Document.prototype.searchCache = searchCache;
 
 

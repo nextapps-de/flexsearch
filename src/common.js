@@ -4,7 +4,6 @@
  * @param {*=} merge_value
  * @return {*}
  */
-
 export function merge_option(value, default_value, merge_value){
 
     const type_merge = typeof merge_value;
@@ -62,6 +61,13 @@ export function merge_option(value, default_value, merge_value){
     return type_value === "undefined"
         ? default_value
         : value;
+}
+
+
+export function inherit(target_value, default_value){
+    return typeof target_value === "undefined"
+        ? default_value
+        : target_value;
 }
 
 export function create_object(){

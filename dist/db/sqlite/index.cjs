@@ -10,7 +10,6 @@ var path = require('path');
  * @return {*}
  */
 
-
 function concat(arrays){
     return [].concat.apply([], arrays);
 }

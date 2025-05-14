@@ -26,6 +26,14 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
                     `: (0,eval)('import("worker_threads").then(function(worker){return new worker["Worker"]((1,eval)(\\"import.meta.dirname\\")+"/worker/node.mjs")})')`
                 );
             }
+            let tmp;
+            while(tmp !== src){
+                tmp = src;
+                // remove comments, keep annotations
+                src = src.replace(/[^:]\/\/(.*)(\r\n|\r|\n|$)/g, "$2");
+                src = src.replace(/^\/\/(.*)(\r\n|\r|\n|$)/g, "$2");
+                src = src.replace(/\/\*[^*](.*)\*\//g, "");
+            }
             fs.writeFileSync("tmp/" + file, src);
         }
     });
@@ -64,6 +72,14 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
                 if(file === "handler.js"){
                     // add the eval wrapper
                     src = src.replace('options=(await import(filepath))["default"];', '//options=(await import(filepath))["default"];');
+                }
+                let tmp;
+                while(tmp !== src){
+                    tmp = src;
+                    // remove comments, keep annotations
+                    src = src.replace(/[^:]\/\/(.*)(\r\n|\r|\n|$)/g, "$2");
+                    src = src.replace(/^\/\/(.*)(\r\n|\r|\n|$)/g, "$2");
+                    src = src.replace(/\/\*[^*](.*)\*\//g, "");
                 }
                 fs.writeFileSync("tmp/" + path + "/" + file, src);
             }

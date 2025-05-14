@@ -13,16 +13,14 @@ Resolver.prototype.handler = function (fn, args) {
 
     if (first_argument.then) {
         const self = this;
-        // todo: check when this branch was taken
-        // instead of Promise.all the args[] array could be reduced
-        // by iterate recursively one by one
+
         return Promise.all(args).then(function (args) {
             return self[fn].apply(self, args);
         });
     }
 
     if (first_argument[0]) {
-        // detect array parameter style
+
         if (first_argument[0].index) {
             return this[fn].apply(this, first_argument);
         }
@@ -87,13 +85,10 @@ Resolver.prototype.handler = function (fn, args) {
                         }
                     }
 
-                    query.resolve = /* suggest */ /* append: */ /* enrich */!1;
-                    //if(DEBUG)
-                    //query.enrich = false;
+                    query.resolve = !1;
+
                     result = index.search(query).result;
                     query.resolve = resolve;
-                    //if(DEBUG)
-                    //query.enrich = enrich;
 
                     if (highlight) {
                         highlight_query = query.query;

@@ -9,7 +9,6 @@ var redis = require('redis');
  * @return {*}
  */
 
-
 /**
  * @param {Map|Set} val
  * @param {boolean=} stringify

@@ -193,9 +193,10 @@ export let EnrichedDocumentSearchResults = [];
 /**
  * @typedef {{
  *   id: (number|string),
- *   doc: (Object|null),
+ *   doc: (Object|null|undefined),
  *   field: (Array<string>|undefined),
- *   tag: (Array<string>|undefined)
+ *   tag: (Array<string>|undefined),
+ *   highlight: (Object<string, string>|undefined)
  * }}
  */
 export let MergedDocumentSearchEntry = {};

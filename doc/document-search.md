@@ -890,7 +890,7 @@ Your results look now like:
 
 ### Configure Document Store (Recommended)
 
-You can configure independently what should being indexed and what should being stored. This can reduce required index space significantly. Indexed fields do not require to be included in the stored data (also the ID isn't necessary to keep in store).
+When storing documents, you can configure independently what should be indexed and what should be stored. This can reduce required index space significantly. Indexed fields do not require to be included in the stored data (also the ID isn't necessary to keep in store).
 It is recommended to just add fields to the store you'll need in the final result to process further on.
 
 A short example of configuring a document store:
@@ -1055,6 +1055,33 @@ const result = index.search({
 const result = index.search({
     query: "john doe",
     tag: { "city": "Berlin" }
+});
+```
+### Best Practices: TypeScript
+
+When using TypeScript, you can type your document data when creating a `Document`-Index. This will provide enhanced type checks of your syntax.
+
+Create a schema accordingly to your document data, e.g.:
+```ts
+type doctype = {
+    id: number,
+    title: string,
+    description: string,
+    tags: string[]
+};
+```
+
+Create the document index by assigning the type `doctype`:
+```ts
+const document = new Document<doctype>({
+    id: "id",
+    store: true,
+    index: [{
+        field: "title"
+    },{
+        field: "description"
+    }],
+    tag: "tags"
 });
 ```
 

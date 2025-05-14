@@ -153,37 +153,15 @@ export default function Document(options){
         if(promises.length){
             const self = this;
             return Promise.all(promises).then(function(result){
-                const encoder_last = new Map();
                 let count = 0;
                 for(const item of self.index.entries()){
                     const key = /** @type {string} */ (item[0]);
                     let index = /** @type {Index|WorkerIndex | Promise<Index|WorkerIndex>} */ (item[1]);
-                    // let encoder;
-                    // if(SUPPORT_HIGHLIGHTING && SUPPORT_STORE){
-                    //     // make encoder available for result highlighting
-                    //     let opt = promises[count].encoder || {};
-                    //     // handle shared encoders
-                    //     let encoder = encoder_last.get(opt);
-                    //     if(!encoder){
-                    //         encoder = opt.encode
-                    //             ? opt
-                    //             : SUPPORT_ENCODER
-                    //                 ? new Encoder(
-                    //                     SUPPORT_CHARSET && typeof opt === "string"
-                    //                         ? Charset[opt]
-                    //                         : opt)
-                    //                 : { encode: fallback_encoder };
-                    //         encoder_last.set(opt, encoder);
-                    //     }
-                    // }
                     if(index.then){
                         index = result[count];
                         self.index.set(key, index);
                         count++;
                     }
-                    // if(encoder){
-                    //     index.encoder = encoder;
-                    // }
                 }
                 return self;
             });

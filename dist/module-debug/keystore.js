@@ -1,64 +1,5 @@
 import { create_object } from "./common.js";
 
-// /**
-//  * @param bitlength
-//  * @constructor
-//  */
-//
-// export function KeystoreObj(bitlength = 8){
-//
-//     if(!this || this.constructor !== KeystoreObj){
-//         return new KeystoreObj(bitlength);
-//     }
-//
-//     this.index = create_object();
-//     this.keys = [];
-//
-//     if(bitlength > 32){
-//         this.crc = lcg64;
-//         this.bit = BigInt(bitlength);
-//     }
-//     else {
-//         this.crc = lcg;
-//         this.bit = bitlength;
-//     }
-//
-//     return /*this.proxy =*/ new Proxy(this, {
-//         get(target, key) {
-//             const address = target.crc(key);
-//             const obj = target.index[address];
-//             return obj && obj[key];
-//         },
-//         set(target, key, value){
-//             const address = target.crc(key);
-//             let obj = target.index[address];
-//             if(!obj){
-//                 target.index[address] = obj = create_object();
-//                 target.keys.push(address);
-//             }
-//             obj[key] = value;
-//             return true;
-//         },
-//         delete(target, key){
-//             const address = target.crc(key);
-//             const obj = target.index[address];
-//             obj && delete obj[key];
-//             return true;
-//         }
-//     });
-// }
-//
-// KeystoreObj.prototype.clear = function(){
-//     this.index = create_object();
-//     this.keys = [];
-// };
-
-// KeystoreObj.prototype.destroy = function(){
-//     this.index = null;
-//     this.keys = null;
-//     this.proxy = null;
-// };
-
 function _slice(self, start, end, splice) {
     let arr = [];
     for (let i = 0, index; i < self.index.length; i++) {
@@ -96,83 +37,78 @@ export function KeystoreArray(arr) {
     this.length = arr ? arr.length : 0;
     const self = this;
 
-    return (/*this.proxy =*/new Proxy([], {
-            get(target, key) {
-                if ("length" === key) {
-                    return self.length;
-                }
-                if ("push" === key) {
-                    return function (value) {
-                        self.index[self.index.length - 1].push(value);
-                        self.length++;
-                    };
-                }
-                if ("pop" === key) {
-                    return function () {
-                        if (self.length) {
-                            self.length--;
-                            return self.index[self.index.length - 1].pop();
-                        }
-                    };
-                }
-                if ("indexOf" === key) {
-                    return function (key) {
-                        let index = 0;
-                        for (let i = 0, arr, tmp; i < self.index.length; i++) {
-                            arr = self.index[i];
-                            //if(!arr.includes(key)) continue;
-                            tmp = arr.indexOf(key);
-                            if (0 <= tmp) return index + tmp;
-                            index += arr.length;
-                        }
-                        return -1;
-                    };
-                }
-                if ("includes" === key) {
-                    return function (key) {
-                        for (let i = 0; i < self.index.length; i++) {
-                            if (self.index[i].includes(key)) {
-                                return (/* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */
-                                    // splice:
-                                    !0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/
-                                );
-                            }
-                        }
-                        return (/* suggest */ /* append: */ /* enrich */!1
-                        );
-                    };
-                }
-                if ("slice" === key) {
-                    return function (start, end) {
-                        return _slice(self, start || 0, end || self.length, !1);
-                    };
-                }
-                if ("splice" === key) {
-                    return function (start, end) {
-                        return _slice(self, start || 0, end || self.length, !0);
-                    };
-                }
-                if ("constructor" === key) {
-                    return Array;
-                }
-                if ("symbol" == typeof key /*|| isNaN(key)*/) {
-                        // not supported
-                        return;
-                    }
-                const arr = self.index[0 | key / 2147483648];
-
-                return arr && arr[key];
-            },
-            set(target, key, value) {
-                const index = 0 | key / 2147483648,
-                      arr = self.index[index] || (self.index[index] = []);
-
-                arr[key] = value;
-                self.length++;
-                return !0;
+    return new Proxy([], {
+        get(target, key) {
+            if ("length" === key) {
+                return self.length;
             }
-        })
-    );
+            if ("push" === key) {
+                return function (value) {
+                    self.index[self.index.length - 1].push(value);
+                    self.length++;
+                };
+            }
+            if ("pop" === key) {
+                return function () {
+                    if (self.length) {
+                        self.length--;
+                        return self.index[self.index.length - 1].pop();
+                    }
+                };
+            }
+            if ("indexOf" === key) {
+                return function (key) {
+                    let index = 0;
+                    for (let i = 0, arr, tmp; i < self.index.length; i++) {
+                        arr = self.index[i];
+
+                        tmp = arr.indexOf(key);
+                        if (0 <= tmp) return index + tmp;
+                        index += arr.length;
+                    }
+                    return -1;
+                };
+            }
+            if ("includes" === key) {
+                return function (key) {
+                    for (let i = 0; i < self.index.length; i++) {
+                        if (self.index[i].includes(key)) {
+                            return !0;
+                        }
+                    }
+                    return !1;
+                };
+            }
+            if ("slice" === key) {
+                return function (start, end) {
+                    return _slice(self, start || 0, end || self.length, !1);
+                };
+            }
+            if ("splice" === key) {
+                return function (start, end) {
+                    return _slice(self, start || 0, end || self.length, !0);
+                };
+            }
+            if ("constructor" === key) {
+                return Array;
+            }
+            if ("symbol" == typeof key) {
+
+                return;
+            }
+            const arr = self.index[0 | key / 2147483648];
+
+            return arr && arr[key];
+        },
+        set(target, key, value) {
+            const index = 0 | key / 2147483648,
+                  arr = self.index[index] || (self.index[index] = []);
+
+            arr[key] = value;
+            self.length++;
+            return !0;
+        }
+    });
 }
 
 KeystoreArray.prototype.clear = function () {
@@ -328,9 +264,7 @@ KeystoreSet.prototype.delete = function (key) {
     const address = this.crc(key),
           map_or_set = this.index[address];
 
-    // set && (set.size === 1
-    //     ? this.index.delete(address)
-    //     : set.delete(key));
+
     map_or_set && map_or_set.delete(key) && this.size--;
 };
 
@@ -340,19 +274,11 @@ KeystoreMap.prototype.clear = KeystoreSet.prototype.clear = function () {
     this.size = 0;
 };
 
-// KeystoreMap.prototype.destroy =
-// KeystoreSet.prototype.destroy = function(){
-//     this.index = null;
-//     this.refs = null;
-//     this.proxy = null;
-// };
-
 /**
  * @return Iterable
  */
 KeystoreMap.prototype.values = KeystoreSet.prototype.values = function* () {
-    // alternatively iterate through this.keys[]
-    //const refs = Object.values(this.index);
+
     for (let i = 0; i < this.refs.length; i++) {
         for (let value of this.refs[i].values()) {
             yield value;
@@ -364,7 +290,7 @@ KeystoreMap.prototype.values = KeystoreSet.prototype.values = function* () {
  * @return Iterable
  */
 KeystoreMap.prototype.keys = KeystoreSet.prototype.keys = function* () {
-    //const values = Object.values(this.index);
+
     for (let i = 0; i < this.refs.length; i++) {
         for (let key of this.refs[i].keys()) {
             yield key;
@@ -376,7 +302,7 @@ KeystoreMap.prototype.keys = KeystoreSet.prototype.keys = function* () {
  * @return Iterable
  */
 KeystoreMap.prototype.entries = KeystoreSet.prototype.entries = function* () {
-    //const values = Object.values(this.index);
+
     for (let i = 0; i < this.refs.length; i++) {
         for (let entry of this.refs[i].entries()) {
             yield entry;
@@ -400,9 +326,8 @@ function lcg(str) {
     for (let i = 0; i < str.length; i++) {
         crc = (crc * bit ^ str.charCodeAt(i)) & range;
     }
-    // shift Int32 to UInt32 because negative numbers
-    // extremely slows down key lookup
-    return 32 === this.bit ? crc + 2147483648 : crc; // & 0xFFFF;
+
+    return 32 === this.bit ? crc + 2147483648 : crc;
 }
 
 /**
@@ -426,5 +351,5 @@ function lcg64(str) {
     for (let i = 0; i < str.length; i++) {
         crc = (crc * bit ^ BigInt(str.charCodeAt(i))) & range;
     }
-    return crc; // & 0xFFFFFFFFFFFFFFFF;
+    return crc;
 }

@@ -7,7 +7,6 @@
  * @return {*}
  */
 
-
 function create_object(){
     return Object.create(null);
 }

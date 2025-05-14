@@ -2,7 +2,7 @@ import { EncoderOptions } from "../../type.js";
 
 /** @type {EncoderOptions} */
 const options = {
-    //normalize: true,
+
     dedupe: !1,
     include: {
         letter: !0
@@ -31,13 +31,13 @@ function soundex(stringToEncode) {
 
     for (let i = 1, char; i < stringToEncode.length; i++) {
         char = stringToEncode.charAt(i);
-        // Remove all occurrences of "h" and "w"
+
         if ("h" !== char && "w" !== char) {
-            // Replace all consonants with digits
+
             char = codes[char];
-            // Remove all occurrences of a,e,i,o,u,y except first letter
+
             if (char) {
-                // Replace all adjacent same digits with one digit
+
                 if (char !== last) {
                     encodedString += char;
                     last = char;
@@ -48,8 +48,6 @@ function soundex(stringToEncode) {
             }
         }
     }
-    // while(encodedString.length < 4){
-    //     encodedString += "0";
-    // }
+
     return encodedString;
 }

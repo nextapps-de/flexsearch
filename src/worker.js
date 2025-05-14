@@ -84,20 +84,19 @@ export default function WorkerIndex(options = /** @type IndexOptions */ ({}), en
             });
         }
 
-        this.worker.postMessage({
-            "task": "init",
-            "factory": factory,
-            "options": options
-        });
-
         if(SUPPORT_ASYNC){
             this.priority = options.priority || 4;
         }
 
         // assign encoder for result highlighting
-        if(encoder){
-            this.encoder = encoder;
-        }
+        this.encoder = encoder || null;
+
+        // initialize worker index
+        this.worker.postMessage({
+            "task": "init",
+            "factory": factory,
+            "options": options
+        });
 
         return this;
     }
@@ -115,6 +114,7 @@ if(SUPPORT_WORKER){
     register("add");
     register("append");
     register("search");
+    register("searchCache");
     register("update");
     register("remove");
     register("clear");
@@ -168,7 +168,7 @@ function create(factory, is_node_js, worker_path){
     let worker
 
     worker = is_node_js ?
-            // if anyone would ask me what JS has delivered the past 10 years,
+            // if anyone asks me what JS has delivered the past 10 years,
             // those are the lines I definitively show up first ^^
             typeof module !== "undefined"
                 // This eval will be removed when compiling

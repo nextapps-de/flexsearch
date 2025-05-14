@@ -9,7 +9,7 @@ import{ClickHouse}from"clickhouse";import StorageInterface from"../interface.js"
                         id  ${this.type}
                     )
                     ENGINE = MergeTree
-                    /*PRIMARY KEY (key)*/
+                    
                     ORDER BY (key, id);
                 `,{params:{name:this.id+".map"+this.field}}).toPromise();break;case"ctx":await this.db.query(`
                     CREATE TABLE IF NOT EXISTS ${this.id}.ctx${this.field}(
@@ -19,7 +19,7 @@ import{ClickHouse}from"clickhouse";import StorageInterface from"../interface.js"
                         id  ${this.type}
                     )
                     ENGINE = MergeTree
-                    /*PRIMARY KEY (ctx, key)*/
+                    
                     ORDER BY (ctx, key, id);
                 `).toPromise();break;case"tag":await this.db.query(`
                     CREATE TABLE IF NOT EXISTS ${this.id}.tag${this.field}(
@@ -27,7 +27,7 @@ import{ClickHouse}from"clickhouse";import StorageInterface from"../interface.js"
                         id  ${this.type}
                     )
                     ENGINE = MergeTree
-                    /*PRIMARY KEY (ctx, key)*/
+                    
                     ORDER BY (tag, id);
                 `).toPromise();break;case"reg":await this.db.query(`
                     CREATE TABLE IF NOT EXISTS ${this.id}.reg(

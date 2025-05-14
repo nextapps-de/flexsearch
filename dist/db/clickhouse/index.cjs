@@ -9,7 +9,6 @@ var clickhouse = require('clickhouse');
  * @return {*}
  */
 
-
 function concat(arrays){
     return [].concat.apply([], arrays);
 }

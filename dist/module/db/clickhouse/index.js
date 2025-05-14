@@ -65,14 +65,13 @@ export default function ClickhouseDB(name, config = {}) {
     if (!name) {
         console.info("Default storage space was used, because a name was not passed.");
     }
-    //field = "Test-456";
+
     this.id = "flexsearch" + (name ? "_" + sanitize(name) : "");
     this.field = config.field ? "_" + sanitize(config.field) : "";
-    // Clickhouse does not support ALTER TABLE to upgrade
-    // the type of the ID when it is a part of the merge key
+
     this.type = config.type ? types[config.type.toLowerCase()] : "String";
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
-    //this.trx = false;
+
     this.support_tag_search = !0;
     this.db = Index || (Index = config.db || null);
     Object.assign(defaults, config);
@@ -81,7 +80,7 @@ export default function ClickhouseDB(name, config = {}) {
 }
 
 ClickhouseDB.prototype.mount = function (flexsearch) {
-    //if(flexsearch.constructor === Document){
+
     if (flexsearch.index) {
         return flexsearch.mount(this);
     }
@@ -116,7 +115,7 @@ ClickhouseDB.prototype.open = async function () {
                         id  ${this.type}
                     )
                     ENGINE = MergeTree
-                    /*PRIMARY KEY (key)*/
+                    
                     ORDER BY (key, id);
                 `, { params: { name: this.id + ".map" + this.field } }).toPromise();
                 break;
@@ -130,7 +129,7 @@ ClickhouseDB.prototype.open = async function () {
                         id  ${this.type}
                     )
                     ENGINE = MergeTree
-                    /*PRIMARY KEY (ctx, key)*/
+                    
                     ORDER BY (ctx, key, id);
                 `).toPromise();
                 break;
@@ -142,7 +141,7 @@ ClickhouseDB.prototype.open = async function () {
                         id  ${this.type}
                     )
                     ENGINE = MergeTree
-                    /*PRIMARY KEY (ctx, key)*/
+                    
                     ORDER BY (tag, id);
                 `).toPromise();
                 break;
@@ -173,7 +172,7 @@ ClickhouseDB.prototype.open = async function () {
 };
 
 ClickhouseDB.prototype.close = function () {
-    //DB && DB.close();
+
     this.db = Index = null;
     return this;
 };
@@ -309,7 +308,7 @@ ClickhouseDB.prototype.has = async function (id) {
     const result = await this.db.query(`
         SELECT 1
         FROM ${this.id}.reg
-        WHERE id = {id:${this.type /*=== "number" ? "Int32" : "String"*/}}
+        WHERE id = {id:${this.type}}
         LIMIT 1`, { params: { id } }).toPromise();
     return !!(result && result[0] && result[0][1]);
 };
@@ -347,7 +346,7 @@ ClickhouseDB.prototype.search = function (flexsearch, query, limit = 100, offset
                    ${enrich ? ", doc" : ""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
+                       ${suggest ? "SUM" : "SUM"}(res) as res
                 FROM ${this.id}.ctx${this.field}
                 WHERE ${where}
                 GROUP BY id
@@ -360,32 +359,6 @@ ClickhouseDB.prototype.search = function (flexsearch, query, limit = 100, offset
             ${limit ? "LIMIT " + limit : ""}
             ${offset ? "OFFSET " + offset : ""}
         `, { params }).toPromise();
-
-        // for(let i = 1; i < query.length; i++){
-        //     where += (where ? " UNION ALL " : "") + `
-        //         SELECT id, res
-        //         FROM ${this.id}.ctx${this.field}
-        //         WHERE ctx = {ctx${i}:String} AND key = {key${i}:String}
-        //     `;
-        //     term = query[i];
-        //     const swap = flexsearch.bidirectional && (term > keyword);
-        //     params["ctx" + i] = swap ? term : keyword;
-        //     params["key" + i] = swap ? keyword : term;
-        //     keyword = term;
-        // }
-        //
-        // rows = await this.db.query(`
-        //     SELECT id, res
-        //     FROM (
-        //         SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-        //         FROM (${where}) as t
-        //         GROUP BY id
-        //         ORDER BY ${suggest ? "count DESC, res" : "res"}
-        //         LIMIT ${limit}
-        //         OFFSET ${offset}
-        //     ) as r
-        //     ${suggest ? "" : "WHERE count = " + (query.length - 1)}
-        // `, { params }).toPromise();
     } else {
         let where = "",
             params = {};
@@ -412,7 +385,7 @@ ClickhouseDB.prototype.search = function (flexsearch, query, limit = 100, offset
                    ${enrich ? ", doc" : ""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
+                       ${suggest ? "SUM" : "SUM"}(res) as res
                 FROM ${this.id}.map${this.field}
                 WHERE ${where}
                 GROUP BY id
@@ -425,56 +398,31 @@ ClickhouseDB.prototype.search = function (flexsearch, query, limit = 100, offset
             ${limit ? "LIMIT " + limit : ""}
             ${offset ? "OFFSET " + offset : ""}
         `, { params }).toPromise();
-
-        // for(let i = 0; i < query.length; i++){
-        //     params["key" + i] = query[i];
-        //     where += (where ? " UNION ALL " : "") + `
-        //         SELECT id, res
-        //         FROM ${ this.id }.map${ this.field }
-        //         WHERE key = {key${i}:String}
-        //     `;
-        // }
-        // rows = await this.db.query(`
-        //     SELECT id, res
-        //     FROM (
-        //         SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-        //         FROM (${where}) as t
-        //         GROUP BY id
-        //         ORDER BY ${suggest ? "count DESC, res" : "res"}
-        //         LIMIT ${limit}
-        //         OFFSET ${offset}
-        //     ) as r
-        //     ${ suggest ? "" : "WHERE count = " + query.length }
-        // `, { params }).toPromise();
     }
     return rows.then(function (rows) {
         return create_result(rows, resolve, enrich);
     });
 };
 
-ClickhouseDB.prototype.info = function () {
-    // todo
-};
+ClickhouseDB.prototype.info = function () {};
 
 ClickhouseDB.prototype.transaction = function (task) {
 
-    // not supported
     return task.call(this);
 };
 
 ClickhouseDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
-    // process cleanup tasks
     if (_replace) {
         await this.clear();
-        // there are just removals in the task queue
+
         flexsearch.commit_task = [];
     } else {
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for (let i = 0, task; i < tasks.length; i++) {
             task = tasks[i];
-            // there are just removals in the task queue
+
             if (task.clear) {
                 await this.clear();
                 _replace = !0;
@@ -504,7 +452,7 @@ ClickhouseDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
             for (let i = 0, ids; i < arr.length; i++) {
                 if ((ids = arr[i]) && ids.length) {
-                    //this.type || (this.type = typeof ids[0]);
+
                     for (let j = 0; j < ids.length; j++) {
                         data.push({
                             key: key,
@@ -589,25 +537,6 @@ ClickhouseDB.prototype.commit = async function (flexsearch, _replace, _append) {
             promises.push(this.db.insert(`INSERT INTO ${this.id}.reg (id)`, data).toPromise());
         }
     }
-
-    // TODO
-    // await this.db.insert(`INSERT INTO ${this.id}.cfg${this.field} (cfg)`, [{
-    //     cfg: JSON.stringify({
-    //         "encode": typeof flexsearch.encode === "string" ? flexsearch.encode : "",
-    //         "charset": typeof flexsearch.charset === "string" ? flexsearch.charset : "",
-    //         "tokenize": flexsearch.tokenize,
-    //         "resolution": flexsearch.resolution,
-    //         "minlength": flexsearch.minlength,
-    //         "optimize": flexsearch.optimize,
-    //         "fastupdate": flexsearch.fastupdate,
-    //         "encoder": flexsearch.encoder,
-    //         "context": {
-    //             "depth": flexsearch.depth,
-    //             "bidirectional": flexsearch.bidirectional,
-    //             "resolution": flexsearch.resolution_ctx
-    //         }
-    //     })
-    // }]).toPromise();
 
     promises.length && (await Promise.all(promises));
 

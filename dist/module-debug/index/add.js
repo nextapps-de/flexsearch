@@ -4,11 +4,6 @@ import Index, { autoCommit } from "../index.js";
 import default_compress from "../compress.js";
 import { KeystoreArray } from "../keystore.js";
 
-// TODO:
-// string + number as text
-// boolean, null, undefined as ?
-
-
 /**
  * @param {!number|string} id
  * @param {!string} content
@@ -20,9 +15,6 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
 
     if (content && (id || 0 === id)) {
 
-        // todo check skip_update
-        //_skip_update = false;
-
         if (!_skip_update && !_append) {
             if (this.reg.has(id)) {
                 return this.update(id, content);
@@ -30,15 +22,11 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
         }
 
         const depth = this.depth;
-        // do not force a string as input
-        // https://github.com/nextapps-de/flexsearch/issues/432
+
         content = this.encoder.encode(content, !depth);
         const word_length = content.length;
 
         if (word_length) {
-
-            // check context dupes to skip all contextual redundancy along a document
-
             const dupes_ctx = create_object(),
                   dupes = create_object(),
                   resolution = this.resolution;
@@ -49,9 +37,6 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
                     term_length = term.length;
 
 
-                // todo check context search
-                // this check also wasn't applied on search, so it's useless here
-                // skip dupes will break the context chain
                 if (term_length && (depth || !dupes[term])) {
                     let score = this.score ? this.score(content, term, i, null, 0) : get_score(resolution, word_length, i),
                         token = "";
@@ -71,10 +56,10 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
                                 }
                                 break;
                             }
-                        // fallthrough to next case when term length < 3
+
                         case "bidirectional":
                         case "reverse":
-                            // skip last round (this token exist already in "forward")
+
                             if (1 < term_length) {
                                 for (let x = term_length - 1; 0 < x; x--) {
                                     token = term[this.rtl ? term_length - 1 - x : x] + token;
@@ -84,7 +69,6 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
                                 token = "";
                             }
 
-                        // fallthrough to next case to apply forward also
                         case "forward":
                             if (1 < term_length) {
                                 for (let x = 0; x < term_length; x++) {
@@ -94,16 +78,12 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
                                 break;
                             }
 
-                        // fallthrough to next case when token has a length of 1
                         default:
-                            // "strict":
                             this.push_index(dupes, term, score, id, _append);
-                            // context is just supported by tokenizer "strict"
+
                             if (depth) {
 
                                 if (1 < word_length && i < word_length - 1) {
-
-                                    // check inner dupes to skip repeating words in the current context
                                     const dupes_inner = create_object(),
                                           resolution = this.resolution_ctx,
                                           keyword = term,
@@ -138,8 +118,7 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
     }
 
     if (this.db) {
-        // when the term has no valid content (e.g. empty),
-        // then it was not added to the ID registry for removal
+
         content || this.commit_task.push({ del: id });
         this.commit_auto && autoCommit(this);
     }
@@ -186,28 +165,25 @@ Index.prototype.push_index = function (dupes, term, score, id, append, keyword) 
 
         tmp = arr.get(term);
         tmp ? arr = tmp : arr.set(term, arr = tmp = []);
-        // the ID array will be upgraded dynamically
+
         arr = arr[score] || (arr[score] = []);
 
         if (!append || !arr.includes(id)) {
-
-            // auto-upgrade to keystore array if max size exceeded
-            if (2147483647 === arr.length /*|| !(arr instanceof KeystoreArray)*/) {
-                    const keystore = new KeystoreArray(arr);
-                    if (this.fastupdate) {
-                        for (let value of this.reg.values()) {
-                            if (value.includes(arr)) {
-                                value[value.indexOf(arr)] = keystore;
-                            }
+            if (2147483647 === arr.length) {
+                const keystore = new KeystoreArray(arr);
+                if (this.fastupdate) {
+                    for (let value of this.reg.values()) {
+                        if (value.includes(arr)) {
+                            value[value.indexOf(arr)] = keystore;
                         }
                     }
-                    tmp[score] = arr = keystore;
                 }
+                tmp[score] = arr = keystore;
+            }
 
 
             arr.push(id);
 
-            // add a reference to the register for fast updates
             if (this.fastupdate) {
                 const tmp = this.reg.get(id);
                 tmp ? tmp.push(arr) : this.reg.set(id, [arr]);
@@ -226,24 +202,6 @@ Index.prototype.push_index = function (dupes, term, score, id, append, keyword) 
  */
 
 function get_score(resolution, length, i, term_length, x) {
-
-    // console.log("resolution", resolution);
-    // console.log("length", length);
-    // console.log("term_length", term_length);
-    // console.log("i", i);
-    // console.log("x", x);
-    // console.log((resolution - 1) / (length + (term_length || 0)) * (i + (x || 0)) + 1);
-
-    // the first resolution slot is reserved for the best match,
-    // when a query matches the first word(s).
-
-    // also to stretch score to the whole range of resolution, the
-    // calculation is shift by one and cut the floating point.
-    // this needs the resolution "1" to be handled additionally.
-
-    // do not stretch the resolution more than the term length will
-    // improve performance and memory, also it improves scoring in
-    // most cases between a short document and a long document
 
     return i && 1 < resolution ? length + (term_length || 0) <= resolution ? i + (x || 0) : 0 | (resolution - 1) / (length + (term_length || 0)) * (i + (x || 0)) + 1 : 0;
 }

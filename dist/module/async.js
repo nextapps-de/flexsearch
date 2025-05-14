@@ -27,7 +27,7 @@ function tick() {
 
 function register(key) {
     this[key + "Async"] = function () {
-        const args = /*[].slice.call*/arguments,
+        const args = arguments,
               arg = args[args.length - 1];
 
         let callback;
@@ -37,10 +37,8 @@ function register(key) {
             delete args[args.length - 1];
         }
 
-        // event loop runtime balancer
         if (!timer) {
-            // when the next event loop occurs earlier than task completion
-            // it will reset the state immediately
+
             timer = setTimeout(tick, 0);
             timestamp = Date.now();
         } else if (!cycle) {
@@ -51,10 +49,9 @@ function register(key) {
             cycle = duration >= target;
         }
 
-        // cycle all instances from this point
         if (cycle) {
             const self = this;
-            // move the next microtask onto the next macrotask queue
+
             return new Promise(resolve => {
                 setTimeout(function () {
                     resolve(self[key + "Async"].apply(self, args));

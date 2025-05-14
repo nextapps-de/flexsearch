@@ -9,7 +9,6 @@ var mongodb = require('mongodb');
  * @return {*}
  */
 
-
 /**
  * @param {Map|Set} val
  * @param {boolean=} stringify

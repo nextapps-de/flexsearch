@@ -4,7 +4,6 @@
  * @param {*=} merge_value
  * @return {*}
  */
-
 export function merge_option(value, default_value, merge_value) {
     const type_merge = typeof merge_value,
           type_value = typeof value;
@@ -62,6 +61,10 @@ export function merge_option(value, default_value, merge_value) {
     return "undefined" == type_value ? default_value : value;
 }
 
+export function inherit(target_value, default_value) {
+    return "undefined" == typeof target_value ? default_value : target_value;
+}
+
 export function create_object() {
     return Object.create(null);
 }
@@ -108,7 +111,6 @@ export function toArray(val, stringify) {
     return result;
 }
 
-// TODO support generic function created from string when tree depth > 1
 export function parse_simple(obj, tree) {
 
     if (is_string(tree)) {

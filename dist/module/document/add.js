@@ -25,7 +25,6 @@ Document.prototype.add = function (id, content, _append) {
             return this.update(id, content);
         }
 
-        // this.field does not include db tag indexes
         for (let i = 0, tree; i < this.field.length; i++) {
 
             tree = this.tree[i];
@@ -34,7 +33,7 @@ Document.prototype.add = function (id, content, _append) {
             if ("function" == typeof tree) {
                 const tmp = tree(content);
                 if (tmp) {
-                    index.add(id, tmp, /* suggest */ /* append: */!1, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/);
+                    index.add(id, tmp, !0);
                 }
             } else {
                 const filter = tree._filter;
@@ -51,8 +50,6 @@ Document.prototype.add = function (id, content, _append) {
         }
 
         if (this.tag) {
-
-            //console.log(this.tag, this.tagtree)
 
             for (let x = 0; x < this.tagtree.length; x++) {
                 let tree = this.tagtree[x],
@@ -87,7 +84,6 @@ Document.prototype.add = function (id, content, _append) {
                 for (let i = 0, tag, arr; i < tags.length; i++) {
 
                     tag = tags[i];
-                    //console.log(this.tag, tag, key, field)
 
                     if (!dupes[tag]) {
                         dupes[tag] = 1;
@@ -97,24 +93,21 @@ Document.prototype.add = function (id, content, _append) {
                         tmp ? arr = tmp : ref.set(tag, arr = []);
 
                         if (!_append || ! /** @type {!Array|KeystoreArray} */arr.includes(id)) {
-
-                            // auto-upgrade to keystore array if max size exceeded
-                            if (2147483647 === arr.length /*|| !(arr instanceof KeystoreArray)*/) {
-                                    const keystore = new KeystoreArray(arr);
-                                    if (this.fastupdate) {
-                                        for (let value of this.reg.values()) {
-                                            if (value.includes(arr)) {
-                                                value[value.indexOf(arr)] = keystore;
-                                            }
+                            if (2147483647 === arr.length) {
+                                const keystore = new KeystoreArray(arr);
+                                if (this.fastupdate) {
+                                    for (let value of this.reg.values()) {
+                                        if (value.includes(arr)) {
+                                            value[value.indexOf(arr)] = keystore;
                                         }
                                     }
-                                    ref.set(tag, arr = keystore);
                                 }
+                                ref.set(tag, arr = keystore);
+                            }
 
 
                             arr.push(id);
 
-                            // add a reference to the register for fast updates
                             if (this.fastupdate) {
                                 const tmp = this.reg.get(id);
                                 tmp ? tmp.push(arr) : this.reg.set(id, [arr]);
@@ -165,8 +158,6 @@ Document.prototype.add = function (id, content, _append) {
     return this;
 };
 
-// TODO support generic function created from string when tree depth > 1
-
 /**
  * @param obj
  * @param store
@@ -180,10 +171,8 @@ function store_value(obj, store, tree, pos, key, custom) {
 
     obj = obj[key];
 
-    // reached target field
     if (pos === tree.length - 1) {
 
-        // store target value
         store[key] = custom || obj;
     } else if (obj) {
 
@@ -192,7 +181,7 @@ function store_value(obj, store, tree, pos, key, custom) {
             store = store[key] = Array(obj.length);
 
             for (let i = 0; i < obj.length; i++) {
-                // do not increase pos (an array is not a field)
+
                 store_value(obj, store, tree, pos, i);
             }
         } else {
@@ -208,21 +197,17 @@ function add_index(obj, tree, marker, pos, index, id, key, _append) {
 
     if (obj = obj[key]) {
 
-        // reached target field
         if (pos === tree.length - 1) {
 
-            // handle target value
             if (is_array(obj)) {
 
-                // append array contents so each entry gets a new scoring context
                 if (marker[pos]) {
                     for (let i = 0; i < obj.length; i++) {
-                        index.add(id, obj[i], !0, !0);
+                        index.add(id, obj[i], !0);
                     }
                     return;
                 }
 
-                // or join array contents and use one scoring context
                 obj = obj.join(" ");
             }
 
@@ -231,7 +216,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append) {
 
             if (is_array(obj)) {
                 for (let i = 0; i < obj.length; i++) {
-                    // do not increase index, an array is not a field
+
                     add_index(obj, tree, marker, pos, index, id, i, _append);
                 }
             } else {

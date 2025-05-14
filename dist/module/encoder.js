@@ -7,18 +7,15 @@ import { EncoderOptions } from "./type.js";
 
 Custom Encoder
 ----------------
-
-// Split a passed string into an Array of words:
+
 function englishEncoder(string){
     return string.toLowerCase().split(/[^a-z]+/)
 }
-
-// For CJK split a passed string into an Array of chars:
+
 function chineseEncoder(string){
     return string.replace(/\s+/, "").split("")
 }
-
-// Alternatively do not split the input:
+
 function fixedEncoder(string){
     return [string]
 }
@@ -50,15 +47,8 @@ const whitespace = /[^\p{L}\p{N}]+/u,
       numeric_split_length = /(\d{3})/g,
       numeric_split_prev_char = /(\D)(\d{3})/g,
       numeric_split_next_char = /(\d{3})(\D)/g,
-      normalize = /*"".normalize &&*//[\u0300-\u036f]/g; // /[\p{Z}\p{S}\p{P}\p{C}]+/u;
-//const numeric_split = /(\d{3})/g;
+      normalize = /[\u0300-\u036f]/g;
 
-//.replace(/(\d{3})/g, "$1 ")
-//.replace(/([^\d])([\d])/g, "$1 $2")
-//.replace(/([\d])([^\d])/g, "$1 $2")
-
-// '´`’ʼ.,
-//const normalize_mapper = SUPPORT_CHARSET && !normalize && normalize_polyfill;
 
 /**
  * @param {EncoderOptions=} options
@@ -68,9 +58,7 @@ const whitespace = /[^\p{L}\p{N}]+/u,
 export default function Encoder(options = {}) {
 
     if (!this || this.constructor !== Encoder) {
-        // let args = Array.prototype.slice.call(arguments);
-        // args.unshift(Encoder);
-        // return new (Encoder.bind.apply(Encoder, args));
+
         return new Encoder(...arguments);
     }
 
@@ -92,18 +80,7 @@ Encoder.prototype.assign = function (options) {
      * pre-processing string input
      * @type {Function|boolean}
      */
-    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/
-    /*await rows.hasNext()*/ /*await rows.hasNext()*/, this.normalize);
-
-    // {
-    //     letter: true,
-    //     number: true,
-    //     whitespace: true,
-    //     symbol: true,
-    //     punctuation: true,
-    //     control: true,
-    //     char: ""
-    // }
+    this.normalize = /** @type {Function|boolean} */merge_option(options.normalize, !0, this.normalize);
 
     let include = options.include,
         tmp = include || options.exclude || options.split,
@@ -114,7 +91,7 @@ Encoder.prototype.assign = function (options) {
         if ("object" == typeof tmp && tmp.constructor !== RegExp) {
             let regex = "";
             numeric = !include;
-            // split on whitespace by default
+
             include || (regex += "\\p{Z}");
             if (tmp.letter) {
                 regex += "\\p{L}";
@@ -137,29 +114,29 @@ Encoder.prototype.assign = function (options) {
             }
 
             try {
-                // https://github.com/nextapps-de/flexsearch/issues/410
+
                 /**
                  * split string input into terms
                  * @type {string|RegExp|boolean|null}
                  */
                 this.split = new RegExp("[" + (include ? "^" : "") + regex + "]+", "u");
             } catch (e) {
-                // fallback to a simple whitespace splitter
+
                 this.split = /\s+/;
             }
         } else {
             this.split = /** @type {string|RegExp|boolean} */tmp;
-            // determine numeric encoding
-            numeric = /* suggest */ /* append: */ /* enrich */!1 === tmp || 2 > "a1a".split(tmp).length;
+
+            numeric = !1 === tmp || 2 > "a1a".split(tmp).length;
         }
 
         this.numeric = merge_option(options.numeric, numeric);
     } else {
         try {
-            // https://github.com/nextapps-de/flexsearch/issues/410
+
             this.split = /** @type {string|RegExp|boolean} */merge_option(this.split, whitespace);
         } catch (e) {
-            // fallback to a simple whitespace splitter
+
             this.split = /\s+/;
         }
 
@@ -177,15 +154,6 @@ Encoder.prototype.assign = function (options) {
      */
     this.finalize = /** @type {Function|null} */merge_option(options.finalize, null, this.finalize);
 
-    // assign the normalization fallback to the mapper
-    // if(SUPPORT_CHARSET && !normalize){
-    //     this.mapper = new Map(
-    //         /** @type {Array<Array<string, string>>} */ (
-    //             normalize_polyfill
-    //         )
-    //     );
-    // }
-
     tmp = options.filter;
     this.filter = "function" == typeof tmp ? tmp : merge_option(tmp && new Set(tmp), null, this.filter);
     this.dedupe = merge_option(options.dedupe, !0, this.dedupe);
@@ -197,32 +165,21 @@ Encoder.prototype.assign = function (options) {
     this.maxlength = merge_option(options.maxlength, 1024, this.maxlength);
     this.rtl = merge_option(options.rtl, !1, this.rtl);
 
-    // auto-balanced cache
     this.cache = tmp = merge_option(options.cache, !0, this.cache);
     if (tmp) {
-        this.timer = null;this.cache_size = "number" == typeof tmp ? tmp : 2e5;
+        this.timer = null;
+        this.cache_size = "number" == typeof tmp ? tmp : 2e5;
         this.cache_enc = new Map();
         this.cache_term = new Map();
         this.cache_enc_length = 128;
         this.cache_term_length = 128;
     }
 
-    // regex temporary state
     this.matcher_str = "";
     this.matcher_test = null;
     this.stemmer_str = "";
     this.stemmer_test = null;
 
-    // prebuilt
-    // if(this.filter && this.split){
-    //     for(const key of this.filter){
-    //         const tmp = key.replace(this.split, "");
-    //         if(key !== tmp){
-    //             this.filter.delete(key);
-    //             this.filter.add(tmp);
-    //         }
-    //     }
-    // }
     if (this.matcher) {
         for (const key of this.matcher.keys()) {
             this.matcher_str += (this.matcher_str ? "|" : "") + key;
@@ -233,15 +190,6 @@ Encoder.prototype.assign = function (options) {
             this.stemmer_str += (this.stemmer_str ? "|" : "") + key;
         }
     }
-
-    // if(SUPPORT_COMPRESSION){
-    //     this.compression = merge_option(options.compress || options.compression, 0, this.compression);
-    //     if(this.compression && !table){
-    //         table = new Array(radix);
-    //         for(let i = 0; i < radix; i++) table[i] = i + 33;
-    //         table = String.fromCharCode.apply(null, table);
-    //     }
-    // }
 
     return this;
 };
@@ -257,8 +205,8 @@ Encoder.prototype.addStemmer = function (match, replace) {
 
 Encoder.prototype.addFilter = function (term) {
     if ("function" == typeof term) {
-        // does not support merge yet
-        this.filter = term; //merge_option(term, term, this.filter);
+
+        this.filter = term;
     } else {
         this.filter || (this.filter = new Set());
         this.filter.add(term);
@@ -275,11 +223,11 @@ Encoder.prototype.addFilter = function (term) {
  * @suppress {invalidCasts}
  */
 Encoder.prototype.addMapper = function (char_match, char_replace) {
-    // regex:
+
     if ("object" == typeof char_match) {
         return this.addReplacer( /**  @type {RegExp} */char_match, char_replace);
     }
-    // not a char:
+
     if (1 < char_match.length) {
         return this.addMatcher(char_match, char_replace);
     }
@@ -297,12 +245,11 @@ Encoder.prototype.addMapper = function (char_match, char_replace) {
  * @suppress {invalidCasts}
  */
 Encoder.prototype.addMatcher = function (match, replace) {
-    // regex:
+
     if ("object" == typeof match) {
         return this.addReplacer( /**  @type {RegExp} */match, replace);
     }
-    // a single char:
-    // only downgrade when dedupe is on or mapper already was filled
+
     if (2 > match.length && (this.dedupe || this.mapper)) {
         return this.addMapper(match, replace);
     }
@@ -347,7 +294,6 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
         }
     }
 
-    // apply charset normalization
     if (this.normalize) {
         if ("function" == typeof this.normalize) {
             str = this.normalize(str);
@@ -358,29 +304,13 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
         }
     }
 
-    // apply custom encoder (can replace split)
     if (this.prepare) {
         str = this.prepare(str);
     }
 
-    // split numbers into triplets
     if (this.numeric && 3 < str.length) {
         str = str.replace(numeric_split_prev_char, "$1 $2").replace(numeric_split_next_char, "$1 $2").replace(numeric_split_length, "$1 ");
     }
-
-    // if(this.matcher && (str.length > 1)){
-    //     this.matcher_test || (
-    //         this.matcher_test = new RegExp("(" + this.matcher_str + ")", "g")
-    //     );
-    //     str = str.replace(this.matcher_test, match => this.matcher.get(match));
-    // }
-
-    // if(this.stemmer){
-    //     this.stemmer_test || (
-    //         this.stemmer_test = new RegExp("(?!\\b)(" + this.stemmer_str + ")(\\b|_)", "g")
-    //     );
-    //     str = str.replace(this.stemmer_test, match => this.stemmer.get(match));
-    // }
 
     const skip = !(this.dedupe || this.mapper || this.filter || this.matcher || this.stemmer || this.replacer);
     let final = [],
@@ -388,7 +318,7 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
         last_term,
         last_term_enc,
         words = this.split || "" === this.split ? str.split( /** @type {string|RegExp} */this.split) : [str];
-    // str;
+
 
     for (let i = 0, word, base; i < words.length; i++) {
 
@@ -433,41 +363,18 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
             }
         }
 
-        // from here minlength should not apply again
-        // when the input string is further shrinking
-
-        // it needs to apply stemmer before bigger transformations
-        // it needs to apply stemmer after filter (user -> us -> filter out)
         if (this.stemmer) {
-            // for(const item of this.stemmer){
-            //     const key = item[0];
-            //     const value = item[1];
-            //     if(word.length > key.length && word.endsWith(key)){
-            //         word = word.substring(0, word.length - key.length) + value;
-            //         break;
-            //     }
-            //     // const position = word.length - key.length;
-            //     // if(position > 0 && word.substring(position) === key){
-            //     //     word = word.substring(0, position) + value;
-            //     //     break;
-            //     // }
-            // }
 
-            // todo compare advantages when filter/stemmer are also encoded
             this.stemmer_test || (this.stemmer_test = new RegExp("(?!^)(" + this.stemmer_str + ")$"));
 
             let old;
 
-            // loop stemmer as long as anything has matched
-            // just terms with length > 2 should need a stemmer (its -> it)
-            // the minlength also prevents stemmer looping to cut off everything
             while (old !== word && 2 < word.length) {
                 old = word;
                 word = word.replace(this.stemmer_test, match => this.stemmer.get(match));
             }
         }
 
-        // apply mapper and collapsing
         if (word && (this.mapper || this.dedupe && 1 < word.length)) {
             let final = "";
             for (let i = 0, prev = "", char, tmp; i < word.length; i++) {
@@ -480,23 +387,16 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
             word = final;
         }
 
-        // apply matcher
         if (this.matcher && 1 < word.length) {
             this.matcher_test || (this.matcher_test = new RegExp("(" + this.matcher_str + ")", "g"));
             word = word.replace(this.matcher_test, match => this.matcher.get(match));
         }
 
-        // apply custom regex
         if (word && this.replacer) {
             for (let i = 0; word && i < this.replacer.length; i += 2) {
                 word = word.replace(this.replacer[i], this.replacer[i + 1]);
             }
         }
-
-        // slower variants for removing same chars in a row:
-        //word = word.replace(/([^0-9])\1+/g, "$1");
-        //word = word.replace(/(.)\1+/g, "$1");
-        //word = word.replace(/(?<=(.))\1+/g, "");
 
         if (this.cache && base.length <= this.cache_term_length) {
             this.cache_term.set(base, word);
@@ -542,39 +442,6 @@ Encoder.prototype.encode = function (str, dedupe_terms) {
 export function fallback_encoder(str) {
     return str.normalize("NFKD").replace(normalize, "").toLowerCase().trim().split(/\s+/);
 }
-
-// Encoder.prototype.compress = function(str) {
-//
-//     //return str;
-//     //if(!str) return str;
-//
-//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_term_length){
-//         if(this.timer){
-//             if(this.cache_cmp.has(str)){
-//                 return this.cache_cmp.get(str);
-//             }
-//         }
-//         else{
-//             this.timer = setTimeout(clear, 0, this);
-//         }
-//     }
-//
-//     const result = typeof this.compression === "function"
-//         ? this.compression(str)
-//         : hash(str); //window.hash(str);
-//
-//     if(SUPPORT_CACHE && this.cache && str.length <= this.cache_term_length){
-//         this.cache_cmp.set(str, result);
-//         this.cache_cmp.size > this.cache_size &&
-//         this.cache_cmp.clear();
-//     }
-//
-//     return result;
-// };
-
-// function hash(str){
-//     return str;
-// }
 
 /**
  * @param {Encoder} self

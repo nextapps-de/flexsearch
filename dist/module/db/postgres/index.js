@@ -61,7 +61,7 @@ export default function PostgresDB(name, config = {}) {
     this.id = (config.schema ? sanitize(config.schema) : defaults.schema) + (name ? "_" + sanitize(name) : "");
     this.field = config.field ? "_" + sanitize(config.field) : "";
     this.type = config.type ? types[config.type.toLowerCase()] : "text";
-    this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search = !0;
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
     this.db = DB || (DB = config.db || null);
     Object.assign(defaults, config);
@@ -69,7 +69,7 @@ export default function PostgresDB(name, config = {}) {
 }
 
 PostgresDB.prototype.mount = function (flexsearch) {
-    //if(flexsearch.constructor === Document){
+
     if (flexsearch.index) {
         return flexsearch.mount(this);
     }
@@ -156,10 +156,7 @@ PostgresDB.prototype.open = async function () {
                                 PRIMARY KEY,
                         doc text DEFAULT NULL
                     );
-                `).catch(() => {
-                    // document indexes will try to create same registry table
-                    // and the "IF NOT EXISTS" did not apply on parallel
-                });
+                `).catch(() => {});
                 break;
 
             case "cfg":
@@ -176,8 +173,8 @@ PostgresDB.prototype.open = async function () {
 };
 
 PostgresDB.prototype.close = function () {
-    //DB && DB.close && DB.close();
-    this.db = /*DB =*/null;
+
+    this.db = null;
     return this;
 };
 
@@ -332,7 +329,6 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
             term,
             count = 1;
 
-        // variant new
 
         for (let i = 1; i < query.length; i++) {
             term = query[i];
@@ -356,7 +352,7 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
                    ${enrich ? ", doc" : ""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
+                       ${suggest ? "SUM" : "SUM"}(res) as res
                 FROM ${this.id}.ctx${this.field}
                 WHERE ${where}
                 GROUP BY id
@@ -369,36 +365,6 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
             ${limit ? "LIMIT " + limit : ""}
             ${offset ? "OFFSET " + offset : ""}
         `, params);
-
-        // variant 1
-
-        // for(let i = 1, count = 1; i < query.length; i++){
-        //     where += (where ? " UNION " : "") + `
-        //         SELECT id, res
-        //         FROM ${this.id}.ctx${this.field}
-        //         WHERE ctx = $${count++} AND key = $${count++}
-        //     `;
-        //     term = query[i];
-        //     const swap = flexsearch.bidirectional && (term > keyword);
-        //     params.push(
-        //         swap ? term : keyword,
-        //         swap ? keyword : term
-        //     );
-        //     keyword = term;
-        // }
-        //
-        // rows = await db.any(`
-        //     SELECT id, res
-        //     FROM (
-        //         SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-        //         FROM (${where}) as t
-        //         GROUP BY id
-        //         ORDER BY ${suggest ? "count DESC, res" : "res"}
-        //         LIMIT ${limit}
-        //         OFFSET ${offset}
-        //     ) as r
-        //     ${suggest ? "" : "WHERE count = " + (query.length - 1)}
-        // `, params);
     } else {
         let where = "",
             count = 1,
@@ -423,7 +389,7 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
                    ${enrich ? ", doc" : ""}
             FROM (
                 SELECT id, count(*) as count,
-                       ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
+                       ${suggest ? "SUM" : "SUM"}(res) as res
                 FROM ${this.id}.map${this.field}
                 WHERE ${where}
                 GROUP BY id
@@ -436,67 +402,6 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
             ${limit ? "LIMIT " + limit : ""}
             ${offset ? "OFFSET " + offset : ""}
         `, query);
-
-        // variant 1
-        // for(let i = 1; i <= query.length; i++){
-        //     where += (where ? " UNION " : "") + `
-        //         SELECT id, res
-        //         FROM ${ this.id }.map${ this.field }
-        //         WHERE key = $${i}
-        //     `;
-        // }
-        // rows = await db.any(`
-        //     SELECT id, res
-        //     FROM (
-        //         SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-        //         FROM (${where}) as t
-        //         GROUP BY id
-        //         ORDER BY ${suggest ? "count DESC, res" : "res"}
-        //         LIMIT ${limit}
-        //         OFFSET ${offset}
-        //     ) as r
-        //     ${ suggest ? "" : "WHERE count = " + query.length }
-        // `, query);
-
-        // variant 2
-        // for(let i = 1; i <= query.length; i++){
-        //     where += (where ? " AND EXISTS " : "") + `(SELECT FROM ${this.id}.map${this.field} as d WHERE d.id = t.id AND d.key = $` + i + ")";
-        // }
-        // rows = await db.any(`
-        //     SELECT t.id, min(t.res)
-        //     FROM ${this.id}.map${this.field} AS t
-        //     WHERE EXISTS ${where}
-        //     GROUP BY t.id
-        //     LIMIT ${limit || 100}
-        //     OFFSET ${offset || 0}
-        // `, query);
-
-        // variant 3
-        // for(let i = 1; i <= query.length; i++){
-        //     where += (where ? " INTERSECT " : "") + `SELECT id FROM ${this.id}.map${this.field} WHERE key = $` + i;
-        // }
-        // rows = await db.any(`
-        //     WITH filtering (id) AS(${where})
-        //     SELECT t.id, min(t.res)
-        //     FROM ${this.id}.map${this.field} AS t
-        //     JOIN filtering USING (id)
-        //     GROUP BY t.id
-        //     LIMIT ${limit || 100}
-        //     OFFSET ${offset || 0}
-        // `, query);
-
-        // variant 4
-        // for(let i = 1; i <= query.length; i++){
-        //     where += (where ? " INTERSECT " : "") + `SELECT id FROM ${this.id}.map${this.field} WHERE key = $` + i;
-        // }
-        // rows = await db.any(`
-        //     SELECT id, min(res)
-        //     FROM ${this.id}.map${this.field}
-        //     WHERE id IN (${where})
-        //     GROUP BY id
-        //     LIMIT ${limit || 100}
-        //     OFFSET ${offset || 0}
-        // `, query);
     }
 
     return rows.then(function (rows) {
@@ -504,23 +409,7 @@ PostgresDB.prototype.search = function (flexsearch, query, limit = 100, offset =
     });
 };
 
-PostgresDB.prototype.info = function () {
-    // todo
-};
-
-// PostgresDB.prototype.transaction = async function(task){
-//     const self = this;
-//     if(TRX){
-//         return TRX.then(function(){
-//             return self.transaction(task);
-//             //task.call(self, TRX);
-//         });
-//     }
-//     TRX = await this.db.tx(async function(trx){
-//         await task.call(self, trx);
-//     });
-//     TRX = null;
-// };
+PostgresDB.prototype.info = function () {};
 
 PostgresDB.prototype.transaction = function (task) {
     const self = this;
@@ -529,30 +418,18 @@ PostgresDB.prototype.transaction = function (task) {
     });
 };
 
-// PostgresDB.prototype.transaction = async function(task){
-//     if(TRX){
-//         return await task.call(this, TRX);
-//     }
-//     const self = this;
-//     return this.db.tx(async function(trx){
-//         await task.call(self, TRX = trx);
-//         TRX = null;
-//     });
-// };
-
 PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
-    // process cleanup tasks
     if (_replace) {
         await this.clear();
-        // there are just removals in the task queue
+
         flexsearch.commit_task = [];
     } else {
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for (let i = 0, task; i < tasks.length; i++) {
             task = tasks[i];
-            // there are just removals in the task queue
+
             if (task.clear) {
                 await this.clear();
                 _replace = !0;
@@ -567,8 +444,6 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
             }
             tasks.length && (await this.remove(tasks));
         }
-
-        //console.log("tasks:", tasks)
     }
 
     if (!flexsearch.reg.size) {
@@ -578,8 +453,6 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
     await this.transaction(function (trx) {
 
         const batch = [];
-
-        // Datastore + Registry
 
         if (flexsearch.store) {
             let data = [],
@@ -591,8 +464,7 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 const id = item[0],
                       doc = item[1];
 
-                // const migration = checkMigration.call(this, id);
-                // migration && await migration;
+
                 data.push({ id, doc: doc && JSON.stringify(doc) });
                 if (data.length === MAXIMUM_QUERY_VARS) {
                     let insert = pgp.helpers.insert(data, stmt);
@@ -604,44 +476,26 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 let insert = pgp.helpers.insert(data, stmt);
                 batch.push(trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2')));
             }
-            // while(data.length){
-            //     let next;
-            //     if(data.length > MAXIMUM_QUERY_VARS){
-            //         next = data.slice(MAXIMUM_QUERY_VARS);
-            //         data = data.slice(0, MAXIMUM_QUERY_VARS);
-            //     }
-            //     let insert = pgp.helpers.insert(data, stmt);
-            //     trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2'));
-            //     if(next) data = next;
-            //     else break;
-            // }
-        }
+        } else if (!flexsearch.bypass) {
+            let data = [],
+                stmt = new pgp.helpers.ColumnSet(["id"], {
+                table: this.id + ".reg"
+            });
 
-        // Registry Only
+            for (const id of flexsearch.reg.keys()) {
 
-        else if (!flexsearch.bypass) {
-                let data = [],
-                    stmt = new pgp.helpers.ColumnSet(["id"], {
-                    table: this.id + ".reg"
-                });
-
-                for (const id of flexsearch.reg.keys()) {
-                    // const migration = checkMigration.call(this, id);
-                    // migration && await migration;
-                    data.push({ id });
-                    if (data.length === MAXIMUM_QUERY_VARS) {
-                        let insert = pgp.helpers.insert(data, stmt);
-                        batch.push(trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2')));
-                        data = [];
-                    }
-                }
-                if (data.length) {
+                data.push({ id });
+                if (data.length === MAXIMUM_QUERY_VARS) {
                     let insert = pgp.helpers.insert(data, stmt);
                     batch.push(trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2')));
+                    data = [];
                 }
             }
-
-        // Default Index
+            if (data.length) {
+                let insert = pgp.helpers.insert(data, stmt);
+                batch.push(trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2')));
+            }
+        }
 
         if (flexsearch.map.size) {
             let data = [],
@@ -656,13 +510,9 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
                 for (let i = 0, ids; i < arr.length; i++) {
                     if ((ids = arr[i]) && ids.length) {
-                        //this.type || (this.type = typeof ids[0]);
-                        // let stmt = "($1,$2,$3)";
-                        // let params = [key, i, ids[0]];
+
                         for (let j = 0; j < ids.length; j++) {
-                            // stmt += ",($1,$2,$3)";
-                            // params.push(key, i, ids[j]);
-                            //trx.none(`INSERT INTO ${config.schema}.map${self.field} (key, res, id) VALUES ($1,$2,$3)`, [key, i, ids[j]]);
+
                             data.push({
                                 key: key,
                                 res: i,
@@ -683,8 +533,6 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
             }
         }
 
-        // Context Index
-
         if (flexsearch.ctx.size) {
             let data = [],
                 stmt = new pgp.helpers.ColumnSet(["ctx", "key", "res", "id"], {
@@ -703,12 +551,9 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
                     for (let i = 0, ids; i < arr.length; i++) {
                         if ((ids = arr[i]) && ids.length) {
-                            // let stmt = "(?,?,?)";
-                            // let params = [ctx_key + ":" + key, i, ids[0]];
+
                             for (let j = 0; j < ids.length; j++) {
-                                // stmt += ",(?,?,?)";
-                                // params.push(ctx_key + ":" + key, i, ids[j]);
-                                //trx.none("INSERT INTO " + config.schema + ".ctx" + self.field + " (ctx, key, res, id) VALUES ($1,$2,$3,$4)", [ctx_key, key, i, ids[j]]);
+
                                 data.push({
                                     ctx: ctx_key,
                                     key: key,
@@ -730,8 +575,6 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 batch.push(trx.none(insert.replace(/^(insert into )"([^"]+)"/, '$1 $2')));
             }
         }
-
-        // Tag Index
 
         if (flexsearch.tag) {
             let data = [],
@@ -759,29 +602,6 @@ PostgresDB.prototype.commit = async function (flexsearch, _replace, _append) {
             }
         }
 
-        // Field Configuration
-
-        // TODO
-        // trx.none("INSERT INTO " + this.id + ".cfg" + this.field + " (cfg) VALUES ($1)", [
-        //     JSON.stringify({
-        //         "encode": typeof flexsearch.encode === "string" ? flexsearch.encode : "",
-        //         "charset": typeof flexsearch.charset === "string" ? flexsearch.charset : "",
-        //         "tokenize": flexsearch.tokenize,
-        //         "resolution": flexsearch.resolution,
-        //         "minlength": flexsearch.minlength,
-        //         "optimize": flexsearch.optimize,
-        //         "fastupdate": flexsearch.fastupdate,
-        //         "encoder": flexsearch.encoder,
-        //         "context": {
-        //             "depth": flexsearch.depth,
-        //             "bidirectional": flexsearch.bidirectional,
-        //             "resolution": flexsearch.resolution_ctx
-        //         }
-        //     })
-        // ]);
-
-        //return Promise.all(batch);
-
         if (batch.length) {
             return trx.batch(batch);
         }
@@ -806,171 +626,9 @@ PostgresDB.prototype.remove = function (ids) {
         return;
     }
 
-    // ids = [ids];
-    // return this.db.none(
-    //     "DELETE FROM " + this.id + ".map" + this.field + " WHERE id = ANY ($1);" +
-    //     "DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id = ANY ($1);" +
-    //     "DELETE FROM " + this.id + ".tag" + this.field + " WHERE id = ANY ($1);" +
-    //     "DELETE FROM " + this.id + ".reg WHERE id = ANY ($1);", [ids]
-    // );
-
-    // ids = [ids];
-    // return Promise.all([
-    //     this.db.none({ text: "DELETE FROM " + this.id + ".map" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids),
-    //     this.db.none({ text: "DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids),
-    //     this.db.none({ text: "DELETE FROM " + this.id + ".tag" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids),
-    //     this.db.none({ text: "DELETE FROM " + this.id + ".reg WHERE id = ANY ($1)", rowMode: "array" }, ids)
-    // ]);
-
     return this.transaction(function (trx) {
-
-        //console.log("remove:", ids);
-
-        // ids = [ids];
-        // trx.none({ text: "DELETE FROM " + this.id + ".map" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids);
-        // trx.none({ text: "DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids);
-        // trx.none({ text: "DELETE FROM " + this.id + ".tag" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids);
-        // trx.none({ text: "DELETE FROM " + this.id + ".reg WHERE id = ANY ($1)", rowMode: "array" }, ids);
-
-        // ids = [ids];
-        // trx.none("DELETE FROM " + this.id + ".map" + this.field + " WHERE id = ANY ($1)", ids);
-        // trx.none("DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id = ANY ($1)", ids);
-        // trx.none("DELETE FROM " + this.id + ".tag" + this.field + " WHERE id = ANY ($1)", ids);
-        // trx.none("DELETE FROM " + this.id + ".reg WHERE id = ANY ($1)", ids);
-        // return;
-
-        // return trx.none(
-        //     "DELETE FROM " + this.id + ".map" + this.field + " WHERE id = ANY ($1);" +
-        //     "DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id = ANY ($1);" +
-        //     "DELETE FROM " + this.id + ".tag" + this.field + " WHERE id = ANY ($1);" +
-        //     "DELETE FROM " + this.id + ".reg WHERE id = ANY ($1);", [ids]
-        // );
-
-        // while(ids.length){
-        //     let next;
-        //     let stmt = "";
-        //     let chunk = 0;
-        //     let migration;
-        //     for(let i = 0; i < ids.length; i++){
-        //         stmt += (stmt ? "," : "") + "$" + (i + 1); // + "::text";
-        //         // maximum count of variables supported
-        //         if(++chunk === MAXIMUM_QUERY_VARS){
-        //             next = ids.slice(MAXIMUM_QUERY_VARS);
-        //             ids = ids.slice(0, MAXIMUM_QUERY_VARS);
-        //             break;
-        //         }
-        //     }
-        //
-        //     trx.batch([
-        //         trx.none("DELETE FROM " + this.id + ".map" + this.field + " WHERE id IN (" + stmt + ")", ids),
-        //         trx.none("DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id IN (" + stmt + ")", ids),
-        //         trx.none("DELETE FROM " + this.id + ".tag" + this.field + " WHERE id IN (" + stmt + ")", ids),
-        //         trx.none("DELETE FROM " + this.id + ".reg WHERE id IN (" + stmt + ")", ids)
-        //     ]);
-        //
-        //     // trx.none(
-        //     //     "DELETE FROM " + this.id + ".map" + this.field + " WHERE id IN (" + stmt + ");" +
-        //     //     "DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id IN (" + stmt + ");" +
-        //     //     "DELETE FROM " + this.id + ".tag" + this.field + " WHERE id IN (" + stmt + ");" +
-        //     //     "DELETE FROM " + this.id + ".reg WHERE id IN (" + stmt + ");", ids
-        //     // );
-        //
-        //     if(next) ids = next;
-        //     else break;
-        // }
 
         ids = [ids];
         return trx.batch([trx.none({ text: "DELETE FROM " + this.id + ".map" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids), trx.none({ text: "DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids), trx.none({ text: "DELETE FROM " + this.id + ".tag" + this.field + " WHERE id = ANY ($1)", rowMode: "array" }, ids), trx.none({ text: "DELETE FROM " + this.id + ".reg WHERE id = ANY ($1)", rowMode: "array" }, ids)]);
-
-        // ids = [ids];
-        // return trx.batch([
-        //     trx.none("DELETE FROM " + this.id + ".map" + this.field + " WHERE id = ANY ($1)", ids),
-        //     trx.none("DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id = ANY ($1)", ids),
-        //     trx.none("DELETE FROM " + this.id + ".tag" + this.field + " WHERE id = ANY ($1)", ids),
-        //     trx.none("DELETE FROM " + this.id + ".reg WHERE id = ANY ($1)", ids)
-        // ]);
-
-        // return trx.batch([
-        //     trx.none("DELETE FROM " + this.id + ".map" + this.field + " WHERE id IN ($1:csv)", [ids]),
-        //     trx.none("DELETE FROM " + this.id + ".ctx" + this.field + " WHERE id IN ($1:csv)", [ids]),
-        //     trx.none("DELETE FROM " + this.id + ".tag" + this.field + " WHERE id IN ($1:csv)", [ids]),
-        //     trx.none("DELETE FROM " + this.id + ".reg WHERE id IN ($1:csv)", [ids])
-        // ]);
-
-        // const type = self.type === "text" ? "text" : "int";
-        // return trx.batch([
-        //     trx.none("DELETE FROM " + this.id + ".map" + self.field + " WHERE id = ANY($1::" + type + "[])", [ids]),
-        //     trx.none("DELETE FROM " + this.id + ".ctx" + self.field + " WHERE id = ANY($1::" + type + "[])", [ids]),
-        //     trx.none("DELETE FROM " + this.id + ".reg WHERE id = ANY($1::" + type + "[])", [ids])
-        // ]);
-
-        // return trx.batch([
-        //     trx.none("DELETE FROM " + this.id + ".map" + self.field + " WHERE id = ANY($1)", [ids]),
-        //     trx.none("DELETE FROM " + this.id + ".ctx" + self.field + " WHERE id = ANY($1)", [ids]),
-        //     trx.none("DELETE FROM " + this.id + ".reg WHERE id = ANY($1)", [ids])
-        // ]);
     });
 };
-
-// if(this.type === "int" && typeof ids[0] === "string"){
-//     ids = ids.map(item => parseInt(item, 10));
-// }
-// if(this.type === "bigint" && typeof ids[0] === "string"){
-//     ids = ids.map(item => BigInt(item));
-// }
-// if(this.type === "string" && typeof ids[0] === "number"){
-//     ids = ids.map(item => item + "");
-// }
-// this.type !== "string" && checkMigration.call(this, ids[0]);
-
-// function checkMigration(id){
-//     if(this.type !== "string"){
-//         if(typeof id === "object"){
-//             id = id[0];
-//         }
-//         if(typeof id === "string"){
-//             this.type = "string";
-//             return upgradeTextId.call(this);
-//         }
-//         if(this.type !== "bigint"){
-//             if(id > 2 ** 31 - 1){
-//                 this.type = "bigint";
-//                 return upgradeBigIntId.call(this);
-//             }
-//         }
-//     }
-// }
-//
-// function upgradeTextId(){
-//     return this.db.none(`
-//         ALTER TABLE ${this.id}.map${this.field}
-//             ALTER COLUMN id type varchar(128)
-//                 USING id::text;
-//         ALTER TABLE ${this.id}.ctx${this.field}
-//             ALTER COLUMN id type varchar(128)
-//                 USING id::text;
-//         ALTER TABLE ${this.id}.tag${this.field}
-//             ALTER COLUMN id type varchar(128)
-//                 USING id::text;
-//         ALTER TABLE ${this.id}.reg
-//             ALTER COLUMN id type varchar(128)
-//                 USING id::text;
-//     `);
-// }
-//
-// function upgradeBigIntId(){
-//     return this.db.none(`
-//         ALTER TABLE ${this.id}.map${this.field}
-//             ALTER COLUMN id type bigint
-//                 USING id::bigint;
-//         ALTER TABLE ${this.id}.ctx${this.field}
-//             ALTER COLUMN id type bigint
-//                 USING id::bigint;
-//         ALTER TABLE ${this.id}.tag${this.field}
-//             ALTER COLUMN id type bigint
-//                 USING id::bigint;
-//         ALTER TABLE ${this.id}.reg
-//             ALTER COLUMN id type bigint
-//                 USING id::bigint;
-//     `);
-// }

@@ -73,10 +73,6 @@ function return_result(final, promises, limit, offset, enrich, resolve, suggest)
 
 function exclusion(result, limit, offset, resolve) {
 
-    // if(!result.length){
-    //     return this.result;
-    // }
-
     /** @type {SearchResults|IntermediateSearchResults} */
     const final = [],
           exclude = new Set(result.flat().flat());

@@ -1,4 +1,4 @@
-let table, timer; // = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/";
+let table, timer;
 
 const cache = new Map();
 
@@ -6,7 +6,7 @@ function toRadix(number, radix = 255) {
 
     if (!table) {
         table = Array(radix);
-        // the char code 0 could be a special marker
+
         for (let i = 0; i < radix; i++) table[i] = i + 1;
         table = String.fromCharCode.apply(null, table);
     }
@@ -35,7 +35,6 @@ export default function (str) {
         timer = setTimeout(clear, 1);
     }
 
-    /* 2 ** ((level + 1.5) * 1.6 | 0) */
 
     const result = toRadix("number" == typeof str ? str : lcg(str));
 
@@ -55,7 +54,7 @@ function lcg(str) {
     for (let i = 0; i < str.length; i++) {
         crc = (crc * 33 ^ str.charCodeAt(i)) & range;
     }
-    // shift up from Int32 to UInt32 range 0xFFFFFFFF
+
     return crc + 2147483648;
 }
 

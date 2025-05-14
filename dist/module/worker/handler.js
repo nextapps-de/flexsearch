@@ -22,21 +22,17 @@ export default (async function (data) {
             options = data.options || {};
             let filepath = options.config;
             if (filepath) {
-                // compiler fix
+
                 options = options;
-                // will be replaced after build with the line below because
-                // there is an issue with closure compiler dynamic import
-                options=(await import(filepath))["default"];
             }
 
             const factory = data.factory;
 
             if (factory) {
 
-                // export the FlexSearch global payload to "self"
                 Function("return " + factory)()(self);
                 index = new self.FlexSearch.Index(options);
-                // destroy the exported payload
+
                 delete self.FlexSearch;
             } else {
 
@@ -51,11 +47,11 @@ export default (async function (data) {
             let message;
 
             if ("export" === task) {
-                // skip non-field indexes
+
                 if (!args[1]) args = null;else {
                     args[0] = options.export;
                     args[2] = 0;
-                    args[3] = 1; // skip reg
+                    args[3] = 1;
                 }
             }
             if ("import" === task) {

@@ -53,18 +53,15 @@ function return_result(final, promises, limit, offset, enrich, resolve) {
     }
 
     if (final.length) {
-        //this.result.length && (final = final.concat([this.result]));
+
         this.result.length && final.push(this.result);
 
         if (2 > final.length) {
             this.result = final[0];
         } else {
-            // the suggest-union (reversed processing, resolve needs to be disabled)
-            this.result = union(final /*.reverse()*/
-            , limit, offset, /* suggest */ /* append: */ /* enrich */
-            /* resolve: */!1, this.boostval);
 
-            // offset was already applied
+            this.result = union(final, limit, offset, !1, this.boostval);
+
             offset = 0;
         }
     }

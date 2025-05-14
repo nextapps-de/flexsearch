@@ -14,7 +14,7 @@ import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex, serialize } from "./serialize.js";
 import { remove_index } from "./index/remove.js";
-//import default_encoder from "./charset/latin/default.js";
+
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
 import tick from "./profiler.js";
@@ -39,13 +39,13 @@ export default function Index(options, _register) {
     /** @type {*} */
     let tmp = options.context;
     /** @type ContextOptions */
-    const context = /** @type ContextOptions */ /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/ === tmp ? { depth: 1 } : tmp || {},
-          encoder = is_string(options.encoder) ? Charset[options.encoder] : options.encode || options.encoder || {} /*default_encoder*/;
+    const context = /** @type ContextOptions */!0 === tmp ? { depth: 1 } : tmp || {},
+          encoder = is_string(options.encoder) ? Charset[options.encoder] : options.encode || options.encoder || {};
 
     /** @type Encoder */
     this.encoder = encoder.encode ? encoder : "object" == typeof encoder ? new Encoder( /** @type {EncoderOptions} */encoder) : { encode: encoder };
 
-    this.compress = options.compress || options.compression || /* suggest */ /* append: */ /* enrich */!1;
+    this.compress = options.compress || options.compression || !1;
 
 
     this.resolution = options.resolution || 9;
@@ -156,32 +156,6 @@ Index.prototype.update = function (id, content) {
     return res && res.then ? res.then(() => self.add(id, content)) : this.add(id, content);
 };
 
-// /**
-//  * @param map
-//  * @return {number}
-//  */
-//
-// function cleanup_index(map){
-//
-//     let count = 0;
-//
-//     if(is_array(map)){
-//         for(let i = 0, arr; i < map.length; i++){
-//             (arr = map[i]) &&
-//             (count += arr.length);
-//         }
-//     }
-//     else for(const item of map.entries()){
-//         const key = item[0];
-//         const value = item[1];
-//         const tmp = cleanup_index(value);
-//         tmp ? count += tmp
-//             : map.delete(key);
-//     }
-//
-//     return count;
-// }
-
 Index.prototype.cleanup = function () {
 
     if (!this.fastupdate) {
@@ -189,10 +163,8 @@ Index.prototype.cleanup = function () {
     }
 
     remove_index(this.map);
-    //cleanup_index(this.map);
-    this.depth &&
-    //cleanup_index(this.ctx);
-    remove_index(this.ctx);
+
+    this.depth && remove_index(this.ctx);
 
     return this;
 };

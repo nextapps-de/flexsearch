@@ -4,10 +4,6 @@
  */
 const { parentPort } = require("worker_threads"),
       { Index } = require("flexsearch");
-//const { join } = require("path");
-// Test Path
-//const { Index } = require("../../dist/flexsearch.bundle.min.js");
-
 
 /** @type Index */
 let index, options;
@@ -24,7 +20,7 @@ parentPort.on("message", async function (data) {
         case "init":
 
             options = data.options || {};
-            // load extern field configuration
+
             let filepath = options.config;
             if (filepath) {
                 options = Object.assign({}, options, require(filepath));
@@ -32,7 +28,6 @@ parentPort.on("message", async function (data) {
             }
 
             index = new Index(options);
-            //index.db && await index.db;
 
             parentPort.postMessage({ id: id });
             break;
@@ -45,11 +40,11 @@ parentPort.on("message", async function (data) {
                 if (!options.export || "function" != typeof options.export) {
                     throw new Error("Either no extern configuration provided for the Worker-Index or no method was defined on the config property \"export\".");
                 }
-                // skip non-field indexes
+
                 if (!args[1]) args = null;else {
                     args[0] = options.export;
                     args[2] = 0;
-                    args[3] = 1; // skip reg
+                    args[3] = 1;
                 }
             }
             if ("import" === task) {

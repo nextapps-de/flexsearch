@@ -21,14 +21,10 @@ export default function Resolver(result, index) {
     if (!this || this.constructor !== Resolver) {
         return new Resolver(result, index);
     }
-    // if(result && result.constructor === Resolver){
-    //     // todo test this branch
-    //     //console.log("Resolver Loopback")
-    //     return /** @type {Resolver} */ (result);
-    // }
+
     if (result && result.index) {
-        // result = /** @type {ResolverOptions} */ (result);
-        result.resolve = /* suggest */ /* append: */ /* enrich */ /* resolve: */!1;
+
+        result.resolve = !1;
         this.index = /** @type {Index|Document} */result.index;
         this.boostval = result.boost || 0;
         this.result = this.index.search(result).result;
@@ -116,19 +112,8 @@ Resolver.prototype.resolve = function (limit, offset, enrich) {
             limit.highlight;
             limit = limit.limit;
         }
-        // const document = this.index;
-        // if(document.index){
-        //     result = default_resolver(result, limit || 100, offset, false);
-        //     return enrich
-        //         ? apply_enrich.call(document, result)
-        //         : result;
-        // }
-        // else{
+
         result = default_resolver.call(index, result, limit || 100, offset, enrich);
-        // if(highlight){
-        //     result = highlight_fields(result);
-        // }
-        // }
     }
 
     return result;

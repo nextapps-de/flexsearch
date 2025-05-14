@@ -1,7 +1,8 @@
 // COMPILER BLOCK -->
 import {
     DEBUG,
-    PROFILER, SUPPORT_ASYNC, SUPPORT_CACHE,
+    PROFILER,
+    SUPPORT_CACHE,
     SUPPORT_HIGHLIGHTING,
     SUPPORT_PERSISTENT,
     SUPPORT_RESOLVER,
@@ -21,7 +22,7 @@ import {
     SearchResults,
     IntermediateSearchResults
 } from "../type.js";
-import { create_object, is_array, is_object, is_string } from "../common.js";
+import { create_object, is_array, is_object, is_string, inherit } from "../common.js";
 import { intersect, intersect_union } from "../intersect.js";
 import Document from "../document.js";
 import Index from "../index.js";
@@ -199,7 +200,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                         PROFILER && tick("Document.search:tag:get:" + pairs[j + 1]);
                         ids = get_tag.call(this, pairs[j], pairs[j + 1], limit, offset, enrich);
                     }
-                    result.push(resolve ? {
+                    result.push(!SUPPORT_RESOLVER || resolve ? {
                         "field": pairs[j],
                         "tag": pairs[j + 1],
                         "result": ids
@@ -210,30 +211,30 @@ Document.prototype.search = function(query, limit, options, _promises){
                     const self = this;
                     return Promise.all(promises).then(function(promises){
                         for(let j = 0; j < promises.length; j++){
-                            if(resolve){
+                            if(!SUPPORT_RESOLVER || resolve){
                                 result[j]["result"] = promises[j];
                             }
                             else{
                                 result[j] = promises[j];
                             }
                         }
-                        return resolve || !SUPPORT_RESOLVER
+                        return !SUPPORT_RESOLVER || resolve
                             ? result
                             : new Resolver(result.length > 1
-                                ? intersect(result, 1, 0, 0, suggest, boost)
+                                ? intersect(/** @type {!Array<IntermediateSearchResults>} */ (result), 1, 0, 0, suggest, boost)
                                 : result[0], self)
                     });
                 }
 
-                return resolve || !SUPPORT_RESOLVER
+                return !SUPPORT_RESOLVER || resolve
                     ? result
                     : new Resolver(result.length > 1
-                        ? intersect(result, 1, 0, 0, suggest, boost)
+                        ? intersect(/** @type {!Array<IntermediateSearchResults>} */ (result), 1, 0, 0, suggest, boost)
                         : result[0], this)
             }
         }
 
-        // upgrade pluck when missing
+        // upgrade pluck for resolver when missing
         if(SUPPORT_RESOLVER && !resolve && !pluck){
             field = field || this.field;
             if(field){
@@ -351,7 +352,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                         }
                         else if(!suggest){
                             // no tags found
-                            return resolve || !SUPPORT_RESOLVER
+                            return !SUPPORT_RESOLVER || resolve
                                 ? result
                                 : new Resolver(result, this)
                         }
@@ -374,7 +375,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                             continue;
                         }
                         else{
-                            return resolve || !SUPPORT_RESOLVER
+                            return !SUPPORT_RESOLVER || resolve
                                 ? result
                                 : new Resolver(result, this)
                         }
@@ -389,7 +390,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                     }
                     else if(!suggest){
                         // no tags found
-                        return resolve || !SUPPORT_RESOLVER
+                        return !SUPPORT_RESOLVER || resolve
                             ? result
                             : new Resolver(result, this)
                     }
@@ -402,7 +403,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                 len = res.length;
                 if(!len && !suggest){
                     // nothing matched
-                    return resolve || !SUPPORT_RESOLVER
+                    return !SUPPORT_RESOLVER || resolve
                         ? res
                         : new Resolver(/** @type {IntermediateSearchResults} */ (res), this);
                 }
@@ -418,7 +419,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
         else if(field.length === 1){
             // fast path: nothing matched
-            return resolve || !SUPPORT_RESOLVER
+            return !SUPPORT_RESOLVER || resolve
                 ? result
                 : new Resolver(result, this);
         }
@@ -440,7 +441,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                             continue;
                         }
                         else{
-                            return resolve || !SUPPORT_RESOLVER
+                            return !SUPPORT_RESOLVER || resolve
                                 ? result
                                 : new Resolver(result, this);
                         }
@@ -462,13 +463,13 @@ Document.prototype.search = function(query, limit, options, _promises){
     }
 
     if(!count){
-        return resolve || !SUPPORT_RESOLVER
+        return !SUPPORT_RESOLVER || resolve
             ? result
             : new Resolver(result, this);
     }
     if(pluck && (!enrich || !this.store)){
         result = result[0];
-        if(!resolve) result.index = this;
+        if(SUPPORT_RESOLVER && !resolve) result.index = this;
         return /** @type {SearchResults|Resolver} */ (result);
     }
 
@@ -494,7 +495,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
 
         if(pluck){
-            return resolve || !SUPPORT_RESOLVER
+            return !SUPPORT_RESOLVER || resolve
                 ? (highlight
                     ? highlight_fields(/** @type {string} */ (query), res, this.index, pluck, highlight)
                     : /** @type {SearchResults|EnrichedSearchResults} */ (res))
@@ -513,29 +514,21 @@ Document.prototype.search = function(query, limit, options, _promises){
             for(let j = 0; j < promises.length; j++){
                 result[j]["result"] = promises[j];
             }
+            if(highlight){
+                result = highlight_fields(/** @type {string} */ (query), result, self.index, pluck, highlight);
+            }
             return merge
                 ? merge_fields(result)
-                : highlight
-                    ? highlight_fields(/** @type {string} */ (query), result, self.index, pluck, highlight)
-                    : /** @type {DocumentSearchResults} */ (
-                        result
-                    );
+                : /** @type {DocumentSearchResults} */ (result);
         });
     }
 
+    if(highlight){
+        result = highlight_fields(/** @type {string} */ (query), result, this.index, pluck, highlight);
+    }
     return merge
         ? merge_fields(result)
-        : highlight
-            ? highlight_fields(/** @type {string} */ (query), result, this.index, pluck, highlight)
-            : /** @type {DocumentSearchResults} */ (
-                result
-            );
-}
-
-function inherit(target_value, default_value){
-    return typeof target_value === "undefined"
-        ? default_value
-        : target_value;
+        : /** @type {DocumentSearchResults} */ (result);
 }
 
 // todo support Resolver
@@ -550,24 +543,33 @@ function inherit(target_value, default_value){
 function merge_fields(fields){
     /** @type {MergedDocumentSearchResults} */
     const final = [];
-    const set = create_object();
-    for(let i = 0, field, res; i < fields.length; i++){
+    const group_field = create_object();
+    const group_highlight = create_object();
+    for(let i = 0, field, key, res, id, entry, tmp, highlight; i < fields.length; i++){
         field = fields[i];
+        key = field.field;
         res = field.result;
-        for(let j = 0, id, entry, tmp; j < res.length; j++){
+        for(let j = 0; j < res.length; j++){
             entry = res[j];
             // upgrade flat results
-            if(typeof entry !== "object"){
-                entry = { "id": entry };
-            }
-            id = entry["id"];
-            tmp = set[id];
+            typeof entry !== "object"
+                ? entry = { "id": id = entry }
+                : id = entry["id"];
+            tmp = group_field[id];
             if(!tmp){
-                entry.field = set[id] = [field.field];
+                entry["field"] = group_field[id] = [key];
                 final.push(/** @type {MergedDocumentSearchEntry} */ (entry));
             }
             else{
-                tmp.push(field.field);
+                tmp.push(key);
+            }
+            if(SUPPORT_HIGHLIGHTING && SUPPORT_STORE && (highlight = entry["highlight"])){
+                tmp = group_highlight[id];
+                if(!tmp){
+                    group_highlight[id] = tmp = {};
+                    entry["highlight"] = tmp;
+                }
+                tmp[key] = highlight;
             }
         }
     }
@@ -581,23 +583,23 @@ function merge_fields(fields){
 function get_tag(tag, key, limit, offset, enrich){
 
     PROFILER && tick("Document.search:tag:get:" + key);
-    let res = this.tag.get(tag);
-    if(!res){
-        DEBUG && console.warn("Tag-Field '" + tag + "' was not found");
-        return [];
-    }
-    res = res && res.get(key);
-    let len = res && (res.length - offset);
 
-    if(len && (len > 0)){
+    let res = this.tag.get(tag);
+    if(!res) return [];
+    res = res.get(key);
+    if(!res) return [];
+    let len = res.length - offset;
+
+    if(len > 0){
         if((limit && len > limit) || offset){
             res = res.slice(offset, offset + limit);
         }
         if(enrich){
             res = apply_enrich.call(this, res);
         }
-        return res;
     }
+
+    return res;
 }
 
 /**

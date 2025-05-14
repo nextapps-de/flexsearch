@@ -174,7 +174,6 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0) {
 
         case 1:
 
-            // todo
             key = "cfg";
             chunk = null;
             break;
@@ -226,13 +225,12 @@ export function importIndex(key, data) {
     switch (key) {
 
         case "cfg":
-            // todo
+
             break;
 
         case "reg":
 
-            // fast update isn't supported by export/import
-            this.fastupdate = /* suggest */ /* append: */ /* enrich */ /* resolve: */!1;
+            this.fastupdate = !1;
             this.reg = json_to_reg( /** @type {Array<string|number>} */data, this.reg);
             break;
 
@@ -262,7 +260,7 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
         const field = this.field[_index_doc],
               idx = this.index.get(field),
               res = idx.export(callback, field, _index_doc, _index_obj = 1);
-        // start from index 1, because document indexes does not additionally store register
+
 
         if (res && res.then) {
             const self = this;
@@ -299,13 +297,6 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
                 _field = null;
                 break;
 
-            // case 3:
-            //
-            //     key = "cfg";
-            //     chunk = null;
-            //     _field = null;
-            //     break;
-
             default:
 
                 return;
@@ -331,7 +322,6 @@ export function importDocument(key, data) {
           ref = 2 < split.length ? split[2] : split[1];
 
 
-    // trigger the import for worker field indexes
     if (this.worker && field) {
         return this.index.get(field).import(key);
     }
@@ -349,7 +339,6 @@ export function importDocument(key, data) {
 
             case "reg":
 
-                // fast update isn't supported by export/import
                 this.fastupdate = !1;
                 this.reg = json_to_reg( /** @type {Array<string|number>} */data, this.reg);
 
@@ -359,17 +348,14 @@ export function importDocument(key, data) {
                     idx.reg = this.reg;
                 }
 
-                // trigger the import for worker field indexes
                 if (this.worker) {
                     const promises = [],
                           self = this;
 
 
                     for (const index of this.index.values()) {
-                        // const ref = item[0];
-                        // const index = item[1];
+
                         promises.push(index.import(key));
-                        //this.index.get(field).import(key);
                     }
 
                     return Promise.all(promises);
@@ -410,8 +396,7 @@ ctx: "gulliver+travel:1,2,3|4,5,6|7,8,9;"
  * @return {string}
  */
 
-export function serialize(withFunctionWrapper = /* tag? */ /* stringify */ /* stringify */ /* single param */ /* skip update: */ /* append: */ /* skip update: */ /* skip_update: */ /* skip deletion */ // splice:
-!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/) {
+export function serialize(withFunctionWrapper = !0) {
     let reg = '',
         map = '',
         ctx = '';

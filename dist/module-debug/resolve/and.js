@@ -84,7 +84,7 @@ function return_result(final, promises, limit, offset, enrich, resolve, suggest)
             this.result = /** @type {SearchResults|IntermediateSearchResults} */final;
         }
     } else {
-        //final = [this.result].concat(final);
+
         this.result.length && final.unshift(this.result);
 
         if (2 > final.length) {

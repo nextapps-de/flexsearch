@@ -146,8 +146,8 @@ import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
 /** @export */IndexOptions.cache;
 /** @export */IndexOptions.resolve;
 /** @export */IndexOptions.db;
-/** @export */IndexOptions.worker; // worker url
-/** @export */IndexOptions.config; // config url
+/** @export */IndexOptions.worker;
+/** @export */IndexOptions.config;
 /** @export */IndexOptions.priority;
 /** @export */IndexOptions.export;
 /** @export */IndexOptions.import;
@@ -304,32 +304,21 @@ const FlexSearch = {
     Language: {}
 };
 
-// Export as library (Bundle)
-// --------------------------------
-
 {
 
-    // Legacy Browser: this refers to window
-    // ESM Browser: self refers to window
-    // NodeJS: global refers to the global scope
     const root = "undefined" != typeof self ? self : "undefined" != typeof global ? global : self;
     let prop;
 
-    // AMD (RequireJS)
     if ((prop = root.define) && prop.amd) {
         prop([], function () {
             return FlexSearch;
         });
+    } else if ("object" == typeof root.exports) {
+        root.exports = FlexSearch;
+    } else {
+        /** @export */
+        root.FlexSearch = FlexSearch;
     }
-    // CommonJS
-    else if ("object" == typeof root.exports) {
-            root.exports = FlexSearch;
-        }
-        // Global (window)
-        else {
-                /** @export */
-                root.FlexSearch = FlexSearch;
-            }
 }
 
 

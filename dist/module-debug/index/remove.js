@@ -14,13 +14,9 @@ Index.prototype.remove = function (id, _skip_deletion) {
 
         if (this.fastupdate) {
 
-            // fast updates did not fully clean up the key entries
-
             for (let i = 0, tmp; i < refs.length; i++) {
                 if (tmp = refs[i]) {
-                    // todo check
-                    //if(tmp.length < 1) throw new Error("invalid length");
-                    //if(tmp.indexOf(id) < 0) throw new Error("invalid id");
+
                     if (2 > tmp.length) {
                         tmp.pop();
                     } else {
@@ -29,51 +25,10 @@ Index.prototype.remove = function (id, _skip_deletion) {
                     }
                 }
             }
-
-            // todo variation which cleans up, requires to push [ctx, key] instead of arr to the index.reg
-            // for(let i = 0, arr, term, keyword; i < refs.length; i++){
-            //     arr = refs[i];
-            //     if(typeof arr === "string"){
-            //         arr = this.map.get(term = arr);
-            //     }
-            //     else{
-            //         arr = this.ctx.get(keyword = arr[0]);
-            //         arr && (arr = arr.get(arr[1]));
-            //     }
-            //     let counter = 0, found;
-            //     if(arr && arr.length){
-            //         for(let j = 0, tmp; j < arr.length; j++){
-            //             if((tmp = arr[j])){
-            //                 if(!found && tmp.length){
-            //                     const index = tmp.indexOf(id);
-            //                     if(index >= 0){
-            //                         tmp.splice(index, 1);
-            //                         // the index [ctx, key]:[res, id] is unique
-            //                         found = 1;
-            //                     }
-            //                 }
-            //                 if(tmp.length){
-            //                     counter++;
-            //                     if(found){
-            //                         break;
-            //                     }
-            //                 }
-            //                 else{
-            //                     delete arr[j];
-            //                 }
-            //             }
-            //         }
-            //     }
-            //     if(!counter){
-            //         keyword
-            //             ? this.ctx.delete(keyword)
-            //             : this.map.delete(term);
-            //     }
-            // }
         } else {
 
-            remove_index(this.map, id /*, this.resolution*/);
-            this.depth && remove_index(this.ctx, id /*, this.resolution_ctx*/);
+            remove_index(this.map, id);
+            this.depth && remove_index(this.ctx, id);
         }
 
         _skip_deletion || this.reg.delete(id);
@@ -82,10 +37,8 @@ Index.prototype.remove = function (id, _skip_deletion) {
     if (this.db) {
         this.commit_task.push({ del: id });
         this.commit_auto && autoCommit(this);
-        //return this.db.remove(id);
     }
 
-    // the cache could be used outside the InMemory store
     if (this.cache) {
         this.cache.remove(id);
     }
@@ -101,9 +54,6 @@ Index.prototype.remove = function (id, _skip_deletion) {
  */
 
 export function remove_index(map, id) {
-
-    // a check counter of filled resolution slots
-    // to prevent removing the field
     let count = 0;
 
 
@@ -111,7 +61,7 @@ export function remove_index(map, id) {
         for (let x = 0, arr, index; x < map.length; x++) {
             if ((arr = map[x]) && arr.length) {
                 if ("undefined" == typeof id) {
-                    //count += arr.length;
+
                     count++;
                 } else {
                     index = arr.indexOf(id);
@@ -120,10 +70,10 @@ export function remove_index(map, id) {
                             arr.splice(index, 1);
                             count++;
                         } else {
-                            // remove resolution slot
+
                             delete map[x];
                         }
-                        // the index key:[res, id] is unique
+
                         break;
                     } else {
                         count++;

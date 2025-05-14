@@ -26,14 +26,14 @@ export const stemmer = new Map([["niss", ""], ["isch", ""], ["lich", ""], ["heit
  */
 const map = new Map([["_", " "], ["ä", "ae"], ["ö", "oe"], ["ü", "ue"], ["ß", "ss"], ["&", " und "], ["€", " EUR "]]),
       options = {
-    prepare: function (str) {
-        // normalization
-        if (/[_äöüß&€]/.test(str)) str = str.replace(/[_äöüß&€]/g, match => map.get(match));
-        // street names
-        return str.replace(/str\b/g, "strasse").replace(/(?!\b)strasse\b/g, " strasse");
-    },
-    filter: filter,
-    stemmer: stemmer
+  prepare: function (str) {
+
+    if (/[_äöüß&€]/.test(str)) str = str.replace(/[_äöüß&€]/g, match => map.get(match));
+
+    return str.replace(/str\b/g, "strasse").replace(/(?!\b)strasse\b/g, " strasse");
+  },
+  filter: filter,
+  stemmer: stemmer
 };
 
 /**

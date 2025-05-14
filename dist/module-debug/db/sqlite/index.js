@@ -1,4 +1,4 @@
-//const sqlite3 = require("sqlite3").verbose();
+
 import sqlite3 from "sqlite3";
 import path from "path";
 import StorageInterface from "../interface.js";
@@ -34,7 +34,6 @@ function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_]/g, "");
 }
 
-// global transaction to keep track of database lock
 const TRX = Object.create(null),
       Index = Object.create(null);
 
@@ -55,18 +54,17 @@ export default function SqliteDB(name, config = {}) {
     if (!name) {
         console.info("Default storage space was used, because a name was not passed.");
     }
-    //field = "Test-456";
+
     this.id = config.path || (":memory:" === name ? name : "flexsearch" + (name ? "-" + sanitize(name) : "") + ".sqlite");
     this.field = config.field ? "_" + sanitize(config.field) : "";
-    this.support_tag_search = /* tag? */ /* stringify */ /* stringify */ /* single param */!0 /*await rows.hasNext()*/
-    /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search = !0;
     this.db = config.db || Index[this.id] || null;
     this.type = config.type ? types[config.type.toLowerCase()] : "string";
     if (!this.type) throw new Error("Unknown type of ID '" + config.type + "'");
 }
 
 SqliteDB.prototype.mount = function (flexsearch) {
-    //if(flexsearch.constructor === Document){
+
     if (flexsearch.index) {
         return flexsearch.mount(this);
     }
@@ -82,9 +80,9 @@ SqliteDB.prototype.open = async function () {
 
             let filepath = this.id;
             if (":memory:" !== filepath) {
-                // skip absolute path
+
                 if ("/" !== filepath[0] && "\\" !== filepath[0]) {
-                    // current working directory
+
                     const dir = process.cwd();
                     filepath = path.join(dir, this.id);
                 }
@@ -246,7 +244,7 @@ function create_result(rows, resolve, enrich) {
     }
 }
 
-SqliteDB.prototype.get = function (key, ctx, limit = 0, offset = 0, resolve = !0, enrich = /* suggest */!1, tags) {
+SqliteDB.prototype.get = function (key, ctx, limit = 0, offset = 0, resolve = !0, enrich = !1, tags) {
     let result,
         stmt = '',
         params = ctx ? [ctx, key] : [key],
@@ -352,12 +350,6 @@ SqliteDB.prototype.enrich = function (ids) {
         const chunk = ids.length - count > MAXIMUM_QUERY_VARS ? ids.slice(count, count + MAXIMUM_QUERY_VARS) : count ? ids.slice(count) : ids;
         count += chunk.length;
 
-        // let stmt = "?";
-        // for(let i = 1; i < chunk.length; i++){
-        //     stmt += ",?";
-        // }
-
-        // 10x faster string concatenation
         let stmt = build_params(chunk.length);
 
         promises.push(this.promisfy({
@@ -430,7 +422,7 @@ SqliteDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0
                        ${enrich ? ", doc" : ""}
                 FROM (
                     SELECT id, count(*) as count,
-                           ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
+                           ${suggest ? "SUM" : "SUM"}(res) as res
                     FROM main.ctx${this.field}
                     WHERE ${stmt}
                     GROUP BY id
@@ -445,36 +437,6 @@ SqliteDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0
             `,
             params
         });
-
-        // variant 1
-        // for(let i = 1; i < query.length; i++){
-        //     stmt += (stmt ? " UNION ALL " : "") + `
-        //         SELECT id, res
-        //         FROM main.ctx${this.field}
-        //         WHERE ctx = ? AND key = ?
-        //     `;
-        //     term = query[i];
-        //     const swap = flexsearch.bidirectional && (term > keyword);
-        //     params.push(swap ? term : keyword, swap ? keyword : term);
-        //     keyword = term;
-        // }
-        //
-        // rows = await this.promisfy({
-        //     method: "all",
-        //     stmt: `
-        //         SELECT id/*, res */
-        //         FROM (
-        //             SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-        //             FROM (${stmt}) as t
-        //             GROUP BY id
-        //             ORDER BY ${suggest ? "count DESC, res" : "res"}
-        //             LIMIT ${limit}
-        //             OFFSET ${offset}
-        //         ) as r
-        //         ${suggest ? "" : "WHERE count = " + (query.length - 1)}
-        //     `,
-        //     params
-        // });
     } else {
         let stmt = "",
             query_length = query.length;
@@ -499,7 +461,7 @@ SqliteDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0
                        ${enrich ? ", doc" : ""}
                 FROM (
                     SELECT id, count(*) as count,
-                           ${suggest ? "SUM" : "SUM" /*"MIN"*/}(res) as res
+                           ${suggest ? "SUM" : "SUM"}(res) as res
                     FROM main.map${this.field}
                     WHERE ${stmt}
                     GROUP BY id
@@ -514,32 +476,6 @@ SqliteDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0
             `,
             params: query
         });
-
-        // variant 1
-        // for(let i = 0; i < query.length; i++){
-        //     stmt += (stmt ? " UNION ALL " : "") + `
-        //         SELECT id, res
-        //         FROM main.map${ this.field }
-        //         WHERE key = ?
-        //     `;
-        // }
-        //
-        // rows = await this.promisfy({
-        //     method: "all",
-        //     stmt: `
-        //         SELECT id/*, res*/
-        //         FROM (
-        //              SELECT id, ${suggest ? "SUM" : "MIN"}(res) as res, count(*) as count
-        //              FROM (${stmt}) as t
-        //              GROUP BY id
-        //              ORDER BY ${suggest ? "count DESC, res" : "res"}
-        //              LIMIT ${limit}
-        //              OFFSET ${offset}
-        //          ) as r
-        //         ${ suggest ? "" : "WHERE count = " + query.length }
-        //     `,
-        //     params: query
-        // });
     }
 
     return rows.then(function (rows) {
@@ -547,9 +483,7 @@ SqliteDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0
     });
 };
 
-SqliteDB.prototype.info = function () {
-    // todo
-};
+SqliteDB.prototype.info = function () {};
 
 SqliteDB.prototype.transaction = async function (task, callback) {
 
@@ -580,17 +514,16 @@ SqliteDB.prototype.transaction = async function (task, callback) {
 
 SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
-    // process cleanup tasks
     if (_replace) {
         await this.clear();
-        // there are just removals in the task queue
+
         flexsearch.commit_task = [];
     } else {
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for (let i = 0, task; i < tasks.length; i++) {
             task = tasks[i];
-            // there are just removals in the task queue
+
             if (task.clear) {
                 await this.clear();
                 _replace = !0;
@@ -627,20 +560,16 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
                     for (let j = 0; j < ids.length; j++) {
                         stmt += (stmt ? "," : "") + "(?,?,?)";
                         params.push(key, i, ids[j]);
-                        // maximum count of variables supported
+
                         if (j === ids.length - 1 || params.length + 3 > MAXIMUM_QUERY_VARS) {
                             this.db.run("INSERT INTO main.map" + this.field + " (key, res, id) VALUES " + stmt, params);
                             stmt = "";
                             params = [];
                         }
-                        //this.db.run("INSERT INTO map (key, res, id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING", [key, i, ids[j]]);
                     }
                 }
             }
         }
-
-        //});
-        //await this.transaction(function(){
 
         for (const ctx of flexsearch.ctx) {
             const ctx_key = ctx[0],
@@ -661,7 +590,7 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
                         for (let j = 0; j < ids.length; j++) {
                             stmt += (stmt ? "," : "") + "(?,?,?,?)";
                             params.push(ctx_key, key, i, ids[j]);
-                            // maximum count of variables supported
+
                             if (j === ids.length - 1 || params.length + 4 > MAXIMUM_QUERY_VARS) {
                                 this.db.run("INSERT INTO main.ctx" + this.field + " (ctx, key, res, id) VALUES " + stmt, params);
                                 stmt = "";
@@ -672,8 +601,6 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 }
             }
         }
-        //});
-        //await this.transaction(function(){
 
         if (flexsearch.store) {
             let stmt = "",
@@ -703,8 +630,6 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 this.db.run("INSERT INTO main.reg (id) VALUES " + stmt, chunk);
             }
         }
-        //});
-        //await this.transaction(function(){
 
         if (flexsearch.tag) {
             let stmt = "",
@@ -731,25 +656,6 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
         }
     });
 
-    // TODO
-    //await this.transaction(function(){
-    //     this.db.run("INSERT INTO main.cfg" + this.field + " (cfg) VALUES (?)", [JSON.stringify({
-    //         "charset": flexsearch.charset,
-    //         "tokenize": flexsearch.tokenize,
-    //         "resolution": flexsearch.resolution,
-    //         "fastupdate": flexsearch.fastupdate,
-    //         "compress": flexsearch.compress,
-    //         "encoder": {
-    //             "minlength": flexsearch.encoder.minlength
-    //         },
-    //         "context": {
-    //             "depth": flexsearch.depth,
-    //             "bidirectional": flexsearch.bidirectional,
-    //             "resolution": flexsearch.resolution_ctx
-    //         }
-    //     })]);
-    //});
-
     flexsearch.map.clear();
     flexsearch.ctx.clear();
     flexsearch.tag && flexsearch.tag.clear();
@@ -764,7 +670,7 @@ SqliteDB.prototype.remove = function (ids) {
     }
 
     let next;
-    // maximum count of variables supported
+
     if (ids.length > MAXIMUM_QUERY_VARS) {
         next = ids.slice(MAXIMUM_QUERY_VARS);
         ids = ids.slice(0, MAXIMUM_QUERY_VARS);

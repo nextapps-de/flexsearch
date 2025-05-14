@@ -9,7 +9,6 @@ var pg_promise = require('pg-promise');
  * @return {*}
  */
 
-
 function concat(arrays){
     return [].concat.apply([], arrays);
 }

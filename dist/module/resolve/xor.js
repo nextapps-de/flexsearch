@@ -58,7 +58,7 @@ function return_result(final, promises, limit, offset, enrich, resolve, suggest)
     if (!final.length) {
         if (!suggest) this.result = /** @type {SearchResults|IntermediateSearchResults} */final;
     } else {
-        //this.result.length && (final = [this.result].concat(final));
+
         this.result.length && final.unshift(this.result);
 
         if (2 > final.length) {
@@ -85,10 +85,6 @@ function return_result(final, promises, limit, offset, enrich, resolve, suggest)
  */
 
 function exclusive(result, limit, offset, resolve, boost) {
-
-    // if(!result.length){
-    //     return result;
-    // }
 
     /** @type {SearchResults|IntermediateSearchResults} */
     const final = [],
@@ -135,7 +131,7 @@ function exclusive(result, limit, offset, resolve, boost) {
                             return final;
                         }
                     } else {
-                        // shift resolution by boost (inverse)
+
                         const index = j + (i ? boost : 0);
                         final[index] || (final[index] = []);
                         final[index].push(id);

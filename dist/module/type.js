@@ -1,5 +1,4 @@
-// When you are looking for type definitions which fully describes the usage take a look into the index.d.ts file.
-// Some of the types here aren't supposed to be used as public, they might be defined just for internal state.
+
 
 import Index from "./index.js";
 import Encoder from "./encoder.js";
@@ -193,9 +192,10 @@ export let EnrichedDocumentSearchResults = [];
 /**
  * @typedef {{
  *   id: (number|string),
- *   doc: (Object|null),
+ *   doc: (Object|null|undefined),
  *   field: (Array<string>|undefined),
- *   tag: (Array<string>|undefined)
+ *   tag: (Array<string>|undefined),
+ *   highlight: (Object<string, string>|undefined)
  * }}
  */
 export let MergedDocumentSearchEntry = {};

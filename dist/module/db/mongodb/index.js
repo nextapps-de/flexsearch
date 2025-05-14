@@ -40,17 +40,13 @@ export default function MongoDB(name, config = {}) {
     this.type = config.type || "";
     this.db = config.db || Index[this.id] || CLIENT || null;
     this.trx = !1;
-    this.support_tag_search = /* tag? */!0 /*await rows.hasNext()*/ /*await rows.hasNext()*/ /*await rows.hasNext()*/;
+    this.support_tag_search = !0;
     Object.assign(defaults, config);
     this.db && delete defaults.db;
 }
 
-// MongoDB.mount = function(flexsearch){
-//     return new this().mount(flexsearch);
-// };
-
 MongoDB.prototype.mount = function (flexsearch) {
-    //if(flexsearch.constructor === Document){
+
     if (flexsearch.index) {
         return flexsearch.mount(this);
     }
@@ -124,7 +120,7 @@ MongoDB.prototype.open = async function () {
 };
 
 MongoDB.prototype.close = function () {
-    //CLIENT && CLIENT.close();
+
     this.db = CLIENT = null;
     Index[this.id] = null;
     return this;
@@ -291,7 +287,7 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
         const stmt = [{ $match: { $or: params } }, { $group: {
                 _id: "$id",
                 count: { $sum: 1 },
-                res: suggest ? { $sum: "$res" } : { $sum /*$min*/: "$res" }
+                res: suggest ? { $sum: "$res" } : { $sum: "$res" }
             } }];
 
         suggest || stmt.push({ $match: { count: query.length - 1 } });
@@ -324,18 +320,10 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
                 count++;
             }
 
-            stmt.push(
-            //{ $project: project },
-            { $match: match });
+            stmt.push({ $match: match });
         }
 
         stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 } }, { $skip: offset }, { $limit: limit });
-
-        // if(tags){
-        //     project = { _id: 1 };
-        //     if(!resolve) project["res"] = 1;
-        //     if(enrich) project["doc"] = 1;
-        // }
 
         stmt.push({ $project: project });
 
@@ -351,7 +339,7 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
             } }, { $group: {
                 _id: "$id",
                 count: { $sum: 1 },
-                res: suggest ? { $sum: "$res" } : { $sum /*$min*/: "$res" }
+                res: suggest ? { $sum: "$res" } : { $sum: "$res" }
             } }];
 
         suggest || stmt.push({ $match: { count: query.length } });
@@ -384,18 +372,10 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
                 count++;
             }
 
-            stmt.push(
-            //{ $project: project },
-            { $match: match });
+            stmt.push({ $match: match });
         }
 
         stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 } }, { $skip: offset }, { $limit: limit });
-
-        // if(tags){
-        //     project = { _id: 1 };
-        //     if(!resolve) project["res"] = 1;
-        //     if(enrich) project["doc"] = 1;
-        // }
 
         stmt.push({ $project: project });
 
@@ -422,28 +402,25 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
     }
 };
 
-MongoDB.prototype.info = function () {
-    // todo
-};
+MongoDB.prototype.info = function () {};
 
 MongoDB.prototype.transaction = function (task) {
-    // not supported
+
     return task.call(this);
 };
 
 MongoDB.prototype.commit = async function (flexsearch, _replace, _append) {
 
-    // process cleanup tasks
     if (_replace) {
         await this.clear();
-        // there are just removals in the task queue
+
         flexsearch.commit_task = [];
     } else {
         let tasks = flexsearch.commit_task;
         flexsearch.commit_task = [];
         for (let i = 0, task; i < tasks.length; i++) {
             task = tasks[i];
-            // there are just removals in the task queue
+
             if (task.clear) {
                 await this.clear();
                 _replace = !0;
@@ -559,23 +536,6 @@ MongoDB.prototype.commit = async function (flexsearch, _replace, _append) {
     flexsearch.tag && flexsearch.tag.clear();
     flexsearch.store && flexsearch.store.clear();
     flexsearch.document || flexsearch.reg.clear();
-
-    // TODO
-    // await this.db.collection("cfg" + this.field).insertOne({
-    //     "encode": typeof flexsearch.encode === "string" ? flexsearch.encode : "",
-    //     "charset": typeof flexsearch.charset === "string" ? flexsearch.charset : "",
-    //     "tokenize": flexsearch.tokenize,
-    //     "resolution": flexsearch.resolution,
-    //     "minlength": flexsearch.minlength,
-    //     "optimize": flexsearch.optimize,
-    //     "fastupdate": flexsearch.fastupdate,
-    //     "encoder": flexsearch.encoder,
-    //     "context": {
-    //         "depth": flexsearch.depth,
-    //         "bidirectional": flexsearch.bidirectional,
-    //         "resolution": flexsearch.resolution_ctx
-    //     }
-    // });
 };
 
 MongoDB.prototype.remove = function (ids) {
@@ -584,10 +544,6 @@ MongoDB.prototype.remove = function (ids) {
     if ("object" != typeof ids) {
         ids = [ids];
     }
-
-    // if(this.type !== "string" && typeof ids[0] !== "number"){
-    //     ids = ids.map(item => parseInt(item, 10));
-    // }
 
     return Promise.all([this.db.collection("map" + this.field).deleteMany({ id: { $in: ids } }), this.db.collection("ctx" + this.field).deleteMany({ id: { $in: ids } }), this.db.collection("tag" + this.field).deleteMany({ id: { $in: ids } }), this.db.collection("reg").deleteMany({ id: { $in: ids } })]);
 };
