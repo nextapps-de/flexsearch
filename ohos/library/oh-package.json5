@@ -1,0 +1,25 @@
+{
+  "types": "./index.d.ts",
+  "keywords": [
+    "fulltext search",
+    "elastic search",
+    "contextual search",
+    "document search",
+    "OpenHarmony"
+  ],
+  "author": "ohos_tpc",
+  "description": "Next-Generation full text search library with zero dependencies for ohos.",
+  "ohos": {
+    "org": "opensource"
+  },
+  "main": "./src/flexsearch.js",
+  "repository": "https://gitcode.com/openharmony-tpc/flexsearch-ohos",
+  "version": "2.0.1",
+  "tags": [
+    "Tool"
+  ],
+  "dependencies": {},
+  "license": "Apache-2.0",
+  "devDependencies": {},
+  "name": "@ohos/flexsearch"
+}
