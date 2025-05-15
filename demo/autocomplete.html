@@ -32,15 +32,16 @@
             background-color: transparent;
             position: absolute;
             -webkit-appearance: none;
+            z-index: 1;
         }
         #autocomplete{
             color: #999;
             background-color: #f5f5f5;
             pointer-events: none;
         }
-        #trigger-prev,
-        #trigger-next{
-            z-index: -1;
+        #select-prev,
+        #select-next{
+            z-index: 0;
         }
         input{
             padding:7px 5px;
@@ -90,17 +91,17 @@
 <body>
 <div id="header">
     <form style="position: relative; width: 100%;">
-        <input type="text" id="trigger-prev" tabindex="1">
+        <input type="text" id="select-prev" tabindex="1">
         <input type="text" id="autocomplete" readonly>
         <input type="text" id="userinput" tabindex="2" placeholder="Search by movie title ..." autocorrect="off" spellcheck="false" autocomplete="off" autofocus>
-        <input type="text" id="trigger-next" tabindex="3">
+        <input type="text" id="select-next" tabindex="3">
     </form>
     <label>
         <input type="checkbox" id="suggest" checked> Suggest
     </label>
 </div>
+<!-- Iterate through results by arrow keys -->
 <div id="suggestions"></div>
-<!--<div id="info">iterate results by arrow keys</div>-->
 <script type="module">
 
     // Features:
@@ -120,9 +121,6 @@
     // for "Result Highlighting" it requires the usage of a Document Index
     // also when just adding id-content-pairs to a single index
     const index = new Document({
-        // the cache is a perfect addition
-        // for an instant search on keypress
-        cache: true,
         document: {
             // storing documents is required in this example
             store: true,
@@ -150,8 +148,8 @@
     const autocomplete = document.getElementById("autocomplete");
     const userinput = document.getElementById("userinput");
     const suggest = document.getElementById("suggest");
-    const trigger_prev = document.getElementById("trigger-prev");
-    const trigger_next = document.getElementById("trigger-next");
+    const select_prev = document.getElementById("select-prev");
+    const select_next = document.getElementById("select-next");
     let results = [];
     let iterate = 0;
 
@@ -161,12 +159,12 @@
     suggest.addEventListener("change", toggle_suggest, true);
     suggestions.addEventListener("click", accept_suggestion, true);
 
-    trigger_prev.addEventListener("focus", function(){
+    select_prev.addEventListener("focus", function(){
         iterate_selected({ key: "ArrowUp" });
         userinput.focus();
     }, true);
 
-    trigger_next.addEventListener("focus", function(){
+    select_next.addEventListener("focus", function(){
         iterate_selected({ key: "ArrowDown" });
         userinput.focus();
     }, true);
@@ -179,6 +177,9 @@
     }
 
     function show_results(){
+
+        // the cache is a perfect addition
+        // for an instant search on keypress
 
         results = index.searchCache({
             query: userinput.value,

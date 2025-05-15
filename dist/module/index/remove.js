@@ -14,14 +14,16 @@ Index.prototype.remove = function (id, _skip_deletion) {
 
         if (this.fastupdate) {
 
-            for (let i = 0, tmp; i < refs.length; i++) {
-                if (tmp = refs[i]) {
+            for (let i = 0, tmp, len; i < refs.length; i++) {
+                if ((tmp = refs[i]) && (len = tmp.length)) {
 
-                    if (2 > tmp.length) {
+                    if (tmp[len - 1] === id) {
                         tmp.pop();
                     } else {
                         const index = tmp.indexOf(id);
-                        index === refs.length - 1 ? tmp.pop() : tmp.splice(index, 1);
+                        if (0 <= index) {
+                            tmp.splice(index, 1);
+                        }
                     }
                 }
             }
@@ -69,12 +71,12 @@ export function remove_index(map, id) {
                         if (1 < arr.length) {
                             arr.splice(index, 1);
                             count++;
+
+                            break;
                         } else {
 
                             delete map[x];
                         }
-
-                        break;
                     } else {
                         count++;
                     }
@@ -86,7 +88,7 @@ export function remove_index(map, id) {
               value = item[1],
               tmp = remove_index(value, id);
 
-        tmp ? count += tmp : map.delete(key);
+        tmp ? count++ : map.delete(key);
     }
 
     return count;

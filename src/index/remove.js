@@ -25,23 +25,24 @@ Index.prototype.remove = function(id, _skip_deletion){
 
             // fast updates did not fully clean up the key entries
 
-            for(let i = 0, tmp; i < refs.length; i++){
-                if((tmp = refs[i])){
+            for(let i = 0, tmp, len; i < refs.length; i++){
+                if((tmp = refs[i]) && (len = tmp.length)){
                     // todo check
                     //if(tmp.length < 1) throw new Error("invalid length");
                     //if(tmp.indexOf(id) < 0) throw new Error("invalid id");
-                    if(tmp.length < 2){
+                    if(tmp[len - 1] === id){
                         tmp.pop();
                     }
                     else{
                         const index = tmp.indexOf(id);
-                        index === refs.length - 1
-                            ? tmp.pop()
-                            : tmp.splice(index, 1);
+                        if(index >= 0){
+                            tmp.splice(index, 1);
+                        }
                     }
                 }
                 else{
                     // todo investigate empty entries
+                    // console.log(tmp)
                 }
             }
 
@@ -137,13 +138,13 @@ export function remove_index(map, id){
                         if(arr.length > 1){
                             arr.splice(index, 1);
                             count++;
+                            // the index key:[res, id] is unique
+                            break;
                         }
                         else{
                             // remove resolution slot
                             delete map[x];
                         }
-                        // the index key:[res, id] is unique
-                        break;
                     }
                     else{
                         count++;
@@ -156,7 +157,7 @@ export function remove_index(map, id){
         const key = item[0];
         const value = item[1];
         const tmp = remove_index(value, id);
-        tmp ? count += tmp
+        tmp ? count++ //count += tmp
             : map.delete(key);
     }
 

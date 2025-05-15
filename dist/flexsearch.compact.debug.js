@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.166 (Bundle/Debug)
+ * FlexSearch.js v0.8.167 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1220,13 +1220,13 @@ Z.prototype.remove = function(a, c) {
   const b = this.reg.size && (this.fastupdate ? this.reg.get(a) : this.reg.has(a));
   if (b) {
     if (this.fastupdate) {
-      for (let e = 0, d; e < b.length; e++) {
-        if (d = b[e]) {
-          if (2 > d.length) {
+      for (let e = 0, d, f; e < b.length; e++) {
+        if ((d = b[e]) && (f = d.length)) {
+          if (d[f - 1] === a) {
             d.pop();
           } else {
-            const f = d.indexOf(a);
-            f === b.length - 1 ? d.pop() : d.splice(f, 1);
+            const g = d.indexOf(a);
+            0 <= g && d.splice(g, 1);
           }
         }
       }
@@ -1248,8 +1248,13 @@ function Sa(a, c) {
           b++;
         } else {
           if (g = f.indexOf(c), 0 <= g) {
-            1 < f.length ? (f.splice(g, 1), b++) : delete a[d];
-            break;
+            if (1 < f.length) {
+              f.splice(g, 1);
+              b++;
+              break;
+            } else {
+              delete a[d];
+            }
           } else {
             b++;
           }
@@ -1258,9 +1263,7 @@ function Sa(a, c) {
     }
   } else {
     for (let d of a.entries()) {
-      e = d[0];
-      const f = Sa(d[1], c);
-      f ? b += f : a.delete(e);
+      e = d[0], Sa(d[1], c) ? b++ : a.delete(e);
     }
   }
   return b;
