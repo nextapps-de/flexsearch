@@ -55,9 +55,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
+    - run: npm install
     - run: npm run build:bundle --if-present
-    - run: npm ci
+    - run: npm install
       working-directory: test
     - run: npm run test:github
       working-directory: test
