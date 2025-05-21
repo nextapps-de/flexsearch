@@ -162,6 +162,8 @@ const result = new Resolver({
 .resolve(100);
 ```
 
+## Async Resolver
+
 ### Using Async Queries (incl. Runtime Balancer)
 
 All async tasks will run in parallel, balanced by the runtime observer:
@@ -207,6 +209,22 @@ const resolver = await new Resolver({
 ```
 
 When tasks are processed consecutively, it will skip specific resolver stages when there is no result expected.
+
+### Compare Parallel VS. Consecutive
+
+When using the parallel workflow, all resolver stages will send their requests (including nested tasks) to the DB immediately and calculate the results in the right order as soon as the request resolves. When the overall workload of your applications has some free resources, a parallel request workflow improves performance compared to the consecutive counterpart. 
+
+<p align="center">
+    <img src="resolver-parallel.svg" width="100%">
+</p>
+
+---
+
+When using the consecutive workflow, all resolver stages will send their requests (including nested tasks) to the DB only when the previous request resolves. The advantage of this variant is when a stage becomes invalid because of the previous result, it can skip the request completely and continue with the next stage. This can reduce the overall workload.
+
+<p align="center">
+    <img src="resolver-consecutive.svg" width="100%">
+</p>
 
 <!--
 ### Custom Resolver
