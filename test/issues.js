@@ -1,5 +1,5 @@
 global.self = global;
-const env = process.argv[3] && process.argv[3] === "--exit" ? process.argv[4] : process.argv[3];
+const env = process.argv[process.argv.length - 1];
 import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
@@ -454,5 +454,44 @@ describe("Github Issues", function(){
         expect(
             flexSearchService.searchDocuments({ query: 'Floor' })
         ).to.eql([]);
+    });
+
+    if(!build_light) it("#504", function(){
+
+        const searchIndex = new Document({
+            tokenize: "forward",
+            document: {
+                id: "id",
+                index: ["name", "shortName"],
+                store: true,
+            },
+        });
+
+        searchIndex.add({
+            id: 1,
+            name: "name",
+            shortName: "" // empty
+        });
+
+        searchIndex.add({
+            id: 2,
+            name: "another name",
+            //shortName: undefined
+        });
+
+        searchIndex.add({
+            id: 3,
+            //name: undefined,
+            shortName: "short name"
+        });
+
+        const result = searchIndex.search({
+            query: "name"
+        });
+
+        expect(result).to.eql([
+            { field: 'name', result: [ 1, 2 ] },
+            { field: 'shortName', result: [ 3 ] }
+        ]);
     });
 });
