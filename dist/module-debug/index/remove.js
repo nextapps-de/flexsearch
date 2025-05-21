@@ -60,24 +60,29 @@ export function remove_index(map, id) {
 
 
     if (is_array(map)) {
-        for (let x = 0, arr, index; x < map.length; x++) {
+        for (let x = 0, arr, index, found; x < map.length; x++) {
             if ((arr = map[x]) && arr.length) {
                 if ("undefined" == typeof id) {
-
-                    count++;
+                    return 1;
                 } else {
                     index = arr.indexOf(id);
                     if (0 <= index) {
                         if (1 < arr.length) {
                             arr.splice(index, 1);
-                            count++;
 
-                            break;
+                            return 1;
                         } else {
 
                             delete map[x];
+                            if (count) {
+                                return 1;
+                            }
+                            found = 1;
                         }
                     } else {
+                        if (found) {
+                            return 1;
+                        }
                         count++;
                     }
                 }

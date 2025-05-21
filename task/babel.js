@@ -69,6 +69,9 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
             if(file.endsWith(".js")){
                 let src = fs.readFileSync("src/" + path + "/" + file, "utf8");
                 src = src.replace(/\/\/ COMPILER BLOCK -->(.*)<-- COMPILER BLOCK/gs, "");
+                if(path.startsWith("db/")){
+                    src = src.replace(/import \{[^}]+} from "\.\.\/(\.\.\/)?type\.js";/, '');
+                }
                 if(file === "handler.js"){
                     // add the eval wrapper
                     src = src.replace('options=(await import(filepath))["default"];', '//options=(await import(filepath))["default"];');
@@ -85,10 +88,6 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
             }
         });
     }
-
-    let content = fs.readFileSync("tmp/db/interface.js", "utf8");
-    content = content.replace(/import \{([^}]+)} from "\.\.\/type\.js";/, '');
-    fs.writeFileSync("tmp/db/interface.js", content);
 
     //fs.copyFileSync("src/db/interface.js", "tmp/db/interface.js");
     fs.copyFileSync("task/babel." + (debug ? "debug": (minify ? "min" : "bundle")) + ".json", "tmp/.babelrc");

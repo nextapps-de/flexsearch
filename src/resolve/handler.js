@@ -1,6 +1,7 @@
 // COMPILER BLOCK -->
 import {
     DEBUG,
+    SUPPORT_ASYNC,
     SUPPORT_DOCUMENT,
     SUPPORT_HIGHLIGHTING,
     SUPPORT_STORE
@@ -10,54 +11,67 @@ import Resolver from "../resolver.js";
 import {
     ResolverOptions,
     SearchResults,
+    EnrichedSearchResults,
     IntermediateSearchResults
 } from "../type.js";
 
 /**
- * @param {string} fn
- * @param {Array<ResolverOptions|Promise<ResolverOptions>>|Arguments} args
+ * @param {string} method
+ * @param {Function} fn
+ * @param {Array<ResolverOptions>|Arguments} args
+ * @return {
+ *   SearchResults |
+ *   EnrichedSearchResults |
+ *   IntermediateSearchResults |
+ *   Promise<SearchResults | EnrichedSearchResults | IntermediateSearchResults> |
+ *   Resolver
+ * }
  */
-Resolver.prototype.handler = function(fn, args){
+Resolver.prototype.handler = function(method, fn, args){
 
-    /** @type {ResolverOptions|Promise<ResolverOptions>} */
-    let first_argument = args[0];
-
-    if(first_argument.then){
-        const self = this;
-        // todo: check when this branch was taken
-        // instead of Promise.all the args[] array could be reduced
-        // by iterate recursively one by one
-        return Promise.all(args).then(function(args){
-            return self[fn].apply(self, args);
-        });
+    /** @type {ResolverOptions} */
+    let arg = args[0];
+    // detect array parameter style
+    if(arg[0] && arg[0].query){
+        return this[method].apply(this, arg);
     }
 
-    if(first_argument[0]){
-        // detect array parameter style
-        if(first_argument[0].index){
-            return this[fn].apply(this, first_argument);
+    // skip tasks on specific conditions
+    if(method === "and" || method === "not") {
+        let execute = this.result.length || this.await;
+        let resolve;
+        if(!execute){
+            if(!arg.suggest){
+                if(args.length > 1){
+                    arg = args[args.length - 1];
+                }
+                resolve = arg.resolve;
+                return resolve
+                    ? this.await || this.result
+                    : this;
+            }
         }
     }
 
-    /** @type {SearchResults|IntermediateSearchResults} */
+    const self = this;
+    /** @type {!Array<IntermediateSearchResults|Promise<IntermediateSearchResults>>} */
     let final = [];
-    /** @type {Array<Promise<SearchResults|IntermediateSearchResults>>} */
-    let promises = [];
     let limit = 0, offset = 0, enrich, resolve, suggest, highlight, highlight_query;
+    let async;
 
-    for(let i = 0, query; i < args.length; i++){
+    for(let i = 0; i < args.length; i++){
 
-        query = /** @type {string|ResolverOptions} */ (
-            args[i]
-        );
+        /** @type {ResolverOptions} */
+        let query = args[i];
 
         if(query){
 
             let result;
+
             if(query.constructor === Resolver){
-                result = query.result;
+                result = query.await || query.result;
             }
-            else if(query.constructor === Array){
+            else if(query.then || query.constructor === Array){
                 result = query;
             }
             else{
@@ -68,10 +82,12 @@ Resolver.prototype.handler = function(fn, args){
                 resolve = query.resolve;
                 highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && query.highlight && resolve;
                 enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && highlight || (query.enrich && resolve);
-                let index;
+                let opt_queue = SUPPORT_ASYNC && query.queue;
+                let opt_async = SUPPORT_ASYNC && (query.async || opt_queue);
+                let index = query.index;
 
-                if(query.index){
-                    this.index = index = query.index;
+                if(index){
+                    this.index || (this.index = index);
                 }
                 else{
                     index = this.index;
@@ -105,57 +121,162 @@ Resolver.prototype.handler = function(fn, args){
                         }
                     }
 
-                    query.resolve = false;
-                    //if(DEBUG)
-                    //query.enrich = false;
-                    result = index.search(query).result;
-                    query.resolve = resolve;
-                    //if(DEBUG)
-                    //query.enrich = enrich;
+                    if(opt_queue && (async || this.await)){
+                        async = 1;
+
+                        // create a new promise for the main queue
+                        // the promise return is controlled internally
+                        let resolve;
+                        const idx = this.promises.length;
+                        const promise = new Promise(function(_resolve){
+                            resolve = _resolve;
+                        });
+
+                        (function(index, query){
+
+                            promise._fn = function(){
+                                query.index = null;
+                                query.resolve = false;
+                                let result = opt_async
+                                    ? index.searchAsync(query)
+                                    : index.search(query);
+                                if(result.then){
+                                    return result.then(function(result){
+                                        self.promises[idx] = result = result.result || result;
+                                        resolve(result);
+                                        return result;
+                                    });
+                                }
+                                result = result.result || result;
+                                resolve(result);
+                                return result;
+                            }
+
+                        }(index, Object.assign({}, /** @type Object */ (query))));
+
+                        this.promises.push(promise);
+                        final[i] = promise;
+                        continue;
+                    }
+                    else {
+                        query.resolve = false;
+                        query.index = null;
+
+                        result = opt_async
+                            ? index.searchAsync(query)
+                            : index.search(query);
+
+                        query.resolve = resolve;
+                        query.index = index;
+                    }
 
                     if(highlight){
                         highlight_query = query.query;
                     }
                 }
                 else if(query.and){
-                    result = this["and"](query.and);
+                    result = inner_call(query, "and", index);
                 }
                 else if(query.or){
-                    result = this["or"](query.or);
-                }
-                else if(query.xor){
-                    result = this["xor"](query.xor);
+                    result = inner_call(query, "or", index);
                 }
                 else if(query.not){
-                    result = this["not"](query.not);
+                    result = inner_call(query, "not", index);
+                }
+                else if(query.xor){
+                    result = inner_call(query, "xor", index);
                 }
                 else{
                     continue;
                 }
             }
 
-            if(result.then){
-                promises.push(result);
+            if(result.await){
+                async = 1;
+                result = result.await;
             }
-            else if(result.length){
-                final[i] = result;
+            else if(result.then){
+                async = 1;
+                result = result.then(function(result){
+                    return result.result || result;
+                });
             }
-            else if(!suggest && (fn === "and" || fn === "xor")){
-                final = [];
-                break;
+            else{
+                result = result.result || result;
             }
+
+            final[i] = result;
         }
     }
 
-    return {
-        final,
-        promises,
-        limit,
-        offset,
-        enrich,
-        resolve,
-        suggest,
-        highlight,
-        highlight_query
-    };
+    if(async && !this.await){
+        this.await = new Promise(function(resolve){
+            self.return = resolve;
+        });
+    }
+
+    if(async){
+
+        const promises = Promise.all(final).then(function(final){
+            for(let i = 0; i < self.promises.length; i++){
+                if(self.promises[i] === promises){
+                    self.promises[i] = function(){
+                        return fn.call(self,
+                            final,
+                            limit,
+                            offset,
+                            enrich,
+                            resolve,
+                            suggest
+                        )
+                    };
+                    break;
+                }
+            }
+            self.execute();
+        });
+        this.promises.push(promises);
+    }
+    else if(this.await){
+
+        this.promises.push(function(){
+            return fn.call(self,
+                final,
+                limit,
+                offset,
+                enrich,
+                resolve,
+                suggest
+            );
+        });
+    }
+    else{
+
+        return fn.call(this,
+            final,
+            limit,
+            offset,
+            enrich,
+            resolve,
+            suggest
+        );
+    }
+
+    return resolve
+        ? this.await || this.result
+        : this;
+}
+
+function inner_call(query, method, index){
+
+    const args = query[method];
+    const arg = args[0] || args;
+    arg.index || (arg.index = index);
+
+    let resolver = new Resolver(arg);
+    if(args.length > 1){
+        resolver = resolver[method].apply(resolver, args.slice(1));
+    }
+
+    return resolver;
 }

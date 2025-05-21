@@ -1,11 +1,14 @@
 // COMPILER BLOCK -->
 import {
+    DEBUG,
     SUPPORT_ASYNC,
+    SUPPORT_CACHE,
     SUPPORT_WORKER
 } from "./config.js";
 // <-- COMPILER BLOCK
 import { IndexOptions } from "./type.js";
 import { create_object } from "./common.js";
+import { searchCache } from "./cache.js";
 import handler from "./worker/handler.js";
 import apply_async from "./async.js";
 import Encoder from "./encoder.js";
@@ -47,6 +50,9 @@ export default function WorkerIndex(options = /** @type IndexOptions */ ({}), en
         this.resolver = create_object();
 
         if(!this.worker){
+            if(DEBUG){
+                console.warn("Worker is not available on this platform. Please report on Github: https://github.com/nextapps-de/flexsearch/issues");
+            }
             return;
         }
 
@@ -66,15 +72,13 @@ export default function WorkerIndex(options = /** @type IndexOptions */ ({}), en
 
         if(options.config){
 
-            // when extern configuration needs to be loaded
+            // when extern configuration needs to be loaded,
             // it needs to return a promise to await for
             return new Promise(function(resolve){
-
+                if(pid > 1e9) pid = 0;
                 _self.resolver[++pid] = function(){
                     resolve(_self);
-                    if(pid > 1e9) pid = 0;
                 };
-
                 _self.worker.postMessage({
                     "id": pid,
                     "task": "init",
@@ -114,12 +118,15 @@ if(SUPPORT_WORKER){
     register("add");
     register("append");
     register("search");
-    register("searchCache");
     register("update");
     register("remove");
     register("clear");
     register("export");
     register("import");
+
+    if(SUPPORT_CACHE){
+        WorkerIndex.prototype.searchCache = searchCache;
+    }
 
     if(SUPPORT_ASYNC){
         apply_async(WorkerIndex.prototype);
@@ -145,6 +152,7 @@ function register(key){
                 // remove function handler
                 args[0] = null;
             }
+            if(pid > 1e9) pid = 0;
             self.resolver[++pid] = resolve;
             self.worker.postMessage({
                 "task": key,
@@ -165,20 +173,18 @@ function register(key){
 
 function create(factory, is_node_js, worker_path){
 
-    let worker
-
-    worker = is_node_js ?
-            // if anyone asks me what JS has delivered the past 10 years,
-            // those are the lines I definitively show up first ^^
-            typeof module !== "undefined"
-                // This eval will be removed when compiling
-                // The issue is that this will not build by Closure Compiler
-                ? (0,eval)('new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js")')
-                // this will need to remove in CommonJS builds,
-                // otherwise the module is treated as ESM by Node.js automatic detection
-                // the path src/worker/node.mjs is located at dist/node/node.mjs
-                // The issue is that this will not build by Babel Compiler
-                : import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/worker/node.mjs")})
+    return is_node_js ?
+        // if anyone asks me what JS has delivered the past 10 years,
+        // those are the lines I definitively show up first ^^
+        typeof module !== "undefined"
+            // This eval will be removed when compiling
+            // The issue is that this will not build by Closure Compiler
+            ? (0,eval)('new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js")')
+            // this will need to remove in CommonJS builds,
+            // otherwise the module is treated as ESM by Node.js automatic detection
+            // the path src/worker/node.mjs is located at dist/node/node.mjs
+            // The issue is that this will not build by Babel Compiler
+            : import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/worker/node.mjs")})
     :(
         factory ?
             new window.Worker(URL.createObjectURL(
@@ -197,6 +203,4 @@ function create(factory, is_node_js, worker_path){
                 , { type: "module" }
             )
     );
-
-    return worker;
 }

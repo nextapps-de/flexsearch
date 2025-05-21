@@ -1,26 +1,13 @@
 import Resolver from "../resolver.js";
 import { SearchResults, EnrichedSearchResults, IntermediateSearchResults } from "../type.js";
-import { apply_enrich } from "../document/search.js";
 
 /** @this {Resolver} */
 Resolver.prototype.not = function () {
-
-    const {
-        final,
-        promises,
-        limit,
-        offset,
-        enrich,
-        resolve,
-        suggest
-    } = this.handler("not", arguments);
-
-    return return_result.call(this, final, promises, limit, offset, enrich, resolve, suggest);
+    return this.handler("not", return_result, arguments);
 };
 
 /**
  * @param {!Array<IntermediateSearchResults>} final
- * @param {!Array<Promise<IntermediateSearchResults>>} promises
  * @param {number} limit
  * @param {number=} offset
  * @param {boolean=} enrich
@@ -35,31 +22,24 @@ Resolver.prototype.not = function () {
  *   Resolver
  * }
  */
+function return_result(final, limit, offset, enrich, resolve, suggest) {
 
-function return_result(final, promises, limit, offset, enrich, resolve, suggest) {
-
-    if (promises.length) {
-        const self = this;
-        return Promise.all(promises).then(function (result) {
-
-            final = [];
-            for (let i = 0, tmp; i < result.length; i++) {
-                if ((tmp = result[i]).length) {
-                    final[i] = tmp;
-                }
-            }
-
-            return return_result.call(self, final, [], limit, offset, enrich, resolve, suggest);
-        });
+    if (!suggest && !this.result.length) {
+        return resolve ? this.result : this;
     }
+
+    let resolved;
 
     if (final.length && this.result.length) {
         this.result = exclusion.call(this, final, limit, offset, resolve);
-    } else if (resolve) {
-        return this.resolve(limit, offset, enrich);
+        resolved = !0;
     }
 
-    return resolve ? enrich ? apply_enrich.call(this.index, this.result) : this.result : this;
+    if (resolve) {
+        this.await = null;
+    }
+
+    return resolve ? this.resolve(limit, offset, enrich, resolved) : this;
 }
 
 /**
@@ -70,7 +50,6 @@ function return_result(final, promises, limit, offset, enrich, resolve, suggest)
  * @this {Resolver}
  * @return {SearchResults|IntermediateSearchResults}
  */
-
 function exclusion(result, limit, offset, resolve) {
 
     /** @type {SearchResults|IntermediateSearchResults} */

@@ -47,6 +47,8 @@ Index.prototype.remove = function(id, _skip_deletion){
             }
 
             // todo variation which cleans up, requires to push [ctx, key] instead of arr to the index.reg
+            //      for some reason pushing [ctx, key] as reference will increase memory drastically
+            // todo test again by using set.add(ref) instead of [ref]
             // for(let i = 0, arr, term, keyword; i < refs.length; i++){
             //     arr = refs[i];
             //     if(typeof arr === "string"){
@@ -126,27 +128,32 @@ export function remove_index(map, id){
     let cleanup = typeof id === "undefined";
 
     if(is_array(map)){
-        for(let x = 0, arr, index; x < map.length; x++){
+        for(let x = 0, arr, index, found; x < map.length; x++){
             if((arr = map[x]) && arr.length){
                 if(cleanup){
-                    //count += arr.length;
-                    count++;
+                    return 1;
                 }
                 else{
                     index = arr.indexOf(id);
                     if(index >= 0){
                         if(arr.length > 1){
                             arr.splice(index, 1);
-                            count++;
                             // the index key:[res, id] is unique
-                            break;
+                            return 1;
                         }
                         else{
                             // remove resolution slot
                             delete map[x];
+                            if(count){
+                                return 1;
+                            }
+                            found = 1;
                         }
                     }
                     else{
+                        if(found){
+                            return 1;
+                        }
                         count++;
                     }
                 }
@@ -157,7 +164,7 @@ export function remove_index(map, id){
         const key = item[0];
         const value = item[1];
         const tmp = remove_index(value, id);
-        tmp ? count++ //count += tmp
+        tmp ? count++
             : map.delete(key);
     }
 

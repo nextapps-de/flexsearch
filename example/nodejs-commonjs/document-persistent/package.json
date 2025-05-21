@@ -1,7 +1,7 @@
 {
   "name": "nodejs-commonjs-document-persistent",
   "dependencies": {
-    "flexsearch": "^0.8.105",
+    "flexsearch": "^0.8.200",
     "sqlite3": "^5.1.7"
   }
 }

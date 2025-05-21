@@ -1,6 +1,6 @@
 {
   "name": "nodejs-commonjs-document-worker-export-import",
   "dependencies": {
-    "flexsearch": "^0.8.138"
+    "flexsearch": "^0.8.200"
   }
 }

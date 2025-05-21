@@ -1,36 +1,18 @@
 import Resolver from "../resolver.js";
-import default_resolver from "./default.js";
 import { create_object } from "../common.js";
-import { SearchResults, EnrichedSearchResults, IntermediateSearchResults } from "../type.js";
-import { apply_enrich } from "../document/search.js";
+import {
+    SearchResults,
+    EnrichedSearchResults,
+    IntermediateSearchResults
+} from "../type.js";
 
 /** @this {Resolver} */
 Resolver.prototype["xor"] = function(){
-
-    const {
-        final,
-        promises,
-        limit,
-        offset,
-        enrich,
-        resolve,
-        suggest
-    } = this.handler("xor", arguments);
-
-    return return_result.call(this,
-        final,
-        promises,
-        limit,
-        offset,
-        enrich,
-        resolve,
-        suggest
-    );
+    return this.handler("xor", return_result, arguments);
 }
 
 /**
  * @param {!Array<IntermediateSearchResults>} final
- * @param {!Array<Promise<IntermediateSearchResults>>} promises
  * @param {number} limit
  * @param {number=} offset
  * @param {boolean=} enrich
@@ -46,36 +28,14 @@ Resolver.prototype["xor"] = function(){
  * }
  */
 
-function return_result(final, promises, limit, offset, enrich, resolve, suggest){
+function return_result(final, limit, offset, enrich, resolve, suggest){
 
-    if(promises.length){
-        const self = this;
-        return Promise.all(promises).then(function(result){
-
-            final = [];
-            for(let i = 0, tmp; i < result.length; i++){
-                if((tmp = result[i]).length){
-                    final[i] = tmp;
-                }
-            }
-
-            return return_result.call(self,
-                final,
-                [],
-                limit,
-                offset,
-                enrich,
-                resolve,
-                suggest
-            );
-        });
-    }
+    let resolved;
 
     if(!final.length){
         if(!suggest) this.result = /** @type {SearchResults|IntermediateSearchResults} */ (final);
     }
     else{
-        //this.result.length && (final = [this.result].concat(final));
         this.result.length && final.unshift(this.result);
 
         if(final.length < 2){
@@ -89,18 +49,17 @@ function return_result(final, promises, limit, offset, enrich, resolve, suggest)
                 resolve,
                 this.boostval
             );
-
-            return resolve
-                ? (enrich
-                    ? apply_enrich.call(this.index, /** @type {SearchResults} */ (this.result))
-                    : this.result
-                )
-                : this;
+            resolved = true;
         }
     }
 
+    // skip recursive promise execution in .resolve()
+    if(resolve){
+        this.await = null;
+    }
+
     return resolve
-        ? this.resolve(limit, offset, enrich)
+        ? this.resolve(limit, offset, enrich, resolved)
         : this;
 }
 
@@ -116,10 +75,6 @@ function return_result(final, promises, limit, offset, enrich, resolve, suggest)
  */
 
 function exclusive(result, limit, offset, resolve, boost){
-
-    // if(!result.length){
-    //     return result;
-    // }
 
     /** @type {SearchResults|IntermediateSearchResults} */
     const final = [];

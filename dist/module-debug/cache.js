@@ -1,36 +1,59 @@
 import Index from "./index.js";
-import Document from "./document.js";
 import { SearchOptions, DocumentSearchOptions } from "./type.js";
 
 /**
- * @param {string|SearchOptions|DocumentSearchOptions} query_or_options
- * @param {number|SearchOptions|DocumentSearchOptions=} limit_or_options
+ * @param {string|SearchOptions|DocumentSearchOptions} query
+ * @param {number|SearchOptions|DocumentSearchOptions=} limit
  * @param {SearchOptions|DocumentSearchOptions=} options
- * @this {Index|Document}
+ * @this {Index}
  * @returns {Array<number|string>|Promise}
  */
+export function searchCache(query, limit, options) {
 
-export function searchCache(query_or_options, limit_or_options, options) {
+    if (!options) {
+        if (!limit && "object" == typeof query) {
+            options = query;
+        } else if ("object" == typeof limit) {
+            options = limit;
+            limit = 0;
+        }
+    }
 
-    const query = (limit_or_options ? "" + query_or_options : "object" == typeof query_or_options ? "" + query_or_options.query : query_or_options).toLowerCase();
+    if (options) {
+        query = options.query || query;
+        limit = options.limit || limit;
+    }
+
+    let key = "" + (limit || 0);
+
+    if (options) {
+
+        const {
+            context,
+            suggest,
+            offset,
+            resolve,
+            boost,
+            resolution
+        } = options;
+
+        key += (offset || 0) + !!context + !!suggest + (!1 !== resolve) + (resolution || this.resolution) + (boost || 0);
+    }
+
+    query = ("" + query).toLowerCase();
 
     if (!this.cache) {
         this.cache = new CacheClass();
     }
 
-    let cache = this.cache.get(query);
+    let cache = this.cache.get(query + key);
     if (!cache) {
-        cache = this.search(query_or_options, limit_or_options, options);
+        const opt_cache = options && options.cache;
+        opt_cache && (options.cache = !1);
+        cache = this.search(query, limit, options);
+        opt_cache && (options.cache = opt_cache);
 
-        if (cache.then) {
-            const self = this;
-            cache.then(function (cache) {
-                self.cache.set(query, cache);
-                return cache;
-            });
-        }
-
-        this.cache.set(query, cache);
+        this.cache.set(query + key, cache);
     }
     return cache;
 }

@@ -88,20 +88,18 @@ RedisDB.prototype.clear = function () {
 
 function create_result(range, type, resolve, enrich, resolution) {
     if (resolve) {
-        if ("number" === type) {
-            for (let i = 0, tmp, id; i < range.length; i++) {
-                tmp = range[i];
-                id = "number" === type ? parseInt(tmp.id || tmp, 10) : tmp.id || tmp;
-                range[i] = enrich ? { id, doc: tmp.doc } : id;
-            }
+        for (let i = 0, tmp, id; i < range.length; i++) {
+            tmp = range[i];
+            id = "number" === type ? parseInt(tmp.value || tmp, 10) : tmp.value || tmp;
+            range[i] = enrich ? { id, doc: tmp.doc } : id;
         }
         return range;
     } else {
         let result = [];
         for (let i = 0, tmp, id, score; i < range.length; i++) {
             tmp = range[i];
-            id = "number" === type ? parseInt(tmp.id || tmp, 10) : tmp.id || tmp;
-            score = resolution - tmp.score;
+            id = "number" === type ? parseInt(tmp.value || tmp, 10) : tmp.value || tmp;
+            score = Math.max(resolution - tmp.score, 0);
             result[score] || (result[score] = []);
             result[score].push(id);
         }

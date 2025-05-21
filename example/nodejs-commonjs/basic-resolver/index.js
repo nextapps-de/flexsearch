@@ -1,4 +1,4 @@
-const { Index } = require("flexsearch");
+const { Index, Resolver } = require("flexsearch");
 
 // create a simple index which can store id-content-pairs
 const index = new Index({
@@ -7,8 +7,8 @@ const index = new Index({
 
 // some test data
 const data = [
-    'cats abcd efgh ijkl mnop qrst uvwx cute',
-    'cats abcd efgh ijkl mnop qrst cute',
+    'cats abcd efgh ijkl dogs pigs rats cute',
+    'cats abcd efgh ijkl dogs pigs cute',
     'cats abcd efgh ijkl dogs cute',
     'cats abcd efgh ijkl cute',
     'cats abcd efgh cute',
@@ -22,10 +22,26 @@ data.forEach((item, id) => {
 });
 
 // perform query
-const result = index.search({
-    query: "black dog or cute cat",
-    suggest: true
-});
+const result = new Resolver({
+    index: index,
+    query: "black"
+})
+.or({
+    index: index,
+    query: "cute"
+})
+.and([{
+    index: index,
+    query: "dog"
+},{
+    index: index,
+    query: "cat"
+}])
+.not({
+    index: index,
+    query: "rat"
+})
+.resolve();
 
 // display results
 result.forEach(i => {

@@ -119,7 +119,7 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
             }
         } else {
 
-            result = 1 < result.length ? union(result, limit, offset, resolve, boost) : (result = result[0]).length > limit || offset ? result.slice(offset, limit + offset) : result;
+            result = 1 < result.length ? union(result, limit, offset, resolve, boost) : (result = result[0]) && limit && result.length > limit || offset ? result.slice(offset, limit + offset) : result;
         }
     }
 

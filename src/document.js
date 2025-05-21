@@ -559,7 +559,6 @@ if(SUPPORT_STORE){
 }
 
 if(SUPPORT_CACHE){
-    // todo mo
     Document.prototype.searchCache = searchCache;
 }
 

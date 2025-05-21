@@ -1,6 +1,3 @@
-
-import { PersistentOptions, SearchResults, EnrichedSearchResults } from "../../type.js";
-
 const VERSION = 1,
       IndexedDB = "undefined" != typeof window && (window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB),
       IDBTransaction = "undefined" != typeof window && (window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction),

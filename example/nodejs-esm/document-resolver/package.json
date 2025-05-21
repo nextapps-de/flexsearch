@@ -1,0 +1,7 @@
+{
+  "name": "nodejs-esm-document-resolver",
+  "type": "module",
+  "dependencies": {
+    "flexsearch": "^0.8.200"
+  }
+}

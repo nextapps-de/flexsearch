@@ -169,6 +169,8 @@ if(release === "lang"){
 
                 content = fs.readFileSync("tmp/type.js", "utf8");
                 content = content.replace('import Index from "./index.js";', '')
+                                 .replace('import WorkerIndex from "./worker.js";', '')
+                                 .replace('import Document from "./document.js";', '')
                                  .replace('import Encoder from "./encoder.js";', '')
                                  .replace('import StorageInterface from "./db/interface.js";', '');
                 fs.writeFileSync("tmp/type.js", content);

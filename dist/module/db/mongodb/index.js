@@ -140,17 +140,25 @@ MongoDB.prototype.clear = function () {
 };
 
 function create_result(rows, resolve, enrich) {
+    const _id = rows[0] && "undefined" != typeof rows[0]._id;
     if (resolve) {
-        if (!enrich) for (let i = 0; i < rows.length; i++) {
-            rows[i] = rows[i].id;
+        if (!enrich || _id) for (let i = 0, row; i < rows.length; i++) {
+            row = rows[i];
+            if (enrich) {
+                const id = row._id;
+                delete row._id;
+                row.id = id;
+            } else {
+                rows[i] = _id ? row._id : row.id;
+            }
         }
         return rows;
     } else {
         const arr = [];
-        for (let i = 0, row; i < rows.length; i++) {
+        for (let i = 0, row, res; i < rows.length; i++) {
             row = rows[i];
-            arr[row.res] || (arr[row.res] = []);
-            arr[row.res].push(enrich ? row : row.id);
+            res = row.res;
+            (arr[res] || (arr[res] = [])).push(_id ? row._id : row.id);
         }
         return arr;
     }
@@ -160,8 +168,17 @@ MongoDB.prototype.get = async function (key, ctx, limit = 0, offset = 0, resolve
     let rows,
         params = ctx ? { ctx, key } : { key };
 
+
     if (!enrich && !tags) {
-        rows = await this.db.collection((ctx ? "ctx" : "map") + this.field).find(params, { projection: { _id: 0, res: 1, id: 1 }, limit, skip: offset }).toArray();
+
+        const stmt = {
+            projection: { _id: 0, res: 1, id: 1 }
+        };
+
+        limit && (stmt.limit = limit);
+        offset && (stmt.skip = offset);
+
+        rows = await this.db.collection((ctx ? "ctx" : "map") + this.field).find(params, stmt).toArray();
     } else {
         const project = { _id: 0, id: 1 },
               stmt = [{ $match: params }];
@@ -204,7 +221,10 @@ MongoDB.prototype.get = async function (key, ctx, limit = 0, offset = 0, resolve
             stmt.push({ $project: project });
         }
 
-        stmt.push({ $sort: { res: 1 } }, { $skip: offset }, { $limit: limit });
+        stmt.push({ $sort: { res: 1 } });
+
+        limit && stmt.push({ $limit: limit });
+        offset && stmt.push({ $skip: offset });
 
         rows = [];
         const result = await this.db.collection((ctx ? "ctx" : "map") + this.field).aggregate(stmt);
@@ -220,14 +240,26 @@ MongoDB.prototype.get = async function (key, ctx, limit = 0, offset = 0, resolve
 
 MongoDB.prototype.tag = async function (tag, limit = 0, offset = 0, enrich = !1) {
 
+    let rows;
+
     if (!enrich) {
 
-        const rows = await this.db.collection("tag" + this.field).find({ tag }, { projection: { _id: 0, id: 1 }, limit, skip: offset }).toArray();
-        return create_result(rows, !0, !1);
+        const stmt = {
+            projection: { _id: 0, id: 1 }
+        };
+
+        limit && (stmt.limit = limit);
+        offset && (stmt.skip = offset);
+
+        rows = await this.db.collection("tag" + this.field).find({ tag }, stmt).toArray();
     } else {
 
-        let rows = [];
-        const result = await this.db.collection("tag" + this.field).aggregate([{ $match: { tag } }, { $skip: offset }, { $limit: limit }, { $lookup: {
+        const stmt = [{ $match: { tag } }];
+
+        limit && stmt.push({ $limit: limit });
+        offset && stmt.push({ $skip: offset });
+
+        stmt.push({ $lookup: {
                 from: "reg",
                 localField: "id",
                 foreignField: "id",
@@ -235,15 +267,18 @@ MongoDB.prototype.tag = async function (tag, limit = 0, offset = 0, enrich = !1)
             } }, { $project: { _id: 0, id: 1, doc: "$doc.doc" } }, { $unwind: {
                 path: "$doc",
                 preserveNullAndEmptyArrays: !0
-            } }]);
+            } });
+
+        rows = [];
+        const result = await this.db.collection("tag" + this.field).aggregate(stmt);
 
         while (!0) {
             const row = await result.next();
             if (row) rows.push(row);else break;
         }
-
-        return rows;
     }
+
+    create_result(rows, !0, enrich);
 };
 
 MongoDB.prototype.enrich = function (ids) {
@@ -323,8 +358,9 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
             stmt.push({ $match: match });
         }
 
-        stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 } }, { $skip: offset }, { $limit: limit });
-
+        stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 } });
+        limit && stmt.push({ $limit: limit });
+        offset && stmt.push({ $skip: offset });
         stmt.push({ $project: project });
 
         rows = await this.db.collection("ctx" + this.field).aggregate(stmt);
@@ -375,8 +411,10 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
             stmt.push({ $match: match });
         }
 
-        stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 } }, { $skip: offset }, { $limit: limit });
-
+        stmt.push({ $sort: suggest ? { count: -1, res: 1 } : { res: 1 }
+        });
+        limit && stmt.push({ $limit: limit });
+        offset && stmt.push({ $skip: offset });
         stmt.push({ $project: project });
 
         rows = await this.db.collection("map" + this.field).aggregate(stmt);
@@ -385,21 +423,15 @@ MongoDB.prototype.search = async function (flexsearch, query, limit = 100, offse
     while (!0) {
         const row = await rows.next();
         if (row) {
-            if (resolve && !enrich) {
-                result.push(row._id);
-            } else {
+            if (resolve && enrich) {
                 row.id = row._id;
                 delete row._id;
-                result.push(row);
             }
+            result.push(row);
         } else break;
     }
 
-    if (resolve && !enrich) {
-        return result;
-    } else {
-        return create_result(result, resolve, enrich);
-    }
+    return create_result(result, resolve, enrich);
 };
 
 MongoDB.prototype.info = function () {};

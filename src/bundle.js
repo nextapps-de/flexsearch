@@ -98,16 +98,16 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Document.prototype.cleanup;
 /** @export */ Document.prototype.addAsync;
 /** @export */ Document.prototype.appendAsync;
-/** @export */ Document.prototype.searchAsync;
-/** @export */ Document.prototype.searchCacheAsync;
 /** @export */ Document.prototype.updateAsync;
 /** @export */ Document.prototype.removeAsync;
+/** @export */ Document.prototype.searchAsync;
+/** @export */ Document.prototype.searchCacheAsync;
+/** @export */ Document.prototype.searchCache;
 /** @export */ Document.prototype.mount;
 /** @export */ Document.prototype.commit;
 /** @export */ Document.prototype.destroy;
 /** @export */ Document.prototype.export;
 /** @export */ Document.prototype.import;
-/** @export */ Document.prototype.searchCache;
 /** @export */ Document.prototype.get;
 /** @export */ Document.prototype.set;
 
@@ -129,6 +129,7 @@ if(SUPPORT_SERIALIZE){
 /** @export */ Resolver.prototype.xor;
 /** @export */ Resolver.prototype.not;
 /** @export */ Resolver.prototype.result;
+/** @export */ Resolver.prototype.await;
 
 /** @export */ StorageInterface.db;
 /** @export */ StorageInterface.id;
@@ -252,7 +253,6 @@ if(SUPPORT_SERIALIZE){
 /** @export */ SearchOptions.context;
 /** @export */ SearchOptions.suggest;
 /** @export */ SearchOptions.resolve;
-/** @export */ SearchOptions.enrich;
 /** @export */ SearchOptions.cache;
 /** @export */ SearchOptions.resolution;
 
@@ -304,9 +304,13 @@ if(SUPPORT_SERIALIZE){
 /** @export */ ResolverOptions.query;
 /** @export */ ResolverOptions.limit;
 /** @export */ ResolverOptions.offset;
+/** @export */ ResolverOptions.boost;
 /** @export */ ResolverOptions.enrich;
 /** @export */ ResolverOptions.resolve;
 /** @export */ ResolverOptions.suggest;
+/** @export */ ResolverOptions.cache;
+/** @export */ ResolverOptions.async;
+/** @export */ ResolverOptions.queue;
 /** @export */ ResolverOptions.and;
 /** @export */ ResolverOptions.or;
 /** @export */ ResolverOptions.xor;

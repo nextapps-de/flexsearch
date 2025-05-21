@@ -26,6 +26,7 @@ import { create_object, is_array, is_object, is_string, inherit } from "../commo
 import { intersect, intersect_union } from "../intersect.js";
 import Document from "../document.js";
 import Index from "../index.js";
+import WorkerIndex from "../worker.js";
 import Resolver from "../resolver.js";
 import tick from "../profiler.js";
 import { highlight_fields } from "./highlight.js";
@@ -54,7 +55,6 @@ import { highlight_fields } from "./highlight.js";
  *   >
  * }
  */
-
 Document.prototype.search = function(query, limit, options, _promises){
 
     PROFILER && tick("Document.search:" + !!_promises);
@@ -70,12 +70,12 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
     }
 
-    if(SUPPORT_CACHE && options && options.cache){
-        options.cache = false;
-        const res = this.searchCache(query, limit, options);
-        options.cache = true;
-        return res;
-    }
+    // if(SUPPORT_CACHE && options && options.cache){
+    //     options.cache = false;
+    //     const res = this.searchCache(query, limit, options);
+    //     options.cache = true;
+    //     return res;
+    // }
 
     /** @type {
      *   DocumentSearchResults|
@@ -87,7 +87,7 @@ Document.prototype.search = function(query, limit, options, _promises){
      * } */
     let result = [];
     let result_field = [];
-    let pluck, enrich, merge, suggest, boost;
+    let pluck, enrich, merge, suggest, boost, cache;
     let field, tag, offset, count = 0, resolve = true, highlight;
 
     if(options){
@@ -106,6 +106,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         tag = SUPPORT_TAGS && this.tag && options.tag;
         suggest = SUPPORT_SUGGESTION && options.suggest;
         resolve = !SUPPORT_RESOLVER || (options.resolve !== false);
+        cache = SUPPORT_CACHE && options.cache;
 
         if(DEBUG){
             if(SUPPORT_STORE && this.store && options.highlight && !resolve){
@@ -293,6 +294,7 @@ Document.prototype.search = function(query, limit, options, _promises){
             suggest = SUPPORT_SUGGESTION && inherit(field_options.suggest, suggest);
             highlight = SUPPORT_STORE && SUPPORT_HIGHLIGHTING && resolve && this.store && inherit(field_options.highlight, highlight);
             enrich = SUPPORT_STORE && (!!highlight || (resolve && this.store && inherit(field_options.enrich, enrich)));
+            cache = SUPPORT_CACHE && inherit(field_options.cache, cache);
         }
 
         if(_promises){
@@ -300,8 +302,9 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
         else{
             PROFILER && tick("Document.search:get:" + key);
-            let opt = field_options || options;
-            let index = this.index.get(key);
+            const opt = field_options || options || {};
+            const opt_enrich = opt.enrich;
+            const index = this.index.get(key);
 
             if(tag){
                 if(SUPPORT_PERSISTENT && this.db){
@@ -309,26 +312,27 @@ Document.prototype.search = function(query, limit, options, _promises){
                     db_tag_search = index.db.support_tag_search;
                     opt.field = field;
                 }
-                if(!db_tag_search){
+                if(!db_tag_search && opt_enrich){
                     opt.enrich = false;
                 }
             }
+
+            res = cache
+                ? index.searchCache(query, limit, opt)
+                : index.search(query, limit, opt);
+
+            // restore state
+            opt_enrich && (opt.enrich = opt_enrich);
+
             if(promises){
-                promises[i] = index.search/*Async*/(query, limit, opt);
-                // restore enrich state
-                opt && enrich && (opt.enrich = enrich);
-                // just collect and continue
+                promises[i] = res;
+                // collect and continue
                 continue;
-            }
-            else{
-                res = index.search(query, limit, opt);
-                // restore enrich state
-                opt && enrich && (opt.enrich = enrich);
             }
         }
 
-        len = res && (resolve ? res.length : res.result.length);
-
+        res = res.result || res;
+        len = res && res.length;
         // todo when no term was matched but tag was retrieved extend suggestion to tags
         // every field has to intersect against all selected tag fields
         if(tag && len){
@@ -453,12 +457,17 @@ Document.prototype.search = function(query, limit, options, _promises){
         }
 
         const self = this;
-
         // TODO unroll this recursion
         return Promise.all(promises).then(function(result){
-            return result.length
-                ? self.search(query, limit, options, /* promises: */ result)
-                : result;
+            // todo restore resolve state
+            options && (options.resolve = resolve);
+            if(result.length){
+                result = self.search(query, limit, options, /* promises: */ result);
+                // if(!resolve && pluck && result[0]){
+                //     result = result[0].result;
+                // }
+            }
+            return result;
         });
     }
 
@@ -468,9 +477,10 @@ Document.prototype.search = function(query, limit, options, _promises){
             : new Resolver(result, this);
     }
     if(pluck && (!enrich || !this.store)){
-        result = result[0];
-        if(SUPPORT_RESOLVER && !resolve) result.index = this;
-        return /** @type {SearchResults|Resolver} */ (result);
+        result = /** @type {SearchResults|IntermediateSearchResults} */ (result[0]);
+        return !SUPPORT_RESOLVER || resolve
+            ? result
+            : new Resolver(result, this);
     }
 
     promises = [];
@@ -483,7 +493,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         if(enrich && res.length && typeof res[0]["doc"] === "undefined"){
             if(!SUPPORT_PERSISTENT || !this.db){
                 // if(res.length){
-                    res = apply_enrich.call(this, res);
+                    res = /** @type {EnrichedSearchResults} */ (apply_enrich.call(this, res));
                 // }
             }
             else{
@@ -604,17 +614,20 @@ function get_tag(tag, key, limit, offset, enrich){
 
 /**
  * @param {SearchResults} ids
- * @return {EnrichedSearchResults|SearchResults}
- * @this {Document|Index|null}
+ * @return {EnrichedSearchResults|SearchResults|Promise<EnrichedSearchResults|SearchResults>}
+ * @this {Document|Index|WorkerIndex|null}
  */
 
 export function apply_enrich(ids){
 
     if(!SUPPORT_STORE || !this || !this.store) return ids;
 
+    if(SUPPORT_PERSISTENT && this.db){
+        return this.index.get(this.field[0]).db.enrich(ids);
+    }
+
     /** @type {EnrichedSearchResults} */
     const result = new Array(ids.length);
-
     for(let x = 0, id; x < ids.length; x++){
         id = ids[x];
         result[x] = {

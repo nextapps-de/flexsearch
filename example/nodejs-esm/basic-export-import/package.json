@@ -2,6 +2,6 @@
   "name": "nodejs-esm-basic-export-import",
   "type": "module",
   "dependencies": {
-    "flexsearch": "^0.8.105"
+    "flexsearch": "^0.8.200"
   }
 }

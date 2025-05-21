@@ -4,6 +4,7 @@ import { create_object, is_array, is_object, is_string, inherit } from "../commo
 import { intersect, intersect_union } from "../intersect.js";
 import Document from "../document.js";
 import Index from "../index.js";
+import WorkerIndex from "../worker.js";
 import Resolver from "../resolver.js";
 import tick from "../profiler.js";
 import { highlight_fields } from "./highlight.js";
@@ -32,7 +33,6 @@ import { highlight_fields } from "./highlight.js";
  *   >
  * }
  */
-
 Document.prototype.search = function (query, limit, options, _promises) {
 
     if (!options) {
@@ -43,13 +43,6 @@ Document.prototype.search = function (query, limit, options, _promises) {
             options = /** @type {DocumentSearchOptions} */limit;
             limit = 0;
         }
-    }
-
-    if (options && options.cache) {
-        options.cache = !1;
-        const res = this.searchCache(query, limit, options);
-        options.cache = !0;
-        return res;
     }
 
     /** @type {
@@ -67,6 +60,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         merge,
         suggest,
         boost,
+        cache,
         field,
         tag,
         offset,
@@ -91,6 +85,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         tag = this.tag && options.tag;
         suggest = options.suggest;
         resolve = !1 !== options.resolve;
+        cache = options.cache;
 
         if (this.store && options.highlight && !resolve) {
             console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })");
@@ -244,13 +239,15 @@ Document.prototype.search = function (query, limit, options, _promises) {
             suggest = inherit(field_options.suggest, suggest);
             highlight = resolve && this.store && inherit(field_options.highlight, highlight);
             enrich = !!highlight || resolve && this.store && inherit(field_options.enrich, enrich);
+            cache = inherit(field_options.cache, cache);
         }
 
         if (_promises) {
             res = _promises[i];
         } else {
-            let opt = field_options || options,
-                index = this.index.get(key);
+            const opt = field_options || options || {},
+                  opt_enrich = opt.enrich,
+                  index = this.index.get(key);
 
 
             if (tag) {
@@ -259,24 +256,24 @@ Document.prototype.search = function (query, limit, options, _promises) {
                     db_tag_search = index.db.support_tag_search;
                     opt.field = field;
                 }
-                if (!db_tag_search) {
+                if (!db_tag_search && opt_enrich) {
                     opt.enrich = !1;
                 }
             }
-            if (promises) {
-                promises[i] = index.search(query, limit, opt);
 
-                opt && enrich && (opt.enrich = enrich);
+            res = cache ? index.searchCache(query, limit, opt) : index.search(query, limit, opt);
+
+            opt_enrich && (opt.enrich = opt_enrich);
+
+            if (promises) {
+                promises[i] = res;
 
                 continue;
-            } else {
-                res = index.search(query, limit, opt);
-
-                opt && enrich && (opt.enrich = enrich);
             }
         }
 
-        len = res && (resolve ? res.length : res.result.length);
+        res = res.result || res;
+        len = res && res.length;
 
         if (tag && len) {
 
@@ -375,7 +372,12 @@ Document.prototype.search = function (query, limit, options, _promises) {
         const self = this;
 
         return Promise.all(promises).then(function (result) {
-            return result.length ? self.search(query, limit, options, result) : result;
+
+            options && (options.resolve = resolve);
+            if (result.length) {
+                result = self.search(query, limit, options, result);
+            }
+            return result;
         });
     }
 
@@ -383,10 +385,8 @@ Document.prototype.search = function (query, limit, options, _promises) {
         return resolve ? result : new Resolver(result, this);
     }
     if (pluck && (!enrich || !this.store)) {
-        result = result[0];
-        if (!resolve) result.index = this;
-        return (/** @type {SearchResults|Resolver} */result
-        );
+        result = /** @type {SearchResults|IntermediateSearchResults} */result[0];
+        return resolve ? result : new Resolver(result, this);
     }
 
     promises = [];
@@ -400,7 +400,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         if (enrich && res.length && "undefined" == typeof res[0].doc) {
             if (!this.db) {
 
-                res = apply_enrich.call(this, res);
+                res = /** @type {EnrichedSearchResults} */apply_enrich.call(this, res);
             } else {
 
                 promises.push(res = this.index.get(this.field[0]).db.enrich(res));
@@ -500,17 +500,20 @@ function get_tag(tag, key, limit, offset, enrich) {
 
 /**
  * @param {SearchResults} ids
- * @return {EnrichedSearchResults|SearchResults}
- * @this {Document|Index|null}
+ * @return {EnrichedSearchResults|SearchResults|Promise<EnrichedSearchResults|SearchResults>}
+ * @this {Document|Index|WorkerIndex|null}
  */
 
 export function apply_enrich(ids) {
 
     if (!this || !this.store) return ids;
 
+    if (this.db) {
+        return this.index.get(this.field[0]).db.enrich(ids);
+    }
+
     /** @type {EnrichedSearchResults} */
     const result = Array(ids.length);
-
     for (let x = 0, id; x < ids.length; x++) {
         id = ids[x];
         result[x] = {

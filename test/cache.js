@@ -14,9 +14,11 @@ if(!build_light) describe("Cache", function(){
 
     it("Should have been cached and sorted by popularity/latest", function(){
 
+        const limit = 0;
         const index = new Index({
             tokenize: "reverse",
-            cache: 2
+            cache: 2,
+            limit
         });
 
         index.add(0, "foo")
@@ -27,8 +29,8 @@ if(!build_light) describe("Cache", function(){
         expect(index.searchCache("bar")).to.eql([1, 2]);
         expect(index.searchCache("foobar")).to.eql([2]);
 
-        expect(index.cache.cache.size).to.equal(2); // limit = 2
-        env || expect(index.cache.last).to.equal("foobar");
+        expect(index.cache.cache.size).to.equal(2);
+        env || expect(index.cache.last).to.equal("foobar" + limit);
         expect(Array.from(index.cache.cache.values()).pop()).to.eql([2]);
 
         expect(index.searchCache("foobar")).to.eql([2]);
@@ -36,7 +38,7 @@ if(!build_light) describe("Cache", function(){
         expect(index.searchCache("foo")).to.eql([0, 2]);
 
         expect(index.cache.cache.size).to.equal(2);
-        env || expect(index.cache.last).to.equal("foo");
+        env || expect(index.cache.last).to.equal("foo" + limit);
         expect(Array.from(index.cache.cache.values()).pop()).to.eql([0, 2]);
 
         expect(index.searchCache("bar")).to.eql([1, 2]);

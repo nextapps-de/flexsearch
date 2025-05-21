@@ -83,6 +83,12 @@ export default async function(data) {
                 if(message && message.then){
                     message = await message;
                 }
+                if(message && message.await){
+                    message = await message.await;
+                }
+                if(task === "search" && message.result){
+                    message = message.result;
+                }
             }
 
             postMessage(

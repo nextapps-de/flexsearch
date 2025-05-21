@@ -2,6 +2,13 @@
 
 ### Current Version
 
+### v0.8.2
+
+- Config-Serialized Query Caches, Improved caching strategy for Document indexes and Resolver
+- Resolver Async Processing Workflow (including Queuing)
+- Extended Resolver Support: Worker, Persistent, Cache
+- Extended Result Highlighting: Boundaries, Ellipsis, Alignment
+- Improved TypeScript Typings
 - Improved Stemmer Handling
 - Improved Result Highlighting
 - Use multi-language charset normalization as the default `Encoder`

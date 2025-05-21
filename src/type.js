@@ -2,6 +2,8 @@
 // Some of the types here aren't supposed to be used as public, they might be defined just for internal state.
 
 import Index from "./index.js";
+import Document from "./document.js";
+import WorkerIndex from "./worker.js";
 import Encoder from "./encoder.js";
 import StorageInterface from "./db/interface.js";
 
@@ -141,7 +143,7 @@ export let SearchOptions = {};
  *   resolve: (boolean|undefined),
  *   enrich: (boolean|undefined),
  *   cache: (boolean|undefined),
- *   tag: (Object|Array<Object>|undefined),
+ *   tag: (Object<string, string>|Array<Object<string, string>>|undefined),
  *   field: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
  *   index: (Array<string>|Array<DocumentSearchOptions>|DocumentSearchOptions|string|undefined),
  *   pluck: (string|DocumentSearchOptions|undefined),
@@ -253,13 +255,20 @@ export let PersistentOptions = {};
 
 /**
  * @typedef {{
- *   index: (Index|Document|undefined),
+ *   index: (Index|Document|WorkerIndex|undefined),
  *   query: (string|undefined),
+ *   pluck: (string|undefined),
+ *   field: (string|undefined),
  *   limit: (number|undefined),
  *   offset: (number|undefined),
+ *   boost: (number|undefined),
  *   enrich: (boolean|undefined),
+ *   highlight: (HighlightOptions|string|undefined),
  *   resolve: (boolean|undefined),
  *   suggest: (boolean|undefined),
+ *   cache: (boolean|undefined),
+ *   async: (boolean|undefined),
+ *   queue: (boolean|undefined),
  *   and: (ResolverOptions|Array<ResolverOptions>|undefined),
  *   or: (ResolverOptions|Array<ResolverOptions>|undefined),
  *   xor: (ResolverOptions|Array<ResolverOptions>|undefined),

@@ -1,6 +1,7 @@
 
 import { IndexOptions } from "./type.js";
 import { create_object } from "./common.js";
+import { searchCache } from "./cache.js";
 import handler from "./worker/handler.js";
 import apply_async from "./async.js";
 import Encoder from "./encoder.js";
@@ -36,6 +37,8 @@ export default function WorkerIndex(options = /** @type IndexOptions */{}, encod
         this.resolver = create_object();
 
         if (!this.worker) {
+            console.warn("Worker is not available on this platform. Please report on Github: https://github.com/nextapps-de/flexsearch/issues");
+
             return;
         }
 
@@ -55,12 +58,10 @@ export default function WorkerIndex(options = /** @type IndexOptions */{}, encod
         if (options.config) {
 
             return new Promise(function (resolve) {
-
+                if (1e9 < pid) pid = 0;
                 _self.resolver[++pid] = function () {
                     resolve(_self);
-                    if (1e9 < pid) pid = 0;
                 };
-
                 _self.worker.postMessage({
                     id: pid,
                     task: "init",
@@ -93,12 +94,13 @@ export default function WorkerIndex(options = /** @type IndexOptions */{}, encod
 register("add");
 register("append");
 register("search");
-register("searchCache");
 register("update");
 register("remove");
 register("clear");
 register("export");
 register("import");
+
+WorkerIndex.prototype.searchCache = searchCache;
 
 apply_async(WorkerIndex.prototype);
 
@@ -122,6 +124,7 @@ function register(key) {
 
                 args[0] = null;
             }
+            if (1e9 < pid) pid = 0;
             self.resolver[++pid] = resolve;
             self.worker.postMessage({
                 task: key,
@@ -141,7 +144,5 @@ function register(key) {
 
 function create(factory, is_node_js, worker_path) {
 
-    let worker = is_node_js ? "undefined" != typeof module ? (0,eval)('new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js")') : import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/../node/node.mjs")}) : factory ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new window.Worker("string" == typeof worker_path ? worker_path : (1, eval)("import.meta.url").replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", "module/worker/worker.js"), { type: "module" });
-
-    return worker;
+    return is_node_js ? "undefined" != typeof module ? (0,eval)('new(require("worker_threads")["Worker"])(__dirname+"/worker/node.js")') : import("worker_threads").then(function(worker){return new worker["Worker"](import.meta.dirname+"/../node/node.mjs")}) : factory ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + handler.toString()], { type: "text/javascript" }))) : new window.Worker("string" == typeof worker_path ? worker_path : (1, eval)("import.meta.url").replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", "module/worker/worker.js"), { type: "module" });
 }

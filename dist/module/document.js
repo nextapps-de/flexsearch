@@ -468,7 +468,6 @@ Document.prototype.set = function (id, data) {
     return this;
 };
 
-
 Document.prototype.searchCache = searchCache;
 
 

@@ -4,27 +4,17 @@ import { SearchResults, EnrichedSearchResults, IntermediateSearchResults } from 
 
 /** @this {Resolver} */
 Resolver.prototype.or = function () {
-
-    const {
-        final,
-        promises,
-        limit,
-        offset,
-        enrich,
-        resolve
-    } = this.handler("or", arguments);
-
-    return return_result.call(this, final, promises, limit, offset, enrich, resolve);
+    return this.handler("or", return_result, arguments);
 };
 
 /**
  * Aggregate the intersection of N raw results
  * @param {!Array<IntermediateSearchResults>} final
- * @param {!Array<Promise<IntermediateSearchResults>>} promises
  * @param {number} limit
  * @param {number=} offset
  * @param {boolean=} enrich
  * @param {boolean=} resolve
+ * @param {boolean=} suggest
  * @this {Resolver}
  * @return {
  *   SearchResults |
@@ -35,25 +25,9 @@ Resolver.prototype.or = function () {
  * }
  */
 
-function return_result(final, promises, limit, offset, enrich, resolve) {
-
-    if (promises.length) {
-        const self = this;
-        return Promise.all(promises).then(function (result) {
-
-            final = [];
-            for (let i = 0, tmp; i < result.length; i++) {
-                if ((tmp = result[i]).length) {
-                    final[i] = tmp;
-                }
-            }
-
-            return return_result.call(self, final, [], limit, offset, enrich, resolve);
-        });
-    }
+function return_result(final, limit, offset, enrich, resolve) {
 
     if (final.length) {
-
         this.result.length && final.push(this.result);
 
         if (2 > final.length) {
@@ -64,6 +38,10 @@ function return_result(final, promises, limit, offset, enrich, resolve) {
 
             offset = 0;
         }
+    }
+
+    if (resolve) {
+        this.await = null;
     }
 
     return resolve ? this.resolve(limit, offset, enrich) : this;

@@ -1,0 +1,6 @@
+{
+  "name": "nodejs-commonjs-document-resolver",
+  "dependencies": {
+    "flexsearch": "^0.8.200"
+  }
+}

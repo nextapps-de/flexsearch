@@ -3,6 +3,7 @@ import { IntermediateSearchResults, SearchResults, EnrichedSearchResults } from 
 import { apply_enrich } from "../document/search.js";
 import Document from "../document.js";
 import Index from "../index.js";
+import WorkerIndex from "../worker.js";
 
 /*
  from -> res[score][id]
@@ -16,7 +17,7 @@ import Index from "../index.js";
  * @param {number=} offset
  * @param {boolean=} enrich
  * @return {SearchResults|EnrichedSearchResults}
- * @this {Document|Index}
+ * @this {Document|Index|WorkerIndex}
  */
 
 export default function(result, limit, offset, enrich){
@@ -29,13 +30,10 @@ export default function(result, limit, offset, enrich){
     if(result.length === 1){
         let final = result[0];
         final = offset || (final.length > limit)
-            ? (limit
-                ? final.slice(offset, offset + limit)
-                : final.slice(offset)
-            )
+            ? final.slice(offset, offset + limit)
             : final;
         return enrich
-            ? apply_enrich.call(this, final)
+            ? /** @type {EnrichedSearchResults} */ (apply_enrich.call(this, final))
             : final;
     }
 
@@ -53,26 +51,23 @@ export default function(result, limit, offset, enrich){
                 offset -= len;
                 continue;
             }
-            // apply offset pointer when length differs
-            if(offset < len){
-                arr = limit
-                    ? arr.slice(offset, offset + limit)
-                    : arr.slice(offset);
-                len = arr.length;
-                offset = 0;
-            }
+            // apply the remaining offset
+            arr = arr.slice(offset, offset + limit);
+            len = arr.length;
+            offset = 0;
         }
 
         if(len > limit){
+            // apply limit
             arr = arr.slice(0, limit);
             len = limit;
         }
 
         if(!final.length){
-            // fast path: when limit was reached in first slot
+            // fast path: when limit was reached in the first slot
             if(len >= limit){
                 return enrich
-                    ? apply_enrich.call(this, arr)
+                    ? /** @type {EnrichedSearchResults} */ (apply_enrich.call(this, arr))
                     : arr;
             }
         }
@@ -94,22 +89,3 @@ export default function(result, limit, offset, enrich){
         ? apply_enrich.call(this, final)
         : final;
 }
-
-// /**
-//  * @param {SearchResults} ids
-//  * @return {EnrichedSearchResults}
-//  */
-//
-// export function enrich_result(ids){
-//     // ids could be the original reference to an index value
-//     /** @type {EnrichedSearchResults} */
-//     const result = new Array(ids.length);
-//     for(let i = 0, id; i < ids.length; i++){
-//         id = ids[i];
-//         result[i] = {
-//             "id": id,
-//             "doc": this.store.get(id)
-//         };
-//     }
-//     return result;
-// }

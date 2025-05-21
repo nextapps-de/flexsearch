@@ -64,6 +64,12 @@ export default (async function (data) {
                 if (message && message.then) {
                     message = await message;
                 }
+                if (message && message.await) {
+                    message = await message.await;
+                }
+                if ("search" === task && message.result) {
+                    message = message.result;
+                }
             }
 
             postMessage("search" === task ? { id: id, msg: message } : { id: id });

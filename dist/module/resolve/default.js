@@ -3,6 +3,7 @@ import { IntermediateSearchResults, SearchResults, EnrichedSearchResults } from 
 import { apply_enrich } from "../document/search.js";
 import Document from "../document.js";
 import Index from "../index.js";
+import WorkerIndex from "../worker.js";
 
 /*
  from -> res[score][id]
@@ -16,7 +17,7 @@ import Index from "../index.js";
  * @param {number=} offset
  * @param {boolean=} enrich
  * @return {SearchResults|EnrichedSearchResults}
- * @this {Document|Index}
+ * @this {Document|Index|WorkerIndex}
  */
 
 export default function (result, limit, offset, enrich) {
@@ -27,8 +28,8 @@ export default function (result, limit, offset, enrich) {
 
     if (1 === result.length) {
         let final = result[0];
-        final = offset || final.length > limit ? limit ? final.slice(offset, offset + limit) : final.slice(offset) : final;
-        return enrich ? apply_enrich.call(this, final) : final;
+        final = offset || final.length > limit ? final.slice(offset, offset + limit) : final;
+        return enrich ? /** @type {EnrichedSearchResults} */apply_enrich.call(this, final) : final;
     }
 
     let final = [];
@@ -43,14 +44,13 @@ export default function (result, limit, offset, enrich) {
                 continue;
             }
 
-            if (offset < len) {
-                arr = limit ? arr.slice(offset, offset + limit) : arr.slice(offset);
-                len = arr.length;
-                offset = 0;
-            }
+            arr = arr.slice(offset, offset + limit);
+            len = arr.length;
+            offset = 0;
         }
 
         if (len > limit) {
+
             arr = arr.slice(0, limit);
             len = limit;
         }
@@ -58,7 +58,7 @@ export default function (result, limit, offset, enrich) {
         if (!final.length) {
 
             if (len >= limit) {
-                return enrich ? apply_enrich.call(this, arr) : arr;
+                return enrich ? /** @type {EnrichedSearchResults} */apply_enrich.call(this, arr) : arr;
             }
         }
 

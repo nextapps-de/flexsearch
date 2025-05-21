@@ -35,11 +35,12 @@ const raw = index.search("a short query", {
 const result = raw.resolve();
 ```
 
-Or use declaration style:
+Alternatively you can create a `Resolver` by passing an initial query:
 
 ```js
-import Resolver from "./resolver.js";
-const raw = new Resolver({ 
+import { Resolver } from "flexsearch";
+const raw = new Resolver({
+    // pass the index is required when query was set
     index: index,
     query: "a short query"
 });
@@ -74,25 +75,26 @@ const result = raw3.resolve({
 console.log("The final result is:", result)
 ```
 
-Use inline queries:
+Chain operations and nest inline queries:
 
 ```js
 const result = index.search("further query", {
     // set resolve to false on the first query
     resolve: false,
+    // boost the first query
     boost: 2
 })
-.or( // union
-    index.search("a query")
-    .and( // intersection
-        index.search("another query", {
-            boost: 2
-        })
-    )
-)
-.not( // exclusion
-    index.search("some query")
-)
+.or({
+    // nested expression
+    and: [{
+        query: "a query"
+    },{
+        query: "another query"
+    }]
+})
+.not({
+    query: "some query"
+})
 // resolve the result
 .resolve({
     limit: 100,
@@ -100,24 +102,27 @@ const result = index.search("further query", {
 });
 ```
 
+Alternatively you can create a `Resolver` by passing an initial query:
+
 ```js
-import Resolver from "./resolver.js";
+import { Resolver } from "flexsearch";
 const result = new Resolver({
+    // pass the index is required when query was set
     index: index,
     query: "further query",
     boost: 2
 })
 .or({
-    and: [{ // inner expression
-        index: index,
+    and: [{
         query: "a query"
     },{
+        // you can bind a different index for this
+        // query when IDs are from same source
         index: index,
-        query: "another query",
-        boost: 2
+        query: "another query"
     }]
 })
-.not({ // exclusion
+.not({
     index: index,
     query: "some query"
 })
@@ -127,67 +132,83 @@ const result = new Resolver({
 });
 ```
 
-When all queries are made against the same index, you can skip the index in every declaration followed after initially calling `new Resolve()`:
+When all queries are made against the same index, you can skip the index in every resolver stage followed after initially calling `new Resolve({ index: ... })`:
 
 ```js
-import Resolver from "./resolver.js";
+import { Resolver } from "flexsearch";
 const result = new Resolver({
     index: index,
     query: "a query"
 })
-.and({ query: "another query", boost: 2 })
+.and({ query: "another query" })
 .or ({ query: "further query", boost: 2 })
 .not({ query: "some query" })
 .resolve(100);
 ```
 
+### Using Cached Queries
+
+```js
+import { Resolver } from "flexsearch";
+const result = new Resolver({
+    index: index,
+    query: "a query",
+    cache: true
+})
+.and({ 
+    query: "another query",
+    cache: true
+})
+.resolve(100);
+```
+
+### Using Async Queries (incl. Runtime Balancer)
+
+All async tasks will run in parallel, balanced by the runtime observer:
+
+```js
+import { Resolver } from "flexsearch";
+const resolver = new Resolver({
+    index: index,
+    query: "a query",
+    async: true
+})
+.and({ 
+    query: "another query",
+    async: true
+})
+.or({
+    query: "some query",
+    async: true
+});
+const result = await resolver.resolve(100);
+```
+
+### Queuing Async Queries
+
+All queued tasks will run consecutively, also balanced by the runtime observer:
+
+```js
+import { Resolver } from "flexsearch";
+const resolver = await new Resolver({
+    index: index,
+    query: "a query",
+    async: true
+})
+.and({ 
+    query: "another query",
+    queue: true
+})
+.or({
+    query: "some query",
+    queue: true
+})
+.resolve(100);
+```
+
+When tasks are processed consecutively, it will skip specific resolver stages when there is no result expected.
+
 <!--
-### Custom Result Decoration
-
-```js
-import highlight from "./resolve/highlight.js";
-import collapse from "./resolve/collapse.js";
-const raw = index.search("a short query", { 
-    resolve: false
-});
-// resolve result for display
-const template = highlight(raw, {
-    wrapper: "<ul>$1</ul>",
-    item: "<li>$1</li>",
-    text: "$1",
-    highlight: "<b>$1</b>"
-});
-document.body.appendChild(template);
-// resolve result for further processing
-const result = collapse(raw);
-```
-
-Alternatively:
-
-```js
-const template = highlight(raw, {
-    wrapper: function(){
-        const wrapper = document.createElement("ul");
-        return wrapper;
-    },
-    item: function(wrapper){
-        const item = document.createElement("li");
-        wrapper.append(item);
-    },
-    text: function(item, content){
-        const node = document.createTextNode(content);
-        item.append(node);
-    },
-    highlight: function(item, content){
-        const node = document.createElement("b");
-        node.textContent = content;
-        item.append(node);
-    }
-});
-document.body.appendChild(template);
-```
--->
-
 ### Custom Resolver
 
 ```js
@@ -202,3 +223,4 @@ const result = index.search("a short query", {
     resolve: CustomResolver
 });
 ```
+-->

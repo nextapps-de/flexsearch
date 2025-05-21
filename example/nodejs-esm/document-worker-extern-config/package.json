@@ -2,6 +2,6 @@
   "name": "nodejs-esm-document-worker-extern-config",
   "type": "module",
   "dependencies": {
-    "flexsearch": "^0.8.105"
+    "flexsearch": "^0.8.200"
   }
 }

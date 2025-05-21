@@ -1,5 +1,5 @@
-FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md)
-
+<!-- FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md) -->
+Getting instant help by the DeepWiki AI assistant:
 [<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/nextapps-de/flexsearch)
 
 <h2></h2>
@@ -313,104 +313,104 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
     </tr>
     <tr>
         <td>flexsearch.bundle.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.bundle.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.bundle.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.bundle.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.bundle.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.bundle.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.module.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.module.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.bundle.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.bundle.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.bundle.module.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.module.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.compact.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.compact.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.compact.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.module.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.module.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.compact.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.compact.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.compact.module.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.module.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.light.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.min.js</a></td>
     </tr>****
     <tr></tr>
     <tr>
         <td>flexsearch.light.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.light.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.light.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.module.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.module.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.light.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.light.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.light.module.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.module.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.es5.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.es5.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.es5.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.es5.min.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.es5.min.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.min.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>flexsearch.es5.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.1/dist/flexsearch.es5.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.es5.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/flexsearch.es5.debug.js</a></td>
+        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.es5.debug.js" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.debug.js</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules (ESM)</td>
-        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.1%2Fdist%2Fmodule" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/module/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/module/</a></td>
+        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.2%2Fdist%2Fmodule" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module/</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules Minified (ESM)</td>
-        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.1%2Fdist%2Fmodule-min" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/module-min/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/module-min/</a></td>
+        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.2%2Fdist%2Fmodule-min" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-min/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-min/</a></td>
     </tr>
     <tr></tr>
     <tr>
         <td>Javascript Modules Debug (ESM)</td>
-        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.1%2Fdist%2Fmodule-debug" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/module-debug/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.1/dist/module-debug/</a></td>
+        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.2%2Fdist%2Fmodule-debug" target="_blank">Download</a></td>
+        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-debug/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-debug/</a></td>
     </tr>
     <tr></tr>
     <tr>
@@ -702,7 +702,7 @@ You can also load modules via CDN:
 
 ```html
 <script type="module">
-    import Index from "https://unpkg.com/flexsearch@0.8.1/dist/module/index.js";
+    import Index from "https://unpkg.com/flexsearch@0.8.2/dist/module/index.js";
     const index = new Index(/* ... */);
 </script>
 ```
@@ -801,6 +801,7 @@ The documentation will refer to several examples. A list of all examples:
 - [basic-export-import](example/nodejs-commonjs/basic-export-import)
 - [document](example/nodejs-commonjs/document)
 - [document-persistent](example/nodejs-commonjs/document-persistent)
+- [document-resolver](example/nodejs-commonjs/document-resolver)
 - [document-worker](example/nodejs-commonjs/document-worker)
 - [document-worker-extern-config](example/nodejs-commonjs/document-worker-extern-config)
 - [document-export-import](example/nodejs-commonjs/document-export-import)
@@ -821,6 +822,7 @@ The documentation will refer to several examples. A list of all examples:
 - [basic-export-import](example/nodejs-esm/basic-export-import)
 - [document](example/nodejs-esm/document)
 - [document-persistent](example/nodejs-esm/document-persistent)
+- [document-resolver](example/nodejs-esm/document-resolver)
 - [document-worker](example/nodejs-esm/document-worker)
 - [document-worker-extern-config](example/nodejs-esm/document-worker-extern-config)
 - [document-export-import](example/nodejs-esm/document-export-import)
@@ -841,6 +843,7 @@ The documentation will refer to several examples. A list of all examples:
 - [document](example/browser-legacy/document)
 - [document-highlighting](example/browser-legacy/document-highlighting)
 - [document-persistent](example/browser-legacy/document-persistent)
+- [document-resolver](example/browser-legacy/document-resolver)
 - [document-worker](example/browser-legacy/document-worker)
 - [language-pack](example/browser-legacy/language-pack)
 
@@ -857,6 +860,7 @@ The documentation will refer to several examples. A list of all examples:
 - [document](example/browser-module/document)
 - [document-highlighting](example/browser-module/document-highlighting)
 - [document-persistent](example/browser-module/document-persistent)
+- [document-resolver](example/browser-module/document-resolver)
 - [document-worker](example/browser-module/document-worker)
 - [document-worker-extern-config](example/browser-module/document-worker-extern-config)
 - [language-pack](example/browser-module/language-pack)

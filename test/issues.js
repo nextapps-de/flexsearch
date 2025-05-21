@@ -320,4 +320,139 @@ describe("Github Issues", function(){
             }
         }]);
     });
+
+    if(!build_light) it("#503", function(){
+
+        const DOCS = {
+            "./doc-1.txt": `
+                 Floor Stream
+                
+                Banana
+                `,
+            "./doc-2.txt": `
+                 Banana Listen
+                
+                Floor
+                `
+        };
+
+        class FlexSearchService {
+            constructor(){
+                const encoder = new Encoder(Charset.Normalize, {
+                    prepare: EnglishPreset.prepare,
+                    filter: EnglishPreset.filter,
+                });
+
+                this.index = new Document({
+                    // enable when frequently update existing contents
+                    fastupdate: false,
+                    document: {
+                        id: 'id',
+                        index: ['displayName', 'body', 'descriptionShort'],
+                        // add tags to the index
+                        tag: ['tags']
+                    },
+                    // favor forward tokenizer instead of full on large inputs will reduce memory
+                    tokenize: 'forward',
+                    encoder
+                });
+            }
+
+            updateIndexWithDocuments(documents) {
+                documents.forEach((document) => {
+                    const { path } = document;
+                    const body = DOCS[path]; //fs.readFileSync(path, 'utf-8');
+                    this.index.add({ ...document, body });
+                });
+            }
+
+            searchDocuments({ query, limit = 100, offset = 0 }) {
+                return this.index.search(query, {
+                    limit,
+                    offset,
+                    merge: true,
+                });
+            }
+        }
+
+        const flexSearchService = new FlexSearchService();
+
+        const mockdocs = [
+            {
+                id: 1,
+                path: './doc-1.txt',
+                displayName: 'Document 1',
+                descriptionShort: 'Document 1 short',
+                tags: ['tag-1'],
+            },
+            {
+                id: 2,
+                path: './doc-2.txt',
+                displayName: 'Document 2',
+                descriptionShort: 'Document 2 short',
+                tags: ['tag-2', 'tag-3'],
+            },
+        ];
+
+        flexSearchService.updateIndexWithDocuments(mockdocs);
+        expect(
+            flexSearchService.searchDocuments({ query: 'Floor' })
+        ).to.eql([
+            { id: 1, field: [ 'body' ] },
+            { id: 2, field: [ 'body' ] }
+        ]);
+
+        flexSearchService.updateIndexWithDocuments([mockdocs[1]]);
+        expect(
+            flexSearchService.searchDocuments({ query: 'Floor' })
+        ).to.eql([
+            { id: 1, field: [ 'body' ] },
+            { id: 2, field: [ 'body' ] }
+        ]);
+
+        flexSearchService.updateIndexWithDocuments([mockdocs[0]]);
+        expect(
+            flexSearchService.searchDocuments({ query: 'Floor' })
+        ).to.eql([
+            { id: 1, field: [ 'body' ] },
+            { id: 2, field: [ 'body' ] }
+        ]);
+
+        expect(
+            flexSearchService.searchDocuments({ query: 'Banana' })
+        ).to.eql([
+            { id: 2, field: [ 'body' ] },
+            { id: 1, field: [ 'body' ] }
+        ]);
+
+        flexSearchService.updateIndexWithDocuments([mockdocs[1]]);
+        expect(
+            flexSearchService.searchDocuments({ query: 'Floor' })
+        ).to.eql([
+            { id: 1, field: [ 'body' ] },
+            { id: 2, field: [ 'body' ] }
+        ]);
+
+        flexSearchService.updateIndexWithDocuments([mockdocs[0]]);
+        expect(
+            flexSearchService.searchDocuments({ query: 'Floor' })
+        ).to.eql([
+            { id: 1, field: [ 'body' ] },
+            { id: 2, field: [ 'body' ] }
+        ]);
+
+        flexSearchService.index.remove(mockdocs[0]);
+
+        expect(
+            flexSearchService.searchDocuments({ query: 'Floor' })
+        ).to.eql([
+            { id: 2, field: [ 'body' ] }
+        ]);
+
+        flexSearchService.index.remove(mockdocs[1]);
+
+        expect(
+            flexSearchService.searchDocuments({ query: 'Floor' })
+        ).to.eql([]);
+    });
 });

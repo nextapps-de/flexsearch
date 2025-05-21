@@ -25,8 +25,6 @@ function toArray(val, stringify){
     return result;
 }
 
-// COMPILER BLOCK -->
-
 const VERSION = 1;
 const IndexedDB = typeof window !== "undefined" && (
     window.indexedDB ||
@@ -73,7 +71,7 @@ function IdxDB(name, config = {}){
     this.trx = {};
 }
 IdxDB.prototype.mount = function(flexsearch){
-    //if(flexsearch.constructor === Document){
+   
     if(flexsearch.index){
         return flexsearch.mount(this);
     }
@@ -89,7 +87,7 @@ IdxDB.prototype.open = function(){
     navigator.storage &&
     navigator.storage.persist();
 
-   // return this.db = new Promise(function(resolve, reject){
+  
 
         Index[self.id] || (Index[self.id] = []);
         Index[self.id].push(self.field);
@@ -101,61 +99,61 @@ IdxDB.prototype.open = function(){
 
             const db = self.db = this.result;
 
-            // Using Indexes + IDBKeyRange on schema map => [key, res, id] performs
-            // too bad and blows up amazingly in size
-            // The schema map:key => [res][id] is currently used instead
-            // In fact that bypass the idea of a storage solution,
-            // IndexedDB is such a poor contribution :(
+           
+           
+           
+           
+           
             for(let i = 0, ref; i < fields.length; i++){
                 ref = fields[i];
                 for(let j = 0, field; j < Index[self.id].length; j++){
                     field = Index[self.id][j];
                     db.objectStoreNames.contains(ref + (ref !== "reg" ? (field ? ":" + field : "") : "")) ||
-                    db.createObjectStore(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));//{ autoIncrement: true /*keyPath: "id"*/ }
-                    //.createIndex("idx", "ids", { multiEntry: true, unique: false });
+                    db.createObjectStore(ref + (ref !== "reg" ? (field ? ":" + field : "") : ""));
+                   
                 }
             }
 
-            // switch(event.oldVersion){ // existing db version
-            //     case 0:
-            //     // version 0 means that the client had no database
-            //     // perform initialization
-            //     case 1:
-            //     // client had version 1
-            //     // update
-            // }
+           
+           
+           
+           
+           
+           
+           
+           
         };
 
         return self.db = promisfy(req, function(result){
-            self.db = result; //event.target.result;
+            self.db = result;
             self.db.onversionchange = function(){
-                //database is outdated
+               
                 self.close();
             };
         });
 
-        // req.onblocked = function(event) {
-        //     // this event shouldn't trigger if we handle onversionchange correctly
-        //     // it means that there's another open connection to the same database
-        //     // and it wasn't closed after db.onversionchange triggered for it
-        //     console.error("blocked", event);
-        //     reject();
-        // };
-        //
-        // req.onerror = function(event){
-        //     console.error(this.error, event);
-        //     reject();
-        // };
-        //
-        // req.onsuccess = function(event){
-        //     self.db = this.result; //event.target.result;
-        //     self.db.onversionchange = function(){
-        //         //database is outdated
-        //         self.close();
-        //     };
-        //     resolve(self);
-        // };
-   // });
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+  
 };
 
 IdxDB.prototype.close = function(){
@@ -170,20 +168,8 @@ IdxDB.prototype.destroy = function(){
     const req = IndexedDB.deleteDatabase(this.id);
     return promisfy(req);
 };
-
-// IdxDB.prototype.set = function(ref, key, ctx, data){
-//     const transaction = this.db.transaction(ref, "readwrite");
-//     const map = transaction.objectStore(ref);
-//     const req = map.put(data, ctx ? ctx + ":" + key : key);
-//     return transaction;//promisfy(req, callback);
-// };
-
-// IdxDB.prototype.delete = function(ref, key, ctx){
-//     const transaction = this.db.transaction(ref, "readwrite");
-//     const map = transaction.objectStore(ref);
-//     const req = map.delete(ctx ? ctx + ":" + key : key);
-//     return transaction;//promisfy(req, callback);
-// };
+
+
 
 /**
  * @return {!Promise<undefined>}
@@ -247,7 +233,7 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
                     }
                 }
             }
-            return enrich
+            return SUPPORT_STORE && enrich
                 ? self.enrich(result)
                 : result;
         }
@@ -257,7 +243,7 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
     });
 };
 
-{
+if(SUPPORT_TAGS){
 
     /**
      * @param {!string} tag
@@ -275,14 +261,14 @@ IdxDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, 
             if(!ids || !ids.length || offset >= ids.length) return [];
             if(!limit && !offset) return ids;
             const result = ids.slice(offset, offset + limit);
-            return enrich
+            return SUPPORT_STORE && enrich
                 ? self.enrich(result)
                 : result;
         });
     };
 }
 
-{
+if(SUPPORT_STORE){
 
     /**
      * @param {SearchResults} ids
@@ -324,16 +310,10 @@ IdxDB.prototype.has = function(id){
 };
 
 IdxDB.prototype.search = null;
-
-// IdxDB.prototype.has = function(ref, key, ctx){
-//     const transaction = this.db.transaction(ref, "readonly");
-//     const map = transaction.objectStore(ref);
-//     const req = map.getKey(ctx ? ctx + ":" + key : key);
-//     return promisfy(req);
-// };
+
 
 IdxDB.prototype.info = function(){
-    // todo
+   
 };
 
 /**
@@ -363,32 +343,32 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
         return promise;
     });
 
-    // return new Promise((resolve, reject) => {
-    //     transaction.onerror = (err) => {
-    //         transaction.abort();
-    //         transaction = store = null;
-    //         reject(err);
-    //         //db.close;
-    //     };
-    //     transaction.oncomplete = (res) => {
-    //         transaction = store = null;
-    //         resolve(res || true);
-    //         //db.close;
-    //     };
-    //     const promise = task.call(this, store);
-    //     // transactions can just be used within the same event loop
-    //     // the indexeddb is such a stupid tool :(
-    //     this.trx[key + ":" + modifier] = null;
-    //     return promise;
-    // });
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 };
 
 IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
 
-    // process cleanup tasks
+   
     if(_replace){
         await this.clear();
-        // there are just removals in the task queue
+       
         flexsearch.commit_task = [];
     }
     else {
@@ -397,7 +377,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         for(let i = 0, task; i < tasks.length; i++){
             /** @dict */
             task = tasks[i];
-            // there are just removals in the task queue
+           
             if(task["clear"]){
                 await this.clear();
                 _replace = true;
@@ -446,14 +426,14 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                                     res.push(val[j]);
                                 }
                                 changed = 1;
-                                //result[i] = res.concat(val);
-                                //result[i] = new Set([...result[i], ...value[i]]);
-                                //result[i] = result[i].union(new Set(value[i]));
+                               
+                               
+                               
                             }
                             else {
                                 result[i] = val;
                                 changed = 1;
-                                //result[i] = new Set(value[i])
+                               
                             }
                         }
                     }
@@ -461,10 +441,10 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                 else {
                     result = value;
                     changed = 1;
-                    //result = [];
-                    //for(let i = 0; i < value.length; i++){
-                    //    if(value[i]) result[i] = new Set(value[i]);
-                    //}
+                   
+                   
+                   
+                   
                 }
 
                 changed &&
@@ -502,7 +482,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                                     for(let j = 0; j < val.length; j++){
                                         res.push(val[j]);
                                     }
-                                    //result[i] = res.concat(val);
+                                   
                                     changed = 1;
                                 }
                                 else {
@@ -524,7 +504,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         }
     });
 
-    if(flexsearch.store){
+    if(SUPPORT_STORE && flexsearch.store){
         await this.transaction("reg", "readwrite", function(store){
             for(const item of flexsearch.store){
                 const id = item[0];
@@ -544,7 +524,7 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         });
     }
 
-    if(flexsearch.tag){
+    if(SUPPORT_TAGS && flexsearch.tag){
         await this.transaction("tag", "readwrite", function(store){
             for(const item of flexsearch.tag){
                 const tag = item[0];
@@ -562,32 +542,32 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
         });
     }
 
-    // TODO
-    // await this.transaction("cfg", "readwrite", function(store){
-    //     store.put({
-    //         "charset": flexsearch.charset,
-    //         "tokenize": flexsearch.tokenize,
-    //         "resolution": flexsearch.resolution,
-    //         "fastupdate": flexsearch.fastupdate,
-    //         "compress": flexsearch.compress,
-    //         "encoder": {
-    //             "minlength": flexsearch.encoder.minlength
-    //         },
-    //         "context": {
-    //             "depth": flexsearch.depth,
-    //             "bidirectional": flexsearch.bidirectional,
-    //             "resolution": flexsearch.resolution_ctx
-    //         }
-    //     }, "current");
-    // });
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
-    {
+    if(SUPPORT_TAGS){
         flexsearch.tag &&
         flexsearch.tag.clear();
     }
-    {
+    if(SUPPORT_STORE){
         flexsearch.store &&
         flexsearch.store.clear();
     }
@@ -608,7 +588,7 @@ function handle(cursor, ids, _tag){
     let count = 0;
 
     for(let x = 0, result; x < arr.length; x++){
-        // tags has no resolution layer
+       
         if((result = _tag ? arr : arr[x])){
             for(let i = 0, pos, id; i < ids.length; i++){
                 id = ids[i];
@@ -632,12 +612,12 @@ function handle(cursor, ids, _tag){
 
     if(!count){
         cursor.delete();
-        //store.delete(cursor.key);
+       
     }
     else if(changed){
-        //await new Promise(resolve => {
-        cursor.update(arr);//.onsuccess = resolve;
-        //});
+       
+        cursor.update(arr);
+       
     }
 
     cursor.continue();
@@ -668,35 +648,35 @@ IdxDB.prototype.remove = function(ids){
                 cursor && handle(cursor, ids);
             };
         }),
-        self.transaction("tag", "readwrite", function(store){
+        SUPPORT_TAGS && self.transaction("tag", "readwrite", function(store){
             store.openCursor().onsuccess = function(){
                 const cursor = this.result;
-                cursor && handle(cursor, ids, /* tag? */ true);
+                cursor && handle(cursor, ids,  true);
             };
         }),
-        // let filtered = [];
+       
         self.transaction("reg", "readwrite", function(store){
             for(let i = 0; i < ids.length; i++){
                 store.delete(ids[i]);
             }
-            // return new Promise(resolve => {
-            //     store.openCursor().onsuccess = function(){
-            //         const cursor = this.result;
-            //         if(cursor){
-            //             const id = cursor.value;
-            //             if(ids.includes(id)){
-            //                 filtered.push(id);
-            //                 cursor.delete();
-            //             }
-            //             cursor.continue();
-            //         }
-            //         else{
-            //             resolve();
-            //         }
-            //     };
-            // });
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
         })
-        // ids = filtered;
+       
     ]));
 };
 
@@ -708,7 +688,7 @@ IdxDB.prototype.remove = function(ids){
 
 function promisfy(req, callback){
     return new Promise((resolve, reject) => {
-        // oncomplete is used for transaction
+       
         /** @this {IDBRequest|IDBOpenDBRequest} */
         req.onsuccess = req.oncomplete = function(){
             callback && callback(this.result);
