@@ -88,7 +88,7 @@ describe("Github Issues", function(){
         }]);
     });
 
-    it("#486", async function(){
+    if(!build_light && !build_compact) it("#486", async function(){
 
         const EnglishPreset = (await import("../src/lang/en.js")).default;
         const encoder = new Encoder(Charset.LatinDefault, EnglishPreset);
@@ -321,7 +321,7 @@ describe("Github Issues", function(){
         }]);
     });
 
-    if(!build_light) it("#503", async function(){
+    if(!build_light && !build_compact)  it("#503", async function(){
 
         const EnglishPreset = (await import("../src/lang/en.js")).default;
         const DOCS = {
