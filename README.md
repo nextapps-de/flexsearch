@@ -1,5 +1,6 @@
 <!-- FlexSearch v0.8: [Overview and Migration Guide](doc/0.8.0.md) -->
 Getting instant help by the DeepWiki AI assistant:
+
 [<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/nextapps-de/flexsearch)
 
 <h2></h2>

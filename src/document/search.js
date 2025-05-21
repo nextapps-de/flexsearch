@@ -333,6 +333,7 @@ Document.prototype.search = function(query, limit, options, _promises){
 
         res = res.result || res;
         len = res && res.length;
+
         // todo when no term was matched but tag was retrieved extend suggestion to tags
         // every field has to intersect against all selected tag fields
         if(tag && len){
