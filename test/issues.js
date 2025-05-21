@@ -9,7 +9,6 @@ const build_light = env && env.includes(".light");
 const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
-const EnglishPreset = (await import("../src/lang/en.js")).default;
 
 describe("Github Issues", function(){
 
@@ -89,8 +88,9 @@ describe("Github Issues", function(){
         }]);
     });
 
-    it("#486", function(){
+    it("#486", async function(){
 
+        const EnglishPreset = (await import("../src/lang/en.js")).default;
         const encoder = new Encoder(Charset.LatinDefault, EnglishPreset);
         const index = new Index({
             tokenize: "full",
@@ -321,8 +321,9 @@ describe("Github Issues", function(){
         }]);
     });
 
-    if(!build_light) it("#503", function(){
+    if(!build_light) it("#503", async function(){
 
+        const EnglishPreset = (await import("../src/lang/en.js")).default;
         const DOCS = {
             "./doc-1.txt": `
                  Floor Stream
