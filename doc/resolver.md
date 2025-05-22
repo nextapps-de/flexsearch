@@ -1,4 +1,4 @@
-## Resolver
+## Resolver (Complex Queries)
 
 Retrieve an unresolved result:
 
@@ -63,7 +63,8 @@ const raw2 = index.search("another query", {
 
 // 2. apply and chain resolver operations
 const raw3 = raw1.and(raw2, /* ... */);
-// you can access the aggregated result by raw3.result
+// raw1 has changed, raw2 is same, raw3 refers to raw1
+// you can access the raw result by
 console.log("The aggregated result is:", raw3.result)
 // apply further operations ...
 
@@ -186,6 +187,26 @@ const resolver = new Resolver({
 const result = await resolver.resolve(100);
 ```
 
+When you need to access the raw result `resolver.result` you should await for the task completion of all added resolver stages up to this point.
+
+```js
+const resolver = new Resolver({
+    index: index,
+    query: "a query",
+    async: true
+})
+.and({ 
+    query: "another query",
+    async: true
+});
+
+// await for the task completion
+await resolver.await;
+// get the raw result
+const raw = resolver.result;
+// continue adding further tasks ...
+```
+
 ### Queuing Async Queries
 
 All queued tasks will run consecutively, also balanced by the runtime observer:
@@ -212,19 +233,15 @@ When tasks are processed consecutively, it will skip specific resolver stages wh
 
 ### Compare Parallel VS. Consecutive
 
-When using the parallel workflow, all resolver stages will send their requests (including nested tasks) to the DB immediately and calculate the results in the right order as soon as the request resolves. When the overall workload of your applications has some free resources, a parallel request workflow improves performance compared to the consecutive counterpart. 
+When using the parallel workflow by passing `{ async: true }`, all resolver stages will send their requests (including nested tasks) to the DB immediately and calculate the results in the right order as soon as the request resolves. When the overall workload of your applications has some free resources, a parallel request workflow improves performance compared to the consecutive counterpart. 
 
-<p align="center">
-    <img src="resolver-parallel.svg" width="100%">
-</p>
+<br><img src="resolver-parallel.svg" width="width: 750px; max-width: 100%">
 
----
+<h2></h2>
 
-When using the consecutive workflow, all resolver stages will send their requests (including nested tasks) to the DB only when the previous request resolves. The advantage of this variant is when a stage becomes invalid because of the previous result, it can skip the request completely and continue with the next stage. This can reduce the overall workload.
+When using the consecutive workflow by passing `{ queue: true }`, all resolver stages will send their requests (including nested tasks) to the DB only when the previous request resolves. The advantage of this variant is when a stage becomes invalid because of the previous result, it can skip the request completely and continue with the next stage. This can reduce the overall workload.
 
-<p align="center">
-    <img src="resolver-consecutive.svg" width="100%">
-</p>
+<br><img src="resolver-consecutive.svg" width="width: 750px; max-width: 100%">
 
 <!--
 ### Custom Resolver

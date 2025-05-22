@@ -108,14 +108,19 @@ RedisDB.prototype.destroy = function(){
 };
 
 RedisDB.prototype.clear = function(){
-    return this.db.unlink([
-        this.id + "map" + this.field,
-        this.id + "ctx" + this.field,
-        this.id + "tag" + this.field,
-        this.id + "cfg" + this.field,
-        this.id + "doc",
-        this.id + "reg"
-    ]);
+    if(!this.id) return;
+    const self = this;
+    return this.db.keys(
+        this.id + "*"
+       
+       
+       
+       
+       
+       
+    ).then(function(keys){
+        return keys.length && self.db.unlink(keys);
+    });
 };
 
 function create_result(range, type, resolve, enrich, resolution){

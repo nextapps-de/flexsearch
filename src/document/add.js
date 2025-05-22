@@ -259,9 +259,9 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
             }
         }
     }
-    else{
-        if(SUPPORT_PERSISTENT && index.db){
-            index.remove(id);
-        }
-    }
+    // else{
+    //     if(SUPPORT_PERSISTENT && index.db){
+    //         index.remove(id);
+    //     }
+    // }
 }

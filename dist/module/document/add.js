@@ -224,9 +224,5 @@ function add_index(obj, tree, marker, pos, index, id, key, _append) {
                 add_index(obj, tree, marker, pos, index, id, key, _append);
             }
         }
-    } else {
-        if (index.db) {
-            index.remove(id);
-        }
     }
 }

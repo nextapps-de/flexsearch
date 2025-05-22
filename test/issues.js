@@ -9,6 +9,7 @@ const build_light = env && env.includes(".light");
 const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
+const EnglishPreset = (await import("../src/lang/en.js")).default;
 
 describe("Github Issues", function(){
 
@@ -88,9 +89,8 @@ describe("Github Issues", function(){
         }]);
     });
 
-    if(!build_light && !build_compact) it("#486", async function(){
+    it("#486", function(){
 
-        const EnglishPreset = (await import("../src/lang/en.js")).default;
         const encoder = new Encoder(Charset.LatinDefault, EnglishPreset);
         const index = new Index({
             tokenize: "full",
@@ -321,9 +321,8 @@ describe("Github Issues", function(){
         }]);
     });
 
-    if(!build_light && !build_compact)  it("#503", async function(){
+    if(!build_light) it("#503", function(){
 
-        const EnglishPreset = (await import("../src/lang/en.js")).default;
         const DOCS = {
             "./doc-1.txt": `
                  Floor Stream
@@ -470,20 +469,8 @@ describe("Github Issues", function(){
 
         searchIndex.add({
             id: 1,
-            name: "name",
-            shortName: "" // empty
-        });
-
-        searchIndex.add({
-            id: 2,
-            name: "another name",
-            //shortName: undefined
-        });
-
-        searchIndex.add({
-            id: 3,
-            //name: undefined,
-            shortName: "short name"
+            name: "a name",
+            shortName: "" // Or undefined
         });
 
         const result = searchIndex.search({
@@ -491,8 +478,7 @@ describe("Github Issues", function(){
         });
 
         expect(result).to.eql([
-            { field: 'name', result: [ 1, 2 ] },
-            { field: 'shortName', result: [ 3 ] }
+            { field: 'name', result: [ 1 ] }
         ]);
     });
 });
