@@ -10,12 +10,10 @@ const build_compact = env && env.includes("compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-import Mongo_src from "../src/db/mongodb/index.js";
-import Mongo_dist from "../dist/module/db/mongodb/index.js";
 import tests from "./persistent.js";
 
 if(!build_light && !build_compact){
-    describe("Persistent: Mongo", function(){
-        tests(env ? Mongo_dist : Mongo_src, "Mongo");
+    describe("Persistent: Mongo", async function(){
+        await tests("Mongo");
     });
 }

@@ -60,24 +60,11 @@ jobs:
       with:
         java-version: 21
     - run: npm install
-    - run: npm install clickhouse
-    - run: npm install redis
-    - run: npm install mongodb
-    - run: npm install pg-promise
-    - run: npm install sqlite3
-    - run: npm run build:compact --if-present
-    - run: npm run build:module:compact --if-present
-    - run: npm run build:light --if-present
-    - run: npm run build:module:light --if-present
+    - run: npm run build:compact
+    - run: npm run build:module:compact
+    - run: npm run build:light
+    - run: npm run build:module:light
     - run: npm install
       working-directory: test
-    - run: npm run test:github-1
-      working-directory: test
-    - run: npm run test:github-2
-      working-directory: test
-    - run: npm run test:github-3
-      working-directory: test
-    - run: npm run test:github-4
-      working-directory: test
-    - run: npm run test:github-5
+    - run: npm run test:github
       working-directory: test

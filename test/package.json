@@ -4,11 +4,7 @@
   "scripts": {
     "test": "mocha ./*.js --exit",
     "test:ts": "npx tsc --noEmit --lib esnext ./types.ts",
-    "test:github-1": "npm run test:ts ",
-    "test:github-2": "mocha ./*.js --exit flexsearch.light.min",
-    "test:github-3": "mocha ./*.js --exit flexsearch.light.module.min",
-    "test:github-4": "mocha ./*.js --exit flexsearch.compact.min",
-    "test:github-5": "mocha ./*.js --exit flexsearch.compact.module.min",
+    "test:github": "npm run test:ts && mocha ./*.js --exit flexsearch.light.min && mocha ./*.js --exit flexsearch.light.module.min && mocha ./*.js --exit flexsearch.compact.min && mocha ./*.js --exit flexsearch.compact.module.min",
     "test:coverage": "c8 -c ./.c8rc.json mocha ./*.js --exit",
     "test:keystore": "set NODE_OPTIONS=--max-old-space-size=16000 && c8 -c ./.c8rc.json mocha ./keystore.js --exit",
     "test:db": "c8 -c ./.c8rc.json mocha ./persistent.*.js --exit",

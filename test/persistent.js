@@ -10,7 +10,24 @@ const build_compact = env && env.includes("compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-export default function(DB, DBClass){
+export default async function(DBClass){
+
+    let DB;
+    if(DBClass === "Clickhouse"){
+        DB = (await import(env ? "../dist/module/db/clickhouse/index.js" : "../src/db/clickhouse/index.js")).default;
+    }
+    if(DBClass === "Redis"){
+        DB = (await import(env ? "../dist/module/db/redis/index.js" : "../src/db/redis/index.js")).default;
+    }
+    if(DBClass === "Mongo"){
+        DB = (await import(env ? "../dist/module/db/mongodb/index.js" : "../src/db/mongodb/index.js")).default;
+    }
+    if(DBClass === "SQLite"){
+        DB = (await import(env ? "../dist/module/db/sqlite/index.js" : "../src/db/sqlite/index.js")).default;
+    }
+    if(DBClass === "Postgres"){
+        DB = (await import(env ? "../dist/module/db/postgres/index.js" : "../src/db/postgres/index.js")).default;
+    }
 
     const data = [{
         "tconst": "tt0000001",
