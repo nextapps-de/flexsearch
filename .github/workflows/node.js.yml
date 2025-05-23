@@ -71,5 +71,13 @@ jobs:
     - run: npm run build:module:light --if-present
     - run: npm install
       working-directory: test
-    - run: npm run test:github
+    - run: npm run test:github-1
+      working-directory: test
+    - run: npm run test:github-2
+      working-directory: test
+    - run: npm run test:github-3
+      working-directory: test
+    - run: npm run test:github-4
+      working-directory: test
+    - run: npm run test:github-5
       working-directory: test
