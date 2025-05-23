@@ -57,7 +57,7 @@ jobs:
         cache: 'npm'
     - uses: actions/setup-java@v1
       with:
-        java-version: 11
+        java-version: 14
     - run: npm install
     - run: npm run build:bundle --if-present
     - run: npm install
