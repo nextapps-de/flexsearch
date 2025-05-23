@@ -1,19 +1,23 @@
 {
-    "reporter": "text",
-    "reports-dir": "./test/report/",
-    "branches": 80,
-    "functions": 80,
-    "lines": 80,
-    "statements": 80,
-    "exclude": [
-      "src/compress.js",
-      "src/db/indexeddb/**"
-    ],
-    "src": [
-      "src"
-    ],
-    "include": [
-      "test/*.js",
-      "src/**"
-    ]
+  "reporter": ["text", "text-summary", "html"],
+  "reports-dir": "./test/report/",
+  "branches": 80,
+  "functions": 80,
+  "lines": 80,
+  "statements": 80,
+  "src": [
+    "src"
+  ],
+  "include": [
+    "src/**"
+  ],
+  "exclude": [
+    "test/*.js",
+    "src/compress.js",
+    "src/type.js",
+    "src/profiler.js",
+    "src/db/indexeddb/*",
+    "src/worker/node.js",
+    "src/worker/worker.js"
+  ]
 }

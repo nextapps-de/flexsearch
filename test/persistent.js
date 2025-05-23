@@ -236,17 +236,12 @@ export default function(DB, DBClass){
 
         // mount database to the index
         await document.mount(db);
+        await document.clear();
+
         expect(document.index.get("primaryTitle").db).to.be.instanceof(db.constructor);
         expect(document.index.get("originalTitle").db).to.be.instanceof(db.constructor);
         expect(document.index.get("startYear").db).to.be.instanceof(db.constructor);
         expect(document.index.get("genres").db).to.be.instanceof(db.constructor);
-
-        //await document.destroy();
-        //expect(document.index.get("primaryTitle").db).to.be.instanceof(db.constructor);
-        // mount database to the index
-        //await db.mount(document);
-        //expect(document.index.get("primaryTitle").db).to.be.instanceof(db.constructor);
-        //await document.clear();
 
         // add test data
         for(let i = 0; i < data.length; i++){
@@ -270,7 +265,6 @@ export default function(DB, DBClass){
 
         // transfer changes in bulk
         await document.commit();
-        //await new Promise(resolve => setTimeout(resolve, 200));
 
         expect(document.index.get("primaryTitle").reg.size).to.equal(0);
         expect(document.index.get("primaryTitle").map.size).to.equal(0);
@@ -382,6 +376,17 @@ export default function(DB, DBClass){
             field: [ 'primaryTitle', 'originalTitle' ]
         });
 
+        await document.clear();
+
+        result = await document.search({
+            query: "karmen or clown or nothing",
+            suggest: true,
+            enrich: true,
+            merge: true
+        });
+
+        expect(result).to.eql([]);
+
         for(const index of document.index.values()){
             index.destroy();
             index.db.close();
@@ -400,7 +405,7 @@ export default function(DB, DBClass){
         }];
 
         // create the document index
-        const index = new Document({
+        const document = new Document({
             cache: true,
             db: new DB("test-highlight", {
                 type: "Integer"
@@ -415,18 +420,18 @@ export default function(DB, DBClass){
             }
         });
 
-        //await index.mount(db);
-        await index.db;
+        //await document.mount(db);
+        await document.db;
 
         // add test data
         for(let i = 0; i < data.length; i++){
-            index.add(data[i]);
+            document.add(data[i]);
         }
 
-        await index.commit();
+        await document.commit();
 
         // perform a query
-        let result = await index.searchCache({
+        let result = await document.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
             highlight: "<b>$1</b>"
@@ -443,7 +448,7 @@ export default function(DB, DBClass){
         }]);
 
         // perform a query on cache
-        result = await index.searchCache({
+        result = await document.searchCache({
             query: "karmen or clown or not found",
             suggest: true,
             highlight: "<b>$1</b>"
@@ -460,7 +465,7 @@ export default function(DB, DBClass){
         }]);
 
         // perform a query using pluck
-        result = await index.search({
+        result = await document.search({
             query: "karmen or clown or not found",
             suggest: true,
             field: "title",
@@ -476,6 +481,11 @@ export default function(DB, DBClass){
             doc: data[1],
             highlight: 'Le <b>clown</b> et ses chiens'
         }]);
+
+        for(const index of document.index.values()){
+            index.destroy();
+            index.db.close();
+        }
     });
 
     it("Resolver (Persistent)", async function(){
@@ -492,7 +502,7 @@ export default function(DB, DBClass){
         }];
 
         // create the document index
-        const index = new Document({
+        const document = new Document({
             db: new DB("test-store", {
                 type: "integer"
             }),
@@ -509,78 +519,77 @@ export default function(DB, DBClass){
             }
         });
 
-        await index.db;
+        await document.db;
 
         // add test data
         for(let i = 0; i < data.length; i++){
-            index.add(data[i]);
+            document.add(data[i]);
         }
 
-        await index.commit();
+        await document.commit();
 
         let result = new Resolver({
-            index: index,
-            query: "karmen",
-            field: "title"
+            index: document,
+            query: "not found",
+            field: "description"
         });
 
         expect(result).to.be.instanceof(Resolver);
 
-        result = result.or({
-            query: "clown",
-            pluck: "description",
-        });
-
         result = result.and({
-            query: "not found",
-            field: "title",
+            query: "karmen or clown",
+            pluck: "title",
             suggest: true,
             enrich: true,
             resolve: true,
-            // TODO
-            //highlight: "<b>$1</b>"
+            highlight: "<b>$1</b>"
         });
 
         expect(result).to.be.instanceof(Promise);
         expect(await result).to.eql([{
             id: 1,
             doc: data[0],
-            //highlight: "<b>Carmen</b>cita"
+            highlight: "<b>Carmen</b>cita"
         },{
             id: 2,
             doc: data[1],
-            //highlight: "Le <b>clown</b> et ses chiens"
+            highlight: "Le <b>clown</b> et ses chiens"
         }]);
 
         // -----------------------------------
 
         result = new Resolver({
-            index: index,
-            query: "karmen",
-            field: "title"
+            index: document,
+            query: "not found",
+            field: "description"
         });
 
         expect(result).to.be.instanceof(Resolver);
 
         result = result.or({
-            query: "clown",
-            pluck: "description",
-        }).and({
-            query: "not found",
-            field: "title",
+            query: "karmen or clown",
+            pluck: "title",
             suggest: true
         }).resolve({
-            enrich: true
+            enrich: true,
+            highlight: "<b>$1</b>"
         });
 
         expect(result).to.be.instanceof(Promise);
         expect(await result).to.eql([{
             id: 1,
-            doc: data[0]
+            doc: data[0],
+            highlight: "<b>Carmen</b>cita"
         },{
             id: 2,
-            doc: data[1]
+            doc: data[1],
+            highlight: "Le <b>clown</b> et ses chiens"
         }]);
+
+        for(const index of document.index.values()){
+            index.destroy();
+            index.db.close();
+        }
     });
 
     it("Should have been resolved a Resolver properly (Async)", async function(){
@@ -744,6 +753,9 @@ export default function(DB, DBClass){
 
         expect(resolver).to.be.instanceof(Promise);
         expect(await resolver).to.have.members([3, 1, 2]);
+
+        await index.destroy();
+        await index.db.close();
     });
 
     it("Should have been resolved a Resolver properly (Document Persistent)", async function(){
@@ -774,6 +786,7 @@ export default function(DB, DBClass){
 
         // mount database to the index
         await document.mount(db);
+        await document.clear();
 
         // add test data
         for(let i = 0; i < data.length; i++){
@@ -926,180 +939,11 @@ export default function(DB, DBClass){
 
         expect(resolver).to.be.instanceof(Promise);
         expect(await resolver).to.eql(["tt0000001", "tt0000002"]);
-    });
 
-    it("Should have been resolved a Resolver properly (Document Worker)", async function(){
-
-        // create the document index
-        const document = await new Document({
-            worker: true,
-            encoder: Charset.LatinBalance,
-            document: {
-                id: "tconst",
-                store: true,
-                index: [{
-                    field: "primaryTitle",
-                    tokenize: "forward"
-                },{
-                    field: "originalTitle",
-                    tokenize: "forward"
-                }],
-                tag: [{
-                    field: "startYear"
-                },{
-                    field: "genres"
-                }]
-            }
-        });
-
-        // add test data
-        for(let i = 0; i < data.length; i++){
-            await document.addAsync(data[i]);
+        for(const index of document.index.values()){
+            index.destroy();
+            index.db.close();
         }
-
-        let resolver = new Resolver({
-            index: document,
-            query: "karmen or clown or nothing",
-            field: "primaryTitle",
-            suggest: true
-        });
-
-        expect(resolver).to.be.instanceof(Resolver);
-        expect(resolver.result).to.eql([]);
-        expect(resolver.await).to.be.instanceof(Promise);
-
-        let tmp = resolver.await;
-        resolver = resolver.resolve();
-        expect(resolver).to.be.instanceof(Promise);
-        expect(await resolver).to.have.members(["tt0000001", "tt0000002"]);
-        expect((await tmp)[0]).to.have.members(["tt0000001"]);
-
-        // -----------------------------------
-
-        resolver = new Resolver({
-            index: document,
-            async: true,
-            query: "karmen or clown or nothing",
-            field: "primaryTitle",
-            suggest: true
-        });
-
-        expect(resolver).to.be.instanceof(Resolver);
-        expect(resolver.result).to.eql([]);
-        expect(resolver.await).to.be.instanceof(Promise);
-
-        tmp = resolver.await;
-        resolver = resolver.resolve({ enrich: true });
-        expect(resolver).to.be.instanceof(Promise);
-        expect(await resolver).to.eql([{
-            id: data[0].tconst,
-            doc: data[0]
-        }, {
-            id: data[1].tconst,
-            doc: data[1]
-        }]);
-        expect((await tmp)[0]).to.have.members(["tt0000001"]);
-
-        // -----------------------------------
-
-        resolver = new Resolver({
-            index: document,
-            async: true,
-            query: "karmen or clown or nothing",
-            field: "primaryTitle",
-            suggest: true
-        }).or({
-            index: document,
-            queue: true,
-            query: "karmen or clown or nothing",
-            pluck: "primaryTitle",
-            suggest: true,
-            enrich: true,
-            resolve: true
-        });
-
-        expect(resolver).to.be.instanceof(Promise);
-        expect(await resolver).to.eql([{
-            id: data[0].tconst,
-            doc: data[0]
-        }, {
-            id: data[1].tconst,
-            doc: data[1]
-        }]);
-
-        // -----------------------------------
-
-        resolver = new Resolver({
-            index: document,
-            async: true,
-            query: "karmen or clown or nothing",
-            pluck: "primaryTitle",
-            suggest: true
-        });
-
-        expect(resolver).to.be.instanceof(Resolver);
-        expect(resolver.result).to.eql([]);
-        expect(resolver.await).to.be.instanceof(Promise);
-
-        resolver = resolver.resolve({
-            limit: 1,
-            offset: 1
-        });
-        expect(resolver).to.be.instanceof(Promise);
-        expect(await resolver).to.eql(["tt0000002"]);
-
-        // -----------------------------------
-
-        resolver = new Resolver({
-            index: document,
-            async: true,
-            query: "karmen",
-            pluck: "primaryTitle"
-        }).or({
-            queue: true,
-            cache: true,
-            query: "clown",
-            field: "originalTitle"
-        }).and({
-            async: true,
-            query: "not found",
-            pluck: "originalTitle",
-            suggest: true
-        });
-
-        expect(resolver).to.be.instanceof(Resolver);
-        resolver = resolver.resolve();
-
-        expect(resolver).to.be.instanceof(Promise);
-        expect(await resolver).to.eql(["tt0000001", "tt0000002"]);
-
-        // -----------------------------------
-
-        resolver = new Resolver({
-            index: document,
-            async: true,
-            // TODO
-            //cache: true,
-            query: "karmen",
-            pluck: "primaryTitle"
-        }).or({
-            and: [{
-                async: true,
-                //cache: true,
-                query: "not found",
-                pluck: "originalTitle",
-                suggest: true
-            },{
-                queue: true,
-                //cache: true,
-                query: "clown",
-                field: "originalTitle",
-                suggest: true
-            }]
-        }).resolve();
-
-        expect(resolver).to.be.instanceof(Promise);
-        expect(await resolver).to.eql(["tt0000001", "tt0000002"]);
     });
 
     it("Should have been resolved a Resolver properly (Queue)", async function(){
@@ -1165,11 +1009,11 @@ export default function(DB, DBClass){
             index: index,
             async: true,
             query: "bar"
-        }).and({
+        }).limit(3).and({
             queue: true,
             query: "foo",
             suggest: true
-        });
+        }).limit(3);
 
         expect(resolver).to.be.instanceof(Resolver);
         resolver = resolver.resolve();
@@ -1181,6 +1025,24 @@ export default function(DB, DBClass){
 
         resolver = new Resolver({
             index: index,
+            async: true,
+            query: "bar"
+        }).boost(2).and({
+            queue: true,
+            query: "foo",
+            suggest: true
+        }).offset(1).limit(1);
+
+        expect(resolver).to.be.instanceof(Resolver);
+        resolver = resolver.resolve();
+
+        expect(resolver).to.be.instanceof(Promise);
+        expect(await resolver).to.have.members([1]);
+
+        // -----------------------------------
+
+        resolver = new Resolver({
+            index: index,
             queue: true,
             query: "bar"
         }).and({
@@ -1264,5 +1126,46 @@ export default function(DB, DBClass){
 
         expect(resolver).to.be.instanceof(Promise);
         expect(await resolver).to.have.members([3, 1, 2]);
+
+        await index.destroy();
+        await index.db.close();
+    });
+
+    it("#504", async function(){
+
+        const document = new Document({
+            tokenize: "forward",
+            commit: true,
+            document: {
+                id: "id",
+                index: ["name", "shortName"],
+                store: true,
+            },
+        });
+
+        const db = new DB("mystore", { type: "integer" });
+        await document.mount(db);
+        await document.clear();
+
+        document.add({
+            id: 1,
+            name: "a name",
+            shortName: "" // Or undefined
+        });
+
+        await document.commit();
+
+        const result = await document.search({
+            query: "name"
+        });
+
+        expect(result).to.eql([
+            { field: 'name', result: [ 1 ] }
+        ]);
+
+        for(const index of document.index.values()){
+            index.destroy();
+            index.db.close();
+        }
     });
 }

@@ -3,6 +3,7 @@ import { DEBUG } from "../config.js";
 // <-- COMPILER BLOCK
 import { parse_simple } from "../common.js";
 import Index from "../index.js";
+import WorkerIndex from "../worker.js";
 import {
     EnrichedDocumentSearchResults,
     EnrichedSearchResults,
@@ -12,7 +13,7 @@ import {
 /**
  * @param {string} query
  * @param {EnrichedDocumentSearchResults|EnrichedSearchResults} result
- * @param {Map<string, Index>} index
+ * @param {Map<string, Index|WorkerIndex>} index
  * @param {string} pluck
  * @param {HighlightOptions|string} config
  * @return {EnrichedDocumentSearchResults|EnrichedSearchResults}
@@ -82,7 +83,6 @@ export function highlight_fields(query, result, index, pluck, config){
     // cache shared encoders across fields
     let encoder = new Map();
     let query_enc;
-    let tokenize;
 
     // todo remove this loop and pass in the field data directly
     // todo support field-specific configuration
@@ -94,24 +94,22 @@ export function highlight_fields(query, result, index, pluck, config){
         let res;
 
         if(pluck){
-            //res = result[0].result;
             res = result;
             path = pluck;
         }
         else{
             const tmp = result[i];
             path = tmp.field;
-            // skip when not a field entry (e.g. tags)
+            // skip when not a field entry (e.g., tags)
             if(!path) continue;
             res = tmp.result;
         }
 
         idx = index.get(path);
         enc = idx.encoder;
-        tokenize = idx.tokenize;
         query_enc = encoder.get(enc);
 
-        // re-encode query when encoder has changed or take cache from shared encoders
+        // re-encode a query when encoder has changed or take cache from shared encoders
         if(typeof query_enc !== "string"){
             query_enc = enc.encode(query);
             encoder.set(enc, query_enc);
@@ -124,7 +122,7 @@ export function highlight_fields(query, result, index, pluck, config){
             if(!doc) continue;
             const content = parse_simple(doc, path);
             if(!content) continue;
-            // just split on whitespace and keep original string (encoder split can't apply)
+            // just split on whitespace and keep the original string (encoder split can't apply)
             const doc_org = content.trim().split(/\s+/);
             if(!doc_org.length) continue;
 
@@ -159,7 +157,7 @@ export function highlight_fields(query, result, index, pluck, config){
                         let query_enc_cur_len = query_enc_cur.length;
                         // add length from shrinking phonetic transformations (todo: add tests)
                         query_enc_cur_len += doc_org_diff;
-                        // skip query token when match length can't exceed previously highest found match
+                        // skip the query token when match length can't exceed the previously highest found match
                         if(match_length && query_enc_cur_len <= match_length){
                             continue;
                         }
@@ -187,12 +185,12 @@ export function highlight_fields(query, result, index, pluck, config){
                                 pos_first_match = str.length + (str ? 1 : 0);
                             }
                             pos_last_match = str.length + (str ? 1 : 0) + match.length;
-                            // the overall length of all matches is used to check if matches exceeds the total boundary
+                            // the overall length of all matches is used to check if matches exceed the total boundary
                             // if so, it can early stop further processing
                             length_matches_all += doc_org_cur_len;
                             // the match positions are used to pick items for the final result more quickly
                             pos_matches.push(str_arr.length)
-                            // collect every term as match or text
+                            // collect every term as a match or text
                             str_arr.push({ match });
                         }
                         str += (str ? " " : "") + match;
@@ -202,12 +200,12 @@ export function highlight_fields(query, result, index, pluck, config){
                 if(!found){
                     const text = doc_org[k];
                     str += (str ? " " : "") + text;
-                    // collect every term as match or text
+                    // collect every term as a match or text
                     boundary && str_arr.push({ text });
                 }
                 else if(boundary){
                     if(length_matches_all >= boundary){
-                        // matches has reached total boundary
+                        // matches have reached the total boundary
                         break;
                     }
                 }
@@ -219,7 +217,7 @@ export function highlight_fields(query, result, index, pluck, config){
             // apply boundaries and align highlights
             if(boundary_before || boundary_after || (boundary && (str.length - markup_length) > boundary)){
 
-                // also reduce ellipsis length from boundary
+                // also reduce ellipsis length from the boundary
                 let boundary_length = boundary + markup_length - ellipsis_length * 2;
                 let length = pos_last_match - pos_first_match;
                 let start, end;
@@ -351,12 +349,12 @@ export function highlight_fields(query, result, index, pluck, config){
                             // 2. add surrounded text to the result
                             else{
                                 // alternate direction term by term
-                                // 2.1. extend to right first (index: k + 1)
+                                // 2.1. extend to the right first (index: k + 1)
                                 if(shift_left !== shift_right){
                                     if(finished[k + 1]) continue;
                                     pos += shift_right;
 
-                                    // overlap with other slot
+                                    // overlap with another slot
                                     if(check[pos]){
                                         final_length -= ellipsis_length;
                                         seamless[k + 1] = 1;
@@ -422,7 +420,7 @@ export function highlight_fields(query, result, index, pluck, config){
                                     if(finished[k]) continue;
                                     pos -= shift_left;
 
-                                    // overlap with other slot
+                                    // overlap with another slot
                                     if(check[pos]){
                                         final_length -= ellipsis_length;
                                         finished[k] = 1;
@@ -500,11 +498,11 @@ export function highlight_fields(query, result, index, pluck, config){
                             shift_left === shift_right
                                 ? loop_left = 0
                                 : loop_right = 0;
-                            // break process when both directions are done
+                            // break the process when both directions are done
                             if(!loop_left && !loop_right){
                                 break;
                             }
-                            // continue with opposite direction
+                            // continue with the opposite direction
                             if(loop_left){
                                 shift_left++;
                                 shift_right = shift_left;
@@ -603,7 +601,6 @@ export function highlight_fields(query, result, index, pluck, config){
 //     // cache shared encoders across fields
 //     let encoder = new Map();
 //     let query_enc;
-//     let tokenize;
 //
 //     // todo remove this loop and pass in the field data directly
 //     // todo support field-specific configuration
@@ -628,7 +625,6 @@ export function highlight_fields(query, result, index, pluck, config){
 //
 //         idx = index.get(path);
 //         enc = idx.encoder;
-//         tokenize = idx.tokenize;
 //         query_enc = encoder.get(enc);
 //
 //         // re-encode query when encoder has changed or take cache from shared encoders

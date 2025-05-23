@@ -10,11 +10,12 @@ const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-import Postgres from "flexsearch/db/postgres";
+import Postgres_src from "../src/db/postgres/index.js";
+import Postgres_dist from "../dist/module/db/postgres/index.js";
 import tests from "./persistent.js";
 
 if(!build_light && !build_compact){
     describe("Persistent: Postgres", function(){
-        tests(Postgres, "Postgres");
+        tests(env ? Postgres_dist : Postgres_src, "Postgres");
     });
 }

@@ -10,11 +10,12 @@ const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-import SQLite from "flexsearch/db/sqlite";
+import SQLite_src from "../src/db/sqlite/index.js";
+import SQLite_dist from "../dist/module/db/sqlite/index.js";
 import tests from "./persistent.js";
 
 if(!build_light && !build_compact){
     describe("Persistent: SQLite", function(){
-        tests(SQLite, "SQLite");
+        tests(env ? SQLite_dist : SQLite_src, "SQLite");
     });
 }

@@ -12,7 +12,7 @@ Getting instant help by the DeepWiki AI assistant:
 
 <a target="_blank" href="https://www.npmjs.com/package/flexsearch"><img src="https://img.shields.io/npm/v/flexsearch.svg"></a>
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen"></a>
-<img src="https://img.shields.io/badge/coverage-91%25-brightgreen">
+<img src="https://img.shields.io/badge/coverage-84%25-yellow">
 <img src="https://img.shields.io/badge/typed-75%25-yellow"><!--<a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>-->
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 
@@ -1299,7 +1299,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 ## Search Options
 
 <table>
-    <tr><td colspan="4"></td></tr>
+    <tr></tr>
     <tr>
         <td>Option</td>
         <td>Values</td>
@@ -1309,22 +1309,43 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
     <tr>
         <td>limit</td>
         <td>number</td>
-        <td>Sets the limit of results.</td>
+        <td>Sets the limit of results</td>
         <td>100</td>
     </tr>
     <tr></tr>
     <tr>
         <td>offset</td>
         <td>number</td>
-        <td>Apply offset (skip items).</td>
+        <td>Apply offset (skip items)</td>
         <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>resolution</td>
+        <td>number</td>
+        <td>Limit the resolution (score) of the results</td>
+        <td></td>
     </tr>
     <tr></tr>
     <tr>
         <td>suggest</td>
         <td>Boolean</td>
-        <td>Enables <a href="#suggestions">suggestions</a> in results.</td>
+        <td>Enables <a href="#suggestions">Suggestions</a> in results</td>
         <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>cache</td>
+        <td>Boolean</td>
+        <td>Use a <a href="#auto-balanced-cache-by-popularity">Query Cache</a></td>
+        <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>resolve</td>
+        <td>Boolean</td>
+        <td>When set to <code>false</code>, an instance of a <a href="doc/resolver.md">Resolver</a> is returned to apply further operations</td>
+        <td>true</td>
     </tr>
 </table>
 
@@ -1579,7 +1600,7 @@ The index size was measured after indexing the book "Gulliver's Travels".
 
 ## Fast-Update Mode
 
-The default mode is highly optimized for search performance and adding contents to the index. Whenever you need to `update` or `remove` existing contents of an index you can enable an additional register which boost those tasks also to a high-performance level. This register will take an extra amount of memory (~30% increase of index size).
+The default mode is highly optimized for search performance and adding contents to the index. Whenever you need to `update` or `remove` existing contents of an index you can enable an additional register that boosts those tasks also to a high-performance level. This register will take an extra amount of memory (~30% increase of index size).
 
 ```js
 const index = new Index({

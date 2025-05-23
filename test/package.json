@@ -18,7 +18,7 @@
     "mocha": "^11.1.0",
     "mongodb": "^6.13.0",
     "pg-promise": "^11.10.2",
-    "redis": "^4.7.0",
+    "redis": "^5.1.0",
     "rollup": "^4.35.0",
     "sqlite3": "^5.1.7",
     "typescript": "^5.8.3"

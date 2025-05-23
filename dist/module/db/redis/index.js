@@ -1,27 +1,26 @@
 import { createClient } from "redis";
-const defaults = {
+import StorageInterface from "../interface.js";
+import { toArray } from "../../common.js";
+
+const VERSION = 1,
+      fields = ["map", "ctx", "reg", "tag", "doc", "cfg"],
+      defaults = {
     host: "localhost",
     port: "6379",
     user: null,
     pass: null
-},
-      VERSION = 1,
-      fields = ["map", "ctx", "reg", "tag", "doc", "cfg"];
+};
 
-import StorageInterface from "../interface.js";
-import { toArray } from "../../common.js";
+let DB, TRX;
 
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
 }
 
-let DB, TRX;
-
 /**
  * @constructor
  * @implements StorageInterface
  */
-
 export default function RedisDB(name, config = {}) {
     if (!this || this.constructor !== RedisDB) {
         return new RedisDB(name, config);
@@ -79,15 +78,16 @@ RedisDB.prototype.close = async function () {
 };
 
 RedisDB.prototype.destroy = function () {
-    return this.clear();
+    return this.clear(!0);
 };
 
-RedisDB.prototype.clear = function () {
+RedisDB.prototype.clear = function (destroy = !1) {
     if (!this.id) return;
     const self = this;
-    return this.db.keys(this.id + "*").then(function (keys) {
+    function unlink(keys) {
         return keys.length && self.db.unlink(keys);
-    });
+    }
+    return Promise.all([this.db.keys(this.id + "map" + (destroy ? "" : this.field) + "*").then(unlink), this.db.keys(this.id + "ctx" + (destroy ? "" : this.field) + "*").then(unlink), this.db.keys(this.id + "tag" + (destroy ? "" : this.field) + "*").then(unlink), this.db.keys(this.id + "ref" + (destroy ? "" : this.field) + "*").then(unlink), unlink([this.id + "cfg" + (destroy ? "*" : this.field), this.id + "doc", this.id + "reg"])]);
 };
 
 function create_result(range, type, resolve, enrich, resolution) {
@@ -163,7 +163,9 @@ RedisDB.prototype.enrich = function (ids) {
 };
 
 RedisDB.prototype.has = function (id) {
-    return this.db.sIsMember(this.id + "reg", "" + id);
+    return this.db.sIsMember(this.id + "reg", "" + id).then(function (res) {
+        return !!res;
+    });
 };
 
 RedisDB.prototype.search = function (flexsearch, query, limit = 100, offset = 0, suggest = !1, resolve = !0, enrich = !1, tags) {

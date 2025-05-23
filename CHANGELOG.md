@@ -2,6 +2,8 @@
 
 ### Current Version
 
+- Resolver: Support Result Highlighting
+
 ### v0.8.2
 
 - Config-Serialized Query Caches, Improved caching strategy for Document indexes and Resolver

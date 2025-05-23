@@ -29,18 +29,16 @@ const defaults = {
     user: null,
     pass: null
 };
+let DB, TRX;
 
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_\-]/g, "");
 }
 
-let DB, TRX;
-
 /**
  * @constructor
  * @implements StorageInterface
  */
-
 function RedisDB(name, config = {}){
     if(!this || this.constructor !== RedisDB){
         return new RedisDB(name, config);
@@ -104,23 +102,26 @@ RedisDB.prototype.close = async function(){
 };
 
 RedisDB.prototype.destroy = function(){
-    return this.clear();
+    return this.clear(true);
 };
 
-RedisDB.prototype.clear = function(){
+RedisDB.prototype.clear = function(destroy = false){
     if(!this.id) return;
     const self = this;
-    return this.db.keys(
-        this.id + "*"
-       
-       
-       
-       
-       
-       
-    ).then(function(keys){
+    function unlink(keys){
         return keys.length && self.db.unlink(keys);
-    });
+    }
+    return Promise.all([
+        this.db.keys(this.id + "map" + (destroy ? "" : this.field) + "*").then(unlink),
+        this.db.keys(this.id + "ctx" + (destroy ? "" : this.field) + "*").then(unlink),
+        this.db.keys(this.id + "tag" + (destroy ? "" : this.field) + "*").then(unlink),
+        this.db.keys(this.id + "ref" + (destroy ? "" : this.field) + "*").then(unlink),
+        unlink([
+            this.id + "cfg" + (destroy ? "*" : this.field),
+            this.id + "doc",
+            this.id + "reg"
+        ])
+    ]);
 };
 
 function create_result(range, type, resolve, enrich, resolution){
@@ -216,7 +217,9 @@ RedisDB.prototype.enrich = function(ids){
 };
 
 RedisDB.prototype.has = function(id){
-    return this.db.sIsMember(this.id + "reg", "" + id);
+    return this.db.sIsMember(this.id + "reg", "" + id).then(function(res){
+        return !!res;
+    });
 };
 
 RedisDB.prototype.search = function(flexsearch, query, limit = 100, offset = 0, suggest = false, resolve = true, enrich = false, tags){

@@ -132,7 +132,8 @@ Index.prototype.clear = function () {
     if (this.db) {
         this.commit_timer && clearTimeout(this.commit_timer);
         this.commit_timer = null;
-        this.commit_task = [{ clear: !0 }];
+        this.commit_task = [];
+        return this.db.clear();
     }
 
     return this;

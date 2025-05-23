@@ -1,7 +1,7 @@
 import Resolver from "../resolver.js";
 import { get_max_len } from "../common.js";
 import { intersect } from "../intersect.js";
-import { SearchResults, EnrichedSearchResults, IntermediateSearchResults } from "../type.js";
+import { SearchResults, EnrichedSearchResults, IntermediateSearchResults, HighlightOptions } from "../type.js";
 
 /**
  * @return {
@@ -25,6 +25,7 @@ Resolver.prototype.and = function () {
  * @param {boolean=} enrich
  * @param {boolean=} resolve
  * @param {boolean=} suggest
+ * @param {string|HighlightOptions=} highlight
  * @this {Resolver}
  * @return {
  *   SearchResults |
@@ -35,7 +36,7 @@ Resolver.prototype.and = function () {
  * }
  */
 
-function return_result(final, limit, offset, enrich, resolve, suggest) {
+function return_result(final, limit, offset, enrich, resolve, suggest, highlight) {
 
     if (!suggest && !this.result.length) {
         return resolve ? this.result : this;
@@ -79,5 +80,5 @@ function return_result(final, limit, offset, enrich, resolve, suggest) {
         this.await = null;
     }
 
-    return resolve ? this.resolve(limit, offset, enrich, resolved) : this;
+    return resolve ? this.resolve(limit, offset, enrich, highlight, resolved) : this;
 }

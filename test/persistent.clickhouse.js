@@ -10,11 +10,12 @@ const build_compact = env && env.includes(".compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-import Clickhouse from "flexsearch/db/clickhouse";
+import Clickhouse_src from "../src/db/clickhouse/index.js";
+import Clickhouse_dist from "../dist/module/db/clickhouse/index.js";
 import tests from "./persistent.js";
 
 if(!build_light && !build_compact){
     describe("Persistent: Clickhouse", function(){
-        tests(Clickhouse, "Clickhouse");
+        tests(env ? Clickhouse_dist : Clickhouse_src, "Clickhouse");
     });
 }

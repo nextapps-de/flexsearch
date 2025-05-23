@@ -842,62 +842,62 @@ if(!build_light) describe("Result Highlighting", function(){
 
     it("Should have been highlighted merged results properly", function(){
 
-// some test data
-const data = [{
-    "id": 1,
-    "title": "Carmencita",
-    "description": "Description: Carmencita"
-},{
-    "id": 2,
-    "title": "Le clown et ses chiens",
-    "description": "Description: Le clown et ses chiens"
-}];
-
-// create the document index
-const index = new Document({
-    encoder: Charset.LatinBalance,
-    document: {
-        store: true,
-        index: [{
-            field: "title",
-            tokenize: "forward"
+        // some test data
+        const data = [{
+            "id": 1,
+            "title": "Carmencita",
+            "description": "Description: Carmencita"
         },{
-            field: "description",
-            tokenize: "forward"
-        }]
-    }
-});
+            "id": 2,
+            "title": "Le clown et ses chiens",
+            "description": "Description: Le clown et ses chiens"
+        }];
 
-// add test data
-for(let i = 0; i < data.length; i++){
-    index.add(data[i]);
-}
+        // create the document index
+        const index = new Document({
+            encoder: Charset.LatinBalance,
+            document: {
+                store: true,
+                index: [{
+                    field: "title",
+                    tokenize: "forward"
+                },{
+                    field: "description",
+                    tokenize: "forward"
+                }]
+            }
+        });
 
-let result = index.search({
-    query: "karmen or clown or not found",
-    suggest: true,
-    enrich: true,
-    merge: true,
-    highlight: "<b>$1</b>"
-});
+        // add test data
+        for(let i = 0; i < data.length; i++){
+            index.add(data[i]);
+        }
 
-expect(result).to.eql([{
-    id: 1,
-    doc: data[0],
-    field: ["title", "description"],
-    highlight: {
-        "title": '<b>Carmen</b>cita',
-        "description": 'Description: <b>Carmen</b>cita',
-    }
-},{
-    id: 2,
-    doc: data[1],
-    field: ["title", "description"],
-    highlight: {
-        "title": 'Le <b>clown</b> et ses chiens',
-        "description": 'Description: Le <b>clown</b> et ses chiens',
-    }
-}]);
+        let result = index.search({
+            query: "karmen or clown or not found",
+            suggest: true,
+            enrich: true,
+            merge: true,
+            highlight: "<b>$1</b>"
+        });
+
+        expect(result).to.eql([{
+            id: 1,
+            doc: data[0],
+            field: ["title", "description"],
+            highlight: {
+                "title": '<b>Carmen</b>cita',
+                "description": 'Description: <b>Carmen</b>cita',
+            }
+        },{
+            id: 2,
+            doc: data[1],
+            field: ["title", "description"],
+            highlight: {
+                "title": 'Le <b>clown</b> et ses chiens',
+                "description": 'Description: Le <b>clown</b> et ses chiens',
+            }
+        }]);
     });
 
     it("Should have been highlighted results properly (#480)", function(){

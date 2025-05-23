@@ -193,7 +193,8 @@ Index.prototype.clear = function(){
     if(SUPPORT_PERSISTENT && this.db){
         this.commit_timer && clearTimeout(this.commit_timer);
         this.commit_timer = null;
-        this.commit_task = [{ "clear": true }];
+        this.commit_task = [];// [{ "clear": true }];
+        return this.db.clear();
     }
 
     return this;

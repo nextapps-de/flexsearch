@@ -70,8 +70,8 @@ Resolver.prototype.handler = function (method, fn, args) {
                 offset = query.offset || 0;
                 suggest = query.suggest;
                 resolve = query.resolve;
-                highlight = query.highlight && resolve;
-                enrich = highlight || query.enrich && resolve;
+                highlight = resolve && query.highlight;
+                enrich = (highlight || query.enrich) && resolve;
                 let opt_queue = query.queue,
                     opt_async = query.async || opt_queue,
                     index = query.index;
@@ -88,7 +88,12 @@ Resolver.prototype.handler = function (method, fn, args) {
                         const field = query.field || query.pluck;
                         if (field) {
 
-                            index = this.index.index.get(field);
+                            if (query.query) {
+                                this.query = query.query;
+                                this.field = field;
+                            }
+
+                            index = index.index.get(field);
                         }
                     }
 
@@ -133,10 +138,6 @@ Resolver.prototype.handler = function (method, fn, args) {
                         query.resolve = resolve;
                         query.index = index;
                     }
-
-                    if (highlight) {
-                        query.query;
-                    }
                 } else if (query.and) {
                     result = inner_call(query, "and", index);
                 } else if (query.or) {
@@ -178,22 +179,23 @@ Resolver.prototype.handler = function (method, fn, args) {
             for (let i = 0; i < self.promises.length; i++) {
                 if (self.promises[i] === promises) {
                     self.promises[i] = function () {
-                        return fn.call(self, final, limit, offset, enrich, resolve, suggest);
+                        return fn.call(self, final, limit, offset, enrich, resolve, suggest, highlight);
                     };
                     break;
                 }
             }
             self.execute();
         });
+
         this.promises.push(promises);
     } else if (this.await) {
 
         this.promises.push(function () {
-            return fn.call(self, final, limit, offset, enrich, resolve, suggest);
+            return fn.call(self, final, limit, offset, enrich, resolve, suggest, highlight);
         });
     } else {
 
-        return fn.call(this, final, limit, offset, enrich, resolve, suggest);
+        return fn.call(this, final, limit, offset, enrich, resolve, suggest, highlight);
     }
 
     return resolve ? this.await || this.result : this;

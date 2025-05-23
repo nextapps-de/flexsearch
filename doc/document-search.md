@@ -27,14 +27,14 @@ FlexSearch Documents also contain these features:
         <td>Default</td>
     </tr>
     <tr>
-        <td>document</td>
+        <td><code>document</code></td>
         <td><a href="#the-document-descriptor">Document Descriptor</a></td>
         <td>Includes any specific information about how the document data should be indexed</td>
         <td style="font-style: italic">(mandatory)</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>worker</td>
+        <td><code>worker</code></td>
         <td>Boolean<br>String</td>
         <td>Enable a worker distributed model. Read more about here: <a href="worker.md">Worker Index</a></td>
         <td><code>false</code></td>
@@ -43,7 +43,7 @@ FlexSearch Documents also contain these features:
 
 ### Document Search Options
 
-> Document search options basically inherits from [Index Search Options](../README.md#search-options), so you can apply most of those options either in the top scope of the config (for all fields) or as per field or both of them.
+> Document search options basically inherit from [Index Search Options](../README.md#search-options), so you can apply most of those options either in the top scope of the config (for all fields) or as per field or both of them.
 
 <table>
     <tr></tr>
@@ -54,35 +54,45 @@ FlexSearch Documents also contain these features:
         <td>Default</td>
     </tr>
     <tr>
-        <td>index</td>
+        <td><code>index</code><br><code>field</code></td>
         <td>String<br>Array&lt;String&gt;<br>Array&lt;SearchOptions&gt;</td>
         <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
         <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>tag</td>
+        <td><code>tag</code></td>
         <td>Object&lt;field:tag&gt;</td>
         <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
         <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>enrich</td>
+        <td><code>enrich</code></td>
         <td>Boolean</td>
         <td>Enrich IDs from the results with the corresponding documents.</td>
         <td><code>false</code></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>merge</td>
+        <td><code>highlight</code></td>
+        <td>
+            <a href="./result-highlighting.md#highlighting-options">Highlighting Options</a><br>
+            String
+        </td>
+        <td>Highlight query matches in the result (for Document Indexes only)</td>
+        <td><code>false</code></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>merge</code></td>
         <td>Boolean</td>
         <td>Merge multiple fields in resultset into one and group results per ID</td>
         <td><code>false</code></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>pluck</td>
+        <td><code>pluck</code></td>
         <td>String</td>
         <td>Pick and apply search to just one field and return a flat result representation</td>
         <td><code>false</code></td>
@@ -102,28 +112,28 @@ When creating a `Document`-Index you will need to define a document descriptor i
         <td>Default</td>
     </tr>
     <tr>
-        <td>id</td>
+        <td><code>id</code></td>
         <td>String</td>
-        <td vertical-align="top"></td>
+        <td></td>
         <td><code>"id"</code></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>index</td>
+        <td><code>index</code></td>
         <td>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
         <td></td>
         <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>tag</td>
+        <td><code>tag</code></td>
         <td>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
         <td></td>
         <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>store</td>
+        <td><code>store</code></td>
         <td>Boolean<br>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
         <td></td>
         <td><code>false</code></td>
@@ -143,21 +153,21 @@ When creating a `Document`-Index you will need to define a document descriptor i
         <td>Default</td>
     </tr>
     <tr>
-        <td>field</td>
+        <td><code>field</code></td>
         <td>String</td>
         <td>The field name (colon seperated syntax)</td>
         <td style="font-style: italic">(mandatory)</td>
     </tr>
     <tr></tr>
     <tr>
-        <td>filter</td>
+        <td><code>filter</code></td>
         <td>Function</td>
         <td></td>
         <td></td>
     </tr>
     <tr></tr>
     <tr>
-        <td>custom</td>
+        <td><code>custom</code></td>
         <td>Function</td>
         <td></td>
         <td></td>

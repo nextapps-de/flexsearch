@@ -3,7 +3,8 @@ import { union } from "../intersect.js";
 import {
     SearchResults,
     EnrichedSearchResults,
-    IntermediateSearchResults
+    IntermediateSearchResults,
+    HighlightOptions
 } from "../type.js";
 
 /** @this {Resolver} */
@@ -19,6 +20,7 @@ Resolver.prototype["or"] = function(){
  * @param {boolean=} enrich
  * @param {boolean=} resolve
  * @param {boolean=} suggest
+ * @param {string|HighlightOptions=} highlight
  * @this {Resolver}
  * @return {
  *   SearchResults |
@@ -29,7 +31,7 @@ Resolver.prototype["or"] = function(){
  * }
  */
 
-function return_result(final, limit, offset, enrich, resolve, suggest){
+function return_result(final, limit, offset, enrich, resolve, suggest, highlight){
 
     if(final.length){
         this.result.length && (final.push(this.result));
@@ -58,6 +60,6 @@ function return_result(final, limit, offset, enrich, resolve, suggest){
     }
 
     return resolve
-        ? this.resolve(limit, offset, enrich)
+        ? this.resolve(limit, offset, enrich, highlight)
         : this;
 }

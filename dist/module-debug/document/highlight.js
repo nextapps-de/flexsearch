@@ -1,12 +1,13 @@
 
 import { parse_simple } from "../common.js";
 import Index from "../index.js";
+import WorkerIndex from "../worker.js";
 import { EnrichedDocumentSearchResults, EnrichedSearchResults, HighlightOptions } from "../type.js";
 
 /**
  * @param {string} query
  * @param {EnrichedDocumentSearchResults|EnrichedSearchResults} result
- * @param {Map<string, Index>} index
+ * @param {Map<string, Index|WorkerIndex>} index
  * @param {string} pluck
  * @param {HighlightOptions|string} config
  * @return {EnrichedDocumentSearchResults|EnrichedSearchResults}
@@ -79,7 +80,6 @@ export function highlight_fields(query, result, index, pluck, config) {
         let res;
 
         if (pluck) {
-
             res = result;
             path = pluck;
         } else {
@@ -92,7 +92,6 @@ export function highlight_fields(query, result, index, pluck, config) {
 
         idx = index.get(path);
         enc = idx.encoder;
-        idx.tokenize;
         query_enc = encoder.get(enc);
 
         if ("string" != typeof query_enc) {

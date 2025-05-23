@@ -16,6 +16,11 @@ import {
     DocumentData
 } from "flexsearch";
 
+test_index();
+test_document();
+test_persistent();
+test_worker();
+
 async function test_index() {
 
     const index = new Index();

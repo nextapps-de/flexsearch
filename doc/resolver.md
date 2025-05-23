@@ -147,6 +147,191 @@ const result = new Resolver({
 .resolve(100);
 ```
 
+## Resolver Tasks
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Method</td>
+        <td>Description</td>
+        <td>Return</td>
+    </tr>
+    <tr>
+        <td>
+            <code>.and(options,...)</code><br>
+            <code>.or(options,...)</code><br>
+            <code>.not(options,...)</code><br>
+            <code>.xor(options,...)</code>
+        </td>
+        <td>Apply an operation</td>
+        <td>Returns a <code>Resolver</code> when <code>resolve</code> was not set to <code>false</code> within the options, otherwise it returns the result (or promise in async context).</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <code>.limit(number)</code><br>
+            <code>.offset(number)</code><br>
+            <code>.boost(number)</code>
+        </td>
+        <td>Apply boost, limit and offset to the result</td>
+        <td>Returns a <code>Resolver</code></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <code>.resolve(options)</code>
+        </td>
+        <td>Resolve results</td>
+        <td>Returns the final result or promise in async context (can't be executed twice)</td>
+    </tr>
+</table>
+
+
+## Resolver Options
+
+<table>
+    <tr></tr>
+    <tr>
+        <td>Option</td>
+        <td>Values</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td colspan="4">Resolver Task Options:</td>
+    </tr>
+    <tr>
+        <td><code>query</code></td>
+        <td>
+            String
+        </td>
+        <td>The search query</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>index</code></td>
+        <td>
+            <code>Index</code><br>
+            <code>Document</code>
+        </td>
+        <td>Assign the index where the query should be applied to</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>suggest</code></td>
+        <td>
+            Boolean
+        </td>
+        <td>Enables <a href="../README.md#suggestions">suggestions</a> in results</td>
+        <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>boost</code></td>
+        <td>
+            Number
+        </td>
+        <td>Boost or reduce the score of this query</td>
+        <td>0</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>async</code></td>
+        <td>
+            Boolean
+        </td>
+        <td>Use a <a href="#using-async-queries-incl-runtime-balancer">parallel processing workflow</a></td>
+        <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>queue</code></td>
+        <td>
+            Boolean
+        </td>
+        <td>Use a <a href="#queuing-async-queries">queued processing workflow</a></td>
+        <td>false</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <code>and</code><br>
+            <code>or</code><br>
+            <code>not</code><br>
+            <code>xor</code><br>
+        </td>
+        <td>
+            Array&lt;<a href="#resolver-options">ResolverOptions</a>&gt;
+        </td>
+        <td>Apply nested queries</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>resolve</code></td>
+        <td>
+            Boolean
+        </td>
+        <td>
+            Resolve the result immediately or not. When set to <code>true</code> all final resolve options are also allowed and there can't exist any further resolver operations.
+        </td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td colspan="4">Document Resolver Options:</td>
+    </tr>
+    <tr>
+        <td><code>field</code><br><code>pluck</code></td>
+        <td>
+            String
+        </td>
+        <td>Select the Document field on which the query should apply to.</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td colspan="4">Final Resolve Options:</td>
+    </tr>
+    <tr>
+        <td><code>enrich</code></td>
+        <td>
+            Boolean
+        </td>
+        <td>Enrich IDs from the results with the corresponding documents (for Document Indexes only)</td>
+        <td>true</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>highlight</code></td>
+        <td>
+            <a href="./result-highlighting.md#highlighting-options">Highlighting Options</a><br>
+            String
+        </td>
+        <td>Highlight query matches in the result (for Document Indexes only)</td>
+        <td></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>limit</code></td>
+        <td>
+            Number
+        </td>
+        <td>Sets the limit of results</td>
+        <td>100</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td><code>offset</code></td>
+        <td>
+            Boolean
+        </td>
+        <td>Apply offset (skip items)</td>
+        <td>0</td>
+    </tr>
+</table>
+
 ### Using Cached Queries
 
 ```js

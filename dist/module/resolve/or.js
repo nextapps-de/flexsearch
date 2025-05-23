@@ -1,6 +1,6 @@
 import Resolver from "../resolver.js";
 import { union } from "../intersect.js";
-import { SearchResults, EnrichedSearchResults, IntermediateSearchResults } from "../type.js";
+import { SearchResults, EnrichedSearchResults, IntermediateSearchResults, HighlightOptions } from "../type.js";
 
 /** @this {Resolver} */
 Resolver.prototype.or = function () {
@@ -15,6 +15,7 @@ Resolver.prototype.or = function () {
  * @param {boolean=} enrich
  * @param {boolean=} resolve
  * @param {boolean=} suggest
+ * @param {string|HighlightOptions=} highlight
  * @this {Resolver}
  * @return {
  *   SearchResults |
@@ -25,7 +26,7 @@ Resolver.prototype.or = function () {
  * }
  */
 
-function return_result(final, limit, offset, enrich, resolve) {
+function return_result(final, limit, offset, enrich, resolve, suggest, highlight) {
 
     if (final.length) {
         this.result.length && final.push(this.result);
@@ -44,5 +45,5 @@ function return_result(final, limit, offset, enrich, resolve) {
         this.await = null;
     }
 
-    return resolve ? this.resolve(limit, offset, enrich) : this;
+    return resolve ? this.resolve(limit, offset, enrich, highlight) : this;
 }

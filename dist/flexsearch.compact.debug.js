@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.201 (Bundle/Debug)
+ * FlexSearch.js v0.8.202 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -516,21 +516,7 @@ function Aa(a, c, b, e, d, f, g, h) {
   }
   return e = 1 < e.length ? [].concat.apply([], e) : e[0];
 }
-;function Da(a, c) {
-  const b = M(), e = [];
-  for (let d = 0, f; d < c.length; d++) {
-    f = c[d];
-    for (let g = 0; g < f.length; g++) {
-      b[f[g]] = 1;
-    }
-  }
-  for (let d = 0, f; d < a.length; d++) {
-    f = a[d], b[f] && (e.push(f), b[f] = 0);
-  }
-  return e;
-}
-;M();
-function Ea(a, c, b, e, d) {
+;function Da(a, c, b, e, d) {
   let f, g, h;
   "string" === typeof d ? (f = d, d = "") : f = d.template;
   if (!f) {
@@ -763,7 +749,21 @@ function Ea(a, c, b, e, d) {
   }
   return c;
 }
-;Y.prototype.search = function(a, c, b, e) {
+;function Ea(a, c) {
+  const b = M(), e = [];
+  for (let d = 0, f; d < c.length; d++) {
+    f = c[d];
+    for (let g = 0; g < f.length; g++) {
+      b[f[g]] = 1;
+    }
+  }
+  for (let d = 0, f; d < a.length; d++) {
+    f = a[d], b[f] && (e.push(f), b[f] = 0);
+  }
+  return e;
+}
+;M();
+Y.prototype.search = function(a, c, b, e) {
   b || (!c && R(a) ? (b = a, a = "") : R(c) && (b = c, c = 0));
   let d = [];
   var f = [];
@@ -877,7 +877,7 @@ function Ea(a, c, b, e, d) {
         }
       }
       if (F) {
-        r = Da(r, u);
+        r = Ea(r, u);
         E = r.length;
         if (!E && !h) {
           return r;
@@ -910,11 +910,11 @@ function Ea(a, c, b, e, d) {
     e = d[m];
     g && e.length && "undefined" === typeof e[0].doc && (e = Ga.call(this, e));
     if (p) {
-      return t ? Ea(a, e, this.index, p, t) : e;
+      return t ? Da(a, e, this.index, p, t) : e;
     }
     d[m] = {field:f[m], result:e};
   }
-  t && (d = Ea(a, d, this.index, p, t));
+  t && (d = Da(a, d, this.index, p, t));
   return x ? Ha(d) : d;
 };
 function Ha(a) {

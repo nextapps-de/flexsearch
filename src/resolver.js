@@ -2,7 +2,7 @@
 import {
     DEBUG,
     SUPPORT_ASYNC,
-    SUPPORT_DOCUMENT,
+    SUPPORT_DOCUMENT, SUPPORT_HIGHLIGHTING,
     SUPPORT_STORE
 } from "./config.js";
 // <-- COMPILER BLOCK
@@ -10,7 +10,8 @@ import {
     ResolverOptions,
     IntermediateSearchResults,
     SearchResults,
-    EnrichedSearchResults
+    EnrichedSearchResults,
+    HighlightOptions
 } from "./type.js";
 import Index from "./index.js";
 import Document from "./document.js";
@@ -22,6 +23,7 @@ import "./resolve/and.js";
 import "./resolve/xor.js";
 import "./resolve/not.js";
 import { apply_enrich } from "./document/search.js";
+import { highlight_fields } from "./document/highlight.js";
 
 /**
  * @param {IntermediateSearchResults|ResolverOptions=} result
@@ -38,6 +40,8 @@ export default function Resolver(result, index){
     // }
     let boost = 0;
     let promises;
+    let query;
+    let field;
     let _await;
     let _return;
 
@@ -45,7 +49,8 @@ export default function Resolver(result, index){
         const options = /** @type {ResolverOptions} */ (result);
         index = options.index;
         boost = options.boost || 0;
-        if(options.query){
+        if((query = options.query)){
+            field = options.field || options.pluck;
             const resolve = options.resolve;
             const async = options.async || options.queue;
             options.resolve = false;
@@ -61,11 +66,6 @@ export default function Resolver(result, index){
             result = [];
         }
     }
-
-    // (async function(result){
-    //     console.log( result)
-    //     console.log(await result)
-    // })(result);
 
     if(result && result.then){
         const self = this;
@@ -93,31 +93,44 @@ export default function Resolver(result, index){
     /** @type {Function} */
     this.return = _return || null;
 
-    ///** @type {string} */
-    //this.query = "";
+    if(SUPPORT_HIGHLIGHTING){
+        /** @type {string} */
+        this.query = query || "";
+        /** @type {string} */
+        this.field = field || "";
+    }
 }
 
 /**
  * @param {number} limit
  */
 Resolver.prototype.limit = function(limit){
-    if(this.result.length){
-        /** @type {IntermediateSearchResults} */
-        const final = [];
-        for(let j = 0, ids; j < this.result.length; j++){
-            if((ids = this.result[j])){
-                if(ids.length <= limit){
-                    final[j] = ids;
-                    limit -= ids.length;
-                    if(!limit) break;
-                }
-                else{
-                    final[j] = ids.slice(0, limit);
-                    break;
+    if(this.await){
+        const self = this;
+        this.promises.push(function(){
+            self.limit(limit);
+            return self.result;
+        });
+    }
+    else{
+        if(this.result.length){
+            /** @type {IntermediateSearchResults} */
+            const final = [];
+            for(let j = 0, ids; j < this.result.length; j++){
+                if((ids = this.result[j])){
+                    if(ids.length <= limit){
+                        final[j] = ids;
+                        limit -= ids.length;
+                        if(!limit) break;
+                    }
+                    else{
+                        final[j] = ids.slice(0, limit);
+                        break;
+                    }
                 }
             }
+            this.result = final;
         }
-        this.result = final;
     }
     return this;
 };
@@ -126,21 +139,30 @@ Resolver.prototype.limit = function(limit){
  * @param {number} offset
  */
 Resolver.prototype.offset = function(offset){
-    if(this.result.length){
-        /** @type {IntermediateSearchResults} */
-        const final = [];
-        for(let j = 0, ids; j < this.result.length; j++){
-            if((ids = this.result[j])){
-                if(ids.length <= offset){
-                    offset -= ids.length;
-                }
-                else{
-                    final[j] = ids.slice(offset);
-                    offset = 0;
+    if(this.await){
+        const self = this;
+        this.promises.push(function(){
+            self.offset(offset);
+            return self.result;
+        });
+    }
+    else{
+        if(this.result.length){
+            /** @type {IntermediateSearchResults} */
+            const final = [];
+            for(let j = 0, ids; j < this.result.length; j++){
+                if((ids = this.result[j])){
+                    if(ids.length <= offset){
+                        offset -= ids.length;
+                    }
+                    else{
+                        final[j] = ids.slice(offset);
+                        offset = 0;
+                    }
                 }
             }
+            this.result = final;
         }
-        this.result = final;
     }
     return this;
 };
@@ -149,7 +171,16 @@ Resolver.prototype.offset = function(offset){
  * @param {number} boost
  */
 Resolver.prototype.boost = function(boost){
-    this.boostval += boost;
+    if(this.await){
+        const self = this;
+        this.promises.push(function(){
+            self.boost(boost);
+            return self.result;
+        });
+    }
+    else{
+        this.boostval += boost;
+    }
     return this;
 };
 
@@ -160,10 +191,13 @@ Resolver.prototype.boost = function(boost){
 Resolver.prototype.execute = function(_skip_callback){
 
     let result = this.result;
+    // temporary reset async state and restore when
+    // at least one unresolved promise was found
+    let execute = this.await;
+    this.await = null;
 
     for(let i = 0, promise; i < this.promises.length; i++){
-        promise = this.promises[i];
-        if(promise){
+        if((promise = this.promises[i])){
             if(typeof promise === "function"){
                 result = promise();
                 this.promises[i] = result = result.result || result;
@@ -175,16 +209,16 @@ Resolver.prototype.execute = function(_skip_callback){
                 i--;
             }
             else if(promise.then){
-                return this.await;
+                return this.await = execute;
             }
         }
     }
 
     const fn = this.return;
-    this.result = result;
+    //this.result = result;
     this.promises = [];
-    this.await = null;
     this.return = null;
+    //this.await = null;
 
     // return final result
     _skip_callback || fn(result);
@@ -195,9 +229,10 @@ Resolver.prototype.execute = function(_skip_callback){
  * @param {number|ResolverOptions=} limit
  * @param {number=} offset
  * @param {boolean=} enrich
+ * @param {string|HighlightOptions|boolean=} highlight
  * @param {boolean=} _resolved
  */
-Resolver.prototype.resolve = function(limit, offset, enrich, _resolved){
+Resolver.prototype.resolve = function(limit, offset, enrich, highlight, _resolved){
 
     let result = this.await
         ? this.execute(true)
@@ -206,21 +241,20 @@ Resolver.prototype.resolve = function(limit, offset, enrich, _resolved){
     if(result.then){
         const self = this;
         return result.then(function(){
-            return self.resolve(limit, offset, enrich);
+            return self.resolve(limit, offset, enrich, highlight, _resolved);
         });
     }
 
     if(result.length){
         if(typeof limit === "object"){
-            enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && limit.enrich;
+            highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && limit.highlight;
+            enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && (!!highlight || limit.enrich);
             offset = limit.offset;
-            if(DEBUG){
-                // TODO
-                if(limit.highlight){
-                    console.warn('Highlighting results is not supported within the resolve() method. Instead pass highlight options within the last resolver stage like { query: "...", resolve: true, highlight: ... }.');
-                }
-            }
             limit = limit.limit;
+        }
+        else{
+            highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && highlight;
+            enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && (!!highlight || enrich);
         }
         result = _resolved
             ? (enrich
@@ -230,21 +264,41 @@ Resolver.prototype.resolve = function(limit, offset, enrich, _resolved){
                 )
                 : result)
             : default_resolver.call(this.index, result, limit || 100, offset, enrich);
-        // TODO
-        // if(highlight){
-        //     result = highlight_fields(result);
-        // }
-        // }
+    }
+
+    return this.finalize(result, highlight);
+};
+
+Resolver.prototype.finalize = function(result, highlight){
+
+    if(result.then){
+        const self = this;
+        return result.then(function(result){
+            return self.finalize(result, highlight);
+        });
+    }
+
+    if(DEBUG){
+        if(highlight && !this.query){
+            console.warn('There was no query specified for highlighting. Please specify a query within the last resolver stage like { query: "...", resolve: true, highlight: ... }.');
+        }
+    }
+    if(SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && highlight && result.length && this.query){
+        result = highlight_fields(this.query, result, this.index.index, this.field, highlight);
     }
 
     const fn = this.return;
-    this.index = null;
-    this.result = null;
-    this.promises = null;
-    this.await = null;
+    this.index =
+    this.result =
+    this.promises =
+    this.await =
     this.return = null;
-    //this.query = "";
+
+    if(SUPPORT_HIGHLIGHTING){
+        this.query =
+        this.field = "";
+    }
 
     fn && fn(result);
     return result;
-};
+}

@@ -56,7 +56,7 @@ Resolver.prototype.handler = function(method, fn, args){
     const self = this;
     /** @type {!Array<IntermediateSearchResults|Promise<IntermediateSearchResults>>} */
     let final = [];
-    let limit = 0, offset = 0, enrich, resolve, suggest, highlight, highlight_query;
+    let limit = 0, offset = 0, enrich, resolve, suggest, highlight;
     let async;
 
     for(let i = 0; i < args.length; i++){
@@ -80,8 +80,8 @@ Resolver.prototype.handler = function(method, fn, args){
                 offset = query.offset || 0;
                 suggest = query.suggest;
                 resolve = query.resolve;
-                highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && query.highlight && resolve;
-                enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && highlight || (query.enrich && resolve);
+                highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && resolve && query.highlight;
+                enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && (highlight || query.enrich) && resolve;
                 let opt_queue = SUPPORT_ASYNC && query.queue;
                 let opt_async = SUPPORT_ASYNC && (query.async || opt_queue);
                 let index = query.index;
@@ -96,7 +96,7 @@ Resolver.prototype.handler = function(method, fn, args){
                 if(query.query || query.tag){
 
                     if(DEBUG){
-                        if(!this.index){
+                        if(!index){
                             throw new Error("Resolver can't apply because the corresponding Index was never specified");
                         }
                     }
@@ -105,13 +105,18 @@ Resolver.prototype.handler = function(method, fn, args){
                         const field = query.field || query.pluck;
                         if(field){
 
+                            if(SUPPORT_STORE && SUPPORT_HIGHLIGHTING && query.query){
+                                this.query = query.query;
+                                this.field = field;
+                            }
+
                             if(DEBUG){
-                                if(!this.index.index){
+                                if(!index.index){
                                     throw new Error("Resolver can't apply because the corresponding Document Index was not specified");
                                 }
                             }
 
-                            index = this.index.index.get(field);
+                            index = index.index.get(field);
 
                             if(DEBUG){
                                 if(!index){
@@ -169,10 +174,6 @@ Resolver.prototype.handler = function(method, fn, args){
                         query.resolve = resolve;
                         query.index = index;
                     }
-
-                    if(highlight){
-                        highlight_query = query.query;
-                    }
                 }
                 else if(query.and){
                     result = inner_call(query, "and", index);
@@ -227,7 +228,8 @@ Resolver.prototype.handler = function(method, fn, args){
                             offset,
                             enrich,
                             resolve,
-                            suggest
+                            suggest,
+                            highlight
                         )
                     };
                     break;
@@ -235,6 +237,7 @@ Resolver.prototype.handler = function(method, fn, args){
             }
             self.execute();
         });
+
         this.promises.push(promises);
     }
     else if(this.await){
@@ -246,7 +249,8 @@ Resolver.prototype.handler = function(method, fn, args){
                 offset,
                 enrich,
                 resolve,
-                suggest
+                suggest,
+                highlight
             );
         });
     }
@@ -258,7 +262,8 @@ Resolver.prototype.handler = function(method, fn, args){
             offset,
             enrich,
             resolve,
-            suggest
+            suggest,
+            highlight
         );
     }
 
