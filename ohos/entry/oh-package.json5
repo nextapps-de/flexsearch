@@ -1,0 +1,16 @@
+{
+  "license": "ISC",
+  "devDependencies": {},
+  "name": "entry",
+  "ohos": {
+    "org": "huawei",
+    "directoryLevel": "module",
+    "buildTool": "hvigor"
+  },
+  "description": "example description",
+  "repository": {},
+  "version": "2.0.1",
+  "dependencies": {
+    "@ohos/flexsearch": "file:../library"
+  }
+}
