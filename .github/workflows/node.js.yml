@@ -18,6 +18,7 @@ jobs:
   build:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
 #    # Docker Hub image that `container-job` executes in
 #    container: node:20-bookworm-slim
@@ -59,9 +60,7 @@ jobs:
       with:
         java-version: 21
     - run: npm install
-    - run: npm run build:light --if-present
     - run: npm run build:compact --if-present
-    - run: npm run build:module:light --if-present
     - run: npm run build:module:compact --if-present
     - run: npm install clickhouse
     - run: npm install redis
