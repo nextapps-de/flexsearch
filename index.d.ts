@@ -15,11 +15,11 @@ declare module "flexsearch" {
     /************************************/
     /* Utils                            */
     /************************************/
-    type Id = number | string;
-    type Limit = number;
-    type ExportHandler = (key: string, data: string) => void;
-    type ExportHandlerAsync = (key: string, data: string) => Promise<void>;
-    type AsyncCallback<T> = (result?: T) => void;
+    export type Id = number | string;
+    export type Limit = number;
+    export type ExportHandler = (key: string, data: string) => void;
+    export type ExportHandlerAsync = (key: string, data: string) => Promise<void>;
+    export type AsyncCallback<T> = (result?: T) => void;
 
     /************************************/
     /* Common Options                   */
@@ -29,7 +29,7 @@ declare module "flexsearch" {
      * **Document:**
      * * Presets: https://github.com/nextapps-de/flexsearch#presets
      */
-    type Preset =
+    export type Preset =
         | "memory"
         | "performance"
         | "match"
@@ -40,7 +40,7 @@ declare module "flexsearch" {
      * Tokenizer: https://github.com/nextapps-de/flexsearch#tokenizer-prefix-search \
      * Custom Tokenizer: https://github.com/nextapps-de/flexsearch#add-custom-tokenizer
      */
-    type Tokenizer =
+    export type Tokenizer =
         | "strict" | "exact" | "default"
         | "tolerant"
         | "forward"
@@ -50,7 +50,7 @@ declare module "flexsearch" {
     /**
      * Encoders: https://github.com/nextapps-de/flexsearch#encoders
      */
-    type Encoders =
+    export type Encoders =
         | "Exact"
         | "Default"
         | "Normalize"
@@ -73,7 +73,7 @@ declare module "flexsearch" {
      * * Contextual search: https://github.com/nextapps-de/flexsearch#contextual
      */
 
-    type ContextOptions = {
+    export type ContextOptions = {
         resolution: number;
         depth: number;
         bidirectional: boolean;
@@ -94,7 +94,7 @@ declare module "flexsearch" {
         resolve?: R;
     };
 
-    type SerializedFunctionString = string;
+    export type SerializedFunctionString = string;
 
     /**
      * **Document:**
@@ -375,11 +375,11 @@ declare module "flexsearch" {
     /* Worker Index                     */
     /************************************/
 
-    type WorkerURL = string;
-    type WorkerPath = string;
-    type WorkerConfigURL = string;
-    type WorkerConfigPath = string;
-    type WorkerType = boolean | WorkerURL | WorkerPath;
+    export type WorkerURL = string;
+    export type WorkerPath = string;
+    export type WorkerConfigURL = string;
+    export type WorkerConfigPath = string;
+    export type WorkerType = boolean | WorkerURL | WorkerPath;
 
     export type WorkerIndexOptions = IndexOptions & IndexWorkerConfig<true> & {
         //config?: WorkerConfigURL | WorkerConfigPath,
@@ -408,7 +408,7 @@ declare module "flexsearch" {
     /* Document Search                  */
     /************************************/
 
-    type CustomFN<D = DocumentData> = (doc: D) => string | boolean;
+    export type CustomFN<D = DocumentData> = (doc: D) => string | boolean;
 
     /**
      * The template to be applied on matches (e.g. <code>"\<b>$1\</b>"</code>), where <code>\$1</code> is a placeholder for the matched partial
@@ -918,7 +918,7 @@ declare module "flexsearch" {
         ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M, true>;
     }
 
-    type IdType =
+    export type IdType =
         "text" |
         "char" |
         "varchar" |
