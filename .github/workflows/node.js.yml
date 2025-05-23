@@ -55,6 +55,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 11
     - run: npm install
     - run: npm run build:bundle --if-present
     - run: npm install
