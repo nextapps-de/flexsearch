@@ -16,9 +16,9 @@ import Document from "../document.js";
  * @param id
  * @param content
  * @param {boolean=} _append
+ * @this Document
  * @returns {Document|Promise}
  */
-
 Document.prototype.add = function(id, content, _append){
 
     if(is_object(id)){

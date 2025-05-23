@@ -1,64 +1,5 @@
 import { create_object } from "./common.js";
 
-// /**
-//  * @param bitlength
-//  * @constructor
-//  */
-//
-// export function KeystoreObj(bitlength = 8){
-//
-//     if(!this || this.constructor !== KeystoreObj){
-//         return new KeystoreObj(bitlength);
-//     }
-//
-//     this.index = create_object();
-//     this.keys = [];
-//
-//     if(bitlength > 32){
-//         this.crc = lcg64;
-//         this.bit = BigInt(bitlength);
-//     }
-//     else {
-//         this.crc = lcg;
-//         this.bit = bitlength;
-//     }
-//
-//     return /*this.proxy =*/ new Proxy(this, {
-//         get(target, key) {
-//             const address = target.crc(key);
-//             const obj = target.index[address];
-//             return obj && obj[key];
-//         },
-//         set(target, key, value){
-//             const address = target.crc(key);
-//             let obj = target.index[address];
-//             if(!obj){
-//                 target.index[address] = obj = create_object();
-//                 target.keys.push(address);
-//             }
-//             obj[key] = value;
-//             return true;
-//         },
-//         delete(target, key){
-//             const address = target.crc(key);
-//             const obj = target.index[address];
-//             obj && delete obj[key];
-//             return true;
-//         }
-//     });
-// }
-//
-// KeystoreObj.prototype.clear = function(){
-//     this.index = create_object();
-//     this.keys = [];
-// };
-
-// KeystoreObj.prototype.destroy = function(){
-//     this.index = null;
-//     this.keys = null;
-//     this.proxy = null;
-// };
-
 function _slice(self, start, end, splice){
     let arr = [];
     for(let i = 0, index; i < self.index.length; i++){
@@ -186,10 +127,10 @@ KeystoreArray.prototype.clear = function(){
     this.index.length = 0;
 };
 
-KeystoreArray.prototype.destroy = function(){
-    this.index = null;
-    this.proxy = null;
-};
+// KeystoreArray.prototype.destroy = function(){
+//     this.index = null;
+//     this.proxy = null;
+// };
 
 KeystoreArray.prototype.push = function(val){};
 
@@ -212,9 +153,8 @@ function Keystore() {
 /**
  * @param bitlength
  * @constructor
- * @implements Keystore
+ * @implements {Keystore}
  */
-
 export function KeystoreMap(bitlength = 8){
 
     if(!this || this.constructor !== KeystoreMap){
@@ -397,6 +337,65 @@ KeystoreSet.prototype.entries = function*(){
         }
     }
 };
+
+// /**
+//  * @param bitlength
+//  * @constructor
+//  */
+//
+// export function KeystoreObj(bitlength = 8){
+//
+//     if(!this || this.constructor !== KeystoreObj){
+//         return new KeystoreObj(bitlength);
+//     }
+//
+//     this.index = create_object();
+//     this.keys = [];
+//
+//     if(bitlength > 32){
+//         this.crc = lcg64;
+//         this.bit = BigInt(bitlength);
+//     }
+//     else {
+//         this.crc = lcg;
+//         this.bit = bitlength;
+//     }
+//
+//     return /*this.proxy =*/ new Proxy(this, {
+//         get(target, key) {
+//             const address = target.crc(key);
+//             const obj = target.index[address];
+//             return obj && obj[key];
+//         },
+//         set(target, key, value){
+//             const address = target.crc(key);
+//             let obj = target.index[address];
+//             if(!obj){
+//                 target.index[address] = obj = create_object();
+//                 target.keys.push(address);
+//             }
+//             obj[key] = value;
+//             return true;
+//         },
+//         delete(target, key){
+//             const address = target.crc(key);
+//             const obj = target.index[address];
+//             obj && delete obj[key];
+//             return true;
+//         }
+//     });
+// }
+//
+// KeystoreObj.prototype.clear = function(){
+//     this.index = create_object();
+//     this.keys = [];
+// };
+
+// KeystoreObj.prototype.destroy = function(){
+//     this.index = null;
+//     this.keys = null;
+//     this.proxy = null;
+// };
 
 /**
  * Linear Congruential Generator (LCG)

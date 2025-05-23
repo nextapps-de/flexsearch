@@ -27,6 +27,17 @@ describe("Tokenizer", function(){
         expect(index.search("björn mayer")).to.include(0);
     });
 
+    it("Should have been added properly to the index: Tolerant", function(){
+
+        let index = new Index({ tokenize: "tolerant" });
+        index.add(0, "björn phillipp mayer");
+
+        expect(index.search("björn phillipp")).to.include(0);
+        expect(index.search("bjönr mayre")).to.include(0);
+        expect(index.search("bjön maer")).to.include(0);
+        expect(index.search("börn myaer")).to.include(0);
+    });
+
     it("Should have been added properly to the index: Forward", function(){
 
         let index = new Index({ tokenize: "forward" });

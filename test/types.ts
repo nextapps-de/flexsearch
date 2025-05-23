@@ -36,37 +36,55 @@ async function test_index() {
     const idx8: DefaultSearchResults = index.searchCache({});
     const idx9: Promise<DefaultSearchResults> = index.searchCacheAsync({});
 
-    const index3 = new Index({ db: new IndexedDB("my-store") });
+    (function(){
+        const api1: Index = index.clear();
+        const api2: boolean = index.contain(1);
+        const api3: Index = index.add(1, "");
+        const api4: Index = index.remove(1);
+        const api5: Index = index.update(1, "");
+    }());
+
+    const index3: Index<false, IndexedDB> = new Index({ db: new IndexedDB("my-store") });
     const db1: Promise<IndexedDB> = index3.db;
     const db2: IndexedDB = await index3.db;
-    const idx10: Promise<DefaultSearchResults> = index3.search({ cache: true });
-    const idx11: Promise<DefaultSearchResults> = index3.searchAsync({ cache: true }, function(res: DefaultSearchResults){});
-    const idx12: Promise<void> = index3.commit();
-    const idx13: Promise<void> = index3.mount(db2);
-    const idx14: Promise<DefaultSearchResults> = index3.searchCache({});
-    const idx15: Promise<DefaultSearchResults> = index3.searchCacheAsync({});
-    const idx16: Promise<DefaultSearchResults> = index3.search({ resolve: true, cache: true });
-    const idx17: Promise<DefaultSearchResults> = index3.searchAsync({ cache: true });
-    const idx18: Resolver = index2.searchCache({});
-    const idx19: Resolver = index2.searchCacheAsync({});
-    const idx20: Resolver = idx5.and({ async: true });
-    const idx21: Promise<DefaultSearchResults> = idx5.and({ queue: true }).resolve();
-    const idx22: Promise<DefaultSearchResults> = idx5.xor({ async: true, resolve: true });
-    const idx23: Promise<DefaultSearchResults> = idx5.and({}).and({ queue: true }).and({ resolve: true });
-    const idx24: Resolver<undefined, false, IndexedDB> = index3.search({ resolve: false });
-    const idx25: Promise<DefaultSearchResults> = index3.search({ resolve: false }).and({}).resolve();
-    const idx26: Promise<DefaultSearchResults> = index3.search({ resolve: false }).and({ resolve: true });
+    const idx12: Promise<DefaultSearchResults> = index3.search({ cache: true });
+    const idx13: Promise<DefaultSearchResults> = index3.searchAsync({ cache: true }, function(res: DefaultSearchResults){});
+    const idx14: Promise<void> = index3.commit();
+    const idx15: Promise<void> = index3.mount(db2);
+    const idx16: Promise<DefaultSearchResults> = index3.searchCache({});
+    const idx17: Promise<DefaultSearchResults> = index3.searchCacheAsync({});
+    const idx18: Promise<DefaultSearchResults> = index3.search({ resolve: true, cache: true });
+    const idx19: Promise<DefaultSearchResults> = index3.searchAsync({ cache: true });
+    const idx20: Resolver = index2.searchCache({});
+    const idx21: Resolver = index2.searchCacheAsync({});
+    const idx22: Resolver = idx5.and({ async: true });
+    const idx23: Promise<DefaultSearchResults> = idx5.and({ queue: true }).resolve();
+    const idx24: Promise<DefaultSearchResults> = idx5.xor({ async: true, resolve: true });
+    const idx25: Promise<DefaultSearchResults> = idx5.and({}).and({ queue: true }).and({ resolve: true });
+    const idx26: Resolver<undefined, false, IndexedDB> = index3.search({ resolve: false });
+    const idx27: Promise<DefaultSearchResults> = index3.search({ resolve: false }).and({}).resolve();
+    const idx28: Promise<DefaultSearchResults> = index3.search({ resolve: false }).and({ resolve: true });
+
+    (function(){
+        const api1: Promise<void> = index3.clear();
+        const api2: Promise<boolean> = index3.contain(1);
+        const api3: Index<false, IndexedDB> = index3.add(1, "");
+        const api4: Index<false, IndexedDB> = index3.remove(1);
+        const api5: Index<false, IndexedDB> = index3.update(1, "");
+    }());
 
     const index4 = await new Worker();
-    const idx27: Promise<DefaultSearchResults> = index4.search({ cache: true });
-    const idx28: Promise<DefaultSearchResults> = index4.searchAsync({ cache: true }, function(res: DefaultSearchResults){});
-    const idx29: Promise<DefaultSearchResults> = index4.searchCache({});
-    const idx30: Promise<DefaultSearchResults> = index4.searchCacheAsync({});
-    const idx31: Promise<DefaultSearchResults> = index4.search({ resolve: true, cache: true });
-    const idx32: Promise<DefaultSearchResults> = index4.searchAsync({ cache: true });
-    const idx33: Resolver<undefined, true> = index4.search({ resolve: false });
-    const idx34: Promise<DefaultSearchResults> = index4.search({ resolve: false }).and({}).resolve();
-    const idx35: Promise<DefaultSearchResults> = index4.search({ resolve: false }).and({ resolve: true });
+    const idx31: Promise<DefaultSearchResults> = index4.search({ cache: true });
+    const idx32: Promise<DefaultSearchResults> = index4.searchAsync({ cache: true }, function(res: DefaultSearchResults){});
+    const idx33: Promise<DefaultSearchResults> = index4.searchCache({});
+    const idx34: Promise<DefaultSearchResults> = index4.searchCacheAsync({});
+    const idx35: Promise<DefaultSearchResults> = index4.search({ resolve: true, cache: true });
+    const idx36: Promise<DefaultSearchResults> = index4.searchAsync({ cache: true });
+    const idx37: Resolver<undefined, true> = index4.search({ resolve: false });
+    const idx38: Promise<DefaultSearchResults> = index4.search({ resolve: false }).and({}).resolve();
+    const idx39: Promise<DefaultSearchResults> = index4.search({ resolve: false }).and({ resolve: true });
+    const api5: Promise<void> = index4.clear();
+    const api6: boolean = index4.contain(1);
 
     const res1: Resolver = new Resolver({ index });
     const res2: Resolver = res1.and({}, { index }).limit(100);
@@ -113,6 +131,17 @@ async function test_index() {
 
     // @ts-expect-deprecation
     const idx_err13: DefaultSearchResults = index.search("query", 100);
+
+    // @ts-expect-error
+    const idx_err14: Index = index.add(1);
+    // @ts-expect-error
+    const idx_err15: Index = index.add("");
+    // @ts-expect-error
+    const idx_err15: Index = index.add({});
+    // @ts-expect-error
+    const idx_err16: Index = index.remove();
+    // @ts-expect-error
+    const idx_err17: Index = index.remove({});
 }
 
 async function test_document() {
@@ -232,6 +261,17 @@ async function test_document() {
     const doc36: Promise<DefaultSearchResults> = doc24.and({ queue: true, cache: true }).resolve();
     const doc37: Promise<EnrichedResults> = doc24.and({ queue: true, cache: true }).resolve({ enrich: true });
     const doc38: Promise<EnrichedResults> = doc24.and({ queue: true }, { enrich: true, highlight: true, resolve: true });
+
+    (function(){
+        const api1: Document<doctype> = document.clear();
+        const api2: boolean = document.contain(1);
+        const api3: Document<doctype> = document.add(1, { id: 1, tags: [""], title: "", description: "" });
+        const api4: Document<doctype> = document.add({ id: 1, tags: [""], title: "", description: "" });
+        const api5: Document<doctype> = document.remove(1);
+        const api6: Document<doctype> = document.remove({ id: 1, tags: [""], title: "", description: "" });
+        const api7: Document<doctype> = document.update(1, { id: 1, tags: [""], title: "", description: "" });
+        const api8: Document<doctype> = document.update({ id: 1, tags: [""], title: "", description: "" });
+    }());
 
     // highlight on .resolve() is never supported:
     // @ts-expect-error
@@ -398,6 +438,18 @@ async function test_persistent() {
     const doc41: Promise<EnrichedResults> = doc24.and({ cache: true }).resolve({ enrich: true });
     const doc42: Promise<EnrichedResults> = doc24.and({}, { enrich: true, highlight: true, resolve: true });
 
+    (function(){
+        const api1: Promise<void> = document.clear();
+        const api2: Promise<boolean> = document.contain(1);
+        const api3: Document<doctype, false, IndexedDB> = document.add(1, { id: 1, tags: [""], title: "", description: "" });
+        const api4: Document<doctype, false, IndexedDB> = document.add({ id: 1, tags: [""], title: "", description: "" });
+        const api5: Document<doctype, false, IndexedDB> = document.remove(1);
+        const api6: Document<doctype, false, IndexedDB> = document.remove({ id: 1, tags: [""], title: "", description: "" });
+        const api7: Document<doctype, false, IndexedDB> = document.update(1, { id: 1, tags: [""], title: "", description: "" });
+        const api8: Document<doctype, false, IndexedDB> = document.update({ id: 1, tags: [""], title: "", description: "" });
+        const api9: Promise<void> = document.commit();
+    }());
+
     // highlight on .resolve() is never supported:
     // @ts-expect-error
     const err0: EnrichedResults = doc24.resolve({ highlight: "" });
@@ -560,6 +612,17 @@ async function test_worker() {
     const doc40: Promise<DefaultSearchResults> = doc24.and({ cache: true }).resolve();
     const doc41: Promise<EnrichedResults> = doc24.and({ cache: true }).resolve({ enrich: true });
     const doc42: Promise<EnrichedResults> = doc24.and({}, { enrich: true, highlight: true, resolve: true });
+
+    (function(){
+        const api1: Promise<void> = document.clear();
+        const api2: boolean = document.contain(1);
+        const api3: Promise<Document<doctype, true>> = document.add(1, { id: 1, tags: [""], title: "", description: "" });
+        const api4: Promise<Document<doctype, true>> = document.add({ id: 1, tags: [""], title: "", description: "" });
+        const api5: Promise<Document<doctype, true>> = document.remove(1);
+        const api6: Promise<Document<doctype, true>> = document.remove({ id: 1, tags: [""], title: "", description: "" });
+        const api7: Promise<Document<doctype, true>> = document.update(1, { id: 1, tags: [""], title: "", description: "" });
+        const api8: Promise<Document<doctype, true>> = document.update({ id: 1, tags: [""], title: "", description: "" });
+    }());
 
     // highlight on .resolve() is never supported:
     // @ts-expect-error

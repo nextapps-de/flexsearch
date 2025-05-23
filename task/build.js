@@ -507,3 +507,5 @@ function exec(prompt, callback){
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
 }
+
+// https://github.com/KimlikDAO/kimlikdao-js/tree/ana/kdjs

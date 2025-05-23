@@ -2,7 +2,7 @@
   "public": true,
   "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.8.202",
+  "version": "0.8.203",
   "description": "Next-Generation full-text search library for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -115,7 +115,8 @@
     "babel-plugin-transform-property-literals": "^6.9.4",
     "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
-    "google-closure-compiler": "^20240317.0.0"
+    "google-closure-compiler": "^20250520.0.0",
+    "rollup": "^4.35.0"
   },
   "funding": [
     {

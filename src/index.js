@@ -110,6 +110,12 @@ export default function Index(options, _register){
 
     this.map = tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map();
     this.ctx = tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map();
+    /** @type {
+     *   Set<string|number>|
+     *   Map<Array<string|number>>|
+     *   KeystoreSet<string|number>|
+     *   KeystoreMap<Array<string|number>>
+     * } */
     this.reg = _register || (
         this.fastupdate
             ? (tmp && SUPPORT_KEYSTORE ? new KeystoreMap(tmp) : new Map())

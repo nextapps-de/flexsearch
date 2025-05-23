@@ -60,6 +60,12 @@ export default function Index(options, _register) {
 
     this.map = tmp && !0 ? new KeystoreMap(tmp) : new Map();
     this.ctx = tmp && !0 ? new KeystoreMap(tmp) : new Map();
+    /** @type {
+     *   Set<string|number>|
+     *   Map<Array<string|number>>|
+     *   KeystoreSet<string|number>|
+     *   KeystoreMap<Array<string|number>>
+     * } */
     this.reg = _register || (this.fastupdate ? tmp && !0 ? new KeystoreMap(tmp) : new Map() : tmp && !0 ? new KeystoreSet(tmp) : new Set());
     this.resolution_ctx = context.resolution || 3;
     this.rtl = encoder.rtl || options.rtl || !1;

@@ -1171,6 +1171,7 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
         <td>tokenize</td>
         <td>
             "strict" / "exact"<br>
+            "tolerant"<br>
             "forward"<br>
             "reverse" / "bidirectional<br>
             "full"
@@ -1435,6 +1436,13 @@ Try to choose the most upper of these tokenizer which covers your requirements:
     </tr>
     <tr></tr>
     <tr>
+        <td><code>"tolerant"</code></td>
+        <td>index the full term by also being tolerant against typos like swapped letters and missing letters</td>
+        <td><code>foobra</code><br><code>foboar</code><br><code>foobr</code><br><code>fooba</code></td>
+        <td>1 + 2(n - 2)</td>
+    </tr>
+    <tr></tr>
+    <tr>
         <td><code>"full"</code></td>
         <td>index every consecutive partial</td>
         <td>fo<code>oba</code>r<br>f<code>oob</code>ar</td>
@@ -1510,9 +1518,9 @@ Encoding is one of the most important task and heavily influence:
 
 FlexSearch provides several methods to achieve fuzziness to make queries more tolerant:
 
-1. Use a tokenizer: `forward`, `reverse` or `full`
-2. Don't forget to use any of the builtin encoder `simple` > `balance` > `advanced` > `extra` > `soundex` (sorted by fuzziness)
-3. Use one of the language specific presets e.g. `/lang/en.js` for en-US specific content
+1. Use a tokenizer: `tolerant`, `forward`, `reverse` or `full`
+2. Consider using any of the builtin encoder `normalize` > `balance` > `advanced` > `extra` > `soundex` (sorted by fuzziness)
+3. Use one of the language-specific presets e.g. `/lang/en.js` for en-US specific content
 4. Enable suggestions by passing the search option `suggest: true`
 
 Additionally, you can apply custom `Mapper`, `Replacer`, `Stemmer`, `Filter` or by assigning a custom `normalize(str)`, `prepare(str)` or `finalize(arr)` function to the Encoder.

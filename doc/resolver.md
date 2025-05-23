@@ -420,13 +420,13 @@ When tasks are processed consecutively, it will skip specific resolver stages wh
 
 When using the parallel workflow by passing `{ async: true }`, all resolver stages will send their requests (including nested tasks) to the DB immediately and calculate the results in the right order as soon as the request resolves. When the overall workload of your applications has some free resources, a parallel request workflow improves performance compared to the consecutive counterpart. 
 
-<br><img src="resolver-parallel.svg" width="width: 750px; max-width: 100%">
+<br><img src="resolver-parallel.svg" style="width: 780px; max-width: 100%">
 
 <h2></h2>
 
 When using the consecutive workflow by passing `{ queue: true }`, all resolver stages will send their requests (including nested tasks) to the DB only when the previous request resolves. The advantage of this variant is when a stage becomes invalid because of the previous result, it can skip the request completely and continue with the next stage. This can reduce the overall workload.
 
-<br><img src="resolver-consecutive.svg" width="width: 750px; max-width: 100%">
+<br><img src="resolver-consecutive.svg" style="width: 780px; max-width: 100%">
 
 <!--
 ### Custom Resolver

@@ -42,6 +42,7 @@ declare module "flexsearch" {
      */
     type Tokenizer =
         | "strict" | "exact" | "default"
+        | "tolerant"
         | "forward"
         | "reverse" | "bidirectional"
         | "full";
@@ -227,16 +228,23 @@ declare module "flexsearch" {
         constructor(options?: Preset | IndexOptions<S, r>);
         db: Promise<S>;
 
-        add(id: Id, content: string): this | Promise<this>;
-
+        add(id: Id, content: string): W extends false
+            ? this
+            : Promise<this>;
         /**
          * @deprecated The method "append" will be removed in an upcoming release, only use "add" instead
          */
-        append(id: Id, content: string): this | Promise<this>;
+        append(id: Id, content: string): W extends false
+            ? this
+            : Promise<this>;
 
-        update(id: Id, content: string): this | Promise<this>;
+        update(id: Id, content: string): W extends false
+            ? this
+            : Promise<this>;
 
-        remove(id: Id): this | Promise<this>;
+        remove(id: Id): W extends false
+            ? this
+            : Promise<this>;
 
         search(query: string): SearchResults<W, S, r>;
         /** @deprecated Pass "limit" within options */
@@ -253,11 +261,17 @@ declare module "flexsearch" {
         searchCache<R extends boolean = r>(options: SearchOptions<R>): SearchResults<W, S, R>;
 
         // https://github.com/nextapps-de/flexsearch#check-existence-of-already-indexed-ids
-        contain(id: Id): boolean | Promise<boolean>;
+        contain(id: Id): S extends false
+            ? boolean
+            : Promise<boolean>;
 
-        clear(): void | Promise<void>;
+        clear(): W extends false
+            ? S extends false
+                ? this
+                : Promise<void>
+            : Promise<void>;
 
-        cleanup(): void | Promise<void>;
+        cleanup(): void;
 
         // Export and Import
         export(handler: ExportHandler): void;
@@ -566,12 +580,7 @@ declare module "flexsearch" {
                     : Promise<DocumentSearchResults<D, H, P, R, E, M>>
                 : Promise<DocumentSearchResults<D, H, P, R, E, M>>
             : Promise<DocumentSearchResults<D, H, P, R, E, M>>
-        : /*W extends false
-            ? S extends false
-                ? Resolver<D, W, S, H, R, E>
-                : Promise<Resolver<D, W, S, H, R, E>>
-            : Promise<Resolver<D, W, S, H, R, E>>*/
-            Resolver<D, W, S, H, R, E, A>;
+        : Resolver<D, W, S, H, R, E, A>;
 
     /**
      * **Document:**
@@ -617,27 +626,39 @@ declare module "flexsearch" {
     > {
         constructor(options: DocumentOptions<D, W, S>);
 
-        add(id: Id, document: D): W extends false ? this : Promise<this>;
-        add(document: D): W extends false ? this : Promise<this>;
+        add(id: Id, document: D): W extends false
+            ? this
+            : Promise<this>;
+        add(document: D): W extends false
+            ? this
+            : Promise<this>;
 
         /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
-        append(id: Id, document: D): W extends false ? this : Promise<this>;
+        append(id: Id, document: D): W extends false
+            ? this
+            : Promise<this>;
         /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
-        append(document: D): W extends false ? this : Promise<this>;
+        append(document: D): W extends false
+            ? this
+            : Promise<this>;
 
-        update(id: Id, document: D): W extends false ? this : Promise<this>;
-        update(document: D): W extends false ? this : Promise<this>;
+        update(id: Id, document: D): W extends false
+            ? this
+            : Promise<this>;
+        update(document: D): W extends false
+            ? this
+            : Promise<this>;
 
-        remove(id: Id): W extends false ? this : Promise<this>;
-        remove(document: D): W extends false ? this : Promise<this>;
+        remove(id: Id): W extends false
+            ? this
+            : Promise<this>;
+        remove(document: D): W extends false
+            ? this
+            : Promise<this>;
 
         // https://github.com/nextapps-de/flexsearch#field-search
         search(query: string): DocumentSearchResultsWrapper<D, W, S>;
         searchCache(query: string): DocumentSearchResultsWrapper<D, W, S>;
-        /** @deprecated Pass "limit" within options */
-        search(query: string, limit: Limit): DocumentSearchResultsWrapper<D, W, S>;
-        /** @deprecated Pass "limit" within options */
-        searchCache(query: string, limit: Limit): DocumentSearchResultsWrapper<D, W, S>;
 
         search<
             H extends HighlightOptions | boolean = false,
@@ -670,7 +691,7 @@ declare module "flexsearch" {
         >(
             query: string,
             limit: Limit,
-            options: DocumentSearchOptions<D, H, P, R, E, M>,
+            options?: DocumentSearchOptions<D, H, P, R, E, M>,
         ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
         /** @deprecated Pass "limit" within options */
         searchCache<
@@ -682,7 +703,7 @@ declare module "flexsearch" {
         >(
             query: string,
             limit: Limit,
-            options: DocumentSearchOptions<D, H, P, R, E, M>,
+            options?: DocumentSearchOptions<D, H, P, R, E, M>,
         ): DocumentSearchResultsWrapper<D, W, S, H, P, R, E, M>;
 
         search<
@@ -709,8 +730,10 @@ declare module "flexsearch" {
             ? boolean
             : Promise<boolean>;
 
-        clear(): S extends false
-            ? W extends false ? void : Promise<void>
+        clear(): W extends false
+            ? S extends false
+                ? this
+                : Promise<void>
             : Promise<void>;
 
         cleanup(): void;

@@ -45,10 +45,17 @@ export default function Document(options) {
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
 
+    /** @type {
+     *   Set<string|number>|
+     *   Map<Array<string|number>>|
+     *   KeystoreSet<string|number>|
+     *   KeystoreMap<Array<string|number>>
+     * } */
     this.reg = this.fastupdate && !options.worker && !options.db ? keystore && !0 ? new KeystoreMap(keystore) : new Map() : keystore && !0 ? new KeystoreSet(keystore) : new Set();
 
     this.storetree = (tmp = document.store || null) && tmp && !0 !== tmp && [];
-    this.store = tmp && (keystore && !0 ? new KeystoreMap(keystore) : new Map());
+    /** @type {Map|KeystoreMap} */
+    this.store = tmp ? keystore && !0 ? new KeystoreMap(keystore) : new Map() : null;
 
     this.cache = (tmp = options.cache || null) && new Cache(tmp);
 

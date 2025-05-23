@@ -115,11 +115,6 @@ KeystoreArray.prototype.clear = function () {
     this.index.length = 0;
 };
 
-KeystoreArray.prototype.destroy = function () {
-    this.index = null;
-    this.proxy = null;
-};
-
 KeystoreArray.prototype.push = function () {};
 
 /**
@@ -141,9 +136,8 @@ function Keystore() {
 /**
  * @param bitlength
  * @constructor
- * @implements Keystore
+ * @implements {Keystore}
  */
-
 export function KeystoreMap(bitlength = 8) {
 
     if (!this || this.constructor !== KeystoreMap) {

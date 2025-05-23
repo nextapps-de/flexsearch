@@ -2,6 +2,9 @@
 
 ### Current Version
 
+- Calling `index.clear()` on a persistent Index does not stack to the task queue by default (which executes on commit), instead it will execute immediately and return a Promise
+- Added new tokenizer `tolerant`, inherits from `strict` but also matches simple typos like missing letters and swapped letters
+- Improved Redis Cleanup
 - Resolver: Support Result Highlighting
 
 ### v0.8.2

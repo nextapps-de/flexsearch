@@ -1,18 +1,18 @@
 /**!
- * FlexSearch.js v0.8.202 (Bundle/Debug)
+ * FlexSearch.js v0.8.203 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
 (function(self){'use strict';
-var A;
+var B;
 function I(a, c, b) {
   const e = typeof b, d = typeof a;
-  if ("undefined" !== e) {
-    if ("undefined" !== d) {
+  if (e !== "undefined") {
+    if (d !== "undefined") {
       if (b) {
-        if ("function" === d && e === d) {
+        if (d === "function" && e === d) {
           return function(h) {
             return a(b(h));
           };
@@ -42,21 +42,21 @@ function I(a, c, b) {
     }
     return b;
   }
-  return "undefined" === d ? c : a;
+  return d === "undefined" ? c : a;
 }
 function J(a, c) {
-  return "undefined" === typeof a ? c : a;
+  return typeof a === "undefined" ? c : a;
 }
 function M() {
   return Object.create(null);
 }
 function P(a) {
-  return "string" === typeof a;
+  return typeof a === "string";
 }
 function R(a) {
-  return "object" === typeof a;
+  return typeof a === "object";
 }
-function S(a, c) {
+function aa(a, c) {
   if (P(c)) {
     a = a[c];
   } else {
@@ -66,10 +66,10 @@ function S(a, c) {
   }
   return a;
 }
-;const aa = /[^\p{L}\p{N}]+/u, da = /(\d{3})/g, ea = /(\D)(\d{3})/g, fa = /(\d{3})(\D)/g, ha = /[\u0300-\u036f]/g;
-function ka(a = {}) {
-  if (!this || this.constructor !== ka) {
-    return new ka(...arguments);
+;const ba = /[^\p{L}\p{N}]+/u, ea = /(\d{3})/g, fa = /(\D)(\d{3})/g, ha = /(\d{3})(\D)/g, ka = /[\u0300-\u036f]/g;
+function la(a = {}) {
+  if (!this || this.constructor !== la) {
+    return new la(...arguments);
   }
   if (arguments.length) {
     for (a = 0; a < arguments.length; a++) {
@@ -79,12 +79,12 @@ function ka(a = {}) {
     this.assign(a);
   }
 }
-A = ka.prototype;
-A.assign = function(a) {
+B = la.prototype;
+B.assign = function(a) {
   this.normalize = I(a.normalize, !0, this.normalize);
   let c = a.include, b = c || a.exclude || a.split, e;
-  if (b || "" === b) {
-    if ("object" === typeof b && b.constructor !== RegExp) {
+  if (b || b === "") {
+    if (typeof b === "object" && b.constructor !== RegExp) {
       let d = "";
       e = !c;
       c || (d += "\\p{Z}");
@@ -94,7 +94,7 @@ A.assign = function(a) {
       b.punctuation && (d += "\\p{P}");
       b.control && (d += "\\p{C}");
       if (b = b.char) {
-        d += "object" === typeof b ? b.join("") : b;
+        d += typeof b === "object" ? b.join("") : b;
       }
       try {
         this.split = new RegExp("[" + (c ? "^" : "") + d + "]+", "u");
@@ -102,12 +102,12 @@ A.assign = function(a) {
         console.error("Your split configuration:", b, "is not supported on this platform. It falls back to using simple whitespace splitter instead: /s+/."), this.split = /\s+/;
       }
     } else {
-      this.split = b, e = !1 === b || 2 > "a1a".split(b).length;
+      this.split = b, e = b === !1 || "a1a".split(b).length < 2;
     }
     this.numeric = I(a.numeric, e);
   } else {
     try {
-      this.split = I(this.split, aa);
+      this.split = I(this.split, ba);
     } catch (d) {
       console.warn("This platform does not support unicode regex. It falls back to using simple whitespace splitter instead: /s+/."), this.split = /\s+/;
     }
@@ -116,7 +116,7 @@ A.assign = function(a) {
   this.prepare = I(a.prepare, null, this.prepare);
   this.finalize = I(a.finalize, null, this.finalize);
   b = a.filter;
-  this.filter = "function" === typeof b ? b : I(b && new Set(b), null, this.filter);
+  this.filter = typeof b === "function" ? b : I(b && new Set(b), null, this.filter);
   this.dedupe = I(a.dedupe, !0, this.dedupe);
   this.matcher = I((b = a.matcher) && new Map(b), null, this.matcher);
   this.mapper = I((b = a.mapper) && new Map(b), null, this.mapper);
@@ -126,12 +126,12 @@ A.assign = function(a) {
   this.maxlength = I(a.maxlength, 1024, this.maxlength);
   this.rtl = I(a.rtl, !1, this.rtl);
   if (this.cache = b = I(a.cache, !0, this.cache)) {
-    this.H = null, this.O = "number" === typeof b ? b : 2e5, this.F = new Map(), this.G = new Map(), this.L = this.K = 128;
+    this.D = null, this.K = typeof b === "number" ? b : 2e5, this.B = new Map(), this.C = new Map(), this.H = this.G = 128;
   }
   this.h = "";
-  this.M = null;
-  this.C = "";
-  this.N = null;
+  this.I = null;
+  this.A = "";
+  this.J = null;
   if (this.matcher) {
     for (const d of this.matcher.keys()) {
       this.h += (this.h ? "|" : "") + d;
@@ -139,76 +139,76 @@ A.assign = function(a) {
   }
   if (this.stemmer) {
     for (const d of this.stemmer.keys()) {
-      this.C += (this.C ? "|" : "") + d;
+      this.A += (this.A ? "|" : "") + d;
     }
   }
   return this;
 };
-A.addStemmer = function(a, c) {
+B.addStemmer = function(a, c) {
   this.stemmer || (this.stemmer = new Map());
   this.stemmer.set(a, c);
-  this.C += (this.C ? "|" : "") + a;
-  this.N = null;
-  this.cache && T(this);
+  this.A += (this.A ? "|" : "") + a;
+  this.J = null;
+  this.cache && S(this);
   return this;
 };
-A.addFilter = function(a) {
-  "function" === typeof a ? this.filter = a : (this.filter || (this.filter = new Set()), this.filter.add(a));
-  this.cache && T(this);
+B.addFilter = function(a) {
+  typeof a === "function" ? this.filter = a : (this.filter || (this.filter = new Set()), this.filter.add(a));
+  this.cache && S(this);
   return this;
 };
-A.addMapper = function(a, c) {
-  if ("object" === typeof a) {
+B.addMapper = function(a, c) {
+  if (typeof a === "object") {
     return this.addReplacer(a, c);
   }
-  if (1 < a.length) {
+  if (a.length > 1) {
     return this.addMatcher(a, c);
   }
   this.mapper || (this.mapper = new Map());
   this.mapper.set(a, c);
-  this.cache && T(this);
+  this.cache && S(this);
   return this;
 };
-A.addMatcher = function(a, c) {
-  if ("object" === typeof a) {
+B.addMatcher = function(a, c) {
+  if (typeof a === "object") {
     return this.addReplacer(a, c);
   }
-  if (2 > a.length && (this.dedupe || this.mapper)) {
+  if (a.length < 2 && (this.dedupe || this.mapper)) {
     return this.addMapper(a, c);
   }
   this.matcher || (this.matcher = new Map());
   this.matcher.set(a, c);
   this.h += (this.h ? "|" : "") + a;
-  this.M = null;
-  this.cache && T(this);
+  this.I = null;
+  this.cache && S(this);
   return this;
 };
-A.addReplacer = function(a, c) {
-  if ("string" === typeof a) {
+B.addReplacer = function(a, c) {
+  if (typeof a === "string") {
     return this.addMatcher(a, c);
   }
   this.replacer || (this.replacer = []);
   this.replacer.push(a, c);
-  this.cache && T(this);
+  this.cache && S(this);
   return this;
 };
-A.encode = function(a, c) {
-  if (this.cache && a.length <= this.K) {
-    if (this.H) {
-      if (this.F.has(a)) {
-        return this.F.get(a);
+B.encode = function(a, c) {
+  if (this.cache && a.length <= this.G) {
+    if (this.D) {
+      if (this.B.has(a)) {
+        return this.B.get(a);
       }
     } else {
-      this.H = setTimeout(T, 50, this);
+      this.D = setTimeout(S, 50, this);
     }
   }
-  this.normalize && ("function" === typeof this.normalize ? a = this.normalize(a) : a = ha ? a.normalize("NFKD").replace(ha, "").toLowerCase() : a.toLowerCase());
+  this.normalize && (typeof this.normalize === "function" ? a = this.normalize(a) : a = ka ? a.normalize("NFKD").replace(ka, "").toLowerCase() : a.toLowerCase());
   this.prepare && (a = this.prepare(a));
-  this.numeric && 3 < a.length && (a = a.replace(ea, "$1 $2").replace(fa, "$1 $2").replace(da, "$1 "));
+  this.numeric && a.length > 3 && (a = a.replace(fa, "$1 $2").replace(ha, "$1 $2").replace(ea, "$1 "));
   const b = !(this.dedupe || this.mapper || this.filter || this.matcher || this.stemmer || this.replacer);
-  let e = [], d = M(), f, g, h = this.split || "" === this.split ? a.split(this.split) : [a];
-  for (let n = 0, l, D; n < h.length; n++) {
-    if ((l = D = h[n]) && !(l.length < this.minlength || l.length > this.maxlength)) {
+  let e = [], d = M(), f, g, h = this.split || this.split === "" ? a.split(this.split) : [a];
+  for (let n = 0, l, z; n < h.length; n++) {
+    if ((l = z = h[n]) && !(l.length < this.minlength || l.length > this.maxlength)) {
       if (c) {
         if (d[l]) {
           continue;
@@ -223,41 +223,41 @@ A.encode = function(a, c) {
       if (b) {
         e.push(l);
       } else {
-        if (!this.filter || ("function" === typeof this.filter ? this.filter(l) : !this.filter.has(l))) {
-          if (this.cache && l.length <= this.L) {
-            if (this.H) {
-              var k = this.G.get(l);
-              if (k || "" === k) {
+        if (!this.filter || (typeof this.filter === "function" ? this.filter(l) : !this.filter.has(l))) {
+          if (this.cache && l.length <= this.H) {
+            if (this.D) {
+              var k = this.C.get(l);
+              if (k || k === "") {
                 k && e.push(k);
                 continue;
               }
             } else {
-              this.H = setTimeout(T, 50, this);
+              this.D = setTimeout(S, 50, this);
             }
           }
           if (this.stemmer) {
-            this.N || (this.N = new RegExp("(?!^)(" + this.C + ")$"));
-            let w;
-            for (; w !== l && 2 < l.length;) {
-              w = l, l = l.replace(this.N, t => this.stemmer.get(t));
+            this.J || (this.J = new RegExp("(?!^)(" + this.A + ")$"));
+            let x;
+            for (; x !== l && l.length > 2;) {
+              x = l, l = l.replace(this.J, u => this.stemmer.get(u));
             }
           }
-          if (l && (this.mapper || this.dedupe && 1 < l.length)) {
+          if (l && (this.mapper || this.dedupe && l.length > 1)) {
             k = "";
-            for (let w = 0, t = "", p, x; w < l.length; w++) {
-              p = l.charAt(w), p === t && this.dedupe || ((x = this.mapper && this.mapper.get(p)) || "" === x ? x === t && this.dedupe || !(t = x) || (k += x) : k += t = p);
+            for (let x = 0, u = "", p, w; x < l.length; x++) {
+              p = l.charAt(x), p === u && this.dedupe || ((w = this.mapper && this.mapper.get(p)) || w === "" ? w === u && this.dedupe || !(u = w) || (k += w) : k += u = p);
             }
             l = k;
           }
-          this.matcher && 1 < l.length && (this.M || (this.M = new RegExp("(" + this.h + ")", "g")), l = l.replace(this.M, w => this.matcher.get(w)));
+          this.matcher && l.length > 1 && (this.I || (this.I = new RegExp("(" + this.h + ")", "g")), l = l.replace(this.I, x => this.matcher.get(x)));
           if (l && this.replacer) {
             for (k = 0; l && k < this.replacer.length; k += 2) {
               l = l.replace(this.replacer[k], this.replacer[k + 1]);
             }
           }
-          this.cache && D.length <= this.L && (this.G.set(D, l), this.G.size > this.O && (this.G.clear(), this.L = this.L / 1.1 | 0));
+          this.cache && z.length <= this.H && (this.C.set(z, l), this.C.size > this.K && (this.C.clear(), this.H = this.H / 1.1 | 0));
           if (l) {
-            if (l !== D) {
+            if (l !== z) {
               if (c) {
                 if (d[l]) {
                   continue;
@@ -277,21 +277,21 @@ A.encode = function(a, c) {
     }
   }
   this.finalize && (e = this.finalize(e) || e);
-  this.cache && a.length <= this.K && (this.F.set(a, e), this.F.size > this.O && (this.F.clear(), this.K = this.K / 1.1 | 0));
+  this.cache && a.length <= this.G && (this.B.set(a, e), this.B.size > this.K && (this.B.clear(), this.G = this.G / 1.1 | 0));
   return e;
 };
-function T(a) {
-  a.H = null;
-  a.F.clear();
-  a.G.clear();
+function S(a) {
+  a.D = null;
+  a.B.clear();
+  a.C.clear();
 }
-;function la(a, c, b) {
-  b || (c || "object" !== typeof a ? "object" === typeof c && (b = c, c = 0) : b = a);
+;function ma(a, c, b) {
+  b || (c || typeof a !== "object" ? typeof c === "object" && (b = c, c = 0) : b = a);
   b && (a = b.query || a, c = b.limit || c);
   let e = "" + (c || 0);
-  b && (e += (b.offset || 0) + !!b.context + !!b.suggest + (!1 !== b.resolve) + (b.resolution || this.resolution) + (b.boost || 0));
+  b && (e += (b.offset || 0) + !!b.context + !!b.suggest + (b.resolve !== !1) + (b.resolution || this.resolution) + (b.boost || 0));
   a = ("" + a).toLowerCase();
-  this.cache || (this.cache = new W());
+  this.cache || (this.cache = new T());
   let d = this.cache.get(a + e);
   if (!d) {
     const f = b && b.cache;
@@ -302,64 +302,64 @@ function T(a) {
   }
   return d;
 }
-function W(a) {
-  this.limit = a && !0 !== a ? a : 1000;
+function T(a) {
+  this.limit = a && a !== !0 ? a : 1000;
   this.cache = new Map();
   this.h = "";
 }
-W.prototype.set = function(a, c) {
+T.prototype.set = function(a, c) {
   this.cache.set(this.h = a, c);
   this.cache.size > this.limit && this.cache.delete(this.cache.keys().next().value);
 };
-W.prototype.get = function(a) {
+T.prototype.get = function(a) {
   const c = this.cache.get(a);
   c && this.h !== a && (this.cache.delete(a), this.cache.set(this.h = a, c));
   return c;
 };
-W.prototype.remove = function(a) {
+T.prototype.remove = function(a) {
   for (const c of this.cache) {
     const b = c[0];
     c[1].includes(a) && this.cache.delete(b);
   }
 };
-W.prototype.clear = function() {
+T.prototype.clear = function() {
   this.cache.clear();
   this.h = "";
 };
-const ma = {normalize:!1, numeric:!1, dedupe:!1};
-const na = {};
-const oa = new Map([["b", "p"], ["v", "f"], ["w", "f"], ["z", "s"], ["x", "s"], ["d", "t"], ["n", "m"], ["c", "k"], ["g", "k"], ["j", "k"], ["q", "k"], ["i", "e"], ["y", "e"], ["u", "o"]]);
-const pa = new Map([["ae", "a"], ["oe", "o"], ["sh", "s"], ["kh", "k"], ["th", "t"], ["ph", "f"], ["pf", "f"]]), qa = [/([^aeo])h(.)/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2", /(.)\1+/g, "$1"];
-const ra = {a:"", e:"", i:"", o:"", u:"", y:"", b:1, f:1, p:1, v:1, c:2, g:2, j:2, k:2, q:2, s:2, x:2, z:2, "\u00df":2, d:3, t:3, l:4, m:5, n:5, r:6};
-var sa = {Exact:ma, Default:na, Normalize:na, LatinBalance:{mapper:oa}, LatinAdvanced:{mapper:oa, matcher:pa, replacer:qa}, LatinExtra:{mapper:oa, replacer:qa.concat([/(?!^)[aeo]/g, ""]), matcher:pa}, LatinSoundex:{dedupe:!1, include:{letter:!0}, finalize:function(a) {
+const na = {normalize:!1, numeric:!1, dedupe:!1};
+const oa = {};
+const pa = new Map([["b", "p"], ["v", "f"], ["w", "f"], ["z", "s"], ["x", "s"], ["d", "t"], ["n", "m"], ["c", "k"], ["g", "k"], ["j", "k"], ["q", "k"], ["i", "e"], ["y", "e"], ["u", "o"]]);
+const qa = new Map([["ae", "a"], ["oe", "o"], ["sh", "s"], ["kh", "k"], ["th", "t"], ["ph", "f"], ["pf", "f"]]), ra = [/([^aeo])h(.)/g, "$1$2", /([aeo])h([^aeo]|$)/g, "$1$2", /(.)\1+/g, "$1"];
+const sa = {a:"", e:"", i:"", o:"", u:"", y:"", b:1, f:1, p:1, v:1, c:2, g:2, j:2, k:2, q:2, s:2, x:2, z:2, "\u00df":2, d:3, t:3, l:4, m:5, n:5, r:6};
+var va = {Exact:na, Default:oa, Normalize:oa, LatinBalance:{mapper:pa}, LatinAdvanced:{mapper:pa, matcher:qa, replacer:ra}, LatinExtra:{mapper:pa, replacer:ra.concat([/(?!^)[aeo]/g, ""]), matcher:qa}, LatinSoundex:{dedupe:!1, include:{letter:!0}, finalize:function(a) {
   for (let b = 0; b < a.length; b++) {
     var c = a[b];
-    let e = c.charAt(0), d = ra[e];
-    for (let f = 1, g; f < c.length && (g = c.charAt(f), "h" === g || "w" === g || !(g = ra[g]) || g === d || (e += g, d = g, 4 !== e.length)); f++) {
+    let e = c.charAt(0), d = sa[e];
+    for (let f = 1, g; f < c.length && (g = c.charAt(f), g === "h" || g === "w" || !(g = sa[g]) || g === d || (e += g, d = g, e.length !== 4)); f++) {
     }
     a[b] = e;
   }
-}}, CJK:{split:""}, LatinExact:ma, LatinDefault:na, LatinSimple:na};
-function va(a) {
-  X.call(a, "add");
-  X.call(a, "append");
-  X.call(a, "search");
-  X.call(a, "update");
-  X.call(a, "remove");
-  X.call(a, "searchCache");
+}}, CJK:{split:""}, LatinExact:na, LatinDefault:oa, LatinSimple:oa};
+function wa(a) {
+  U.call(a, "add");
+  U.call(a, "append");
+  U.call(a, "search");
+  U.call(a, "update");
+  U.call(a, "remove");
+  U.call(a, "searchCache");
 }
-let wa, xa, ya;
-function za() {
-  wa = ya = 0;
+let xa, ya, za;
+function Aa() {
+  xa = za = 0;
 }
-function X(a) {
+function U(a) {
   this[a + "Async"] = function() {
     const c = arguments;
     var b = c[c.length - 1];
     let e;
-    "function" === typeof b && (e = b, delete c[c.length - 1]);
-    wa ? ya || (ya = Date.now() - xa >= this.priority * this.priority * 3) : (wa = setTimeout(za, 0), xa = Date.now());
-    if (ya) {
+    typeof b === "function" && (e = b, delete c[c.length - 1]);
+    xa ? za || (za = Date.now() - ya >= this.priority * this.priority * 3) : (xa = setTimeout(Aa, 0), ya = Date.now());
+    if (za) {
       const f = this;
       return new Promise(g => {
         setTimeout(function() {
@@ -373,40 +373,40 @@ function X(a) {
     return b;
   };
 }
-;Y.prototype.add = function(a, c, b) {
-  R(a) && (c = a, a = S(c, this.key));
-  if (c && (a || 0 === a)) {
+;X.prototype.add = function(a, c, b) {
+  R(a) && (c = a, a = aa(c, this.key));
+  if (c && (a || a === 0)) {
     if (!b && this.reg.has(a)) {
       return this.update(a, c);
     }
     for (let h = 0, k; h < this.field.length; h++) {
-      k = this.D[h];
+      k = this.B[h];
       var e = this.index.get(this.field[h]);
-      if ("function" === typeof k) {
+      if (typeof k === "function") {
         var d = k(c);
         d && e.add(a, d, !1, !0);
       } else {
-        if (d = k.I, !d || d(c)) {
-          k.constructor === String ? k = ["" + k] : P(k) && (k = [k]), Aa(c, k, this.J, 0, e, a, k[0], b);
+        if (d = k.F, !d || d(c)) {
+          k.constructor === String ? k = ["" + k] : P(k) && (k = [k]), Ba(c, k, this.C, 0, e, a, k[0], b);
         }
       }
     }
     if (this.tag) {
-      for (e = 0; e < this.B.length; e++) {
-        var f = this.B[e], g = this.R[e];
+      for (e = 0; e < this.A.length; e++) {
+        var f = this.A[e], g = this.D[e];
         d = this.tag.get(g);
         let h = M();
-        if ("function" === typeof f) {
+        if (typeof f === "function") {
           if (f = f(c), !f) {
             continue;
           }
         } else {
-          const k = f.I;
+          const k = f.F;
           if (k && !k(c)) {
             continue;
           }
           f.constructor === String && (f = "" + f);
-          f = S(c, f);
+          f = aa(c, f);
         }
         if (d && f) {
           P(f) && (f = [f]);
@@ -420,25 +420,25 @@ function X(a) {
     }
     if (this.store && (!b || !this.store.has(a))) {
       let h;
-      if (this.A) {
+      if (this.h) {
         h = M();
-        for (let k = 0, n; k < this.A.length; k++) {
-          n = this.A[k];
-          if ((b = n.I) && !b(c)) {
+        for (let k = 0, n; k < this.h.length; k++) {
+          n = this.h[k];
+          if ((b = n.F) && !b(c)) {
             continue;
           }
           let l;
-          if ("function" === typeof n) {
+          if (typeof n === "function") {
             l = n(c);
             if (!l) {
               continue;
             }
-            n = [n.S];
+            n = [n.M];
           } else if (P(n) || n.constructor === String) {
             h[n] = c[n];
             continue;
           }
-          Ba(c, h, n, 0, n[0], l);
+          Ca(c, h, n, 0, n[0], l);
         }
       }
       this.store.set(a, h || c);
@@ -446,21 +446,21 @@ function X(a) {
   }
   return this;
 };
-function Ba(a, c, b, e, d, f) {
+function Ca(a, c, b, e, d, f) {
   a = a[d];
   if (e === b.length - 1) {
     c[d] = f || a;
   } else if (a) {
     if (a.constructor === Array) {
       for (c = c[d] = Array(a.length), d = 0; d < a.length; d++) {
-        Ba(a, c, b, e, d);
+        Ca(a, c, b, e, d);
       }
     } else {
-      c = c[d] || (c[d] = M()), d = b[++e], Ba(a, c, b, e, d);
+      c = c[d] || (c[d] = M()), d = b[++e], Ca(a, c, b, e, d);
     }
   }
 }
-function Aa(a, c, b, e, d, f, g, h) {
+function Ba(a, c, b, e, d, f, g, h) {
   if (a = a[g]) {
     if (e === c.length - 1) {
       if (a.constructor === Array) {
@@ -476,19 +476,19 @@ function Aa(a, c, b, e, d, f, g, h) {
     } else {
       if (a.constructor === Array) {
         for (g = 0; g < a.length; g++) {
-          Aa(a, c, b, e, d, f, g, h);
+          Ba(a, c, b, e, d, f, g, h);
         }
       } else {
-        g = c[++e], Aa(a, c, b, e, d, f, g, h);
+        g = c[++e], Ba(a, c, b, e, d, f, g, h);
       }
     }
   }
 }
-;function Ca(a, c, b) {
+;function Da(a, c, b) {
   if (!a.length) {
     return a;
   }
-  if (1 === a.length) {
+  if (a.length === 1) {
     return a = a[0], a = b || a.length > c ? a.slice(b, b + c) : a;
   }
   let e = [];
@@ -514,56 +514,56 @@ function Aa(a, c, b, e, d, f, g, h) {
       }
     }
   }
-  return e = 1 < e.length ? [].concat.apply([], e) : e[0];
+  return e = e.length > 1 ? [].concat.apply([], e) : e[0];
 }
-;function Da(a, c, b, e, d) {
+;function Ea(a, c, b, e, d) {
   let f, g, h;
-  "string" === typeof d ? (f = d, d = "") : f = d.template;
+  typeof d === "string" ? (f = d, d = "") : f = d.template;
   if (!f) {
     throw Error('No template pattern was specified by the search option "highlight"');
   }
   g = f.indexOf("$1");
-  if (-1 === g) {
+  if (g === -1) {
     throw Error('Invalid highlight template. The replacement pattern "$1" was not found in template: ' + f);
   }
   h = f.substring(g + 2);
   g = f.substring(0, g);
-  let k = d && d.boundary, n = !d || !1 !== d.clip, l = d && d.merge && h && g && new RegExp(h + " " + g, "g");
+  let k = d && d.boundary, n = !d || d.clip !== !1, l = d && d.merge && h && g && new RegExp(h + " " + g, "g");
   d = d && d.ellipsis;
-  var D = 0;
-  if ("object" === typeof d) {
-    var w = d.template;
-    D = w.length - 2;
+  var z = 0;
+  if (typeof d === "object") {
+    var x = d.template;
+    z = x.length - 2;
     d = d.pattern;
   }
-  "string" !== typeof d && (d = !1 === d ? "" : "...");
-  D && (d = w.replace("$1", d));
-  w = d.length - D;
-  let t, p;
-  "object" === typeof k && (t = k.before, 0 === t && (t = -1), p = k.after, 0 === p && (p = -1), k = k.total || 9e5);
-  D = new Map();
-  for (let ta = 0, U, Ka, ba; ta < c.length; ta++) {
-    let ca;
+  typeof d !== "string" && (d = d === !1 ? "" : "...");
+  z && (d = x.replace("$1", d));
+  x = d.length - z;
+  let u, p;
+  typeof k === "object" && (u = k.before, u === 0 && (u = -1), p = k.after, p === 0 && (p = -1), k = k.total || 9e5);
+  z = new Map();
+  for (let ta = 0, V, Ka, ca; ta < c.length; ta++) {
+    let da;
     if (e) {
-      ca = c, ba = e;
+      da = c, ca = e;
     } else {
-      var x = c[ta];
-      ba = x.field;
-      if (!ba) {
+      var w = c[ta];
+      ca = w.field;
+      if (!ca) {
         continue;
       }
-      ca = x.result;
+      da = w.result;
     }
-    Ka = b.get(ba);
-    U = Ka.encoder;
-    x = D.get(U);
-    "string" !== typeof x && (x = U.encode(a), D.set(U, x));
-    for (let ia = 0; ia < ca.length; ia++) {
-      var m = ca[ia].doc;
+    Ka = b.get(ca);
+    V = Ka.encoder;
+    w = z.get(V);
+    typeof w !== "string" && (w = V.encode(a), z.set(V, w));
+    for (let ia = 0; ia < da.length; ia++) {
+      var m = da[ia].doc;
       if (!m) {
         continue;
       }
-      m = S(m, ba);
+      m = aa(m, ca);
       if (!m) {
         continue;
       }
@@ -572,44 +572,44 @@ function Aa(a, c, b, e, d, f, g, h) {
         continue;
       }
       m = "";
-      var u = [];
+      var t = [];
       let ja = [];
-      var F = -1, z = -1, r = 0;
+      var C = -1, A = -1, r = 0;
       for (var y = 0; y < v.length; y++) {
-        var E = v[y], B = U.encode(E);
-        B = 1 < B.length ? B.join(" ") : B[0];
+        var F = v[y], D = V.encode(F);
+        D = D.length > 1 ? D.join(" ") : D[0];
         let q;
-        if (B && E) {
-          var C = E.length, K = (U.split ? E.replace(U.split, "") : E).length - B.length, L = "", Q = 0;
-          for (var V = 0; V < x.length; V++) {
-            var N = x[V];
+        if (D && F) {
+          var E = F.length, K = (V.split ? F.replace(V.split, "") : F).length - D.length, L = "", Q = 0;
+          for (var W = 0; W < w.length; W++) {
+            var N = w[W];
             if (N) {
               var H = N.length;
               H += K;
-              Q && H <= Q || (N = B.indexOf(N), -1 < N && (L = (N ? E.substring(0, N) : "") + g + E.substring(N, N + H) + h + (N + H < C ? E.substring(N + H) : ""), Q = H, q = !0));
+              Q && H <= Q || (N = D.indexOf(N), N > -1 && (L = (N ? F.substring(0, N) : "") + g + F.substring(N, N + H) + h + (N + H < E ? F.substring(N + H) : ""), Q = H, q = !0));
             }
           }
-          L && (k && (0 > F && (F = m.length + (m ? 1 : 0)), z = m.length + (m ? 1 : 0) + L.length, r += C, ja.push(u.length), u.push({match:L})), m += (m ? " " : "") + L);
+          L && (k && (C < 0 && (C = m.length + (m ? 1 : 0)), A = m.length + (m ? 1 : 0) + L.length, r += E, ja.push(t.length), t.push({match:L})), m += (m ? " " : "") + L);
         }
         if (!q) {
-          E = v[y], m += (m ? " " : "") + E, k && u.push({text:E});
+          F = v[y], m += (m ? " " : "") + F, k && t.push({text:F});
         } else if (k && r >= k) {
           break;
         }
       }
       r = ja.length * (f.length - 2);
-      if (t || p || k && m.length - r > k) {
-        if (r = k + r - 2 * w, y = z - F, 0 < t && (y += t), 0 < p && (y += p), y <= r) {
-          v = t ? F - (0 < t ? t : 0) : F - ((r - y) / 2 | 0), u = p ? z + (0 < p ? p : 0) : v + r, n || (0 < v && " " !== m.charAt(v) && " " !== m.charAt(v - 1) && (v = m.indexOf(" ", v), 0 > v && (v = 0)), u < m.length && " " !== m.charAt(u - 1) && " " !== m.charAt(u) && (u = m.lastIndexOf(" ", u), u < z ? u = z : ++u)), m = (v ? d : "") + m.substring(v, u) + (u < m.length ? d : "");
+      if (u || p || k && m.length - r > k) {
+        if (r = k + r - x * 2, y = A - C, u > 0 && (y += u), p > 0 && (y += p), y <= r) {
+          v = u ? C - (u > 0 ? u : 0) : C - ((r - y) / 2 | 0), t = p ? A + (p > 0 ? p : 0) : v + r, n || (v > 0 && m.charAt(v) !== " " && m.charAt(v - 1) !== " " && (v = m.indexOf(" ", v), v < 0 && (v = 0)), t < m.length && m.charAt(t - 1) !== " " && m.charAt(t) !== " " && (t = m.lastIndexOf(" ", t), t < A ? t = A : ++t)), m = (v ? d : "") + m.substring(v, t) + (t < m.length ? d : "");
         } else {
-          z = [];
-          F = {};
+          A = [];
+          C = {};
           r = {};
           y = {};
-          E = {};
-          B = {};
-          L = K = C = 0;
-          for (V = Q = 1;;) {
+          F = {};
+          D = {};
+          L = K = E = 0;
+          for (W = Q = 1;;) {
             var O = void 0;
             for (let q = 0, G; q < ja.length; q++) {
               G = ja[q];
@@ -619,23 +619,23 @@ function Aa(a, c, b, e, d, f, g, h) {
                     continue;
                   }
                   G += L;
-                  if (F[G]) {
-                    C -= w;
+                  if (C[G]) {
+                    E -= x;
                     r[q + 1] = 1;
                     y[q + 1] = 1;
                     continue;
                   }
-                  if (G >= u.length - 1) {
-                    if (G >= u.length) {
+                  if (G >= t.length - 1) {
+                    if (G >= t.length) {
                       y[q + 1] = 1;
                       G >= v.length && (r[q + 1] = 1);
                       continue;
                     }
-                    C -= w;
+                    E -= x;
                   }
-                  m = u[G].text;
-                  if (H = p && B[q]) {
-                    if (0 < H) {
+                  m = t[G].text;
+                  if (H = p && D[q]) {
+                    if (H > 0) {
                       if (m.length > H) {
                         if (y[q + 1] = 1, n) {
                           m = m.substring(0, H);
@@ -644,16 +644,16 @@ function Aa(a, c, b, e, d, f, g, h) {
                         }
                       }
                       (H -= m.length) || (H = -1);
-                      B[q] = H;
+                      D[q] = H;
                     } else {
                       y[q + 1] = 1;
                       continue;
                     }
                   }
-                  if (C + m.length + 1 <= k) {
-                    m = " " + m, z[q] += m;
+                  if (E + m.length + 1 <= k) {
+                    m = " " + m, A[q] += m;
                   } else if (n) {
-                    O = k - C - 1, 0 < O && (m = " " + m.substring(0, O), z[q] += m), y[q + 1] = 1;
+                    O = k - E - 1, O > 0 && (m = " " + m.substring(0, O), A[q] += m), y[q + 1] = 1;
                   } else {
                     y[q + 1] = 1;
                     continue;
@@ -663,23 +663,23 @@ function Aa(a, c, b, e, d, f, g, h) {
                     continue;
                   }
                   G -= K;
-                  if (F[G]) {
-                    C -= w;
+                  if (C[G]) {
+                    E -= x;
                     y[q] = 1;
                     r[q] = 1;
                     continue;
                   }
-                  if (0 >= G) {
-                    if (0 > G) {
+                  if (G <= 0) {
+                    if (G < 0) {
                       y[q] = 1;
                       r[q] = 1;
                       continue;
                     }
-                    C -= w;
+                    E -= x;
                   }
-                  m = u[G].text;
-                  if (H = t && E[q]) {
-                    if (0 < H) {
+                  m = t[G].text;
+                  if (H = u && F[q]) {
+                    if (H > 0) {
                       if (m.length > H) {
                         if (y[q] = 1, n) {
                           m = m.substring(m.length - H);
@@ -688,60 +688,60 @@ function Aa(a, c, b, e, d, f, g, h) {
                         }
                       }
                       (H -= m.length) || (H = -1);
-                      E[q] = H;
+                      F[q] = H;
                     } else {
                       y[q] = 1;
                       continue;
                     }
                   }
-                  if (C + m.length + 1 <= k) {
-                    m += " ", z[q] = m + z[q];
+                  if (E + m.length + 1 <= k) {
+                    m += " ", A[q] = m + A[q];
                   } else if (n) {
-                    O = m.length + 1 - (k - C), 0 <= O && O < m.length && (m = m.substring(O) + " ", z[q] = m + z[q]), y[q] = 1;
+                    O = m.length + 1 - (k - E), O >= 0 && O < m.length && (m = m.substring(O) + " ", A[q] = m + A[q]), y[q] = 1;
                   } else {
                     y[q] = 1;
                     continue;
                   }
                 }
               } else {
-                m = u[G].match;
-                t && (E[q] = t);
-                p && (B[q] = p);
-                q && C++;
+                m = t[G].match;
+                u && (F[q] = u);
+                p && (D[q] = p);
+                q && E++;
                 let ua;
-                G ? !q && w && (C += w) : (r[q] = 1, y[q] = 1);
-                G >= v.length - 1 ? ua = 1 : G < u.length - 1 && u[G + 1].match ? ua = 1 : w && (C += w);
-                C -= f.length - 2;
-                if (!q || C + m.length <= k) {
-                  z[q] = m;
+                G ? !q && x && (E += x) : (r[q] = 1, y[q] = 1);
+                G >= v.length - 1 ? ua = 1 : G < t.length - 1 && t[G + 1].match ? ua = 1 : x && (E += x);
+                E -= f.length - 2;
+                if (!q || E + m.length <= k) {
+                  A[q] = m;
                 } else {
-                  O = Q = V = r[q] = 0;
+                  O = Q = W = r[q] = 0;
                   break;
                 }
                 ua && (r[q + 1] = 1, y[q + 1] = 1);
               }
-              C += m.length;
-              O = F[G] = 1;
+              E += m.length;
+              O = C[G] = 1;
             }
             if (O) {
               K === L ? L++ : K++;
             } else {
-              K === L ? Q = 0 : V = 0;
-              if (!Q && !V) {
+              K === L ? Q = 0 : W = 0;
+              if (!Q && !W) {
                 break;
               }
               Q ? (K++, L = K) : L++;
             }
           }
           m = "";
-          for (let q = 0, G; q < z.length; q++) {
-            G = (q && r[q] ? " " : (q && !d ? " " : "") + d) + z[q], m += G;
+          for (let q = 0, G; q < A.length; q++) {
+            G = (q && r[q] ? " " : (q && !d ? " " : "") + d) + A[q], m += G;
           }
-          d && !r[z.length] && (m += d);
+          d && !r[A.length] && (m += d);
         }
       }
       l && (m = m.replace(l, " "));
-      ca[ia].highlight = m;
+      da[ia].highlight = m;
     }
     if (e) {
       break;
@@ -749,7 +749,7 @@ function Aa(a, c, b, e, d, f, g, h) {
   }
   return c;
 }
-;function Ea(a, c) {
+;function Fa(a, c) {
   const b = M(), e = [];
   for (let d = 0, f; d < c.length; d++) {
     f = c[d];
@@ -763,55 +763,55 @@ function Aa(a, c, b, e, d, f, g, h) {
   return e;
 }
 ;M();
-Y.prototype.search = function(a, c, b, e) {
+X.prototype.search = function(a, c, b, e) {
   b || (!c && R(a) ? (b = a, a = "") : R(c) && (b = c, c = 0));
   let d = [];
   var f = [];
   let g;
   let h, k, n, l;
-  let D = 0, w = !0, t;
+  let z = 0, x = !0, u;
   if (b) {
     b.constructor === Array && (b = {index:b});
     a = b.query || a;
     var p = b.pluck;
-    var x = b.merge;
+    var w = b.merge;
     n = p || b.field || (n = b.index) && (n.index ? null : n);
     l = this.tag && b.tag;
     h = b.suggest;
-    w = !0;
+    x = !0;
     k = b.cache;
-    this.store && b.highlight && !w ? console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })") : this.store && b.enrich && !w && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
-    t = w && this.store && b.highlight;
-    g = !!t || w && this.store && b.enrich;
+    this.store && b.highlight && !x ? console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })") : this.store && b.enrich && !x && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
+    u = x && this.store && b.highlight;
+    g = !!u || x && this.store && b.enrich;
     c = b.limit || c;
     var m = b.offset || 0;
-    c || (c = w ? 100 : 0);
+    c || (c = x ? 100 : 0);
     if (l) {
       l.constructor !== Array && (l = [l]);
       var v = [];
-      for (let z = 0, r; z < l.length; z++) {
-        r = l[z];
+      for (let A = 0, r; A < l.length; A++) {
+        r = l[A];
         if (P(r)) {
           throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
         }
         if (r.field && r.tag) {
-          var u = r.tag;
-          if (u.constructor === Array) {
-            for (var F = 0; F < u.length; F++) {
-              v.push(r.field, u[F]);
+          var t = r.tag;
+          if (t.constructor === Array) {
+            for (var C = 0; C < t.length; C++) {
+              v.push(r.field, t[C]);
             }
           } else {
-            v.push(r.field, u);
+            v.push(r.field, t);
           }
         } else {
-          u = Object.keys(r);
-          for (let y = 0, E, B; y < u.length; y++) {
-            if (E = u[y], B = r[E], B.constructor === Array) {
-              for (F = 0; F < B.length; F++) {
-                v.push(E, B[F]);
+          t = Object.keys(r);
+          for (let y = 0, F, D; y < t.length; y++) {
+            if (F = t[y], D = r[F], D.constructor === Array) {
+              for (C = 0; C < D.length; C++) {
+                v.push(F, D[C]);
               }
             } else {
-              v.push(E, B);
+              v.push(F, D);
             }
           }
         }
@@ -824,12 +824,12 @@ Y.prototype.search = function(a, c, b, e) {
         f = [];
         if (v.length) {
           for (p = 0; p < v.length; p += 2) {
-            x = Fa.call(this, v[p], v[p + 1], c, m, g), d.push({field:v[p], tag:v[p + 1], result:x});
+            w = Ga.call(this, v[p], v[p + 1], c, m, g), d.push({field:v[p], tag:v[p + 1], result:w});
           }
         }
-        return f.length ? Promise.all(f).then(function(z) {
-          for (let r = 0; r < z.length; r++) {
-            d[r].result = z[r];
+        return f.length ? Promise.all(f).then(function(A) {
+          for (let r = 0; r < A.length; r++) {
+            d[r].result = A[r];
           }
           return d;
         }) : d;
@@ -839,67 +839,67 @@ Y.prototype.search = function(a, c, b, e) {
   }
   n || (n = this.field);
   v = !1;
-  for (let z = 0, r, y, E; z < n.length; z++) {
-    y = n[z];
-    let B;
-    P(y) || (B = y, y = B.field, a = B.query || a, c = J(B.limit, c), m = J(B.offset, m), h = J(B.suggest, h), t = w && this.store && J(B.highlight, t), g = !!t || w && this.store && J(B.enrich, g), k = J(B.cache, k));
+  for (let A = 0, r, y, F; A < n.length; A++) {
+    y = n[A];
+    let D;
+    P(y) || (D = y, y = D.field, a = D.query || a, c = J(D.limit, c), m = J(D.offset, m), h = J(D.suggest, h), u = x && this.store && J(D.highlight, u), g = !!u || x && this.store && J(D.enrich, g), k = J(D.cache, k));
     if (e) {
-      r = e[z];
+      r = e[A];
     } else {
-      u = B || b || {};
-      F = u.enrich;
-      const C = this.index.get(y);
-      l && F && (u.enrich = !1);
-      r = k ? C.searchCache(a, c, u) : C.search(a, c, u);
-      F && (u.enrich = F);
+      t = D || b || {};
+      C = t.enrich;
+      const E = this.index.get(y);
+      l && C && (t.enrich = !1);
+      r = k ? E.searchCache(a, c, t) : E.search(a, c, t);
+      C && (t.enrich = C);
       if (v) {
-        v[z] = r;
+        v[A] = r;
         continue;
       }
     }
-    E = (r = r.result || r) && r.length;
-    if (l && E) {
-      u = [];
-      F = 0;
-      for (let C = 0, K, L; C < l.length; C += 2) {
-        K = this.tag.get(l[C]);
+    F = (r = r.result || r) && r.length;
+    if (l && F) {
+      t = [];
+      C = 0;
+      for (let E = 0, K, L; E < l.length; E += 2) {
+        K = this.tag.get(l[E]);
         if (!K) {
-          if (console.warn("Tag '" + l[C] + ":" + l[C + 1] + "' will be skipped because there is no field '" + l[C] + "'."), h) {
+          if (console.warn("Tag '" + l[E] + ":" + l[E + 1] + "' will be skipped because there is no field '" + l[E] + "'."), h) {
             continue;
           } else {
             return d;
           }
         }
-        if (L = (K = K && K.get(l[C + 1])) && K.length) {
-          F++, u.push(K);
+        if (L = (K = K && K.get(l[E + 1])) && K.length) {
+          C++, t.push(K);
         } else if (!h) {
           return d;
         }
       }
-      if (F) {
-        r = Ea(r, u);
-        E = r.length;
-        if (!E && !h) {
+      if (C) {
+        r = Fa(r, t);
+        F = r.length;
+        if (!F && !h) {
           return r;
         }
-        F--;
+        C--;
       }
     }
-    if (E) {
-      f[D] = y, d.push(r), D++;
-    } else if (1 === n.length) {
+    if (F) {
+      f[z] = y, d.push(r), z++;
+    } else if (n.length === 1) {
       return d;
     }
   }
   if (v) {
-    const z = this;
+    const A = this;
     return Promise.all(v).then(function(r) {
-      b && (b.resolve = w);
-      r.length && (r = z.search(a, c, b, r));
+      b && (b.resolve = x);
+      r.length && (r = A.search(a, c, b, r));
       return r;
     });
   }
-  if (!D) {
+  if (!z) {
     return d;
   }
   if (p && (!g || !this.store)) {
@@ -908,30 +908,30 @@ Y.prototype.search = function(a, c, b, e) {
   v = [];
   for (m = 0; m < f.length; m++) {
     e = d[m];
-    g && e.length && "undefined" === typeof e[0].doc && (e = Ga.call(this, e));
+    g && e.length && typeof e[0].doc === "undefined" && (e = Ha.call(this, e));
     if (p) {
-      return t ? Da(a, e, this.index, p, t) : e;
+      return u ? Ea(a, e, this.index, p, u) : e;
     }
     d[m] = {field:f[m], result:e};
   }
-  t && (d = Da(a, d, this.index, p, t));
-  return x ? Ha(d) : d;
+  u && (d = Ea(a, d, this.index, p, u));
+  return w ? Ia(d) : d;
 };
-function Ha(a) {
+function Ia(a) {
   const c = [], b = M(), e = M();
-  for (let d = 0, f, g, h, k, n, l, D; d < a.length; d++) {
+  for (let d = 0, f, g, h, k, n, l, z; d < a.length; d++) {
     f = a[d];
     g = f.field;
     h = f.result;
-    for (let w = 0; w < h.length; w++) {
-      if (n = h[w], "object" !== typeof n ? n = {id:k = n} : k = n.id, (l = b[k]) ? l.push(g) : (n.field = b[k] = [g], c.push(n)), D = n.highlight) {
-        l = e[k], l || (e[k] = l = {}, n.highlight = l), l[g] = D;
+    for (let x = 0; x < h.length; x++) {
+      if (n = h[x], typeof n !== "object" ? n = {id:k = n} : k = n.id, (l = b[k]) ? l.push(g) : (n.field = b[k] = [g], c.push(n)), z = n.highlight) {
+        l = e[k], l || (e[k] = l = {}, n.highlight = l), l[g] = z;
       }
     }
   }
   return c;
 }
-function Fa(a, c, b, e, d) {
+function Ga(a, c, b, e, d) {
   a = this.tag.get(a);
   if (!a) {
     return [];
@@ -941,15 +941,15 @@ function Fa(a, c, b, e, d) {
     return [];
   }
   c = a.length - e;
-  if (0 < c) {
+  if (c > 0) {
     if (b && c > b || e) {
       a = a.slice(e, e + b);
     }
-    d && (a = Ga.call(this, a));
+    d && (a = Ha.call(this, a));
   }
   return a;
 }
-function Ga(a) {
+function Ha(a) {
   if (!this || !this.store) {
     return a;
   }
@@ -959,73 +959,73 @@ function Ga(a) {
   }
   return c;
 }
-;function Y(a) {
-  if (!this || this.constructor !== Y) {
-    return new Y(a);
+;function X(a) {
+  if (!this || this.constructor !== X) {
+    return new X(a);
   }
   const c = a.document || a.doc || a;
   var b;
-  this.D = [];
+  this.B = [];
   this.field = [];
-  this.J = [];
-  this.key = (b = c.key || c.id) && Ia(b, this.J) || "id";
+  this.C = [];
+  this.key = (b = c.key || c.id) && Ja(b, this.C) || "id";
   this.reg = (this.fastupdate = !!a.fastupdate) ? new Map() : new Set();
-  this.A = (b = c.store || null) && b && !0 !== b && [];
-  this.store = b && new Map();
-  this.cache = (b = a.cache || null) && new W(b);
+  this.h = (b = c.store || null) && b && b !== !0 && [];
+  this.store = b ? new Map() : null;
+  this.cache = (b = a.cache || null) && new T(b);
   a.cache = !1;
   this.priority = a.priority || 4;
   b = new Map();
   let e = c.index || c.field || c;
   P(e) && (e = [e]);
   for (let d = 0, f, g; d < e.length; d++) {
-    f = e[d], P(f) || (g = f, f = f.field), g = R(g) ? Object.assign({}, a, g) : a, b.set(f, new Z(g, this.reg)), g.custom ? this.D[d] = g.custom : (this.D[d] = Ia(f, this.J), g.filter && ("string" === typeof this.D[d] && (this.D[d] = new String(this.D[d])), this.D[d].I = g.filter)), this.field[d] = f;
+    f = e[d], P(f) || (g = f, f = f.field), g = R(g) ? Object.assign({}, a, g) : a, b.set(f, new Y(g, this.reg)), g.custom ? this.B[d] = g.custom : (this.B[d] = Ja(f, this.C), g.filter && (typeof this.B[d] === "string" && (this.B[d] = new String(this.B[d])), this.B[d].F = g.filter)), this.field[d] = f;
   }
-  if (this.A) {
+  if (this.h) {
     a = c.store;
     P(a) && (a = [a]);
     for (let d = 0, f, g; d < a.length; d++) {
-      f = a[d], g = f.field || f, f.custom ? (this.A[d] = f.custom, f.custom.S = g) : (this.A[d] = Ia(g, this.J), f.filter && ("string" === typeof this.A[d] && (this.A[d] = new String(this.A[d])), this.A[d].I = f.filter));
+      f = a[d], g = f.field || f, f.custom ? (this.h[d] = f.custom, f.custom.M = g) : (this.h[d] = Ja(g, this.C), f.filter && (typeof this.h[d] === "string" && (this.h[d] = new String(this.h[d])), this.h[d].F = f.filter));
     }
   }
   this.index = b;
   this.tag = null;
   if (b = c.tag) {
-    if ("string" === typeof b && (b = [b]), b.length) {
+    if (typeof b === "string" && (b = [b]), b.length) {
       this.tag = new Map();
-      this.B = [];
-      this.R = [];
+      this.A = [];
+      this.D = [];
       for (let d = 0, f, g; d < b.length; d++) {
         f = b[d];
         g = f.field || f;
         if (!g) {
           throw Error("The tag field from the document descriptor is undefined.");
         }
-        f.custom ? this.B[d] = f.custom : (this.B[d] = Ia(g, this.J), f.filter && ("string" === typeof this.B[d] && (this.B[d] = new String(this.B[d])), this.B[d].I = f.filter));
-        this.R[d] = g;
+        f.custom ? this.A[d] = f.custom : (this.A[d] = Ja(g, this.C), f.filter && (typeof this.A[d] === "string" && (this.A[d] = new String(this.A[d])), this.A[d].F = f.filter));
+        this.D[d] = g;
         this.tag.set(g, new Map());
       }
     }
   }
 }
-function Ia(a, c) {
+function Ja(a, c) {
   const b = a.split(":");
   let e = 0;
   for (let d = 0; d < b.length; d++) {
-    a = b[d], "]" === a[a.length - 1] && (a = a.substring(0, a.length - 2)) && (c[e] = !0), a && (b[e++] = a);
+    a = b[d], a[a.length - 1] === "]" && (a = a.substring(0, a.length - 2)) && (c[e] = !0), a && (b[e++] = a);
   }
   e < b.length && (b.length = e);
-  return 1 < e ? b : b[0];
+  return e > 1 ? b : b[0];
 }
-A = Y.prototype;
-A.append = function(a, c) {
+B = X.prototype;
+B.append = function(a, c) {
   return this.add(a, c, !0);
 };
-A.update = function(a, c) {
+B.update = function(a, c) {
   return this.remove(a).add(a, c);
 };
-A.remove = function(a) {
-  R(a) && (a = S(a, this.key));
+B.remove = function(a) {
+  R(a) && (a = aa(a, this.key));
   for (var c of this.index.values()) {
     c.remove(a, !0);
   }
@@ -1035,7 +1035,7 @@ A.remove = function(a) {
         for (let e of b) {
           c = e[0];
           const d = e[1], f = d.indexOf(a);
-          -1 < f && (1 < d.length ? d.splice(f, 1) : b.delete(c));
+          f > -1 && (d.length > 1 ? d.splice(f, 1) : b.delete(c));
         }
       }
     }
@@ -1045,7 +1045,7 @@ A.remove = function(a) {
   this.cache && this.cache.remove(a);
   return this;
 };
-A.clear = function() {
+B.clear = function() {
   const a = [];
   for (const c of this.index.values()) {
     const b = c.clear();
@@ -1060,28 +1060,28 @@ A.clear = function() {
   this.cache && this.cache.clear();
   return a.length ? Promise.all(a) : this;
 };
-A.contain = function(a) {
+B.contain = function(a) {
   return this.reg.has(a);
 };
-A.cleanup = function() {
+B.cleanup = function() {
   for (const a of this.index.values()) {
     a.cleanup();
   }
   return this;
 };
-A.get = function(a) {
+B.get = function(a) {
   return this.store.get(a) || null;
 };
-A.set = function(a, c) {
-  "object" === typeof a && (c = a, a = S(c, this.key));
+B.set = function(a, c) {
+  typeof a === "object" && (c = a, a = aa(c, this.key));
   this.store.set(a, c);
   return this;
 };
-A.searchCache = la;
-A.export = Ja;
-A.import = La;
-va(Y.prototype);
-function Ma(a, c = 0) {
+B.searchCache = ma;
+B.export = La;
+B.import = Ma;
+wa(X.prototype);
+function Na(a, c = 0) {
   let b = [], e = [];
   c && (c = 250000 / c * 5000 | 0);
   for (const d of a.entries()) {
@@ -1090,45 +1090,45 @@ function Ma(a, c = 0) {
   e.length && b.push(e);
   return b;
 }
-function Na(a, c) {
+function Oa(a, c) {
   c || (c = new Map());
   for (let b = 0, e; b < a.length; b++) {
     e = a[b], c.set(e[0], e[1]);
   }
   return c;
 }
-function Oa(a, c = 0) {
+function Pa(a, c = 0) {
   let b = [], e = [];
   c && (c = 250000 / c * 1000 | 0);
   for (const d of a.entries()) {
-    e.push([d[0], Ma(d[1])[0]]), e.length === c && (b.push(e), e = []);
+    e.push([d[0], Na(d[1])[0]]), e.length === c && (b.push(e), e = []);
   }
   e.length && b.push(e);
   return b;
 }
-function Pa(a, c) {
+function Qa(a, c) {
   c || (c = new Map());
   for (let b = 0, e, d; b < a.length; b++) {
-    e = a[b], d = c.get(e[0]), c.set(e[0], Na(e[1], d));
+    e = a[b], d = c.get(e[0]), c.set(e[0], Oa(e[1], d));
   }
   return c;
 }
-function Qa(a) {
+function Ra(a) {
   let c = [], b = [];
   for (const e of a.keys()) {
-    b.push(e), 250000 === b.length && (c.push(b), b = []);
+    b.push(e), b.length === 250000 && (c.push(b), b = []);
   }
   b.length && c.push(b);
   return c;
 }
-function Ra(a, c) {
+function Sa(a, c) {
   c || (c = new Set());
   for (let b = 0; b < a.length; b++) {
     c.add(a[b]);
   }
   return c;
 }
-function Sa(a, c, b, e, d, f, g = 0) {
+function Ta(a, c, b, e, d, f, g = 0) {
   const h = e && e.constructor === Array;
   var k = h ? e.shift() : e;
   if (!k) {
@@ -1137,12 +1137,12 @@ function Sa(a, c, b, e, d, f, g = 0) {
   if ((k = a((c ? c + "." : "") + (g + 1) + "." + b, JSON.stringify(k))) && k.then) {
     const n = this;
     return k.then(function() {
-      return Sa.call(n, a, c, b, h ? e : null, d, f, g + 1);
+      return Ta.call(n, a, c, b, h ? e : null, d, f, g + 1);
     });
   }
-  return Sa.call(this, a, c, b, h ? e : null, d, f, g + 1);
+  return Ta.call(this, a, c, b, h ? e : null, d, f, g + 1);
 }
-function Ja(a, c, b = 0, e = 0) {
+function La(a, c, b = 0, e = 0) {
   if (b < this.field.length) {
     const g = this.field[b];
     if ((c = this.index.get(g).export(a, g, b, e = 1)) && c.then) {
@@ -1157,51 +1157,51 @@ function Ja(a, c, b = 0, e = 0) {
   switch(e) {
     case 0:
       d = "reg";
-      f = Qa(this.reg);
+      f = Ra(this.reg);
       c = null;
       break;
     case 1:
       d = "tag";
-      f = this.tag && Oa(this.tag, this.reg.size);
+      f = this.tag && Pa(this.tag, this.reg.size);
       c = null;
       break;
     case 2:
       d = "doc";
-      f = this.store && Ma(this.store);
+      f = this.store && Na(this.store);
       c = null;
       break;
     default:
       return;
   }
-  return Sa.call(this, a, c, d, f, b, e);
+  return Ta.call(this, a, c, d, f || null, b, e);
 }
-function La(a, c) {
+function Ma(a, c) {
   var b = a.split(".");
-  "json" === b[b.length - 1] && b.pop();
-  a = 2 < b.length ? b[0] : "";
-  b = 2 < b.length ? b[2] : b[1];
+  b[b.length - 1] === "json" && b.pop();
+  a = b.length > 2 ? b[0] : "";
+  b = b.length > 2 ? b[2] : b[1];
   if (c) {
-    "string" === typeof c && (c = JSON.parse(c));
+    typeof c === "string" && (c = JSON.parse(c));
     if (a) {
       return this.index.get(a).import(b, c);
     }
     switch(b) {
       case "reg":
         this.fastupdate = !1;
-        this.reg = Ra(c, this.reg);
+        this.reg = Sa(c, this.reg);
         for (let e = 0, d; e < this.field.length; e++) {
           d = this.index.get(this.field[e]), d.fastupdate = !1, d.reg = this.reg;
         }
         break;
       case "tag":
-        this.tag = Pa(c, this.tag);
+        this.tag = Qa(c, this.tag);
         break;
       case "doc":
-        this.store = Na(c, this.store);
+        this.store = Oa(c, this.store);
     }
   }
 }
-function Ta(a, c) {
+function Ua(a, c) {
   let b = "";
   for (const e of a.entries()) {
     a = e[0];
@@ -1211,7 +1211,7 @@ function Ta(a, c) {
       h = d[g] || [""];
       let k = "";
       for (let n = 0; n < h.length; n++) {
-        k += (k ? "," : "") + ("string" === c ? '"' + h[n] + '"' : h[n]);
+        k += (k ? "," : "") + (c === "string" ? '"' + h[n] + '"' : h[n]);
       }
       k = "[" + k + "]";
       f += (f ? "," : "") + k;
@@ -1221,7 +1221,7 @@ function Ta(a, c) {
   }
   return b;
 }
-;Z.prototype.remove = function(a, c) {
+;Y.prototype.remove = function(a, c) {
   const b = this.reg.size && (this.fastupdate ? this.reg.get(a) : this.reg.has(a));
   if (b) {
     if (this.fastupdate) {
@@ -1231,21 +1231,21 @@ function Ta(a, c) {
             d.pop();
           } else {
             const g = d.indexOf(a);
-            0 <= g && d.splice(g, 1);
+            g >= 0 && d.splice(g, 1);
           }
         }
       }
     } else {
-      Ua(this.map, a), this.depth && Ua(this.ctx, a);
+      Va(this.map, a), this.depth && Va(this.ctx, a);
     }
     c || this.reg.delete(a);
   }
   this.cache && this.cache.remove(a);
   return this;
 };
-function Ua(a, c) {
+function Va(a, c) {
   let b = 0;
-  var e = "undefined" === typeof c;
+  var e = typeof c === "undefined";
   if (a.constructor === Array) {
     for (let d = 0, f, g, h; d < a.length; d++) {
       if ((f = a[d]) && f.length) {
@@ -1253,8 +1253,8 @@ function Ua(a, c) {
           return 1;
         }
         g = f.indexOf(c);
-        if (0 <= g) {
-          if (1 < f.length) {
+        if (g >= 0) {
+          if (f.length > 1) {
             return f.splice(g, 1), 1;
           }
           delete a[d];
@@ -1272,14 +1272,14 @@ function Ua(a, c) {
     }
   } else {
     for (let d of a.entries()) {
-      e = d[0], Ua(d[1], c) ? b++ : a.delete(e);
+      e = d[0], Va(d[1], c) ? b++ : a.delete(e);
     }
   }
   return b;
 }
-;const Va = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
-Z.prototype.add = function(a, c, b, e) {
-  if (c && (a || 0 === a)) {
+;const Wa = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
+Y.prototype.add = function(a, c, b, e) {
+  if (c && (a || a === 0)) {
     if (!e && !b && this.reg.has(a)) {
       return this.update(a, c);
     }
@@ -1287,49 +1287,59 @@ Z.prototype.add = function(a, c, b, e) {
     c = this.encoder.encode(c, !e);
     const n = c.length;
     if (n) {
-      const l = M(), D = M(), w = this.resolution;
-      for (let t = 0; t < n; t++) {
-        let p = c[this.rtl ? n - 1 - t : t];
+      const l = M(), z = M(), x = this.resolution;
+      for (let u = 0; u < n; u++) {
+        let p = c[this.rtl ? n - 1 - u : u];
         var d = p.length;
-        if (d && (e || !D[p])) {
-          var f = this.score ? this.score(c, p, t, null, 0) : Wa(w, n, t), g = "";
+        if (d && (e || !z[p])) {
+          var f = this.score ? this.score(c, p, u, null, 0) : Xa(x, n, u), g = "";
           switch(this.tokenize) {
+            case "tolerant":
+              Z(this, z, p, f, a, b);
+              if (d > 2) {
+                for (let w = 1, m, v, t, C; w < d - 1; w++) {
+                  m = p.charAt(w), v = p.charAt(w + 1), t = p.substring(0, w) + v, C = p.substring(w + 2), g = t + m + C, z[g] || Z(this, z, g, f, a, b), g = t + C, z[g] || Z(this, z, g, f, a, b);
+                }
+              }
+              break;
             case "full":
-              if (2 < d) {
-                for (let x = 0, m; x < d; x++) {
-                  for (f = d; f > x; f--) {
-                    g = p.substring(x, f);
-                    m = this.rtl ? d - 1 - x : x;
-                    var h = this.score ? this.score(c, p, t, g, m) : Wa(w, n, t, d, m);
-                    Xa(this, D, g, h, a, b);
+              if (d > 2) {
+                for (let w = 0, m; w < d; w++) {
+                  for (f = d; f > w; f--) {
+                    if (g = p.substring(w, f), !z[g]) {
+                      m = this.rtl ? d - 1 - w : w;
+                      var h = this.score ? this.score(c, p, u, g, m) : Xa(x, n, u, d, m);
+                      Z(this, z, g, h, a, b);
+                    }
                   }
                 }
                 break;
               }
             case "bidirectional":
             case "reverse":
-              if (1 < d) {
-                for (h = d - 1; 0 < h; h--) {
-                  g = p[this.rtl ? d - 1 - h : h] + g;
-                  var k = this.score ? this.score(c, p, t, g, h) : Wa(w, n, t, d, h);
-                  Xa(this, D, g, k, a, b);
+              if (d > 1) {
+                for (h = d - 1; h > 0; h--) {
+                  if (g = p[this.rtl ? d - 1 - h : h] + g, !z[g]) {
+                    var k = this.score ? this.score(c, p, u, g, h) : Xa(x, n, u, d, h);
+                    Z(this, z, g, k, a, b);
+                  }
                 }
                 g = "";
               }
             case "forward":
-              if (1 < d) {
+              if (d > 1) {
                 for (h = 0; h < d; h++) {
-                  g += p[this.rtl ? d - 1 - h : h], Xa(this, D, g, f, a, b);
+                  g += p[this.rtl ? d - 1 - h : h], z[g] || Z(this, z, g, f, a, b);
                 }
                 break;
               }
             default:
-              if (Xa(this, D, p, f, a, b), e && 1 < n && t < n - 1) {
-                for (d = M(), g = this.P, f = p, h = Math.min(e + 1, this.rtl ? t + 1 : n - t), d[f] = 1, k = 1; k < h; k++) {
-                  if ((p = c[this.rtl ? n - 1 - t - k : t + k]) && !d[p]) {
+              if (Z(this, z, p, f, a, b), e && n > 1 && u < n - 1) {
+                for (d = M(), g = this.L, f = p, h = Math.min(e + 1, this.rtl ? u + 1 : n - u), d[f] = 1, k = 1; k < h; k++) {
+                  if ((p = c[this.rtl ? n - 1 - u - k : u + k]) && !d[p]) {
                     d[p] = 1;
-                    const x = this.score ? this.score(c, f, t, p, k - 1) : Wa(g + (n / 2 > g ? 0 : 1), n, t, h - 1, k - 1), m = this.bidirectional && p > f;
-                    Xa(this, l, m ? f : p, x, a, b, m ? p : f);
+                    const w = this.score ? this.score(c, f, u, p, k - 1) : Xa(g + (n / 2 > g ? 0 : 1), n, u, h - 1, k - 1), m = this.bidirectional && p > f;
+                    Z(this, l, m ? f : p, w, a, b, m ? p : f);
                   }
                 }
               }
@@ -1341,17 +1351,17 @@ Z.prototype.add = function(a, c, b, e) {
   }
   return this;
 };
-function Xa(a, c, b, e, d, f, g) {
+function Z(a, c, b, e, d, f, g) {
   let h = g ? a.ctx : a.map, k;
   if (!c[b] || g && !(k = c[b])[g]) {
     g ? (c = k || (c[b] = M()), c[g] = 1, (k = h.get(g)) ? h = k : h.set(g, h = new Map())) : c[b] = 1, (k = h.get(b)) ? h = k : h.set(b, h = []), h = h[e] || (h[e] = []), f && h.includes(d) || (h.push(d), a.fastupdate && ((c = a.reg.get(d)) ? c.push(h) : a.reg.set(d, [h])));
   }
 }
-function Wa(a, c, b, e, d) {
-  return b && 1 < a ? c + (e || 0) <= a ? b + (d || 0) : (a - 1) / (c + (e || 0)) * (b + (d || 0)) + 1 | 0 : 0;
+function Xa(a, c, b, e, d) {
+  return b && a > 1 ? c + (e || 0) <= a ? b + (d || 0) : (a - 1) / (c + (e || 0)) * (b + (d || 0)) + 1 | 0 : 0;
 }
-;Z.prototype.search = function(a, c, b) {
-  b || (c || "object" !== typeof a ? "object" === typeof c && (b = c, c = 0) : (b = a, a = ""));
+;Y.prototype.search = function(a, c, b) {
+  b || (c || typeof a !== "object" ? typeof c === "object" && (b = c, c = 0) : (b = a, a = ""));
   if (b && b.cache) {
     return b.cache = !1, c = this.searchCache(a, c, b), b.cache = !0, c;
   }
@@ -1365,16 +1375,16 @@ function Wa(a, c, b, e, d) {
     var h = !0;
     var k = b.resolution;
   }
-  "undefined" === typeof h && (h = !0);
-  f = this.depth && !1 !== f;
+  typeof h === "undefined" && (h = !0);
+  f = this.depth && f !== !1;
   b = this.encoder.encode(a, !f);
   a = b.length;
   c = c || (h ? 100 : 0);
-  if (1 === a) {
-    return g = d, (d = Ya(this, b[0], "")) && d.length ? Ca.call(this, d, c, g) : [];
+  if (a === 1) {
+    return g = d, (d = Ya(this, b[0], "")) && d.length ? Da.call(this, d, c, g) : [];
   }
-  if (2 === a && f && !g) {
-    return g = d, (d = Ya(this, b[1], b[0])) && d.length ? Ca.call(this, d, c, g) : [];
+  if (a === 2 && f && !g) {
+    return g = d, (d = Ya(this, b[1], b[0])) && d.length ? Da.call(this, d, c, g) : [];
   }
   h = M();
   var n = 0;
@@ -1382,39 +1392,39 @@ function Wa(a, c, b, e, d) {
     var l = b[0];
     n = 1;
   }
-  k || 0 === k || (k = l ? this.P : this.resolution);
-  for (let p, x; n < a; n++) {
-    if ((x = b[n]) && !h[x]) {
-      h[x] = 1;
-      p = Ya(this, x, l);
+  k || k === 0 || (k = l ? this.L : this.resolution);
+  for (let p, w; n < a; n++) {
+    if ((w = b[n]) && !h[w]) {
+      h[w] = 1;
+      p = Ya(this, w, l);
       a: {
         f = p;
-        var D = e, w = g, t = k;
+        var z = e, x = g, u = k;
         let m = [];
         if (f && f.length) {
-          if (f.length <= t) {
-            D.push(f);
+          if (f.length <= u) {
+            z.push(f);
             p = void 0;
             break a;
           }
-          for (let v = 0, u; v < t; v++) {
-            if (u = f[v]) {
-              m[v] = u;
+          for (let v = 0, t; v < u; v++) {
+            if (t = f[v]) {
+              m[v] = t;
             }
           }
           if (m.length) {
-            D.push(m);
+            z.push(m);
             p = void 0;
             break a;
           }
         }
-        p = w ? void 0 : m;
+        p = x ? void 0 : m;
       }
       if (p) {
         e = p;
         break;
       }
-      l && (g && p && e.length || (l = x));
+      l && (g && p && e.length || (l = w));
     }
     g && l && n === a - 1 && !e.length && (k = this.resolution, l = "", n = -1, h = M());
   }
@@ -1422,18 +1432,18 @@ function Wa(a, c, b, e, d) {
     b = e;
     e = b.length;
     l = b;
-    if (1 < e) {
+    if (e > 1) {
       b: {
         e = g;
         l = b.length;
         g = [];
         a = M();
-        for (let p = 0, x, m, v, u; p < k; p++) {
+        for (let p = 0, w, m, v, t; p < k; p++) {
           for (n = 0; n < l; n++) {
-            if (v = b[n], p < v.length && (x = v[p])) {
-              for (f = 0; f < x.length; f++) {
-                if (m = x[f], (h = a[m]) ? a[m]++ : (h = 0, a[m] = 1), u = g[h] || (g[h] = []), u.push(m), c && h === l - 1 && u.length - d === c) {
-                  l = d ? u.slice(d) : u;
+            if (v = b[n], p < v.length && (w = v[p])) {
+              for (f = 0; f < w.length; f++) {
+                if (m = w[f], (h = a[m]) ? a[m]++ : (h = 0, a[m] = 1), t = g[h] || (g[h] = []), t.push(m), c && h === l - 1 && t.length - d === c) {
+                  l = d ? t.slice(d) : t;
                   break b;
                 }
               }
@@ -1442,9 +1452,9 @@ function Wa(a, c, b, e, d) {
         }
         if (b = g.length) {
           if (e) {
-            if (1 < g.length) {
+            if (g.length > 1) {
               c: {
-                for (b = [], k = M(), e = g.length, h = e - 1; 0 <= h; h--) {
+                for (b = [], k = M(), e = g.length, h = e - 1; h >= 0; h--) {
                   if (a = (e = g[h]) && e.length) {
                     for (n = 0; n < a; n++) {
                       if (l = e[n], !k[l]) {
@@ -1479,8 +1489,8 @@ function Wa(a, c, b, e, d) {
         }
         l = g;
       }
-    } else if (1 === e) {
-      c = Ca.call(null, b[0], c, d);
+    } else if (e === 1) {
+      c = Da.call(null, b[0], c, d);
       break a;
     }
     c = l;
@@ -1493,68 +1503,68 @@ function Ya(a, c, b) {
   a = b ? (a = a.ctx.get(b)) && a.get(c) : a.map.get(c);
   return a;
 }
-;function Z(a, c) {
-  if (!this || this.constructor !== Z) {
-    return new Z(a);
+;function Y(a, c) {
+  if (!this || this.constructor !== Y) {
+    return new Y(a);
   }
   if (a) {
     var b = P(a) ? a : a.preset;
-    b && (Va[b] || console.warn("Preset not found: " + b), a = Object.assign({}, Va[b], a));
+    b && (Wa[b] || console.warn("Preset not found: " + b), a = Object.assign({}, Wa[b], a));
   } else {
     a = {};
   }
   b = a.context;
-  const e = !0 === b ? {depth:1} : b || {}, d = P(a.encoder) ? sa[a.encoder] : a.encode || a.encoder || {};
-  this.encoder = d.encode ? d : "object" === typeof d ? new ka(d) : {encode:d};
+  const e = b === !0 ? {depth:1} : b || {}, d = P(a.encoder) ? va[a.encoder] : a.encode || a.encoder || {};
+  this.encoder = d.encode ? d : typeof d === "object" ? new la(d) : {encode:d};
   this.resolution = a.resolution || 9;
-  this.tokenize = b = (b = a.tokenize) && "default" !== b && "exact" !== b && b || "strict";
-  this.depth = "strict" === b && e.depth || 0;
-  this.bidirectional = !1 !== e.bidirectional;
+  this.tokenize = b = (b = a.tokenize) && b !== "default" && b !== "exact" && b || "strict";
+  this.depth = b === "strict" && e.depth || 0;
+  this.bidirectional = e.bidirectional !== !1;
   this.fastupdate = !!a.fastupdate;
   this.score = a.score || null;
-  e && e.depth && "strict" !== this.tokenize && console.warn('Context-Search could not applied, because it is just supported when using the tokenizer "strict".');
+  e && e.depth && this.tokenize !== "strict" && console.warn('Context-Search could not applied, because it is just supported when using the tokenizer "strict".');
   b = !1;
   this.map = new Map();
   this.ctx = new Map();
   this.reg = c || (this.fastupdate ? new Map() : new Set());
-  this.P = e.resolution || 3;
+  this.L = e.resolution || 3;
   this.rtl = d.rtl || a.rtl || !1;
-  this.cache = (b = a.cache || null) && new W(b);
+  this.cache = (b = a.cache || null) && new T(b);
   this.priority = a.priority || 4;
 }
-A = Z.prototype;
-A.clear = function() {
+B = Y.prototype;
+B.clear = function() {
   this.map.clear();
   this.ctx.clear();
   this.reg.clear();
   this.cache && this.cache.clear();
   return this;
 };
-A.append = function(a, c) {
+B.append = function(a, c) {
   return this.add(a, c, !0);
 };
-A.contain = function(a) {
+B.contain = function(a) {
   return this.reg.has(a);
 };
-A.update = function(a, c) {
+B.update = function(a, c) {
   const b = this, e = this.remove(a);
   return e && e.then ? e.then(() => b.add(a, c)) : this.add(a, c);
 };
-A.cleanup = function() {
+B.cleanup = function() {
   if (!this.fastupdate) {
     return console.info('Cleanup the index isn\'t required when not using "fastupdate".'), this;
   }
-  Ua(this.map);
-  this.depth && Ua(this.ctx);
+  Va(this.map);
+  this.depth && Va(this.ctx);
   return this;
 };
-A.searchCache = la;
-A.export = function(a, c, b = 0, e = 0) {
+B.searchCache = ma;
+B.export = function(a, c, b = 0, e = 0) {
   let d, f;
   switch(e) {
     case 0:
       d = "reg";
-      f = Qa(this.reg);
+      f = Ra(this.reg);
       break;
     case 1:
       d = "cfg";
@@ -1562,45 +1572,45 @@ A.export = function(a, c, b = 0, e = 0) {
       break;
     case 2:
       d = "map";
-      f = Ma(this.map, this.reg.size);
+      f = Na(this.map, this.reg.size);
       break;
     case 3:
       d = "ctx";
-      f = Oa(this.ctx, this.reg.size);
+      f = Pa(this.ctx, this.reg.size);
       break;
     default:
       return;
   }
-  return Sa.call(this, a, c, d, f, b, e);
+  return Ta.call(this, a, c, d, f, b, e);
 };
-A.import = function(a, c) {
+B.import = function(a, c) {
   if (c) {
-    switch("string" === typeof c && (c = JSON.parse(c)), a = a.split("."), "json" === a[a.length - 1] && a.pop(), 3 === a.length && a.shift(), a = 1 < a.length ? a[1] : a[0], a) {
+    switch(typeof c === "string" && (c = JSON.parse(c)), a = a.split("."), a[a.length - 1] === "json" && a.pop(), a.length === 3 && a.shift(), a = a.length > 1 ? a[1] : a[0], a) {
       case "reg":
         this.fastupdate = !1;
-        this.reg = Ra(c, this.reg);
+        this.reg = Sa(c, this.reg);
         break;
       case "map":
-        this.map = Na(c, this.map);
+        this.map = Oa(c, this.map);
         break;
       case "ctx":
-        this.ctx = Pa(c, this.ctx);
+        this.ctx = Qa(c, this.ctx);
     }
   }
 };
-A.serialize = function(a = !0) {
+B.serialize = function(a = !0) {
   let c = "", b = "", e = "";
   if (this.reg.size) {
     let f;
     for (var d of this.reg.keys()) {
-      f || (f = typeof d), c += (c ? "," : "") + ("string" === f ? '"' + d + '"' : d);
+      f || (f = typeof d), c += (c ? "," : "") + (f === "string" ? '"' + d + '"' : d);
     }
     c = "index.reg=new Set([" + c + "]);";
-    b = Ta(this.map, f);
+    b = Ua(this.map, f);
     b = "index.map=new Map([" + b + "]);";
     for (const g of this.ctx.entries()) {
       d = g[0];
-      let h = Ta(g[1], f);
+      let h = Ua(g[1], f);
       h = "new Map([" + h + "])";
       h = '["' + d + '",' + h + "]";
       e += (e ? "," : "") + h;
@@ -1609,11 +1619,11 @@ A.serialize = function(a = !0) {
   }
   return a ? "function inject(index){" + c + b + e + "}" : c + b + e;
 };
-va(Z.prototype);
+wa(Y.prototype);
 M();
-const Za = {Index:Z, Charset:sa, Encoder:ka, Document:Y, Worker:null, Resolver:null, IndexedDB:null, Language:{}}, $a = "undefined" !== typeof self ? self : "undefined" !== typeof global ? global : self;
+const Za = {Index:Y, Charset:va, Encoder:la, Document:X, Worker:null, Resolver:null, IndexedDB:null, Language:{}}, $a = typeof self !== "undefined" ? self : typeof global !== "undefined" ? global : self;
 let ab;
 (ab = $a.define) && ab.amd ? ab([], function() {
   return Za;
-}) : "object" === typeof $a.exports ? $a.exports = Za : $a.FlexSearch = Za;
+}) : typeof $a.exports === "object" ? $a.exports = Za : $a.FlexSearch = Za;
 }(this||self));

@@ -44,14 +44,34 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
 
                     switch (this.tokenize) {
 
+                        case "tolerant":
+                            this.push_index(dupes, term, score, id, _append);
+                            if (2 < term_length) {
+                                for (let x = 1, char_a, char_b, prt_1, prt_2; x < term_length - 1; x++) {
+                                    char_a = term.charAt(x);
+                                    char_b = term.charAt(x + 1);
+                                    prt_1 = term.substring(0, x) + char_b;
+                                    prt_2 = term.substring(x + 2);
+
+                                    token = prt_1 + char_a + prt_2;
+                                    dupes[token] || this.push_index(dupes, token, score, id, _append);
+
+                                    token = prt_1 + prt_2;
+                                    dupes[token] || this.push_index(dupes, token, score, id, _append);
+                                }
+                            }
+                            break;
+
                         case "full":
                             if (2 < term_length) {
                                 for (let x = 0, _x; x < term_length; x++) {
                                     for (let y = term_length; y > x; y--) {
                                         token = term.substring(x, y);
-                                        _x = this.rtl ? term_length - 1 - x : x;
-                                        const partial_score = this.score ? this.score(content, term, i, token, _x) : get_score(resolution, word_length, i, term_length, _x);
-                                        this.push_index(dupes, token, partial_score, id, _append);
+                                        if (!dupes[token]) {
+                                            _x = this.rtl ? term_length - 1 - x : x;
+                                            const partial_score = this.score ? this.score(content, term, i, token, _x) : get_score(resolution, word_length, i, term_length, _x);
+                                            this.push_index(dupes, token, partial_score, id, _append);
+                                        }
                                     }
                                 }
                                 break;
@@ -63,8 +83,10 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
                             if (1 < term_length) {
                                 for (let x = term_length - 1; 0 < x; x--) {
                                     token = term[this.rtl ? term_length - 1 - x : x] + token;
-                                    const partial_score = this.score ? this.score(content, term, i, token, x) : get_score(resolution, word_length, i, term_length, x);
-                                    this.push_index(dupes, token, partial_score, id, _append);
+                                    if (!dupes[token]) {
+                                        const partial_score = this.score ? this.score(content, term, i, token, x) : get_score(resolution, word_length, i, term_length, x);
+                                        this.push_index(dupes, token, partial_score, id, _append);
+                                    }
                                 }
                                 token = "";
                             }
@@ -73,7 +95,7 @@ Index.prototype.add = function (id, content, _append, _skip_update) {
                             if (1 < term_length) {
                                 for (let x = 0; x < term_length; x++) {
                                     token += term[this.rtl ? term_length - 1 - x : x];
-                                    this.push_index(dupes, token, score, id, _append);
+                                    dupes[token] || this.push_index(dupes, token, score, id, _append);
                                 }
                                 break;
                             }

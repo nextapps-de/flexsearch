@@ -71,6 +71,12 @@ export default function Document(options){
     keystore && (this.keystore = keystore);
     this.fastupdate = !!options.fastupdate;
     // Shared Registry
+    /** @type {
+     *   Set<string|number>|
+     *   Map<Array<string|number>>|
+     *   KeystoreSet<string|number>|
+     *   KeystoreMap<Array<string|number>>
+     * } */
     this.reg = this.fastupdate && (!SUPPORT_WORKER || !options.worker) && (!SUPPORT_PERSISTENT || !options.db)
         ? (keystore && SUPPORT_KEYSTORE ? new KeystoreMap(keystore) : new Map())
         : (keystore && SUPPORT_KEYSTORE ? new KeystoreSet(keystore) : new Set());
@@ -78,11 +84,12 @@ export default function Document(options){
     if(SUPPORT_STORE){
         // todo support custom filter function
         this.storetree = (tmp = document.store || null) && tmp && tmp !== true && [];
-        this.store = tmp && (
+        /** @type {Map|KeystoreMap} */
+        this.store = tmp ? (
             keystore && SUPPORT_KEYSTORE
                 ? new KeystoreMap(keystore)
                 : new Map()
-        );
+        ) : null;
     }
 
     if(SUPPORT_CACHE){

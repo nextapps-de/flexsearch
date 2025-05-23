@@ -14,6 +14,7 @@ import { highlight_fields } from "./highlight.js";
  * @param {number|DocumentSearchOptions=} limit
  * @param {DocumentSearchOptions=} options
  * @param {Array<Array>=} _promises async recursion
+ * @this Document
  * @returns {
  *   DocumentSearchResults|
  *   EnrichedDocumentSearchResults|
@@ -306,7 +307,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
             }
 
             if (count) {
-                res = intersect_union(res, arr, resolve);
+                res = intersect_union( /** @type {IntermediateSearchResults} */res, arr, resolve);
                 len = res.length;
                 if (!len && !suggest) {
 
@@ -435,7 +436,7 @@ function merge_fields(fields) {
             tmp = group_field[id];
             if (!tmp) {
                 entry.field = group_field[id] = [key];
-                final.push( /** @type {MergedDocumentSearchEntry} */entry);
+                final.push( /** @type {!MergedDocumentSearchEntry} */entry);
             } else {
                 tmp.push(key);
             }
@@ -481,7 +482,6 @@ function get_tag(tag, key, limit, offset, enrich) {
  * @return {EnrichedSearchResults|SearchResults|Promise<EnrichedSearchResults|SearchResults>}
  * @this {Document|Index|WorkerIndex|null}
  */
-
 export function apply_enrich(ids) {
 
     if (!this || !this.store) return ids;

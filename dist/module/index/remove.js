@@ -1,6 +1,7 @@
 
 import { is_array } from "../common.js";
 import Index, { autoCommit } from "../index.js";
+import { KeystoreMap } from "../keystore.js";
 
 /**
  * @param {!number|string} id
@@ -50,7 +51,7 @@ Index.prototype.remove = function (id, _skip_deletion) {
 
 /**
  * When called without passing ID it just will clean up
- * @param {!Map|Array<number|string|Array<number|string>>} map
+ * @param {!Map|KeystoreMap|Array<number|string|Array<number|string>>} map
  * @param {!number|string=} id
  * @return {number}
  */

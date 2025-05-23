@@ -24,7 +24,7 @@ All search capabilities are available on persistent indexes like:
 - Boost Fields
 - Custom Encoder
 - Resolver
-- Tokenizer (Strict, Forward, Reverse, Full)
+- Tokenizer
 - Document Store (incl. enrich results)
 - Worker Threads to run in parallel
 - Auto-Balanced Cache (top queries + last queries)

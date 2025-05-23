@@ -1,8 +1,8 @@
 
 import Index from "./index.js";
 import Document from "./document.js";
+import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_string } from "./common.js";
-import { IntermediateSearchResults } from "./type.js";
 
 const chunk_size_reg = 250000,
       chunk_size_map = 5000,
@@ -10,7 +10,7 @@ const chunk_size_reg = 250000,
 
 
 /**
- * @param {Map<IntermediateSearchResults>} map
+ * @param {Map<IntermediateSearchResults>|KeystoreMap<IntermediateSearchResults>} map
  * @param {number=} size
  * @return {Array<Object>}
  */
@@ -34,8 +34,8 @@ function map_to_json(map, size = 0) {
 
 /**
  * @param {Array<Object>} json
- * @param {Map<IntermediateSearchResults>} map
- * @return {Map<IntermediateSearchResults>}
+ * @param {Map<IntermediateSearchResults>|KeystoreMap<IntermediateSearchResults>} map
+ * @return {Map<IntermediateSearchResults>|KeystoreMap<IntermediateSearchResults>}
  */
 function json_to_map(json, map) {
     map || (map = new Map());
@@ -48,7 +48,7 @@ function json_to_map(json, map) {
 }
 
 /**
- * @param {Map<Map<IntermediateSearchResults>>} ctx
+ * @param {Map<Map<IntermediateSearchResults>>|KeystoreMap<KeystoreMap<IntermediateSearchResults>>} ctx
  * @param {number=} size
  * @return {Array<Object>}
  */
@@ -75,8 +75,8 @@ function ctx_to_json(ctx, size = 0) {
 
 /**
  * @param {Array<Object>} json
- * @param {Map<Map<IntermediateSearchResults>>} ctx
- * @return {Map<Map<IntermediateSearchResults>>}
+ * @param {Map<Map<IntermediateSearchResults>>|KeystoreMap<KeystoreMap<IntermediateSearchResults>>} ctx
+ * @return {Map<Map<IntermediateSearchResults>>|KeystoreMap<KeystoreMap<IntermediateSearchResults>>}
  */
 function json_to_ctx(json, ctx) {
     ctx || (ctx = new Map());
@@ -89,7 +89,12 @@ function json_to_ctx(json, ctx) {
 }
 
 /**
- * @param {Set<string|number>|Map<Array<string|number>>} reg
+ * @param {
+ *   Set<string|number>|
+ *   Map<Array<string|number>>|
+ *   KeystoreSet<string|number>|
+ *   KeystoreMap<Array<string|number>>
+ * } reg
  * @return {Array<Array<string|number>>}
  */
 function reg_to_json(reg) {
@@ -109,15 +114,24 @@ function reg_to_json(reg) {
 
 /**
  * @param {Array<string|number>} json
- * @param {Set<string|number>} reg
- * @return {Set<string|number>}
+ * @param {
+ *   Set<string|number>|
+ *   Map<Array<string|number>>|
+ *   KeystoreSet<string|number>|
+ *   KeystoreMap<Array<string|number>>
+ * } reg
+ * @return {
+ *   Set<string|number>|
+ *   KeystoreSet<string|number>
+ * }
  */
 function json_to_reg(json, reg) {
     reg || (reg = new Set());
     for (let i = 0; i < json.length; i++) {
         reg.add(json[i]);
     }
-    return reg;
+    return (/** @type {Set<string|number>} */reg
+    );
 }
 
 /**
@@ -200,7 +214,7 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0) {
 
 /**
  * @param {string} key
- * @param {string|Array<Object>} data
+ * @param {string|Array<Object>=} data
  * @this Index
  */
 
@@ -293,7 +307,8 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
             case 2:
 
                 key = "doc";
-                chunk = this.store && map_to_json(this.store);
+                chunk = this.store && map_to_json(
+                /** @type {Map<IntermediateSearchResults>} */this.store);
                 _field = null;
                 break;
 
@@ -302,7 +317,8 @@ export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0)
                 return;
         }
 
-        return save.call(this, callback, _field, key, chunk, _index_doc, _index_obj);
+        return save.call(this, callback, _field, key,
+        /** @type {Array|null} */chunk || null, _index_doc, _index_obj);
     }
 }
 

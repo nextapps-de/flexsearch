@@ -64,10 +64,10 @@ export default function Encoder(options = {}) {
 
     if (arguments.length) {
         for (let i = 0; i < arguments.length; i++) {
-            this.assign(arguments[i]);
+            this.assign( /** @type {!EncoderOptions} */arguments[i]);
         }
     } else {
-        this.assign(options);
+        this.assign( /** @type {!EncoderOptions} */options);
     }
 }
 
