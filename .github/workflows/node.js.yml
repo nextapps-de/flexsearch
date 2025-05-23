@@ -60,6 +60,11 @@ jobs:
       with:
         java-version: 21
     - run: npm install
+    - run: npm install clickhouse
+    - run: npm install redis
+    - run: npm install mongodb
+    - run: npm install pg-promise
+    - run: npm install sqlite3
     - run: npm run build:compact --if-present
     - run: npm run build:module:compact --if-present
     - run: npm run build:light --if-present
