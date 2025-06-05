@@ -318,12 +318,23 @@ Document.prototype.search = function(query, limit, options, _promises){
                 }
             }
 
+            // TODO merge sorted by score
+            // TODO add score property to results
+            // if(merge){
+            //     opt.resolve = false;
+            // }
+
             res = cache
                 ? index.searchCache(query, limit, opt)
                 : index.search(query, limit, opt);
 
             // restore state
-            opt_enrich && (opt.enrich = opt_enrich);
+            // if(merge){
+            //     opt.resolve = resolve;
+            // }
+            if(opt_enrich) {
+                opt.enrich = opt_enrich;
+            }
 
             if(promises){
                 promises[i] = res;

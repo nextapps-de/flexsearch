@@ -14,13 +14,13 @@ if(!build_light) describe("Document (Multi-Field Search)", function(){
 
     const data = [{
         id: 2,
-        data: { title: "Title 3", body: "Body 3" }
+        data: { title: "Title 3", body: "Body 3", cat: "A" }
     },{
         id: 1,
-        data: { title: "Title 2", body: "Body 2" }
+        data: { title: "Title 2", body: "Body 2", cat: "B" }
     },{
         id: 0,
-        data: { title: "Title 1", body: "Body 1" }
+        data: { title: "Title 1", body: "Body 1", cat: "A" }
     }];
 
     const update = [{
@@ -402,6 +402,89 @@ if(!build_light) describe("Document (Multi-Field Search)", function(){
             suggest: true,
             offset: 3
         })).to.eql([]);
+    });
+
+    it("Merge Results", function(){
+
+        const document = new Document({
+            document: {
+                store: [
+                    "data:title"
+                ],
+                id: "id",
+                field: [
+                    "data:title",
+                    "data:body"
+                ],
+                tag: "data:cat"
+            }
+        });
+
+        for(let i = 0; i < data.length; i++){
+            document.add(data[i]);
+        }
+
+        expect(document.search({
+            query: "title",
+            enrich: false,
+            suggest: true,
+            merge: true
+        })).to.eql([
+            { id: 2, field: [ 'data:title' ] },
+            { id: 1, field: [ 'data:title' ] },
+            { id: 0, field: [ 'data:title' ] }
+        ]);
+
+        expect(document.search({
+            query: "title",
+            enrich: true,
+            suggest: true,
+            merge: true
+        }).map(res => res.doc)).to.eql([
+            { data: { title: data[0].data.title }},
+            { data: { title: data[1].data.title }},
+            { data: { title: data[2].data.title }}
+        ]);
+
+        expect(document.search({
+            query: "title",
+            tag: { "data:cat": "A" },
+            enrich: true,
+            suggest: true,
+            merge: true
+        }).map(res => res.doc)).to.eql([
+            { data: { title: data[0].data.title }},
+            { data: { title: data[2].data.title }}
+        ]);
+    });
+
+    it("Using BigInt", function(){
+
+        const document = new Document({
+            document: {
+                store: "data:title",
+                id: "id",
+                field: [
+                    "data:title",
+                    "data:body"
+                ],
+                tag: "data:cat"
+            }
+        });
+
+        for(let i = 0, tmp; i < data.length; i++){
+            tmp = Object.assign({}, data[i], { id: BigInt(i + 1) });
+            document.add(tmp);
+        }
+
+        expect(document.search({
+            query: "title",
+            tag: { "data:cat": "A" },
+            merge: true
+        })).to.eql([
+            { id: BigInt(1), field: [ "data:title" ] },
+            { id: BigInt(3), field: [ "data:title" ] }
+        ]);
     });
 
     it("Custom Document Store", function(){

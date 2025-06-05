@@ -255,10 +255,12 @@ function create_result(rows, resolve, enrich){
 }
 
 SqliteDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = true, enrich = false, tags){
+
     let result;
     let stmt = '';
     let params = ctx ? [ctx, key] : [key];
     let table = "main." + (ctx ? "ctx" : "map") + this.field;
+
     if(tags){
         for(let i = 0; i < tags.length; i+=2){
             stmt += ` AND ${ table }.id IN (SELECT id FROM main.tag_${ sanitize(tags[i]) } WHERE tag = ?)`;
@@ -303,12 +305,14 @@ SqliteDB.prototype.get = function(key, ctx, limit = 0, offset = 0, resolve = tru
             params
         });
     }
+
     return result.then(function(rows){
         return create_result(rows, resolve, enrich);
     });
 };
 
 SqliteDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
+
     const table = "main.tag" + this.field;
     const promise = this.promisfy({
         method: "all",
@@ -325,17 +329,25 @@ SqliteDB.prototype.tag = function(tag, limit = 0, offset = 0, enrich = false){
         `,
         params: [tag]
     });
+
     enrich || promise.then(function(rows){
         return create_result(rows, true, false);
     });
+
     return promise;
 };
 
 function build_params(length, single_param){
 
+    // let stmt = "?";
+    // for(let i = 1; i < length; i++){
+    //     stmt += ",?";
+    // }
+
     let stmt = single_param
         ? ",(?)"
         : ",?";
+
     for(let i = 1; i < length;){
         if(i <= (length - i)){
             stmt += stmt;
@@ -346,6 +358,7 @@ function build_params(length, single_param){
             break;
         }
     }
+
     return stmt.substring(1);
 }
 
@@ -362,15 +375,8 @@ SqliteDB.prototype.enrich = function(ids){
         const chunk = ids.length - count > MAXIMUM_QUERY_VARS
             ? ids.slice(count, count + MAXIMUM_QUERY_VARS)
             : count ? ids.slice(count) : ids;
+        const stmt = build_params(chunk.length);
         count += chunk.length;
-
-        // let stmt = "?";
-        // for(let i = 1; i < chunk.length; i++){
-        //     stmt += ",?";
-        // }
-
-        // 10x faster string concatenation
-        let stmt = build_params(chunk.length);
 
         promises.push(this.promisfy({
             method: "all",
@@ -594,37 +600,29 @@ SqliteDB.prototype.transaction = async function(task, callback){
     });
 };
 
-SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
+SqliteDB.prototype.commit = async function(flexsearch){
 
-    // process cleanup tasks
-    if(_replace){
-        await this.clear();
-        // there are just removals in the task queue
-        flexsearch.commit_task = [];
-    }
-    else{
-        let tasks = flexsearch.commit_task;
-        flexsearch.commit_task = [];
-        for(let i = 0, task; i < tasks.length; i++){
-            task = tasks[i];
-            // there are just removals in the task queue
-            if(task.clear){
-                await this.clear();
-                _replace = true;
-                break;
-            }
-            else{
-                tasks[i] = task.del;
-            }
+    let tasks = flexsearch.commit_task;
+    let removals = [];
+    let inserts = [];
+    flexsearch.commit_task = [];
+
+    for(let i = 0, task; i < tasks.length; i++){
+        task = tasks[i];
+        if(typeof task["del"] !== "undefined"){
+            removals.push(task["del"]);
         }
-        if(!_replace){
-            if(!_append){
-                tasks = tasks.concat(toArray(flexsearch.reg));
-            }
-            tasks.length && await this.remove(tasks);
+        else if(typeof task["ins"] !== "undefined"){
+            inserts.push(task["ins"]);
         }
     }
 
+    if(removals.length){
+        await this.remove(removals);
+    }
+    // if(inserts_map.length || inserts_ctx.length){
+    //     await this.insert(inserts_map, inserts_ctx);
+    // }
     if(!flexsearch.reg.size){
         return;
     }
@@ -645,7 +643,11 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
                         params.push(key, i, ids[j]);
                         // maximum count of variables supported
                         if((j === ids.length - 1) || (params.length + 3 > MAXIMUM_QUERY_VARS)){
-                            this.db.run("INSERT INTO main.map" + this.field + " (key, res, id) VALUES " + stmt, params);
+                            this.db.run(
+                                "INSERT INTO main.map" + this.field + " (key, res, id) VALUES " + stmt
+                                // " ON CONFLICT DO " +
+                                // "UPDATE main.map" + this.field + " SET key = '', res = 0 WHERE key = ? AND res > ? AND id = ?"
+                            , params);
                             stmt = "";
                             params = [];
                         }
@@ -700,13 +702,13 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
                     : doc || null
                 );
                 if(chunk.length + 2 > MAXIMUM_QUERY_VARS){
-                    this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt, chunk);
+                    this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt + " ON CONFLICT DO NOTHING", chunk);
                     stmt = "";
                     chunk = [];
                 }
             }
             if(chunk.length){
-                this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt, chunk);
+                this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt + " ON CONFLICT DO NOTHING", chunk);
             }
         }
         else if(!flexsearch.bypass){
@@ -717,7 +719,7 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
                     : count ? ids.slice(count) : ids;
                 count += chunk.length;
                 const stmt = build_params(chunk.length, /* single param */ true);
-                this.db.run("INSERT INTO main.reg (id) VALUES " + stmt, chunk);
+                this.db.run("INSERT INTO main.reg (id) VALUES " + stmt + " ON CONFLICT DO NOTHING", chunk);
             }
         }
     //});
@@ -745,6 +747,10 @@ SqliteDB.prototype.commit = async function(flexsearch, _replace, _append){
             }
         }
     });
+
+    if(inserts.length){
+        await this.cleanup();
+    }
 
     // TODO
     //await this.transaction(function(){
@@ -799,6 +805,34 @@ SqliteDB.prototype.remove = function(ids){
         return next
             ? self.remove(next)
             : result;
+    });
+};
+
+SqliteDB.prototype.cleanup = function(){
+    return this.transaction(function(){
+        this.db.run(
+            "DELETE FROM main.map" + this.field + " " +
+            "WHERE ROWID IN (" +
+                "SELECT ROWID FROM (" +
+                    "SELECT ROWID, row_number() OVER dupes AS count " +
+                    "FROM main.map" + this.field + " _t " +
+                    "WINDOW dupes AS (PARTITION BY id, key ORDER BY res) " +
+                ") " +
+                "WHERE count > 1" +
+            ")"
+
+        );
+        this.db.run(
+            "DELETE FROM main.ctx" + this.field + " " +
+            "WHERE ROWID IN (" +
+                "SELECT ROWID FROM (" +
+                    "SELECT ROWID, row_number() OVER dupes AS count " +
+                    "FROM main.ctx" + this.field + " _t " +
+                    "WINDOW dupes AS (PARTITION BY id, ctx, key ORDER BY res) " +
+                ") " +
+                "WHERE count > 1" +
+            ")"
+        );
     });
 };
 

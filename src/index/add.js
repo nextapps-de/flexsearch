@@ -8,7 +8,7 @@ import {
 import { create_object } from "../common.js";
 import Index, { autoCommit } from "../index.js";
 import default_compress from "../compress.js";
-import { KeystoreArray } from "../keystore.js";
+import { KeystoreArray, KeystoreMap } from "../keystore.js";
 
 // TODO:
 // string + number as text
@@ -21,7 +21,6 @@ import { KeystoreArray } from "../keystore.js";
  * @param {boolean=} _append
  * @param {boolean=} _skip_update
  */
-
 Index.prototype.add = function(id, content, _append, _skip_update){
 
     if(content && (id || (id === 0))){
@@ -39,9 +38,9 @@ Index.prototype.add = function(id, content, _append, _skip_update){
         // do not force a string as input
         // https://github.com/nextapps-de/flexsearch/issues/432
         content = this.encoder.encode(content, !depth);
-        const word_length = content.length;
+        const term_count = content.length;
 
-        if(word_length){
+        if(term_count){
 
             // check context dupes to skip all contextual redundancy along a document
 
@@ -49,9 +48,9 @@ Index.prototype.add = function(id, content, _append, _skip_update){
             const dupes = create_object();
             const resolution = this.resolution;
 
-            for(let i = 0; i < word_length; i++){
+            for(let i = 0; i < term_count; i++){
 
-                let term = content[this.rtl ? word_length - 1 - i : i];
+                let term = content[this.rtl ? term_count - 1 - i : i];
                 let term_length = term.length;
 
                 // skip dupes will break the context chain
@@ -59,7 +58,7 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
                     let score = this.score
                         ? this.score(content, term, i, null, 0)
-                        : get_score(resolution, word_length, i);
+                        : get_score(resolution, term_count, i);
                     let token = "";
 
                     switch(this.tokenize){
@@ -70,22 +69,25 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                         // A[CB]DE     A[]CDE
                         // AB[DC]E     AB[]DE
                         // ABC[ED]     ABC[]E
+                        //             ABCD[]
 
                         case "tolerant":
-                            this.push_index(dupes, term, score, id, _append);
+                            this._push_index(dupes, term, score, id, _append);
                             if(term_length > 2){
                                 for(let x = 1, char_a, char_b, prt_1, prt_2; x < term_length - 1; x++){
                                     char_a = term.charAt(x);
                                     char_b = term.charAt(x + 1);
                                     prt_1 = term.substring(0, x) + char_b;
                                     prt_2 = term.substring(x + 2);
-                                    // swap letters
+                                    // swapped letters
                                     token = prt_1 /*+ char_b*/ + char_a + prt_2;
-                                    dupes[token] || this.push_index(dupes, token, score, id, _append);
-                                    // remove letters
+                                    this._push_index(dupes, token, score, id, _append);
+                                    // missing letters
                                     token = prt_1 /*+ char_b*/ + prt_2;
-                                    dupes[token] || this.push_index(dupes, token, score, id, _append);
+                                    this._push_index(dupes, token, score, id, _append);
                                 }
+                                // missing last letter
+                                this._push_index(dupes, term.substring(0, term.length - 1), score, id, _append);
                             }
                             break;
 
@@ -94,13 +96,11 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                 for(let x = 0, _x; x < term_length; x++){
                                     for(let y = term_length; y > x; y--){
                                         token = term.substring(x, y);
-                                        if(!dupes[token]){
-                                            _x = this.rtl ? term_length - 1 - x : x;
-                                            const partial_score = this.score
-                                                ? this.score(content, term, i, token, _x)
-                                                : get_score(resolution, word_length, i, term_length, _x);
-                                            this.push_index(dupes, token, partial_score, id, _append);
-                                        }
+                                        _x = this.rtl ? term_length - 1 - x : x;
+                                        const partial_score = this.score
+                                            ? this.score(content, term, i, token, _x)
+                                            : get_score(resolution, term_count, i, term_length, _x);
+                                        this._push_index(dupes, token, partial_score, id, _append);
                                     }
                                 }
                                 break;
@@ -117,12 +117,10 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                             ? term_length - 1 - x
                                             : x
                                     ] + token;
-                                    if(!dupes[token]){
-                                        const partial_score = this.score
-                                            ? this.score(content, term, i, token, x)
-                                            : get_score(resolution, word_length, i, term_length, x);
-                                        this.push_index(dupes, token, partial_score, id, _append);
-                                    }
+                                    const partial_score = this.score
+                                        ? this.score(content, term, i, token, x)
+                                        : get_score(resolution, term_count, i, term_length, x);
+                                    this._push_index(dupes, token, partial_score, id, _append);
                                 }
                                 token = "";
                             }
@@ -136,57 +134,47 @@ Index.prototype.add = function(id, content, _append, _skip_update){
                                             ? term_length - 1 - x
                                             : x
                                     ];
-                                    dupes[token] || this.push_index(dupes, token, score, id, _append);
+                                    this._push_index(dupes, token, score, id, _append);
                                 }
                                 break;
                             }
 
                         // fallthrough to next case when token has a length of 1
                         default: // "strict":
-                            this.push_index(dupes, term, score, id, _append);
+                            this._push_index(dupes, term, score, id, _append);
+
                             // context is just supported by tokenizer "strict"
-                            if(depth){
+                            if(depth && (term_count > 1) && (i < (term_count - 1))){
 
-                                if((word_length > 1) && (i < (word_length - 1))){
+                                const resolution = this.resolution_ctx;
+                                const keyword = term;
+                                const size = Math.min(
+                                    depth + 1,
+                                    this.rtl
+                                        ? i + 1
+                                        : term_count - i
+                                );
 
-                                    // check inner dupes to skip repeating words in the current context
-                                    const dupes_inner = create_object();
-                                    const resolution = this.resolution_ctx;
-                                    const keyword = term;
-                                    const size = Math.min(
-                                        depth + 1,
+                                for(let x = 1; x < size; x++){
+
+                                    term = content[
                                         this.rtl
-                                            ? i + 1
-                                            : word_length - i
+                                            ? term_count - 1 - i - x
+                                            : i + x
+                                    ];
+
+                                    const swap = this.bidirectional && (term > keyword);
+                                    const context_score = this.score
+                                        ? this.score(content, keyword, i, term, x - 1)
+                                        : get_score(resolution + ((term_count / 2) > resolution ? 0 : 1), term_count, i, size - 1, x - 1);
+                                    this._push_index(
+                                        dupes_ctx,
+                                        swap ? keyword : term,
+                                        context_score,
+                                        id,
+                                        _append,
+                                        swap ? term : keyword
                                     );
-
-                                    dupes_inner[keyword] = 1;
-
-                                    for(let x = 1; x < size; x++){
-
-                                        term = content[
-                                            this.rtl
-                                                ? word_length - 1 - i - x
-                                                : i + x
-                                        ];
-
-                                        if(term && !dupes_inner[term]){
-
-                                            dupes_inner[term] = 1;
-                                            const context_score = this.score
-                                                ? this.score(content, keyword, i, term, x - 1)
-                                                : get_score(resolution + ((word_length / 2) > resolution ? 0 : 1), word_length, i, size - 1, x - 1);
-                                            const swap = this.bidirectional && (term > keyword);
-                                            this.push_index(
-                                                dupes_ctx,
-                                                swap ? keyword : term,
-                                                context_score,
-                                                id,
-                                                _append,
-                                                swap ? term : keyword
-                                            );
-                                        }
-                                    }
                                 }
                             }
                     }
@@ -195,15 +183,10 @@ Index.prototype.add = function(id, content, _append, _skip_update){
 
             this.fastupdate || this.reg.add(id);
         }
-        else{
-            content = "";
-        }
     }
 
     if(SUPPORT_PERSISTENT && this.db){
-        // when the term has no valid content (e.g., empty),
-        // then it was not added to the ID registry for removal
-        content || this.commit_task.push({ "del": id });
+        this.commit_task.push(_append ? { "ins": id } : { "del": id });
         this.commit_auto && autoCommit(this);
     }
 
@@ -219,29 +202,34 @@ Index.prototype.add = function(id, content, _append, _skip_update){
  * @param {boolean=} append
  * @param {string=} keyword
  */
+Index.prototype._push_index = function(dupes, term, score, id, append, keyword){
 
-Index.prototype.push_index = function(dupes, term, score, id, append, keyword){
+    let res, arr;
 
-    let arr = keyword ? this.ctx : this.map;
-    let tmp;
-
-    if(!dupes[term] || (keyword && !(tmp = dupes[term])[keyword])){
+    if(!(res = dupes[term]) || (keyword && !res[keyword])){
 
         if(keyword){
 
-            dupes = tmp || (dupes[term] = create_object());
+            dupes = res || (dupes[term] = create_object());
             dupes[keyword] = 1;
 
             if(SUPPORT_COMPRESSION && this.compress){
                 keyword = default_compress(keyword);
             }
 
-            tmp = arr.get(keyword);
-            tmp ? arr = tmp
-                : arr.set(keyword, arr = new Map());
+            arr = this.ctx;
+            res = arr.get(keyword);
+            res ? arr = res
+                : arr.set(
+                    keyword,
+                    arr = SUPPORT_KEYSTORE && this.keystore
+                        ? new KeystoreMap(this.keystore)
+                        : new Map()
+                );
         }
         else{
 
+            arr = this.map;
             dupes[term] = 1;
         }
 
@@ -249,36 +237,55 @@ Index.prototype.push_index = function(dupes, term, score, id, append, keyword){
             term = default_compress(term);
         }
 
-        tmp = arr.get(term);
-        tmp ? arr = tmp : arr.set(term, arr = tmp = []);
-        // the ID array will be upgraded dynamically
-        arr = arr[score] || (arr[score] = []);
+        res = arr.get(term);
+        res ? arr = res
+            : arr.set(term, arr = res = []);
 
-        if(!append || !arr.includes(id)){
-
-            // auto-upgrade to a keystore array if max size exceeded
-            if(SUPPORT_KEYSTORE){
-                if(arr.length === 2**31-1 /*|| !(arr instanceof KeystoreArray)*/){
-                    const keystore = new KeystoreArray(arr);
-                    if(this.fastupdate){
-                        for(let value of this.reg.values()){
-                            if(value.includes(arr)){
-                                value[value.indexOf(arr)] = keystore;
-                            }
+        if(append){
+            for(let i = 0, arr; i < res.length; i++){
+                arr = res[i];
+                if(arr && arr.includes(id)){
+                    if(i <= score){
+                        // already included in the right slot
+                        return;
+                    }
+                    else{
+                        // update slot
+                        arr.splice(arr.indexOf(id), 1);
+                        if(this.fastupdate){
+                            const tmp = this.reg.get(id);
+                            tmp && tmp.splice(tmp.indexOf(arr), 1);
                         }
                     }
-                    tmp[score] = arr = keystore;
+                    break;
                 }
             }
+        }
 
-            arr.push(id);
+        // the ID keystore array will upgrade automatically
+        arr = arr[score] || (arr[score] = []);
+        arr.push(id);
 
-            // add a reference to the register for fast updates
-            if(this.fastupdate){
-                const tmp = this.reg.get(id);
-                tmp ? tmp.push(arr)
-                    : this.reg.set(id, [arr]);
+        // auto-upgrade to a keystore array if max size exceeded
+        if(SUPPORT_KEYSTORE){
+            if(arr.length === 2**31-1 /*|| !(arr instanceof KeystoreArray)*/){
+                const keystore = new KeystoreArray(arr);
+                if(this.fastupdate){
+                    for(let value of this.reg.values()){
+                        if(value.includes(arr)){
+                            value[value.indexOf(arr)] = keystore;
+                        }
+                    }
+                }
+                res[score] = arr = keystore;
             }
+        }
+
+        // add a reference to the register for fast updates
+        if(this.fastupdate){
+            const tmp = this.reg.get(id);
+            tmp ? tmp.push(arr)
+                : this.reg.set(id, [arr]);
         }
     }
 }
@@ -291,7 +298,6 @@ Index.prototype.push_index = function(dupes, term, score, id, append, keyword){
  * @param {number=} x
  * @returns {number}
  */
-
 function get_score(resolution, length, i, term_length, x){
 
     // console.log("resolution", resolution);

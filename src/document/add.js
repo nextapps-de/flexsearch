@@ -42,7 +42,7 @@ Document.prototype.add = function(id, content, _append){
             if(typeof tree === "function"){
                 const tmp = tree(content);
                 if(tmp){
-                    index.add(id, tmp, /* append: */ false, /* skip update: */ true);
+                    index.add(id, tmp, /* append: */ _append, /* skip update: */ true);
                 }
             }
             else{
@@ -225,7 +225,7 @@ function add_index(obj, tree, marker, pos, index, id, key, _append){
 
     if((obj = obj[key])){
 
-        // reached target field
+        // reached the target field
         if(pos === (tree.length - 1)){
 
             // handle target value

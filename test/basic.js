@@ -10,9 +10,6 @@ const build_compact = env && env.includes("compact");
 const build_esm = !env || env.startsWith("module");
 const Charset = _Charset || (await import("../src/charset.js")).default;
 
-// global.FlexSearch = { Index, Document, Worker, Charset, Encoder, Resolver };
-// global.build = { build_light, build_compact, build_esm };
-
 describe("Initialize", function(){
 
     const index = new Index();
@@ -150,6 +147,108 @@ describe("Add", function(){
         index.add(3, "    ");
         index.add(4, "  -  ");
         index.add(5, ` ...
+         -           : , 
+        <-- `);
+
+        expect(index.reg.size).to.equal(0);
+    });
+});
+
+describe("Append", function(){
+
+    it("Should have been properly appended to the index", function(){
+
+        const index = new Index();
+
+        index.append(0, "foo");
+        index.append(2, "bar");
+        index.append(1, "FooBar");
+        index.append(3, "Some 'short' content.");
+
+        expect(Array.from(index.reg.keys())).to.have.members([0, 1, 2, 3]);
+        expect(Array.from(index.map.keys())).to.have.members(["fo", "bar", "fobar", "some", "short", "content"]);
+        expect(index.ctx.size).to.equal(0);
+        expect(index.reg.size).to.equal(4);
+    });
+
+    it("Should have been properly appended by score", function(){
+
+        let index = new Index();
+        index.add(0, "foo A B C D E F bar");
+        index.add(1, "foo A B C bar D E F");
+        index.add(2, "foo bar A B C D E F");
+
+        expect(index.search("foo")).to.eql([0, 1, 2]);
+        expect(index.search("bar")).to.eql([2, 1, 0]);
+        expect(index.reg.size).to.equal(3);
+        expect(index.map.size).to.equal(8);
+        expect(index.ctx.size).to.equal(0);
+
+        index.append(0, "bar");
+        index.append(0, "foo");
+        index.append(0, "bar");
+
+        expect(index.search("foo")).to.eql([0, 1, 2]);
+        expect(index.search("bar")).to.eql([0, 2, 1]);
+        expect(index.reg.size).to.equal(3);
+        expect(index.map.size).to.equal(8);
+        expect(index.ctx.size).to.equal(0);
+
+        index.remove(2).remove(1).remove(0);
+        expect(index.reg.size).to.equal(0);
+        expect(index.map.size).to.equal(0);
+        expect(index.ctx.size).to.equal(0);
+
+        index = new Index({ context: true });
+        index.add(0, "foo A B C D E F bar");
+        index.add(1, "foo A B C bar D E F");
+        index.add(2, "foo bar A B C D E F");
+
+        expect(index.search("foo")).to.eql([0, 1, 2]);
+        expect(index.search("bar")).to.eql([2, 1, 0]);
+        expect(index.reg.size).to.equal(3);
+        expect(index.map.size).to.equal(8);
+        expect(index.ctx.size).to.equal(7);
+
+        index.append(0, "bar");
+        index.append(0, "foo");
+        index.append(0, "bar");
+
+        expect(index.search("foo")).to.eql([0, 1, 2]);
+        expect(index.search("bar")).to.eql([0, 2, 1]);
+        expect(index.reg.size).to.equal(3);
+        expect(index.map.size).to.equal(8);
+        expect(index.ctx.size).to.equal(7);
+
+        index.remove(2).remove(1).remove(0);
+        expect(index.reg.size).to.equal(0);
+        expect(index.map.size).to.equal(0);
+        expect(index.ctx.size).to.equal(0);
+    });
+
+    it("Should not have been appended to the index (Parameter)", function(){
+
+        const index = new Index();
+
+        index.append("foo");
+        index.append(3);
+        index.append(null, "foobar");
+        index.append(void 0, "foobar");
+        index.append(3, null);
+        index.append(3, false);
+
+        expect(index.reg.size).to.equal(0);
+    });
+
+    it("Should not have been appended to the index (Empty)", function(){
+
+        const index = new Index();
+
+        index.append(1, "");
+        index.append(2, " ");
+        index.append(3, "    ");
+        index.append(4, "  -  ");
+        index.append(5, ` ...
          -           : , 
         <-- `);
 

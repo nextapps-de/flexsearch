@@ -112,112 +112,20 @@ Index.prototype.search = function(query, limit, options){
         );
     }
 
-    // let maxlength = 0;
-    // let minlength = 0;
-    //
-    // if(length > 1){
-    //
-    //     // term deduplication will break the context chain
-    //     // todo add context to dupe check
-    //     const dupes = create_object();
-    //     const query_new = [];
-    //
-    //     // if(context){
-    //     //     keyword = query_terms[0];
-    //     //     dupes[keyword] = 1;
-    //     //     query_new.push(keyword);
-    //     //     maxlength = minlength = keyword.length;
-    //     //     i = 1;
-    //     // }
-    //
-    //     for(let i = 0, term; i < length; i++){
-    //
-    //         term = query_terms[i];
-    //
-    //         if(term && !dupes[term]){
-    //
-    //             // todo add keyword check
-    //             // this fast path can't apply to persistent indexes
-    //             if(!suggest && !(SUPPORT_PERSISTENT && this.db) && !this.get_array(term/*, keyword*/)){
-    //
-    //                 // fast path "not found"
-    //                 return !SUPPORT_RESOLVER || resolve
-    //                     ? result
-    //                     : new Resolver(result);
-    //             }
-    //             else{
-    //
-    //                 query_new.push(term);
-    //                 dupes[term] = 1;
-    //             }
-    //
-    //             const term_length = term.length;
-    //             maxlength = Math.max(maxlength, term_length);
-    //             minlength = minlength ? Math.min(minlength, term_length) : term_length;
-    //         }
-    //         // else if(term && (!this.depth || context === false)){
-    //         //     query_new.push(term);
-    //         // }
-    //     }
-    //
-    //     query_terms = query_new;
-    //     length = query_terms.length;
-    // }
-    //
-    // // the term length could be changed after deduplication
-    //
-    // if(!length){
-    //     return !SUPPORT_RESOLVER || resolve
-    //         ? result
-    //         : new Resolver(result);
-    // }
-    //
-    // // fast path single term
-    // if(length === 1){
-    //     return single_term_query.call(
-    //         this,
-    //         query_terms[0], // term
-    //         "",       // ctx
-    //         limit,
-    //         offset,
-    //         resolve,
-    //         enrich,
-    //         tag
-    //     );
-    // }
-    //
-    // // fast path single context
-    // if(length === 2 && context && !suggest){
-    //     return single_term_query.call(
-    //         this,
-    //         query_terms[0], // term
-    //         query_terms[1], // ctx
-    //         limit,
-    //         offset,
-    //         resolve,
-    //         enrich,
-    //         tag
-    //     );
-    // }
-
     let dupes = create_object();
     let index = 0, keyword;
 
-    //if(length > 1){
-        if(context){
-            // start with context right away
-            keyword = query_terms[0];
-            index = 1;
-        }
-        // todo
-        // else if(maxlength > 9 && (maxlength / minlength) > 3){
-        //     // sorting terms will break the context chain
-        //     // bigger terms has less occurrence
-        //     // this might also reduce the intersection task
-        //     // todo check intersection order
-        //     query_terms.sort(sort_by_length_down);
-        // }
-    //}
+    if(context){
+        // start with context right away
+        keyword = query_terms[0];
+        index = 1;
+    }
+    // else {
+    //     // sorting terms will break the context chain
+    //     // bigger terms have a less occurrence
+    //     // this might reduce the intersection task
+    //     query_terms.sort(sort_by_length_down);
+    // }
 
     if(!resolution && resolution !== 0){
         resolution = keyword
@@ -245,7 +153,7 @@ Index.prototype.search = function(query, limit, options){
                 if(term && !dupes[term]){
 
                     dupes[term] = 1;
-                    arr = await self.get_array(term, keyword, 0, 0, false, false);
+                    arr = await self._get_array(term, keyword, 0, 0, false, false);
                     arr = add_result(arr, /** @type {Array} */ (result), suggest, resolution);
 
                     if(arr){
@@ -295,7 +203,7 @@ Index.prototype.search = function(query, limit, options){
         if(term && !dupes[term]){
 
             dupes[term] = 1;
-            arr = this.get_array(term, keyword, 0, 0, false, false);
+            arr = this._get_array(term, keyword, 0, 0, false, false);
             arr = add_result(arr,  /** @type {Array} */ (result), suggest, resolution);
 
             if(arr){
@@ -397,7 +305,7 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
 
 function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
 
-    const result = this.get_array(
+    const result = this._get_array(
         term,
         keyword,
         limit,
@@ -483,7 +391,7 @@ function add_result(arr, result, suggest, resolution){
  *   Promise<IntermediateSearchResults|EnrichedSearchResults>
  * }
  */
-Index.prototype.get_array = function(term, keyword, limit, offset, resolve, enrich, tag){
+Index.prototype._get_array = function(term, keyword, limit, offset, resolve, enrich, tag){
 
     let arr, swap;
 

@@ -231,9 +231,7 @@ declare module "flexsearch" {
         add(id: Id, content: string): W extends false
             ? this
             : Promise<this>;
-        /**
-         * @deprecated The method "append" will be removed in an upcoming release, only use "add" instead
-         */
+
         append(id: Id, content: string): W extends false
             ? this
             : Promise<this>;
@@ -295,7 +293,6 @@ declare module "flexsearch" {
             callback?: AsyncCallback<void>,
         ): Promise<this>;
 
-        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         appendAsync(
             id: Id,
             content: string,
@@ -633,11 +630,9 @@ declare module "flexsearch" {
             ? this
             : Promise<this>;
 
-        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         append(id: Id, document: D): W extends false
             ? this
             : Promise<this>;
-        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         append(document: D): W extends false
             ? this
             : Promise<this>;
@@ -769,13 +764,11 @@ declare module "flexsearch" {
             callback?: AsyncCallback<void>,
         ): Promise<this>;
 
-        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         appendAsync(
             id: Id,
             document: D,
             callback?: AsyncCallback<void>,
         ): Promise<this>;
-        /** @deprecated The method "append" will be removed in an upcoming release, just use "add" instead */
         appendAsync(
             document: D,
             callback?: AsyncCallback<void>,

@@ -891,7 +891,7 @@ Global Members:
 `Index` / `Worker`-Index Methods:
 
 - index.[**add**](#add-text-item-to-an-index)(id, string)
-- ~~index.[**append**]()(id, string)~~
+- index.[**append**]()(id, string)
 - index.[**update**](#update-item-from-an-index)(id, string)
 - index.[**remove**](#remove-item-from-an-index)(id)
 - index.[**search**](#search-items)(string, \<limit\>, \<options\>)
@@ -918,7 +918,7 @@ Global Members:
 `Document` Methods:
 
 - document.[**add**](doc/document-search.md#addupdateremove-documents)(\<id\>, document)
-- ~~document.[**append**]()(\<id\>, document)~~
+- document.[**append**]()(\<id\>, document)
 - document.[**update**](doc/document-search.md#addupdateremove-documents)(\<id\>, document)
 - document.[**remove**](doc/document-search.md#addupdateremove-documents)(id)
 - document.[**remove**](doc/document-search.md#addupdateremove-documents)(document)
@@ -951,7 +951,7 @@ Global Members:
 Async Equivalents (Non-Blocking Balanced):
 
 - <small>_async_</small> [**.addAsync**](doc/async.md)( ... , \<callback\>)
-- <small>_async_</small> ~~[**.appendAsync**](doc/async.md)( ... , \<callback\>)~~
+- <small>_async_</small> [**.appendAsync**](doc/async.md)( ... , \<callback\>)
 - <small>_async_</small> [**.updateAsync**](doc/async.md)( ... , \<callback\>)
 - <small>_async_</small> [**.removeAsync**](doc/async.md)( ... , \<callback\>)
 - <small>_async_</small> [**.searchAsync**](doc/async.md)( ... , \<callback\>)
@@ -1439,7 +1439,7 @@ Try to choose the most upper of these tokenizer which covers your requirements:
         <td><code>"tolerant"</code></td>
         <td>index the full term by also being tolerant against typos like swapped letters and missing letters</td>
         <td><code>foobra</code><br><code>foboar</code><br><code>foobr</code><br><code>fooba</code></td>
-        <td>1 + 2(n - 2)</td>
+        <td>2(n - 2) + 2</td>
     </tr>
     <tr></tr>
     <tr>

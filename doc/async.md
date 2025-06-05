@@ -5,7 +5,7 @@
 Those methods of each index type provides an async version:
 
 - addAsync()
-- ~~appendAsync()~~
+- appendAsync()
 - updateAsync()
 - removeAsync()
 - searchAsync()

@@ -154,12 +154,12 @@ if(SUPPORT_PERSISTENT){
         }
         return db.mount(this);
     };
-    Index.prototype.commit = function(replace, append){
+    Index.prototype.commit = function(replace){
         if(this.commit_timer){
             clearTimeout(this.commit_timer);
             this.commit_timer = null;
         }
-        return this.db.commit(this, replace, append);
+        return this.db.commit(this, replace);
     };
     Index.prototype.destroy = function(){
         if(this.commit_timer){
