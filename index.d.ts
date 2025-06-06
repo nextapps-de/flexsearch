@@ -282,7 +282,7 @@ declare module "flexsearch" {
         // Persistent Index
         mount(db: StorageInterface): Promise<void>;
 
-        commit(replace_all_contents?: boolean): Promise<void>;
+        commit(): Promise<void>;
 
         destroy(): Promise<void>;
 
@@ -749,7 +749,7 @@ declare module "flexsearch" {
         // Persistent Index
         mount<S = StorageInterface<D>>(db: S): Promise<void>;
 
-        commit(replace_all_contents?: boolean): Promise<void>;
+        commit(): Promise<void>;
 
         destroy(): Promise<void>;
 
@@ -941,8 +941,9 @@ declare module "flexsearch" {
 
     export type DefaultResolve<
         D extends DocumentData = undefined,
+        H extends HighlightOptions | boolean = false,
         R extends boolean = true,
-        E extends boolean = false
+        E extends boolean = H extends false ? false : true,
     > = {
         limit?: number;
         offset?: number;
@@ -951,6 +952,9 @@ declare module "flexsearch" {
         enrich?: D extends undefined
             ? false
             : R extends true ? E : false;
+        highlight?: D extends undefined
+            ? false
+            : H; // R extends true ? H : false;
     };
 
     export type ResolverOptions<
@@ -961,7 +965,7 @@ declare module "flexsearch" {
         R extends boolean = false,
         E extends boolean = H extends false ? false : true,
         A extends boolean = false
-    > = Resolver<D, W, S, H, R, E> | (DefaultResolve<D, R, E> & {
+    > = Resolver<D, W, S, H, R, E> | (DefaultResolve<D, H, R, E> & {
         query?: string;
         index?: Index<W, S> | Document<D, W, S> | Worker;
         pluck?: FieldName<D>;
@@ -976,10 +980,6 @@ declare module "flexsearch" {
         cache?: boolean;
         async?: A;
         queue?: A;
-        /** only usable when "resolve" was not set to false */
-        highlight?: D extends undefined
-            ? false
-            : R extends true ? H : false;
     });
 
     export type HighlightBoundaryOptions = {
@@ -1071,10 +1071,11 @@ declare module "flexsearch" {
         boost(boost: number): Resolver<D, W, S>;
 
         resolve<
-            e extends boolean = E,
+            h extends HighlightOptions | boolean = H,
+            e extends boolean = h extends HighlightOptions ? true : E,
             a extends boolean = A
-        >(options?: DefaultResolve<D, true, e>):
-            DocumentSearchResultsWrapper<D, W, S, false, true, true, e, false, a>;
+        >(options?: DefaultResolve<D, h, true, e>):
+            DocumentSearchResultsWrapper<D, W, S, h, true, true, e, false, a>;
     }
 
     export class StorageInterface<D extends DocumentData = DocumentData> {

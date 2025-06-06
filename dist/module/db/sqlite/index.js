@@ -250,6 +250,7 @@ SqliteDB.prototype.get = function (key, ctx, limit = 0, offset = 0, resolve = !0
         params = ctx ? [ctx, key] : [key],
         table = "main." + (ctx ? "ctx" : "map") + this.field;
 
+
     if (tags) {
         for (let i = 0; i < tags.length; i += 2) {
             stmt += ` AND ${table}.id IN (SELECT id FROM main.tag_${sanitize(tags[i])} WHERE tag = ?)`;
@@ -293,6 +294,7 @@ SqliteDB.prototype.get = function (key, ctx, limit = 0, offset = 0, resolve = !0
             params
         });
     }
+
     return result.then(function (rows) {
         return create_result(rows, resolve, enrich);
     });
@@ -316,15 +318,18 @@ SqliteDB.prototype.tag = function (tag, limit = 0, offset = 0, enrich = !1) {
         params: [tag]
     });
 
+
     enrich || promise.then(function (rows) {
         return create_result(rows, !0, !1);
     });
+
     return promise;
 };
 
 function build_params(length, single_param) {
 
     let stmt = single_param ? ",(?)" : ",?";
+
     for (let i = 1; i < length;) {
         if (i <= length - i) {
             stmt += stmt;
@@ -334,6 +339,7 @@ function build_params(length, single_param) {
             break;
         }
     }
+
     return stmt.substring(1);
 }
 
@@ -346,11 +352,10 @@ SqliteDB.prototype.enrich = function (ids) {
     }
 
     for (let count = 0; count < ids.length;) {
+        const chunk = ids.length - count > MAXIMUM_QUERY_VARS ? ids.slice(count, count + MAXIMUM_QUERY_VARS) : count ? ids.slice(count) : ids,
+              stmt = build_params(chunk.length);
 
-        const chunk = ids.length - count > MAXIMUM_QUERY_VARS ? ids.slice(count, count + MAXIMUM_QUERY_VARS) : count ? ids.slice(count) : ids;
         count += chunk.length;
-
-        let stmt = build_params(chunk.length);
 
         promises.push(this.promisfy({
             method: "all",
@@ -512,32 +517,24 @@ SqliteDB.prototype.transaction = async function (task, callback) {
     });
 };
 
-SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
+SqliteDB.prototype.commit = async function (flexsearch) {
+    let tasks = flexsearch.commit_task,
+        removals = [],
+        inserts = [];
 
-    if (_replace) {
-        await this.clear();
+    flexsearch.commit_task = [];
 
-        flexsearch.commit_task = [];
-    } else {
-        let tasks = flexsearch.commit_task;
-        flexsearch.commit_task = [];
-        for (let i = 0, task; i < tasks.length; i++) {
-            task = tasks[i];
-
-            if (task.clear) {
-                await this.clear();
-                _replace = !0;
-                break;
-            } else {
-                tasks[i] = task.del;
-            }
+    for (let i = 0, task; i < tasks.length; i++) {
+        task = tasks[i];
+        if ("undefined" != typeof task.del) {
+            removals.push(task.del);
+        } else if ("undefined" != typeof task.ins) {
+            inserts.push(task.ins);
         }
-        if (!_replace) {
-            if (!_append) {
-                tasks = tasks.concat(toArray(flexsearch.reg));
-            }
-            tasks.length && (await this.remove(tasks));
-        }
+    }
+
+    if (removals.length) {
+        await this.remove(removals);
     }
 
     if (!flexsearch.reg.size) {
@@ -613,13 +610,13 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 stmt += (stmt ? "," : "") + "(?,?)";
                 chunk.push(id, "object" == typeof doc ? JSON.stringify(doc) : doc || null);
                 if (chunk.length + 2 > MAXIMUM_QUERY_VARS) {
-                    this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt, chunk);
+                    this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt + " ON CONFLICT DO NOTHING", chunk);
                     stmt = "";
                     chunk = [];
                 }
             }
             if (chunk.length) {
-                this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt, chunk);
+                this.db.run("INSERT INTO main.reg (id, doc) VALUES " + stmt + " ON CONFLICT DO NOTHING", chunk);
             }
         } else if (!flexsearch.bypass) {
             let ids = toArray(flexsearch.reg);
@@ -627,7 +624,7 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
                 const chunk = ids.length - count > MAXIMUM_QUERY_VARS ? ids.slice(count, count + MAXIMUM_QUERY_VARS) : count ? ids.slice(count) : ids;
                 count += chunk.length;
                 const stmt = build_params(chunk.length, !0);
-                this.db.run("INSERT INTO main.reg (id) VALUES " + stmt, chunk);
+                this.db.run("INSERT INTO main.reg (id) VALUES " + stmt + " ON CONFLICT DO NOTHING", chunk);
             }
         }
 
@@ -655,6 +652,10 @@ SqliteDB.prototype.commit = async function (flexsearch, _replace, _append) {
             }
         }
     });
+
+    if (inserts.length) {
+        await this.cleanup();
+    }
 
     flexsearch.map.clear();
     flexsearch.ctx.clear();
@@ -685,6 +686,13 @@ SqliteDB.prototype.remove = function (ids) {
         this.db.run("DELETE FROM main.reg WHERE id IN (" + stmt + ")", ids);
     }).then(function (result) {
         return next ? self.remove(next) : result;
+    });
+};
+
+SqliteDB.prototype.cleanup = function () {
+    return this.transaction(function () {
+        this.db.run("DELETE FROM main.map" + this.field + " WHERE ROWID IN (SELECT ROWID FROM (SELECT ROWID, row_number() OVER dupes AS count FROM main.map" + this.field + " _t WINDOW dupes AS (PARTITION BY id, key ORDER BY res) ) WHERE count > 1)");
+        this.db.run("DELETE FROM main.ctx" + this.field + " WHERE ROWID IN (SELECT ROWID FROM (SELECT ROWID, row_number() OVER dupes AS count FROM main.ctx" + this.field + " _t WINDOW dupes AS (PARTITION BY id, ctx, key ORDER BY res) ) WHERE count > 1)");
     });
 };
 

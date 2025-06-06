@@ -70,11 +70,12 @@ Resolver.prototype.handler = function (method, fn, args) {
                 offset = query.offset || 0;
                 suggest = query.suggest;
                 resolve = query.resolve;
-                highlight = resolve && query.highlight;
+                highlight = query.highlight || this.highlight;
                 enrich = (highlight || query.enrich) && resolve;
                 let opt_queue = query.queue,
                     opt_async = query.async || opt_queue,
-                    index = query.index;
+                    index = query.index,
+                    query_value = query.query;
 
 
                 if (index) {
@@ -83,7 +84,7 @@ Resolver.prototype.handler = function (method, fn, args) {
                     index = this.index;
                 }
 
-                if (query.query || query.tag) {
+                if (query_value || query.tag) {
                     if (!index) {
                         throw new Error("Resolver can't apply because the corresponding Index was never specified");
                     }
@@ -91,9 +92,10 @@ Resolver.prototype.handler = function (method, fn, args) {
                         const field = query.field || query.pluck;
                         if (field) {
 
-                            if (query.query) {
-                                this.query = query.query;
+                            if (query_value && (!this.query || highlight)) {
+                                this.query = query_value;
                                 this.field = field;
+                                this.highlight = highlight;
                             }
 
                             if (!index.index) {
@@ -144,9 +146,7 @@ Resolver.prototype.handler = function (method, fn, args) {
                     } else {
                         query.resolve = !1;
                         query.index = null;
-
                         result = opt_async ? index.searchAsync(query) : index.search(query);
-
                         query.resolve = resolve;
                         query.index = index;
                     }

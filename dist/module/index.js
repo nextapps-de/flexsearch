@@ -91,12 +91,12 @@ Index.prototype.mount = function (db) {
     }
     return db.mount(this);
 };
-Index.prototype.commit = function (replace, append) {
+Index.prototype.commit = function () {
     if (this.commit_timer) {
         clearTimeout(this.commit_timer);
         this.commit_timer = null;
     }
-    return this.db.commit(this, replace, append);
+    return this.db.commit(this);
 };
 Index.prototype.destroy = function () {
     if (this.commit_timer) {
@@ -108,15 +108,12 @@ Index.prototype.destroy = function () {
 
 /**
  * @param {!Index} self
- * @param {boolean=} replace
- * @param {boolean=} append
  */
-
-export function autoCommit(self, replace, append) {
+export function autoCommit(self) {
     if (!self.commit_timer) {
         self.commit_timer = setTimeout(function () {
             self.commit_timer = null;
-            self.db.commit(self, replace, append);
+            self.db.commit(self);
         }, 1);
     }
 }

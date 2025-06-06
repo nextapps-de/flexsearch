@@ -80,11 +80,12 @@ Resolver.prototype.handler = function(method, fn, args){
                 offset = query.offset || 0;
                 suggest = query.suggest;
                 resolve = query.resolve;
-                highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && resolve && query.highlight;
+                highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && (query.highlight || this.highlight);
                 enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && (highlight || query.enrich) && resolve;
                 let opt_queue = SUPPORT_ASYNC && query.queue;
                 let opt_async = SUPPORT_ASYNC && (query.async || opt_queue);
                 let index = query.index;
+                let query_value = query.query;
 
                 if(index){
                     this.index || (this.index = index);
@@ -93,7 +94,7 @@ Resolver.prototype.handler = function(method, fn, args){
                     index = this.index;
                 }
 
-                if(query.query || query.tag){
+                if(query_value || query.tag){
 
                     if(DEBUG){
                         if(!index){
@@ -105,9 +106,10 @@ Resolver.prototype.handler = function(method, fn, args){
                         const field = query.field || query.pluck;
                         if(field){
 
-                            if(SUPPORT_STORE && SUPPORT_HIGHLIGHTING && query.query){
-                                this.query = query.query;
+                            if(SUPPORT_STORE && SUPPORT_HIGHLIGHTING && query_value && (!this.query || highlight)){
+                                this.query = query_value;
                                 this.field = field;
+                                this.highlight = highlight;
                             }
 
                             if(DEBUG){
@@ -166,11 +168,9 @@ Resolver.prototype.handler = function(method, fn, args){
                     else {
                         query.resolve = false;
                         query.index = null;
-
                         result = opt_async
                             ? index.searchAsync(query)
                             : index.search(query);
-
                         query.resolve = resolve;
                         query.index = index;
                     }

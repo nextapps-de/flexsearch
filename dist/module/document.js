@@ -195,11 +195,11 @@ Document.prototype.mount = function (db) {
     });
 };
 
-Document.prototype.commit = async function (replace, append) {
+Document.prototype.commit = async function () {
 
     const promises = [];
     for (const index of this.index.values()) {
-        promises.push(index.commit(replace, append));
+        promises.push(index.commit());
     }
     await Promise.all(promises);
     this.reg.clear();

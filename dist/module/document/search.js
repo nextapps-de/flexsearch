@@ -246,7 +246,9 @@ Document.prototype.search = function (query, limit, options, _promises) {
 
             res = cache ? index.searchCache(query, limit, opt) : index.search(query, limit, opt);
 
-            opt_enrich && (opt.enrich = opt_enrich);
+            if (opt_enrich) {
+                opt.enrich = opt_enrich;
+            }
 
             if (promises) {
                 promises[i] = res;

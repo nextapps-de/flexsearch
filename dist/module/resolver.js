@@ -27,6 +27,7 @@ export default function Resolver(result, index) {
         promises,
         query,
         field,
+        highlight,
         _await,
         _return;
 
@@ -36,6 +37,7 @@ export default function Resolver(result, index) {
         boost = options.boost || 0;
         if (query = options.query) {
             field = options.field || options.pluck;
+            highlight = options.highlight;
             const resolve = options.resolve,
                   async = options.async || options.queue;
 
@@ -76,6 +78,8 @@ export default function Resolver(result, index) {
     /** @type {Function} */
     this.return = _return || null;
 
+    /** @type {HighlightOptions|null} */
+    this.highlight = /** @type {HighlightOptions|null} */highlight || null;
     /** @type {string} */
     this.query = query || "";
     /** @type {string} */
@@ -89,8 +93,7 @@ Resolver.prototype.limit = function (limit) {
     if (this.await) {
         const self = this;
         this.promises.push(function () {
-            self.limit(limit);
-            return self.result;
+            return self.limit(limit).result;
         });
     } else {
         if (this.result.length) {
@@ -121,8 +124,7 @@ Resolver.prototype.offset = function (offset) {
     if (this.await) {
         const self = this;
         this.promises.push(function () {
-            self.offset(offset);
-            return self.result;
+            return self.offset(offset).result;
         });
     } else {
         if (this.result.length) {
@@ -151,8 +153,7 @@ Resolver.prototype.boost = function (boost) {
     if (this.await) {
         const self = this;
         this.promises.push(function () {
-            self.boost(boost);
-            return self.result;
+            return self.boost(boost).result;
         });
     } else {
         this.boostval += boost;
@@ -215,12 +216,12 @@ Resolver.prototype.resolve = function (limit, offset, enrich, highlight, _resolv
 
     if (result.length) {
         if ("object" == typeof limit) {
-            highlight = limit.highlight;
+            highlight = limit.highlight || this.highlight;
             enrich = !!highlight || limit.enrich;
             offset = limit.offset;
             limit = limit.limit;
         } else {
-            highlight = highlight;
+            highlight = highlight || this.highlight;
             enrich = !!highlight || enrich;
         }
         result = _resolved ? enrich ? apply_enrich.call(
@@ -247,6 +248,7 @@ Resolver.prototype.finalize = function (result, highlight) {
     const fn = this.return;
     this.index = this.result = this.promises = this.await = this.return = null;
 
+    this.highlight = null;
     this.query = this.field = "";
 
 

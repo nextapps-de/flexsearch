@@ -114,7 +114,7 @@ Index.prototype.search = function (query, limit, options) {
                 if (term && !dupes[term]) {
 
                     dupes[term] = 1;
-                    arr = await self.get_array(term, keyword, 0, 0, !1, !1);
+                    arr = await self._get_array(term, keyword, 0, 0, !1, !1);
                     arr = add_result(arr, /** @type {Array} */result, suggest, resolution);
 
                     if (arr) {
@@ -152,7 +152,7 @@ Index.prototype.search = function (query, limit, options) {
         if (term && !dupes[term]) {
 
             dupes[term] = 1;
-            arr = this.get_array(term, keyword, 0, 0, !1, !1);
+            arr = this._get_array(term, keyword, 0, 0, !1, !1);
             arr = add_result(arr, /** @type {Array} */result, suggest, resolution);
 
             if (arr) {
@@ -227,7 +227,7 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
 
 function single_term_query(term, keyword, limit, offset, resolve, enrich, tag) {
 
-    const result = this.get_array(term, keyword, limit, offset, resolve, enrich, tag);
+    const result = this._get_array(term, keyword, limit, offset, resolve, enrich, tag);
 
     if (this.db) {
         return result.then(function (result) {
@@ -292,7 +292,7 @@ function add_result(arr, result, suggest, resolution) {
  *   Promise<IntermediateSearchResults|EnrichedSearchResults>
  * }
  */
-Index.prototype.get_array = function (term, keyword, limit, offset, resolve, enrich, tag) {
+Index.prototype._get_array = function (term, keyword, limit, offset, resolve, enrich, tag) {
 
     let arr, swap;
 

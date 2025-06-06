@@ -21,7 +21,7 @@ StorageInterface.prototype.destroy = async function(){};
 // ------------------------------
 
 // transfer all changes of an index to the database
-StorageInterface.prototype.commit = async function(index, _replace, _append){};
+StorageInterface.prototype.commit = async function(index/*, _replace, _append*/){};
 /**
  * get results of a term "key" with optional context "ctx"
  * @param {!string} key

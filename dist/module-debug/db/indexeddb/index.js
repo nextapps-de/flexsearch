@@ -263,33 +263,22 @@ IdxDB.prototype.transaction = function (ref, modifier, task) {
     });
 };
 
-IdxDB.prototype.commit = async function (flexsearch, _replace, _append) {
+IdxDB.prototype.commit = async function (flexsearch) {
+    let tasks = flexsearch.commit_task,
+        removals = [];
 
-    if (_replace) {
-        await this.clear();
+    flexsearch.commit_task = [];
 
-        flexsearch.commit_task = [];
-    } else {
-        let tasks = flexsearch.commit_task;
-        flexsearch.commit_task = [];
-        for (let i = 0, task; i < tasks.length; i++) {
-            /** @dict */
-            task = tasks[i];
-
-            if (task.clear) {
-                await this.clear();
-                _replace = !0;
-                break;
-            } else {
-                tasks[i] = task.del;
-            }
+    for (let i = 0, task; i < tasks.length; i++) {
+        /** @dict */
+        task = tasks[i];
+        if (task.del) {
+            removals.push(task.del);
         }
-        if (!_replace) {
-            if (!_append) {
-                tasks = tasks.concat(toArray(flexsearch.reg));
-            }
-            tasks.length && (await this.remove(tasks));
-        }
+    }
+
+    if (removals.length) {
+        await this.remove(removals);
     }
 
     if (!flexsearch.reg.size) {
@@ -303,11 +292,6 @@ IdxDB.prototype.commit = async function (flexsearch, _replace, _append) {
                   value = item[1];
 
             if (!value.length) continue;
-
-            if (_replace) {
-                store.put(value, key);
-                continue;
-            }
 
             store.get(key).onsuccess = function () {
                 let result = this.result,
@@ -352,11 +336,6 @@ IdxDB.prototype.commit = async function (flexsearch, _replace, _append) {
                       value = item[1];
 
                 if (!value.length) continue;
-
-                if (_replace) {
-                    store.put(value, ctx_key + ":" + key);
-                    continue;
-                }
 
                 store.get(ctx_key + ":" + key).onsuccess = function () {
                     let result = this.result,

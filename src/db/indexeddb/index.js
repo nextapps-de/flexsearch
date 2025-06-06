@@ -380,36 +380,25 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
     // });
 };
 
-IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
+IdxDB.prototype.commit = async function(flexsearch){
 
-    // process cleanup tasks
-    if(_replace){
-        await this.clear();
-        // there are just removals in the task queue
-        flexsearch.commit_task = [];
+    let tasks = flexsearch.commit_task;
+    let removals = [];
+    flexsearch.commit_task = [];
+
+    for(let i = 0, task; i < tasks.length; i++){
+        /** @dict */
+        task = tasks[i];
+        if(task["del"]){
+            removals.push(task["del"]);
+        }
+        // else if(task["ins"]){
+        //
+        // }
     }
-    else{
-        let tasks = flexsearch.commit_task;
-        flexsearch.commit_task = [];
-        for(let i = 0, task; i < tasks.length; i++){
-            /** @dict */
-            task = tasks[i];
-            // there are just removals in the task queue
-            if(task["clear"]){
-                await this.clear();
-                _replace = true;
-                break;
-            }
-            else{
-                tasks[i] = task["del"];
-            }
-        }
-        if(!_replace){
-            if(!_append){
-                tasks = tasks.concat(toArray(flexsearch.reg));
-            }
-            tasks.length && await this.remove(tasks);
-        }
+
+    if(removals.length){
+        await this.remove(removals);
     }
 
     if(!flexsearch.reg.size){
@@ -424,10 +413,10 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
             const value = item[1];
             if(!value.length) continue;
 
-            if(_replace){
-                store.put(value, key);
-                continue;
-            }
+            // if(_replace){
+            //     store.put(value, key);
+            //     continue;
+            // }
 
             store.get(key).onsuccess = function(){
                 let result = this.result;
@@ -481,10 +470,10 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                 const value = item[1];
                 if(!value.length) continue;
 
-                if(_replace){
-                    store.put(value, ctx_key + ":" + key);
-                    continue;
-                }
+                // if(_replace){
+                //     store.put(value, ctx_key + ":" + key);
+                //     continue;
+                // }
 
                 store.get(ctx_key + ":" + key).onsuccess = function(){
                     let result = this.result;

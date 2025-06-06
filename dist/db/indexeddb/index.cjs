@@ -11,20 +11,6 @@ function create_object(){
     return Object.create(null);
 }
 
-/**
- * @param {Map|Set} val
- * @param {boolean=} stringify
- * @return {Array}
- */
-
-function toArray(val, stringify){
-    const result = [];
-    for(const key of val.keys()){
-        result.push(key);
-    }
-    return result;
-}
-
 const VERSION = 1;
 const IndexedDB = typeof window !== "undefined" && (
     window.indexedDB ||
@@ -363,36 +349,25 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
    
 };
 
-IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
+IdxDB.prototype.commit = async function(flexsearch){
 
-   
-    if(_replace){
-        await this.clear();
+    let tasks = flexsearch.commit_task;
+    let removals = [];
+    flexsearch.commit_task = [];
+
+    for(let i = 0, task; i < tasks.length; i++){
+        /** @dict */
+        task = tasks[i];
+        if(task["del"]){
+            removals.push(task["del"]);
+        }
        
-        flexsearch.commit_task = [];
+       
+       
     }
-    else {
-        let tasks = flexsearch.commit_task;
-        flexsearch.commit_task = [];
-        for(let i = 0, task; i < tasks.length; i++){
-            /** @dict */
-            task = tasks[i];
-           
-            if(task["clear"]){
-                await this.clear();
-                _replace = true;
-                break;
-            }
-            else {
-                tasks[i] = task["del"];
-            }
-        }
-        if(!_replace){
-            if(!_append){
-                tasks = tasks.concat(toArray(flexsearch.reg));
-            }
-            tasks.length && await this.remove(tasks);
-        }
+
+    if(removals.length){
+        await this.remove(removals);
     }
 
     if(!flexsearch.reg.size){
@@ -407,10 +382,10 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
             const value = item[1];
             if(!value.length) continue;
 
-            if(_replace){
-                store.put(value, key);
-                continue;
-            }
+           
+           
+           
+           
 
             store.get(key).onsuccess = function(){
                 let result = this.result;
@@ -464,10 +439,10 @@ IdxDB.prototype.commit = async function(flexsearch, _replace, _append){
                 const value = item[1];
                 if(!value.length) continue;
 
-                if(_replace){
-                    store.put(value, ctx_key + ":" + key);
-                    continue;
-                }
+               
+               
+               
+               
 
                 store.get(ctx_key + ":" + key).onsuccess = function(){
                     let result = this.result;

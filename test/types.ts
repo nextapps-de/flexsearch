@@ -261,6 +261,9 @@ async function test_document() {
     const doc36: Promise<DefaultSearchResults> = doc24.and({ queue: true, cache: true }).resolve();
     const doc37: Promise<EnrichedResults> = doc24.and({ queue: true, cache: true }).resolve({ enrich: true });
     const doc38: Promise<EnrichedResults> = doc24.and({ queue: true }, { enrich: true, highlight: true, resolve: true });
+    const doc39: Promise<EnrichedResults> = doc14.or({ queue: true, cache: true, query: "", highlight: "" }).not({}).resolve();
+    const doc40: EnrichedResults = doc24.or({ cache: true, query: "", highlight: "" }).not({}).resolve();
+    const doc41: EnrichedResults = doc24.or({ cache: true, query: "" }).not({}).resolve({ highlight: "" });
 
     (function(){
         const api1: Document<doctype> = document.clear();
@@ -273,9 +276,7 @@ async function test_document() {
         const api8: Document<doctype> = document.update({ id: 1, tags: [""], title: "", description: "" });
     }());
 
-    // highlight on .resolve() is never supported:
-    // @ts-expect-error
-    const err0: EnrichedResults = doc24.resolve({ highlight: "" });
+    //const err0: EnrichedResults = doc24.resolve({ highlight: "" });
 
     // @ts-expect-error
     const err1: DocumentData = doc1[0].result[0].doc;
@@ -432,11 +433,14 @@ async function test_persistent() {
     const doc36: Promise<DefaultSearchResults> = doc24.and({ queue: true, cache: true }).resolve();
     const doc37: Promise<EnrichedResults> = doc24.and({ queue: true, cache: true }).resolve({ enrich: true });
     const doc38: Promise<EnrichedResults> = doc24.and({ queue: true }, { enrich: true, highlight: true, resolve: true });
+    const doc39: Promise<EnrichedResults> = doc14.or({ queue: true, cache: true, query: "", highlight: "" }).not({}).resolve();
+    const doc40: Promise<EnrichedResults> = doc24.or({ cache: true, query: "", highlight: "" }).not({}).resolve();
+    const doc41: Promise<EnrichedResults> = doc24.or({ cache: true, query: "" }).not({}).resolve({ highlight: "" });
 
-    const doc39: Resolver<doctype2, false, IndexedDB> = doc24.and({ cache: true });
-    const doc40: Promise<DefaultSearchResults> = doc24.and({ cache: true }).resolve();
-    const doc41: Promise<EnrichedResults> = doc24.and({ cache: true }).resolve({ enrich: true });
-    const doc42: Promise<EnrichedResults> = doc24.and({}, { enrich: true, highlight: true, resolve: true });
+    const doc42: Resolver<doctype2, false, IndexedDB> = doc24.and({ cache: true });
+    const doc43: Promise<DefaultSearchResults> = doc24.and({ cache: true }).resolve();
+    const doc44: Promise<EnrichedResults> = doc24.and({ cache: true }).resolve({ enrich: true });
+    const doc45: Promise<EnrichedResults> = doc24.and({}, { enrich: true, highlight: true, resolve: true });
 
     (function(){
         const api1: Promise<void> = document.clear();
@@ -449,10 +453,6 @@ async function test_persistent() {
         const api8: Document<doctype, false, IndexedDB> = document.update({ id: 1, tags: [""], title: "", description: "" });
         const api9: Promise<void> = document.commit();
     }());
-
-    // highlight on .resolve() is never supported:
-    // @ts-expect-error
-    const err0: EnrichedResults = doc24.resolve({ highlight: "" });
 
     // @ts-expect-error
     const err1: DocumentData = doc1[0].result[0].doc;
@@ -607,11 +607,14 @@ async function test_worker() {
     const doc36: Promise<DefaultSearchResults> = doc24.and({ queue: true, cache: true }).resolve();
     const doc37: Promise<EnrichedResults> = doc24.and({ queue: true, cache: true }).resolve({ enrich: true });
     const doc38: Promise<EnrichedResults> = doc24.and({ queue: true }, { enrich: true, highlight: true, resolve: true });
+    const doc39: Promise<EnrichedResults> = doc14.or({ queue: true, cache: true, query: "", highlight: "" }).not({}).resolve();
+    const doc40: Promise<EnrichedResults> = doc24.or({ cache: true, query: "", highlight: "" }).not({}).resolve();
+    const doc41: Promise<EnrichedResults> = doc24.or({ cache: true, query: "" }).not({}).resolve({ highlight: "" });
 
-    const doc39: Resolver<doctype2, true> = doc24.and({ cache: true });
-    const doc40: Promise<DefaultSearchResults> = doc24.and({ cache: true }).resolve();
-    const doc41: Promise<EnrichedResults> = doc24.and({ cache: true }).resolve({ enrich: true });
-    const doc42: Promise<EnrichedResults> = doc24.and({}, { enrich: true, highlight: true, resolve: true });
+    const doc42: Resolver<doctype2, true> = doc24.and({ cache: true });
+    const doc43: Promise<DefaultSearchResults> = doc24.and({ cache: true }).resolve();
+    const doc44: Promise<EnrichedResults> = doc24.and({ cache: true }).resolve({ enrich: true });
+    const doc45: Promise<EnrichedResults> = doc24.and({}, { enrich: true, highlight: true, resolve: true });
 
     (function(){
         const api1: Promise<void> = document.clear();
@@ -623,10 +626,6 @@ async function test_worker() {
         const api7: Promise<Document<doctype, true>> = document.update(1, { id: 1, tags: [""], title: "", description: "" });
         const api8: Promise<Document<doctype, true>> = document.update({ id: 1, tags: [""], title: "", description: "" });
     }());
-
-    // highlight on .resolve() is never supported:
-    // @ts-expect-error
-    const err0: EnrichedResults = doc24.resolve({ highlight: "" });
 
     // @ts-expect-error
     const err1: DocumentData = doc1[0].result[0].doc;

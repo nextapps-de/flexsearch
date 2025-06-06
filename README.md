@@ -910,7 +910,7 @@ Global Members:
 ##
 
 - <small>_async_</small> index.[**mount**](doc/persistent.md)(db)
-- <small>_async_</small> index.[**commit**](doc/persistent.md)(boolean)
+- <small>_async_</small> index.[**commit**](doc/persistent.md)()
 - <small>_async_</small> index.[**destroy**](doc/persistent.md#delete-store--migration)()
 
 ---
@@ -939,7 +939,7 @@ Global Members:
 ##
 
 - <small>_async_</small> document.[**mount**](doc/persistent.md)(db)
-- <small>_async_</small> document.[**commit**](doc/persistent.md)(boolean)
+- <small>_async_</small> document.[**commit**](doc/persistent.md)()
 - <small>_async_</small> document.[**destroy**](doc/persistent.md#delete-store--migration)()
 
 `Document` Properties:
@@ -955,6 +955,7 @@ Async Equivalents (Non-Blocking Balanced):
 - <small>_async_</small> [**.updateAsync**](doc/async.md)( ... , \<callback\>)
 - <small>_async_</small> [**.removeAsync**](doc/async.md)( ... , \<callback\>)
 - <small>_async_</small> [**.searchAsync**](doc/async.md)( ... , \<callback\>)
+- <small>_async_</small> [**.searchCacheAsync**](doc/async.md)( ... , \<callback\>)
 
 Async methods will return a `Promise`, additionally you can pass a callback function as the last parameter.
 
@@ -988,6 +989,7 @@ Methods `.export()` and also `.import()` are always async as well as every metho
 `Resolver` Properties:
 
 - resolver.[**result**](doc/resolver.md)
+- resolver.[**await**](doc/resolver.md) (Async)
 
 ---
 
@@ -998,6 +1000,7 @@ Methods `.export()` and also `.import()` are always async as well as every metho
 - <small>_async_</small> db.[**close**](doc/persistent.md)()
 - <small>_async_</small> db.[**destroy**](doc/persistent.md)()
 - <small>_async_</small> db.[**clear**](doc/persistent.md)()
+- <small>_async_</small> db.[**commit**](doc/persistent.md)(index)
 
 ---
 

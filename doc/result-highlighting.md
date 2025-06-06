@@ -324,3 +324,27 @@ Result:
 ```js
 "<i>...</i> dolor <b>sit</b> <b>amet</b> conset<i>...</i>"
 ```
+
+### Using Result Highlighting on Resolver
+
+When using complex queries by `Resolver` you can pass a highlight option to any one of the resolver stages that is also including a query. The last resolver stage will then automatically inherit necessary options.
+
+```js
+const raw = new Resolver({
+  index: index,
+  field: "title",
+  query: "some query"
+})
+.or({
+    field: "title",
+    // highlight requires a query
+    query: "highlight this",
+    // define on a single resolver stage
+    highlight: { /* ... */ }
+})
+.not({
+    field: "title",
+    query: "undefined",
+})
+.resolve();
+```

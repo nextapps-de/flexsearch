@@ -2,27 +2,6 @@
 
 var mongodb = require('mongodb');
 
-/**
- * @param {*} value
- * @param {*} default_value
- * @param {*=} merge_value
- * @return {*}
- */
-
-/**
- * @param {Map|Set} val
- * @param {boolean=} stringify
- * @return {Array}
- */
-
-function toArray(val, stringify){
-    const result = [];
-    for(const key of val.keys()){
-        result.push(key);
-    }
-    return result;
-}
-
 const defaults = {
     host: "localhost",
     port: "27017",
@@ -565,35 +544,23 @@ MongoDB.prototype.transaction = function(task){
     return task.call(this);
 };
 
-MongoDB.prototype.commit = async function(flexsearch, _replace, _append){
+MongoDB.prototype.commit = async function(flexsearch){
 
-   
-    if(_replace){
-        await this.clear();
-       
-        flexsearch.commit_task = [];
+    let tasks = flexsearch.commit_task;
+    let removals = [];
+    flexsearch.commit_task = [];
+
+    for(let i = 0, task; i < tasks.length; i++){
+        /** @dict */
+        task = tasks[i];
+        if(task["del"]){
+            removals.push(task["del"]);
+        }
+        else if(task["ins"]);
     }
-    else {
-        let tasks = flexsearch.commit_task;
-        flexsearch.commit_task = [];
-        for(let i = 0, task; i < tasks.length; i++){
-            task = tasks[i];
-           
-            if(task.clear){
-                await this.clear();
-                _replace = true;
-                break;
-            }
-            else {
-                tasks[i] = task.del;
-            }
-        }
-        if(!_replace){
-            if(!_append){
-                tasks = tasks.concat(toArray(flexsearch.reg));
-            }
-            tasks.length && await this.remove(tasks);
-        }
+
+    if(removals.length){
+        await this.remove(removals);
     }
 
     if(!flexsearch.reg.size){

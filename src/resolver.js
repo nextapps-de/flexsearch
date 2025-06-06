@@ -2,7 +2,8 @@
 import {
     DEBUG,
     SUPPORT_ASYNC,
-    SUPPORT_DOCUMENT, SUPPORT_HIGHLIGHTING,
+    SUPPORT_DOCUMENT,
+    SUPPORT_HIGHLIGHTING,
     SUPPORT_STORE
 } from "./config.js";
 // <-- COMPILER BLOCK
@@ -42,6 +43,7 @@ export default function Resolver(result, index){
     let promises;
     let query;
     let field;
+    let highlight;
     let _await;
     let _return;
 
@@ -51,6 +53,7 @@ export default function Resolver(result, index){
         boost = options.boost || 0;
         if((query = options.query)){
             field = options.field || options.pluck;
+            highlight = options.highlight;
             const resolve = options.resolve;
             const async = options.async || options.queue;
             options.resolve = false;
@@ -94,6 +97,8 @@ export default function Resolver(result, index){
     this.return = _return || null;
 
     if(SUPPORT_HIGHLIGHTING){
+        /** @type {HighlightOptions|null} */
+        this.highlight = /** @type {HighlightOptions|null} */ (highlight || null);
         /** @type {string} */
         this.query = query || "";
         /** @type {string} */
@@ -108,8 +113,7 @@ Resolver.prototype.limit = function(limit){
     if(this.await){
         const self = this;
         this.promises.push(function(){
-            self.limit(limit);
-            return self.result;
+            return self.limit(limit).result;
         });
     }
     else{
@@ -142,8 +146,7 @@ Resolver.prototype.offset = function(offset){
     if(this.await){
         const self = this;
         this.promises.push(function(){
-            self.offset(offset);
-            return self.result;
+            return self.offset(offset).result;
         });
     }
     else{
@@ -174,8 +177,7 @@ Resolver.prototype.boost = function(boost){
     if(this.await){
         const self = this;
         this.promises.push(function(){
-            self.boost(boost);
-            return self.result;
+            return self.boost(boost).result;
         });
     }
     else{
@@ -247,13 +249,13 @@ Resolver.prototype.resolve = function(limit, offset, enrich, highlight, _resolve
 
     if(result.length){
         if(typeof limit === "object"){
-            highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && limit.highlight;
+            highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && (limit.highlight || this.highlight);
             enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && (!!highlight || limit.enrich);
             offset = limit.offset;
             limit = limit.limit;
         }
         else{
-            highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && highlight;
+            highlight = SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && (highlight || this.highlight);
             enrich = SUPPORT_DOCUMENT && SUPPORT_STORE && (!!highlight || enrich);
         }
         result = _resolved
@@ -280,7 +282,7 @@ Resolver.prototype.finalize = function(result, highlight){
 
     if(DEBUG){
         if(highlight && !this.query){
-            console.warn('There was no query specified for highlighting. Please specify a query within the last resolver stage like { query: "...", resolve: true, highlight: ... }.');
+            console.warn('There was no query specified for highlighting. Please specify a query within the highlight resolver stage like { query: "...", highlight: ... }.');
         }
     }
     if(SUPPORT_DOCUMENT && SUPPORT_STORE && SUPPORT_HIGHLIGHTING && highlight && result.length && this.query){
@@ -295,6 +297,7 @@ Resolver.prototype.finalize = function(result, highlight){
     this.return = null;
 
     if(SUPPORT_HIGHLIGHTING){
+        this.highlight = null;
         this.query =
         this.field = "";
     }
