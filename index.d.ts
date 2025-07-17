@@ -622,6 +622,7 @@ declare module "flexsearch" {
         S extends StorageInterface | boolean = false
     > {
         constructor(options: DocumentOptions<D, W, S>);
+        db: Promise<S>;
 
         add(id: Id, document: D): W extends false
             ? this
