@@ -1001,4 +1001,49 @@ if(!build_light) describe("Result Highlighting", function(){
         expect(search[0].result.length).to.equal(1);
         expect(search[0].result[0].highlight).to.equal('Publis<b>h</b>ed: April 14, 2025 From bold color c<b>h</b>oices to intricate patterns, t<b>h</b>ere are many ways to make your springtime <b>h</b>oliday decorations stand out from t<b>h</b>e rest. T<b>h</b>e Onion s<b>h</b>ares tips for dyeing Easter eggs.');
     });
+
+    it("Should have been highlighted results properly (#508)", async function(){
+
+        const index = new Document({
+            encoder: Charset.Normalize,
+            document: {
+                store: true,
+                index: [
+                    {
+                        field: "title",
+                        tokenize: "forward"
+                    },
+                    {
+                        field: "content",
+                        tokenize: "forward"
+                    }
+                ],
+            },
+        });
+
+        await index.addAsync({
+            id: 1,
+            title: "Tips For Decorating Easter Eggs",
+            content: `Published: April 14, 2025 From bold color choices to intricate patterns, there are many ways to make your springtime holiday decorations stand out from the rest. The Onion shares tips for dyeing Easter eggs.`
+        });
+
+        const search = await index.search("h", {
+            suggest: true,
+            enrich: true,
+            highlight: {
+                template: "<mark>$1</mark>",
+                merge: true,
+                clip: false,
+                boundary: {
+                    before: 200,
+                    after: 100,
+                    total: 400
+                }
+            }
+        });
+
+        expect(search.length).to.equal(1);
+        expect(search[0].result.length).to.equal(1);
+        expect(search[0].result[0].highlight).to.equal('Publis<mark>h</mark>ed: April 14, 2025 From bold color c<mark>h</mark>oices to intricate patterns, t<mark>h</mark>ere are many ways to make your springtime <mark>h</mark>oliday decorations stand out from t<mark>h</mark>e rest. T<mark>h</mark>e Onion s<mark>h</mark>ares tips for dyeing Easter eggs.');
+    });
 });

@@ -433,7 +433,7 @@ export function highlight_fields(query, result, index, pluck, config) {
 
                     str = "";
                     for (let k = 0, tmp; k < final.length; k++) {
-                        tmp = (k && seamless[k] ? " " : (k && !ellipsis ? " " : "") + ellipsis) + final[k];
+                        tmp = (seamless[k] ? k ? " " : "" : (k && !ellipsis ? " " : "") + ellipsis) + final[k];
                         str += tmp;
                     }
                     if (ellipsis && !seamless[final.length]) {

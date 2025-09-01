@@ -2,7 +2,7 @@
   "public": true,
   "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.8.205",
+  "version": "0.8.206",
   "description": "Next-Generation full-text search library for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -138,10 +138,6 @@
     {
       "type": "paypal",
       "url": "https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW"
-    },
-    {
-      "type": "bountysource",
-      "url": "https://salt.bountysource.com/teams/ts-thomas"
     }
   ]
 }

@@ -25,7 +25,7 @@
         <path d="M 385 183.88 L 381.5 176.88 L 385 178.63 L 388.5 176.88 Z" fill="#4986ff" stroke="#4986ff"
               stroke-miterlimit="10" pointer-events="none"/>
         <g transform="translate(308.5,26.5)">
-            <text x="77" y="16" fill="#999" text-anchor="middle" font-size="16px" font-family="Helvetica">Context of Relevance
+            <text x="77" y="14" fill="#999" text-anchor="middle" font-size="16px" font-family="Helvetica">Context-based Scoring
             </text>
         </g>
         <path d="M 385 293 L 385 249.37" fill="none" stroke="#ff7300" stroke-miterlimit="10" stroke-dasharray="3 3"
@@ -43,7 +43,7 @@
         <path d="M 466.88 156 L 459.88 159.5 L 461.63 156 L 459.88 152.5 Z" fill="#4986ff" stroke="#4986ff"
               stroke-miterlimit="10" pointer-events="none"/>
         <g transform="translate(476.5,149.5)">
-            <text x="41" y="10" fill="#74a2ff" text-anchor="middle" font-size="11px" font-family="Helvetica">2. Context Score
+            <text x="61" y="10" fill="#74a2ff" text-anchor="middle" font-size="11px" font-family="Helvetica">2. Context (Bidirectional)
             </text>
         </g>
         <path d="M 332 95 L 435.63 95" fill="none" stroke="#000" stroke-miterlimit="10" stroke-dasharray="3 3"
@@ -51,7 +51,7 @@
         <path d="M 440.88 95 L 433.88 98.5 L 435.63 95 L 433.88 91.5 Z" fill="#000" stroke="#000"
               stroke-miterlimit="10" pointer-events="none"/>
         <g transform="translate(345.5,104.5)">
-            <text x="36" y="11" fill="#000" text-anchor="middle" font-size="11px" font-family="Helvetica">1. Partial Score
+            <text x="38" y="11" fill="#000" text-anchor="middle" font-size="11px" font-family="Helvetica">1. Partial Match
             </text>
         </g>
         <path d="M 379 100 L 379 100" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
@@ -77,9 +77,10 @@
         <path d="M 302.12 156 L 309.12 152.5 L 307.37 156 L 309.12 159.5 Z" fill="#999999" stroke="#999999"
               stroke-miterlimit="10" pointer-events="none"/>
         <g transform="translate(200.5,149.5)">
-            <text x="48" y="10" fill="#999999" text-anchor="middle" font-size="11px" font-family="Helvetica">3. Document Score
+            <text x="48" y="10" fill="#999999" text-anchor="middle" font-size="11px" font-family="Helvetica">3. Document Root
             </text>
         </g>
+        <!--
         <g transform="translate(557.5,344.5)">
             <text x="65" y="7" fill="#999999" text-anchor="middle" font-size="8px" font-weight="700" font-family="Helvetica">"Model of Context-based Scoring"
             </text>
@@ -88,6 +89,7 @@
             <text x="29.5" y="27" fill="#999999" text-anchor="middle" font-size="8px" font-weight="400" font-family="Helvetica">Nextapps GmbH
             </text>
         </g>
+        -->
         <g opacity="0.65" transform="translate(167.5,84.5)">
             <text x="26" y="16" fill="#555" text-anchor="middle" font-size="16px" font-family="Helvetica">Term 2
             </text>
