@@ -310,11 +310,15 @@ Document.prototype.search = function(query, limit, options, _promises){
             if(tag){
                 if(SUPPORT_PERSISTENT && this.db){
                     opt.tag = tag;
-                    db_tag_search = index.db.support_tag_search;
                     opt.field = field;
+                    db_tag_search = index.db.support_tag_search;
                 }
                 if(!db_tag_search && opt_enrich){
                     opt.enrich = false;
+                }
+                if(!db_tag_search){
+                    opt.limit = 0;
+                    opt.offset = 0;
                 }
             }
 
@@ -325,8 +329,13 @@ Document.prototype.search = function(query, limit, options, _promises){
             // }
 
             res = cache
-                ? index.searchCache(query, limit, opt)
-                : index.search(query, limit, opt);
+                ? index.searchCache(query, tag && !db_tag_search ? 0 : limit, opt)
+                : index.search(query, tag && !db_tag_search ? 0 : limit, opt);
+
+            if(tag && !db_tag_search){
+                opt.limit = limit;
+                opt.offset = offset;
+            }
 
             // restore state
             // if(merge){
@@ -416,7 +425,7 @@ Document.prototype.search = function(query, limit, options, _promises){
 
             if(count){
                 PROFILER && tick("Document.search:tag:intersect");
-                res = intersect_union(/** @type {IntermediateSearchResults} */ (res), arr, resolve); // intersect(arr, limit, offset)
+                res = intersect_union(/** @type {IntermediateSearchResults} */ (res), arr, limit, offset, resolve); // intersect(arr, limit, offset)
                 len = res.length;
                 if(!len && !suggest){
                     // nothing matched

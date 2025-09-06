@@ -482,6 +482,8 @@ describe("Github Issues", function(){
         ]);
     });
 
+    // TODO https://jsfiddle.net/u9x6L0mw/2/
+
     if(!build_light) it("#514", function(){
 
         const data = [
@@ -590,5 +592,90 @@ describe("Github Issues", function(){
                 expect(data).to.eql('[["scoredValue",[]]]');
             }
         });
+    });
+
+    // TODO
+    if(!build_light) it.skip("#523", function(){
+
+        const data = [
+            { "id": 1, "title": "REQ-1" },
+            { "id": 2, "title": "REQ2" },
+            { "id": 3, "title": "REQFOOBAR" }
+        ];
+
+        const index = new Document({
+            document: {
+                store: true,
+                index: [{
+                    field: "title",
+                    tokenize: "forward",
+                    encoder: { dedupe: true }
+                }]
+            }
+        });
+
+        data.forEach(item => index.add(item));
+
+        const result = index.search({
+            query: "req",
+            pluck: "title",
+            highlight: "<b>$1</b>"
+        });
+
+        expect(result[0].highlight).to.eql("<b>REQ</b>-1");
+        expect(result[1].highlight).to.eql("<b>REQ</b>2");
+        expect(result[2].highlight).to.eql("<b>REQ</b>FOOBAR");
+    });
+
+    if(!build_light) it("#524", function(){
+
+        const testData = [
+            // First 10 notes on page2 that match "g" (but we want page1)
+            { id: '1', content: 'green apple', parentId: 'page2' },
+            { id: '2', content: 'great day', parentId: 'page2' },
+            { id: '3', content: 'good morning', parentId: 'page2' },
+            { id: '4', content: 'big dog', parentId: 'page2' },
+            { id: '5', content: 'long night', parentId: 'page2' },
+            { id: '6', content: 'huge garden', parentId: 'page2' },
+            { id: '7', content: 'large group', parentId: 'page2' },
+            { id: '8', content: 'big game', parentId: 'page2' },
+            { id: '9', content: 'great goal', parentId: 'page2' },
+            { id: '10', content: 'good girl', parentId: 'page2' },
+
+            // The note we want is at position 11 (on page1)
+            { id: '11', content: 'glasgow coma scale', parentId: 'page1' },
+
+            // More notes on page2
+            { id: '12', content: 'big green', parentId: 'page2' },
+            { id: '13', content: 'great god', parentId: 'page2' },
+        ];
+
+        const index = new Document({
+            tokenize: 'forward',
+            encoder: {
+                minlength: 1
+            },
+            document: {
+                id: 'id',
+                tag: 'parentId',
+                index: ['content'],
+                store: true
+            }
+        });
+
+        testData.forEach(item => {
+            index.add(item);
+        });
+
+        expect(testData.length).to.equal(13);
+        expect(testData.filter(d => d.content.includes('g')).length).to.equal(13);
+        expect(testData.filter(d => d.content.includes('g') && d.parentId === 'page1').length).to.equal(1);
+        expect(testData.filter(d => d.content.includes('g') && d.parentId === 'page2').length).to.equal(12);
+
+        expect(index.search("g")[0]?.result?.length || 0).to.equal(11);
+        expect(index.search('g', { tag: { parentId: 'page1' } })[0]?.result?.length || 0).to.equal(1);
+        expect(index.search('g', { limit: 5 })[0]?.result?.length || 0).to.equal(5);
+        expect(index.search('g', { limit: 5, tag: { parentId: 'page1' } })[0]?.result?.length || 0).to.equal(1);
+        expect(index.search('g', { limit: 20, offset: 0, tag: { parentId: 'page1' } })[0]?.result?.length || 0).to.equal(1);
     });
 });

@@ -236,15 +236,24 @@ Document.prototype.search = function (query, limit, options, _promises) {
             if (tag) {
                 if (this.db) {
                     opt.tag = tag;
-                    db_tag_search = index.db.support_tag_search;
                     opt.field = field;
+                    db_tag_search = index.db.support_tag_search;
                 }
                 if (!db_tag_search && opt_enrich) {
                     opt.enrich = !1;
                 }
+                if (!db_tag_search) {
+                    opt.limit = 0;
+                    opt.offset = 0;
+                }
             }
 
-            res = cache ? index.searchCache(query, limit, opt) : index.search(query, limit, opt);
+            res = cache ? index.searchCache(query, tag && !db_tag_search ? 0 : limit, opt) : index.search(query, tag && !db_tag_search ? 0 : limit, opt);
+
+            if (tag && !db_tag_search) {
+                opt.limit = limit;
+                opt.offset = offset;
+            }
 
             if (opt_enrich) {
                 opt.enrich = opt_enrich;
@@ -309,7 +318,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
             }
 
             if (count) {
-                res = intersect_union( /** @type {IntermediateSearchResults} */res, arr, resolve);
+                res = intersect_union( /** @type {IntermediateSearchResults} */res, arr, limit, offset, resolve);
                 len = res.length;
                 if (!len && !suggest) {
 

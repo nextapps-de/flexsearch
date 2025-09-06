@@ -254,10 +254,12 @@ export function union(arrays, limit, offset, resolve, boost){
 /**
  * @param {SearchResults|IntermediateSearchResults|Resolver} arrays
  * @param {Array<SearchResults>} mandatory
+ * @param {number} limit
+ * @param {number=} offset
  * @param {boolean=} resolve
  * @returns {SearchResults}
  */
-export function intersect_union(arrays, mandatory, resolve) {
+export function intersect_union(arrays, mandatory, limit, offset, resolve) {
 
     const check = create_object();
     /** @type {SearchResults|IntermediateSearchResults} */
@@ -274,8 +276,17 @@ export function intersect_union(arrays, mandatory, resolve) {
         for(let i = 0, id; i < arrays.length; i++){
             id = arrays[i];
             if(check[id]){
+                if(offset){
+                    offset--;
+                    continue;
+                }
                 result.push(id);
                 check[id] = 0;
+                if(limit){
+                    if(--limit === 0){
+                        break;
+                    }
+                }
             }
         }
     }
