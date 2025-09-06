@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.207 (ES5/Debug)
+ * FlexSearch.js v0.8.208 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -109,7 +109,7 @@ la.prototype.return = function(a) {
   this.C = {return:a};
   this.h = this.I;
 };
-function K(a, b, c) {
+function L(a, b, c) {
   a.h = c;
   return {value:b};
 }
@@ -1343,7 +1343,7 @@ w.values = Y.prototype.values = function Ya() {
           break;
         }
         f = e.value;
-        return K(g, f, 6);
+        return L(g, f, 6);
       case 6:
         e = d.next(), g.h = 5;
     }
@@ -1369,7 +1369,7 @@ w.keys = Y.prototype.keys = function Za() {
           break;
         }
         f = e.value;
-        return K(g, f, 6);
+        return L(g, f, 6);
       case 6:
         e = d.next(), g.h = 5;
     }
@@ -1395,7 +1395,7 @@ w.entries = Y.prototype.entries = function $a() {
           break;
         }
         f = e.value;
-        return K(g, f, 6);
+        return L(g, f, 6);
       case 6:
         e = d.next(), g.h = 5;
     }
@@ -1450,14 +1450,14 @@ function cb(a) {
             h.h = 5;
             break;
           }
-          return K(h, bb.import.call(ab, d[0]), 11);
+          return L(h, bb.import.call(ab, d[0]), 11);
         }
         f = d && ab[b].apply(ab, d);
         if (!f || !f.then) {
           h.h = 6;
           break;
         }
-        return K(h, f, 7);
+        return L(h, f, 7);
       case 7:
         f = h.B;
       case 6:
@@ -1465,7 +1465,7 @@ function cb(a) {
           h.h = 8;
           break;
         }
-        return K(h, f.await, 9);
+        return L(h, f.await, 9);
       case 9:
         f = h.B;
       case 8:
@@ -2080,15 +2080,15 @@ function Bb(a, b, c, d, e, f, g) {
             W = W.length > 1 ? W.join(" ") : W[0];
             var O = void 0;
             if (W && R) {
-              for (var L = R.length, M = (B.split ? R.replace(B.split, "") : R).length - W.length, ba = "", oa = 0, z = 0; z < u.length; z++) {
+              for (var M = R.length, K = (B.split ? R.replace(B.split, "") : R).length - W.length, ba = "", oa = 0, z = 0; z < u.length; z++) {
                 var I = u[z];
                 if (I) {
                   var J = I.length;
-                  J += M;
-                  oa && J <= oa || (I = W.indexOf(I), I > -1 && (ba = (I ? R.substring(0, I) : "") + g + R.substring(I, I + J) + h + (I + J < L ? R.substring(I + J) : ""), oa = J, O = !0));
+                  J += K < 0 ? 0 : K;
+                  oa && J <= oa || (I = W.indexOf(I), I > -1 && (ba = (I ? R.substring(0, I) : "") + g + R.substring(I, I + J) + h + (I + J < M ? R.substring(I + J) : ""), oa = J, O = !0));
                 }
               }
-              ba && (k && (G < 0 && (G = r.length + (r ? 1 : 0)), N = r.length + (r ? 1 : 0) + ba.length, Q += L, T.push(E.length), E.push({match:ba})), r += (r ? " " : "") + ba);
+              ba && (k && (G < 0 && (G = r.length + (r ? 1 : 0)), N = r.length + (r ? 1 : 0) + ba.length, Q += M, T.push(E.length), E.push({match:ba})), r += (r ? " " : "") + ba);
             }
             if (!O) {
               R = x[F], r += (r ? " " : "") + R, k && E.push({text:R});
@@ -2107,17 +2107,17 @@ function Bb(a, b, c, d, e, f, g) {
               F = {};
               R = {};
               W = {};
-              M = L = O = 0;
+              K = M = O = 0;
               for (oa = ba = 1;;) {
                 I = void 0;
                 for (z = 0; z < T.length; z++) {
                   J = T[z];
-                  if (M) {
-                    if (L !== M) {
+                  if (K) {
+                    if (M !== K) {
                       if (F[z + 1]) {
                         continue;
                       }
-                      J += M;
+                      J += K;
                       if (Q[J]) {
                         O -= n;
                         G[z + 1] = 1;
@@ -2162,7 +2162,7 @@ function Bb(a, b, c, d, e, f, g) {
                       if (F[z]) {
                         continue;
                       }
-                      J -= L;
+                      J -= M;
                       if (Q[J]) {
                         O -= n;
                         F[z] = 1;
@@ -2224,13 +2224,13 @@ function Bb(a, b, c, d, e, f, g) {
                   I = Q[J] = 1;
                 }
                 if (I) {
-                  L === M ? M++ : L++;
+                  M === K ? K++ : M++;
                 } else {
-                  L === M ? ba = 0 : oa = 0;
+                  M === K ? ba = 0 : oa = 0;
                   if (!ba && !oa) {
                     break;
                   }
-                  ba ? (L++, M = L) : M++;
+                  ba ? (M++, K = M) : K++;
                 }
               }
               r = "";
@@ -2596,9 +2596,9 @@ ob.prototype.search = function(a, b, c, d) {
         }
         if (f.length) {
           var N = this;
-          return Promise.all(f).then(function(L) {
-            for (var M = 0; M < L.length; M++) {
-              h ? e[M].result = L[M] : e[M] = L[M];
+          return Promise.all(f).then(function(M) {
+            for (var K = 0; K < M.length; K++) {
+              h ? e[K].result = M[K] : e[K] = M[K];
             }
             return h ? e : new Z(e.length > 1 ? zb(e, 1, 0, 0, q, m) : e[0], N);
           });
@@ -2708,10 +2708,10 @@ ob.prototype.search = function(a, b, c, d) {
       }
     }
     var W = this;
-    return Promise.all(y).then(function(L) {
+    return Promise.all(y).then(function(M) {
       c && (c.resolve = h);
-      L.length && (L = W.search(a, b, c, L));
-      return L;
+      M.length && (M = W.search(a, b, c, M));
+      return M;
     });
   }
   if (!g) {
@@ -2731,9 +2731,9 @@ ob.prototype.search = function(a, b, c, d) {
   }
   if (v && this.db && y.length) {
     var O = this;
-    return Promise.all(y).then(function(L) {
-      for (var M = 0; M < L.length; M++) {
-        e[M].result = L[M];
+    return Promise.all(y).then(function(M) {
+      for (var K = 0; K < M.length; K++) {
+        e[K].result = M[K];
       }
       u && (e = Cb(a, e, O.index, k, u));
       return l ? Fb(e) : e;
@@ -2889,7 +2889,7 @@ w.commit = function() {
       for (d = c.next(); !d.done; d = c.next()) {
         e = d.value, b.push(e.commit());
       }
-      return K(f, Promise.all(b), 2);
+      return L(f, Promise.all(b), 2);
     }
     a.reg.clear();
     f.h = 0;
@@ -3370,7 +3370,7 @@ function Vb(a, b, c, d, e) {
               break;
             }
             t[A] = 1;
-            return K(C, Yb(B, A, v, 0, 0, !1, !1), 6);
+            return L(C, Yb(B, A, v, 0, 0, !1, !1), 6);
           case 6:
             y = C.B;
             if (y = Zb(y, d, h, m)) {
@@ -3771,9 +3771,9 @@ w.commit = function(a) {
           g.h = 2;
           break;
         }
-        return K(g, b.remove(d), 2);
+        return L(g, b.remove(d), 2);
       case 2:
-        return a.reg.size ? K(g, b.transaction("map", "readwrite", function(h) {
+        return a.reg.size ? L(g, b.transaction("map", "readwrite", function(h) {
           for (var k = D(a.map), l = k.next(), m = {}; !l.done; m = {N:void 0, W:void 0}, l = k.next()) {
             l = l.value, m.W = l[0], m.N = l[1], m.N.length && (h.get(m.W).onsuccess = function(p) {
               return function() {
@@ -3800,7 +3800,7 @@ w.commit = function(a) {
           }
         }), 4) : g.return();
       case 4:
-        return K(g, b.transaction("ctx", "readwrite", function(h) {
+        return L(g, b.transaction("ctx", "readwrite", function(h) {
           for (var k = D(a.ctx), l = k.next(), m = {}; !l.done; m = {V:void 0}, l = k.next()) {
             l = l.value;
             m.V = l[0];
@@ -3833,7 +3833,7 @@ w.commit = function(a) {
         }), 5);
       case 5:
         if (a.store) {
-          return K(g, b.transaction("reg", "readwrite", function(h) {
+          return L(g, b.transaction("reg", "readwrite", function(h) {
             for (var k = D(a.store), l = k.next(); !l.done; l = k.next()) {
               var m = l.value;
               l = m[0];
@@ -3846,7 +3846,7 @@ w.commit = function(a) {
           g.h = 7;
           break;
         }
-        return K(g, b.transaction("reg", "readwrite", function(h) {
+        return L(g, b.transaction("reg", "readwrite", function(h) {
           for (var k = D(a.reg.keys()), l = k.next(); !l.done; l = k.next()) {
             h.put(1, l.value);
           }
@@ -3856,7 +3856,7 @@ w.commit = function(a) {
           g.h = 11;
           break;
         }
-        return K(g, b.transaction("tag", "readwrite", function(h) {
+        return L(g, b.transaction("tag", "readwrite", function(h) {
           for (var k = D(a.tag), l = k.next(), m = {}; !l.done; m = {S:void 0, Z:void 0}, l = k.next()) {
             l = l.value, m.Z = l[0], m.S = l[1], m.S.length && (h.get(m.Z).onsuccess = function(p) {
               return function() {

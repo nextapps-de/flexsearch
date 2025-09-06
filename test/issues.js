@@ -481,4 +481,33 @@ describe("Github Issues", function(){
             { field: 'name', result: [ 1 ] }
         ]);
     });
+
+    if(!build_light) it("#514", function(){
+
+        const data = [
+            { "id": 1, "title": "Carmencita" },
+            { "id": 2, "title": "en-US.json" }
+        ];
+
+        const index = new Document({
+            document: {
+                store: true,
+                index: [{
+                    field: "title",
+                    tokenize: "full",
+                    encoder: Charset.Default
+                }]
+            }
+        });
+
+        data.forEach(item => index.add(item));
+
+        const result = index.search({
+            query: 'en',
+            enrich: true,
+            highlight: "<b>$1</b>"
+        });
+
+        console.log(result[0]);
+    });
 });

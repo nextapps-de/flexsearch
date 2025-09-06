@@ -1,12 +1,12 @@
 /**!
- * FlexSearch.js v0.8.207 (Bundle/Debug)
+ * FlexSearch.js v0.8.208 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
  * https://github.com/nextapps-de/flexsearch
  */
 var B;
-function I(a, c, b) {
+function J(a, c, b) {
   const e = typeof b, d = typeof a;
   if (e !== "undefined") {
     if (d !== "undefined") {
@@ -80,7 +80,7 @@ function la(a = {}) {
 }
 B = la.prototype;
 B.assign = function(a) {
-  this.normalize = I(a.normalize, !0, this.normalize);
+  this.normalize = J(a.normalize, !0, this.normalize);
   let c = a.include, b = c || a.exclude || a.split, e;
   if (b || b === "") {
     if (typeof b === "object" && b.constructor !== RegExp) {
@@ -103,28 +103,28 @@ B.assign = function(a) {
     } else {
       this.split = b, e = b === !1 || "a1a".split(b).length < 2;
     }
-    this.numeric = I(a.numeric, e);
+    this.numeric = J(a.numeric, e);
   } else {
     try {
-      this.split = I(this.split, ba);
+      this.split = J(this.split, ba);
     } catch (d) {
       console.warn("This platform does not support unicode regex. It falls back to using simple whitespace splitter instead: /s+/."), this.split = /\s+/;
     }
-    this.numeric = I(a.numeric, I(this.numeric, !0));
+    this.numeric = J(a.numeric, J(this.numeric, !0));
   }
-  this.prepare = I(a.prepare, null, this.prepare);
-  this.finalize = I(a.finalize, null, this.finalize);
+  this.prepare = J(a.prepare, null, this.prepare);
+  this.finalize = J(a.finalize, null, this.finalize);
   b = a.filter;
-  this.filter = typeof b === "function" ? b : I(b && new Set(b), null, this.filter);
-  this.dedupe = I(a.dedupe, !0, this.dedupe);
-  this.matcher = I((b = a.matcher) && new Map(b), null, this.matcher);
-  this.mapper = I((b = a.mapper) && new Map(b), null, this.mapper);
-  this.stemmer = I((b = a.stemmer) && new Map(b), null, this.stemmer);
-  this.replacer = I(a.replacer, null, this.replacer);
-  this.minlength = I(a.minlength, 1, this.minlength);
-  this.maxlength = I(a.maxlength, 1024, this.maxlength);
-  this.rtl = I(a.rtl, !1, this.rtl);
-  if (this.cache = b = I(a.cache, !0, this.cache)) {
+  this.filter = typeof b === "function" ? b : J(b && new Set(b), null, this.filter);
+  this.dedupe = J(a.dedupe, !0, this.dedupe);
+  this.matcher = J((b = a.matcher) && new Map(b), null, this.matcher);
+  this.mapper = J((b = a.mapper) && new Map(b), null, this.mapper);
+  this.stemmer = J((b = a.stemmer) && new Map(b), null, this.stemmer);
+  this.replacer = J(a.replacer, null, this.replacer);
+  this.minlength = J(a.minlength, 1, this.minlength);
+  this.maxlength = J(a.maxlength, 1024, this.maxlength);
+  this.rtl = J(a.rtl, !1, this.rtl);
+  if (this.cache = b = J(a.cache, !0, this.cache)) {
     this.D = null, this.K = typeof b === "number" ? b : 2e5, this.B = new Map(), this.C = new Map(), this.H = this.G = 128;
   }
   this.h = "";
@@ -579,12 +579,12 @@ function Ba(a, c, b, e, d, f, g, k) {
         D = D.length > 1 ? D.join(" ") : D[0];
         let q;
         if (D && F) {
-          var E = F.length, J = (V.split ? F.replace(V.split, "") : F).length - D.length, L = "", R = 0;
+          var E = F.length, I = (V.split ? F.replace(V.split, "") : F).length - D.length, L = "", R = 0;
           for (var W = 0; W < w.length; W++) {
             var N = w[W];
             if (N) {
               var H = N.length;
-              H += J;
+              H += I < 0 ? 0 : I;
               R && H <= R || (N = D.indexOf(N), N > -1 && (L = (N ? F.substring(0, N) : "") + g + F.substring(N, N + H) + k + (N + H < E ? F.substring(N + H) : ""), R = H, q = !0));
             }
           }
@@ -607,13 +607,13 @@ function Ba(a, c, b, e, d, f, g, k) {
           y = {};
           F = {};
           D = {};
-          L = J = E = 0;
+          L = I = E = 0;
           for (W = R = 1;;) {
             var O = void 0;
             for (let q = 0, G; q < ja.length; q++) {
               G = ja[q];
               if (L) {
-                if (J !== L) {
+                if (I !== L) {
                   if (y[q + 1]) {
                     continue;
                   }
@@ -661,7 +661,7 @@ function Ba(a, c, b, e, d, f, g, k) {
                   if (y[q]) {
                     continue;
                   }
-                  G -= J;
+                  G -= I;
                   if (C[G]) {
                     E -= x;
                     y[q] = 1;
@@ -723,13 +723,13 @@ function Ba(a, c, b, e, d, f, g, k) {
               O = C[G] = 1;
             }
             if (O) {
-              J === L ? L++ : J++;
+              I === L ? L++ : I++;
             } else {
-              J === L ? R = 0 : W = 0;
+              I === L ? R = 0 : W = 0;
               if (!R && !W) {
                 break;
               }
-              R ? (J++, L = J) : L++;
+              R ? (I++, L = I) : L++;
             }
           }
           n = "";
@@ -860,17 +860,17 @@ X.prototype.search = function(a, c, b, e) {
     if (l && F) {
       t = [];
       C = 0;
-      for (let E = 0, J, L; E < l.length; E += 2) {
-        J = this.tag.get(l[E]);
-        if (!J) {
+      for (let E = 0, I, L; E < l.length; E += 2) {
+        I = this.tag.get(l[E]);
+        if (!I) {
           if (console.warn("Tag '" + l[E] + ":" + l[E + 1] + "' will be skipped because there is no field '" + l[E] + "'."), k) {
             continue;
           } else {
             return d;
           }
         }
-        if (L = (J = J && J.get(l[E + 1])) && J.length) {
-          C++, t.push(J);
+        if (L = (I = I && I.get(l[E + 1])) && I.length) {
+          C++, t.push(I);
         } else if (!k) {
           return d;
         }

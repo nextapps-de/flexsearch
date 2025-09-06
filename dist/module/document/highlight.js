@@ -128,7 +128,7 @@ export function highlight_fields(query, result, index, pluck, config) {
                         if (!query_enc_cur) continue;
                         let query_enc_cur_len = query_enc_cur.length;
 
-                        query_enc_cur_len += doc_org_diff;
+                        query_enc_cur_len += 0 > doc_org_diff ? 0 : doc_org_diff;
 
                         if (match_length && query_enc_cur_len <= match_length) {
                             continue;

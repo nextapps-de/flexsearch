@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.207 (Bundle/Debug)
+ * FlexSearch.js v0.8.208 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1144,12 +1144,12 @@ function bb(a, c, b, e, d, f, g) {
         z = z.length > 1 ? z.join(" ") : z[0];
         let y;
         if (z && B) {
-          var C = B.length, K = (ea.split ? B.replace(ea.split, "") : B).length - z.length, F = "", L = 0;
+          var C = B.length, J = (ea.split ? B.replace(ea.split, "") : B).length - z.length, F = "", L = 0;
           for (var O = 0; O < n.length; O++) {
             var P = n[O];
             if (P) {
               var M = P.length;
-              M += K;
+              M += J < 0 ? 0 : J;
               L && M <= L || (P = z.indexOf(P), P > -1 && (F = (P ? B.substring(0, P) : "") + g + B.substring(P, P + M) + h + (P + M < C ? B.substring(P + M) : ""), L = M, y = !0));
             }
           }
@@ -1172,32 +1172,32 @@ function bb(a, c, b, e, d, f, g) {
           E = {};
           B = {};
           z = {};
-          F = K = C = 0;
+          F = J = C = 0;
           for (O = L = 1;;) {
             var U = void 0;
-            for (let y = 0, J; y < za.length; y++) {
-              J = za[y];
+            for (let y = 0, K; y < za.length; y++) {
+              K = za[y];
               if (F) {
-                if (K !== F) {
+                if (J !== F) {
                   if (E[y + 1]) {
                     continue;
                   }
-                  J += F;
-                  if (A[J]) {
+                  K += F;
+                  if (A[K]) {
                     C -= u;
                     G[y + 1] = 1;
                     E[y + 1] = 1;
                     continue;
                   }
-                  if (J >= v.length - 1) {
-                    if (J >= v.length) {
+                  if (K >= v.length - 1) {
+                    if (K >= v.length) {
                       E[y + 1] = 1;
-                      J >= x.length && (G[y + 1] = 1);
+                      K >= x.length && (G[y + 1] = 1);
                       continue;
                     }
                     C -= u;
                   }
-                  q = v[J].text;
+                  q = v[K].text;
                   if (M = t && z[y]) {
                     if (M > 0) {
                       if (q.length > M) {
@@ -1226,22 +1226,22 @@ function bb(a, c, b, e, d, f, g) {
                   if (E[y]) {
                     continue;
                   }
-                  J -= K;
-                  if (A[J]) {
+                  K -= J;
+                  if (A[K]) {
                     C -= u;
                     E[y] = 1;
                     G[y] = 1;
                     continue;
                   }
-                  if (J <= 0) {
-                    if (J < 0) {
+                  if (K <= 0) {
+                    if (K < 0) {
                       E[y] = 1;
                       G[y] = 1;
                       continue;
                     }
                     C -= u;
                   }
-                  q = v[J].text;
+                  q = v[K].text;
                   if (M = r && B[y]) {
                     if (M > 0) {
                       if (q.length > M) {
@@ -1268,13 +1268,13 @@ function bb(a, c, b, e, d, f, g) {
                   }
                 }
               } else {
-                q = v[J].match;
+                q = v[K].match;
                 r && (B[y] = r);
                 t && (z[y] = t);
                 y && C++;
                 let Qa;
-                J ? !y && u && (C += u) : (G[y] = 1, E[y] = 1);
-                J >= x.length - 1 ? Qa = 1 : J < v.length - 1 && v[J + 1].match ? Qa = 1 : u && (C += u);
+                K ? !y && u && (C += u) : (G[y] = 1, E[y] = 1);
+                K >= x.length - 1 ? Qa = 1 : K < v.length - 1 && v[K + 1].match ? Qa = 1 : u && (C += u);
                 C -= f.length - 2;
                 if (!y || C + q.length <= k) {
                   D[y] = q;
@@ -1285,21 +1285,21 @@ function bb(a, c, b, e, d, f, g) {
                 Qa && (G[y + 1] = 1, E[y + 1] = 1);
               }
               C += q.length;
-              U = A[J] = 1;
+              U = A[K] = 1;
             }
             if (U) {
-              K === F ? F++ : K++;
+              J === F ? F++ : J++;
             } else {
-              K === F ? L = 0 : O = 0;
+              J === F ? L = 0 : O = 0;
               if (!L && !O) {
                 break;
               }
-              L ? (K++, F = K) : F++;
+              L ? (J++, F = J) : F++;
             }
           }
           q = "";
-          for (let y = 0, J; y < D.length; y++) {
-            J = (G[y] ? y ? " " : "" : (y && !d ? " " : "") + d) + D[y], q += J;
+          for (let y = 0, K; y < D.length; y++) {
+            K = (G[y] ? y ? " " : "" : (y && !d ? " " : "") + d) + D[y], q += K;
           }
           d && !G[D.length] && (q += d);
         }
@@ -1633,13 +1633,13 @@ Na.prototype.search = function(a, c, b, e) {
           }
         } else {
           A = Object.keys(z);
-          for (let C = 0, K, F; C < A.length; C++) {
-            if (K = A[C], F = z[K], F.constructor === Array) {
+          for (let C = 0, J, F; C < A.length; C++) {
+            if (J = A[C], F = z[J], F.constructor === Array) {
               for (D = 0; D < F.length; D++) {
-                v.push(K, F[D]);
+                v.push(J, F[D]);
               }
             } else {
-              v.push(K, F);
+              v.push(J, F);
             }
           }
         }
@@ -1690,7 +1690,7 @@ Na.prototype.search = function(a, c, b, e) {
   p || (p = this.field);
   let G;
   v = (this.worker || this.db) && !e && [];
-  for (let B = 0, z, C, K; B < p.length; B++) {
+  for (let B = 0, z, C, J; B < p.length; B++) {
     C = p[B];
     if (this.db && this.tag && !this.B[B]) {
       continue;
@@ -1711,8 +1711,8 @@ Na.prototype.search = function(a, c, b, e) {
         continue;
       }
     }
-    K = (z = z.result || z) && z.length;
-    if (n && K) {
+    J = (z = z.result || z) && z.length;
+    if (n && J) {
       A = [];
       D = 0;
       if (this.db && e) {
@@ -1745,14 +1745,14 @@ Na.prototype.search = function(a, c, b, e) {
       }
       if (D) {
         z = db(z, A, r);
-        K = z.length;
-        if (!K && !k) {
+        J = z.length;
+        if (!J && !k) {
           return r ? z : new X(z, this);
         }
         D--;
       }
     }
-    if (K) {
+    if (J) {
       f[u] = C, d.push(z), u++;
     } else if (p.length === 1) {
       return r ? d : new X(d, this);
