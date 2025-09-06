@@ -451,6 +451,8 @@ else (async function(){
         fs.existsSync("dist/node/") || fs.mkdirSync("dist/node/");
         fs.copyFileSync("src/worker/node.js", "dist/node/node.js");
         fs.copyFileSync("src/worker/node.mjs", "dist/node/node.mjs");
+        fs.existsSync("dist/flexsearch.bundle.module.min.js") && fs.copyFileSync("dist/flexsearch.bundle.module.min.js", "dist/flexsearch.bundle.module.min.mjs");
+        fs.existsSync("dist/flexsearch.bundle.module.debug.js") && fs.copyFileSync("dist/flexsearch.bundle.module.debug.js", "dist/flexsearch.bundle.module.debug.mjs");
 
         console.log("Saved to " + filename);
         console.log("Build Complete.");

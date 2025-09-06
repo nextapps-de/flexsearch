@@ -2,7 +2,7 @@
   "public": true,
   "preferGlobal": false,
   "name": "flexsearch",
-  "version": "0.8.206",
+  "version": "0.8.207",
   "description": "Next-Generation full-text search library for Browser and Node.js",
   "homepage": "https://github.com/nextapps-de/flexsearch/",
   "author": "Thomas Wilkerling",
@@ -28,12 +28,12 @@
     "email": "info@nextapps.de"
   },
   "main": "dist/flexsearch.bundle.min.js",
-  "module": "dist/flexsearch.bundle.module.min.js",
+  "module": "dist/flexsearch.bundle.module.min.mjs",
   "types": "./index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "import": "./dist/flexsearch.bundle.module.min.js",
+      "import": "./dist/flexsearch.bundle.module.min.mjs",
       "require": "./dist/flexsearch.bundle.min.js"
     },
     "./lang/*": {
@@ -45,15 +45,16 @@
       "require": "./dist/db/*/index.cjs"
     },
     "./debug": {
-      "import": "./dist/flexsearch.bundle.module.debug.js",
+      "import": "./dist/flexsearch.bundle.module.debug.mjs",
       "require": "./dist/flexsearch.bundle.debug.js"
     }
   },
   "browser": {
-    "flexsearch": "./dist/flexsearch.bundle.module.min.js",
-    "flexsearch/debug": "./dist/flexsearch.bundle.module.debug.js",
+    "flexsearch": "./dist/flexsearch.bundle.module.min.mjs",
+    "flexsearch/debug": "./dist/flexsearch.bundle.module.debug.mjs",
     "dist/flexsearch.bundle.min.js": "./dist/flexsearch.bundle.min.js",
-    "dist/flexsearch.bundle.module.min.js": "./dist/flexsearch.bundle.module.min.js",
+    "dist/flexsearch.bundle.module.min.js": "./dist/flexsearch.bundle.module.min.mjs",
+    "dist/flexsearch.bundle.module.min.mjs": "./dist/flexsearch.bundle.module.min.mjs",
     "worker_threads": false,
     "path": false,
     "clickhouse": false,
@@ -124,6 +125,10 @@
       "url": "https://github.com/ts-thomas"
     },
     {
+      "type": "paypal",
+      "url": "https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW"
+    },
+    {
       "type": "opencollective",
       "url": "https://opencollective.com/flexsearch"
     },
@@ -134,10 +139,6 @@
     {
       "type": "liberapay",
       "url": "https://liberapay.com/ts-thomas"
-    },
-    {
-      "type": "paypal",
-      "url": "https://www.paypal.com/donate/?hosted_button_id=GEVR88FC9BWRW"
     }
   ]
 }

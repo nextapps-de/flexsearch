@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.206 (ES5/Debug)
+ * FlexSearch.js v0.8.207 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1582,7 +1582,7 @@ function nb(a) {
 }
 function mb(a, b, c) {
   return b ? typeof module !== "undefined" ? new(require("worker_threads")["Worker"])(__dirname+"/node/node.js") : import("worker_threads").then(function(worker){return new worker["Worker"]((1,eval)("import.meta.dirname")+"/node/node.mjs")}) : a ? new window.Worker(URL.createObjectURL(new Blob(["onmessage=" + cb.toString()], {type:"text/javascript"}))) : new window.Worker(typeof c === "string" ? c : (0,eval)("import.meta.url").replace("/worker.js", "/worker/worker.js").replace("flexsearch.bundle.module.min.js", 
-  "module/worker/worker.js"), {type:"module"});
+  "module/worker/worker.js").replace("flexsearch.bundle.module.min.mjs", "module/worker/worker.js"), {type:"module"});
 }
 ;ob.prototype.add = function(a, b, c) {
   Ca(a) && (b = a, a = Da(b, this.key));

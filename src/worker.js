@@ -199,7 +199,8 @@ function create(factory, is_node_js, worker_path){
                     ? worker_path
                     // when loaded from /src/ folder the worker file is located at /worker/worker.js
                     : import.meta.url.replace("/worker.js", "/worker/worker.js")
-                                     .replace("flexsearch.bundle.module.min.js", "module/worker/worker.js") /*"worker/worker.js"*/
+                                     .replace("flexsearch.bundle.module.min.js", "module/worker/worker.js")
+                                     .replace("flexsearch.bundle.module.min.mjs", "module/worker/worker.js")/*"worker/worker.js"*/
                 , { type: "module" }
             )
     );
