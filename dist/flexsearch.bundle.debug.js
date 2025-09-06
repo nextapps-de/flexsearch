@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.208 (Bundle/Debug)
+ * FlexSearch.js v0.8.209 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2766,7 +2766,6 @@ w.transaction = function(a, c, b) {
   const f = b.call(this, e);
   this.h[a + ":" + c] = null;
   return Z(d).finally(function() {
-    d = e = null;
     return f;
   });
 };

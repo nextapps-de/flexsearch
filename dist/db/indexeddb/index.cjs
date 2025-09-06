@@ -316,6 +316,7 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
      */
     let store = this.trx[key + ":" + modifier];
     if(store) return task.call(this, store);
+
     let transaction = this.db.transaction(key, modifier);
     /**
      * @type {IDBObjectStore}
@@ -325,7 +326,7 @@ IdxDB.prototype.transaction = function(ref, modifier, task){
     this.trx[key + ":" + modifier] = null;
 
     return promisfy(transaction).finally(function(){
-        transaction = store = null;
+       
         return promise;
     });
 
