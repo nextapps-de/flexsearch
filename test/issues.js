@@ -530,7 +530,7 @@ describe("Github Issues", function(){
         const index = new Document({
             document: {
                 id: "document_id",
-                store: ["document_id", "title", "contact_id"],
+                store: true,
                 index: [{
                     field: "title",
                     tokenize: "full",
@@ -549,10 +549,46 @@ describe("Github Issues", function(){
 
         expect(result).to.eql([{
             "id": 1,
-            "doc": { "document_id": 1, "title": "Call Sammy on 9944343432", "contact_id": "" }
+            "doc": data[1]
         },{
             "id": 2,
-            "doc": { "document_id": 2, "title": "Call Jimmy on 9941343432", "contact_id": "" }
+            "doc": data[2]
         }]);
+    });
+
+    if(!build_light) it("#521", async function(){
+
+        const data = [{
+            "id": 1,
+            "title": "One",
+            "score":  null,
+        },{
+            "id": 2,
+            "title": "Two",
+            "score":  null,
+        }];
+
+        const index = new Document({
+            document: {
+                id: "id",
+                store: true,
+                index: [{
+                    field: "title",
+                    tokenize: "forward"
+                }],
+                tag: [{
+                    field: "scoredValue",
+                    custom: (data) => Number(data.score) > 1 ? ">1" : false
+                }]
+            }
+        });
+
+        data.forEach(item => index.add(item));
+
+        await index.export(function(key, data){
+            if(key === "1.tag"){
+                expect(data).to.eql('[["scoredValue",[]]]');
+            }
+        });
     });
 });

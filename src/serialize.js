@@ -65,7 +65,7 @@ function ctx_to_json(ctx, size = 0){
     for(const item of ctx.entries()){
         const key = item[0];
         const value = item[1];
-        json.push([key, map_to_json(value)[0]]);
+        json.push([key, map_to_json(value)[0] || []]);
         if(json.length === size){
             chunk.push(json);
             json = [];

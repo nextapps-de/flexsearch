@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.210 (ES5/Debug)
+ * FlexSearch.js v0.8.211 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -3021,7 +3021,7 @@ function Mb(a, b) {
   b && (b = 250000 / b * 1000 | 0);
   a = D(a.entries());
   for (var e = a.next(); !e.done; e = a.next()) {
-    e = e.value, d.push([e[0], Kb(e[1])[0]]), d.length === b && (c.push(d), d = []);
+    e = e.value, d.push([e[0], Kb(e[1])[0] || []]), d.length === b && (c.push(d), d = []);
   }
   d.length && c.push(d);
   return c;
