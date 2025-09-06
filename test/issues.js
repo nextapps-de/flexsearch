@@ -508,6 +508,51 @@ describe("Github Issues", function(){
             highlight: "<b>$1</b>"
         });
 
-        console.log(result[0]);
+        expect(result[0]).to.eql({
+            field: "title",
+            result: [
+                { id: 1, doc: data[0], highlight: "Carm<b>en</b>cita" },
+                { id: 2, doc: data[1], highlight: "<b>en</b>-US.json" }
+            ]
+        });
+    });
+
+    if(!build_light) it("#514", function(){
+
+        const data = [
+            { "document_id": 0, "title": "Call Sammy on 9944", "content": "", "contact_id": "" },
+            { "document_id": 1, "title": "Call Sammy on 9944343432", "content": "", "contact_id": "" },
+            { "document_id": 2, "title": "Call Jimmy on 9941343432", "content": "", "contact_id": "" },
+            { "document_id": 3, "title": "Call Jimmy on 9941", "content": "", "contact_id": "" }
+        ];
+
+        const encoder = new Encoder(Charset.LatinDefault, EnglishPreset, { numeric: false });
+        const index = new Document({
+            document: {
+                id: "document_id",
+                store: ["document_id", "title", "contact_id"],
+                index: [{
+                    field: "title",
+                    tokenize: "full",
+                    encoder
+                }]
+            }
+        });
+
+        data.forEach(item => index.add(item));
+
+        const result = index.search({
+            query: "432",
+            pluck: "title",
+            enrich: true
+        });
+
+        expect(result).to.eql([{
+            "id": 1,
+            "doc": { "document_id": 1, "title": "Call Sammy on 9944343432", "contact_id": "" }
+        },{
+            "id": 2,
+            "doc": { "document_id": 2, "title": "Call Jimmy on 9941343432", "contact_id": "" }
+        }]);
     });
 });

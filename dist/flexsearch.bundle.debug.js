@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.209 (Bundle/Debug)
+ * FlexSearch.js v0.8.210 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -2644,7 +2644,7 @@ w.open = function() {
     return this.db;
   }
   let a = this;
-  navigator.storage && navigator.storage.persist();
+  navigator.storage && navigator.storage.persist && navigator.storage.persist();
   Db[a.id] || (Db[a.id] = []);
   Db[a.id].push(a.field);
   const c = Bb.open(a.id, 1);

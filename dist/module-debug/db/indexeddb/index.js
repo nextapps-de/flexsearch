@@ -58,7 +58,7 @@ IdxDB.prototype.open = function () {
     if (this.db) return this.db;
     let self = this;
 
-    navigator.storage && navigator.storage.persist();
+    navigator.storage && navigator.storage.persist && navigator.storage.persist();
 
     Index[self.id] || (Index[self.id] = []);
     Index[self.id].push(self.field);

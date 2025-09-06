@@ -71,6 +71,7 @@ IdxDB.prototype.open = function(){
     let self = this;
 
     navigator.storage &&
+    navigator.storage.persist &&
     navigator.storage.persist();
 
   
