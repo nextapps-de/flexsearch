@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.213 (Bundle/Module/Debug)
+ * FlexSearch.js v0.8.214 (Bundle/Module/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -856,31 +856,32 @@ function Qa(a, c, b, e, d, f, g, k) {
           if (r && (u || a.await)) {
             u = 1;
             let v;
-            const A = a.C.length, D = new Promise(function(F) {
+            const A = a.C.length, E = new Promise(function(F) {
               v = F;
             });
-            (function(F, E) {
-              D.h = function() {
-                E.index = null;
-                E.resolve = !1;
-                let B = t ? F.searchAsync(E) : F.search(E);
-                if (B.then) {
-                  return B.then(function(z) {
+            (function(F, B) {
+              E.h = function() {
+                B.index = null;
+                B.resolve = !1;
+                B.enrich = !1;
+                let C = t ? F.searchAsync(B) : F.search(B);
+                if (C.then) {
+                  return C.then(function(z) {
                     a.C[A] = z = z.result || z;
                     v(z);
                     return z;
                   });
                 }
-                B = B.result || B;
-                v(B);
-                return B;
+                C = C.result || C;
+                v(C);
+                return C;
               };
             })(n, Object.assign({}, d));
-            a.C.push(D);
-            f[c] = D;
+            a.C.push(E);
+            f[c] = E;
             continue;
           } else {
-            d.resolve = !1, d.index = null, r = t ? n.searchAsync(d) : n.search(d), d.resolve = l, d.index = n;
+            d.resolve = !1, d.enrich = !1, d.index = null, r = t ? n.searchAsync(d) : n.search(d), d.resolve = l, d.enrich = h, d.index = n;
           }
         } else if (d.and) {
           r = Va(d, "and", n);
@@ -1137,70 +1138,70 @@ function bb(a, c, b, e, d, f, g) {
       q = "";
       var v = [];
       let za = [];
-      var A = -1, D = -1, F = 0;
-      for (var E = 0; E < x.length; E++) {
-        var B = x[E], z = ea.encode(B);
+      var A = -1, E = -1, F = 0;
+      for (var B = 0; B < x.length; B++) {
+        var C = x[B], z = ea.encode(C);
         z = z.length > 1 ? z.join(" ") : z[0];
         let y;
-        if (z && B) {
-          var C = B.length, J = (ea.split ? B.replace(ea.split, "") : B).length - z.length, G = "", L = 0;
+        if (z && C) {
+          var D = C.length, J = (ea.split ? C.replace(ea.split, "") : C).length - z.length, G = "", L = 0;
           for (var O = 0; O < n.length; O++) {
             var P = n[O];
             if (P) {
               var M = P.length;
               M += J < 0 ? 0 : J;
-              L && M <= L || (P = z.indexOf(P), P > -1 && (G = (P ? B.substring(0, P) : "") + g + B.substring(P, P + M) + k + (P + M < C ? B.substring(P + M) : ""), L = M, y = !0));
+              L && M <= L || (P = z.indexOf(P), P > -1 && (G = (P ? C.substring(0, P) : "") + g + C.substring(P, P + M) + k + (P + M < D ? C.substring(P + M) : ""), L = M, y = !0));
             }
           }
-          G && (h && (A < 0 && (A = q.length + (q ? 1 : 0)), D = q.length + (q ? 1 : 0) + G.length, F += C, za.push(v.length), v.push({match:G})), q += (q ? " " : "") + G);
+          G && (h && (A < 0 && (A = q.length + (q ? 1 : 0)), E = q.length + (q ? 1 : 0) + G.length, F += D, za.push(v.length), v.push({match:G})), q += (q ? " " : "") + G);
         }
         if (!y) {
-          B = x[E], q += (q ? " " : "") + B, h && v.push({text:B});
+          C = x[B], q += (q ? " " : "") + C, h && v.push({text:C});
         } else if (h && F >= h) {
           break;
         }
       }
       F = za.length * (f.length - 2);
       if (r || t || h && q.length - F > h) {
-        if (F = h + F - u * 2, E = D - A, r > 0 && (E += r), t > 0 && (E += t), E <= F) {
-          x = r ? A - (r > 0 ? r : 0) : A - ((F - E) / 2 | 0), v = t ? D + (t > 0 ? t : 0) : x + F, l || (x > 0 && q.charAt(x) !== " " && q.charAt(x - 1) !== " " && (x = q.indexOf(" ", x), x < 0 && (x = 0)), v < q.length && q.charAt(v - 1) !== " " && q.charAt(v) !== " " && (v = q.lastIndexOf(" ", v), v < D ? v = D : ++v)), q = (x ? d : "") + q.substring(x, v) + (v < q.length ? d : "");
+        if (F = h + F - u * 2, B = E - A, r > 0 && (B += r), t > 0 && (B += t), B <= F) {
+          x = r ? A - (r > 0 ? r : 0) : A - ((F - B) / 2 | 0), v = t ? E + (t > 0 ? t : 0) : x + F, l || (x > 0 && q.charAt(x) !== " " && q.charAt(x - 1) !== " " && (x = q.indexOf(" ", x), x < 0 && (x = 0)), v < q.length && q.charAt(v - 1) !== " " && q.charAt(v) !== " " && (v = q.lastIndexOf(" ", v), v < E ? v = E : ++v)), q = (x ? d : "") + q.substring(x, v) + (v < q.length ? d : "");
         } else {
-          D = [];
+          E = [];
           A = {};
           F = {};
-          E = {};
           B = {};
+          C = {};
           z = {};
-          G = J = C = 0;
+          G = J = D = 0;
           for (O = L = 1;;) {
             var U = void 0;
             for (let y = 0, K; y < za.length; y++) {
               K = za[y];
               if (G) {
                 if (J !== G) {
-                  if (E[y + 1]) {
+                  if (B[y + 1]) {
                     continue;
                   }
                   K += G;
                   if (A[K]) {
-                    C -= u;
+                    D -= u;
                     F[y + 1] = 1;
-                    E[y + 1] = 1;
+                    B[y + 1] = 1;
                     continue;
                   }
                   if (K >= v.length - 1) {
                     if (K >= v.length) {
-                      E[y + 1] = 1;
+                      B[y + 1] = 1;
                       K >= x.length && (F[y + 1] = 1);
                       continue;
                     }
-                    C -= u;
+                    D -= u;
                   }
                   q = v[K].text;
                   if (M = t && z[y]) {
                     if (M > 0) {
                       if (q.length > M) {
-                        if (E[y + 1] = 1, l) {
+                        if (B[y + 1] = 1, l) {
                           q = q.substring(0, M);
                         } else {
                           continue;
@@ -1209,81 +1210,81 @@ function bb(a, c, b, e, d, f, g) {
                       (M -= q.length) || (M = -1);
                       z[y] = M;
                     } else {
-                      E[y + 1] = 1;
+                      B[y + 1] = 1;
                       continue;
                     }
                   }
-                  if (C + q.length + 1 <= h) {
-                    q = " " + q, D[y] += q;
+                  if (D + q.length + 1 <= h) {
+                    q = " " + q, E[y] += q;
                   } else if (l) {
-                    U = h - C - 1, U > 0 && (q = " " + q.substring(0, U), D[y] += q), E[y + 1] = 1;
+                    U = h - D - 1, U > 0 && (q = " " + q.substring(0, U), E[y] += q), B[y + 1] = 1;
                   } else {
-                    E[y + 1] = 1;
+                    B[y + 1] = 1;
                     continue;
                   }
                 } else {
-                  if (E[y]) {
+                  if (B[y]) {
                     continue;
                   }
                   K -= J;
                   if (A[K]) {
-                    C -= u;
-                    E[y] = 1;
+                    D -= u;
+                    B[y] = 1;
                     F[y] = 1;
                     continue;
                   }
                   if (K <= 0) {
                     if (K < 0) {
-                      E[y] = 1;
+                      B[y] = 1;
                       F[y] = 1;
                       continue;
                     }
-                    C -= u;
+                    D -= u;
                   }
                   q = v[K].text;
-                  if (M = r && B[y]) {
+                  if (M = r && C[y]) {
                     if (M > 0) {
                       if (q.length > M) {
-                        if (E[y] = 1, l) {
+                        if (B[y] = 1, l) {
                           q = q.substring(q.length - M);
                         } else {
                           continue;
                         }
                       }
                       (M -= q.length) || (M = -1);
-                      B[y] = M;
+                      C[y] = M;
                     } else {
-                      E[y] = 1;
+                      B[y] = 1;
                       continue;
                     }
                   }
-                  if (C + q.length + 1 <= h) {
-                    q += " ", D[y] = q + D[y];
+                  if (D + q.length + 1 <= h) {
+                    q += " ", E[y] = q + E[y];
                   } else if (l) {
-                    U = q.length + 1 - (h - C), U >= 0 && U < q.length && (q = q.substring(U) + " ", D[y] = q + D[y]), E[y] = 1;
+                    U = q.length + 1 - (h - D), U >= 0 && U < q.length && (q = q.substring(U) + " ", E[y] = q + E[y]), B[y] = 1;
                   } else {
-                    E[y] = 1;
+                    B[y] = 1;
                     continue;
                   }
                 }
               } else {
                 q = v[K].match;
-                r && (B[y] = r);
+                r && (C[y] = r);
                 t && (z[y] = t);
-                y && C++;
+                y && D++;
                 let Pa;
-                K ? !y && u && (C += u) : (F[y] = 1, E[y] = 1);
-                K >= x.length - 1 ? Pa = 1 : K < v.length - 1 && v[K + 1].match ? Pa = 1 : u && (C += u);
-                C -= f.length - 2;
-                if (!y || C + q.length <= h) {
-                  D[y] = q;
+                K ? !y && u && (D += u) : (F[y] = 1, B[y] = 1);
+                K >= x.length - 1 ? Pa = 1 : K < v.length - 1 && v[K + 1].match ? Pa = 1 : u && (D += u);
+                D -= f.length - 2;
+                if (!y || D + q.length <= h) {
+                  E[y] = q;
                 } else {
                   U = L = O = F[y] = 0;
                   break;
                 }
-                Pa && (F[y + 1] = 1, E[y + 1] = 1);
+                Pa && (F[y + 1] = 1, B[y + 1] = 1);
               }
-              C += q.length;
+              D += q.length;
               U = A[K] = 1;
             }
             if (U) {
@@ -1297,10 +1298,10 @@ function bb(a, c, b, e, d, f, g) {
             }
           }
           q = "";
-          for (let y = 0, K; y < D.length; y++) {
-            K = (F[y] ? y ? " " : "" : (y && !d ? " " : "") + d) + D[y], q += K;
+          for (let y = 0, K; y < E.length; y++) {
+            K = (F[y] ? y ? " " : "" : (y && !d ? " " : "") + d) + E[y], q += K;
           }
-          d && !F[D.length] && (q += d);
+          d && !F[E.length] && (q += d);
         }
       }
       m && (q = q.replace(m, " "));
@@ -1327,9 +1328,11 @@ function bb(a, c, b, e, d, f, g) {
       const m = l.resolve;
       a = l.async || l.queue;
       l.resolve = !1;
+      l.highlight = "";
       l.index = null;
       a = a ? c.searchAsync(l) : c.search(l);
       l.resolve = m;
+      l.highlight = g;
       l.index = c;
       a = a.result || a;
     } else {
@@ -1625,26 +1628,26 @@ Na.prototype.search = function(a, c, b, e) {
     if (n && (!this.db || !e)) {
       n.constructor !== Array && (n = [n]);
       var v = [];
-      for (let B = 0, z; B < n.length; B++) {
-        z = n[B];
+      for (let C = 0, z; C < n.length; C++) {
+        z = n[C];
         if (N(z)) {
           throw Error("A tag option can't be a string, instead it needs a { field: tag } format.");
         }
         if (z.field && z.tag) {
           var A = z.tag;
           if (A.constructor === Array) {
-            for (var D = 0; D < A.length; D++) {
-              v.push(z.field, A[D]);
+            for (var E = 0; E < A.length; E++) {
+              v.push(z.field, A[E]);
             }
           } else {
             v.push(z.field, A);
           }
         } else {
           A = Object.keys(z);
-          for (let C = 0, J, G; C < A.length; C++) {
-            if (J = A[C], G = z[J], G.constructor === Array) {
-              for (D = 0; D < G.length; D++) {
-                v.push(J, G[D]);
+          for (let D = 0, J, G; D < A.length; D++) {
+            if (J = A[D], G = z[J], G.constructor === Array) {
+              for (E = 0; E < G.length; E++) {
+                v.push(J, G[E]);
               }
             } else {
               v.push(J, G);
@@ -1674,12 +1677,12 @@ Na.prototype.search = function(a, c, b, e) {
           }
         }
         if (f.length) {
-          const B = this;
+          const C = this;
           return Promise.all(f).then(function(z) {
-            for (let C = 0; C < z.length; C++) {
-              r ? d[C].result = z[C] : d[C] = z[C];
+            for (let D = 0; D < z.length; D++) {
+              r ? d[D].result = z[D] : d[D] = z[D];
             }
-            return r ? d : new X(d.length > 1 ? $a(d, 1, 0, 0, h, l) : d[0], B);
+            return r ? d : new X(d.length > 1 ? $a(d, 1, 0, 0, h, l) : d[0], C);
           });
         }
         return r ? d : new X(d.length > 1 ? $a(d, 1, 0, 0, h, l) : d[0], this);
@@ -1698,38 +1701,38 @@ Na.prototype.search = function(a, c, b, e) {
   p || (p = this.field);
   let F;
   v = (this.worker || this.db) && !e && [];
-  for (let B = 0, z, C, J; B < p.length; B++) {
-    C = p[B];
-    if (this.db && this.tag && !this.B[B]) {
+  for (let C = 0, z, D, J; C < p.length; C++) {
+    D = p[C];
+    if (this.db && this.tag && !this.B[C]) {
       continue;
     }
     let G;
-    N(C) || (G = C, C = G.field, a = G.query || a, c = aa(G.limit, c), x = aa(G.offset, x), h = aa(G.suggest, h), t = r && this.store && aa(G.highlight, t), q = !!t || r && this.store && aa(G.enrich, q), m = aa(G.cache, m));
+    N(D) || (G = D, D = G.field, a = G.query || a, c = aa(G.limit, c), x = aa(G.offset, x), h = aa(G.suggest, h), t = r && this.store && aa(G.highlight, t), q = !!t || r && this.store && aa(G.enrich, q), m = aa(G.cache, m));
     if (e) {
-      z = e[B];
+      z = e[C];
     } else {
       A = G || b || {};
-      D = A.enrich;
-      var E = this.index.get(C);
-      n && (this.db && (A.tag = n, A.field = p, F = E.db.support_tag_search), !F && D && (A.enrich = !1), F || (A.limit = 0, A.offset = 0));
-      z = m ? E.searchCache(a, n && !F ? 0 : c, A) : E.search(a, n && !F ? 0 : c, A);
+      E = A.enrich;
+      var B = this.index.get(D);
+      n && (this.db && (A.tag = n, A.field = p, F = B.db.support_tag_search), !F && E && (A.enrich = !1), F || (A.limit = 0, A.offset = 0));
+      z = m ? B.searchCache(a, n && !F ? 0 : c, A) : B.search(a, n && !F ? 0 : c, A);
       n && !F && (A.limit = c, A.offset = x);
-      D && (A.enrich = D);
+      E && (A.enrich = E);
       if (v) {
-        v[B] = z;
+        v[C] = z;
         continue;
       }
     }
     J = (z = z.result || z) && z.length;
     if (n && J) {
       A = [];
-      D = 0;
+      E = 0;
       if (this.db && e) {
         if (!F) {
-          for (E = p.length; E < e.length; E++) {
-            let L = e[E];
+          for (B = p.length; B < e.length; B++) {
+            let L = e[B];
             if (L && L.length) {
-              D++, A.push(L);
+              E++, A.push(L);
             } else if (!h) {
               return r ? d : new X(d, this);
             }
@@ -1746,23 +1749,23 @@ Na.prototype.search = function(a, c, b, e) {
             }
           }
           if (P = (O = O && O.get(n[L + 1])) && O.length) {
-            D++, A.push(O);
+            E++, A.push(O);
           } else if (!h) {
             return r ? d : new X(d, this);
           }
         }
       }
-      if (D) {
+      if (E) {
         z = eb(z, A, c, x, r);
         J = z.length;
         if (!J && !h) {
           return r ? z : new X(z, this);
         }
-        D--;
+        E--;
       }
     }
     if (J) {
-      f[u] = C, d.push(z), u++;
+      f[u] = D, d.push(z), u++;
     } else if (p.length === 1) {
       return r ? d : new X(d, this);
     }
@@ -1781,10 +1784,10 @@ Na.prototype.search = function(a, c, b, e) {
         v.push(f.db.tag(n[q + 1], c, x, !1));
       }
     }
-    const B = this;
+    const C = this;
     return Promise.all(v).then(function(z) {
       b && (b.resolve = r);
-      z.length && (z = B.search(a, c, b, z));
+      z.length && (z = C.search(a, c, b, z));
       return z;
     });
   }
@@ -1804,12 +1807,12 @@ Na.prototype.search = function(a, c, b, e) {
     d[x] = {field:f[x], result:n};
   }
   if (q && this.db && v.length) {
-    const B = this;
+    const C = this;
     return Promise.all(v).then(function(z) {
-      for (let C = 0; C < z.length; C++) {
-        d[C].result = z[C];
+      for (let D = 0; D < z.length; D++) {
+        d[D].result = z[D];
       }
-      t && (d = cb(a, d, B.index, g, t));
+      t && (d = cb(a, d, C.index, g, t));
       return k ? gb(d) : d;
     });
   }
@@ -2276,7 +2279,7 @@ function tb(a, c) {
   }
   return b;
 }
-;const vb = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
+;const vb = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"full"}, score:{resolution:9, context:{depth:2, resolution:3}}};
 T.prototype.add = function(a, c, b, e) {
   if (c && (a || a === 0)) {
     if (!e && !b && this.reg.has(a)) {

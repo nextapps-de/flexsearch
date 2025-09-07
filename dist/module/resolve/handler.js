@@ -114,6 +114,7 @@ Resolver.prototype.handler = function (method, fn, args) {
                             promise._fn = function () {
                                 query.index = null;
                                 query.resolve = !1;
+                                query.enrich = !1;
                                 let result = opt_async ? index.searchAsync(query) : index.search(query);
                                 if (result.then) {
                                     return result.then(function (result) {
@@ -133,9 +134,11 @@ Resolver.prototype.handler = function (method, fn, args) {
                         continue;
                     } else {
                         query.resolve = !1;
+                        query.enrich = !1;
                         query.index = null;
                         result = opt_async ? index.searchAsync(query) : index.search(query);
                         query.resolve = resolve;
+                        query.enrich = enrich;
                         query.index = index;
                     }
                 } else if (query.and) {

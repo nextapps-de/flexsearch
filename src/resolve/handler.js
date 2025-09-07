@@ -144,6 +144,7 @@ Resolver.prototype.handler = function(method, fn, args){
                             promise._fn = function(){
                                 query.index = null;
                                 query.resolve = false;
+                                query.enrich = false;
                                 let result = opt_async
                                     ? index.searchAsync(query)
                                     : index.search(query);
@@ -167,11 +168,13 @@ Resolver.prototype.handler = function(method, fn, args){
                     }
                     else {
                         query.resolve = false;
+                        query.enrich = false;
                         query.index = null;
                         result = opt_async
                             ? index.searchAsync(query)
                             : index.search(query);
                         query.resolve = resolve;
+                        query.enrich = enrich;
                         query.index = index;
                     }
                 }

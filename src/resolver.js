@@ -57,11 +57,13 @@ export default function Resolver(result, index){
             const resolve = options.resolve;
             const async = options.async || options.queue;
             options.resolve = false;
+            options.highlight = "";
             options.index = null;
             result = SUPPORT_ASYNC && async
                 ? index.searchAsync(options)
                 : index.search(options);
             options.resolve = resolve;
+            options.highlight = highlight;
             options.index = index;
             result = result.result || result;
         }

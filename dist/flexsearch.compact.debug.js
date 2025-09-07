@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.213 (Bundle/Debug)
+ * FlexSearch.js v0.8.214 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1286,7 +1286,7 @@ function Va(a, c) {
   }
   return b;
 }
-;const Wa = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
+;const Wa = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"full"}, score:{resolution:9, context:{depth:2, resolution:3}}};
 Y.prototype.add = function(a, c, b, e) {
   if (c && (a || a === 0)) {
     if (!e && !b && this.reg.has(a)) {

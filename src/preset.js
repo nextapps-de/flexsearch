@@ -24,7 +24,7 @@ const presets = {
     },
 
     "match": {
-        tokenize: "forward"
+        tokenize: "full"
     },
 
     "score": {

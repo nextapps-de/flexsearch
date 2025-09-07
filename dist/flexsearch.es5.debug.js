@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.213 (ES5/Debug)
+ * FlexSearch.js v0.8.214 (ES5/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1800,6 +1800,7 @@ function pb(a, b, c, d, e, f, g, h) {
                 B.T.H = function() {
                   r.index = null;
                   r.resolve = !1;
+                  r.enrich = !1;
                   var x = B.Y ? C.searchAsync(r) : C.search(r);
                   if (x.then) {
                     return x.then(function(E) {
@@ -1818,7 +1819,7 @@ function pb(a, b, c, d, e, f, g, h) {
             f[e] = b.T;
             continue;
           } else {
-            l.resolve = !1, l.index = null, m = b.Y ? t.searchAsync(l) : t.search(l), l.resolve = n, l.index = t;
+            l.resolve = !1, l.enrich = !1, l.index = null, m = b.Y ? t.searchAsync(l) : t.search(l), l.resolve = n, l.enrich = q, l.index = t;
           }
         } else if (l.and) {
           m = ub(l, "and", t);
@@ -2266,9 +2267,11 @@ function Bb(a, b, c, d, e, f, g) {
       var k = f.resolve;
       a = f.async || f.queue;
       f.resolve = !1;
+      f.highlight = "";
       f.index = null;
       a = a ? b.searchAsync(f) : b.search(f);
       f.resolve = k;
+      f.highlight = h;
       f.index = b;
       a = a.result || a;
     } else {
@@ -3220,7 +3223,7 @@ function Sb(a, b) {
   }
   return c;
 }
-;var Ub = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"forward"}, score:{resolution:9, context:{depth:2, resolution:3}}};
+;var Ub = {memory:{resolution:1}, performance:{resolution:3, fastupdate:!0, context:{depth:1, resolution:1}}, match:{tokenize:"full"}, score:{resolution:9, context:{depth:2, resolution:3}}};
 db.prototype.add = function(a, b, c, d) {
   if (b && (a || a === 0)) {
     if (!d && !c && this.reg.has(a)) {

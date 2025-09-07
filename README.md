@@ -1640,7 +1640,8 @@ index.cleanup();
 The basic idea of this concept is to limit relevance by its context instead of calculating relevance through the whole distance of its corresponding document. The context acts like a bidirectional moving window of 2 pointers (terms) which can initially have a maximum distance of the value passed via option setting `depth` and dynamically growth on search when the query did not match any results.
 
 <p align="center">
-    <img src="doc/context-index.svg" width="100%">
+    <br>
+    <img src="doc/context-index.svg" width="100%" style="max-width: 700px;" alt="FlexSearch Context-based Scoring (Full-text Search)">
 </p>
 
 ### Enable Context-Search

@@ -42,9 +42,11 @@ export default function Resolver(result, index) {
                   async = options.async || options.queue;
 
             options.resolve = !1;
+            options.highlight = "";
             options.index = null;
             result = async ? index.searchAsync(options) : index.search(options);
             options.resolve = resolve;
+            options.highlight = highlight;
             options.index = index;
             result = result.result || result;
         } else {

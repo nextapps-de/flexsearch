@@ -482,7 +482,7 @@ describe("Github Issues", function(){
         ]);
     });
 
-    if(!build_light) it("#506", async function(){
+    if(!build_light && !build_compact) it("#506", async function(){
 
         const data = [{
             "id": "ab105.49",

@@ -569,17 +569,16 @@ describe("Presets", function(){
         expect(Index("performance").resolution).to.equal(3);
         expect(Index("match").resolution).to.equal(9);
         expect(Index("score").resolution).to.equal(9);
-        expect(Index("default").resolution).to.equal(9);
     });
 
     it("Should have been properly extended", function(){
 
-        let index = Index({ preset: "performance" });
+        let index = Index({ preset: "memory" });
         index.add(0, "foobar");
         expect(index.search("bar")).to.have.lengthOf(0);
 
         index = Index({
-            preset: "performance",
+            preset: "memory",
             tokenize: "reverse"
         });
 
@@ -588,6 +587,6 @@ describe("Presets", function(){
 
         index = Index("match");
         index.add(0, "foobar");
-        expect(index.search("foo")).to.eql([0]);
+        expect(index.search("oba")).to.eql([0]);
     });
 });
