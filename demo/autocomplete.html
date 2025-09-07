@@ -181,14 +181,14 @@
         // the cache is a perfect addition
         // for an instant search on keypress
 
-        results = index.searchCache({
+        results = userinput.value ? index.searchCache({
             query: userinput.value,
             suggest: suggest.checked,
             limit: 25,
             pluck: "title",
             enrich: true,
             highlight: "<b>$1</b>"
-        });
+        }) : [];
 
         let entry, childs = suggestions.childNodes;
         let i = 0, len = results.length;
