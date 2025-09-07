@@ -482,6 +482,49 @@ describe("Github Issues", function(){
         ]);
     });
 
+    if(!build_light) it("#506", async function(){
+
+        const data = [{
+            "id": "ab105.49",
+            "text": "<test_name>/anytime_<command>",
+            "tag": "block",
+            "site": "docs"
+        },{
+            "id": "cfc6c.50",
+            "text": "Test the cluster and health-checker setup locally:",
+            "tag": "block",
+            "site": "docs"
+        }];
+
+        const index = new Document({
+            document: {
+                id: 'id',
+                index: 'text',
+                store: [
+                    'text',  'tag', 'site'
+                ],
+                tag: ['tag', 'site']
+            },
+            tokenize: 'reverse',
+            encoder: Charset.LatinAdvanced
+        });
+
+        data.forEach(item => index.add(item));
+
+        const result = new Resolver({
+            index: index,
+            query: "test",
+            field: 'text',
+            tag: {
+                site: 'docs'
+            },
+            limit: 35,
+            highlight: "<b>$1</b>"
+        }).resolve();
+
+        expect(result[1].highlight).to.eql("<b>Test</b> the cluster and health-checker setup locally:");
+    });
+
     // TODO https://jsfiddle.net/u9x6L0mw/2/
 
     if(!build_light) it("#514", function(){
@@ -519,7 +562,7 @@ describe("Github Issues", function(){
         });
     });
 
-    if(!build_light) it("#514", function(){
+    if(!build_light) it("#517", function(){
 
         const data = [
             { "document_id": 0, "title": "Call Sammy on 9944", "content": "", "contact_id": "" },

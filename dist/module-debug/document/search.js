@@ -89,7 +89,7 @@ Document.prototype.search = function (query, limit, options, _promises) {
         cache = options.cache;
 
         if (this.store && options.highlight && !resolve) {
-            console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })");
+            console.warn("Highlighting results can only be done within a resolver stage (and/or/not/xor) or when calling .resolve({ highlight: ... })");
         } else if (this.store && options.enrich && !resolve) {
             console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
         }

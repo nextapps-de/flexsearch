@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.212 (Light/Debug)
+ * FlexSearch.js v0.8.213 (Light/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH

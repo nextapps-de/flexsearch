@@ -21,7 +21,7 @@ export default async function(data) {
 
         case "init":
 
-            options = data["options"] || {};
+            options = /** @type {IndexOptions} */ (data["options"] || {});
             let filepath = options.config;
             if(filepath){
                 // compiler fix

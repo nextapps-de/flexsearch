@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.212 (Bundle/Debug)
+ * FlexSearch.js v0.8.213 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -787,7 +787,7 @@ X.prototype.search = function(a, c, b, e) {
     h = b.suggest;
     x = !0;
     k = b.cache;
-    this.store && b.highlight && !x ? console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })") : this.store && b.enrich && !x && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
+    this.store && b.highlight && !x ? console.warn("Highlighting results can only be done within a resolver stage (and/or/not/xor) or when calling .resolve({ highlight: ... })") : this.store && b.enrich && !x && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
     u = x && this.store && b.highlight;
     g = !!u || x && this.store && b.enrich;
     c = b.limit || c;

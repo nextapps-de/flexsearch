@@ -1,5 +1,5 @@
 /**!
- * FlexSearch.js v0.8.212 (Bundle/Debug)
+ * FlexSearch.js v0.8.213 (Bundle/Debug)
  * Author and Copyright: Thomas Wilkerling
  * Licence: Apache-2.0
  * Hosted by Nextapps GmbH
@@ -1589,8 +1589,9 @@ function db(a, c, b, e, d) {
       }
     }
   } else {
-    for (let k = 0, h, l; k < a.result.length; k++) {
-      for (h = a.result[k], c = 0; c < h.length; c++) {
+    a = a.result || a;
+    for (let k = 0, h, l; k < a.length; k++) {
+      for (h = a[k], c = 0; c < h.length; c++) {
         l = h[c], f[l] && ((g[k] || (g[k] = [])).push(l), f[l] = 0);
       }
     }
@@ -1616,7 +1617,7 @@ Na.prototype.search = function(a, c, b, e) {
     h = b.suggest;
     r = b.resolve !== !1;
     m = b.cache;
-    this.store && b.highlight && !r ? console.warn("Highlighting results can only be done on a final resolver task or when calling .resolve({ highlight: ... })") : this.store && b.enrich && !r && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
+    this.store && b.highlight && !r ? console.warn("Highlighting results can only be done within a resolver stage (and/or/not/xor) or when calling .resolve({ highlight: ... })") : this.store && b.enrich && !r && console.warn("Enrich results can only be done on a final resolver task or when calling .resolve({ enrich: true })");
     t = r && this.store && b.highlight;
     var q = !!t || r && this.store && b.enrich;
     c = b.limit || c;

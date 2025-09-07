@@ -291,8 +291,9 @@ export function intersect_union(arrays, mandatory, limit, offset, resolve) {
         }
     }
     else{
-        for(let i = 0, ids, id; i < arrays.result.length; i++){
-            ids = arrays.result[i];
+        arrays = arrays.result || arrays;
+        for(let i = 0, ids, id; i < arrays.length; i++){
+            ids = arrays[i];
             for(let j = 0; j < ids.length; j++){
                 id = ids[j];
                 if(check[id]){
