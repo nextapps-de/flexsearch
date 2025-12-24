@@ -702,7 +702,7 @@ You can also load modules via CDN:
 
 ```html
 <script type="module">
-    import Index from "https://unpkg.com/flexsearch@0.8.2/dist/module/index.js";
+    import Index from "https://unpkg.com/flexsearch@0.8.212/dist/module/index.js";
     const index = new Index(/* ... */);
 </script>
 ```
