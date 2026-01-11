@@ -9,14 +9,11 @@ import charset_cjk from "./charset/cjk.js";
 export const Exact = charset_exact;
 export const Default = charset_normalize;
 export const Normalize = charset_normalize;
-
 export const LatinBalance = charset_latin_balance;
 export const LatinAdvanced = charset_latin_advanced;
 export const LatinExtra = charset_latin_extra;
 export const LatinSoundex = charset_latin_soundex;
-
 export const CJK = charset_cjk;
-
 export const LatinExact = charset_exact;
 export const LatinDefault = charset_normalize;
 export const LatinSimple = charset_normalize;

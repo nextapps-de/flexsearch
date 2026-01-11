@@ -55,7 +55,7 @@ const types = {
 function sanitize(str) {
     return str.toLowerCase().replace(/[^a-z0-9_]/g, "");
 }
-
+
 const TRX = Object.create(null);
 const Index = Object.create(null);
 

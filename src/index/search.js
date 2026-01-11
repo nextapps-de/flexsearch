@@ -57,6 +57,7 @@ Index.prototype.search = function(query, limit, options){
         tag,
         boost,
         resolution,
+        score,
         // enrich is internally used just
         // for the persistent indexes
         enrich;
@@ -71,6 +72,7 @@ Index.prototype.search = function(query, limit, options){
         enrich = resolve && options.enrich;
         boost = SUPPORT_DOCUMENT && options.boost;
         resolution = options.resolution;
+        score = options.score;
         tag = SUPPORT_DOCUMENT && SUPPORT_TAGS && SUPPORT_PERSISTENT && this.db && options.tag;
     }
 
@@ -95,7 +97,8 @@ Index.prototype.search = function(query, limit, options){
             offset,
             resolve,
             enrich,
-            tag
+            tag,
+            score
         );
     }
 
@@ -108,7 +111,8 @@ Index.prototype.search = function(query, limit, options){
             offset,
             resolve,
             enrich,
-            tag
+            tag,
+            score
         );
     }
 
@@ -190,7 +194,8 @@ Index.prototype.search = function(query, limit, options){
                 offset,
                 suggest,
                 boost,
-                resolve
+                resolve,
+                score
             );
         }());
     }
@@ -239,7 +244,8 @@ Index.prototype.search = function(query, limit, options){
         offset,
         suggest,
         boost,
-        resolve
+        resolve,
+        score
     );
 };
 
@@ -251,13 +257,14 @@ Index.prototype.search = function(query, limit, options){
  * @param {boolean=} suggest
  * @param {number=} boost
  * @param {boolean=} resolve
+ * @param {boolean=} score
  * @return {
  *   SearchResults|EnrichedSearchResults|Resolver |
  *   Promise<SearchResults|EnrichedSearchResults|Resolver>
  * }
  */
 
-function return_result(result, resolution, limit, offset, suggest, boost, resolve){
+function return_result(result, resolution, limit, offset, suggest, boost, resolve, score){
 
     let length = result.length;
     let final = result;
@@ -270,7 +277,8 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
             offset,
             suggest,
             boost,
-            resolve
+            resolve,
+            score
         );
     }
     else if(length === 1){
@@ -278,7 +286,8 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
             ? resolve_default.call(null,
                 result[0],
                 limit,
-                offset
+                offset,
+                score
             )
             : new Resolver(result[0], this);
     }
@@ -303,7 +312,7 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
  * }
  */
 
-function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
+function single_term_query(term, keyword, limit, offset, resolve, enrich, tag, score){
 
     const result = this._get_array(
         term,
@@ -325,7 +334,7 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag){
 
     return result && result.length
         ? (!SUPPORT_RESOLVER || resolve
-            ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */ (result), limit, offset)
+            ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */ (result), limit, offset, enrich, score)
             : new Resolver(result, this)
         )
         : !SUPPORT_RESOLVER || resolve

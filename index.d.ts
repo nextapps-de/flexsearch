@@ -92,6 +92,7 @@ declare module "flexsearch" {
         context?: boolean;
         cache?: R extends true ? boolean : false;
         resolve?: R;
+        score?: boolean;
     };
 
     export type SerializedFunctionString = string;
@@ -197,7 +198,7 @@ declare module "flexsearch" {
     /* Index Search                     */
     /************************************/
 
-    export type DefaultSearchResults = Id[];
+    export type DefaultSearchResults = Id[] | Array<{id: Id; score: number}>;
     export type IntermediateSearchResults = Array<Id[]>;
     export type SearchResults<
         W extends WorkerType | boolean = false,
@@ -1098,6 +1099,22 @@ declare module "flexsearch" {
 
     export class IndexedDB extends StorageInterface {
         /*db: IDBDatabase;*/
+        
+        /**
+         * Export IndexedDB index to JSON
+         * @param handler Function that receives (key: string, data: string) and optionally returns Promise
+         * @returns Promise<void> or void
+         */
+        export(handler: ExportHandler): void;
+        export(handler: ExportHandlerAsync): Promise<void>;
+        
+        /**
+         * Import IndexedDB index from JSON
+         * @param key Key identifier (typically "indexeddb.json")
+         * @param data JSON string or parsed object
+         * @returns Promise<void>
+         */
+        import(key: string, data: string | object): Promise<void>;
     }
 
     const FlexSearch: {

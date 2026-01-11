@@ -22,9 +22,10 @@ import { SearchResults, IntermediateSearchResults } from "./type.js";
  * @param {boolean=} suggest
  * @param {number=} boost
  * @param {boolean=} resolve
+ * @param {boolean=} score
  * @returns {SearchResults|IntermediateSearchResults}
  */
-export function intersect(arrays, resolution, limit, offset, suggest, boost, resolve) {
+export function intersect(arrays, resolution, limit, offset, suggest, boost, resolve, score) {
 
     const length = arrays.length;
 
@@ -35,8 +36,9 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
 
 
     check = create_object();
+    const scoreMap = score ? create_object() : null;
 
-    for (let y = 0, ids, id, res_arr, tmp; y < resolution; y++) {
+    for (let y = 0, ids, id, res_arr, tmp, itemScore; y < resolution; y++) {
 
         for (let x = 0; x < length; x++) {
 
@@ -55,12 +57,21 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                         check[id] = 1;
                     }
 
+                    itemScore = resolution - y;
+
+                    if (score && scoreMap) {
+
+                        if (!scoreMap[id] || scoreMap[id] < itemScore) {
+                            scoreMap[id] = itemScore;
+                        }
+                    }
+
                     tmp = result[count] || (result[count] = []);
 
                     if (!resolve) {
 
-                        let score = y + (x || !suggest ? 0 : boost || 0);
-                        tmp = tmp[score] || (tmp[score] = []);
+                        let score_val = y + (x || !suggest ? 0 : boost || 0);
+                        tmp = tmp[score_val] || (tmp[score_val] = []);
                     }
 
                     tmp.push(id);
@@ -88,6 +99,18 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
             }
 
             result = /** @type {SearchResults|IntermediateSearchResults} */result[result_len - 1];
+
+            if (score && scoreMap && resolve) {
+                const scoredResult = [];
+                for (let i = 0; i < result.length; i++) {
+                    const id = result[i];
+                    scoredResult.push({
+                        id: id,
+                        score: scoreMap[id] || 0
+                    });
+                }
+                result = scoredResult;
+            }
 
             if (limit || offset) {
                 if (resolve) {
@@ -119,7 +142,28 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
             }
         } else {
 
-            result = 1 < result.length ? union(result, limit, offset, resolve, boost) : (result = result[0]) && limit && result.length > limit || offset ? result.slice(offset, limit + offset) : result;
+            result = 1 < result.length ? union(result, limit, offset, resolve, boost, score, resolution) : (result = result[0]) && limit && result.length > limit || offset ? result.slice(offset, limit + offset) : result;
+
+            if (score && resolve && !Array.isArray(result[0]) && 'object' != typeof result[0]) {
+                const scoredResult = [],
+                      unionScoreMap = create_object();
+
+
+                for (let i = 0; i < result.length; i++) {
+                    const id = result[i];
+                    if (!unionScoreMap[id]) {
+                        unionScoreMap[id] = resolution - i;
+                    }
+                }
+                for (let i = 0; i < result.length; i++) {
+                    const id = result[i];
+                    scoredResult.push({
+                        id: id,
+                        score: unionScoreMap[id] || 0
+                    });
+                }
+                result = scoredResult;
+            }
         }
     }
 
@@ -133,9 +177,11 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
  * @param {number=} offset
  * @param {boolean=} resolve
  * @param {number=} boost
+ * @param {boolean=} score
+ * @param {number=} resolution
  * @returns {SearchResults|IntermediateSearchResults}
  */
-export function union(arrays, limit, offset, resolve, boost) {
+export function union(arrays, limit, offset, resolve, boost, score, resolution) {
 
     /** @type {SearchResults|IntermediateSearchResults} */
     const result = [],
@@ -166,8 +212,8 @@ export function union(arrays, limit, offset, resolve, boost) {
                         if (offset) {
                             offset--;
                         } else {
-                            let score = 0 | (k + (i < arr_len - 1 ? boost || 0 : 0)) / (i + 1),
-                                arr = result[score] || (result[score] = []);
+                            let score_val = 0 | (k + (i < arr_len - 1 ? boost || 0 : 0)) / (i + 1),
+                                arr = result[score_val] || (result[score_val] = []);
 
                             arr.push(id);
                             if (++count === limit) {
@@ -192,7 +238,14 @@ export function union(arrays, limit, offset, resolve, boost) {
                 if (offset) {
                     offset--;
                 } else {
-                    result.push(id);
+                    if (score && resolve && resolution) {
+                        result.push({
+                            id: id,
+                            score: resolution - i
+                        });
+                    } else {
+                        result.push(id);
+                    }
                     if (result.length === limit) {
                         return result;
                     }

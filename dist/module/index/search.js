@@ -46,6 +46,7 @@ Index.prototype.search = function (query, limit, options) {
         tag,
         boost,
         resolution,
+        score,
         enrich;
 
 
@@ -59,6 +60,7 @@ Index.prototype.search = function (query, limit, options) {
         enrich = resolve && options.enrich;
         boost = options.boost;
         resolution = options.resolution;
+        score = options.score;
         tag = this.db && options.tag;
     }
 
@@ -74,11 +76,11 @@ Index.prototype.search = function (query, limit, options) {
     limit = /** @type {!number} */limit || (resolve ? 100 : 0);
 
     if (1 === length) {
-        return single_term_query.call(this, query_terms[0], "", limit, offset, resolve, enrich, tag);
+        return single_term_query.call(this, query_terms[0], "", limit, offset, resolve, enrich, tag, score);
     }
 
     if (2 === length && context && !suggest) {
-        return single_term_query.call(this, query_terms[1], query_terms[0], limit, offset, resolve, enrich, tag);
+        return single_term_query.call(this, query_terms[1], query_terms[0], limit, offset, resolve, enrich, tag, score);
     }
 
     let dupes = create_object(),
@@ -141,7 +143,7 @@ Index.prototype.search = function (query, limit, options) {
             }
 
             return return_result(result, resolution,
-            /** @type {!number} */limit, offset, suggest, boost, resolve);
+            /** @type {!number} */limit, offset, suggest, boost, resolve, score);
         }();
     }
 
@@ -179,7 +181,7 @@ Index.prototype.search = function (query, limit, options) {
     }
 
     return return_result(result, resolution,
-    /** @type {!number} */limit, offset, suggest, boost, resolve);
+    /** @type {!number} */limit, offset, suggest, boost, resolve, score);
 };
 
 /**
@@ -190,21 +192,22 @@ Index.prototype.search = function (query, limit, options) {
  * @param {boolean=} suggest
  * @param {number=} boost
  * @param {boolean=} resolve
+ * @param {boolean=} score
  * @return {
  *   SearchResults|EnrichedSearchResults|Resolver |
  *   Promise<SearchResults|EnrichedSearchResults|Resolver>
  * }
  */
 
-function return_result(result, resolution, limit, offset, suggest, boost, resolve) {
+function return_result(result, resolution, limit, offset, suggest, boost, resolve, score) {
     let length = result.length,
         final = result;
 
 
     if (1 < length) {
-        final = intersect(result, resolution, limit, offset, suggest, boost, resolve);
+        final = intersect(result, resolution, limit, offset, suggest, boost, resolve, score);
     } else if (1 === length) {
-        return resolve ? resolve_default.call(null, result[0], limit, offset) : new Resolver(result[0], this);
+        return resolve ? resolve_default.call(null, result[0], limit, offset, score) : new Resolver(result[0], this);
     }
 
     return resolve ? final : new Resolver(final, this);
@@ -225,7 +228,7 @@ function return_result(result, resolution, limit, offset, suggest, boost, resolv
  * }
  */
 
-function single_term_query(term, keyword, limit, offset, resolve, enrich, tag) {
+function single_term_query(term, keyword, limit, offset, resolve, enrich, tag, score) {
 
     const result = this._get_array(term, keyword, limit, offset, resolve, enrich, tag);
 
@@ -235,7 +238,7 @@ function single_term_query(term, keyword, limit, offset, resolve, enrich, tag) {
         });
     }
 
-    return result && result.length ? resolve ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */result, limit, offset) : new Resolver(result, this) : resolve ? [] : new Resolver([], this);
+    return result && result.length ? resolve ? resolve_default.call(this, /** @type {SearchResults|EnrichedSearchResults} */result, limit, offset, enrich, score) : new Resolver(result, this) : resolve ? [] : new Resolver([], this);
 }
 
 /**

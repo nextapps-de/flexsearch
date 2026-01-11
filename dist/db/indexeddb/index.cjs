@@ -155,8 +155,8 @@ IdxDB.prototype.destroy = function(){
     const req = IndexedDB.deleteDatabase(this.id);
     return promisfy(req);
 };
-
-
+
+
 
 /**
  * @return {!Promise<undefined>}
@@ -297,10 +297,158 @@ IdxDB.prototype.has = function(id){
 };
 
 IdxDB.prototype.search = null;
-
+
 
 IdxDB.prototype.info = function(){
    
+};
+
+/**
+ * Export IndexedDB index to JSON
+ * @param {function(string, string):Promise|void} handler
+ * @return {Promise<void>|void}
+ */
+IdxDB.prototype.export = function(handler){
+    const self = this;
+    const exportData = {
+        id: this.id,
+        field: this.field,
+        version: VERSION,
+        data: {}
+    };
+
+    return this.open().then(function(){
+        const promises = [];
+
+       
+        for(let i = 0, ref; i < fields.length; i++){
+            ref = fields[i];
+            for(let j = 0, field; j < Index[self.id].length; j++){
+                field = Index[self.id][j];
+                const storeName = ref + (ref !== "reg" ? (field ? ":" + field : "") : "");
+                
+                promises.push(
+                    new Promise(function(resolve){
+                        const transaction = self.db.transaction(storeName, "readonly");
+                        const store = transaction.objectStore(storeName);
+                        const data = [];
+                        const cursor = store.openCursor();
+                        
+                        cursor.onsuccess = function(){
+                            const cursor_result = this.result;
+                            if(cursor_result){
+                                data.push({
+                                    key: cursor_result.key,
+                                    value: cursor_result.value
+                                });
+                                cursor_result.continue();
+                            } else {
+                                exportData.data[storeName] = data;
+                                resolve();
+                            }
+                        };
+                        
+                        cursor.onerror = function(){
+                            exportData.data[storeName] = [];
+                            resolve();
+                        };
+                        
+                        transaction.onerror = function(){
+                            exportData.data[storeName] = [];
+                            resolve();
+                        };
+                    })
+                );
+            }
+        }
+
+        return Promise.all(promises).then(function(){
+            const json = JSON.stringify(exportData);
+            const result = handler("indexeddb.json", json);
+            return result && result.then ? result : Promise.resolve();
+        });
+    });
+};
+
+/**
+ * Import IndexedDB index from JSON
+ * @param {string} key
+ * @param {string|Object} data
+ * @return {Promise<void>}
+ */
+IdxDB.prototype.import = function(key, data){
+    const self = this;
+    
+    if(!data){
+        return Promise.resolve();
+    }
+    
+    if(typeof data === "string"){
+        try {
+            data = JSON.parse(data);
+        } catch(e){
+            return Promise.reject(new Error("Invalid JSON data"));
+        }
+    }
+    
+    if(!data.data || typeof data.data !== "object"){
+        return Promise.reject(new Error("Invalid export data format"));
+    }
+
+    return this.open().then(function(){
+       
+        return self.clear().then(function(){
+            const promises = [];
+            const dataObj = data.data;
+
+           
+            for(const storeName in dataObj){
+                if(!dataObj.hasOwnProperty(storeName)) continue;
+                
+                const storeData = dataObj[storeName];
+                if(!Array.isArray(storeData)) continue;
+
+                promises.push(
+                    new Promise(function(resolve){
+                        const transaction = self.db.transaction(storeName, "readwrite");
+                        const store = transaction.objectStore(storeName);
+                        let count = 0;
+                        const total = storeData.length;
+                        
+                        if(total === 0){
+                            resolve();
+                            return;
+                        }
+
+                        for(let i = 0; i < storeData.length; i++){
+                            const item = storeData[i];
+                            const req = store.put(item.value, item.key);
+                            
+                            req.onsuccess = function(){
+                                count++;
+                                if(count === total){
+                                    resolve();
+                                }
+                            };
+                            
+                            req.onerror = function(){
+                                count++;
+                                if(count === total){
+                                    resolve();
+                                }
+                            };
+                        }
+                        
+                        transaction.onerror = function(){
+                            resolve();
+                        };
+                    })
+                );
+            }
+
+            return Promise.all(promises);
+        });
+    });
 };
 
 /**

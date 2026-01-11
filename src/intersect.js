@@ -24,9 +24,10 @@ import { SearchResults, IntermediateSearchResults } from "./type.js";
  * @param {boolean=} suggest
  * @param {number=} boost
  * @param {boolean=} resolve
+ * @param {boolean=} score
  * @returns {SearchResults|IntermediateSearchResults}
  */
-export function intersect(arrays, resolution, limit, offset, suggest, boost, resolve) {
+export function intersect(arrays, resolution, limit, offset, suggest, boost, resolve, score) {
 
     const length = arrays.length;
 
@@ -39,8 +40,9 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
     //arrays.sort(sort_by_length_up);
 
     check = create_object();
+    const scoreMap = score ? create_object() : null;
 
-    for(let y = 0, ids, id, res_arr, tmp; y < resolution; y++){
+    for(let y = 0, ids, id, res_arr, tmp, itemScore; y < resolution; y++){
 
         for(let x = 0; x < length; x++){
 
@@ -71,12 +73,23 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
                         // };
                     }
 
+                    // Calculate score: lower y value = higher score (better match)
+                    // Score is normalized: resolution - y (higher is better)
+                    itemScore = resolution - y;
+
+                    if(score && scoreMap){
+                        // Store the best (highest) score for each ID
+                        if(!scoreMap[id] || scoreMap[id] < itemScore){
+                            scoreMap[id] = itemScore;
+                        }
+                    }
+
                     tmp = result[count] || (result[count] = []);
 
                     if(SUPPORT_RESOLVER && !resolve){
                         // boost everything after first result
-                        let score = y + (x || !suggest ? 0 : boost || 0);
-                        tmp = tmp[score] || (tmp[score] = []);
+                        let score_val = y + (x || !suggest ? 0 : boost || 0);
+                        tmp = tmp[score_val] || (tmp[score_val] = []);
                     }
 
                     tmp.push(id);
@@ -114,6 +127,19 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
             result = /** @type {SearchResults|IntermediateSearchResults} */ (
                 result[result_len - 1]
             );
+
+            // Convert to score format if requested
+            if(score && scoreMap && resolve){
+                const scoredResult = [];
+                for(let i = 0; i < result.length; i++){
+                    const id = result[i];
+                    scoredResult.push({
+                        id: id,
+                        score: scoreMap[id] || 0
+                    });
+                }
+                result = scoredResult;
+            }
 
             if(limit || offset){
                 if(!SUPPORT_RESOLVER || resolve){
@@ -156,11 +182,31 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
         else{
 
             result = result.length > 1
-                ? union(result, limit, offset, resolve, boost)
+                ? union(result, limit, offset, resolve, boost, score, resolution)
                 : ((result = result[0]) && limit && result.length > limit) || offset
                     ? result.slice(offset, limit + offset)
                     : result;
 
+            // Convert to score format if requested (for suggestions/union)
+            if(score && resolve && !Array.isArray(result[0]) && typeof result[0] !== 'object'){
+                const scoredResult = [];
+                const unionScoreMap = create_object();
+                // Build score map from union result
+                for(let i = 0; i < result.length; i++){
+                    const id = result[i];
+                    if(!unionScoreMap[id]){
+                        unionScoreMap[id] = resolution - i; // Approximate score based on position
+                    }
+                }
+                for(let i = 0; i < result.length; i++){
+                    const id = result[i];
+                    scoredResult.push({
+                        id: id,
+                        score: unionScoreMap[id] || 0
+                    });
+                }
+                result = scoredResult;
+            }
         }
     }
 
@@ -175,9 +221,11 @@ export function intersect(arrays, resolution, limit, offset, suggest, boost, res
  * @param {number=} offset
  * @param {boolean=} resolve
  * @param {number=} boost
+ * @param {boolean=} score
+ * @param {number=} resolution
  * @returns {SearchResults|IntermediateSearchResults}
  */
-export function union(arrays, limit, offset, resolve, boost){
+export function union(arrays, limit, offset, resolve, boost, score, resolution){
 
     /** @type {SearchResults|IntermediateSearchResults} */
     const result = [];
@@ -212,8 +260,8 @@ export function union(arrays, limit, offset, resolve, boost){
                             //       be added to the chain and resolved later, that will keep
                             //       the original score but also can't resolve early when
                             //       nothing was found
-                            let score = (k + (i < arr_len - 1 ? boost || 0 : 0)) / (i + 1) | 0;
-                            let arr = result[score] || (result[score] = []);
+                            let score_val = (k + (i < arr_len - 1 ? boost || 0 : 0)) / (i + 1) | 0;
+                            let arr = result[score_val] || (result[score_val] = []);
                             arr.push(id);
                             if(++count === limit){
                                 return result;
@@ -239,7 +287,14 @@ export function union(arrays, limit, offset, resolve, boost){
                     offset--;
                 }
                 else{
-                    result.push(id);
+                    if(score && resolve && resolution){
+                        result.push({
+                            id: id,
+                            score: resolution - i // Approximate score based on array position
+                        });
+                    } else {
+                        result.push(id);
+                    }
                     if(result.length === limit){
                         return result;
                     }

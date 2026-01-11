@@ -41,7 +41,7 @@ function MongoDB(name, config = {}){
     this.support_tag_search = true;
     Object.assign(defaults, config);
     this.db && delete defaults.db;
-}
+}
 
 MongoDB.prototype.mount = function(flexsearch){
    

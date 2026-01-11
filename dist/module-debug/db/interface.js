@@ -6,11 +6,8 @@
 export default function StorageInterface() {}
 
 StorageInterface.prototype.mount = async function () {};
-
 StorageInterface.prototype.open = async function () {};
-
 StorageInterface.prototype.close = function () {};
-
 StorageInterface.prototype.destroy = async function () {};
 
 StorageInterface.prototype.commit = async function () {};
@@ -31,11 +28,8 @@ StorageInterface.prototype.get = async function () {};
  * @return {!Promise<EnrichedSearchResults>}
  */
 StorageInterface.prototype.enrich = async function () {};
-
 StorageInterface.prototype.has = async function () {};
-
 StorageInterface.prototype.remove = async function () {};
-
 StorageInterface.prototype.clear = async function () {};
 
 /**

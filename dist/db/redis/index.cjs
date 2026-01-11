@@ -61,7 +61,7 @@ function RedisDB(name, config = {}){
    
     Object.assign(defaults, config);
     this.db && delete defaults.db;
-}
+}
 
 RedisDB.prototype.mount = function(flexsearch){
    

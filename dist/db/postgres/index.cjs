@@ -541,7 +541,7 @@ PostgresDB.prototype.search = function(flexsearch, query, limit = 100, offset = 
 PostgresDB.prototype.info = function(){
    
 };
-
+
 
 PostgresDB.prototype.transaction = function(task){
     const self = this;
@@ -549,7 +549,7 @@ PostgresDB.prototype.transaction = function(task){
         return task.call(self, trx);
     });
 };
-
+
 
 PostgresDB.prototype.commit = async function(flexsearch){
 

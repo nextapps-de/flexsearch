@@ -7,15 +7,15 @@ import { EncoderOptions } from "./type.js";
 
 Custom Encoder
 ----------------
-
+
 function englishEncoder(string){
     return string.toLowerCase().split(/[^a-z]+/)
 }
-
+
 function chineseEncoder(string){
     return string.replace(/\s+/, "").split("")
 }
-
+
 function fixedEncoder(string){
     return [string]
 }
