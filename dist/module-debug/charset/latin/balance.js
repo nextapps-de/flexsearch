@@ -5,6 +5,6 @@ export const soundex = new Map([["b", "p"], ["v", "f"], ["w", "f"], ["z", "s"], 
 /** @type EncoderOptions */
 const options = {
 
-   mapper: soundex
+  mapper: soundex
 };
 export default options;

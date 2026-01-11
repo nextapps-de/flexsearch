@@ -127,7 +127,8 @@ export let StoreOptions = {};
  *   suggest: (boolean|undefined),
  *   resolve: (boolean|undefined),
  *   enrich: (boolean|undefined),
- *   cache: (boolean|undefined)
+ *   cache: (boolean|undefined),
+ *   score: (boolean|undefined)
  * }}
  */
 export let SearchOptions = {};

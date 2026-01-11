@@ -14,7 +14,6 @@ import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
 import { exportIndex, importIndex, serialize } from "./serialize.js";
 import { remove_index } from "./index/remove.js";
-
 import apply_preset from "./preset.js";
 import apply_async from "./async.js";
 import tick from "./profiler.js";
