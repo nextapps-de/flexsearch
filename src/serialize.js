@@ -470,7 +470,7 @@ ctx: "gulliver+travel:1,2,3|4,5,6|7,8,9;"
  * @return {string}
  */
 
-export function serialize(withFunctionWrapper = true){
+export function serializeIndex(withFunctionWrapper = true){
 
     let reg = '';
     let map = '';
@@ -562,10 +562,10 @@ function parse_tag_map(tagMap, type){
  * Serialize a Document's multi-field indexes with optional streaming compression
  * @this {Document}
  * @param {boolean=} withFunctionWrapper - Wrap in function(doc) or return raw statements
- * @param {boolean=} compress - Stream through gzip compression
+ * @param {boolean=} withCompression - Apply gzip compression
  * @return {string|Promise<Uint8Array>|Uint8Array}
  */
-export function serializeDocument(withFunctionWrapper = true, compress = false){
+export function serializeDocument(withFunctionWrapper = true, withCompression = false){
     
     let statements = '';
     let type = undefined;
@@ -647,50 +647,35 @@ export function serializeDocument(withFunctionWrapper = true, compress = false){
         ? "function inject(doc){" + statements + "}"
         : statements;
     
-    if(!compress){
+    if(!withCompression){
         return body;
     }
     
-    return compressString(body);
+    return compress(body);
 }
 
 /**
- * Compress a string using gzip
- * @param {string} input - String to compress
- * @return {Promise<Uint8Array>} Compressed data
- */
-async function compressString(input){
-    const cs = new CompressionStream('gzip');
-    const encoder = new TextEncoder();
-    const inputBytes = encoder.encode(input);
-    const stream = new Blob([inputBytes]).stream().pipeThrough(cs);
-    const compressedBuffer = await new Response(stream).arrayBuffer();
-    return new Uint8Array(compressedBuffer);
-}
-
-/**
- * Compress data using gzip
- * @param {string|Uint8Array} data - String or binary data to compress
+ * Compress string using gzip
+ * @param {string} data - String to compress
  * @return {Promise<Uint8Array>} Compressed data
  */
 export async function compress(data){
     const cs = new CompressionStream('gzip');
-    const encoder = new TextEncoder();
-    const inputBytes = data instanceof Uint8Array ? data : encoder.encode(data);
-    const stream = new Blob([inputBytes]).stream().pipeThrough(cs);
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+    const stream = blob.stream().pipeThrough(cs);
     const compressedBuffer = await new Response(stream).arrayBuffer();
     return new Uint8Array(compressedBuffer);
 }
 
 /**
- * Decompress gzip data
- * @param {Uint8Array|ArrayBuffer} data - Compressed data
+ * Decompress gzip-compressed data
+ * @param {Uint8Array} data - Compressed data
  * @return {Promise<string>} Decompressed string
  */
 export async function decompress(data){
     const ds = new DecompressionStream('gzip');
-    const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-    const stream = new Blob([bytes]).stream().pipeThrough(ds);
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+    const stream = blob.stream().pipeThrough(ds);
     const decompressedBuffer = await new Response(stream).arrayBuffer();
     const decoder = new TextDecoder();
     return decoder.decode(decompressedBuffer);

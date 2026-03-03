@@ -4,7 +4,7 @@ import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
 if(FlexSearch.FlexSearch) FlexSearch = FlexSearch.FlexSearch;
-const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver } = FlexSearch;
+const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver, decompress } = FlexSearch;
 const build_light = env && env.includes("light");
 const build_compact = env && env.includes("compact");
 const build_esm = !env || env.startsWith("module");
@@ -245,7 +245,7 @@ if(!build_light) describe("Document Export/Import", function(){
         ]);
     });
 
-    it("Should have been serialized Document-Index properly (Fast-Boot)", function(){
+    it("Should have been serialized Document-Index properly (Fast-Boot)", async function(){
 
         let document = new Document(config);
 
@@ -253,6 +253,7 @@ if(!build_light) describe("Document Export/Import", function(){
             document.add(data[i]);
         }
 
+        // Test basic serialization without compression
         const fn_string = document.serialize(false);
         const inject = new Function("doc", fn_string);
 
@@ -279,8 +280,25 @@ if(!build_light) describe("Document Export/Import", function(){
         expect(search2).to.eql(search1);
 
         // Test with function wrapper
-        let document3 = new Document(config);
         expect(document.serialize()).to.equal("function inject(doc){" + fn_string + "}");
+
+        // Test serialization with compression
+        const compressed = await document.serialize(false, true);
+        expect(compressed).to.be.instanceOf(Uint8Array);
+        expect(compressed.length).to.be.lessThan(Buffer.byteLength(fn_string));
+
+        // Decompress and verify
+        const decompressed = await decompress(compressed);
+        expect(decompressed).to.eql(fn_string);
+
+        // Inject decompressed function
+        const inject2 = new Function("doc", decompressed);
+        let document3 = new Document(config);
+        inject2(document3);
+
+        // Verify search results match after decompression
+        const search3 = document3.search("karmen");
+        expect(search3).to.eql(search1);
     });
 });
 

@@ -149,11 +149,11 @@ declare module "flexsearch" {
     };
 
     /**
-     * Compress data using gzip compression
-     * @param data - String or binary data to compress
+     * Compress a string using gzip compression
+     * @param data - String data to compress
      * @returns Promise that resolves to compressed Uint8Array
      */
-    export function compress(data: string | Uint8Array): Promise<Uint8Array>;
+    export function compress(data: string): Promise<Uint8Array>;
 
     /**
      * Decompress gzip-compressed data

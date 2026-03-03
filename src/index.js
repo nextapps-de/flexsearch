@@ -29,7 +29,7 @@ import Cache, { searchCache } from "./cache.js";
 import Charset from "./charset.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_array, is_string } from "./common.js";
-import { exportIndex, importIndex, serialize } from "./serialize.js";
+import { exportIndex, importIndex, serializeIndex } from "./serialize.js";
 import { remove_index } from "./index/remove.js";
 //import default_encoder from "./charset/latin/default.js";
 import apply_preset from "./preset.js";
@@ -281,7 +281,7 @@ if(SUPPORT_SERIALIZE){
 
     Index.prototype.export = exportIndex;
     Index.prototype.import = importIndex;
-    Index.prototype.serialize = serialize;
+    Index.prototype.serialize = serializeIndex;
 }
 
 if(SUPPORT_ASYNC){
