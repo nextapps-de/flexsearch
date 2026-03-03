@@ -149,6 +149,20 @@ declare module "flexsearch" {
     };
 
     /**
+     * Compress data using gzip compression
+     * @param data - String or binary data to compress
+     * @returns Promise that resolves to compressed Uint8Array
+     */
+    export function compress(data: string | Uint8Array): Promise<Uint8Array>;
+
+    /**
+     * Decompress gzip-compressed data
+     * @param data - Compressed data as Uint8Array
+     * @returns Promise that resolves to decompressed string
+     */
+    export function decompress(data: Uint8Array): Promise<string>;
+
+    /**
      * These options will determine how the contents will be indexed.
      *
      * **Document:**
@@ -746,6 +760,8 @@ declare module "flexsearch" {
         export(handler: ExportHandlerAsync): Promise<void>;
 
         import(key: string, data: string): void;
+
+        serialize(with_function_wrapper?: boolean, compress?: boolean): SerializedFunctionString | Promise<Uint8Array>;
 
         // Persistent Index
         mount<S = StorageInterface<D>>(db: S): Promise<void>;

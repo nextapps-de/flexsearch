@@ -244,6 +244,87 @@ if(!build_light) describe("Document Export/Import", function(){
             }] }
         ]);
     });
+
+    it("Should have been serialized Document-Index properly (Fast-Boot)", function(){
+
+        const config = {
+            document: {
+                id: "tconst",
+                store: true,
+                index: [{
+                    field: "primaryTitle",
+                    tokenize: "forward",
+                    encoder: Charset.LatinBalance
+                },{
+                    field: "originalTitle",
+                    tokenize: "forward",
+                    encoder: Charset.LatinBalance
+                }],
+                tag: [{
+                    field: "startYear"
+                },{
+                    field: "genres"
+                }]
+            }
+        };
+
+        let document = new Document(config);
+
+        for(let i = 0; i < data.length; i++){
+            document.add(data[i]);
+        }
+
+        // Test serialize without compression (string output)
+        const fn_string = document.serialize(true, false);
+        expect(typeof fn_string).to.equal('string');
+        expect(fn_string).to.match(/function inject\(doc\)/);
+
+        // Extract function body for new Function constructor
+        // The format is "function inject(doc){...}" so skip "function inject(doc){" (21 chars) and "}" at end (1 char)
+        const fnBody = fn_string.slice(21, -1);
+        const inject = new Function("doc", fnBody);
+
+        let document2 = new Document(config);
+        inject(document2);
+
+        // Verify indexes were restored correctly
+        const search1 = document.search({
+            query: "karmen",
+            tag: {
+                "startYear": "1894",
+                "genres": ["Documentary", "Short"]
+            },
+            suggest: true,
+            enrich: true
+        });
+
+        if(search1 && search1.field){
+            const search2 = document2.search({
+                query: "karmen",
+                tag: {
+                    "startYear": "1894",
+                    "genres": ["Documentary", "Short"]
+                },
+                suggest: true,
+                enrich: true
+            });
+
+            expect(search2).to.be.ok;
+            if(search2.field && search1.field){
+                expect(search2.field).to.equal(search1.field);
+            }
+        }
+
+        // Verify reg was restored
+        expect(document2.reg.size).to.equal(document.reg.size);
+
+        // Test storing and retrieving directly from inject function
+        let document3 = new Document(config);
+        eval("(function(){ (function inject(doc){" + fnBody + "})(document3); })()");
+        
+        expect(document3.reg.size).to.equal(document.reg.size);
+        expect(document3.store.size).to.equal(document.store.size);
+    });
 });
 
 function normalize_map(map){

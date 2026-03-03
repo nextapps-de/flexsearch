@@ -524,3 +524,279 @@ function parse_map(map, type){
     }
     return result;
 }
+
+/**
+ * Helper: Serialize a Map<string, Map> for tags
+ * @param {Map} tagMap
+ * @param {string} type
+ * @return {string}
+ */
+function parse_tag_map(tagMap, type){
+    let result = '';
+    for(const item of tagMap.entries()){
+        const key = item[0];
+        const value = item[1]; // inner Map
+        let inner = '';
+        for(const innerItem of value.entries()){
+            const innerKey = innerItem[0];
+            const innerValue = innerItem[1];
+            let ids = '';
+            for(let j = 0; j < innerValue.length; j++){
+                ids += (ids ? ',' : '') + (type === "string" ? '"' + innerValue[j] + '"' : innerValue[j]);
+            }
+            ids = '["' + innerKey + '",[' + ids + ']]';
+            inner += (inner ? ',' : '') + ids;
+        }
+        inner = '["' + key + '",new Map([' + inner + '])]';
+        result += (result ? ',' : '') + inner;
+    }
+    return result;
+}
+
+/**
+ * Serialize a Document's multi-field indexes with optional streaming compression
+ * @this {Document}
+ * @param {boolean=} withFunctionWrapper - Wrap in function(doc) or return raw statements
+ * @param {boolean=} compress - Stream through gzip compression
+ * @return {string|Promise<Uint8Array>|Uint8Array}
+ */
+export function serializeDocument(withFunctionWrapper = true, compress = false){
+    
+    let statements = '';
+    let type = undefined;
+    
+    // Serialize shared registry once
+    if(this.reg && this.reg.size){
+        let reg = '';
+        for(const key of this.reg.keys()){
+            type || (type = typeof key);
+            reg += (reg ? ',' : '') + (type === "string" ? '"' + key + '"' : key);
+        }
+        statements += 'doc.reg=new Set([' + reg + ']);';
+    }
+    
+    // Serialize each field index
+    if(this.index && this.index.size){
+        for(const fieldName of this.field){
+            const index = this.index.get(fieldName);
+            if(!index) continue;
+            
+            // Only serialize if field index has map data
+            if(index.map && index.map.size){
+                let map = parse_map(index.map, type);
+                if(map){
+                    statements += 'doc.index.get("' + fieldName + '").map=new Map([' + map + ']);';
+                }
+                
+                // Serialize ctx if present
+                if(index.ctx && index.ctx.size){
+                    let ctx = '';
+                    for(const context of index.ctx.entries()){
+                        const key_ctx = context[0];
+                        const value_ctx = context[1];
+                        let ctx_map = parse_map(value_ctx, type);
+                        if(ctx_map){
+                            ctx_map = "new Map([" + ctx_map + "])";
+                            ctx_map = '["' + key_ctx + '",' + ctx_map + ']';
+                            ctx += (ctx ? ',' : '') + ctx_map;
+                        }
+                    }
+                    if(ctx){
+                        statements += 'doc.index.get("' + fieldName + '").ctx=new Map([' + ctx + ']);';
+                    }
+                }
+            }
+        }
+    }
+    
+    // Serialize tags if present
+    if(SUPPORT_TAGS && this.tag && this.tagfield){
+        for(let i = 0; i < this.tagfield.length; i++){
+            const tagField = this.tagfield[i];
+            const tagMap = this.tag.get(tagField);
+            if(tagMap && tagMap.size){
+                let tag = parse_tag_map(tagMap, type);
+                if(tag){
+                    statements += 'doc.tag.get("' + tagField + '").clear();' + 
+                                  'for(const [k,v] of new Map([' + tag + ']).entries()){doc.tag.get("' + tagField + '").set(k,v);}';
+                }
+            }
+        }
+    }
+    
+    // Serialize store if present
+    if(SUPPORT_STORE && this.store && this.store.size){
+        let storeData = '';
+        for(const item of this.store.entries()){
+            const key = item[0];
+            const value = item[1];
+            const valueJson = JSON.stringify(value);
+            storeData += (storeData ? ',' : '') + '[' + (typeof key === "string" ? '"' + key + '"' : key) + ',' + valueJson + ']';
+        }
+        if(storeData){
+            statements += 'for(const [k,v] of new Map([' + storeData + ']).entries()){doc.store.set(k,v);}';
+        }
+    }
+    
+    const body = withFunctionWrapper
+        ? "function inject(doc){" + statements + "}"
+        : statements;
+    
+    if(!compress){
+        return body;
+    }
+    
+    // Stream compression path with TransformStream
+    return new Promise(function(resolve, reject){
+        try {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(body);
+            
+            const compressedChunks = [];
+            const stream = data.stream ? data.stream() : new ReadableStream({
+                start(controller){
+                    controller.enqueue(data);
+                    controller.close();
+                }
+            });
+            
+            const compressedStream = stream.pipeThrough(new CompressionStream('gzip'));
+            
+            const reader = compressedStream.getReader();
+            
+            (async function pump(){
+                try {
+                    while(true){
+                        const { done, value } = await reader.read();
+                        if(done) break;
+                        compressedChunks.push(value);
+                    }
+                    
+                    let totalLength = 0;
+                    for(let i = 0; i < compressedChunks.length; i++){
+                        totalLength += compressedChunks[i].length;
+                    }
+                    
+                    const result = new Uint8Array(totalLength);
+                    let offset = 0;
+                    for(let i = 0; i < compressedChunks.length; i++){
+                        result.set(compressedChunks[i], offset);
+                        offset += compressedChunks[i].length;
+                    }
+                    
+                    resolve(result);
+                } catch(err){
+                    reject(err);
+                }
+            })();
+        } catch(err){
+            reject(err);
+        }
+    });
+}
+
+/**
+ * Compress data using gzip
+ * @param {string|Uint8Array} data - String or ArrayBuffer to compress
+ * @return {Promise<Uint8Array>} Compressed data as Uint8Array
+ */
+export function compress(data){
+    
+    return new Promise(function(resolve, reject){
+        try {
+            const encoder = new TextEncoder();
+            let bytes = data instanceof Uint8Array ? data : encoder.encode(data);
+            
+            const stream = bytes.stream ? bytes.stream() : new ReadableStream({
+                start(controller){
+                    controller.enqueue(bytes);
+                    controller.close();
+                }
+            });
+            
+            const compressedStream = stream.pipeThrough(new CompressionStream('gzip'));
+            const compressedChunks = [];
+            const reader = compressedStream.getReader();
+            
+            (async function pump(){
+                try {
+                    while(true){
+                        const { done, value } = await reader.read();
+                        if(done) break;
+                        compressedChunks.push(value);
+                    }
+                    
+                    let totalLength = 0;
+                    for(let i = 0; i < compressedChunks.length; i++){
+                        totalLength += compressedChunks[i].length;
+                    }
+                    
+                    const result = new Uint8Array(totalLength);
+                    let offset = 0;
+                    for(let i = 0; i < compressedChunks.length; i++){
+                        result.set(compressedChunks[i], offset);
+                        offset += compressedChunks[i].length;
+                    }
+                    
+                    resolve(result);
+                } catch(err){
+                    reject(err);
+                }
+            })();
+        } catch(err){
+            reject(err);
+        }
+    });
+}
+
+/**
+ * Decompress gzip data
+ * @param {Uint8Array} data - Compressed data
+ * @return {Promise<string>} Decompressed string
+ */
+export function decompress(data){
+    
+    return new Promise(function(resolve, reject){
+        try {
+            const stream = data.stream ? data.stream() : new ReadableStream({
+                start(controller){
+                    controller.enqueue(data);
+                    controller.close();
+                }
+            });
+            
+            const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
+            const decompressedChunks = [];
+            const reader = decompressedStream.getReader();
+            
+            (async function pump(){
+                try {
+                    while(true){
+                        const { done, value } = await reader.read();
+                        if(done) break;
+                        decompressedChunks.push(value);
+                    }
+                    
+                    let totalLength = 0;
+                    for(let i = 0; i < decompressedChunks.length; i++){
+                        totalLength += decompressedChunks[i].length;
+                    }
+                    
+                    const result = new Uint8Array(totalLength);
+                    let offset = 0;
+                    for(let i = 0; i < decompressedChunks.length; i++){
+                        result.set(decompressedChunks[i], offset);
+                        offset += decompressedChunks[i].length;
+                    }
+                    
+                    const decoder = new TextDecoder();
+                    resolve(decoder.decode(result));
+                } catch(err){
+                    reject(err);
+                }
+            })();
+        } catch(err){
+            reject(err);
+        }
+    });
+}

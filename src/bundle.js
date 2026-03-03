@@ -37,6 +37,7 @@ import Encoder from "./encoder.js";
 import IdxDB from "./db/indexeddb/index.js";
 import Charset from "./charset.js";
 import { KeystoreMap, KeystoreArray, KeystoreSet } from "./keystore.js";
+import { compress, decompress } from "./serialize.js";
 
 /** @export */ Index.prototype.add;
 /** @export */ Index.prototype.append;
@@ -339,6 +340,8 @@ const FlexSearch = {
     "Worker": SUPPORT_WORKER ? WorkerIndex : null,
     "Resolver": SUPPORT_RESOLVER ? Resolver : null,
     "IndexedDB": SUPPORT_PERSISTENT ? IdxDB : null,
+    "compress": SUPPORT_SERIALIZE ? compress : null,
+    "decompress": SUPPORT_SERIALIZE ? decompress : null,
     "Language": {}
 };
 
@@ -386,6 +389,8 @@ export {
     Document,
     Encoder,
     Charset,
+    compress,
+    decompress,
     WorkerIndex as Worker,
     Resolver,
     IdxDB as IndexedDB

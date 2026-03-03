@@ -38,7 +38,7 @@ import Encoder, { fallback_encoder } from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import { is_string, is_object, parse_simple } from "./common.js";
 import apply_async from "./async.js";
-import { exportDocument, importDocument } from "./serialize.js";
+import { exportDocument, importDocument, serializeDocument } from "./serialize.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import "./document/add.js";
 import "./document/search.js";
@@ -573,6 +573,7 @@ if(SUPPORT_SERIALIZE){
 
     Document.prototype.export = exportDocument;
     Document.prototype.import = importDocument;
+    Document.prototype.serialize = serializeDocument;
 }
 
 if(SUPPORT_ASYNC){
