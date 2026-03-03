@@ -156,28 +156,28 @@ if(!build_light) describe("Document Export/Import", function(){
         ]
     }];
 
-    it("Should have been exported Document-Index properly", function(){
+    const config = {
+        document: {
+            id: "tconst",
+            store: true,
+            index: [{
+                field: "primaryTitle",
+                tokenize: "forward",
+                encoder: Charset.LatinBalance
+            },{
+                field: "originalTitle",
+                tokenize: "forward",
+                encoder: Charset.LatinBalance
+            }],
+            tag: [{
+                field: "startYear"
+            },{
+                field: "genres"
+            }]
+        }
+    };
 
-        const config = {
-            document: {
-                id: "tconst",
-                store: true,
-                index: [{
-                    field: "primaryTitle",
-                    tokenize: "forward",
-                    encoder: Charset.LatinBalance
-                },{
-                    field: "originalTitle",
-                    tokenize: "forward",
-                    encoder: Charset.LatinBalance
-                }],
-                tag: [{
-                    field: "startYear"
-                },{
-                    field: "genres"
-                }]
-            }
-        };
+    it("Should have been exported Document-Index properly", function(){
 
         let document = new Document(config);
 
@@ -247,89 +247,46 @@ if(!build_light) describe("Document Export/Import", function(){
 
     it("Should have been serialized Document-Index properly (Fast-Boot)", function(){
 
-        const config = {
-            document: {
-                id: "tconst",
-                store: true,
-                index: [{
-                    field: "primaryTitle",
-                    tokenize: "forward",
-                    encoder: Charset.LatinBalance
-                },{
-                    field: "originalTitle",
-                    tokenize: "forward",
-                    encoder: Charset.LatinBalance
-                }],
-                tag: [{
-                    field: "startYear"
-                },{
-                    field: "genres"
-                }]
-            }
-        };
-
         let document = new Document(config);
 
         for(let i = 0; i < data.length; i++){
             document.add(data[i]);
         }
 
-        // Test serialize without compression (string output)
-        const fn_string = document.serialize(true, false);
-        expect(typeof fn_string).to.equal('string');
-        expect(fn_string).to.match(/function inject\(doc\)/);
-
-        // Extract function body for new Function constructor
-        // The format is "function inject(doc){...}" so skip "function inject(doc){" (21 chars) and "}" at end (1 char)
-        const fnBody = fn_string.slice(21, -1);
-        const inject = new Function("doc", fnBody);
+        const fn_string = document.serialize(false);
+        const inject = new Function("doc", fn_string);
 
         let document2 = new Document(config);
         inject(document2);
 
-        // Verify indexes were restored correctly
-        const search1 = document.search({
-            query: "karmen",
-            tag: {
-                "startYear": "1894",
-                "genres": ["Documentary", "Short"]
-            },
-            suggest: true,
-            enrich: true
-        });
-
-        if(search1 && search1.field){
-            const search2 = document2.search({
-                query: "karmen",
-                tag: {
-                    "startYear": "1894",
-                    "genres": ["Documentary", "Short"]
-                },
-                suggest: true,
-                enrich: true
-            });
-
-            expect(search2).to.be.ok;
-            if(search2.field && search1.field){
-                expect(search2.field).to.equal(search1.field);
-            }
+        // Verify internal structures match
+        expect(document2.reg.size).to.equal(document.reg.size);
+        expect(document2.store.size).to.equal(document.store.size);
+        
+        // Check each field's index data
+        for(const field of document.field){
+            const idx1 = document.index.get(field);
+            const idx2 = document2.index.get(field);
+            expect(idx2.map.size).to.equal(idx1.map.size);
+            expect(idx2.ctx.size).to.equal(idx1.ctx.size);
+            expect(normalize_map(idx2.map)).to.eql(normalize_map(idx1.map));
+            expect(normalize_ctx(idx2.ctx)).to.eql(normalize_ctx(idx1.ctx));
         }
 
-        // Verify reg was restored
-        expect(document2.reg.size).to.equal(document.reg.size);
+        // Test search results match
+        const search1 = document.search("karmen");
+        const search2 = document2.search("karmen");
+        expect(search2).to.eql(search1);
 
-        // Test storing and retrieving directly from inject function
+        // Test with function wrapper
         let document3 = new Document(config);
-        eval("(function(){ (function inject(doc){" + fnBody + "})(document3); })()");
-        
-        expect(document3.reg.size).to.equal(document.reg.size);
-        expect(document3.store.size).to.equal(document.store.size);
+        expect(document.serialize()).to.equal("function inject(doc){" + fn_string + "}");
     });
 });
 
 function normalize_map(map){
     return Array.from(map.entries()).map(item => {
-        item[1].forEach((res, i) => res.length || delete item[1][i]);
+        item[1].forEach((res, i) => (res && res.length) || delete item[1][i]);
         return item;
     });
 }

@@ -511,12 +511,17 @@ function parse_map(map, type){
         const value = item[1];
         let res = '';
         for(let i = 0, ids; i < value.length; i++){
-            ids = value[i] || [''];
+            ids = value[i];
             let str = '';
-            for(let j = 0; j < ids.length; j++){
-                str += (str ? ',' : '') + (type === "string" ? '"' + ids[j] + '"' : ids[j]);
+            if(ids && ids.length){
+                for(let j = 0; j < ids.length; j++){
+                    str += (str ? ',' : '') + (type === "string" ? '"' + ids[j] + '"' : ids[j]);
+                }
+                str = '[' + str + ']';
             }
-            str = '[' + str + ']';
+            else{
+                str = 'null'; // Preserve null/empty for array structure
+            }
             res += (res ? ',' : '') + str;
         }
         res = '["' + key + '",[' + res + ']]';
@@ -646,157 +651,47 @@ export function serializeDocument(withFunctionWrapper = true, compress = false){
         return body;
     }
     
-    // Stream compression path with TransformStream
-    return new Promise(function(resolve, reject){
-        try {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(body);
-            
-            const compressedChunks = [];
-            const stream = data.stream ? data.stream() : new ReadableStream({
-                start(controller){
-                    controller.enqueue(data);
-                    controller.close();
-                }
-            });
-            
-            const compressedStream = stream.pipeThrough(new CompressionStream('gzip'));
-            
-            const reader = compressedStream.getReader();
-            
-            (async function pump(){
-                try {
-                    while(true){
-                        const { done, value } = await reader.read();
-                        if(done) break;
-                        compressedChunks.push(value);
-                    }
-                    
-                    let totalLength = 0;
-                    for(let i = 0; i < compressedChunks.length; i++){
-                        totalLength += compressedChunks[i].length;
-                    }
-                    
-                    const result = new Uint8Array(totalLength);
-                    let offset = 0;
-                    for(let i = 0; i < compressedChunks.length; i++){
-                        result.set(compressedChunks[i], offset);
-                        offset += compressedChunks[i].length;
-                    }
-                    
-                    resolve(result);
-                } catch(err){
-                    reject(err);
-                }
-            })();
-        } catch(err){
-            reject(err);
-        }
-    });
+    return compressString(body);
+}
+
+/**
+ * Compress a string using gzip
+ * @param {string} input - String to compress
+ * @return {Promise<Uint8Array>} Compressed data
+ */
+async function compressString(input){
+    const cs = new CompressionStream('gzip');
+    const encoder = new TextEncoder();
+    const inputBytes = encoder.encode(input);
+    const stream = new Blob([inputBytes]).stream().pipeThrough(cs);
+    const compressedBuffer = await new Response(stream).arrayBuffer();
+    return new Uint8Array(compressedBuffer);
 }
 
 /**
  * Compress data using gzip
- * @param {string|Uint8Array} data - String or ArrayBuffer to compress
- * @return {Promise<Uint8Array>} Compressed data as Uint8Array
+ * @param {string|Uint8Array} data - String or binary data to compress
+ * @return {Promise<Uint8Array>} Compressed data
  */
-export function compress(data){
-    
-    return new Promise(function(resolve, reject){
-        try {
-            const encoder = new TextEncoder();
-            let bytes = data instanceof Uint8Array ? data : encoder.encode(data);
-            
-            const stream = bytes.stream ? bytes.stream() : new ReadableStream({
-                start(controller){
-                    controller.enqueue(bytes);
-                    controller.close();
-                }
-            });
-            
-            const compressedStream = stream.pipeThrough(new CompressionStream('gzip'));
-            const compressedChunks = [];
-            const reader = compressedStream.getReader();
-            
-            (async function pump(){
-                try {
-                    while(true){
-                        const { done, value } = await reader.read();
-                        if(done) break;
-                        compressedChunks.push(value);
-                    }
-                    
-                    let totalLength = 0;
-                    for(let i = 0; i < compressedChunks.length; i++){
-                        totalLength += compressedChunks[i].length;
-                    }
-                    
-                    const result = new Uint8Array(totalLength);
-                    let offset = 0;
-                    for(let i = 0; i < compressedChunks.length; i++){
-                        result.set(compressedChunks[i], offset);
-                        offset += compressedChunks[i].length;
-                    }
-                    
-                    resolve(result);
-                } catch(err){
-                    reject(err);
-                }
-            })();
-        } catch(err){
-            reject(err);
-        }
-    });
+export async function compress(data){
+    const cs = new CompressionStream('gzip');
+    const encoder = new TextEncoder();
+    const inputBytes = data instanceof Uint8Array ? data : encoder.encode(data);
+    const stream = new Blob([inputBytes]).stream().pipeThrough(cs);
+    const compressedBuffer = await new Response(stream).arrayBuffer();
+    return new Uint8Array(compressedBuffer);
 }
 
 /**
  * Decompress gzip data
- * @param {Uint8Array} data - Compressed data
+ * @param {Uint8Array|ArrayBuffer} data - Compressed data
  * @return {Promise<string>} Decompressed string
  */
-export function decompress(data){
-    
-    return new Promise(function(resolve, reject){
-        try {
-            const stream = data.stream ? data.stream() : new ReadableStream({
-                start(controller){
-                    controller.enqueue(data);
-                    controller.close();
-                }
-            });
-            
-            const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
-            const decompressedChunks = [];
-            const reader = decompressedStream.getReader();
-            
-            (async function pump(){
-                try {
-                    while(true){
-                        const { done, value } = await reader.read();
-                        if(done) break;
-                        decompressedChunks.push(value);
-                    }
-                    
-                    let totalLength = 0;
-                    for(let i = 0; i < decompressedChunks.length; i++){
-                        totalLength += decompressedChunks[i].length;
-                    }
-                    
-                    const result = new Uint8Array(totalLength);
-                    let offset = 0;
-                    for(let i = 0; i < decompressedChunks.length; i++){
-                        result.set(decompressedChunks[i], offset);
-                        offset += decompressedChunks[i].length;
-                    }
-                    
-                    const decoder = new TextDecoder();
-                    resolve(decoder.decode(result));
-                } catch(err){
-                    reject(err);
-                }
-            })();
-        } catch(err){
-            reject(err);
-        }
-    });
+export async function decompress(data){
+    const ds = new DecompressionStream('gzip');
+    const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+    const stream = new Blob([bytes]).stream().pipeThrough(ds);
+    const decompressedBuffer = await new Response(stream).arrayBuffer();
+    const decoder = new TextDecoder();
+    return decoder.decode(decompressedBuffer);
 }

@@ -208,32 +208,9 @@ Decompress gzip-compressed data back to string.
 const decompressed = await decompress(compressed);
 ```
 
-### Compression Ratios
+### Compression Benefits
 
-Typical compression ratios for serialized FlexSearch data:
-
-- Small indexes (< 10KB): 15-25% reduction
-- Medium indexes (10KB - 100KB): 25-35% reduction
-- Large indexes (> 100KB): 30-45% reduction
-
-Text-heavy content with repetitive terms compresses even better (40-50%+).
-
-### Streaming Architecture
-
-The compression is implemented with streaming to minimize memory overhead:
-
-1. **Serialization with compression toggle:**
-```js
-const compressed = await document.serialize(true, true);
-```
-
-2. **Standalone compression:**
-```js
-const data = "...";
-const compressed = await compress(data);
-```
-
-Both use efficient streaming to avoid allocating the entire uncompressed data in memory.
+Gzip compression significantly reduces the size of serialized FlexSearch data, especially for larger indexes and text-heavy content. The actual compression ratio depends on factors like index size, data structure, and content repetitiveness.
 
 ### Deployment Patterns
 
@@ -261,7 +238,7 @@ inject(doc);
 ```js
 async function loadSerializedIndex() {
     const response = await fetch("serialized.js.gz");
-    const compressed = new Uint8Array(await response.arrayBuffer());
+    const compressed = await response.arrayBuffer();
     const fn_string = await decompress(compressed);
     
     const doc = new Document(config);
