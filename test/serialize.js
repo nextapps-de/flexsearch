@@ -4,7 +4,7 @@ import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
 if(FlexSearch.FlexSearch) FlexSearch = FlexSearch.FlexSearch;
-const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver, compress, decompress } = FlexSearch;
+const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver, decompress } = FlexSearch;
 const build_light = env && env.includes("light");
 const build_compact = env && env.includes("compact");
 const build_esm = !env || env.startsWith("module");
@@ -498,29 +498,31 @@ if(!build_light) describe("Export / Import", function(){
         expect(ksDoc3.search(tagQ2)).to.eql(ksDocRef.search(tagQ2));
     });
 
-    it("Should compress/decompress export payload (Index)", async function(){
+    it("Should exportCompressed/importCompressed (Index)", async function(){
 
         const idx = new Index({ tokenize: "forward", resolution: 3 });
         idx.add(0, "foo bar foobar");
         idx.add(1, "bar foo foobar");
         idx.add(2, "foobar foo bar");
 
-        // collect via callback, then compress
-        const payload = new Map();
-        idx.export(function(key, value){ payload.set(key, value); });
-        const compressed = await compress(payload);
+        const compressed = await idx.exportCompressed();
         expect(compressed).to.be.instanceOf(Uint8Array);
 
-        // decompress → parse → replay into a plain new Index
-        const entries = JSON.parse(await decompress(compressed));
         const idx2 = new Index({});
-        for(const [key, value] of entries) idx2.import(key, value);
+        await idx2.importCompressed(compressed);
 
         expect(normalize_index(idx2)).to.eql(normalize_index(idx));
         expect(idx2.search("foobar")).to.eql(idx.search("foobar"));
+
+        // bulk import still works from map payload
+        const payload = new Map();
+        idx.export(function(key, value){ payload.set(key, value); });
+        const idx3 = new Index({});
+        idx3.import(payload);
+        expect(normalize_index(idx3)).to.eql(normalize_index(idx));
     });
 
-    it("Should compress/decompress export payload (Document)", async function(){
+    it("Should exportCompressed/importCompressed (Document)", async function(){
 
         const doc = new Document({
             document: {
@@ -533,21 +535,23 @@ if(!build_light) describe("Export / Import", function(){
         doc.add({ id: 1, title: "Carmencita", year: "1865" });
         doc.add({ id: 2, title: "Gulliver", year: "1864" });
 
-        // collect via callback, then compress
-        const payload = new Map();
-        doc.export(function(key, value){ payload.set(key, value); });
-        const compressed = await compress(payload);
+        const compressed = await doc.exportCompressed();
         expect(compressed).to.be.instanceOf(Uint8Array);
 
-        // decompress → parse → replay
-        const entries = JSON.parse(await decompress(compressed));
         const doc2 = new Document({});
-        for(const [key, value] of entries) doc2.import(key, value);
+        await doc2.importCompressed(compressed);
 
         expect(normalize_doc(doc2)).to.eql(normalize_doc(doc));
         const tagQ = { query: "carmen", tag: { year: "1865" } };
         expect(doc2.search(tagQ)).to.eql(doc.search(tagQ));
         expect(doc2.search(tagQ).some(r => r.result.includes(1))).to.equal(true);
+
+        // bulk import still works from map payload
+        const payload = new Map();
+        doc.export(function(key, value){ payload.set(key, value); });
+        const doc3 = new Document({});
+        doc3.import(payload);
+        expect(normalize_doc(doc3)).to.eql(normalize_doc(doc));
     });
 
 });

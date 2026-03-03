@@ -394,7 +394,7 @@ function apply_document_cfg(doc, cfg){
  * @this {Index|Document}
  * @return {Promise}
  */
-function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
+function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0, raw = false){
 
     const is_arr = chunk && chunk.constructor === Array;
     const data = is_arr ? chunk.shift() : chunk;
@@ -403,13 +403,14 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
             callback,
             field,
             index_doc,
-            index_obj + 1
+            index_obj + 1,
+            raw
         );
     }
 
     const res = callback(
         (field ? field + "." : "") + (index_prt + 1) + "." + key,
-        JSON.stringify(data)
+        raw ? data : JSON.stringify(data)
     );
 
     if(res && res["then"]){
@@ -422,7 +423,8 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
                 is_arr ? chunk : null,
                 index_doc,
                 index_obj,
-                index_prt + 1
+                index_prt + 1,
+                raw
             );
         });
     }
@@ -434,7 +436,8 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
         is_arr ? chunk : null,
         index_doc,
         index_obj,
-        index_prt + 1
+        index_prt + 1,
+        raw
     );
 }
 
@@ -443,10 +446,11 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0){
  * @param {!string|null=} _field
  * @param {number=} _index_doc
  * @param {number=} _index_obj
+ * @param {boolean=} _raw
  * @this {Index}
  */
 
-export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0){
+export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0, _raw = false){
 
     let key, chunk;
 
@@ -487,7 +491,9 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0){
         key,
         chunk,
         _index_doc,
-        _index_obj
+        _index_obj,
+        0,
+        _raw
     );
 }
 
@@ -498,6 +504,13 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0){
  */
 
 export function importIndex(key, data){
+
+    if(key && (key.constructor === Map || Array.isArray(key))){
+        for(const [k, v] of key){
+            importIndex.call(this, k, v);
+        }
+        return;
+    }
 
     if(!data){
         return;
@@ -550,11 +563,11 @@ export function importIndex(key, data){
  * @this {Document}
  */
 
-export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0){
+export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0, _raw = false){
 
     if(_index_doc === -1){
         const cfgObj = document_config_to_export_obj(this);
-        const res = callback("1.cfg", JSON.stringify(cfgObj));
+        const res = callback("1.cfg", _raw ? cfgObj : JSON.stringify(cfgObj));
         if(res && res["then"]){
             const self = this;
             return res["then"](function(){
@@ -574,11 +587,11 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
         if(res && res["then"]){
             const self = this;
             return res["then"](function(){
-                return self.export(callback, field, _index_doc + 1);
+                return self.export(callback, field, _index_doc + 1, 0);
             });
         }
 
-        return this.export(callback, field, _index_doc + 1);
+        return this.export(callback, field, _index_doc + 1, 0);
     }
     else{
 
@@ -620,7 +633,9 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
             key,
             /** @type {Array|null} */ (chunk || null),
             _index_doc,
-            _index_obj
+            _index_obj,
+            0,
+            _raw
         );
     }
 }
@@ -632,6 +647,13 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
  */
 
 export function importDocument(key, data){
+
+    if(key && (key.constructor === Map || Array.isArray(key))){
+        for(const [k, v] of key){
+            importDocument.call(this, k, v);
+        }
+        return;
+    }
 
     const split = key.split(".");
     if(split[split.length - 1] === "json"){
@@ -821,10 +843,10 @@ function parse_tag_map(tagMap, type){
  * @return {string|Promise<Uint8Array>|Uint8Array}
  */
 export function serializeDocument(withFunctionWrapper = true, withCompression = false, withCfg = false){
-    
+
     let statements = '';
     let type = undefined;
-    
+
     // Serialize shared registry once
     if(this.reg && this.reg.size){
         let reg = '';
@@ -838,20 +860,20 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             statements += 'doc.index.get("' + fieldName + '").reg=doc.reg;';
         }
     }
-    
+
     // Serialize each field index
     if(this.index && this.index.size){
         for(const fieldName of this.field){
             const index = this.index.get(fieldName);
             if(!index) continue;
-            
+
             // Only serialize if field index has map data
             if(index.map && index.map.size){
                 let map = parse_map(index.map, type);
                 if(map){
                     statements += 'doc.index.get("' + fieldName + '").map=new Map([' + map + ']);';
                 }
-                
+
                 // Serialize ctx if present
                 if(index.ctx && index.ctx.size){
                     let ctx = '';
@@ -872,7 +894,7 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             }
         }
     }
-    
+
     // Serialize tags if present
     if(SUPPORT_TAGS && this.tag && this.tagfield){
         for(let i = 0; i < this.tagfield.length; i++){
@@ -881,13 +903,13 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             if(tagMap && tagMap.size){
                 let tag = parse_tag_map(tagMap, type);
                 if(tag){
-                    statements += 'doc.tag.get("' + tagField + '").clear();' + 
+                    statements += 'doc.tag.get("' + tagField + '").clear();' +
                                   'for(const [k,v] of new Map([' + tag + ']).entries()){doc.tag.get("' + tagField + '").set(k,v);}';
                 }
             }
         }
     }
-    
+
     // Serialize store if present
     if(SUPPORT_STORE && this.store && this.store.size){
         let storeData = '';
@@ -901,7 +923,7 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             statements += 'for(const [k,v] of new Map([' + storeData + ']).entries()){doc.store.set(k,v);}';
         }
     }
-    
+
     if(withCfg){
         const cfgJs = document_config_to_js(this, "Charset");
         const body = "const {Document,Charset}=FlexSearch;const doc=new Document(" + cfgJs + ");" + statements + "return doc;";
@@ -919,29 +941,81 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
 }
 
 /**
- * Compress string using gzip
+ * Export compressed index data
+ * @this {Index}
+ * @return {Promise<Uint8Array>}
+ */
+export async function exportCompressedIndex(){
+    const map = new Map();
+    await exportIndex.call(this, (key, data) => {
+        map.set(key, data);
+    }, null, 0, 0, true);
+    return compress(JSON.stringify([...map]));
+}
+
+/**
+ * Export compressed document data
+ * @this {Document}
+ * @return {Promise<Uint8Array>}
+ */
+export async function exportCompressedDocument(){
+    const map = new Map();
+    await exportDocument.call(this, (key, data) => {
+        map.set(key, data);
+    }, null, -1, 0, true);
+    return compress(JSON.stringify([...map]));
+}
+
+/**
+ * Import compressed index data
+ * @param {Uint8Array} source - Compressed data
+ * @this {Index}
+ * @return {Promise<void>}
+ */
+export async function importCompressedIndex(source){
+    const json = await decompress(source);
+    const entries = JSON.parse(json);
+    return importIndex.call(this, entries);
+}
+
+/**
+ * Import compressed document data
+ * @param {Uint8Array} source - Compressed data
+ * @this {Document}
+ * @return {Promise<void>}
+ */
+export async function importCompressedDocument(source){
+    const json = await decompress(source);
+    const entries = JSON.parse(json);
+    return importDocument.call(this, entries);
+}
+
+/**
+ * Compress string using gzip (no intermediate Blob needed)
  * @param {string} data - String to compress
  * @return {Promise<Uint8Array>} Compressed data
  */
 export async function compress(data){
-    if(data instanceof Map) data = JSON.stringify(Array.from(data.entries()));
     const cs = new CompressionStream('gzip');
-    const blob = new Blob([data], { type: 'application/octet-stream' });
-    const stream = blob.stream().pipeThrough(cs);
-    const compressedBuffer = await new Response(stream).arrayBuffer();
-    return new Uint8Array(compressedBuffer);
+    const writer = cs.writable.getWriter();
+    const encoder = new TextEncoder();
+    await writer.write(encoder.encode(data));
+    await writer.close();
+    const compressed = await new Response(cs.readable).arrayBuffer();
+    return new Uint8Array(compressed);
 }
 
 /**
- * Decompress gzip-compressed data
+ * Decompress gzip-compressed data (no intermediate Blob needed)
  * @param {Uint8Array} data - Compressed data
  * @return {Promise<string>} Decompressed string
  */
 export async function decompress(data){
     const ds = new DecompressionStream('gzip');
-    const blob = new Blob([data], { type: 'application/octet-stream' });
-    const stream = blob.stream().pipeThrough(ds);
-    const decompressedBuffer = await new Response(stream).arrayBuffer();
-    const decoder = new TextDecoder();
-    return decoder.decode(decompressedBuffer);
+    const writer = ds.writable.getWriter();
+    await writer.write(data);
+    await writer.close();
+
+    const decompressed = await new Response(ds.readable).arrayBuffer();
+    return new TextDecoder().decode(decompressed);
 }

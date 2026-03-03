@@ -179,55 +179,57 @@ const inject = new Function("doc", fn_body);
 
 ## Compression
 
-Compression is decoupled from export and import. Call `export()` to collect the payload, then `compress()` separately:
+Use the built-in compressed APIs when you want a single compressed binary blob for transport or storage:
+
+```js
+const compressed = await index.exportCompressed();
+
+const restored = new Index({});
+await restored.importCompressed(compressed);
+```
+
+Same pattern for `Document`:
+
+```js
+const compressed = await doc.exportCompressed();
+
+const restoredDoc = new Document({});
+await restoredDoc.importCompressed(compressed);
+```
+
+These methods collect all export data into a Map, serialize to JSON, and compress with gzip. This leverages the same bulk import support and provides a simple, maintainable approach.
+
+### Bulk import convenience
+
+`import()` also accepts a full payload map or entries array and loops internally:
+
+```js
+const payload = new Map();
+await index.export((key, data) => payload.set(key, data));
+
+const index2 = new Index({});
+index2.import(payload);            // or index2.import(Array.from(payload.entries()))
+```
+
+### Utility helpers for generic strings
+
+`compress()` and `decompress()` stay as convenience helpers for string payloads (for example serialized fast-boot function strings):
 
 ```js
 import { compress, decompress } from "flexsearch";
 
-// export() with no args returns a Map<string, string> synchronously
-const payload = index.export();
-
-// compress() accepts a Map or a string
-const compressed = await compress(payload);   // Promise<Uint8Array>
-```
-
-To restore:
-
-```js
-const json = await decompress(compressed);    // Promise<string>
-const entries = JSON.parse(json);             // Array<[key, value]>
-
-const index2 = new Index({});                 // no config needed — cfg key restores it
-for(const [key, value] of entries) index2.import(key, value);
-```
-
-Same pattern for Document:
-
-```js
-const payload = doc.export();
-const compressed = await compress(payload);
-
-// ...
-
-const doc2 = new Document({});
-const entries = JSON.parse(await decompress(compressed));
-for(const [key, value] of entries) doc2.import(key, value);
-```
-
-Compressing serialized Fast-Boot output works the same way — pass the string directly:
-
-```js
-const fn_string = index.serialize(false);
-const compressed = await compress(fn_string);   // string → Uint8Array
-
-const restored = await decompress(compressed);  // Uint8Array → string
-const inject = new Function("index", restored);
+const fnString = index.serialize(false);
+const compressed = await compress(fnString);
+const restored = await decompress(compressed);
 ```
 
 #### API
 
 | Function | Signature | Returns |
 |---|---|---|
-| `compress` | `(data: string \| Map)` | `Promise<Uint8Array>` |
-| `decompress` | `(data: Uint8Array)` | `Promise<string>` |
+| `exportCompressed` | `() => Promise<Uint8Array>` | Compressed binary payload |
+| `importCompressed` | `(source: Uint8Array) => Promise<void>` | Restores from compressed payload |
+| `import` | `(payload: Map<string, string> \| Array<[string, string]>) => void` | Bulk import convenience |
+| `compress` | `(data: string) => Promise<Uint8Array>` | Compress string data |
+| `decompress` | `(data: Uint8Array) => Promise<string>` | Decompress to string |
 

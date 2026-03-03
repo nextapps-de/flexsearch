@@ -19,6 +19,9 @@ declare module "flexsearch" {
     export type Limit = number;
     export type ExportHandler = (key: string, data: string) => void;
     export type ExportHandlerAsync = (key: string, data: string) => Promise<void>;
+    export type ExportEntries = Array<[string, string]>;
+    export type ExportMap = Map<string, string>;
+    export type CompressedSource = Uint8Array | ArrayBuffer | ReadableStream<Uint8Array>;
     export type AsyncCallback<T> = (result?: T) => void;
 
     /************************************/
@@ -290,6 +293,11 @@ declare module "flexsearch" {
         export(handler: ExportHandlerAsync): Promise<void>;
 
         import(key: string, data: string): void;
+        import(payload: ExportMap): void;
+        import(payload: ExportEntries): void;
+
+        exportCompressed(): Promise<Uint8Array>;
+        importCompressed(source: CompressedSource): Promise<void>;
 
         serialize(with_function_wrapper?: boolean): SerializedFunctionString;
 
@@ -760,6 +768,11 @@ declare module "flexsearch" {
         export(handler: ExportHandlerAsync): Promise<void>;
 
         import(key: string, data: string): void;
+        import(payload: ExportMap): void;
+        import(payload: ExportEntries): void;
+
+        exportCompressed(): Promise<Uint8Array>;
+        importCompressed(source: CompressedSource): Promise<void>;
 
         serialize(with_function_wrapper?: boolean, compress?: boolean): SerializedFunctionString | Promise<Uint8Array>;
 
