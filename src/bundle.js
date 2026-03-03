@@ -56,8 +56,8 @@ import { compress, decompress } from "./serialize.js";
 /** @export */ Index.prototype.removeAsync;
 /** @export */ Index.prototype.export;
 /** @export */ Index.prototype.import;
-/** @export */ Index.prototype.exportCompressed;
-/** @export */ Index.prototype.importCompressed;
+/** @export */ Index.prototype.exportIndexBulk;
+/** @export */ Index.prototype.importIndexBulk;
 /** @export */ Index.prototype.serialize;
 /** @export */ Index.prototype.mount;
 /** @export */ Index.prototype.commit;
@@ -111,8 +111,9 @@ if(SUPPORT_PERSISTENT){
 /** @export */ Document.prototype.destroy;
 /** @export */ Document.prototype.export;
 /** @export */ Document.prototype.import;
-/** @export */ Document.prototype.exportCompressed;
-/** @export */ Document.prototype.importCompressed;
+/** @export */ Document.prototype.exportDocumentBulk;
+/** @export */ Document.prototype.importDocumentBulk;
+/** @export */ Document.prototype.serialize;
 /** @export */ Document.prototype.get;
 /** @export */ Document.prototype.set;
 

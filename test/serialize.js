@@ -554,6 +554,125 @@ if(!build_light) describe("Export / Import", function(){
         expect(normalize_doc(doc3)).to.eql(normalize_doc(doc));
     });
 
+    it("Should handle special characters in IDs and indexed content (serialize)", function () {
+
+        // Special characters in both IDs and indexed content
+        const index = new Index({ tokenize: "forward" });
+        index.add('he"llo', 'text with "quotes"');
+        index.add("back\\slash", "path\\like\\content");
+        index.add("new\nline", "multi\nline\ntext");
+
+        const fn_body = index.serialize(false);
+        const inject = new Function("index", fn_body);
+
+        const index2 = new Index({ tokenize: "forward" });
+        inject(index2);
+
+        // Verify all IDs survived round-trip
+        expect(index2.reg.size).to.equal(3);
+        // Verify search still works for tokens from original content
+        expect(index2.search("quotes")).to.eql(index.search("quotes"));
+        expect(index2.search("path")).to.eql(index.search("path"));
+        expect(index2.search("multi")).to.eql(index.search("multi"));
+    });
+
+    it("Should handle special characters in IDs and indexed content (export/import)", function () {
+
+        let index = new Index({ tokenize: "forward" });
+        index.add('he"llo', 'text with "quotes"');
+        index.add("back\\slash", "path\\like\\content");
+
+        const payload = new Map();
+        index.export(function (key, value) { payload.set(key, value); });
+
+        let index2 = new Index({});
+        for (const [key, value] of payload) {
+            index2.import(key, value);
+        }
+
+        // Verify all IDs survived round-trip
+        expect(index2.reg.size).to.equal(2);
+        // Verify search works for tokens from original content
+        expect(index2.search("quotes")).to.eql(index.search("quotes"));
+        expect(index2.search("path")).to.eql(index.search("path"));
+    });
+
+
+    it("Should export/import uncompressed bulk (Document)", async function () {
+
+        const doc = new Document({
+            document: {
+                id: "id",
+                store: true,
+                index: [{ field: "title", tokenize: "forward" }],
+                tag: [{ field: "year" }]
+            }
+        });
+        doc.add({ id: 1, title: "Carmencita", year: "1865" });
+        doc.add({ id: 2, title: "Gulliver", year: "1864" });
+
+        const json = await doc.exportDocumentBulk(false);
+        expect(typeof json).to.equal("string");
+
+        const doc2 = new Document({});
+        await doc2.importDocumentBulk(json, false);
+
+        expect(normalize_doc(doc2)).to.eql(normalize_doc(doc));
+        expect(doc2.search("carmen")).to.eql(doc.search("carmen"));
+    });
+
+    it("Should export/import uncompressed bulk (Index)", async function () {
+
+        const idx = new Index({ tokenize: "forward" });
+        idx.add(0, "foo bar");
+        idx.add(1, "baz qux");
+
+        const json = await idx.exportIndexBulk(false);
+        expect(typeof json).to.equal("string");
+
+        const idx2 = new Index({});
+        await idx2.importIndexBulk(json, false);
+
+        expect(normalize_index(idx2)).to.eql(normalize_index(idx));
+        expect(idx2.search("foo")).to.eql(idx.search("foo"));
+    });
+
+    it("Should import from Array entries (same as Map)", function () {
+
+        const index = new Index({ tokenize: "forward" });
+        index.add(0, "foo bar foobar");
+        index.add(1, "bar foo foobar");
+
+        const payload = new Map();
+        index.export(function (key, value) { payload.set(key, value); });
+
+        const entries = Array.from(payload.entries());
+        const index2 = new Index({});
+        index2.import(entries);
+
+        expect(index2.reg.size).to.equal(index.reg.size);
+        expect(index2.search("foobar")).to.eql(index.search("foobar"));
+    });
+
+    it("Should serialize empty Index gracefully", function () {
+
+        const index = new Index({ tokenize: "forward" });
+        expect(index.serialize()).to.equal("function inject(index){}");
+        expect(index.serialize(false)).to.equal("");
+    });
+
+    it("Should serialize empty Document gracefully", function () {
+
+        const doc = new Document({
+            document: {
+                id: "id",
+                index: [{ field: "title" }]
+            }
+        });
+        expect(doc.serialize()).to.equal("function inject(doc){}");
+        expect(doc.serialize(false)).to.equal("");
+    });
+
 });
 
 function normalize_map(map){

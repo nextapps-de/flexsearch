@@ -23,6 +23,16 @@ const chunk_size_map = 5000;
 const chunk_size_ctx = 1000;
 
 /**
+ * Escape a string for safe embedding in a JS string literal.
+ * Handles backslash, double-quote, single-quote, newlines, and other control chars.
+ * @param {string} str
+ * @return {string}
+ */
+function escape_js_string(str) {
+    return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+}
+
+/**
  * @param {Map<IntermediateSearchResults>|KeystoreMap<IntermediateSearchResults>} map
  * @param {number=} size
  * @return {Array<Object>}
@@ -505,7 +515,7 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0, _r
 
 export function importIndex(key, data){
 
-    if(key && (key.constructor === Map || Array.isArray(key))){
+    if (key && (key instanceof Map || Array.isArray(key))) {
         for(const [k, v] of key){
             importIndex.call(this, k, v);
         }
@@ -571,10 +581,10 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
         if(res && res["then"]){
             const self = this;
             return res["then"](function(){
-                return self.export(callback, null, 0, 0);
+                return self.export(callback, null, 0, 0, _raw);
             });
         }
-        return this.export(callback, null, 0, 0);
+        return this.export(callback, null, 0, 0, _raw);
     }
 
     if(_index_doc < this.field.length){
@@ -582,16 +592,16 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
         const field = this.field[_index_doc];
         const idx = this.index.get(field);
         // start from index 1, because document indexes does not additionally store register
-        const res = idx.export(callback, field, _index_doc, _index_obj = 1);
+        const res = idx.export(callback, field, _index_doc, _index_obj = 1, _raw);
 
         if(res && res["then"]){
             const self = this;
             return res["then"](function(){
-                return self.export(callback, field, _index_doc + 1, 0);
+                return self.export(callback, field, _index_doc + 1, 0, _raw);
             });
         }
 
-        return this.export(callback, field, _index_doc + 1, 0);
+        return this.export(callback, field, _index_doc + 1, 0, _raw);
     }
     else{
 
@@ -648,7 +658,7 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
 
 export function importDocument(key, data){
 
-    if(key && (key.constructor === Map || Array.isArray(key))){
+    if (key && (key instanceof Map || Array.isArray(key))) {
         for(const [k, v] of key){
             importDocument.call(this, k, v);
         }
@@ -757,7 +767,7 @@ export function serializeIndex(withFunctionWrapper = true, withCfg = false){
         let type;
         for(const key of this.reg.keys()){
             type || (type = typeof key);
-            reg += (reg ? ',' : '') + (type === "string" ? '"' + key + '"' : key);
+            reg += (reg ? ',' : '') + (type === "string" ? '"' + escape_js_string(key) + '"' : key);
         }
         reg = 'index.reg=new Set([' + reg + ']);';
 
@@ -769,7 +779,7 @@ export function serializeIndex(withFunctionWrapper = true, withCfg = false){
             const value_ctx = context[1];
             let ctx_map = parse_map(value_ctx, type);
             ctx_map = "new Map([" + ctx_map + "])";
-            ctx_map = '["' + key_ctx + '",' + ctx_map + ']';
+            ctx_map = '["' + escape_js_string(key_ctx) + '",' + ctx_map + ']';
             ctx += (ctx ? ',' : '') + ctx_map;
         }
         ctx = "index.ctx=new Map([" + ctx + "]);";
@@ -799,7 +809,7 @@ function parse_map(map, type){
             let str = '';
             if(ids && ids.length){
                 for(let j = 0; j < ids.length; j++){
-                    str += (str ? ',' : '') + (type === "string" ? '"' + ids[j] + '"' : ids[j]);
+                    str += (str ? ',' : '') + (type === "string" ? '"' + escape_js_string(ids[j]) + '"' : ids[j]);
                 }
                 str = '[' + str + ']';
             }
@@ -808,7 +818,7 @@ function parse_map(map, type){
             }
             res += (res ? ',' : '') + str;
         }
-        res = '["' + key + '",[' + res + ']]';
+        res = '["' + escape_js_string(key) + '",[' + res + ']]';
         result += (result ? ',' : '') + res;
     }
     return result;
@@ -827,9 +837,9 @@ function parse_tag_map(tagMap, type){
         const ids = item[1];   // flat Array<ID> (e.g., ["tt0000001"])
         let idsStr = '';
         for(let j = 0; j < ids.length; j++){
-            idsStr += (idsStr ? ',' : '') + (type === "string" ? '"' + ids[j] + '"' : ids[j]);
+            idsStr += (idsStr ? ',' : '') + (type === "string" ? '"' + escape_js_string(ids[j]) + '"' : ids[j]);
         }
-        result += (result ? ',' : '') + '["' + key + '",[' + idsStr + ']]';
+        result += (result ? ',' : '') + '["' + escape_js_string(key) + '",[' + idsStr + ']]';
     }
     return result;
 }
@@ -852,12 +862,12 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
         let reg = '';
         for(const key of this.reg.keys()){
             type || (type = typeof key);
-            reg += (reg ? ',' : '') + (type === "string" ? '"' + key + '"' : key);
+            reg += (reg ? ',' : '') + (type === "string" ? '"' + escape_js_string(key) + '"' : key);
         }
         statements += 'doc.reg=new Set([' + reg + ']);';
         // Sync the shared reg reference into each field index (mirrors importDocument "reg" case)
         for(const fieldName of this.field){
-            statements += 'doc.index.get("' + fieldName + '").reg=doc.reg;';
+            statements += 'doc.index.get("' + escape_js_string(fieldName) + '").reg=doc.reg;';
         }
     }
 
@@ -871,7 +881,7 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             if(index.map && index.map.size){
                 let map = parse_map(index.map, type);
                 if(map){
-                    statements += 'doc.index.get("' + fieldName + '").map=new Map([' + map + ']);';
+                    statements += 'doc.index.get("' + escape_js_string(fieldName) + '").map=new Map([' + map + ']);';
                 }
 
                 // Serialize ctx if present
@@ -883,12 +893,12 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
                         let ctx_map = parse_map(value_ctx, type);
                         if(ctx_map){
                             ctx_map = "new Map([" + ctx_map + "])";
-                            ctx_map = '["' + key_ctx + '",' + ctx_map + ']';
+                            ctx_map = '["' + escape_js_string(key_ctx) + '",' + ctx_map + ']';
                             ctx += (ctx ? ',' : '') + ctx_map;
                         }
                     }
                     if(ctx){
-                        statements += 'doc.index.get("' + fieldName + '").ctx=new Map([' + ctx + ']);';
+                        statements += 'doc.index.get("' + escape_js_string(fieldName) + '").ctx=new Map([' + ctx + ']);';
                     }
                 }
             }
@@ -903,8 +913,7 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             if(tagMap && tagMap.size){
                 let tag = parse_tag_map(tagMap, type);
                 if(tag){
-                    statements += 'doc.tag.get("' + tagField + '").clear();' +
-                                  'for(const [k,v] of new Map([' + tag + ']).entries()){doc.tag.get("' + tagField + '").set(k,v);}';
+                    statements += 'doc.tag.set("' + escape_js_string(tagField) + '",new Map([' + tag + ']));';
                 }
             }
         }
@@ -917,10 +926,10 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             const key = item[0];
             const value = item[1];
             const valueJson = JSON.stringify(value);
-            storeData += (storeData ? ',' : '') + '[' + (typeof key === "string" ? '"' + key + '"' : key) + ',' + valueJson + ']';
+            storeData += (storeData ? ',' : '') + '[' + (typeof key === "string" ? '"' + escape_js_string(key) + '"' : key) + ',' + valueJson + ']';
         }
         if(storeData){
-            statements += 'for(const [k,v] of new Map([' + storeData + ']).entries()){doc.store.set(k,v);}';
+            statements += 'doc.store=new Map([' + storeData + ']);';
         }
     }
 
@@ -930,16 +939,14 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
         const result = withFunctionWrapper
             ? "function inject(FlexSearch){" + body + "}"
             : body;
-        const compressed_result = withCompression ? compress(result) : result;
-    return compressed_result;
+        return withCompression ? compress(result) : result;
     }
 
     const plain = withFunctionWrapper
         ? "function inject(doc){" + statements + "}"
         : statements;
 
-    const compressed_plain = withCompression ? compress(plain) : plain;
-    return compressed_plain;
+    return withCompression ? compress(plain) : plain;
 }
 
 /**

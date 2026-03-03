@@ -301,6 +301,7 @@ declare module "flexsearch" {
 
 
         serialize(with_function_wrapper?: boolean): SerializedFunctionString;
+        serialize(with_function_wrapper: boolean, with_cfg: boolean): SerializedFunctionString;
 
         // Persistent Index
         mount(db: StorageInterface): Promise<void>;
@@ -777,6 +778,7 @@ declare module "flexsearch" {
 
 
         serialize(with_function_wrapper?: boolean, compress?: boolean): SerializedFunctionString | Promise<Uint8Array>;
+        serialize(with_function_wrapper: boolean, compress: boolean, with_cfg: boolean): SerializedFunctionString | Promise<Uint8Array>;
 
         // Persistent Index
         mount<S = StorageInterface<D>>(db: S): Promise<void>;
