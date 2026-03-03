@@ -88,6 +88,10 @@ export default function Index(options, _register){
             )
             : { encode: encoder };
 
+    if(SUPPORT_SERIALIZE){
+        this._encoderOpt = options.encoder || options.encode || null;
+    }
+
     if(SUPPORT_COMPRESSION){
         this.compress = options.compress || options.compression || false;
     }

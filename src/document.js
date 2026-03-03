@@ -66,6 +66,7 @@ export default function Document(options){
     this.field = [];
     this.marker = [];
     this.key = ((tmp = document.key || document.id) && parse_tree(tmp, this.marker)) || "id";
+    if(SUPPORT_SERIALIZE) this._cfgKey = document.key || document.id || null;
 
     keystore = SUPPORT_KEYSTORE && (options.keystore || 0);
     keystore && (this.keystore = keystore);

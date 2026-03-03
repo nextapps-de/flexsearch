@@ -2,12 +2,17 @@
 import {
     SUPPORT_STORE,
     SUPPORT_TAGS,
-    SUPPORT_WORKER
+    SUPPORT_WORKER,
+    SUPPORT_SERIALIZE,
+    SUPPORT_CHARSET,
+    SUPPORT_ENCODER
 } from "./config.js";
 import { IntermediateSearchResults } from "./type.js";
 // <-- COMPILER BLOCK
 import Index from "./index.js";
 import Document from "./document.js";
+import Charset from "./charset.js";
+import Encoder from "./encoder.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import { is_string } from "./common.js";
 
@@ -135,6 +140,207 @@ function json_to_reg(json, reg){
 }
 
 /**
+ * Find the name of a Charset preset by object reference.
+ * @param {*} encoderOpt
+ * @return {string|null}
+ */
+function find_charset_name(encoderOpt){
+    if(!encoderOpt || typeof encoderOpt === "string") return null;
+    const keys = Object.keys(Charset);
+    for(let i = 0; i < keys.length; i++){
+        if(Charset[keys[i]] === encoderOpt) return keys[i];
+    }
+    return null;
+}
+
+/**
+ * Serialize an encoder option to a string key for JSON export/import.
+ * @param {*} encoderOpt
+ * @return {string|null}
+ */
+function serialize_encoder_to_str(encoderOpt){
+    if(!encoderOpt) return null;
+    if(typeof encoderOpt === "string") return encoderOpt;
+    const name = find_charset_name(encoderOpt);
+    if(name) return name;
+    if(typeof encoderOpt === "function") return encoderOpt.toString();
+    return null;
+}
+
+/**
+ * Serialize an encoder option to a JS expression for inject function bodies.
+ * @param {*} encoderOpt
+ * @param {string} charsetRef - JS variable name for Charset
+ * @return {string|null}
+ */
+function serialize_encoder_to_js(encoderOpt, charsetRef){
+    if(!encoderOpt) return null;
+    if(typeof encoderOpt === "string") return charsetRef + '["' + encoderOpt + '"]';
+    const name = find_charset_name(encoderOpt);
+    if(name) return charsetRef + '["' + name + '"]';
+    if(typeof encoderOpt === "function") return encoderOpt.toString();
+    return null;
+}
+
+/**
+ * Build an Index config as a JS object literal string.
+ * @param {Index} index
+ * @param {string} charsetRef
+ * @return {string}
+ */
+function index_config_to_js(index, charsetRef){
+    const parts = [];
+    if(index.tokenize && index.tokenize !== "strict"){
+        parts.push('tokenize:"' + index.tokenize + '"');
+    }
+    if(index.resolution !== undefined && index.resolution !== 9){
+        parts.push("resolution:" + index.resolution);
+    }
+    if(index.depth){
+        const ctxParts = ["depth:" + index.depth];
+        if(!index.bidirectional) ctxParts.push("bidirectional:false");
+        if(index.resolution_ctx !== undefined && index.resolution_ctx !== 3){
+            ctxParts.push("resolution:" + index.resolution_ctx);
+        }
+        parts.push("context:{" + ctxParts.join(",") + "}");
+    }
+    if(index.rtl) parts.push("rtl:true");
+    if(SUPPORT_SERIALIZE && index._encoderOpt){
+        const expr = serialize_encoder_to_js(index._encoderOpt, charsetRef);
+        if(expr) parts.push("encoder:" + expr);
+    }
+    return "{" + parts.join(",") + "}";
+}
+
+/**
+ * Build an Index config as a plain object for JSON export.
+ * @param {Index} index
+ * @return {Object}
+ */
+function index_config_to_obj(index){
+    const cfg = {};
+    if(index.tokenize && index.tokenize !== "strict") cfg.tokenize = index.tokenize;
+    if(index.resolution !== 9) cfg.resolution = index.resolution;
+    if(index.depth){
+        cfg.context = { depth: index.depth };
+        if(!index.bidirectional) cfg.context.bidirectional = false;
+        if(index.resolution_ctx !== 3) cfg.context.resolution = index.resolution_ctx;
+    }
+    if(index.rtl) cfg.rtl = true;
+    if(SUPPORT_SERIALIZE && index._encoderOpt){
+        const str = serialize_encoder_to_str(index._encoderOpt);
+        if(str) cfg.encoder = str;
+    }
+    return cfg;
+}
+
+/**
+ * Build a Document config as a JS object literal string for inject functions.
+ * @param {Document} doc
+ * @param {string} charsetRef
+ * @return {string}
+ */
+function document_config_to_js(doc, charsetRef){
+    const idField = (SUPPORT_SERIALIZE && doc._cfgKey) || doc.key || "id";
+    let indexFields = "";
+    for(let i = 0; i < doc.field.length; i++){
+        const fieldName = doc.field[i];
+        const fieldIdx = doc.index.get(fieldName);
+        const inner = fieldIdx ? index_config_to_js(fieldIdx, charsetRef).slice(1, -1) : "";
+        indexFields += (indexFields ? "," : "") + '{field:"' + fieldName + '"' + (inner ? "," + inner : "") + "}";
+    }
+    const parts = ['id:"' + idField + '"'];
+    if(indexFields) parts.push("index:[" + indexFields + "]");
+    if(SUPPORT_TAGS && doc.tagfield && doc.tagfield.length){
+        let tagFields = "";
+        for(let i = 0; i < doc.tagfield.length; i++){
+            tagFields += (tagFields ? "," : "") + '{field:"' + doc.tagfield[i] + '"}';
+        }
+        parts.push("tag:[" + tagFields + "]");
+    }
+    if(SUPPORT_STORE && doc.store !== null) parts.push("store:true");
+    return "{document:{" + parts.join(",") + "}}";
+}
+
+/**
+ * Build a Document config as a plain object for JSON export.
+ * @param {Document} doc
+ * @return {Object}
+ */
+function document_config_to_export_obj(doc){
+    const cfg = {
+        id: (SUPPORT_SERIALIZE && doc._cfgKey) || doc.key || "id",
+        fields: doc.field.slice()
+    };
+    if(SUPPORT_TAGS && doc.tagfield && doc.tagfield.length){
+        cfg.tagfields = doc.tagfield.slice();
+    }
+    if(SUPPORT_STORE && doc.store !== null) cfg.store = true;
+    return cfg;
+}
+
+/**
+ * Apply a serialized config object to an Index instance.
+ * @param {Index} index
+ * @param {Object} cfg
+ */
+function apply_index_cfg(index, cfg){
+    if(cfg.tokenize) index.tokenize = cfg.tokenize;
+    if(cfg.resolution !== undefined) index.resolution = cfg.resolution;
+    if(cfg.context){
+        index.depth = cfg.context.depth || 0;
+        if(cfg.context.bidirectional !== undefined) index.bidirectional = cfg.context.bidirectional;
+        if(cfg.context.resolution !== undefined) index.resolution_ctx = cfg.context.resolution;
+    }
+    if(cfg.rtl !== undefined) index.rtl = cfg.rtl;
+    if(cfg.encoder){
+        let encoderOpt;
+        const encoderStr = cfg.encoder;
+        if(typeof encoderStr === "string" && SUPPORT_CHARSET && Charset[encoderStr]){
+            encoderOpt = Charset[encoderStr];
+        } else if(typeof encoderStr === "string"){
+            try { encoderOpt = new Function("return (" + encoderStr + ")")(); } catch(e){}
+        }
+        if(encoderOpt){
+            index.encoder = encoderOpt.encode
+                ? encoderOpt
+                : (SUPPORT_ENCODER && typeof encoderOpt === "object"
+                    ? new Encoder(encoderOpt)
+                    : { encode: encoderOpt });
+            if(SUPPORT_SERIALIZE) index._encoderOpt = cfg.encoder;
+        }
+    }
+}
+
+/**
+ * Apply a serialized config object to a Document instance.
+ * Initializes fields/tags/store only when the document has no data yet.
+ * @param {Document} doc
+ * @param {Object} cfg
+ */
+function apply_document_cfg(doc, cfg){
+    if(cfg.id || cfg.key) doc.key = cfg.id || cfg.key;
+    if(!doc.field.length && cfg.fields && cfg.fields.length){
+        doc.field = cfg.fields;
+        for(let i = 0; i < cfg.fields.length; i++){
+            if(!doc.index.has(cfg.fields[i])){
+                doc.index.set(cfg.fields[i], new Index({}, doc.reg));
+            }
+        }
+    }
+    if(SUPPORT_TAGS && cfg.tagfields && cfg.tagfields.length && !doc.tag){
+        doc.tag = new Map();
+        doc.tagfield = cfg.tagfields;
+        for(let i = 0; i < cfg.tagfields.length; i++){
+            doc.tag.set(cfg.tagfields[i], new Map());
+        }
+    }
+    if(SUPPORT_STORE && cfg.store && !doc.store){
+        doc.store = new Map();
+    }
+}
+
+/**
  *
  * @param {function(string, string):Promise|void} callback
  * @param {string|null|void} field
@@ -212,9 +418,8 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0){
 
         case 1:
 
-            // todo
             key = "cfg";
-            chunk = null;
+            chunk = [index_config_to_obj(this)];
             break;
 
         case 2:
@@ -273,7 +478,7 @@ export function importIndex(key, data){
     switch(key){
 
         case "cfg":
-            // todo
+            apply_index_cfg(this, data);
             break;
 
         case "reg":
@@ -303,7 +508,19 @@ export function importIndex(key, data){
  * @this {Document}
  */
 
-export function exportDocument(callback, _field, _index_doc = 0, _index_obj = 0){
+export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0){
+
+    if(_index_doc === -1){
+        const cfgObj = document_config_to_export_obj(this);
+        const res = callback("1.cfg", JSON.stringify(cfgObj));
+        if(res && res["then"]){
+            const self = this;
+            return res["then"](function(){
+                return self.export(callback, null, 0, 0);
+            });
+        }
+        return this.export(callback, null, 0, 0);
+    }
 
     if(_index_doc < this.field.length){
 
@@ -448,6 +665,7 @@ export function importDocument(key, data){
 
             case "cfg":
 
+                apply_document_cfg(this, data);
                 break;
 
         }
@@ -467,10 +685,11 @@ ctx: "gulliver+travel:1,2,3|4,5,6|7,8,9;"
 /**
  * @this {Index}
  * @param {boolean} withFunctionWrapper
+ * @param {boolean} withCfg - When true, embed config and return a self-contained function(FlexSearch)
  * @return {string}
  */
 
-export function serializeIndex(withFunctionWrapper = true){
+export function serializeIndex(withFunctionWrapper = true, withCfg = false){
 
     let reg = '';
     let map = '';
@@ -499,9 +718,17 @@ export function serializeIndex(withFunctionWrapper = true){
         ctx = "index.ctx=new Map([" + ctx + "]);";
     }
 
+    if(withCfg){
+        const cfgJs = index_config_to_js(this, "Charset");
+        const body = "const {Index,Charset}=FlexSearch;const index=new Index(" + cfgJs + ");" + reg + map + ctx + "return index;";
+        return withFunctionWrapper
+            ? "function inject(FlexSearch){" + body + "}"
+            : body;
+    }
+
     return withFunctionWrapper
         ? "function inject(index){" + reg + map + ctx + "}"
-        : reg + map + ctx
+        : reg + map + ctx;
 }
 
 function parse_map(map, type){
@@ -563,9 +790,10 @@ function parse_tag_map(tagMap, type){
  * @this {Document}
  * @param {boolean=} withFunctionWrapper - Wrap in function(doc) or return raw statements
  * @param {boolean=} withCompression - Apply gzip compression
+ * @param {boolean=} withCfg - When true, embed config and return a self-contained function(FlexSearch)
  * @return {string|Promise<Uint8Array>|Uint8Array}
  */
-export function serializeDocument(withFunctionWrapper = true, withCompression = false){
+export function serializeDocument(withFunctionWrapper = true, withCompression = false, withCfg = false){
     
     let statements = '';
     let type = undefined;
@@ -578,6 +806,10 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
             reg += (reg ? ',' : '') + (type === "string" ? '"' + key + '"' : key);
         }
         statements += 'doc.reg=new Set([' + reg + ']);';
+        // Sync the shared reg reference into each field index (mirrors importDocument "reg" case)
+        for(const fieldName of this.field){
+            statements += 'doc.index.get("' + fieldName + '").reg=doc.reg;';
+        }
     }
     
     // Serialize each field index
@@ -643,15 +875,20 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
         }
     }
     
-    const body = withFunctionWrapper
+    if(withCfg){
+        const cfgJs = document_config_to_js(this, "Charset");
+        const body = "const {Document,Charset}=FlexSearch;const doc=new Document(" + cfgJs + ");" + statements + "return doc;";
+        const result = withFunctionWrapper
+            ? "function inject(FlexSearch){" + body + "}"
+            : body;
+        return withCompression ? compress(result) : result;
+    }
+
+    const plain = withFunctionWrapper
         ? "function inject(doc){" + statements + "}"
         : statements;
-    
-    if(!withCompression){
-        return body;
-    }
-    
-    return compress(body);
+
+    return withCompression ? compress(plain) : plain;
 }
 
 /**

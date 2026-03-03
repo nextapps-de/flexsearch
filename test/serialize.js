@@ -34,6 +34,7 @@ if(!build_light) describe("Export / Import", function(){
 
         expect(payload).to.eql(new Map([
             ['1.reg', '[0,1,2]'],
+            ['1.cfg', '{"tokenize":"forward"}'],
             ['1.map', '[["f",[[0,2],[1]]],["fo",[[0,2],[1]]],["b",[[1],[0],[2]]],["ba",[[1],[0],[2]]],["bar",[[1],[0],[2]]],["fob",[[2],null,[0,1]]],["foba",[[2],null,[0,1]]],["fobar",[[2],null,[0,1]]]]']
         ]));
 
@@ -72,6 +73,7 @@ if(!build_light) describe("Export / Import", function(){
 
         expect(payload).to.eql(new Map([
             ['1.reg', '[0,1,2]'],
+            ['1.cfg', '{"context":{"depth":1}}'],
             ['1.map', '[["fo",[[0],[1,2]]],["bar",[[1],[0],[2]]],["fobar",[[2],null,[0,1]]]]'],
             ['1.ctx', '[["fo",[["bar",[[0,1],[2]]]]],["fobar",[["bar",[null,[0]]],["fo",[[2],[1]]]]]]']
         ]));
@@ -123,6 +125,51 @@ if(!build_light) describe("Export / Import", function(){
         });
 
         expect(index3.serialize()).to.equal("function inject(index){}");
+    });
+
+    it("Should have been serialized Index with self-contained inject (Fast-Boot)", function(){
+
+        let index = new Index({
+            tokenize: "forward",
+            encoder: Charset.LatinBalance
+        });
+
+        index.add(1, "Carmencita");
+        index.add(2, "Le clown et ses chiens");
+
+        const body = index.serialize(false, true);
+        const index2 = new Function("FlexSearch", body)(FlexSearch);
+
+        expect(index2).to.be.instanceOf(Index);
+        expect(index2.tokenize).to.equal(index.tokenize);
+        expect(index2.reg.size).to.equal(index.reg.size);
+        expect(Array.from(index2.reg)).to.eql(Array.from(index.reg));
+        expect(normalize_map(index2.map)).to.eql(normalize_map(index.map));
+    });
+
+    it("Should have been exported Index with cfg", function(){
+
+        let index = new Index({
+            tokenize: "forward",
+            encoder: Charset.LatinBalance
+        });
+
+        index.add(1, "Carmencita");
+        index.add(2, "Le clown et ses chiens");
+
+        const payload = new Map();
+        index.export(function(key, value){ payload.set(key, value); });
+
+        expect(Array.from(payload.keys())).to.include("1.cfg");
+
+        let index2 = new Index({});
+        for(const [key, value] of payload){
+            index2.import(key, value);
+        }
+
+        expect(index2.tokenize).to.equal(index.tokenize);
+        expect(index2.reg.size).to.equal(index.reg.size);
+        expect(normalize_map(index2.map)).to.eql(normalize_map(index.map));
     });
 });
 
@@ -299,6 +346,67 @@ if(!build_light) describe("Document Export/Import", function(){
         // Verify search results match after decompression
         const search3 = document3.search("karmen");
         expect(search3).to.eql(search1);
+    });
+
+    it("Should have been serialized Document with self-contained inject (Fast-Boot)", function(){
+
+        let document = new Document(config);
+
+        for(let i = 0; i < data.length; i++){
+            document.add(data[i]);
+        }
+
+        const body = document.serialize(false, false, true);
+        const document2 = new Function("FlexSearch", body)(FlexSearch);
+
+        expect(document2.field).to.eql(document.field);
+        expect(document2.reg.size).to.equal(document.reg.size);
+        expect(Array.from(document2.reg)).to.eql(Array.from(document.reg));
+        expect(document2.store.size).to.equal(document.store.size);
+        expect(Array.from(document2.store.entries())).to.eql(Array.from(document.store.entries()));
+
+        for(const field of document.field){
+            const idx1 = document.index.get(field);
+            const idx2 = document2.index.get(field);
+            expect(idx2.tokenize).to.equal(idx1.tokenize);
+            expect(idx2.reg.size).to.equal(idx1.reg.size);
+            expect(normalize_map(idx2.map)).to.eql(normalize_map(idx1.map));
+        }
+    });
+
+    it("Should have been exported Document with cfg", function(){
+
+        let document = new Document(config);
+
+        for(let i = 0; i < data.length; i++){
+            document.add(data[i]);
+        }
+
+        const payload = new Map();
+        document.export(function(key, value){ payload.set(key, value); });
+
+        // doc-level cfg must be first key
+        const keys = Array.from(payload.keys());
+        expect(keys[0]).to.equal("1.cfg");
+
+        // Restore without config
+        let document2 = new Document({});
+        for(const [key, value] of payload){
+            document2.import(key, value);
+        }
+
+        expect(document2.field).to.eql(document.field);
+        expect(document2.reg.size).to.equal(document.reg.size);
+        expect(Array.from(document2.reg)).to.eql(Array.from(document.reg));
+        expect(document2.store.size).to.equal(document.store.size);
+        expect(Array.from(document2.store.entries())).to.eql(Array.from(document.store.entries()));
+
+        for(const field of document.field){
+            const idx1 = document.index.get(field);
+            const idx2 = document2.index.get(field);
+            expect(idx2.tokenize).to.equal(idx1.tokenize);
+            expect(normalize_map(idx2.map)).to.eql(normalize_map(idx1.map));
+        }
     });
 });
 
