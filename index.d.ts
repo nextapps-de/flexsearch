@@ -296,8 +296,9 @@ declare module "flexsearch" {
         import(payload: ExportMap): void;
         import(payload: ExportEntries): void;
 
-        exportCompressed(): Promise<Uint8Array>;
-        importCompressed(source: CompressedSource): Promise<void>;
+        exportIndexBulk(compressed?: boolean): Promise<string | Uint8Array>;
+        importIndexBulk(source: string | Uint8Array, compressed?: boolean): Promise<void>;
+
 
         serialize(with_function_wrapper?: boolean): SerializedFunctionString;
 
@@ -771,8 +772,9 @@ declare module "flexsearch" {
         import(payload: ExportMap): void;
         import(payload: ExportEntries): void;
 
-        exportCompressed(): Promise<Uint8Array>;
-        importCompressed(source: CompressedSource): Promise<void>;
+        exportDocumentBulk(compressed?: boolean): Promise<string | Uint8Array>;
+        importDocumentBulk(source: string | Uint8Array, compressed?: boolean): Promise<void>;
+
 
         serialize(with_function_wrapper?: boolean, compress?: boolean): SerializedFunctionString | Promise<Uint8Array>;
 

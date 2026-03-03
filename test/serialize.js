@@ -498,18 +498,18 @@ if(!build_light) describe("Export / Import", function(){
         expect(ksDoc3.search(tagQ2)).to.eql(ksDocRef.search(tagQ2));
     });
 
-    it("Should exportCompressed/importCompressed (Index)", async function(){
+    it("Should exportIndexBulk/importIndexBulk with compression (Index)", async function(){
 
         const idx = new Index({ tokenize: "forward", resolution: 3 });
         idx.add(0, "foo bar foobar");
         idx.add(1, "bar foo foobar");
         idx.add(2, "foobar foo bar");
 
-        const compressed = await idx.exportCompressed();
+        const compressed = await idx.exportIndexBulk(true);
         expect(compressed).to.be.instanceOf(Uint8Array);
 
         const idx2 = new Index({});
-        await idx2.importCompressed(compressed);
+        await idx2.importIndexBulk(compressed, true);
 
         expect(normalize_index(idx2)).to.eql(normalize_index(idx));
         expect(idx2.search("foobar")).to.eql(idx.search("foobar"));
@@ -522,7 +522,7 @@ if(!build_light) describe("Export / Import", function(){
         expect(normalize_index(idx3)).to.eql(normalize_index(idx));
     });
 
-    it("Should exportCompressed/importCompressed (Document)", async function(){
+    it("Should exportDocumentBulk/importDocumentBulk with compression (Document)", async function(){
 
         const doc = new Document({
             document: {
@@ -535,11 +535,11 @@ if(!build_light) describe("Export / Import", function(){
         doc.add({ id: 1, title: "Carmencita", year: "1865" });
         doc.add({ id: 2, title: "Gulliver", year: "1864" });
 
-        const compressed = await doc.exportCompressed();
+        const compressed = await doc.exportDocumentBulk(true);
         expect(compressed).to.be.instanceOf(Uint8Array);
 
         const doc2 = new Document({});
-        await doc2.importCompressed(compressed);
+        await doc2.importDocumentBulk(compressed, true);
 
         expect(normalize_doc(doc2)).to.eql(normalize_doc(doc));
         const tagQ = { query: "carmen", tag: { year: "1865" } };

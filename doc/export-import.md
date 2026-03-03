@@ -175,29 +175,37 @@ const fn_body = document.serialize(false);
 const inject = new Function("doc", fn_body);
 ```
 
-<a name="compression"></a>
+## Bulk Export / Import
 
-## Compression
-
-Use the built-in compressed APIs when you want a single compressed binary blob for transport or storage:
+Use the bulk export APIs when you want all index data in a single payload for transport or storage:
 
 ```js
-const compressed = await index.exportCompressed();
+// Export uncompressed (returns JSON string)
+const json = await index.exportIndexBulk();
 
+// Export compressed (returns gzip Uint8Array)
+const compressed = await index.exportIndexBulk(true);
+```
+
+```js
+// Import uncompressed JSON string
 const restored = new Index({});
-await restored.importCompressed(compressed);
+await restored.importIndexBulk(json);
+
+// Import compressed Uint8Array
+const restored2 = new Index({});
+await restored2.importIndexBulk(compressed, true);
 ```
 
 Same pattern for `Document`:
 
 ```js
-const compressed = await doc.exportCompressed();
-
-const restoredDoc = new Document({});
-await restoredDoc.importCompressed(compressed);
+const json = await doc.exportDocumentBulk();
+const docRestored = new Document({});
+await docRestored.importDocumentBulk(json);
 ```
 
-These methods collect all export data into a Map, serialize to JSON, and compress with gzip. This leverages the same bulk import support and provides a simple, maintainable approach.
+These methods collect all export data into a Map, serialize to JSON, and optionally compress with gzip. This leverages the same bulk import support and provides a simple, maintainable approach.
 
 ### Bulk import convenience
 
@@ -227,9 +235,13 @@ const restored = await decompress(compressed);
 
 | Function | Signature | Returns |
 |---|---|---|
-| `exportCompressed` | `() => Promise<Uint8Array>` | Compressed binary payload |
-| `importCompressed` | `(source: Uint8Array) => Promise<void>` | Restores from compressed payload |
+| `exportIndexBulk` | `(compressed?: boolean) => Promise<string \| Uint8Array>` | JSON string (uncompressed) or Uint8Array (compressed) |
+| `importIndexBulk` | `(source: string \| Uint8Array, compressed?: boolean) => Promise<void>` | Restores from bulk payload |
+| `exportDocumentBulk` | `(compressed?: boolean) => Promise<string \| Uint8Array>` | JSON string (uncompressed) or Uint8Array (compressed) |
+| `importDocumentBulk` | `(source: string \| Uint8Array, compressed?: boolean) => Promise<void>` | Restores from bulk payload |
 | `import` | `(payload: Map<string, string> \| Array<[string, string]>) => void` | Bulk import convenience |
+| `serialize` | **Index:** `(withFunctionWrapper?: boolean, withCfg?: boolean) => SerializedFunctionString` | **Index:** Fast-boot function string or body |
+| | **Document:** `(withFunctionWrapper?: boolean, withCompression?: boolean, withCfg?: boolean) => SerializedFunctionString \| Promise<Uint8Array>` | **Document:** Fast-boot function string/body or compressed data |
 | `compress` | `(data: string) => Promise<Uint8Array>` | Compress string data |
 | `decompress` | `(data: Uint8Array) => Promise<string>` | Decompress to string |
 

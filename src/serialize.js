@@ -930,68 +930,88 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
         const result = withFunctionWrapper
             ? "function inject(FlexSearch){" + body + "}"
             : body;
-        return withCompression ? compress(result) : result;
+        const compressed_result = withCompression ? compress(result) : result;
+    return compressed_result;
     }
 
     const plain = withFunctionWrapper
         ? "function inject(doc){" + statements + "}"
         : statements;
 
-    return withCompression ? compress(plain) : plain;
+    const compressed_plain = withCompression ? compress(plain) : plain;
+    return compressed_plain;
 }
 
 /**
- * Export compressed index data
+ * Export bulk index data with optional gzip compression
+ * Collects all index data into a single bulk format.
+ * @param {boolean=} compressed - Whether to apply gzip compression (default: false)
  * @this {Index}
- * @return {Promise<Uint8Array>}
+ * @return {Promise<string|Uint8Array>}
  */
-export async function exportCompressedIndex(){
+export async function exportIndexBulk(compressed = false){
     const map = new Map();
     await exportIndex.call(this, (key, data) => {
         map.set(key, data);
-    }, null, 0, 0, true);
-    return compress(JSON.stringify([...map]));
+    }, null, 0, 0, true);  // _raw = true
+    const json = JSON.stringify([...map]);
+    return compressed ? compress(json) : json;
 }
 
 /**
- * Export compressed document data
+ * Export bulk document data with optional gzip compression
+ * Collects all document data into a single bulk format.
+ * @param {boolean=} compressed - Whether to apply gzip compression (default: false)
  * @this {Document}
- * @return {Promise<Uint8Array>}
+ * @return {Promise<string|Uint8Array>}
  */
-export async function exportCompressedDocument(){
+export async function exportDocumentBulk(compressed = false){
     const map = new Map();
     await exportDocument.call(this, (key, data) => {
         map.set(key, data);
-    }, null, -1, 0, true);
-    return compress(JSON.stringify([...map]));
+    }, null, -1, 0, true);  // _raw = true
+    const json = JSON.stringify([...map]);
+    return compressed ? compress(json) : json;
 }
 
 /**
- * Import compressed index data
- * @param {Uint8Array} source - Compressed data
+ * Import bulk index data with optional gzip decompression
+ * @param {Uint8Array|string} source - Bulk data (compressed as Uint8Array, or uncompressed as string)
+ * @param {boolean=} compressed - Whether source is gzip compressed (default: false)
  * @this {Index}
  * @return {Promise<void>}
  */
-export async function importCompressedIndex(source){
-    const json = await decompress(source);
+export async function importIndexBulk(source, compressed = false){
+    let json;
+    if(compressed){
+        json = await decompress(source);
+    } else {
+        json = typeof source === "string" ? source : new TextDecoder().decode(source);
+    }
     const entries = JSON.parse(json);
     return importIndex.call(this, entries);
 }
 
 /**
- * Import compressed document data
- * @param {Uint8Array} source - Compressed data
+ * Import bulk document data with optional gzip decompression
+ * @param {Uint8Array|string} source - Bulk data (compressed as Uint8Array, or uncompressed as string)
+ * @param {boolean=} compressed - Whether source is gzip compressed (default: false)
  * @this {Document}
  * @return {Promise<void>}
  */
-export async function importCompressedDocument(source){
-    const json = await decompress(source);
+export async function importDocumentBulk(source, compressed = false){
+    let json;
+    if(compressed){
+        json = await decompress(source);
+    } else {
+        json = typeof source === "string" ? source : new TextDecoder().decode(source);
+    }
     const entries = JSON.parse(json);
     return importDocument.call(this, entries);
 }
 
 /**
- * Compress string using gzip (no intermediate Blob needed)
+ * Compress string using gzip
  * @param {string} data - String to compress
  * @return {Promise<Uint8Array>} Compressed data
  */
@@ -1006,7 +1026,7 @@ export async function compress(data){
 }
 
 /**
- * Decompress gzip-compressed data (no intermediate Blob needed)
+ * Decompress gzip-compressed data
  * @param {Uint8Array} data - Compressed data
  * @return {Promise<string>} Decompressed string
  */
