@@ -15,7 +15,8 @@ await index.export(async function(key, data){
 Import from folder `/export/` into an `Index` or `Document-Index`:
 
 ```js
-const index = new Index({/* keep old config and place it here */});
+// Config is restored automatically from the export payload
+const index = new Index({});
 
 const files = await fs.readdir("./export/");
 for(let i = 0; i < files.length; i++){
@@ -24,14 +25,18 @@ for(let i = 0; i < files.length; i++){
 }
 ```
 
-> You'll need to use the same configuration as you used before the export. Any changes on the configuration needs to be re-indexed.
+The export payload includes a `.cfg` key that carries all index configuration (tokenizer, encoder, resolution, context, score, etc). A plain `new Index({})` or `new Document({})` is sufficient — no need to repeat the original options.
+
+> When a custom encoder or score function is defined **inline** in the original config it is serialized as source text and reconstructed on import. If the function closes over outer variables those bindings **will not** be available after restore — keep any required values inside the function body.
+
+> The feature "fastupdate" is automatically disabled on import.
 
 <a name="serialize"></a>
 ## Fast-Boot Serialization for Server-Side-Rendering (PHP, Python, Ruby, Rust, Java, Go, Node.js, ...)
 
 > This is an experimental feature with limited support which probably might drop in future release. You're welcome to give some feedback.
 
-When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore a __<u>static</u>__ index on page load. Document-Indexes aren't supported yet for this method.
+When using Server-Side-Rendering you can create a different export which instantly boot up. Especially when using Server-side rendered content, this could help to restore a __<u>static</u>__ index on page load.
 
 > When your index is too large you should use the default export/import mechanism.
 
@@ -39,7 +44,7 @@ You'll need Javascript to create the serialized output. Alternatively just creat
 
 As the first step populate the FlexSearch index with your contents.
 
-You have two options:
+You have three options:
 
 ### 1. Create a function as string
 
@@ -70,8 +75,6 @@ inject(index);
 
 That's it.
 
-> You'll need to use the same configuration as you used before the export. Any changes on the configuration needs to be re-indexed.
-
 ### 2. Create just a function body as string
 
 Alternatively you can use lazy function declaration by passing `false` to the serialize function:
@@ -101,6 +104,17 @@ const index = new Index();
 inject(index);
 ```
 
+### 3. Self-contained inject (config embedded)
+
+Pass `true` as the second argument to embed the index configuration inside the serialized output. The restored index needs no external config at all:
+
+```js
+const fn_body = index.serialize(false, true);
+const index2 = new Function("FlexSearch", fn_body)(FlexSearch);
+```
+
+This is the recommended approach when the index was built with custom options (custom encoder, score function, tokenizer, etc.) and you cannot guarantee the consumer will supply the same config. The encoder and score functions are serialized as source text — the same caveat about closure variables applies as with export/import.
+
 <a name="document-serialize"></a>
 
 ## Document Fast-Boot Serialization
@@ -126,20 +140,29 @@ function inject(doc){
 
 ### Restore the serialized Document
 
-On the client side, create a new Document with the same configuration and inject:
+**Option A — self-contained inject (config embedded):**
 
 ```js
-const config = {
-    document: {
-        id: "id",
-        index: [{field: "title"}, {field: "body"}]
-    }
-};
+const fn_body = document.serialize(false, false, true);
+const doc = new Function("FlexSearch", fn_body)(FlexSearch);
 
-const doc = new Document(config);
+// Ready to search immediately
+const results = doc.search("your query");
+```
+
+Pass `true` as the third argument to embed all field configuration (encoders, tokenizers, score functions, etc.) in the serialized output. `FlexSearch` must be in scope when the function runs.
+
+**Option B — inject into a pre-created document (no config needed):**
+
+```js
+const fn_body = document.serialize(false);
+const inject = new Function("doc", fn_body);
+
+// A plain new Document({}) is enough — config is read from the serialized data
+const doc = new Document({});
 inject(doc);
 
-// Now search on the restored index
+// Ready to search
 const results = doc.search("your query");
 ```
 
@@ -154,195 +177,57 @@ const inject = new Function("doc", fn_body);
 
 <a name="compression"></a>
 
-## Compression Utilities
+## Compression
 
-For large indexes, you can compress the serialized output using gzip compression to reduce payload size for delivery over the network or storage.
-
-### Compress Serialized Data
+Compression is decoupled from export and import. Call `export()` to collect the payload, then `compress()` separately:
 
 ```js
 import { compress, decompress } from "flexsearch";
 
-// Get compressed serialized output directly
-const compressed = await document.serialize(true, true);
-// Returns Uint8Array
+// export() with no args returns a Map<string, string> synchronously
+const payload = index.export();
 
-// Store or send the compressed data
-const buffer = Buffer.from(compressed);
-await fs.writeFile("./serialized.js.gz", buffer);
+// compress() accepts a Map or a string
+const compressed = await compress(payload);   // Promise<Uint8Array>
 ```
 
-### Decompress and Restore
+To restore:
 
 ```js
-// Load compressed data
-const buffer = await fs.readFile("./serialized.js.gz");
-const compressed = new Uint8Array(buffer);
+const json = await decompress(compressed);    // Promise<string>
+const entries = JSON.parse(json);             // Array<[key, value]>
 
-// Decompress
-const fn_string = await decompress(compressed);
-
-// Create inject function
-const inject = new Function("doc", fn_string.slice(17, -1)); // Remove "function inject(doc){" and "}"
-
-// Create document with same config and inject
-const doc = new Document(config);
-inject(doc);
+const index2 = new Index({});                 // no config needed — cfg key restores it
+for(const [key, value] of entries) index2.import(key, value);
 ```
 
-### Compression Utilities API
-
-#### compress(data: string | Uint8Array): Promise<Uint8Array>
-
-Compress a string or binary data using gzip.
+Same pattern for Document:
 
 ```js
-const compressed = await compress("some string data");
+const payload = doc.export();
+const compressed = await compress(payload);
+
+// ...
+
+const doc2 = new Document({});
+const entries = JSON.parse(await decompress(compressed));
+for(const [key, value] of entries) doc2.import(key, value);
 ```
 
-#### decompress(data: Uint8Array): Promise<string>
-
-Decompress gzip-compressed data back to string.
+Compressing serialized Fast-Boot output works the same way — pass the string directly:
 
 ```js
-const decompressed = await decompress(compressed);
+const fn_string = index.serialize(false);
+const compressed = await compress(fn_string);   // string → Uint8Array
+
+const restored = await decompress(compressed);  // Uint8Array → string
+const inject = new Function("index", restored);
 ```
 
-### Compression Benefits
+#### API
 
-Gzip compression significantly reduces the size of serialized FlexSearch data, especially for larger indexes and text-heavy content. The actual compression ratio depends on factors like index size, data structure, and content repetitiveness.
+| Function | Signature | Returns |
+|---|---|---|
+| `compress` | `(data: string \| Map)` | `Promise<Uint8Array>` |
+| `decompress` | `(data: Uint8Array)` | `Promise<string>` |
 
-### Deployment Patterns
-
-#### Pattern 1: Inline in HTML (small indexes)
-
-```html
-<script>
-const serialized = "function inject(doc){...}";
-const doc = new Document(config);
-const inject = new Function("doc", serialized.slice(17, -1));
-inject(doc);
-</script>
-```
-
-#### Pattern 2: External gzipped script (medium indexes)
-
-```html
-<!-- Application/gzip in response headers + CompressionStream for decompression -->
-<script src="serialized.js.gz"></script>
-<!-- Browser automatically decompresses, then executes -->
-```
-
-#### Pattern 3: Dynamic loader with compression (large indexes)
-
-```js
-async function loadSerializedIndex() {
-    const response = await fetch("serialized.js.gz");
-    const compressed = await response.arrayBuffer();
-    const fn_string = await decompress(compressed);
-    
-    const doc = new Document(config);
-    const inject = new Function("doc", fn_string.slice(17, -1));
-    inject(doc);
-    return doc;
-}
-
-const doc = await loadSerializedIndex();
-```
-
-#### Pattern 4: Data URLs (very small indexes)
-
-```js
-const fn_string = document.serialize(true, false);
-const dataUrl = "data:text/javascript;base64," + btoa(fn_string);
-// Use in <script src> or dynamic loading
-```
-
-<a name="export"></a>
-
-## Export / Import (In-Memory)
-
-### Node.js
-
-> Persistent-Indexes and Worker-Indexes don't support Import/Export.
-
-Export an `Index` or `Document-Index` to the folder `/export/`:
-
-```js
-import { promises as fs } from "fs";
-
-await index.export(async function(key, data){
-  await fs.writeFile("./export/" + key, data, "utf8");
-});
-```
-
-Import from folder `/export/` into an `Index` or `Document-Index`:
-
-```js
-const index = new Index({/* keep old config and place it here */});
-
-const files = await fs.readdir("./export/");
-for(let i = 0; i < files.length; i++){
-  const data = await fs.readFile("./export/" + files[i], "utf8");
-  await index.import(files[i], data);
-}
-```
-
-> You'll need to use the same configuration as you used before the export. Any changes on the configuration needs to be re-indexed.
-
-### Browser
-
-```js
-index.export(function(key, data){ 
-    
-    // you need to store both the key and the data!
-    // e.g. use the key for the filename and save your data
-    
-    localStorage.setItem(key, data);
-});
-```
-
-> The size of the export corresponds to the memory consumption of the library. To reduce export size you have to use a configuration which has less memory footprint (use the table at the bottom to get information about configs and its memory allocation).
-
-When your save routine runs asynchronously you have to use `async/await` or return a promise:
-
-```js
-index.export(function(key, data){ 
-    
-    return new Promise(function(resolve){
-        
-        // do the saving as async
-
-        resolve();
-    });
-});
-```
-
-Before you can import data, you need to create your index first. For document indexes provide the same document descriptor you used when export the data. This configuration isn't stored in the export.
-
-```js
-const index = new Index({/* keep old config and place it here */});
-```
-
-To import the data just pass a key and data:
-
-```
-const data = localStorage.getItem(key);
-index.import(key, data);
-```
-
-You need to import every key! Otherwise, your index does not work. You need to store the keys from the export and use this keys for the import (the order of the keys can differ).
-
-> The feature "fastupdate" is automatically disabled on import.
-
-This is just for demonstration and is not recommended, because you might have other keys in your localStorage which aren't supported as an import:
-
-```js
-var keys = Object.keys(localStorage);
-
-for(let i = 0, key, data; i < keys.length; i++){
-    key = keys[i]
-    data = localStorage.getItem(key);
-    index.import(key, data);
-}
-```

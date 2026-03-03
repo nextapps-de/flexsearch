@@ -4,7 +4,7 @@ import { expect } from "chai";
 let FlexSearch = await import(env ? "../dist/" + env + ".js" : "../src/bundle.js");
 if(FlexSearch.default) FlexSearch = FlexSearch.default;
 if(FlexSearch.FlexSearch) FlexSearch = FlexSearch.FlexSearch;
-const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver, decompress } = FlexSearch;
+const { Index, Document, Worker, Charset: _Charset, Encoder, Resolver, compress, decompress } = FlexSearch;
 const build_light = env && env.includes("light");
 const build_compact = env && env.includes("compact");
 const build_esm = !env || env.startsWith("module");
@@ -145,6 +145,14 @@ if(!build_light) describe("Export / Import", function(){
         expect(index2.reg.size).to.equal(index.reg.size);
         expect(Array.from(index2.reg)).to.eql(Array.from(index.reg));
         expect(normalize_map(index2.map)).to.eql(normalize_map(index.map));
+
+        // Encoder works: phonetic search results match original (proves LatinBalance restored)
+        expect(index2.search("karmen")).to.eql(index.search("karmen"));
+
+        // Encoder works for documents added to the restored index
+        index.add(3, "Carmelo");
+        index2.add(3, "Carmelo");
+        expect(index2.search("karm")).to.eql(index.search("karm"));
     });
 
     it("Should have been exported Index with cfg", function(){
@@ -170,10 +178,71 @@ if(!build_light) describe("Export / Import", function(){
         expect(index2.tokenize).to.equal(index.tokenize);
         expect(index2.reg.size).to.equal(index.reg.size);
         expect(normalize_map(index2.map)).to.eql(normalize_map(index.map));
-    });
-});
 
-if(!build_light) describe("Document Export/Import", function(){
+        // Encoder works: phonetic search results match original (proves LatinBalance restored)
+        expect(index2.search("karmen")).to.eql(index.search("karmen"));
+
+        // Encoder works for documents added to the restored index
+        index.add(3, "Carmelo");
+        index2.add(3, "Carmelo");
+        expect(index2.search("karm")).to.eql(index.search("karm"));
+    });
+
+    it("Kitchen sink: Index - encoder, score, context, priority, keystore", function () {
+
+        // Inline encoder strips vowels ("alpha"→"lph", "tau"→"t").
+        // Score always returns 0 (best bucket) — a post-restore add to "sigma tau"
+        // must put "t" in bucket 0; the default scorer at resolution=4 puts i=1 → bucket 1.
+        // normalize_index covers config scalars + score source + map/ctx data in one eql.
+
+        function makeKsIndex() {
+            return new Index({
+                tokenize: "strict",
+                resolution: 4,
+                context: { depth: 1, bidirectional: false, resolution: 2 },
+                rtl: false,
+                priority: 2,
+                keystore: 4,
+                encoder: function (str) {
+                    return str.toLowerCase().replace(/[aeiou]/g, "").split(/\s+/).filter(Boolean);
+                },
+                score: function (content, term, i) { return 0; }
+            });
+        }
+
+        const ksRef = makeKsIndex();
+        ksRef.add(1, "alpha beta gamma");
+        ksRef.add(2, "delta epsilon");
+
+        // Serialize for inject BEFORE mutating ksRef with the post-restore liveness doc
+        const body = ksRef.serialize(false, true);
+        const ks3 = new Function("FlexSearch", body)(FlexSearch);
+
+        // Export / import
+        const payload = new Map();
+        ksRef.export(function (key, value) { payload.set(key, value); });
+        const ks2 = new Index({});
+        for (const [key, value] of payload) { ks2.import(key, value); }
+
+        // Single eql: config scalars + score source + full map/ctx data
+        expect(normalize_index(ks2)).to.eql(normalize_index(ksRef));
+        expect(normalize_index(ks3)).to.eql(normalize_index(ksRef));
+        expect(ks3).to.be.instanceOf(Index);
+
+        // One search tests encoder (strips vowels), context (depth=1 multi-term), tokenizer
+        // "alpha beta" → ["lph", "bt"] (vowels stripped), both in same doc (context), strict tokenize
+        expect(ks2.search("alpha beta")).to.eql(ksRef.search("alpha beta"));
+        expect(ks3.search("alpha beta")).to.eql(ksRef.search("alpha beta"));
+        expect(ks2.search("alpha beta")).to.eql([1]);
+
+        // Score liveness: "sigma tau" → "t" token. score()=0 → bucket 0.
+        // Default scorer at resolution=4 puts i=1 tokens in bucket > 0.
+        ksRef.add(3, "sigma tau");
+        ks2.add(3, "sigma tau");
+        ks3.add(3, "sigma tau");
+        expect(ks2.map.get("t")[0]).to.include(3);
+        expect(ks3.map.get("t")[0]).to.include(3);
+    });
 
     const data = [{
         "tconst": "tt0000001",
@@ -310,7 +379,7 @@ if(!build_light) describe("Document Export/Import", function(){
         // Verify internal structures match
         expect(document2.reg.size).to.equal(document.reg.size);
         expect(document2.store.size).to.equal(document.store.size);
-        
+
         // Check each field's index data
         for(const field of document.field){
             const idx1 = document.index.get(field);
@@ -348,66 +417,139 @@ if(!build_light) describe("Document Export/Import", function(){
         expect(search3).to.eql(search1);
     });
 
-    it("Should have been serialized Document with self-contained inject (Fast-Boot)", function(){
+    it("Kitchen sink: Document - deep nesting, per-field custom functions", function () {
 
-        let document = new Document(config);
+        // meta:title: nested field path, LatinBalance encoder, forward tokenize
+        // genre: inline vowel-stripping encoder, score always 0 (bucket liveness proof)
+        // year: tag field; store: enabled
+        // normalize_doc covers key, fields, tree, tagtree, store size + per-field map/ctx/config.
 
-        for(let i = 0; i < data.length; i++){
-            document.add(data[i]);
+        const ksDocData = [{
+            id: 1, meta: { title: "Carmencita" }, genre: "fantasy", year: "1865"
+        }, {
+            id: 2, meta: { title: "Gulliver" }, genre: "adventure", year: "1864"
+        }];
+
+        function makeKsDoc() {
+            return new Document({
+                document: {
+                    id: "id",
+                    store: true,
+                    index: [{
+                        field: "meta:title",
+                        tokenize: "forward",
+                        encoder: Charset.LatinBalance
+                    }, {
+                        field: "genre",
+                        tokenize: "strict",
+                        encoder: function (str) {
+                            return str.toLowerCase().replace(/[aeiou]/g, "").split(/\s+/).filter(Boolean);
+                        },
+                        score: function (content, term, i) { return 0; }
+                    }],
+                    tag: [{ field: "year" }]
+                }
+            });
         }
 
-        const body = document.serialize(false, false, true);
-        const document2 = new Function("FlexSearch", body)(FlexSearch);
+        const ksDocRef = makeKsDoc();
+        for (const record of ksDocData) ksDocRef.add(record);
 
-        expect(document2.field).to.eql(document.field);
-        expect(document2.reg.size).to.equal(document.reg.size);
-        expect(Array.from(document2.reg)).to.eql(Array.from(document.reg));
-        expect(document2.store.size).to.equal(document.store.size);
-        expect(Array.from(document2.store.entries())).to.eql(Array.from(document.store.entries()));
-
-        for(const field of document.field){
-            const idx1 = document.index.get(field);
-            const idx2 = document2.index.get(field);
-            expect(idx2.tokenize).to.equal(idx1.tokenize);
-            expect(idx2.reg.size).to.equal(idx1.reg.size);
-            expect(normalize_map(idx2.map)).to.eql(normalize_map(idx1.map));
-        }
-    });
-
-    it("Should have been exported Document with cfg", function(){
-
-        let document = new Document(config);
-
-        for(let i = 0; i < data.length; i++){
-            document.add(data[i]);
-        }
-
+        // Export / import
         const payload = new Map();
-        document.export(function(key, value){ payload.set(key, value); });
+        ksDocRef.export(function (key, value) { payload.set(key, value); });
+        expect(Array.from(payload.keys())[0]).to.equal("1.cfg");
+        const ksDoc2 = new Document({});
+        for (const [key, value] of payload) ksDoc2.import(key, value);
 
-        // doc-level cfg must be first key
-        const keys = Array.from(payload.keys());
-        expect(keys[0]).to.equal("1.cfg");
+        // Self-contained inject AFTER export/import
+        const body = ksDocRef.serialize(false, false, true);
+        const ksDoc3 = new Function("FlexSearch", body)(FlexSearch);
 
-        // Restore without config
-        let document2 = new Document({});
-        for(const [key, value] of payload){
-            document2.import(key, value);
-        }
+        // Single eql: key, fields, tree, tagtree, store size, per-field config + map data
+        expect(normalize_doc(ksDoc2)).to.eql(normalize_doc(ksDocRef));
+        expect(normalize_doc(ksDoc3)).to.eql(normalize_doc(ksDocRef));
 
-        expect(document2.field).to.eql(document.field);
-        expect(document2.reg.size).to.equal(document.reg.size);
-        expect(Array.from(document2.reg)).to.eql(Array.from(document.reg));
-        expect(document2.store.size).to.equal(document.store.size);
-        expect(Array.from(document2.store.entries())).to.eql(Array.from(document.store.entries()));
+        // Tag-filtered search tests: LatinBalance encoder on meta:title, tags live, store live
+        // Tests that field-specific config (encoder, tokenize, tags) all survived
+        const tagQ = { query: "karmen", tag: { year: "1865" } };
+        expect(ksDoc2.search(tagQ)).to.eql(ksDocRef.search(tagQ));
+        expect(ksDoc3.search(tagQ)).to.eql(ksDocRef.search(tagQ));
+        expect(ksDoc2.search(tagQ).some(r => r.result.includes(1))).to.equal(true);
 
-        for(const field of document.field){
-            const idx1 = document.index.get(field);
-            const idx2 = document2.index.get(field);
-            expect(idx2.tokenize).to.equal(idx1.tokenize);
-            expect(normalize_map(idx2.map)).to.eql(normalize_map(idx1.map));
-        }
+        // Per-field encoder: genre field uses vowel-stripping encoder
+        expect(ksDoc2.search("fntsy")).to.eql(ksDocRef.search("fntsy"));
+        expect(ksDoc3.search("fntsy")).to.eql(ksDocRef.search("fntsy"));
+
+        // Score liveness + tree/tagtree live after restore: add new doc to all three
+        const newDoc = { id: 3, meta: { title: "Alice in Wonderland" }, genre: "fantasy", year: "1866" };
+        ksDocRef.add(newDoc);
+        ksDoc2.add(newDoc);
+        ksDoc3.add(newDoc);
+
+        expect(ksDoc2.search("alice")).to.eql(ksDocRef.search("alice"));
+        expect(ksDoc3.search("alice")).to.eql(ksDocRef.search("alice"));
+        // score()=0 for genre → "fntsy" must land in bucket 0 for newDoc
+        expect(ksDoc2.index.get("genre").map.get("fntsy")[0]).to.include(3);
+        expect(ksDoc3.index.get("genre").map.get("fntsy")[0]).to.include(3);
+
+        const tagQ2 = { query: "alice", tag: { year: "1866" } };
+        expect(ksDoc2.search(tagQ2)).to.eql(ksDocRef.search(tagQ2));
+        expect(ksDoc3.search(tagQ2)).to.eql(ksDocRef.search(tagQ2));
     });
+
+    it("Should compress/decompress export payload (Index)", async function(){
+
+        const idx = new Index({ tokenize: "forward", resolution: 3 });
+        idx.add(0, "foo bar foobar");
+        idx.add(1, "bar foo foobar");
+        idx.add(2, "foobar foo bar");
+
+        // collect via callback, then compress
+        const payload = new Map();
+        idx.export(function(key, value){ payload.set(key, value); });
+        const compressed = await compress(payload);
+        expect(compressed).to.be.instanceOf(Uint8Array);
+
+        // decompress → parse → replay into a plain new Index
+        const entries = JSON.parse(await decompress(compressed));
+        const idx2 = new Index({});
+        for(const [key, value] of entries) idx2.import(key, value);
+
+        expect(normalize_index(idx2)).to.eql(normalize_index(idx));
+        expect(idx2.search("foobar")).to.eql(idx.search("foobar"));
+    });
+
+    it("Should compress/decompress export payload (Document)", async function(){
+
+        const doc = new Document({
+            document: {
+                id: "id",
+                store: true,
+                index: [{ field: "title", tokenize: "forward" }],
+                tag: [{ field: "year" }]
+            }
+        });
+        doc.add({ id: 1, title: "Carmencita", year: "1865" });
+        doc.add({ id: 2, title: "Gulliver", year: "1864" });
+
+        // collect via callback, then compress
+        const payload = new Map();
+        doc.export(function(key, value){ payload.set(key, value); });
+        const compressed = await compress(payload);
+        expect(compressed).to.be.instanceOf(Uint8Array);
+
+        // decompress → parse → replay
+        const entries = JSON.parse(await decompress(compressed));
+        const doc2 = new Document({});
+        for(const [key, value] of entries) doc2.import(key, value);
+
+        expect(normalize_doc(doc2)).to.eql(normalize_doc(doc));
+        const tagQ = { query: "carmen", tag: { year: "1865" } };
+        expect(doc2.search(tagQ)).to.eql(doc.search(tagQ));
+        expect(doc2.search(tagQ).some(r => r.result.includes(1))).to.equal(true);
+    });
+
 });
 
 function normalize_map(map){
@@ -422,4 +564,37 @@ function normalize_ctx(ctx){
         item[1] = normalize_map(item[1]);
         return item;
     });
+}
+
+function normalize_index(idx) {
+    return {
+        tokenize: idx.tokenize,
+        resolution: idx.resolution,
+        depth: idx.depth,
+        bidirectional: idx.bidirectional,
+        resolution_ctx: idx.resolution_ctx,
+        rtl: idx.rtl,
+        priority: idx.priority,
+        keystore: idx.keystore || 0,
+        score: idx.score ? idx.score.toString() : null,
+        map: normalize_map(idx.map),
+        ctx: normalize_ctx(idx.ctx),
+        regSize: idx.reg.size
+    };
+}
+
+function normalize_doc(doc) {
+    const fields = {};
+    for (const field of doc.field) {
+        fields[field] = normalize_index(doc.index.get(field));
+    }
+    return {
+        key: doc.key,
+        field: doc.field.slice(),
+        tree: doc.tree.map(t => Array.isArray(t) ? t.slice() : t),
+        tagfield: (doc.tagfield || []).slice(),
+        tagtree: (doc.tagtree || []).map(t => Array.isArray(t) ? t.slice() : t),
+        store: doc.store ? Array.from(doc.store.entries()) : null,
+        fields
+    };
 }

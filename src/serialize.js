@@ -5,7 +5,9 @@ import {
     SUPPORT_WORKER,
     SUPPORT_SERIALIZE,
     SUPPORT_CHARSET,
-    SUPPORT_ENCODER
+    SUPPORT_ENCODER,
+    SUPPORT_ASYNC,
+    SUPPORT_KEYSTORE
 } from "./config.js";
 import { IntermediateSearchResults } from "./type.js";
 // <-- COMPILER BLOCK
@@ -209,6 +211,9 @@ function index_config_to_js(index, charsetRef){
         const expr = serialize_encoder_to_js(index._encoderOpt, charsetRef);
         if(expr) parts.push("encoder:" + expr);
     }
+    if(index.score) parts.push("score:" + index.score.toString());
+    if(SUPPORT_ASYNC && index.priority && index.priority !== 4) parts.push("priority:" + index.priority);
+    if(SUPPORT_KEYSTORE && index.keystore) parts.push("keystore:" + index.keystore);
     return "{" + parts.join(",") + "}";
 }
 
@@ -231,6 +236,9 @@ function index_config_to_obj(index){
         const str = serialize_encoder_to_str(index._encoderOpt);
         if(str) cfg.encoder = str;
     }
+    if(index.score) cfg.score = index.score.toString();
+    if(SUPPORT_ASYNC && index.priority && index.priority !== 4) cfg.priority = index.priority;
+    if(SUPPORT_KEYSTORE && index.keystore) cfg.keystore = index.keystore;
     return cfg;
 }
 
@@ -270,8 +278,17 @@ function document_config_to_js(doc, charsetRef){
 function document_config_to_export_obj(doc){
     const cfg = {
         id: (SUPPORT_SERIALIZE && doc._cfgKey) || doc.key || "id",
-        fields: doc.field.slice()
+        fields: []
     };
+    for(let i = 0; i < doc.field.length; i++){
+        const fieldName = doc.field[i];
+        const fieldIdx = doc.index.get(fieldName);
+        const fieldCfg = { field: fieldName };
+        if(fieldIdx){
+            Object.assign(fieldCfg, index_config_to_obj(fieldIdx));
+        }
+        cfg.fields.push(fieldCfg);
+    }
     if(SUPPORT_TAGS && doc.tagfield && doc.tagfield.length){
         cfg.tagfields = doc.tagfield.slice();
     }
@@ -310,6 +327,20 @@ function apply_index_cfg(index, cfg){
             if(SUPPORT_SERIALIZE) index._encoderOpt = cfg.encoder;
         }
     }
+    if(cfg.score && typeof cfg.score === "string"){
+        try {
+            const scoreFn = new Function("return (" + cfg.score + ")")();
+            if(typeof scoreFn === "function") index.score = scoreFn;
+        } catch(e){}
+    }
+    if(SUPPORT_ASYNC && cfg.priority !== undefined) index.priority = cfg.priority;
+    if(SUPPORT_KEYSTORE && cfg.keystore){
+        const ks = cfg.keystore;
+        index.keystore = ks;
+        // Replace empty map/ctx with Keystore variants (populated in subsequent imports)
+        if(!index.map.size) index.map = new KeystoreMap(ks);
+        if(!index.ctx.size) index.ctx = new KeystoreMap(ks);
+    }
 }
 
 /**
@@ -321,17 +352,28 @@ function apply_index_cfg(index, cfg){
 function apply_document_cfg(doc, cfg){
     if(cfg.id || cfg.key) doc.key = cfg.id || cfg.key;
     if(!doc.field.length && cfg.fields && cfg.fields.length){
-        doc.field = cfg.fields;
         for(let i = 0; i < cfg.fields.length; i++){
-            if(!doc.index.has(cfg.fields[i])){
-                doc.index.set(cfg.fields[i], new Index({}, doc.reg));
+            const fc = cfg.fields[i];
+            // Support both old format (string) and new format (object with .field)
+            const fieldName = typeof fc === "string" ? fc : fc.field;
+            doc.field.push(fieldName);
+            // Reconstruct tree entry so new documents can be indexed after import
+            const parts = fieldName.split(":");
+            doc.tree[i] = parts.length > 1 ? parts : parts[0];
+            if(!doc.index.has(fieldName)){
+                const idx = new Index({}, doc.reg);
+                if(typeof fc === "object") apply_index_cfg(idx, fc);
+                doc.index.set(fieldName, idx);
             }
         }
     }
     if(SUPPORT_TAGS && cfg.tagfields && cfg.tagfields.length && !doc.tag){
+        if(!doc.tagtree) doc.tagtree = [];
         doc.tag = new Map();
         doc.tagfield = cfg.tagfields;
         for(let i = 0; i < cfg.tagfields.length; i++){
+            const parts = cfg.tagfields[i].split(":");
+            doc.tagtree[i] = parts.length > 1 ? parts : parts[0];
             doc.tag.set(cfg.tagfields[i], new Map());
         }
     }
@@ -567,13 +609,6 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
                 _field = null;
                 break;
 
-            // case 3:
-            //
-            //     key = "cfg";
-            //     chunk = null;
-            //     _field = null;
-            //     break;
-
             default:
 
                 return;
@@ -758,29 +793,21 @@ function parse_map(map, type){
 }
 
 /**
- * Helper: Serialize a Map<string, Map> for tags
- * @param {Map} tagMap
- * @param {string} type
+ * Helper: Serialize a Map<tagValue, Array<ID>> for tags
+ * @param {Map} tagMap - inner map: tagValue → Array<ID>
+ * @param {string} type - "string" or "number"
  * @return {string}
  */
 function parse_tag_map(tagMap, type){
     let result = '';
     for(const item of tagMap.entries()){
-        const key = item[0];
-        const value = item[1]; // inner Map
-        let inner = '';
-        for(const innerItem of value.entries()){
-            const innerKey = innerItem[0];
-            const innerValue = innerItem[1];
-            let ids = '';
-            for(let j = 0; j < innerValue.length; j++){
-                ids += (ids ? ',' : '') + (type === "string" ? '"' + innerValue[j] + '"' : innerValue[j]);
-            }
-            ids = '["' + innerKey + '",[' + ids + ']]';
-            inner += (inner ? ',' : '') + ids;
+        const key = item[0];   // tag value (e.g., "1894")
+        const ids = item[1];   // flat Array<ID> (e.g., ["tt0000001"])
+        let idsStr = '';
+        for(let j = 0; j < ids.length; j++){
+            idsStr += (idsStr ? ',' : '') + (type === "string" ? '"' + ids[j] + '"' : ids[j]);
         }
-        inner = '["' + key + '",new Map([' + inner + '])]';
-        result += (result ? ',' : '') + inner;
+        result += (result ? ',' : '') + '["' + key + '",[' + idsStr + ']]';
     }
     return result;
 }
@@ -897,6 +924,7 @@ export function serializeDocument(withFunctionWrapper = true, withCompression = 
  * @return {Promise<Uint8Array>} Compressed data
  */
 export async function compress(data){
+    if(data instanceof Map) data = JSON.stringify(Array.from(data.entries()));
     const cs = new CompressionStream('gzip');
     const blob = new Blob([data], { type: 'application/octet-stream' });
     const stream = blob.stream().pipeThrough(cs);
