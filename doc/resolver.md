@@ -3,7 +3,7 @@
 Retrieve an unresolved result:
 
 ```js
-const raw = index.search("a short query", { 
+const raw = index.search("a short query", {
     resolve: false
 });
 ```
@@ -29,7 +29,7 @@ raw.and( ... )
 The default resolver:
 
 ```js
-const raw = index.search("a short query", { 
+const raw = index.search("a short query", {
     resolve: false
 });
 const result = raw.resolve();
@@ -53,7 +53,7 @@ The basic concept explained:
 
 ```js
 // 1. get one or multiple unresolved results
-const raw1 = index.search("a short query", { 
+const raw1 = index.search("a short query", {
     resolve: false
 });
 const raw2 = index.search("another query", {
@@ -149,188 +149,47 @@ const result = new Resolver({
 
 ## Resolver Tasks
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Method</td>
-        <td>Description</td>
-        <td>Return</td>
-    </tr>
-    <tr>
-        <td>
-            <code>.and(options,...)</code><br>
-            <code>.or(options,...)</code><br>
-            <code>.not(options,...)</code><br>
-            <code>.xor(options,...)</code>
-        </td>
-        <td>Apply an operation</td>
-        <td>Returns a <code>Resolver</code> when <code>resolve</code> was not set to <code>false</code> within the options, otherwise it returns the result (or promise in async context).</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <code>.limit(number)</code><br>
-            <code>.offset(number)</code><br>
-            <code>.boost(number)</code>
-        </td>
-        <td>Apply boost, limit and offset to the result</td>
-        <td>Returns a <code>Resolver</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <code>.resolve(options)</code>
-        </td>
-        <td>Resolve results</td>
-        <td>Returns the final result or promise in async context (can't be executed twice)</td>
-    </tr>
-</table>
+|        |             |        |
+|--------|-------------|--------|
+| Method | Description | Return |
+| .and(options,...)
+            .or(options,...)
+            .not(options,...)
+            .xor(options,...) | Apply an operation | Returns a Resolver when resolve was not set to false within the options, otherwise it returns the result (or promise in async context). |
+| .limit(number)
+            .offset(number)
+            .boost(number) | Apply boost, limit and offset to the result | Returns a Resolver |
+| .resolve(options) | Resolve results | Returns the final result or promise in async context (can't be executed twice) |
+
 
 
 ## Resolver Options
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td colspan="4">Resolver Task Options:</td>
-    </tr>
-    <tr>
-        <td><code>query</code></td>
-        <td>
-            String
-        </td>
-        <td>The search query</td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>index</code></td>
-        <td>
-            <code>Index</code><br>
-            <code>Document</code>
-        </td>
-        <td>Assign the index where the query should be applied to</td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>suggest</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Enables <a href="../README.md#suggestions">suggestions</a> in results</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>boost</code></td>
-        <td>
-            Number
-        </td>
-        <td>Boost or reduce the score of this query</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>async</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Use a <a href="#using-async-queries-incl-runtime-balancer">parallel processing workflow</a></td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>queue</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Use a <a href="#queuing-async-queries">queued processing workflow</a></td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <code>and</code><br>
-            <code>or</code><br>
-            <code>not</code><br>
-            <code>xor</code><br>
-        </td>
-        <td>
-            Array&lt;<a href="#resolver-options">ResolverOptions</a>&gt;
-        </td>
-        <td>Apply nested queries</td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>resolve</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>
-            Resolve the result immediately or not. When set to <code>true</code> all final resolve options are also allowed and there can't exist any further resolver operations.
-        </td>
-        <td>false</td>
-    </tr>
-    <tr>
-        <td colspan="4">Document Resolver Options:</td>
-    </tr>
-    <tr>
-        <td><code>field</code><br><code>pluck</code></td>
-        <td>
-            String
-        </td>
-        <td>Select the Document field on which the query should apply to.</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td colspan="4">Final Resolve Options:</td>
-    </tr>
-    <tr>
-        <td><code>enrich</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Enrich IDs from the results with the corresponding documents (for Document Indexes only)</td>
-        <td>true</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>highlight</code></td>
-        <td>
-            <a href="./result-highlighting.md#highlighting-options">Highlighting Options</a><br>
-            String
-        </td>
-        <td>Highlight query matches in the result (for Document Indexes only)</td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>limit</code></td>
-        <td>
-            Number
-        </td>
-        <td>Sets the limit of results</td>
-        <td>100</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>offset</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Apply offset (skip items)</td>
-        <td>0</td>
-    </tr>
-</table>
+|        |        |             |         |
+|--------|--------|-------------|---------|
+| Option | Values | Description | Default |
+| Resolver Task Options: |
+| query | String | The search query |  |
+| index | Index
+            Document | Assign the index where the query should be applied to |  |
+| suggest | Boolean | Enables suggestions in results | false |
+| boost | Number | Boost or reduce the score of this query | 0 |
+| async | Boolean | Use a parallel processing workflow | false |
+| queue | Boolean | Use a queued processing workflow | false |
+| and
+            or
+            not
+            xor | Array&lt;ResolverOptions&gt; | Apply nested queries |  |
+| resolve | Boolean | Resolve the result immediately or not. When set to true all final resolve options are also allowed and there can't exist any further resolver operations. | false |
+| Document Resolver Options: |
+| fieldpluck | String | Select the Document field on which the query should apply to. |  |
+| Final Resolve Options: |
+| enrich | Boolean | Enrich IDs from the results with the corresponding documents (for Document Indexes only) | true |
+| highlight | Highlighting Options
+            String | Highlight query matches in the result (for Document Indexes only) |  |
+| limit | Number | Sets the limit of results | 100 |
+| offset | Boolean | Apply offset (skip items) | 0 |
+
 
 ### Using Cached Queries
 
@@ -341,7 +200,7 @@ const result = new Resolver({
     query: "a query",
     cache: true
 })
-.and({ 
+.and({
     query: "another query",
     cache: true
 })
@@ -361,7 +220,7 @@ const resolver = new Resolver({
     query: "a query",
     async: true
 })
-.and({ 
+.and({
     query: "another query",
     async: true
 })
@@ -380,7 +239,7 @@ const resolver = new Resolver({
     query: "a query",
     async: true
 })
-.and({ 
+.and({
     query: "another query",
     async: true
 });
@@ -403,7 +262,7 @@ const resolver = await new Resolver({
     query: "a query",
     async: true
 })
-.and({ 
+.and({
     query: "another query",
     queue: true
 })
@@ -418,7 +277,7 @@ When tasks are processed consecutively, it will skip specific resolver stages wh
 
 ### Compare Parallel VS. Consecutive
 
-When using the parallel workflow by passing `{ async: true }`, all resolver stages will send their requests (including nested tasks) to the DB immediately and calculate the results in the right order as soon as the request resolves. When the overall workload of your applications has some free resources, a parallel request workflow improves performance compared to the consecutive counterpart. 
+When using the parallel workflow by passing `{ async: true }`, all resolver stages will send their requests (including nested tasks) to the DB immediately and calculate the results in the right order as soon as the request resolves. When the overall workload of your applications has some free resources, a parallel request workflow improves performance compared to the consecutive counterpart.
 
 <br><img src="resolver-parallel.svg" style="width: 780px; max-width: 100%">
 
@@ -439,7 +298,7 @@ function CustomResolver(raw){
     return output;
 }
 
-const result = index.search("a short query", { 
+const result = index.search("a short query", {
     resolve: CustomResolver
 });
 ```
