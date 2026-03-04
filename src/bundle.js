@@ -13,6 +13,10 @@ import {
 import {
     SearchOptions,
     ContextOptions,
+    SerializedIndexContext,
+    SerializedIndexConfig,
+    SerializedFieldConfig,
+    SerializedDocumentConfig,
     DocumentDescriptor,
     DocumentSearchOptions,
     FieldOptions,
@@ -68,6 +72,11 @@ if(SUPPORT_SERIALIZE || SUPPORT_PERSISTENT){
 /** @export */ Index.prototype.reg;
 /** @export */ Index.prototype.map;
 /** @export */ Index.prototype.ctx;
+/** @export */ Index.prototype.resolution_ctx;
+}
+
+if (SUPPORT_SERIALIZE) {
+/** @export */ Index.prototype._encoderOpt;
 }
 
 if(SUPPORT_PERSISTENT){
@@ -124,6 +133,10 @@ if(SUPPORT_SERIALIZE){
 /** @export */ Document.prototype.tag;
 /** @export */ Document.prototype.store;
 /** @export */ Document.prototype.fastupdate;
+/** @export */ Document.prototype._cfgKey;
+/** @export */ Document.prototype.tree;
+/** @export */ Document.prototype.tagtree;
+/** @export */ Document.prototype.tagfield;
 }
 
 /** @export */ Resolver.prototype.limit;
@@ -233,6 +246,34 @@ if(SUPPORT_SERIALIZE){
 /** @export */ ContextOptions.depth;
 /** @export */ ContextOptions.bidirectional;
 /** @export */ ContextOptions.resolution;
+
+/** @export */ SerializedIndexContext.depth;
+/** @export */ SerializedIndexContext.bidirectional;
+/** @export */ SerializedIndexContext.resolution;
+
+/** @export */ SerializedIndexConfig.tokenize;
+/** @export */ SerializedIndexConfig.resolution;
+/** @export */ SerializedIndexConfig.context;
+/** @export */ SerializedIndexConfig.rtl;
+/** @export */ SerializedIndexConfig.encoder;
+/** @export */ SerializedIndexConfig.score;
+/** @export */ SerializedIndexConfig.priority;
+/** @export */ SerializedIndexConfig.keystore;
+
+/** @export */ SerializedFieldConfig.field;
+/** @export */ SerializedFieldConfig.tokenize;
+/** @export */ SerializedFieldConfig.resolution;
+/** @export */ SerializedFieldConfig.context;
+/** @export */ SerializedFieldConfig.rtl;
+/** @export */ SerializedFieldConfig.encoder;
+/** @export */ SerializedFieldConfig.score;
+/** @export */ SerializedFieldConfig.priority;
+/** @export */ SerializedFieldConfig.keystore;
+
+/** @export */ SerializedDocumentConfig.id;
+/** @export */ SerializedDocumentConfig.fields;
+/** @export */ SerializedDocumentConfig.tagfields;
+/** @export */ SerializedDocumentConfig.store;
 
 /** @export */ DocumentDescriptor.field;
 /** @export */ DocumentDescriptor.index;

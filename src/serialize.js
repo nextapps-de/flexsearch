@@ -13,6 +13,7 @@ import { IntermediateSearchResults } from "./type.js";
 // <-- COMPILER BLOCK
 import Index from "./index.js";
 import Document from "./document.js";
+import WorkerIndex from "./worker.js";
 import Charset from "./charset.js";
 import Encoder from "./encoder.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
@@ -21,6 +22,12 @@ import { is_string } from "./common.js";
 const chunk_size_reg = 250000;
 const chunk_size_map = 5000;
 const chunk_size_ctx = 1000;
+
+// Runtime config records used for Closure @export protection in bundle builds.
+/** @constructor */ export function IndexContextRecord(){}
+/** @constructor */ export function IndexConfigRecord(){}
+/** @constructor */ export function FieldConfigRecord(){}
+/** @constructor */ export function DocumentConfigRecord(){}
 
 /**
  * Escape a string for safe embedding in a JS string literal.
@@ -196,7 +203,7 @@ function serialize_encoder_to_js(encoderOpt, charsetRef){
 
 /**
  * Build an Index config as a JS object literal string.
- * @param {Index} index
+ * @param {Index|WorkerIndex} index
  * @param {string} charsetRef
  * @return {string}
  */
@@ -229,26 +236,28 @@ function index_config_to_js(index, charsetRef){
 
 /**
  * Build an Index config as a plain object for JSON export.
- * @param {Index} index
- * @return {Object}
+ * @param {Index|WorkerIndex} index
+ * @return {IndexConfigRecord}
  */
 function index_config_to_obj(index){
-    const cfg = {};
-    if(index.tokenize && index.tokenize !== "strict") cfg.tokenize = index.tokenize;
-    if(index.resolution !== 9) cfg.resolution = index.resolution;
+    const cfg = new IndexConfigRecord();
+    if (index.tokenize && index.tokenize !== "strict") cfg.tokenize = index.tokenize;
+    if (index.resolution !== 9) cfg.resolution = index.resolution;
     if(index.depth){
-        cfg.context = { depth: index.depth };
-        if(!index.bidirectional) cfg.context.bidirectional = false;
-        if(index.resolution_ctx !== 3) cfg.context.resolution = index.resolution_ctx;
+        const ctx = new IndexContextRecord();
+        ctx.depth = index.depth;
+        if (!index.bidirectional) ctx.bidirectional = false;
+        if (index.resolution_ctx !== 3) ctx.resolution = index.resolution_ctx;
+        cfg.context = ctx;
     }
-    if(index.rtl) cfg.rtl = true;
+    if (index.rtl) cfg.rtl = true;
     if(SUPPORT_SERIALIZE && index._encoderOpt){
         const str = serialize_encoder_to_str(index._encoderOpt);
-        if(str) cfg.encoder = str;
+        if (str) cfg.encoder = str;
     }
-    if(index.score) cfg.score = index.score.toString();
-    if(SUPPORT_ASYNC && index.priority && index.priority !== 4) cfg.priority = index.priority;
-    if(SUPPORT_KEYSTORE && index.keystore) cfg.keystore = index.keystore;
+    if (index.score) cfg.score = index.score.toString();
+    if (SUPPORT_ASYNC && index.priority && index.priority !== 4) cfg.priority = index.priority;
+    if (SUPPORT_KEYSTORE && index.keystore) cfg.keystore = index.keystore;
     return cfg;
 }
 
@@ -283,17 +292,17 @@ function document_config_to_js(doc, charsetRef){
 /**
  * Build a Document config as a plain object for JSON export.
  * @param {Document} doc
- * @return {Object}
+ * @return {DocumentConfigRecord}
  */
 function document_config_to_export_obj(doc){
-    const cfg = {
-        id: (SUPPORT_SERIALIZE && doc._cfgKey) || doc.key || "id",
-        fields: []
-    };
+    const cfg = new DocumentConfigRecord();
+    cfg.id = (SUPPORT_SERIALIZE && doc._cfgKey) || doc.key || "id";
+    cfg.fields = [];
     for(let i = 0; i < doc.field.length; i++){
         const fieldName = doc.field[i];
         const fieldIdx = doc.index.get(fieldName);
-        const fieldCfg = { field: fieldName };
+        const fieldCfg = new FieldConfigRecord();
+        fieldCfg.field = fieldName;
         if(fieldIdx){
             Object.assign(fieldCfg, index_config_to_obj(fieldIdx));
         }
@@ -302,25 +311,25 @@ function document_config_to_export_obj(doc){
     if(SUPPORT_TAGS && doc.tagfield && doc.tagfield.length){
         cfg.tagfields = doc.tagfield.slice();
     }
-    if(SUPPORT_STORE && doc.store !== null) cfg.store = true;
+    if (SUPPORT_STORE && doc.store !== null) cfg.store = true;
     return cfg;
 }
 
 /**
  * Apply a serialized config object to an Index instance.
  * @param {Index} index
- * @param {Object} cfg
+ * @param {IndexConfigRecord|FieldConfigRecord|Object} cfg
  */
 function apply_index_cfg(index, cfg){
-    if(cfg.tokenize) index.tokenize = cfg.tokenize;
-    if(cfg.resolution !== undefined) index.resolution = cfg.resolution;
-    if(cfg.context){
+    if (cfg.tokenize) index.tokenize = cfg.tokenize;
+    if (cfg.resolution !== undefined) index.resolution = cfg.resolution;
+    if (cfg.context) {
         index.depth = cfg.context.depth || 0;
-        if(cfg.context.bidirectional !== undefined) index.bidirectional = cfg.context.bidirectional;
-        if(cfg.context.resolution !== undefined) index.resolution_ctx = cfg.context.resolution;
+        if (cfg.context.bidirectional !== undefined) index.bidirectional = cfg.context.bidirectional;
+        if (cfg.context.resolution !== undefined) index.resolution_ctx = cfg.context.resolution;
     }
-    if(cfg.rtl !== undefined) index.rtl = cfg.rtl;
-    if(cfg.encoder){
+    if (cfg.rtl !== undefined) index.rtl = cfg.rtl;
+    if (cfg.encoder) {
         let encoderOpt;
         const encoderStr = cfg.encoder;
         if(typeof encoderStr === "string" && SUPPORT_CHARSET && Charset[encoderStr]){
@@ -334,17 +343,17 @@ function apply_index_cfg(index, cfg){
                 : (SUPPORT_ENCODER && typeof encoderOpt === "object"
                     ? new Encoder(encoderOpt)
                     : { encode: encoderOpt });
-            if(SUPPORT_SERIALIZE) index._encoderOpt = cfg.encoder;
+            if (SUPPORT_SERIALIZE) index._encoderOpt = cfg.encoder;
         }
     }
-    if(cfg.score && typeof cfg.score === "string"){
+    if (cfg.score && typeof cfg.score === "string") {
         try {
             const scoreFn = new Function("return (" + cfg.score + ")")();
             if(typeof scoreFn === "function") index.score = scoreFn;
         } catch(e){}
     }
-    if(SUPPORT_ASYNC && cfg.priority !== undefined) index.priority = cfg.priority;
-    if(SUPPORT_KEYSTORE && cfg.keystore){
+    if (SUPPORT_ASYNC && cfg.priority !== undefined) index.priority = cfg.priority;
+    if (SUPPORT_KEYSTORE && cfg.keystore) {
         const ks = cfg.keystore;
         index.keystore = ks;
         // Replace empty map/ctx with Keystore variants (populated in subsequent imports)
@@ -357,12 +366,12 @@ function apply_index_cfg(index, cfg){
  * Apply a serialized config object to a Document instance.
  * Initializes fields/tags/store only when the document has no data yet.
  * @param {Document} doc
- * @param {Object} cfg
+ * @param {DocumentConfigRecord|Object} cfg
  */
 function apply_document_cfg(doc, cfg){
-    if(cfg.id || cfg.key) doc.key = cfg.id || cfg.key;
-    if(!doc.field.length && cfg.fields && cfg.fields.length){
-        for(let i = 0; i < cfg.fields.length; i++){
+    if (cfg.id || cfg.key) doc.key = cfg.id || cfg.key;
+    if (!doc.field.length && cfg.fields && cfg.fields.length) {
+        for (let i = 0; i < cfg.fields.length; i++) {
             const fc = cfg.fields[i];
             // Support both old format (string) and new format (object with .field)
             const fieldName = typeof fc === "string" ? fc : fc.field;
@@ -377,24 +386,24 @@ function apply_document_cfg(doc, cfg){
             }
         }
     }
-    if(SUPPORT_TAGS && cfg.tagfields && cfg.tagfields.length && !doc.tag){
+    if (SUPPORT_TAGS && cfg.tagfields && cfg.tagfields.length && !doc.tag) {
         if(!doc.tagtree) doc.tagtree = [];
         doc.tag = new Map();
         doc.tagfield = cfg.tagfields;
-        for(let i = 0; i < cfg.tagfields.length; i++){
+        for (let i = 0; i < cfg.tagfields.length; i++) {
             const parts = cfg.tagfields[i].split(":");
             doc.tagtree[i] = parts.length > 1 ? parts : parts[0];
             doc.tag.set(cfg.tagfields[i], new Map());
         }
     }
-    if(SUPPORT_STORE && cfg.store && !doc.store){
+    if (SUPPORT_STORE && cfg.store && !doc.store) {
         doc.store = new Map();
     }
 }
 
 /**
  *
- * @param {function(string, string):Promise|void} callback
+ * @param {function(string, (string|Array<Object>|Object)):Promise|void} callback
  * @param {string|null|void} field
  * @param {string} key
  * @param {Array|null} chunk
@@ -452,7 +461,7 @@ function save(callback, field, key, chunk, index_doc, index_obj, index_prt = 0, 
 }
 
 /**
- * @param {function(string,string):Promise|void} callback
+ * @param {function(string,(string|Array<Object>|Object)):Promise|void} callback
  * @param {!string|null=} _field
  * @param {number=} _index_doc
  * @param {number=} _index_obj
@@ -508,8 +517,8 @@ export function exportIndex(callback, _field, _index_doc = 0, _index_obj = 0, _r
 }
 
 /**
- * @param {string} key
- * @param {string|Array<Object>=} data
+ * @param {string|Map<string,(string|Array<Object>|Object)>|Array<Array<*>>} key
+ * @param {string|Array<Object>|Object=} data
  * @this Index
  */
 
@@ -555,18 +564,18 @@ export function importIndex(key, data){
 
         case "map":
 
-            this.map = json_to_map(data, this.map);
+            this.map = json_to_map(/** @type {Array<(Object|null)>} */(data), this.map);
             break;
 
         case "ctx":
 
-            this.ctx = json_to_ctx(data, this.ctx);
+            this.ctx = json_to_ctx(/** @type {Array<(Object|null)>} */(data), this.ctx);
             break;
     }
 }
 
 /**
- * @param {function(string,string):Promise|void} callback
+ * @param {function(string,(string|Array<Object>|Object)):Promise|void} callback
  * @param {string|null=} _field
  * @param {number=} _index_doc
  * @param {number=} _index_obj
@@ -651,8 +660,8 @@ export function exportDocument(callback, _field, _index_doc = -1, _index_obj = 0
 }
 
 /**
- * @param {!string} key
- * @param {string|Array<Object>} data
+ * @param {string|Map<string,(string|Array<Object>|Object)>|Array<Array<*>>} key
+ * @param {string|Array<Object>|Object=} data
  * @this {Document}
  */
 
@@ -722,12 +731,12 @@ export function importDocument(key, data){
 
             case "tag":
 
-                this.tag = json_to_ctx(data, this.tag);
+                this.tag = json_to_ctx(/** @type {Array<(Object|null)>} */(data), this.tag);
                 break;
 
             case "doc":
 
-                this.store = json_to_map(data, this.store);
+                this.store = json_to_map(/** @type {Array<(Object|null)>} */(data), this.store);
                 break;
 
             case "cfg":
@@ -827,10 +836,10 @@ function parse_map(map, type){
 /**
  * Helper: Serialize a Map<tagValue, Array<ID>> for tags
  * @param {Map} tagMap - inner map: tagValue → Array<ID>
- * @param {string} type - "string" or "number"
+ * @param {string=} type - "string" or "number"
  * @return {string}
  */
-function parse_tag_map(tagMap, type){
+function parse_tag_map(tagMap, type = "string") {
     let result = '';
     for(const item of tagMap.entries()){
         const key = item[0];   // tag value (e.g., "1894")
@@ -960,6 +969,7 @@ export async function exportIndexBulk(compressed = false){
     const map = new Map();
     await exportIndex.call(this, (key, data) => {
         map.set(key, data);
+        return null;
     }, null, 0, 0, true);  // _raw = true
     const json = JSON.stringify([...map]);
     return compressed ? compress(json) : json;
@@ -976,6 +986,7 @@ export async function exportDocumentBulk(compressed = false){
     const map = new Map();
     await exportDocument.call(this, (key, data) => {
         map.set(key, data);
+        return null;
     }, null, -1, 0, true);  // _raw = true
     const json = JSON.stringify([...map]);
     return compressed ? compress(json) : json;
@@ -983,37 +994,51 @@ export async function exportDocumentBulk(compressed = false){
 
 /**
  * Import bulk index data with optional gzip decompression
- * @param {Uint8Array|string} source - Bulk data (compressed as Uint8Array, or uncompressed as string)
+ * @param {Uint8Array|string|null} source - Bulk data (compressed as Uint8Array, or uncompressed as string)
  * @param {boolean=} compressed - Whether source is gzip compressed (default: false)
  * @this {Index}
  * @return {Promise<void>}
  */
 export async function importIndexBulk(source, compressed = false){
-    let json;
+    /** @type {string} */
+    let json = "";
     if(compressed){
-        json = await decompress(source);
+        if (typeof source === "string" || !source) {
+            throw new TypeError("Compressed import expects a Uint8Array source.");
+        }
+        json = /** @type {string} */ (await decompress(source));
     } else {
+        if (source === null) {
+            throw new TypeError("Import source must not be null.");
+        }
         json = typeof source === "string" ? source : new TextDecoder().decode(source);
     }
-    const entries = JSON.parse(json);
+    const entries = /** @type {Array<Array<*>>} */ (JSON.parse(json));
     return importIndex.call(this, entries);
 }
 
 /**
  * Import bulk document data with optional gzip decompression
- * @param {Uint8Array|string} source - Bulk data (compressed as Uint8Array, or uncompressed as string)
+ * @param {Uint8Array|string|null} source - Bulk data (compressed as Uint8Array, or uncompressed as string)
  * @param {boolean=} compressed - Whether source is gzip compressed (default: false)
  * @this {Document}
  * @return {Promise<void>}
  */
 export async function importDocumentBulk(source, compressed = false){
-    let json;
+    /** @type {string} */
+    let json = "";
     if(compressed){
-        json = await decompress(source);
+        if (typeof source === "string" || !source) {
+            throw new TypeError("Compressed import expects a Uint8Array source.");
+        }
+        json = /** @type {string} */ (await decompress(source));
     } else {
+        if (source === null) {
+            throw new TypeError("Import source must not be null.");
+        }
         json = typeof source === "string" ? source : new TextDecoder().decode(source);
     }
-    const entries = JSON.parse(json);
+    const entries = /** @type {Array<Array<*>>} */ (JSON.parse(json));
     return importDocument.call(this, entries);
 }
 

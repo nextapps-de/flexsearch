@@ -63,10 +63,14 @@ export default function Document(options){
     let tmp, keystore;
 
     this.tree = [];
+    // Keep stable public property names for bundled/minified builds.
+    this["tree"] = this.tree;
     this.field = [];
     this.marker = [];
     this.key = ((tmp = document.key || document.id) && parse_tree(tmp, this.marker)) || "id";
-    if(SUPPORT_SERIALIZE) this._cfgKey = document.key || document.id || null;
+    if(SUPPORT_SERIALIZE){
+        this._cfgKey = document.key || document.id || null;
+    }
 
     keystore = SUPPORT_KEYSTORE && (options.keystore || 0);
     keystore && (this.keystore = keystore);
@@ -124,6 +128,8 @@ export default function Document(options){
                 this.tag = new Map();
                 this.tagtree = [];
                 this.tagfield = [];
+                this["tagtree"] = this.tagtree;
+                this["tagfield"] = this.tagfield;
                 for(let i = 0, params, field; i < tmp.length; i++){
                     params = tmp[i];
                     field = params.field || params;
