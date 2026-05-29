@@ -20,7 +20,7 @@
     "pg-promise": "^11.10.2",
     "redis": "^5.1.0",
     "rollup": "^4.59.0",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^6.0.1",
     "typescript": "^5.8.3"
   }
 }
