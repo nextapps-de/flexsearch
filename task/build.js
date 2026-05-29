@@ -195,13 +195,30 @@ if(release === "lang"){
                 //fs.copyFileSync("src/lang/" + lang + ".js", "tmp/lang/" + lang + ".js");
                 //console.log(lang)
 
-                content = fs.readFileSync("tmp/type.js", "utf8");
-                content = content.replace('import Index from "./index.js";', '')
-                                 .replace('import WorkerIndex from "./worker.js";', '')
-                                 .replace('import Document from "./document.js";', '')
-                                 .replace('import Encoder from "./encoder.js";', '')
-                                 .replace('import StorageInterface from "./db/interface.js";', '');
-                fs.writeFileSync("tmp/type.js", content);
+                // Only modify tmp/type.js on the first iteration
+                if (x === 0) {
+                    content = fs.readFileSync("tmp/type.js", "utf8");
+                    // Remove imports
+                    content = content.replace('import Index from "./index.js";', '')
+                        .replace('import WorkerIndex from "./worker.js";', '')
+                        .replace('import Document from "./document.js";', '')
+                        .replace('import Encoder from "./encoder.js";', '')
+                        .replace('import StorageInterface from "./db/interface.js";', '');
+                    // Remove the JSDoc typedefs for exported types if they exist (from source file)
+                    content = content.replace(/\/\/ JSDoc type definitions for Closure Compiler.*\n/g, '')
+                        .replace(/\/\*\*\n \* @typedef \{\*?\} Index\n \*\/\n/g, '')
+                        .replace(/\/\*\*\n \* @typedef \{\*?\} Document\n \*\/\n/g, '')
+                        .replace(/\/\*\*\n \* @typedef \{\*?\} WorkerIndex\n \*\/\n/g, '')
+                        .replace(/\/\*\*\n \* @typedef \{\*?\} Encoder\n \*\/\n/g, '')
+                        .replace(/\/\*\*\n \* @typedef \{\*?\} StorageInterface\n \*\/\n/g, '');
+                    // Replace type references with Object or * to avoid "Unknown type" warnings
+                    content = content.replace(/\(Encoder\|/g, '(Object|')
+                        .replace(/\(StorageInterface\|/g, '(Object|')
+                        .replace(/\(Index\|/g, '(Object|')
+                        .replace(/Document\|/g, 'Object|')
+                        .replace(/WorkerIndex\|/g, 'Object|');
+                    fs.writeFileSync("tmp/type.js", content);
+                }
 
                 fs.writeFileSync("tmp/lang.js", `
                     import { EncoderOptions, EncoderSplitOptions } from "./type.js";

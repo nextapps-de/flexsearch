@@ -7,6 +7,23 @@ import WorkerIndex from "./worker.js";
 import Encoder from "./encoder.js";
 import StorageInterface from "./db/interface.js";
 
+// JSDoc type definitions for Closure Compiler (used when imports are stripped during build)
+/**
+ * @typedef {*} Index
+ */
+/**
+ * @typedef {*} Document
+ */
+/**
+ * @typedef {*} WorkerIndex
+ */
+/**
+ * @typedef {*} Encoder
+ */
+/**
+ * @typedef {*} StorageInterface
+ */
+
 /**
  * @typedef {{
  *   preset: (string|undefined),
@@ -235,7 +252,7 @@ export let EncoderSplitOptions = {};
  *   matcher: (Map<string, string>|undefined),
  *   mapper: (Map<string, string>|undefined),
  *   stemmer: (Map<string, string>|undefined),
- *   replacer: (Array<string|RegExp, string>|undefined),
+ *   replacer: (Array<*>|undefined),
  *   minlength: (number|undefined),
  *   maxlength: (number|undefined),
  *   cache: (boolean|undefined)
