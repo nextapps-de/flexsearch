@@ -438,7 +438,7 @@ else (async function(){
         build = build.replace(/\(([a-z])=([a-z]).config\)&&\(([a-z])=([a-z])\)/, "($1=$2.config)&&($3=(await import($4))[\"default\"])");
 
         if(options["SUPPORT_WORKER"]){
-            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");
+            build = build.replace("(function(self){'use strict';", "(function _f(self){'use strict';if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined' && typeof process.env !== 'undefined')self=process;self._factory=_f;");
             //build = build.replace("(function(self){", "(function _f(self){if(typeof module!=='undefined')self=module;else if(typeof process !== 'undefined')self=process;self._factory=_f;");
         }
 
