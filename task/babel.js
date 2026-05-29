@@ -94,7 +94,7 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
     fs.existsSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : ""))) && fs.rmSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")), { recursive: true });
     fs.mkdirSync("dist/module" + (debug ? "-debug" : (minify ? "-min" : "")));
 
-    exec("npx babel tmp -d dist/module" + (debug ? "-debug" : (minify ? "-min --minified --compact true" : "")) + " --config-file tmp/.babelrc && exit 0", function(){
+    spawn("npx babel tmp", ["-d dist/module" + (debug ? "-debug" : (minify ? "-min --minified --compact true" : "")) + " --config-file tmp/.babelrc && exit 0"], function(){
         console.log("Build Complete.");
 
         // fix babel compiler dynamic import
@@ -128,17 +128,18 @@ fs.existsSync("dist") || fs.mkdirSync("dist");
     });
 }());
 
-function exec(prompt, callback){
+function spawn(prompt, args, callback){
 
-    const child = child_process.exec(prompt, function(err, stdout, stderr){
-        if(err){
-            console.error(err);
-        }
-        else{
-            callback && callback();
-        }
-    });
+    const child = child_process.spawn(prompt, args, { shell: true });
 
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
+
+    child.on("error", function(err){
+        console.error(err);
+    });
+
+    child.on("close", function(code){
+        callback && callback();
+    });
 }

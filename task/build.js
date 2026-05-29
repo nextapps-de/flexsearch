@@ -1,5 +1,6 @@
 const child_process = require("child_process");
 const fs = require("fs");
+const path = require("path");
 
 console.log("Start build .....");
 
@@ -8,19 +9,51 @@ fs.mkdirSync("tmp");
 fs.existsSync("dist") || fs.mkdirSync("dist");
 
 let supported_lang = [
-    'en',
-    'de',
-    'fr'
+    "en",
+    "de",
+    "fr"
 ];
 
 let supported_charset = {
-    'latin': ["exact", "default", "simple", "balance", "advanced", "extra", "soundex"],
-    'cjk': ["default"],
-    'cyrillic': ["default"],
-    'arabic': ["default"],
+    "latin": ["exact", "default", "simple", "balance", "advanced", "extra", "soundex"],
+    "cjk": ["default"],
+    "cyrillic": ["default"],
+    "arabic": ["default"],
 };
 
-let flag_str = "";
+let supported_args = {
+    "RELEASE": [
+        "bundle",
+        "compact",
+        "light",
+        "es5",
+        "lang",
+        "module",
+        "bundle.module",
+        "compact.module",
+        "light.module"
+    ],
+    "POLYFILL": ["true", "false"],
+    "PROFILER": ["true", "false"],
+    "DEBUG": ["true", "false", "verbose"],
+    "FORMATTING": ["pretty_print"],
+    "SUPPORT_WORKER": ["true", "false"],
+    "SUPPORT_ENCODER": ["true", "false"],
+    "SUPPORT_CHARSET": ["true", "false"],
+    "SUPPORT_CACHE": ["true", "false"],
+    "SUPPORT_ASYNC": ["true", "false"],
+    "SUPPORT_STORE": ["true", "false"],
+    "SUPPORT_TAGS": ["true", "false"],
+    "SUPPORT_SUGGESTION": ["true", "false"],
+    "SUPPORT_SERIALIZE": ["true", "false"],
+    "SUPPORT_DOCUMENT": ["true", "false"],
+    "SUPPORT_PERSISTENT": ["true", "false"],
+    "SUPPORT_RESOLVER": ["true", "false"],
+    "SUPPORT_HIGHLIGHTING": ["true", "false"],
+    "SUPPORT_KEYSTORE": ["true", "false"],
+    "SUPPORT_COMPRESSION": ["true", "false"]
+};
+
 let language_out;
 let use_polyfill;
 let formatting;
@@ -28,7 +61,7 @@ let compilation_level;
 
 let options = (function(argv){
 
-    const arr = {};
+    const args = Object.create(null);
     let count = 0;
 
     argv.forEach(function(val, index) {
@@ -47,17 +80,16 @@ let options = (function(argv){
 
                 use_polyfill = val !== "false";
             }
-            else{
+            else if(supported_args.hasOwnProperty(index) && supported_args[index].includes(val.toLowerCase())){
 
                 if(val === "false") val = false;
-                arr[index] = val;
+                args[index] = val;
             }
         }
     });
 
-    console.log('Release: ' + (arr['RELEASE'] || 'custom') + (arr['DEBUG'] ?  ":debug" : ""));
-
-    return arr;
+    console.log("Release: " + (args["RELEASE"] || "custom") + (args["DEBUG"] ?  ":debug" : ""));
+    return args;
 
 })(process.argv);
 
@@ -68,15 +100,11 @@ const module_version = (release === "module") || (process.argv[2] === "--module"
 
 let parameter = (function(opt){
 
-    let parameter = '';
+    let parameter = "";
 
     for(let index in opt){
-
         if(opt.hasOwnProperty(index)){
-
-            //if(release !== "lang"){
-                parameter += ' --' + index + '=' + opt[index];
-            //}
+            parameter += ' --' + index + '=' + opt[index];
         }
     }
 
@@ -122,7 +150,7 @@ if(!release.endsWith(".module") || release === "lang"){
 }
 
 const custom = (!release || release.startsWith("custom"))
-    && hashCode(parameter + flag_str + JSON.stringify(options)).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    && hashCode(parameter + JSON.stringify(options)).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
 if(custom){
     release || (options["RELEASE"] = release = "custom");
@@ -203,11 +231,11 @@ if(release === "lang"){
                     else if(self["FlexSearch"]) self["FlexSearch"]["Language"]['${lang}'] = lang;
                 `);
 
-                const executable = process.platform === "win32" ?  "\"node_modules/google-closure-compiler-windows/compiler.exe\"" :
-                                   process.platform === "darwin" ? "\"node_modules/google-closure-compiler-osx/compiler\"" :
+                const executable = process.platform === "win32"  ? path.resolve(__dirname + "/../node_modules/google-closure-compiler-windows/compiler.exe") :
+                                   process.platform === "darwin" ? path.resolve(__dirname + "/../node_modules/google-closure-compiler-osx/compiler") :
                                                                    "java -jar node_modules/google-closure-compiler-java/compiler.jar";
 
-                exec(executable + parameter + " --js='tmp/lang.js' --js='tmp/lang/*.js' --js='tmp/type.js'" + flag_str + " --js_output_file='dist/lang/" + lang + ".min.js' && exit 0", function(){
+                spawn(executable, [parameter + " --js='tmp/lang.js' --js='tmp/lang/*.js' --js='tmp/type.js' --js_output_file='dist/lang/" + lang + ".min.js' && exit 0"], function(){
 
                     console.log("Build Complete: " + lang + ".min.js");
                     next(++x, y, z);
@@ -349,11 +377,11 @@ else (async function(){
     fs.writeFileSync("tmp/worker/handler.js", content);
 
     const filename = "dist/flexsearch." + (release + (custom ? "." + custom : "")) + (options["DEBUG"] ?  ".debug" : ".min") + ".js";
-    const executable = process.platform === "win32" ?  "\"node_modules/google-closure-compiler-windows/compiler.exe\"" :
-                       process.platform === "darwin" ? "\"node_modules/google-closure-compiler-osx/compiler\"" :
+    const executable = process.platform === "win32"  ? path.resolve(__dirname + "/../node_modules/google-closure-compiler-windows/compiler.exe") :
+                       process.platform === "darwin" ? path.resolve(__dirname + "/../node_modules/google-closure-compiler-osx/compiler") :
                                                        "java -jar node_modules/google-closure-compiler-java/compiler.jar";
 
-    exec(executable + parameter + " --js='tmp/**.js' --js='!tmp/**/node.js' --js='!tmp/**/node.mjs'" + flag_str + " --js_output_file='" + filename + "' && exit 0", function(){
+    spawn(executable, [parameter + " --js='tmp/**.js' --js='!tmp/**/node.js' --js='!tmp/**/node.mjs' --js_output_file='" + filename + "' && exit 0"], function(){
 
         let build = fs.readFileSync(filename);
         let preserve = fs.readFileSync("src/index.js", "utf8");
@@ -489,25 +517,20 @@ function hashCode(str) {
     return crc.toString(36).substring(0, 5);
 }
 
-function exec(prompt, callback){
+function spawn(prompt, args, callback){
 
-    const child = child_process.exec(prompt, function(err, stdout, stderr){
-
-        if(err){
-
-            console.error(err);
-        }
-        else{
-
-            if(callback){
-
-                callback();
-            }
-        }
-    });
+    const child = child_process.spawn(prompt, args, { shell: true });
 
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
+
+    child.on("error", function(err){
+        console.error(err);
+    });
+
+    child.on("close", function(code){
+        callback && callback();
+    });
 }
 
 // https://github.com/KimlikDAO/kimlikdao-js/tree/ana/kdjs
