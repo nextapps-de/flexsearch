@@ -86,7 +86,11 @@
     "build:module:light:debug": "node task/build RELEASE=light.module DEBUG=true PROFILER=false SUPPORT_WORKER=false SUPPORT_ENCODER=true SUPPORT_CHARSET=false SUPPORT_CACHE=false SUPPORT_ASYNC=false SUPPORT_STORE=false SUPPORT_TAGS=false SUPPORT_SUGGESTION=true SUPPORT_SERIALIZE=false SUPPORT_DOCUMENT=false POLYFILL=false SUPPORT_PERSISTENT=false SUPPORT_RESOLVER=false SUPPORT_HIGHLIGHTING=false SUPPORT_KEYSTORE=false SUPPORT_COMPRESSION=false FORMATTING=PRETTY_PRINT",
     "build:all": "npm run build:bundle && npm run build:bundle:debug && npm run build:light && npm run build:light:debug && npm run build:compact && npm run build:compact:debug && npm run build:module:bundle && npm run build:module:bundle:debug && npm run build:module:light && npm run build:module:light:debug && npm run build:module:compact && npm run build:module:compact:debug && npm run build:es5 && npm run build:es5:debug && npm run build:lang && npm run build:module && npm run build:module:debug && npm run build:module:min && npm run build:db",
     "build:custom": "node task/build RELEASE=custom",
-    "test:all": "cd test/ && npm install && npm run test:all && cd ..",
+    "test": "mocha test/*.js --exit",
+    "test:coverage": "c8 -c test/.c8rc.json mocha test/*.js --exit",
+    "test:keystore": "set NODE_OPTIONS=--max-old-space-size=16000 && c8 -c test/.c8rc.json mocha test/keystore.js --exit",
+    "test:db": "c8 -c test/.c8rc.json mocha test/persistent.*.js --exit",
+    "test:all": "npx mocha test/*.js --exit module/bundle && npx mocha test/*.js --exit module-debug/bundle && npx mocha test/*.js --exit module-min/bundle && npx mocha test/*.js --exit flexsearch.bundle.debug && npx mocha test/*.js --exit flexsearch.bundle.min && npx mocha test/*.js --exit flexsearch.bundle.module.debug && npx mocha test/*.js --exit flexsearch.bundle.module.min && npx mocha test/*.js --exit flexsearch.compact.debug && npx mocha test/*.js --exit flexsearch.compact.min && npx mocha test/*.js --exit flexsearch.compact.module.debug && npx mocha test/*.js --exit flexsearch.compact.module.min && npx mocha test/*.js --exit flexsearch.es5.debug && npx mocha test/*.js --exit flexsearch.es5.min && npx mocha test/*.js --exit flexsearch.light.debug && npx mocha test/*.js --exit flexsearch.light.min && npx mocha test/*.js --exit flexsearch.light.module.debug && npx mocha test/*.js --exit flexsearch.light.module.min",
     "release": "npm version --no-git-tag-version patch && npm run build:all && npm run test:all"
   },
   "files": [
@@ -116,8 +120,16 @@
     "babel-plugin-transform-property-literals": "^6.9.4",
     "babel-plugin-transform-simplify-comparison-operators": "^6.9.4",
     "babel-plugin-transform-undefined-to-void": "^6.9.4",
+    "c8": "^10.1.3",
+    "chai": "^5.2.0",
+    "clickhouse": "^2.6.0",
     "google-closure-compiler": "^20250520.0.0",
-    "rollup": "^4.35.0"
+    "mocha": "^11.1.0",
+    "mongodb": "^6.13.0",
+    "pg-promise": "^11.13.0",
+    "redis": "^5.1.0",
+    "rollup": "^4.35.0",
+    "sqlite3": "^5.1.7"
   },
   "funding": [
     {
