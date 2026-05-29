@@ -88,6 +88,58 @@ export let DocumentOptions = {};
 export let ContextOptions = {};
 
 /**
+ * Internal: serialized Index context payload used by export/import.
+ * @typedef {{
+ *   depth: (number|undefined),
+ *   bidirectional: (boolean|undefined),
+ *   resolution: (number|undefined)
+ * }}
+ */
+export let SerializedIndexContext = {};
+
+/**
+ * Internal: serialized Index payload used by export/import.
+ * @typedef {{
+ *   tokenize: (string|undefined),
+ *   resolution: (number|undefined),
+ *   context: (SerializedIndexContext|undefined),
+ *   rtl: (boolean|undefined),
+ *   encoder: (string|undefined),
+ *   score: (string|undefined),
+ *   priority: (number|undefined),
+ *   keystore: (string|undefined)
+ * }}
+ */
+export let SerializedIndexConfig = {};
+
+/**
+ * Internal: serialized Document field payload used by export/import.
+ * @typedef {{
+ *   field: (string|undefined),
+ *   tokenize: (string|undefined),
+ *   resolution: (number|undefined),
+ *   context: (SerializedIndexContext|undefined),
+ *   rtl: (boolean|undefined),
+ *   encoder: (string|undefined),
+ *   score: (string|undefined),
+ *   priority: (number|undefined),
+ *   keystore: (string|undefined)
+ * }}
+ */
+export let SerializedFieldConfig = {};
+
+/**
+ * Internal: serialized Document payload used by export/import.
+ * @typedef {{
+ *   id: (string|undefined),
+ *   fields: (Array<SerializedFieldConfig>|undefined),
+ *   tagfields: (Array<string>|undefined),
+ *   store: (boolean|undefined)
+ * }}
+ */
+export let SerializedDocumentConfig = {};
+
+/**
  * @typedef {{
  *   id: (string|undefined),
  *   field: (string|Array<string>|FieldOptions|Array<FieldOptions>|undefined),

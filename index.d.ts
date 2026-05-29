@@ -19,6 +19,9 @@ declare module "flexsearch" {
     export type Limit = number;
     export type ExportHandler = (key: string, data: string) => void;
     export type ExportHandlerAsync = (key: string, data: string) => Promise<void>;
+    export type ExportEntries = Array<[string, string]>;
+    export type ExportMap = Map<string, string>;
+    export type CompressedSource = Uint8Array | ArrayBuffer | ReadableStream<Uint8Array>;
     export type AsyncCallback<T> = (result?: T) => void;
 
     /************************************/
@@ -149,6 +152,20 @@ declare module "flexsearch" {
     };
 
     /**
+     * Compress a string using gzip compression
+     * @param data - String data to compress
+     * @returns Promise that resolves to compressed Uint8Array
+     */
+    export function compress(data: string): Promise<Uint8Array>;
+
+    /**
+     * Decompress gzip-compressed data
+     * @param data - Compressed data as Uint8Array
+     * @returns Promise that resolves to decompressed string
+     */
+    export function decompress(data: Uint8Array): Promise<string>;
+
+    /**
      * These options will determine how the contents will be indexed.
      *
      * **Document:**
@@ -276,8 +293,15 @@ declare module "flexsearch" {
         export(handler: ExportHandlerAsync): Promise<void>;
 
         import(key: string, data: string): void;
+        import(payload: ExportMap): void;
+        import(payload: ExportEntries): void;
+
+        exportIndexBulk(compressed?: boolean): Promise<string | Uint8Array>;
+        importIndexBulk(source: string | Uint8Array, compressed?: boolean): Promise<void>;
+
 
         serialize(with_function_wrapper?: boolean): SerializedFunctionString;
+        serialize(with_function_wrapper: boolean, with_cfg: boolean): SerializedFunctionString;
 
         // Persistent Index
         mount(db: StorageInterface): Promise<void>;
@@ -746,6 +770,15 @@ declare module "flexsearch" {
         export(handler: ExportHandlerAsync): Promise<void>;
 
         import(key: string, data: string): void;
+        import(payload: ExportMap): void;
+        import(payload: ExportEntries): void;
+
+        exportDocumentBulk(compressed?: boolean): Promise<string | Uint8Array>;
+        importDocumentBulk(source: string | Uint8Array, compressed?: boolean): Promise<void>;
+
+
+        serialize(with_function_wrapper?: boolean, compress?: boolean): SerializedFunctionString | Promise<Uint8Array>;
+        serialize(with_function_wrapper: boolean, compress: boolean, with_cfg: boolean): SerializedFunctionString | Promise<Uint8Array>;
 
         // Persistent Index
         mount<S = StorageInterface<D>>(db: S): Promise<void>;

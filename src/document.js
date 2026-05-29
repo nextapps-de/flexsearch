@@ -38,7 +38,7 @@ import Encoder, { fallback_encoder } from "./encoder.js";
 import Cache, { searchCache } from "./cache.js";
 import { is_string, is_object, parse_simple } from "./common.js";
 import apply_async from "./async.js";
-import { exportDocument, importDocument } from "./serialize.js";
+import { exportDocument, importDocument, serializeDocument, exportDocumentBulk, importDocumentBulk } from "./serialize.js";
 import { KeystoreMap, KeystoreSet } from "./keystore.js";
 import "./document/add.js";
 import "./document/search.js";
@@ -63,9 +63,14 @@ export default function Document(options){
     let tmp, keystore;
 
     this.tree = [];
+    // Keep stable public property names for bundled/minified builds.
+    this["tree"] = this.tree;
     this.field = [];
     this.marker = [];
     this.key = ((tmp = document.key || document.id) && parse_tree(tmp, this.marker)) || "id";
+    if(SUPPORT_SERIALIZE){
+        this._cfgKey = document.key || document.id || null;
+    }
 
     keystore = SUPPORT_KEYSTORE && (options.keystore || 0);
     keystore && (this.keystore = keystore);
@@ -123,6 +128,8 @@ export default function Document(options){
                 this.tag = new Map();
                 this.tagtree = [];
                 this.tagfield = [];
+                this["tagtree"] = this.tagtree;
+                this["tagfield"] = this.tagfield;
                 for(let i = 0, params, field; i < tmp.length; i++){
                     params = tmp[i];
                     field = params.field || params;
@@ -573,6 +580,9 @@ if(SUPPORT_SERIALIZE){
 
     Document.prototype.export = exportDocument;
     Document.prototype.import = importDocument;
+    Document.prototype.exportDocumentBulk = exportDocumentBulk;
+    Document.prototype.importDocumentBulk = importDocumentBulk;
+    Document.prototype.serialize = serializeDocument;
 }
 
 if(SUPPORT_ASYNC){
