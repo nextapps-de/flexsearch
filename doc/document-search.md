@@ -18,167 +18,58 @@ FlexSearch Documents also contain these features:
 
 > Document options basically inherits from [Index Options](../README.md#index-options), so you can apply most of those options either in the top scope of the config (for all fields) or as per field or both of them.
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td><code>document</code></td>
-        <td><a href="#the-document-descriptor">Document Descriptor</a></td>
-        <td>Includes any specific information about how the document data should be indexed</td>
-        <td style="font-style: italic">(mandatory)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>worker</code></td>
-        <td>Boolean<br>String</td>
-        <td>Enable a worker distributed model. Read more about here: <a href="worker.md">Worker Index</a></td>
-        <td><code>false</code></td>
-    </tr>
-</table>
+| Option   | Values              | Description                                                                     | Default     |
+|----------|---------------------|---------------------------------------------------------------------------------|-------------|
+| document | Document Descriptor | Includes any specific information about how the document data should be indexed | (mandatory) |
+| worker   | BooleanString       | Enable a worker distributed model. Read more about here: Worker Index           | false       |
+
 
 ### Document Search Options
 
 > Document search options basically inherit from [Index Search Options](../README.md#search-options), so you can apply most of those options either in the top scope of the config (for all fields) or as per field or both of them.
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td><code>index</code><br><code>field</code></td>
-        <td>String<br>Array&lt;String&gt;<br>Array&lt;SearchOptions&gt;</td>
-        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>tag</code></td>
-        <td>Object&lt;field:tag&gt;</td>
-        <td>Sets the <a href="#docs">document fields</a> which should be searched. When no field is set, all fields will be searched. <a href="#options-field-search">Custom options per field</a> are also supported.</td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>enrich</code></td>
-        <td>Boolean</td>
-        <td>Enrich IDs from the results with the corresponding documents.</td>
-        <td><code>false</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>highlight</code></td>
-        <td>
-            <a href="./result-highlighting.md#highlighting-options">Highlighting Options</a><br>
-            String
-        </td>
-        <td>Highlight query matches in the result (for Document Indexes only)</td>
-        <td><code>false</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>merge</code></td>
-        <td>Boolean</td>
-        <td>Merge multiple fields in resultset into one and group results per ID</td>
-        <td><code>false</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>pluck</code></td>
-        <td>String</td>
-        <td>Pick and apply search to just one field and return a flat result representation</td>
-        <td><code>false</code></td>
-    </tr>
-</table>
+|            |                                                     |                                                                                                                                                    |         |
+|------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| Option     | Values                                              | Description                                                                                                                                        | Default |
+| indexfield | StringArray&lt;String&gt;Array&lt;SearchOptions&gt; | Sets the document fields which should be searched. When no field is set, all fields will be searched. Custom options per field are also supported. |         |
+| tag        | Object&lt;field:tag&gt;                             | Sets the document fields which should be searched. When no field is set, all fields will be searched. Custom options per field are also supported. |         |
+| enrich     | Boolean                                             | Enrich IDs from the results with the corresponding documents.                                                                                      | false   |
+| highlight | Highlighting Options
+            String | Highlight query matches in the result (for Document Indexes only) | false |
+| merge | Boolean | Merge multiple fields in resultset into one and group results per ID | false |
+| pluck | String | Pick and apply search to just one field and return a flat result representation | false |
+
 
 ## The Document Descriptor
 
 When creating a `Document`-Index you will need to define a document descriptor in the field `document`. This descriptor is including any specific information about how the document data should be indexed.
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td><code>id</code></td>
-        <td>String</td>
-        <td></td>
-        <td><code>"id"</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>index</code></td>
-        <td>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>tag</code></td>
-        <td>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>store</code></td>
-        <td>Boolean<br>String<br>Array&lt;String><br>Array&lt;FieldOptions></td>
-        <td></td>
-        <td><code>false</code></td>
-    </tr>
-</table>
+|        |                                                     |             |         |
+|--------|-----------------------------------------------------|-------------|---------|
+| Option | Values                                              | Description | Default |
+| id     | String                                              |             | "id"    |
+| index  | StringArray&lt;String>Array&lt;FieldOptions>        |             |         |
+| tag    | StringArray&lt;String>Array&lt;FieldOptions>        |             |         |
+| store  | BooleanStringArray&lt;String>Array&lt;FieldOptions> |             | false   |
+
 
 ### Field Options
 
 > You can use all standard [Index Options](../README.md#index-options) within field options.
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td><code>field</code></td>
-        <td>String</td>
-        <td>The field name (colon seperated syntax)</td>
-        <td style="font-style: italic">(mandatory)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>filter</code></td>
-        <td>Function</td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>custom</code></td>
-        <td>Function</td>
-        <td></td>
-        <td></td>
-    </tr>
-</table>
+|        |          |                                         |             |
+|--------|----------|-----------------------------------------|-------------|
+| Option | Values   | Description                             | Default     |
+| field  | String   | The field name (colon seperated syntax) | (mandatory) |
+| filter | Function |                                         |             |
+| custom | Function |                                         |             |
+
 
 Assuming our document has a simple data structure like this:
 
 ```json
-{ 
-    "id": 0, 
+{
+    "id": 0,
     "content": "some text"
 }
 ```
@@ -198,8 +89,8 @@ const index = new Document({
 });
 
 // add documents to the index
-index.add({ 
-    id: 0, 
+index.add({
+    id: 0,
     content: "some text"
 });
 ```
@@ -432,7 +323,7 @@ const index = new Document({
 Remember when searching you have to use the same colon-separated-string as a key from your field definition.
 
 ```js
-index.search(query, { 
+index.search(query, {
     index: "contents:body:title"
 });
 ```
@@ -499,7 +390,7 @@ function add(sequential_data){
             // add to index
             index.add(record);
         }
-    }  
+    }
 }
 
 // now just use add() helper method as usual:
@@ -674,7 +565,7 @@ By passing the search option `merge: true` all fields of the result set will be 
 When using `pluck` instead of `field` you can explicitly select just one field and get back a flat representation:
 
 ```js
-index.search(query, { 
+index.search(query, {
     pluck: "title",
     enrich: true
 });
@@ -693,7 +584,7 @@ Like the property `index` within a document descriptor just define a property `t
 
 ```js
 const index = new Document({
-    document: { 
+    document: {
         id: "id",
         tag: "species",
         index: "content"
@@ -723,7 +614,7 @@ You can perform a tag-specific search by:
 
 ```js
 index.search(query, {
-    tag: { species: "fish" } 
+    tag: { species: "fish" }
 });
 ```
 
@@ -806,7 +697,7 @@ Get entries of multiple tags (intersection):
 ```js
 const result = index.search({
     //enrich: true, // enrich documents
-    tag: { 
+    tag: {
         "genres": ["Documentary", "Short"],
         "startYear": "1894"
     }
@@ -817,7 +708,7 @@ Combine tags with queries (intersection):
 ```js
 const result = index.search({
     query: "Carmen", // forward tokenizer
-    tag: { 
+    tag: {
         "genres": ["Documentary", "Short"],
         "startYear": "1894"
     }
@@ -853,7 +744,7 @@ This will add the whole original content to the store:
 
 ```js
 const index = new Document({
-    document: { 
+    document: {
         index: "content",
         store: true
     }
@@ -907,9 +798,9 @@ A short example of configuring a document store:
 
 ```js
 const index = new Document({
-    document: { 
+    document: {
         index: "content",
-        store: ["author", "email"] 
+        store: ["author", "email"]
     }
 });
 
@@ -1013,7 +904,7 @@ const index = new Document({
             field: "fullname",
             custom: function(data){
                 // return custom string
-                return data.firstname + " " + 
+                return data.firstname + " " +
                        data.lastname;
             }
         },{

@@ -33,13 +33,13 @@ npm run build:custom SUPPORT_DOCUMENT=true SUPPORT_TAGS=true LANGUAGE_OUT=ECMASC
 Perform a custom build in ESM module format:
 
 ```bash
-npm run build:custom RELEASE=custom.module SUPPORT_DOCUMENT=true SUPPORT_TAGS=true 
+npm run build:custom RELEASE=custom.module SUPPORT_DOCUMENT=true SUPPORT_TAGS=true
 ```
 
 Perform a debug build:
 
 ```bash
-npm run build:custom DEBUG=true SUPPORT_DOCUMENT=true SUPPORT_TAGS=true 
+npm run build:custom DEBUG=true SUPPORT_DOCUMENT=true SUPPORT_TAGS=true
 ```
 
 > On custom builds each build flag will be set to `false` by default when not passed.
@@ -54,136 +54,29 @@ The custom build will be saved to `dist/flexsearch.custom.xxxx.min.js` or when f
 
 ### Supported Build Flags
 
-<table>
-    <tr>
-        <td>Flag</td>
-        <td>Values</td>
-        <td>Info</td>
-    </tr>
-    <tr>
-        <td colspan="3"><br><b>Feature Flags</b></td>
-    </tr>
-    <tr>
-        <td>SUPPORT_WORKER</td>
-        <td>true, false</td>
-        <td>Worker Indexes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_ENCODER</td>
-        <td>true, false</td>
-        <td>When not included you'll need to pass a custom <code>encode</code> method when creating an index</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_CHARSET</td>
-        <td>true, false</td>
-        <td>Includes: <code>LatinBalance</code>, <code>LatinAdvanced</code>, <code>LatinExtra</code>, <code>LatinSoundex</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_CACHE</td>
-        <td>true, false</td>
-        <td>Support for <code>index.searchCache()</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_ASYNC</td>
-        <td>true, false</td>
-        <td>The async version of index standard methods</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_STORE</td>
-        <td>true, false</td>
-        <td>Document Datastore</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_SUGGESTION</td>
-        <td>true, false</td>
-        <td>Use the option <code>suggestions</code> when searching</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_SERIALIZE</td>
-        <td>true, <b>false</b></td>
-        <td>Export / Import / Serialize Index</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_DOCUMENT</td>
-        <td>true, false</td>
-        <td>Document Indexes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_TAGS</td>
-        <td>true, false</td>
-        <td>Tag-Search</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_PERSISTENT</td>
-        <td>true, false</td>
-        <td>Use any of the persistent indexes</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_KEYSTORE</td>
-        <td>true, false</td>
-        <td>Extended size for InMemory indexes</td>
-    </tr>
-    <!--
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_COMPRESSION</td>
-        <td>true, false</td>
-        <td></td>
-    </tr>
-    -->
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_RESOLVER</td>
-        <td>true, false</td>
-        <td>Apply complex queries by chaining boolean operations</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>SUPPORT_HIGHLIGHTING</td>
-        <td>true, false</td>
-        <td>Result Highlighting for Document-Search (also requires <code>SUPPORT_STORE</code>)</td>
-    </tr>
-    <tr>
-        <td colspan="3"><br><b>Compiler Flags</b></td>
-    </tr>
-    <tr>
-        <td>DEBUG</td>
-        <td>true, false</td>
-        <td>Apply common checks and throw errors more frequently, output debug information and helpful hints to the console</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>RELEASE</td>
-        <td>custom<br>custom.module</td>
-        <td>Choose build schema: custom = Legacy Browser (<code>window.FlexSearch</code>), custom.module = ES6 Modules (ESM)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>POLYFILL</td>
-        <td>true, false</td>
-        <td>Include Polyfills (based on <code>LANGUAGE_OUT</code>)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>PROFILER</td>
-        <td>true, false</td>
-        <td>Just used for automatic performance tests</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>LANGUAGE_OUT</td>
-        <td>ECMASCRIPT3<br>ECMASCRIPT5<br>ECMASCRIPT_2015<br>ECMASCRIPT_2016<br>ECMASCRIPT_2017<br>ECMASCRIPT_2018<br>ECMASCRIPT_2019<br>ECMASCRIPT_2020<br>ECMASCRIPT_2021<br>ECMASCRIPT_2022<br>ECMASCRIPT_NEXT<br>STABLE</td>
-        <td>Target language</td>
-    </tr>
-</table>
+|      |        |      |
+|------|--------|------|
+| Flag | Values | Info |
+| Feature Flags |
+| SUPPORT_WORKER | true, false | Worker Indexes |
+| SUPPORT_ENCODER | true, false | When not included you'll need to pass a custom encode method when creating an index |
+| SUPPORT_CHARSET | true, false | Includes: LatinBalance, LatinAdvanced, LatinExtra, LatinSoundex |
+| SUPPORT_CACHE | true, false | Support for index.searchCache() |
+| SUPPORT_ASYNC | true, false | The async version of index standard methods |
+| SUPPORT_STORE | true, false | Document Datastore |
+| SUPPORT_SUGGESTION | true, false | Use the option suggestions when searching |
+| SUPPORT_SERIALIZE | true, false | Export / Import / Serialize Index |
+| SUPPORT_DOCUMENT | true, false | Document Indexes |
+| SUPPORT_TAGS | true, false | Tag-Search |
+| SUPPORT_PERSISTENT | true, false | Use any of the persistent indexes |
+| SUPPORT_KEYSTORE | true, false | Extended size for InMemory indexes |
+| SUPPORT_COMPRESSION | true, false |  |
+| SUPPORT_RESOLVER | true, false | Apply complex queries by chaining boolean operations |
+| SUPPORT_HIGHLIGHTING | true, false | Result Highlighting for Document-Search (also requires SUPPORT_STORE) |
+| Compiler Flags |
+| DEBUG | true, false | Apply common checks and throw errors more frequently, output debug information and helpful hints to the console |
+| RELEASE | customcustom.module | Choose build schema: custom = Legacy Browser (window.FlexSearch), custom.module = ES6 Modules (ESM) |
+| POLYFILL | true, false | Include Polyfills (based on LANGUAGE_OUT) |
+| PROFILER | true, false | Just used for automatic performance tests |
+| LANGUAGE_OUT | ECMASCRIPT3ECMASCRIPT5ECMASCRIPT_2015ECMASCRIPT_2016ECMASCRIPT_2017ECMASCRIPT_2018ECMASCRIPT_2019ECMASCRIPT_2020ECMASCRIPT_2021ECMASCRIPT_2022ECMASCRIPT_NEXTSTABLE | Target language |
+

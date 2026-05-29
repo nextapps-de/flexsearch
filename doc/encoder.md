@@ -101,7 +101,7 @@ const encoder = new Encoder({
 Instead of using `include` or `exclude` you can pass a regular expression or a string to the field `split`:
 
 ```js
-const encoder = new Encoder({ 
+const encoder = new Encoder({
     split: /\s+/
 });
 ```
@@ -109,7 +109,7 @@ const encoder = new Encoder({
 E.g. this split configuration will tokenize every symbol/char from a content:
 
 ```js
-const encoder = new Encoder({ 
+const encoder = new Encoder({
     split: ""
 });
 ```
@@ -137,7 +137,7 @@ Further reading: [Encoder Processing Workflow](#encoder-processing-workflow)
 Assign an encoder to an index:
 
 ```js
-const index = new Index({ 
+const index = new Index({
     encoder: encoder
 });
 ```
@@ -251,264 +251,64 @@ encoder.addFilter(function(str){
 Shortcut for just assigning one encoder configuration to an index:
 
 ```js
-const index = new Index({ 
+const index = new Index({
     encoder: Charset.Normalize
 });
 ```
 
 ## Encoder Options
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td colspan="4">You can just choose one of those 3 options:</td>
-    </tr>
-    <tr>
-        <td><code>include</code></td>
-        <td>
-            <a href="#encoder-split-options">Encoder Split Options</a>
-        </td>
-        <td>Define which of the string contents should be included (inclusion properties defaults to false)</td>
-        <td>{ letter: true, number: true }</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>exclude</code></td>
-        <td>
-            <a href="#encoder-split-options">Encoder Split Options</a>
-        </td>
-        <td>Define which of the string contents should be excluded (exclusion properties defaults to true)</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>split</code></td>
-        <td>
-            false<br>
-            RegExp<br>
-            String<br>
-            <a href="#encoder-split-options">Encoder Split Options</a>
-        </td>
-        <td>
-            The expression used to split the content into terms
-        </td>
-        <td>→ include { letter: true, number: true }</td>
-    </tr>
-    <tr>
-        <td colspan="4">Other options:</td>
-    </tr>
-    <tr>
-        <td><code>dedupe</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Deduplicate consecutive letters, e.g. "missing" to "mising"</td>
-        <td>true</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>numeric</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>By default, the extended numeric support (Triplets) inherits from chosen <a href="#encoder-split-options">Encoder Split Options</a>. You probably might want to disable Triplets to get a more exact result (fewer entries) in some cases.</td>
-        <td>true</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>minlength</code></td>
-        <td>
-            Number
-        </td>
-        <td>Set the minimum term length which should be added to the index. This limit does not apply to the <code>forward</code> tokenizer. You still get results when just typing "f" on a term "flexsearch" when e.g. <code>minlength: 4</code> was used.</td>
-        <td>1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>maxlength</code></td>
-        <td>
-            Number
-        </td>
-        <td>Set the maximum term length which should be added to the index. Larger content will drop.</td>
-        <td>1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>rtl</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Force Right-To-Left encoding (you should just apply this when the string content was not already encoded as RTL)</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>normalize</code></td>
-        <td>
-            <code>true</code> enable normalization (default)<br>
-            <code>false</code> disable normalization<br>
-            <code>function(str) => str</code> custom function
-        </td>
-        <td>The normalization stage will apply basic charset normalization e.g. by replacing "é" to "e"</td>
-        <td>true</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>prepare</code></td>
-        <td>
-            <code>function(str) => str</code> custom function
-        </td>
-        <td>The preparation stage is a custom function direct followed when normalization was done</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>finalize</code></td>
-        <td>
-            <code>function([str]) => [str]</code> custom function
-        </td>
-        <td>The finalization stage is a custom function executed at the last task in the encoding pipeline (here it gets an array of tokens and need to return an array of tokens)</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>filter</code></td>
-        <td>
-            <code>Set(["and", "to", "be"])</code><br>
-            <code>function(str) => bool</code> custom function<h2></h2>
-            <code>encoder.addFilter("and")</code>
-        </td>
-        <td>Stop-word filter is like a blacklist of words to be filtered out from indexing at all (e.g. "and", "to" or "be"). This is also very useful when using <a href="../README.md#context-search">Context Search</a></td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>stemmer</code></td>
-        <td>
-            <code>Map([["ing", ""], ["ies", "y"]])</code><h2></h2>
-            <code>encoder.addStemmer("ing", "")</code>
-        </td>
-        <td>Stemmer will normalize several linguistic mutations of the same word (e.g. "run" and "running", or "property" and "properties"). This is also very useful when using <a href="../README.md#context-search">Context Search</a></td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>mapper</code></td>
-        <td>
-            <code>Map([["é", "e"], ["ß", "ss"]])</code><h2></h2>
-            <code>encoder.addMapper("é", "e")</code>
-        </td>
-        <td>Mapper will replace a single char (e.g. "é" into "e")</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>matcher</code></td>
-        <td>
-            <code>Map([["and", "&"], ["usd", "$"]])</code><h2></h2>
-            <code>encoder.addMatcher("and", "&")</code>
-        </td>
-        <td>Matcher will do same as Mapper but instead of single chars it will replace char sequences</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>replacer</code></td>
-        <td>
-            <code>[/[^a-z0-9]/g, "", /([^aeo])h(.)/g, "$1$2"])</code><h2></h2>
-            <code>encoder.addReplacer(/[^a-z0-9]/g, "")</code>
-        </td>
-        <td>Replacer takes custom regular expressions and couldn't get optimized in the same way as Mapper or Matcher. You should take this as the last option when no other replacement can do the same.</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>cache</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>In some very rare situations (large consecutive content with high cardinality) it might be useful to disable the internal event-loop-cache</td>
-        <td>true</td>
-    </tr>
-</table>
+|        |        |             |         |
+|--------|--------|-------------|---------|
+| Option | Values | Description | Default |
+| You can just choose one of those 3 options: |
+| include | Encoder Split Options | Define which of the string contents should be included (inclusion properties defaults to false) | { letter: true, number: true } |
+| exclude | Encoder Split Options | Define which of the string contents should be excluded (exclusion properties defaults to true) | false |
+| split | false
+            RegExp
+            String
+            Encoder Split Options | The expression used to split the content into terms | → include { letter: true, number: true } |
+| Other options: |
+| dedupe | Boolean | Deduplicate consecutive letters, e.g. "missing" to "mising" | true |
+| numeric | Boolean | By default, the extended numeric support (Triplets) inherits from chosen Encoder Split Options. You probably might want to disable Triplets to get a more exact result (fewer entries) in some cases. | true |
+| minlength | Number | Set the minimum term length which should be added to the index. This limit does not apply to the forward tokenizer. You still get results when just typing "f" on a term "flexsearch" when e.g. minlength: 4 was used. | 1 |
+| maxlength | Number | Set the maximum term length which should be added to the index. Larger content will drop. | 1 |
+| rtl | Boolean | Force Right-To-Left encoding (you should just apply this when the string content was not already encoded as RTL) | false |
+| normalize | true enable normalization (default)
+            false disable normalization
+            function(str) => str custom function | The normalization stage will apply basic charset normalization e.g. by replacing "é" to "e" | true |
+| prepare | function(str) => str custom function | The preparation stage is a custom function direct followed when normalization was done | false |
+| finalize | function([str]) => [str] custom function | The finalization stage is a custom function executed at the last task in the encoding pipeline (here it gets an array of tokens and need to return an array of tokens) | false |
+| filter | Set(["and", "to", "be"])
+            function(str) => bool custom function
+            encoder.addFilter("and") | Stop-word filter is like a blacklist of words to be filtered out from indexing at all (e.g. "and", "to" or "be"). This is also very useful when using Context Search | false |
+| stemmer | Map([["ing", ""], ["ies", "y"]])
+            encoder.addStemmer("ing", "") | Stemmer will normalize several linguistic mutations of the same word (e.g. "run" and "running", or "property" and "properties"). This is also very useful when using Context Search | false |
+| mapper | Map([["é", "e"], ["ß", "ss"]])
+            encoder.addMapper("é", "e") | Mapper will replace a single char (e.g. "é" into "e") | false |
+| matcher | Map([["and", "&"], ["usd", "$"]])
+            encoder.addMatcher("and", "&") | Matcher will do same as Mapper but instead of single chars it will replace char sequences | false |
+| replacer | [/[^a-z0-9]/g, "", /([^aeo])h(.)/g, "$1$2"])
+            encoder.addReplacer(/[^a-z0-9]/g, "") | Replacer takes custom regular expressions and couldn't get optimized in the same way as Mapper or Matcher. You should take this as the last option when no other replacement can do the same. | false |
+| cache | Boolean | In some very rare situations (large consecutive content with high cardinality) it might be useful to disable the internal event-loop-cache | true |
+
 
 > [!TIP]
 > The methods `.addMapper()`, `.addMatcher()` and `.addReplacer()` might be confusing. For this reason they will automatically resolve to the right one when just using the same method for every rule. You can simplify this e.g. by just use `.addReplacer()` for each of this 3 rules.
 
 ### Encoder Split Options
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td><code>letter</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Toggle inclusion of letters on/off</td>
-        <td>true</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>number</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Toggle inclusion of numerics on/off</td>
-        <td>true</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>symbol</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Toggle inclusion of symbols on/off</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>punctuation</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>
-            Toggle inclusion of punctuation on/off
-        </td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>control</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Toggle inclusion of control chars on/off</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>char</code></td>
-        <td>
-            String<br>
-            Array[String]
-        </td>
-        <td>Toggle inclusion of specific chars on/off</td>
-        <td>false</td>
-    </tr>
-</table>
+|             |         |                                          |         |
+|-------------|---------|------------------------------------------|---------|
+| Option      | Values  | Description                              | Default |
+| letter      | Boolean | Toggle inclusion of letters on/off       | true    |
+| number      | Boolean | Toggle inclusion of numerics on/off      | true    |
+| symbol      | Boolean | Toggle inclusion of symbols on/off       | false   |
+| punctuation | Boolean | Toggle inclusion of punctuation on/off   | false   |
+| control     | Boolean | Toggle inclusion of control chars on/off | false   |
+| char | String
+            Array[String] | Toggle inclusion of specific chars on/off | false |
+
 
 ## Custom Encoder
 

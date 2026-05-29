@@ -10,7 +10,7 @@ Alternatively you can simply upgrade id-content-pairs to a flat document when ca
 // 1. create the document index
 const index = new Document({
   document: {
-    // using store is required  
+    // using store is required
     store: true,
     index: [{
       field: "title",
@@ -33,7 +33,7 @@ index.add({
 // 3. perform a query
 const result = index.search({
   query: "karmen or clown or not found",
-  // also get results when query has no exact match  
+  // also get results when query has no exact match
   suggest: true,
   // use highlighting options or pass a template, where $1 is
   // a placeholder for the matched partial
@@ -60,116 +60,26 @@ There are several options to customize result highlighting.
 
 ### Highlighting Options
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td><code>template</code></td>
-        <td>
-            String
-        </td>
-        <td>The template to be applied on matches (e.g. <code>"&lt;b>$1&lt;/b>"</code>), where <code>$1</code> is a placeholder for the matched partial</td>
-        <td style="font-style: italic">(mandatory)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>boundary</code></td>
-        <td>
-            <a href="#highlighting-boundary-options">Boundary Options</a><br>
-            Number
-        </td>
-        <td>Limit the total length of highlighted content (add ellipsis by default). The template markup does not stack to the total length.</td>
-        <td><code>false</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>ellipsis</code></td>
-        <td>
-            <a href="#highlighting-ellipsis-options">Ellipsis Options</a><br>
-            Boolean<br>
-            String
-        </td>
-        <td>
-            Define a custom ellipsis or disable
-        </td>
-        <td><code>"..."</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>merge</code></td>
-        <td>
+|          |        |                                                                                                                   |             |
+|----------|--------|-------------------------------------------------------------------------------------------------------------------|-------------|
+| Option   | Values | Description                                                                                                       | Default     |
+| template | String | The template to be applied on matches (e.g. "&lt;b>$1&lt;/b>"), where $1 is a placeholder for the matched partial | (mandatory) |
+| boundary | Boundary Options
+            Number | Limit the total length of highlighted content (add ellipsis by default). The template markup does not stack to the total length. | false |
+| ellipsis | Ellipsis Options
             Boolean
-        </td>
-        <td>Wrap consecutive matches by just a single template</td>
-        <td><code>false</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>clip</code></td>
-        <td>
-            Boolean
-        </td>
-        <td>Allow to clip terms</td>
-        <td><code>true</code></td>
-    </tr>
-    <tr>
-        <td colspan="4"><a id="highlighting-boundary-options"></a>Boundary Options</td>
-    </tr>
-    <tr>
-        <td><code>boundary.total</code></td>
-        <td>
-            Number
-        </td>
-        <td>Limit the total length of highlighted content</td>
-        <td><code>false</code></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>boundary.before</code></td>
-        <td>
-            Number
-        </td>
-        <td>Limit the length of content before highlighted parts</td>
-        <td style="font-style: italic">(auto)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>boundary.after</code></td>
-        <td>
-            Number
-        </td>
-        <td>Limit the length of content after highlighted parts</td>
-        <td style="font-style: italic">(auto)</td>
-    </tr>
-    <tr>
-        <td colspan="4"><a id="highlighting-ellipsis-options"></a>Ellipsis Options</td>
-    </tr>
-    <tr>
-        <td><code>ellipsis.template</code></td>
-        <td>
-            String
-        </td>
-        <td>The template to be applied on ellipsis (e.g. <code>"&lt;i>$1&lt;/i>"</code>), where <code>$1</code> is a placeholder for the ellipsis</td>
-        <td style="font-style: italic">(mandatory)</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>ellipsis.pattern</code></td>
-        <td>
-            Boolean<br>
-            String
-        </td>
-        <td>
-            Define a custom ellipsis or disable
-        </td>
-        <td><code>"..."</code></td>
-    </tr>
-</table>
+            String | Define a custom ellipsis or disable | "..." |
+| merge | Boolean | Wrap consecutive matches by just a single template | false |
+| clip | Boolean | Allow to clip terms | true |
+| Boundary Options |
+| boundary.total | Number | Limit the total length of highlighted content | false |
+| boundary.before | Number | Limit the length of content before highlighted parts | (auto) |
+| boundary.after | Number | Limit the length of content after highlighted parts | (auto) |
+| Ellipsis Options |
+| ellipsis.template | String | The template to be applied on ellipsis (e.g. "&lt;i>$1&lt;/i>"), where $1 is a placeholder for the ellipsis | (mandatory) |
+| ellipsis.pattern | Boolean
+            String | Define a custom ellipsis or disable | "..." |
+
 
 ### Boundaries & Alignment
 
@@ -209,7 +119,7 @@ const result = index.search({
 });
 ```
 > The highlight markup does not stack to the total length.
-> 
+>
 Result:
 ```js
 "...um dolor <b>sit</b> <b>amet</b> consetet..."
@@ -282,12 +192,12 @@ const result = index.search({
   highlight: {
     template: "<b>$1</b>",
     boundary: {
-      // length before match  
+      // length before match
       before: 3,
-      // length after match  
+      // length after match
       after: 15,
-      // overall length  
-      total: 32  
+      // overall length
+      total: 32
     }
   }
 });

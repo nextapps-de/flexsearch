@@ -17,21 +17,21 @@ Documents will create worker automatically for each field by just apply the opti
 ```js
 const index = new Document({
     worker: true,
-    document: { 
+    document: {
         id: "id",
         index: ["name", "title"],
         tag: ["cat"]
     }
 });
 
-index.add({ 
-    id: 1, cat: "catA", name: "Tom", title: "some" 
+index.add({
+    id: 1, cat: "catA", name: "Tom", title: "some"
 }).add({
     id: 2, cat: "catA", name: "Ben", title: "title"
-}).add({ 
+}).add({
     id: 3, cat: "catB", name: "Max", title: "to"
-}).add({ 
-    id: 4, cat: "catB", name: "Tim", title: "index"" 
+}).add({
+    id: 4, cat: "catB", name: "Tim", title: "index""
 });
 ```
 
@@ -105,31 +105,13 @@ const index = new Worker({ options });
 
 > Worker-Index Options extends the default [Index Options](../README.md#index-options), you can apply also.
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-    </tr>
-    <tr>
-        <td>config</td>
-        <td>String</td>
-        <td>Either the absolute URL to the config file when used in Browser context (should match the Same-Origin-Policy) or the filepath to the configuration file when used in Node.js context</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>export</td>
-        <td>function</td>
-        <td>The export handler function. Read more about <a href="export-import.md">Export</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>import</td>
-        <td>function</td>
-        <td>The export handler function. Read more about <a href="export-import.md">Import</a></td>
-    </tr>
-</table>
+|        |          |                                                                                                                                                                                      |
+|--------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Option | Values   | Description                                                                                                                                                                          |
+| config | String   | Either the absolute URL to the config file when used in Browser context (should match the Same-Origin-Policy) or the filepath to the configuration file when used in Node.js context |
+| export | function | The export handler function. Read more about Export                                                                                                                                  |
+| import | function | The export handler function. Read more about Import                                                                                                                                  |
+
 
 ## Extern Worker Configuration
 

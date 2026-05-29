@@ -16,7 +16,7 @@ Getting instant help by the DeepWiki AI assistant:
 <img src="https://img.shields.io/badge/typed-75%25-yellow"><!--<a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>-->
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 
-[Basic Start](#load-library) &ensp;&bull;&ensp; 
+[Basic Start](#load-library) &ensp;&bull;&ensp;
 [API Reference](#api-overview) &ensp;&bull;&ensp;
 [Encoder](doc/encoder.md) &ensp;&bull;&ensp;
 [Document Search](doc/document-search.md) &ensp;&bull;&ensp;
@@ -98,124 +98,21 @@ Benchmarks:
 The benchmark was measured in terms per seconds, higher values are better (except the test "Memory").
 The memory value refers to the amount of memory which was additionally allocated during search.<br>
 
-<table>
-    <tr></tr>
-    <tr>
-        <th>Library</th>
-        <th>Memory</th>
-        <th>Query: Single</th>
-        <th>Query: Multi</th>
-        <th>Query: Large</th>
-        <th>Query: Not Found</th>
-    </tr>
-    <tr>
-        <td>flexsearch</td>
-        <td align="right">16</td>
-        <td align="right">50955718</td>
-        <td align="right">11912730</td>
-        <td align="right">13981110</td>
-        <td align="right">51706499</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>jsii</td>
-        <td align="right">2188</td>
-        <td align="right">13847</td>
-        <td align="right">949559</td>
-        <td align="right">1635959</td>
-        <td align="right">3730307</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>wade</td>
-        <td align="right">980</td>
-        <td align="right">60473</td>
-        <td align="right">443214</td>
-        <td align="right">419152</td>
-        <td align="right">1239372</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>js-search</td>
-        <td align="right">237</td>
-        <td align="right">22982</td>
-        <td align="right">383775</td>
-        <td align="right">426609</td>
-        <td align="right">994803</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>minisearch</td>
-        <td align="right">4777</td>
-        <td align="right">30589</td>
-        <td align="right">191657</td>
-        <td align="right">5849</td>
-        <td align="right">304233</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>orama</td>
-        <td align="right">5355</td>
-        <td align="right">29445</td>
-        <td align="right">170231</td>
-        <td align="right">4454</td>
-        <td align="right">225491</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>elasticlunr</td>
-        <td align="right">3073</td>
-        <td align="right">14326</td>
-        <td align="right">48558</td>
-        <td align="right">101206</td>
-        <td align="right">95840</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>lunr</td>
-        <td align="right">2443</td>
-        <td align="right">11527</td>
-        <td align="right">51476</td>
-        <td align="right">88858</td>
-        <td align="right">103386</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>ufuzzy</td>
-        <td align="right">13754</td>
-        <td align="right">2799</td>
-        <td align="right">7788</td>
-        <td align="right">58544</td>
-        <td align="right">9557</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bm25</td>
-        <td align="right">33963</td>
-        <td align="right">3903</td>
-        <td align="right">4777</td>
-        <td align="right">12657</td>
-        <td align="right">12471</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>fuzzysearch</td>
-        <td align="right">300147</td>
-        <td align="right">148</td>
-        <td align="right">229</td>
-        <td align="right">455</td>
-        <td align="right">276</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>fuse</td>
-        <td align="right">247107</td>
-        <td align="right">422</td>
-        <td align="right">321</td>
-        <td align="right">337</td>
-        <td align="right">329</td>
-    </tr>
-</table>
+| Library     | Memory | Query: Single | Query: Multi | Query: Large | Query: Not Found |
+|-------------|--------|---------------|--------------|--------------|------------------|
+| flexsearch  | 16     | 50955718      | 11912730     | 13981110     | 51706499         |
+| jsii        | 2188   | 13847         | 949559       | 1635959      | 3730307          |
+| wade        | 980    | 60473         | 443214       | 419152       | 1239372          |
+| js-search   | 237    | 22982         | 383775       | 426609       | 994803           |
+| minisearch  | 4777   | 30589         | 191657       | 5849         | 304233           |
+| orama       | 5355   | 29445         | 170231       | 4454         | 225491           |
+| elasticlunr | 3073   | 14326         | 48558        | 101206       | 95840            |
+| lunr        | 2443   | 11527         | 51476        | 88858        | 103386           |
+| ufuzzy      | 13754  | 2799          | 7788         | 58544        | 9557             |
+| bm25        | 33963  | 3903          | 4777         | 12657        | 12471            |
+| fuzzysearch | 300147 | 148           | 229          | 455          | 276              |
+| fuse        | 247107 | 422           | 321          | 337          | 329              |
+
 
 Run Comparison: <a href="https://nextapps-de.github.io/flexsearch/" target="_blank">Performance Benchmark "Gulliver's Travels"</a>
 
@@ -304,120 +201,28 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
 <details>
 <summary>Download Builds</summary>
 <br>
-<table>
-    <tr></tr>
-    <tr>
-        <td>Build</td>
-        <td>File</td>
-        <td>CDN</td>
-    </tr>
-    <tr>
-        <td>flexsearch.bundle.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.min.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.bundle.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.debug.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.bundle.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.min.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.bundle.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.bundle.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.debug.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.compact.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.min.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.compact.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.debug.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.compact.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.min.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.compact.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.compact.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.debug.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.light.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.min.js</a></td>
-    </tr>****
-    <tr></tr>
-    <tr>
-        <td>flexsearch.light.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.debug.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.light.module.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.module.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.min.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.light.module.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.light.module.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.debug.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.es5.min.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.es5.min.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.min.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.min.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.es5.debug.js</td>
-        <td><a href="https://github.com/nextapps-de/flexsearch/raw/0.8.2/dist/flexsearch.es5.debug.js" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.debug.js" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.debug.js</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Javascript Modules (ESM)</td>
-        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.2%2Fdist%2Fmodule" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module/</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Javascript Modules Minified (ESM)</td>
-        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.2%2Fdist%2Fmodule-min" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-min/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-min/</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>Javascript Modules Debug (ESM)</td>
-        <td><a href="https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fnextapps-de%2Fflexsearch%2Ftree%2F0.8.2%2Fdist%2Fmodule-debug" target="_blank">Download</a></td>
-        <td><a href="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-debug/" target="_blank">https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-debug/</a></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>flexsearch.custom.js</td>
-        <td colspan="2"><a href="/doc/custom-builds.md">Read more about "Custom Build"</a></td>
-    </tr>
-</table>
+|                                    |          |                                                                                                  |
+|------------------------------------|----------|--------------------------------------------------------------------------------------------------|
+| Build                              | File     | CDN                                                                                              |
+| flexsearch.bundle.min.js           | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.min.js           |
+| flexsearch.bundle.debug.js         | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.debug.js         |
+| flexsearch.bundle.module.min.js    | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.min.js    |
+| flexsearch.bundle.module.debug.js  | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.bundle.module.debug.js  |
+| flexsearch.compact.min.js          | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.min.js          |
+| flexsearch.compact.debug.js        | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.debug.js        |
+| flexsearch.compact.module.min.js   | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.min.js   |
+| flexsearch.compact.module.debug.js | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.compact.module.debug.js |
+| flexsearch.light.min.js            | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.min.js            |
+| flexsearch.light.debug.js          | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.debug.js          |
+| flexsearch.light.module.min.js     | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.min.js     |
+| flexsearch.light.module.debug.js   | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.light.module.debug.js   |
+| flexsearch.es5.min.js              | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.min.js              |
+| flexsearch.es5.debug.js            | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/flexsearch.es5.debug.js            |
+| Javascript Modules (ESM)           | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module/                            |
+| Javascript Modules Minified (ESM)  | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-min/                        |
+| Javascript Modules Debug (ESM)     | Download | https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.8.2/dist/module-debug/                      |
+| flexsearch.custom.js | Read more about "Custom Build" |
+
 
 </details>
 <a name="bundles"></a>
@@ -427,154 +232,27 @@ The **_dist_** folder is located in: `node_modules/flexsearch/dist/`
 
 > The Node.js package includes all features.
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Feature</td>
-        <td>flexsearch.bundle.js</td>
-        <td>flexsearch.compact.js</td>
-        <td>flexsearch.light.js</td>
-    </tr>
-    <tr>
-        <td>
-            <a href="#presets">Presets</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="doc/async.md">Async Processing</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="doc/worker.md">Workers (Web + Node.js)</a>
-        </td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#context-search">Context Search</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="doc/document-search.md">Document Search</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="doc/document-search.md#store">Document Datastore</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#tokenizer">Partial Matching</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="doc/cache.md">Auto-Balanced Cache by Popularity/Last Queries</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="doc/document-search.md#tag-search">Tag Search</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#suggestions">Suggestions</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>
-            <a href="#fuzzy-search">Phonetic Search (Fuzzy Search)</a>
-        </td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><a href="doc/encoder.md">Encoder</a></td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><a href="doc/export-import.md">Export / Import Indexes</a></td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><a href="doc/resolver.md">Resolver</a></td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><a href="doc/result-highlighting.md">Result Highlighting</a></td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>-</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><a href="doc/persistent.md">Persistent Index (IndexedDB)</a></td>
-        <td>✓</td>
-        <td>-</td>
-        <td>-</td>
-    </tr>
-    <tr>
-        <td>File Size (gzip)</td>
-        <td>16.3 kb</td>
-        <td>11.4 kb</td>
-        <td>4.5 kb</td>
-    </tr>
-</table>
+|                                                |                      |                       |                     |
+|------------------------------------------------|----------------------|-----------------------|---------------------|
+| Feature                                        | flexsearch.bundle.js | flexsearch.compact.js | flexsearch.light.js |
+| Presets                                        | ✓                    | ✓                     | ✓                   |
+| Async Processing                               | ✓                    | ✓                     | -                   |
+| Workers (Web + Node.js)                        | ✓                    | -                     | -                   |
+| Context Search                                 | ✓                    | ✓                     | ✓                   |
+| Document Search                                | ✓                    | ✓                     | -                   |
+| Document Datastore                             | ✓                    | ✓                     | -                   |
+| Partial Matching                               | ✓                    | ✓                     | ✓                   |
+| Auto-Balanced Cache by Popularity/Last Queries | ✓                    | ✓                     | -                   |
+| Tag Search                                     | ✓                    | ✓                     | -                   |
+| Suggestions                                    | ✓                    | ✓                     | ✓                   |
+| Phonetic Search (Fuzzy Search)                 | ✓                    | ✓                     | -                   |
+| Encoder                                        | ✓                    | ✓                     | ✓                   |
+| Export / Import Indexes                        | ✓                    | ✓                     | -                   |
+| Resolver                                       | ✓                    | -                     | -                   |
+| Result Highlighting                            | ✓                    | ✓                     | -                   |
+| Persistent Index (IndexedDB)                   | ✓                    | -                     | -                   |
+| File Size (gzip)                               | 16.3 kb              | 11.4 kb               | 4.5 kb              |
+
 
 </details>
 
@@ -657,7 +335,7 @@ Or import FlexSearch members separately by:
 
 ```html
 <script type="module">
-    import { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB } 
+    import { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB }
         from "./dist/flexsearch.bundle.module.min.js";
     const index = new Index(/* ... */);
 </script>
@@ -864,7 +542,7 @@ The documentation will refer to several examples. A list of all examples:
 - [document-worker](example/browser-module/document-worker)
 - [document-worker-extern-config](example/browser-module/document-worker-extern-config)
 - [language-pack](example/browser-module/language-pack)
-  
+
 </details>
 
 ## API Overview
@@ -1069,7 +747,7 @@ const index = new Index({
 });
 ```
 
-Related Topics: [Index Options](#index-options) 
+Related Topics: [Index Options](#index-options)
 &ensp;&bull;&ensp; [Resolution](#resolution)
 &ensp;&bull;&ensp; [Charset Collection](#charset-collection)
 &ensp;&bull;&ensp; [Tokenizer](#tokenizer-partial-match)
@@ -1146,211 +824,37 @@ index.remove(0).update(1, 'foo').add(2, 'foobar');
 
 ## Index Options
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td>preset</td>
-        <td>
-            "memory"<br>
-            "performance"<br>
-            "match"<br>
-            "score"<br>
-            "default"
-        </td>
-        <td>
-            The <a href="#presets">configuration profile</a> as a shortcut or as a base for your custom settings.<br>
-        </td>
-        <td>"default"</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>tokenize</td>
-        <td>
-            "strict" / "exact"<br>
-            "tolerant"<br>
-            "forward"<br>
-            "reverse" / "bidirectional<br>
-            "full"
-        </td>
-        <td>
-            Indicates how terms should be indexed by <a href="#tokenizer-partial-match">tokenization</a>.
-        </td>
-        <td>"strict"</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>resolution</td>
-        <td>
-            Number
-        </td>
-        <td>Sets the scoring <a href="#resolution">resolution</a></td>
-        <td>9</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encoder</td>
-        <td>
-            <a href="doc/encoder.md">new Encoder(options)</a><br>
-            Charset.Exact<br>
-            Charset.Default<br>
-            Charset.Normalize<br>
-            Charset.LatinBalance<br>
-            Charset.LatinAdvanced<br>
-            Charset.LatinExtra<br>
-            Charset.LatinSoundex<br>
-            Charset.CJK<br>
-            false
-        </td>
-        <td>Choose one of the <a href="#charset-collection">built-in encoder</a><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
-        <td>"default"</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>encode</td>
-        <td>
-            function(string) => string[]
-        </td>
-        <td>Pass a <a href="doc/encoder.md#custom-encoder">custom encoding function</a><br>Read more about <a href="doc/encoder.md">Encoder</a></td>
-        <td>"default"</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>context</td>
-        <td>
-            Boolean<br>
-            <a href="#context-options">Context Options</a>
-        </td>
-        <td>Enable/Disable <a href="#context-search">context index</a>. When passing "true" as a value will use the defaults for the context.</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>cache</td>
-        <td>
-            Boolean<br>
-            Number
-        </td>
-        <td>Enable/Disable and/or set capacity of cached entries.<br><br>The cache automatically balance stored entries related to their popularity.</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>fastupdate</td>
-        <td>
-            Boolean
-        </td>
-        <td>Additionally add a <a href="#fastupdate">fastupdate index</a> which boost any replace/update/remove task to a high performance level by also increasing index size by ~30%.</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>priority</td>
-        <td>
-            Number
-        </td>
-        <td>Sets the task execution priority (1 low priority - 9 high priority) when using the <a href="doc/async.md">async methods</a></td>
-        <td>4</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>score</td>
-        <td>
-            function(string) => number
-        </td>
-        <td>Use a <a href="doc/customization.md">custom score function</a></td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>keystore</td>
-        <td>
-            Number
-        </td>
-        <td>Increase available size for In-Memory-Index by additionally using uniform balanced registers (<a href="doc/keystore.md">Keystore</a>). You can apply values from 1 to 64.</td>
-        <td>false</td>
-    </tr>
-    <tr>
-        <td colspan="4">
-            Persistent Options:
-        </td>
-    </tr>
-    <tr>
-        <td>db</td>
-        <td>
-            StorageInterface
-        </td>
-        <td>Pass an instance of a <a href="doc/persistent.md">persistent adapter</a></td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>commit</td>
-        <td>
-            Boolean
-        </td>
-        <td>When disabled any changes won't commit, instead it needs calling <code>index.commit()</code> manually to make modifications to the index (add, update, remove) persistent.</td>
-        <td>true</td>
-    </tr>
-</table>
+|        |        |             |         |
+|--------|--------|-------------|---------|
+| Option | Values | Description | Default |
+| preset | "memory", "performance", "match", "score", "default" | The configuration profile as a shortcut or as a base for your custom settings. | "default" |
+| tokenize | "strict" / "exact", "tolerant", "forward", "reverse" / "bidirectional, "full" | Indicates how terms should be indexed by tokenization. | "strict" |
+| resolution | Number | Sets the scoring resolution | 9 |
+| encoder | new Encoder(options), Charset.Exact, Charset.Default, Charset.Normalize, Charset.LatinBalance, Charset.LatinAdvanced, Charset.LatinExtra, Charset.LatinSoundex, Charset.CJK, false | Choose one of the built-in encoderRead more about Encoder | "default" |
+| encode | function(string) => string[] | Pass a custom encoding functionRead more about Encoder | "default" |
+| context | Boolean | Context Options | Enable/Disable context index. When passing "true" as a value will use the defaults for the context. | false |
+| cache | Boolean, Number | Enable/Disable and/or set capacity of cached entries.The cache automatically balance stored entries related to their popularity. | false |
+| fastupdate | Boolean | Additionally add a fastupdate index which boost any replace/update/remove task to a high performance level by also increasing index size by ~30%. | false |
+| priority | Number | Sets the task execution priority (1 low priority - 9 high priority) when using the async methods | 4 |
+| score | function(string) => number | Use a custom score function |  |
+| keystore | Number | Increase available size for In-Memory-Index by additionally using uniform balanced registers (Keystore). You can apply values from 1 to 64. | false |
+| Persistent Options: |
+| db | StorageInterface | Pass an instance of a persistent adapter |  |
+| commit | Boolean | When disabled any changes won't commit, instead it needs calling index.commit() manually to make modifications to the index (add, update, remove) persistent. | true |
+
 
 ## Search Options
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td>limit</td>
-        <td>number</td>
-        <td>Sets the limit of results</td>
-        <td>100</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>offset</td>
-        <td>number</td>
-        <td>Apply offset (skip items)</td>
-        <td>0</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>resolution</td>
-        <td>number</td>
-        <td>Limit the resolution (score) of the results</td>
-        <td></td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>suggest</td>
-        <td>Boolean</td>
-        <td>Enables <a href="#suggestions">Suggestions</a> in results</td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>cache</td>
-        <td>Boolean</td>
-        <td>Use a <a href="#auto-balanced-cache-by-popularity">Query Cache</a></td>
-        <td>false</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>resolve</td>
-        <td>Boolean</td>
-        <td>When set to <code>false</code>, an instance of a <a href="doc/resolver.md">Resolver</a> is returned to apply further operations</td>
-        <td>true</td>
-    </tr>
-</table>
+|            |         |                                                                                      |         |
+|------------|---------|--------------------------------------------------------------------------------------|---------|
+| Option     | Values  | Description                                                                          | Default |
+| limit      | number  | Sets the limit of results                                                            | 100     |
+| offset     | number  | Apply offset (skip items)                                                            | 0       |
+| resolution | number  | Limit the resolution (score) of the results                                          |         |
+| suggest    | Boolean | Enables Suggestions in results                                                       | false   |
+| cache      | Boolean | Use a Query Cache                                                                    | false   |
+| resolve    | Boolean | When set to false, an instance of a Resolver is returned to apply further operations | true    |
+
 
 ## Suggestions
 
@@ -1408,49 +912,15 @@ The tokenizer is one of the most important options and heavily influence:
 
 Try to choose the most upper of these tokenizer which covers your requirements:
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Description</td>
-        <td>Example</td>
-        <td>Memory Factor (n = length of term)</td>
-    </tr>
-    <tr>
-        <td><code>"strict"</code><br><code>"exact"</code><br><code>"default"</code></td>
-        <td>index the full term</td>
-        <td><code>foobar</code></td>
-        <td>1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>"forward"</code></td>
-        <td>index term in forward direction (supports right-to-left by Index option <code>rtl: true</code>)</td>
-        <td><code>fo</code>obar<br><code>foob</code>ar<br></td>
-        <td>n</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>"reverse"</code><br><code>"bidirectional"</code></td>
-        <td>index term in both directions</td>
-        <td><code>fo</code>obar<br><code>foob</code>ar<br>foob<code>ar</code><br>fo<code>obar</code></td>
-        <td>2n - 1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>"tolerant"</code></td>
-        <td>index the full term by also being tolerant against typos like swapped letters and missing letters</td>
-        <td><code>foobra</code><br><code>foboar</code><br><code>foobr</code><br><code>fooba</code></td>
-        <td>2(n - 2) + 2</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>"full"</code></td>
-        <td>index every consecutive partial</td>
-        <td>fo<code>oba</code>r<br>f<code>oob</code>ar</td>
-        <td>n * (n - 1)</td>
-    </tr>
-</table>
+|                          |                                                                                                   |                          |                                    |
+|--------------------------|---------------------------------------------------------------------------------------------------|--------------------------|------------------------------------|
+| Option                   | Description                                                                                       | Example                  | Memory Factor (n = length of term) |
+| "strict""exact""default" | index the full term                                                                               | foobar                   | 1                                  |
+| "forward"                | index term in forward direction (supports right-to-left by Index option rtl: true)                | foobarfoobar             | n                                  |
+| "reverse""bidirectional" | index term in both directions                                                                     | foobarfoobarfoobarfoobar | 2n - 1                             |
+| "tolerant"               | index the full term by also being tolerant against typos like swapped letters and missing letters | foobrafoboarfoobrfooba   | 2(n - 2) + 2                       |
+| "full"                   | index every consecutive partial                                                                   | foobarfoobar             | n * (n - 1)                        |
+
 
 ## Charset Collection
 
@@ -1459,62 +929,17 @@ Encoding is one of the most important task and heavily influence:
 1. required memory / storage
 2. capabilities of phonetic matches (Fuzzy-Search)
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Description</td>
-        <td>Charset Type</td>
-        <td>Compression Ratio</td>
-    </tr>
-    <tr>
-        <td><code>Exact</code></td>
-        <td>Bypass encoding and take exact input</td>
-        <td>Universal (multi-lang)</td>
-        <td>0%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>Normalize</code><br><code>Default</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication</td>
-        <td>Universal (multi-lang)</td>
-        <td>~ 7%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>LatinBalance</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication<br>Phonetic basic transformation</td>
-        <td>Latin</td>
-        <td>~ 30%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>LatinAdvanced</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication<br>Phonetic advanced transformation</td>
-        <td>Latin</td>
-        <td>~ 45%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>LatinExtra</code></td>
-        <td>Case in-sensitive encoding<br>Charset normalization<br>Letter deduplication<br>Soundex-like transformation</td>
-        <td>Latin</td>
-        <td>~ 60%</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td><code>LatinSoundex</code></td>
-        <td>Full Soundex transformation</td>
-        <td>Latin</td>
-        <td>~ 70%</td>
-    </tr>
-    <tr>
-        <td><code>function(str) => [str]</code></td>
-        <td>Pass a custom encoding function to the <code>Encoder</code></td>
-        <td></td>
-        <td></td>
-    </tr>
-</table>
+|                        |                                                                                                     |                        |                   |
+|------------------------|-----------------------------------------------------------------------------------------------------|------------------------|-------------------|
+| Option                 | Description                                                                                         | Charset Type           | Compression Ratio |
+| Exact                  | Bypass encoding and take exact input                                                                | Universal (multi-lang) | 0%                |
+| NormalizeDefault       | Case in-sensitive encodingCharset normalizationLetter deduplication                                 | Universal (multi-lang) | ~ 7%              |
+| LatinBalance           | Case in-sensitive encodingCharset normalizationLetter deduplicationPhonetic basic transformation    | Latin                  | ~ 30%             |
+| LatinAdvanced          | Case in-sensitive encodingCharset normalizationLetter deduplicationPhonetic advanced transformation | Latin                  | ~ 45%             |
+| LatinExtra             | Case in-sensitive encodingCharset normalizationLetter deduplicationSoundex-like transformation      | Latin                  | ~ 60%             |
+| LatinSoundex           | Full Soundex transformation                                                                         | Latin                  | ~ 70%             |
+| function(str) => [str] | Pass a custom encoding function to the Encoder                                                      |                        |                   |
+
 
 ## Fuzzy-Search
 
@@ -1531,80 +956,16 @@ Additionally, you can apply custom `Mapper`, `Replacer`, `Stemmer`, `Filter` or 
 
 Original term which was indexed: "Struldbrugs"
 
-<table>
-    <tr>
-        <th align="left">Encoder:</th>
-        <th><code>Exact</code></th>
-        <th><code>Normalize (Default)</code></th>
-        <th><code>LatinBalance</code></th>
-        <th><code>LatinAdvanced</code></th>
-        <th><code>LatinExtra</code></th>
-        <th><code>LatinSoundex</code></th>
-    </tr>
-    <tr>
-        <th align="left">Index Size</th>
-        <th>3.1 Mb</th>
-        <th>1.9 Mb</th>
-        <th>1.7 Mb</th>
-        <th>1.6 Mb</th>
-        <th>1.1 Mb</th>
-        <th>0.7 Mb</th>
-    </tr>
-    <tr>
-        <td align="left">Struldbrugs</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr>
-        <td align="left">strũlldbrųĝgs</td>
-        <td></td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr>
-        <td align="left">strultbrooks</td>
-        <td></td>
-        <td></td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr>
-        <td align="left">shtruhldbrohkz</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>✓</td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr>
-        <td align="left">zdroltbrykz</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>✓</td>
-        <td>✓</td>
-    </tr>
-    <tr>
-        <td align="left">struhlbrogger</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>✓</td>
-    </tr>
-</table>
+| Encoder:       | Exact  | Normalize (Default) | LatinBalance | LatinAdvanced | LatinExtra | LatinSoundex |
+|----------------|--------|---------------------|--------------|---------------|------------|--------------|
+| **Index Size**     | **3.1 Mb** | **1.9 Mb**            | **1.7 Mb**       | **1.6 Mb**        | **1.1 Mb**    | **0.7 Mb**       |
+| Struldbrugs    | ✓      | ✓                   | ✓            | ✓             | ✓          | ✓            |
+| strũlldbrųĝgs  |        | ✓                   | ✓            | ✓             | ✓          | ✓            |
+| strultbrooks   |        |                     | ✓            | ✓             | ✓          | ✓            |
+| shtruhldbrohkz |        |                     |              | ✓             | ✓          | ✓            |
+| zdroltbrykz    |        |                     |              |               | ✓          | ✓            |
+| struhlbrogger  |        |                     |              |               |            | ✓            |
+
 
 The index size was measured after indexing the book "Gulliver's Travels".
 
@@ -1658,7 +1019,7 @@ Create an index and apply custom options for the context:
 ```js
 var index = new FlexSearch({
     tokenize: "strict",
-    context: { 
+    context: {
         resolution: 5,
         depth: 3,
         bidirectional: true
@@ -1696,42 +1057,13 @@ The first index returns ID 1 in the first slot for the best pick, because matche
 
 ### Context Options
 
-<table>
-    <tr></tr>
-    <tr>
-        <td>Option</td>
-        <td>Values</td>
-        <td>Description</td>
-        <td>Default</td>
-    </tr>
-    <tr>
-        <td>resolution</td>
-        <td>
-            Number
-        </td>
-        <td>Sets the scoring <a href="#resolution">resolution</a> for the context.</td>
-        <td>3</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>depth<br><br></td>
-        <td>
-            false<br>
-            Number
-        </td>
-        <td>Enable/Disable context index and also sets the maximum initial distance of related terms.</td>
-        <td>1</td>
-    </tr>
-    <tr></tr>
-    <tr>
-        <td>bidirectional</td>
-        <td>
-            Boolean
-        </td>
-        <td>If enabled the context direction (aka "context chain") can move bidirectional. You should ony disable this options when you need a more exact match with fewer results.</td>
-        <td>true</td>
-    </tr>
-</table>
+|            |        |                                              |         |
+|------------|--------|----------------------------------------------|---------|
+| Option     | Values | Description                                  | Default |
+| resolution | Number | Sets the scoring resolution for the context. | 3       |
+| depth | false | Number | Enable/Disable context index and also sets the maximum initial distance of related terms. | 1 |
+| bidirectional | Boolean | If enabled the context direction (aka "context chain") can move bidirectional. You should ony disable this options when you need a more exact match with fewer results. | true |
+
 
 ## Auto-Balanced Cache (By Popularity)
 

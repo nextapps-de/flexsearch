@@ -136,100 +136,17 @@ await index.commit();
 
 The benchmark was measured in "terms per second".
 
-<table>
-    <tr>
-        <th align="left">Store</th>
-        <th>Add</th>
-        <th>Search 1</th>
-        <th>Search N</th>
-        <th>Replace</th>
-        <th>Remove</th>
-        <th>Not Found</th>
-        <th>Scaling</th>
-    </tr>
-    <tr>
-        <td></td>
-        <td align="right"><sub>terms per sec</sub></td>
-        <td align="right"><sub>terms per sec</sub></td>
-        <td align="right"><sub>terms per sec</sub></td>
-        <td align="right"><sub>terms per sec</sub></td>
-        <td align="right"><sub>terms per sec</sub></td>
-        <td align="right"><sub>terms per sec</sub></td>
-        <td></td>
-    </tr>
-    <!--
-    <tr>
-        <td align="left">Memory</td>
-        <td align="right">28,345,405</td>
-        <td align="right">65,180,102</td>
-        <td align="right">12,098,298</td>
-        <td align="right">19,099,981</td>
-        <td align="right">36,164,827</td>
-        <td align="right">143,369,175</td>
-        <td align="right">No</td>
-    </tr>
-    -->
-    <tr>
-        <td align="left">IndexedDB</td>
-        <td align="right">123,298</td>
-        <td align="right">83,823</td>
-        <td align="right">62,370</td>
-        <td align="right">57,410</td>
-        <td align="right">171,053</td>
-        <td align="right">425,744</td>
-        <td align="right">No</td>
-    </tr>
-    <tr>
-        <td align="left">Redis</td>
-        <td align="right">1,566,091</td>
-        <td align="right">201,534</td>
-        <td align="right">859,463</td>
-        <td align="right">117,013</td>
-        <td align="right">129,595</td>
-        <td align="right">875,526</td>
-        <td align="right">Yes</td>
-    </tr>
-    <tr>
-        <td align="left">Sqlite</td>
-        <td align="right">269,812</td>
-        <td align="right">29,627</td>
-        <td align="right">129,735</td>
-        <td align="right">174,445</td>
-        <td align="right">1,406,553</td>
-        <td align="right">122,566</td>
-        <td align="right">No</td>
-    </tr>
-    <tr>
-        <td align="left">Postgres</td>
-        <td align="right">354,894</td>
-        <td align="right">24,329</td>
-        <td align="right">76,189</td>
-        <td align="right">324,546</td>
-        <td align="right">3,702,647</td>
-        <td align="right">50,305</td>
-        <td align="right">Yes</td>
-    </tr>
-    <tr>
-        <td align="left">MongoDB</td>
-        <td align="right">515,938</td>
-        <td align="right">19,684</td>
-        <td align="right">81,558</td>
-        <td align="right">243,353</td>
-        <td align="right">485,192</td>
-        <td align="right">67,751</td>
-        <td align="right">Yes</td>
-    </tr>
-    <tr>
-        <td align="left">Clickhouse</td>
-        <td align="right">1,436,992</td>
-        <td align="right">11,507</td>
-        <td align="right">22,196</td>
-        <td align="right">931,026</td>
-        <td align="right">3,276,847</td>
-        <td align="right">16,644</td>
-        <td align="right">Yes</td>
-    </tr>
-</table>
+| Store      | Add           | Search 1      | Search N      | Replace       | Remove        | Not Found     | Scaling |
+|------------|---------------|---------------|---------------|---------------|---------------|---------------|---------|
+|            | terms per sec | terms per sec | terms per sec | terms per sec | terms per sec | terms per sec |         |
+| Memory     | 28,345,405    | 65,180,102    | 12,098,298    | 19,099,981    | 36,164,827    | 143,369,175   | No      |
+| IndexedDB  | 123,298       | 83,823        | 62,370        | 57,410        | 171,053       | 425,744       | No      |
+| Redis      | 1,566,091     | 201,534       | 859,463       | 117,013       | 129,595       | 875,526       | Yes     |
+| Sqlite     | 269,812       | 29,627        | 129,735       | 174,445       | 1,406,553     | 122,566       | No      |
+| Postgres   | 354,894       | 24,329        | 76,189        | 324,546       | 3,702,647     | 50,305        | Yes     |
+| MongoDB    | 515,938       | 19,684        | 81,558        | 243,353       | 485,192       | 67,751        | Yes     |
+| Clickhouse | 1,436,992     | 11,507        | 22,196        | 931,026       | 3,276,847     | 16,644        | Yes     |
+
 
 __Search 1:__ Single term query<br>
 __Search N:__ Multi term query (Context-Search)
