@@ -12,21 +12,21 @@ import {
 } from "../../type.js";
 
 const VERSION = 1;
-const IndexedDB = typeof window !== "undefined" && (
-    window.indexedDB ||
-    window.mozIndexedDB ||
-    window.webkitIndexedDB ||
-    window.msIndexedDB
+const IndexedDB = (
+    globalThis.indexedDB ||
+    globalThis.mozIndexedDB ||
+    globalThis.webkitIndexedDB ||
+    globalThis.msIndexedDB
 );
-const IDBTransaction = typeof window !== "undefined" && (
-    window.IDBTransaction ||
-    window.webkitIDBTransaction ||
-    window.msIDBTransaction
+const IDBTransaction = (
+    globalThis.IDBTransaction ||
+    globalThis.webkitIDBTransaction ||
+    globalThis.msIDBTransaction
 );
-const IDBKeyRange = typeof window !== "undefined" && (
-    window.IDBKeyRange ||
-    window.webkitIDBKeyRange ||
-    window.msIDBKeyRange
+const IDBKeyRange = (
+    globalThis.IDBKeyRange ||
+    globalThis.webkitIDBKeyRange ||
+    globalThis.msIDBKeyRange
 );
 const fields = ["map", "ctx", "tag", "reg", "cfg"];
 import StorageInterface from "../interface.js";
@@ -83,9 +83,10 @@ IdxDB.prototype.open = function(){
     if(this.db) return this.db;
     let self = this;
 
-    navigator.storage &&
-    navigator.storage.persist &&
-    navigator.storage.persist();
+    globalThis.navigator &&
+    globalThis.navigator.storage &&
+    globalThis.navigator.storage.persist &&
+    globalThis.navigator.storage.persist();
 
    // return this.db = new Promise(function(resolve, reject){
 
