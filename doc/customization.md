@@ -7,9 +7,9 @@ const index = new FlexSearchIndex({
         // you'll need to return a number between 0 and "resolution"
         // score is starting from 0, which is the highest score
         // for a resolution of 10 you can return 0 - 9
-        // ... 
+        // ...
         return 3;
-    } 
+    }
 });
 ```
 
@@ -35,5 +35,5 @@ function score(content, term, term_index, partial, partial_index){
     term_index = 3
     partial = "amp"
     partial_index = 2
-} 
+}
 ```

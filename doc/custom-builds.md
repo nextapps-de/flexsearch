@@ -33,13 +33,13 @@ npm run build:custom SUPPORT_DOCUMENT=true SUPPORT_TAGS=true LANGUAGE_OUT=ECMASC
 Perform a custom build in ESM module format:
 
 ```bash
-npm run build:custom RELEASE=custom.module SUPPORT_DOCUMENT=true SUPPORT_TAGS=true 
+npm run build:custom RELEASE=custom.module SUPPORT_DOCUMENT=true SUPPORT_TAGS=true
 ```
 
 Perform a debug build:
 
 ```bash
-npm run build:custom DEBUG=true SUPPORT_DOCUMENT=true SUPPORT_TAGS=true 
+npm run build:custom DEBUG=true SUPPORT_DOCUMENT=true SUPPORT_TAGS=true
 ```
 
 > On custom builds each build flag will be set to `false` by default when not passed.

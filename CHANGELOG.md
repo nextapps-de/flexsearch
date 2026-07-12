@@ -197,7 +197,7 @@ const data = Object.values(index.store);
 The line above retrieves data from the document store (just useful when not already available in your runtime).
 
 ```js
-const result = data.filter(function(item){ 
+const result = data.filter(function(item){
     return item.cat === "comedy" && item.year === "2018";
 });
 ```

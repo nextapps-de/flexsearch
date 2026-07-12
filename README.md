@@ -16,7 +16,7 @@ Getting instant help by the DeepWiki AI assistant:
 <img src="https://img.shields.io/badge/typed-75%25-yellow"><!--<a target="_blank" href="https://github.com/nextapps-de/flexsearch/issues"><img src="https://img.shields.io/github/issues/nextapps-de/flexsearch.svg"></a>-->
 <a target="_blank" href="https://github.com/nextapps-de/flexsearch/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/flexsearch.svg"></a>
 
-[Basic Start](#load-library) &ensp;&bull;&ensp; 
+[Basic Start](#load-library) &ensp;&bull;&ensp;
 [API Reference](#api-overview) &ensp;&bull;&ensp;
 [Encoder](doc/encoder.md) &ensp;&bull;&ensp;
 [Document Search](doc/document-search.md) &ensp;&bull;&ensp;
@@ -657,7 +657,7 @@ Or import FlexSearch members separately by:
 
 ```html
 <script type="module">
-    import { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB } 
+    import { Index, Document, Encoder, Charset, Resolver, Worker, IndexedDB }
         from "./dist/flexsearch.bundle.module.min.js";
     const index = new Index(/* ... */);
 </script>
@@ -864,7 +864,7 @@ The documentation will refer to several examples. A list of all examples:
 - [document-worker](example/browser-module/document-worker)
 - [document-worker-extern-config](example/browser-module/document-worker-extern-config)
 - [language-pack](example/browser-module/language-pack)
-  
+
 </details>
 
 ## API Overview
@@ -1069,7 +1069,7 @@ const index = new Index({
 });
 ```
 
-Related Topics: [Index Options](#index-options) 
+Related Topics: [Index Options](#index-options)
 &ensp;&bull;&ensp; [Resolution](#resolution)
 &ensp;&bull;&ensp; [Charset Collection](#charset-collection)
 &ensp;&bull;&ensp; [Tokenizer](#tokenizer-partial-match)
@@ -1658,7 +1658,7 @@ Create an index and apply custom options for the context:
 ```js
 var index = new FlexSearch({
     tokenize: "strict",
-    context: { 
+    context: {
         resolution: 5,
         depth: 3,
         bidirectional: true
