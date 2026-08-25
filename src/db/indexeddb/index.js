@@ -12,21 +12,23 @@ import {
 } from "../../type.js";
 
 const VERSION = 1;
-const IndexedDB = typeof window !== "undefined" && (
-    window.indexedDB ||
-    window.mozIndexedDB ||
-    window.webkitIndexedDB ||
-    window.msIndexedDB
+// use globalThis instead of window so this also resolves inside Web Workers,
+// where IndexedDB is available but there is no window object
+const IndexedDB = typeof globalThis !== "undefined" && (
+    globalThis.indexedDB ||
+    globalThis.mozIndexedDB ||
+    globalThis.webkitIndexedDB ||
+    globalThis.msIndexedDB
 );
-const IDBTransaction = typeof window !== "undefined" && (
-    window.IDBTransaction ||
-    window.webkitIDBTransaction ||
-    window.msIDBTransaction
+const IDBTransaction = typeof globalThis !== "undefined" && (
+    globalThis.IDBTransaction ||
+    globalThis.webkitIDBTransaction ||
+    globalThis.msIDBTransaction
 );
-const IDBKeyRange = typeof window !== "undefined" && (
-    window.IDBKeyRange ||
-    window.webkitIDBKeyRange ||
-    window.msIDBKeyRange
+const IDBKeyRange = typeof globalThis !== "undefined" && (
+    globalThis.IDBKeyRange ||
+    globalThis.webkitIDBKeyRange ||
+    globalThis.msIDBKeyRange
 );
 const fields = ["map", "ctx", "tag", "reg", "cfg"];
 import StorageInterface from "../interface.js";
