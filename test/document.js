@@ -458,6 +458,42 @@ if(!build_light) describe("Document (Multi-Field Search)", function(){
         ]);
     });
 
+    it("Should cap merged results at the requested limit", function(){
+
+        const document = new Document({
+            document: {
+                id: "id",
+                field: [
+                    "name_1",
+                    "name_2",
+                    "name_3"
+                ]
+            }
+        });
+
+        const names = ["foo", "bar"];
+
+        // each field matches a different, non-overlapping half of the ids,
+        // so merging the per-field results (each already capped at "limit")
+        // produces more unique ids than "limit" unless the merge step
+        // re-applies the cap itself
+        for(let i = 0; i < 30; i++){
+            document.add({
+                id: i,
+                name_1: names[i % 2],
+                name_2: names[(i + 1) % 2],
+                name_3: names[i % 2]
+            });
+        }
+
+        const result = document.search("foo", {
+            merge: true,
+            limit: 10
+        });
+
+        expect(result.length).to.equal(10);
+    });
+
     it("Using BigInt", function(){
 
         const document = new Document({
