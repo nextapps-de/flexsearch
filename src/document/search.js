@@ -89,7 +89,7 @@ Document.prototype.search = function(query, limit, options, _promises){
     let result = [];
     let result_field = [];
     let pluck, enrich, merge, suggest, boost, cache;
-    let field, tag, offset, count = 0, resolve = true, highlight;
+    let field, tag, offset, count = 0, resolve = true, highlight, merge_limit = 0;
 
     if(options){
 
@@ -123,6 +123,10 @@ Document.prototype.search = function(query, limit, options, _promises){
         limit = options.limit || limit;
         offset = options.offset || 0;
         limit || (limit = (resolve ? 100 : 0));
+        // per-field options below may override "limit" for individual fields,
+        // so the overall limit requested by the caller has to be captured here
+        // to cap the merged result correctly.
+        merge_limit = limit;
 
         if(tag && (!SUPPORT_PERSISTENT || !this.db || !_promises)){
 
@@ -550,7 +554,7 @@ Document.prototype.search = function(query, limit, options, _promises){
                 result = highlight_fields(/** @type {string} */ (query), result, self.index, pluck, highlight);
             }
             return merge
-                ? merge_fields(result)
+                ? merge_fields(result, merge_limit)
                 : /** @type {DocumentSearchResults} */ (result);
         });
     }
@@ -559,7 +563,7 @@ Document.prototype.search = function(query, limit, options, _promises){
         result = highlight_fields(/** @type {string} */ (query), result, this.index, pluck, highlight);
     }
     return merge
-        ? merge_fields(result)
+        ? merge_fields(result, merge_limit)
         : /** @type {DocumentSearchResults} */ (result);
 }
 
@@ -570,14 +574,15 @@ Document.prototype.search = function(query, limit, options, _promises){
 
 /**
  * @param {DocumentSearchResults} fields
+ * @param {number=} limit
  * @return {MergedDocumentSearchResults}
  */
-function merge_fields(fields){
+function merge_fields(fields, limit){
     /** @type {MergedDocumentSearchResults} */
     const final = [];
     const group_field = create_object();
     const group_highlight = create_object();
-    for(let i = 0, field, key, res, id, entry, tmp, highlight; i < fields.length; i++){
+    outer: for(let i = 0, field, key, res, id, entry, tmp, highlight; i < fields.length; i++){
         field = fields[i];
         key = field.field;
         res = field.result;
@@ -589,6 +594,12 @@ function merge_fields(fields){
                 : id = entry["id"];
             tmp = group_field[id];
             if(!tmp){
+                // results are merged across fields, so the per-field limit
+                // applied earlier does not cap the merged total; stop once
+                // the overall requested limit has been reached
+                if(limit && final.length === limit){
+                    break outer;
+                }
                 entry["field"] = group_field[id] = [key];
                 final.push(/** @type {!MergedDocumentSearchEntry} */ (entry));
             }
