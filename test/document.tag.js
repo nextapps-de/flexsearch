@@ -12,6 +12,42 @@ const Charset = _Charset || (await import("../src/charset.js")).default;
 
 if(!build_light) describe("Documents: Tag-Search", function(){
 
+    for(const tags of [["cat", "MISSING"], ["MISSING", "cat"], ["cat", "MISSING", "fish"]]){
+        it("Should union existing tags with missing tag values: " + tags, async function(){
+            const document = new Document({
+                document: { id: "id", index: "content", tag: "species", store: true }
+            });
+            const data = [
+                { id: 0, species: "cat", content: "alpha" },
+                { id: 1, species: "dog", content: "alpha" },
+                { id: 2, species: "fish", content: "alpha" },
+                { id: 3, species: ["cat", "dog"], content: "alpha" }
+            ];
+            data.forEach(item => document.add(item));
+            const expected = tags.includes("fish") ? [0, 2, 3] : [0, 3];
+            const options = { tag: { species: tags }, pluck: "content" };
+            expect(document.search("alpha", options)).to.eql(expected);
+            expect(await document.searchAsync("alpha", options)).to.eql(expected);
+            if(!build_compact){
+                expect(document.search("alpha", { ...options, resolve: false }).resolve()).to.eql(expected);
+            }
+            expect(document.search("alpha", { ...options, limit: 1, offset: 1 })).to.eql([expected[1]]);
+            expect(document.search("alpha", { ...options, enrich: true })).to.eql(
+                expected.map(id => ({ id, doc: data[id] }))
+            );
+            expect(document.search("alpha", { ...options, suggest: true })).to.eql(expected);
+            expect(document.search("alpha", { tag: { species: ["MISSING"] } })).to.eql([]);
+            expect(document.search("alpha", {
+                tag: { species: ["MISSING"] }, suggest: true, pluck: "content"
+            })).to.eql([0, 1, 2, 3]);
+            document.remove(0);
+            document.update({ id: 3, species: "dog", content: "alpha" });
+            expect(document.search("alpha", options)).to.eql(tags.includes("fish") ? [2] : []);
+            document.clear();
+            expect(document.search("alpha", options)).to.eql([]);
+        });
+    }
+
     const data = [{
         id: 2,
         data: { title: "Title 3", body: "Body 3", cat: "A" }
