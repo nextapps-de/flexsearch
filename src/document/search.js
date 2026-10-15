@@ -372,15 +372,9 @@ Document.prototype.search = function(query, limit, options, _promises){
                         let ids = _promises[y];
                         let len = ids && ids.length;
 
-                        if(len){
+                        if(len || !suggest){
                             count++;
-                            arr.push(ids);
-                        }
-                        else if(!suggest){
-                            // no tags found
-                            return !SUPPORT_RESOLVER || resolve
-                                ? result
-                                : new Resolver(result, this)
+                            arr.push(ids || []);
                         }
                     }
                 }
@@ -410,15 +404,9 @@ Document.prototype.search = function(query, limit, options, _promises){
                     ids = ids && ids.get(tag[y + 1]);
                     len = ids && ids.length;
 
-                    if(len){
+                    if(len || !suggest){
                         count++;
-                        arr.push(ids);
-                    }
-                    else if(!suggest){
-                        // no tags found
-                        return !SUPPORT_RESOLVER || resolve
-                            ? result
-                            : new Resolver(result, this)
+                        arr.push(ids || []);
                     }
                 }
             }
